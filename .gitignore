@@ -59,3 +59,8 @@ run-data/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Source snapshots / archives - never belong in the source tree.
+*.zip
+*.7z
+*.tar.gz
