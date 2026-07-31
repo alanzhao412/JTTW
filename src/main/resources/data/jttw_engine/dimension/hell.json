@@ -1,0 +1,17 @@
+{
+  "type": "jttw_engine:hell",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "jttw_engine:hell_biome",
+      "lakes": false,
+      "features": false,
+      "structure_overrides": [],
+      "layers": [
+        { "block": "minecraft:bedrock", "height": 1 },
+        { "block": "minecraft:blackstone", "height": 20 },
+        { "block": "minecraft:soul_sand", "height": 3 }
+      ]
+    }
+  }
+}

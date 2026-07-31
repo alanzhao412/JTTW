@@ -1,0 +1,11 @@
+{
+  "type": "jttw_engine:heaven",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "jttw_engine:heaven",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "jttw_engine:heaven_biome"
+    }
+  }
+}

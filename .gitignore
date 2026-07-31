@@ -1,0 +1,61 @@
+# ---------------------------------------------------------------
+# Build output and generated artifacts
+# ---------------------------------------------------------------
+build/
+bin/
+out/
+*.jar
+*.class
+
+# ---------------------------------------------------------------
+# Gradle
+# ---------------------------------------------------------------
+.gradle/
+gradle-app.setting
+!gradle/wrapper/gradle-wrapper.jar
+
+# ---------------------------------------------------------------
+# Minecraft dev runtime.
+# run/ is where ForgeGradle drops an actual Minecraft installation:
+# game assets, world saves, logs, and your own auth token cache.
+# None of it is yours to redistribute, and it is ~64 MB.
+# ---------------------------------------------------------------
+run/
+runs/
+run-data/
+
+# ---------------------------------------------------------------
+# Decompiled Minecraft source.
+# ForgeGradle and IDE "download sources" actions can drop Mojang's
+# decompiled code into the project tree. It is not redistributable,
+# and it is not needed to build - the classes resolve from the
+# ForgeGradle dependency declared in build.gradle.
+# ---------------------------------------------------------------
+/net/
+/com/mojang/
+
+# ---------------------------------------------------------------
+# IDE and editor
+# ---------------------------------------------------------------
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.eclipse/
+.settings/
+.classpath
+.project
+.metadata/
+
+# ---------------------------------------------------------------
+# Agent/tooling local config (may contain machine-specific paths)
+# ---------------------------------------------------------------
+.claude/
+
+# ---------------------------------------------------------------
+# OS noise
+# ---------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini

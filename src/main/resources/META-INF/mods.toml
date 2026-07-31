@@ -1,0 +1,25 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="jttw_engine"
+version="1.0.0"
+displayName="JTTW Engine"
+description='''
+Journey to the West Engine - Core functionality for advanced features like 72 Transformations
+'''
+
+[[dependencies.jttw_engine]]
+    modId="forge"
+    mandatory=true
+    versionRange="[47,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.jttw_engine]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.20.1]"
+    ordering="NONE"
+    side="BOTH"

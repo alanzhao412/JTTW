@@ -1,0 +1,15 @@
+# Normalize line endings so the repo is consistent regardless of the OS a
+# contributor clones it on. Without this, a Windows checkout commits CRLF and
+# every file shows as fully modified when someone on Linux/macOS opens it.
+* text=auto eol=lf
+
+# Gradle wrapper scripts must keep their platform line endings to stay runnable.
+gradlew         text eol=lf
+gradlew.bat     text eol=crlf
+
+# Binary assets - never touch these.
+*.png    binary
+*.jar    binary
+*.class  binary
+*.ogg    binary
+*.zip    binary
