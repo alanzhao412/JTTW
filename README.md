@@ -1,281 +1,162 @@
-# JTTW Engine - 72 Transformations System
+# JTTW Engine
 
-This is the **core Forge mod** that provides advanced functionality that Palladium alone cannot handle.
+A Minecraft Forge 1.20.1 mod implementing a *Journey to the West* transformation and progression
+system — 72 entity transformations, tiered flight, skill trees, custom dimensions, and bespoke
+entities. Roughly 27,000 lines of Java across 144 source files, written solo.
 
-## What This Does
+It started as an addon for [Palladium](https://www.curseforge.com/minecraft/mc-mods/palladium), a
+powers framework. Working inside that framework meant accepting its model for how abilities,
+movement, and rendering behave — and the behaviours I wanted didn't fit it. So I dropped the
+dependency and reimplemented the parts I needed directly against Minecraft's own classes. This repo
+is that rewrite. It has no runtime dependency on Palladium or any other powers framework.
 
-The JTTW Engine provides:
-- **72 Transformations** - Transform into any Minecraft entity
-- **Automatic eye level adjustment** - Your view height changes based on entity size
-- **Automatic hitbox scaling** - Your collision box changes to match the entity
-- **Model rendering** - You actually look like the entity you transform into
-- **Network synchronization** - Other players see your transformation
-- **Persistent transformations** - Transformations survive logout/death
+---
 
-## How It Works
+## The interesting parts
 
-### Architecture
+If you're skimming this to see how it's built, these are the three problems worth reading about.
+
+### 1. Overriding engine internals without forking
+
+Minecraft's movement, collision, and rendering behaviour lives in classes that aren't designed to be
+extended. The usual options are to fork the game's source (unmaintainable across versions) or to
+work around the engine from the outside (fragile, and often impossible).
+
+Instead this uses [SpongePowered Mixin](https://github.com/SpongePowered/Mixin) to instrument
+bytecode at class-load time — 14 Mixin classes registered in
+[`jttw_engine.mixins.json`](src/main/resources/jttw_engine.mixins.json), split across injectors,
+accessors, and invokers.
+
+The clearest example is phasing through blocks, which took two separate injections to get right:
+
+- [`BlockStateBaseMixin`](src/main/java/com/jttw/engine/mixin/BlockStateBaseMixin.java) makes blocks
+  return an empty collision shape for a phasing entity.
+- That alone isn't enough. `Entity.moveTowardsClosestSpace()` runs an independent pass that detects
+  block overlap and *teleports* the entity to the nearest clear space — so a phasing player gets
+  ejected the moment they enter a wall.
+  [`EntityPhaseMixin`](src/main/java/com/jttw/engine/mixin/EntityPhaseMixin.java) injects at `HEAD`
+  of that method and cancels it when the entity can phase.
+
+Two injections into unrelated classes, required together, because the engine enforces the same
+invariant in two places.
+
+### 2. A custom flight and movement system
+
+613 lines across [`JTTWFlight`](src/main/java/com/jttw/engine/flight/JTTWFlight.java) and
+[`ClientFlightHandler`](src/main/java/com/jttw/engine/flight/ClientFlightHandler.java), written
+because vanilla creative flight and elytra gliding both felt wrong for the movement I wanted.
+
+It maintains a persistent velocity vector in player NBT rather than applying motion directly, which
+is what makes the rest possible:
+
+- **Turn-rate limiting.** Direction changes interpolate toward the input at a fixed rate per tick
+  rather than snapping, so flight has weight instead of feeling like a free camera.
+- **Momentum decay.** With no input, velocity decays by a constant factor per tick until it falls
+  below a cutoff — and the same decay continues after flight ends, so landing reads as a continuous
+  glide rather than an abrupt stop.
+- **Speed tiers.** Glide-only (sinks, cannot gain altitude), full flight, and a top tier that also
+  permits dimension travel — with per-character speed variation layered on top.
+- **Independent velocity clamps** on vertical and horizontal axes, and a separate scale factor for
+  strafing, so lateral drift doesn't match forward thrust.
+- **A parallel swim system** with its own stored vector, distinct cruise and sprint speeds, and a
+  different acceleration constant.
+
+Every constant is a named field at the top of the file, because tuning movement is iterative and
+magic numbers buried in the logic are miserable to adjust.
+
+### 3. Keeping state consistent across clients
+
+Transformation, progression, and ability state has to agree between the server and every client that
+can see the player — otherwise your model desyncs from your hitbox, or a cooldown looks ready on one
+screen and isn't on another.
+
+18 packet types in [`network/`](src/main/java/com/jttw/engine/network/) handle this, most of them
+one-way server→client syncs for a specific slice of state (level, Qi, cooldowns, skill tree, ring
+state, transformation), plus client→server requests for actions the server must authorize.
+
+State is persisted in three places deliberately —
+server memory, player NBT, and a client-side mirror — so transformations survive logout, death, and
+dimension changes.
+
+---
+
+## Models and animation
+
+**Every 3D model, animation, and texture in this project was made by me in
+[Blockbench](https://www.blockbench.net/).** The repo includes the source `.bbmodel` project files
+alongside their exports, in [`assets_source/`](assets_source/):
+
+| Asset | Source file |
+|---|---|
+| Ruyi Jingu Bang (staff) | `Staff.bbmodel` |
+| Celestial block | `celestial_block.bbmodel` |
+| Immortal peach | `immortal_peach.bbmodel` |
+| Xiaotian Quan (Erlang Shen's hound) | `xiaotian_quan.bbmodel` |
+
+Plus 18 textures and the item/block model and blockstate JSONs under
+[`src/main/resources/assets/`](src/main/resources/assets/).
+
+The rigging and animation code is hand-written —
+[`XiaotianQuanModel`](src/main/java/com/jttw/engine/client/model/XiaotianQuanModel.java) and
+[`XiaotianQuanAnimations`](src/main/java/com/jttw/engine/client/model/XiaotianQuanAnimations.java)
+drive the entity directly. There's no GeckoLib or other animation library in `build.gradle`.
+
+---
+
+## Layout
 
 ```
-Player transforms → Command executed → TransformationManager
-                                              ↓
-                                    Applies transformations:
-                                    - Eye height (via Mixin)
-                                    - Scale attribute
-                                    - Model rendering (via Mixin)
-                                              ↓
-                                    Syncs to all clients
-                                              ↓
-                                    Other players see you as the entity
+src/main/java/com/jttw/engine/
+├── mixin/           14 Mixin classes — bytecode instrumentation
+├── flight/          custom flight, glide, and swim physics
+├── network/         18 packet types for client–server state sync
+├── progression/     leveling, Qi, skill trees, per-character ability handlers
+├── transformation/  72-entity transformation system + transmutation
+├── reincarnation/   alignment tracking and reincarnation outcomes
+├── dimension/       custom Heaven and Hell dimensions with worldgen
+├── entity/          custom entities, projectiles, summons
+├── item/            artifacts and weapons
+├── client/          renderers, GUI screens, HUD overlays
+└── commands/        /jttw command tree
 ```
 
-### Key Components
+Largest components: `TransformationAbilityHandler` (1,385 lines), `YuanDiAbilityHandler` (1,236),
+`WuCloneManager` (874, including custom pathfinding goals).
 
-1. **TransformationManager** - Core logic for transformations
-2. **TransformationData** - Stores entity type, dimensions, eye height
-3. **NetworkHandler** - Syncs transformation state
-4. **PlayerMixin** - Adjusts eye height
-5. **PlayerRendererMixin** - Renders entity model instead of player
-6. **TransformCommand** - `/jttw transform` and `/jttw demorph` commands
+---
 
-## Commands
+## Building
 
-### Transform Into Entity
-```
-/jttw transform <entity_id>
-```
-Examples:
-- `/jttw transform minecraft:zombie`
-- `/jttw transform minecraft:enderman`
-- `/jttw transform minecraft:chicken`
-- `/jttw transform minecraft:ender_dragon`
+Requires **JDK 17**.
 
-### Transform Another Player
-```
-/jttw transform <player> <entity_id>
-```
-Example:
-- `/jttw transform Steve minecraft:creeper`
-
-### Return to Normal
-```
-/jttw demorph
+```bash
+./gradlew build          # jar lands in build/libs/
+./gradlew runClient      # launch a dev client
 ```
 
-### Return Another Player to Normal
-```
-/jttw demorph <player>
-```
+> **Note:** the Gradle wrapper is not yet committed. Until it is, run `gradle wrapper` once with a
+> local Gradle install (8.x), or open the project in an IDE with Gradle support and let it generate.
 
-### Check Transformation Status
+Then drop the built jar into `mods/` alongside Minecraft Forge 1.20.1 (47.4.10+).
+
+### Commands
+
 ```
-/jttw status
-/jttw status <player>
-```
-
-## Integration with Palladium Powers
-
-In your `j_t_t_w` addon power JSONs, you can call these commands:
-
-```json
-{
-  "seventy_two_transformations_zombie": {
-    "type": "palladium:command",
-    "title": "Transform: Zombie",
-    "hidden": false,
-    "hidden_in_bar": false,
-    "key_bind": "key.wukong.transform_zombie",
-    "cooldown": 300,
-    "description": "Transform into a zombie",
-    "commands": [
-      "jttw transform minecraft:zombie"
-    ]
-  },
-  
-  "seventy_two_transformations_enderman": {
-    "type": "palladium:command",
-    "title": "Transform: Enderman",
-    "hidden": false,
-    "hidden_in_bar": false,
-    "key_bind": "key.wukong.transform_enderman",
-    "cooldown": 300,
-    "description": "Transform into an enderman",
-    "commands": [
-      "jttw transform minecraft:enderman"
-    ]
-  },
-  
-  "revert_transformation": {
-    "type": "palladium:command",
-    "title": "Revert Form",
-    "hidden": false,
-    "hidden_in_bar": false,
-    "key_bind": "key.wukong.demorph",
-    "description": "Return to normal form",
-    "commands": [
-      "jttw demorph"
-    ]
-  }
-}
+/jttw transform <entity_id>      transform into any Minecraft entity
+/jttw transform <player> <id>    transform another player
+/jttw demorph [player]           revert
+/jttw status [player]            inspect current transformation state
 ```
 
-## Building the Mod
+---
 
-### Prerequisites
-- JDK 17
-- Gradle (wrapper included)
+## Known limitations
 
-### Build Steps
-
-1. **Navigate to directory**:
-   ```bash
-   cd jttw_engine_custom
-   ```
-
-2. **Run Gradle setup** (first time only):
-   ```bash
-   ./gradlew genIntellijRuns
-   # or on Windows:
-   gradlew.bat genIntellijRuns
-   ```
-
-3. **Build the mod**:
-   ```bash
-   ./gradlew build
-   ```
-
-4. **Find the JAR**:
-   ```
-   build/libs/jttw_engine-1.0.0.jar
-   ```
-
-## Installation
-
-1. Install Minecraft Forge 1.20.1 (version 47.4.10+)
-2. Place `jttw_engine-1.0.0.jar` in your `mods` folder
-3. (Optional) Install `j_t_t_w` Palladium addon for the full class system
-
-## Technical Details
-
-### Eye Height Adjustment
-
-The `PlayerMixin` intercepts the `getStandingEyeHeight` method and returns the transformed entity's eye height stored in persistent NBT data.
-
-```java
-@Inject(method = "getStandingEyeHeight", at = @At("RETURN"), cancellable = true)
-private void jttw_adjustEyeHeight(...) {
-    if (data.contains("jttw_morph_eye_height")) {
-        cir.setReturnValue(data.getFloat("jttw_morph_eye_height"));
-    }
-}
-```
-
-### Model Rendering
-
-The `PlayerRendererMixin` intercepts player rendering and instead:
-1. Creates a dummy entity of the transformed type
-2. Copies player position/rotation to the dummy
-3. Uses the entity's renderer to draw it
-4. Cancels normal player rendering
-
-```java
-@Inject(method = "render", at = @At("HEAD"), cancellable = true)
-private void jttw_renderMorph(...) {
-    if (transformed) {
-        // Render entity model
-        // Cancel player rendering
-    }
-}
-```
-
-### Networking
-
-Transformations are synchronized using Forge's networking:
-- Server → Client: When transformation changes
-- Server → All tracking clients: So nearby players see the transformation
-
-```java
-NetworkHandler.sendToPlayer(new SyncTransformationPacket(uuid, data), player);
-NetworkHandler.sendToTrackingPlayers(new SyncTransformationPacket(uuid, data), player);
-```
-
-### Persistence
-
-Transformation data is stored in:
-1. **Server memory** - `TransformationManager.TRANSFORMATIONS` map
-2. **Player NBT** - `jttw_transformation` tag
-3. **Client memory** - `TransformationManager.CLIENT_TRANSFORMATIONS` map
-
-This ensures transformations persist across:
-- Logout/login
-- Death/respawn
-- Dimension changes
-
-## Supported Entities
-
-Works with **ALL** Minecraft entities:
-- Hostile mobs (zombie, skeleton, creeper, etc.)
-- Passive mobs (cow, pig, chicken, etc.)
-- Neutral mobs (enderman, spider, etc.)
-- Boss mobs (ender dragon, wither)
-- Aquatic mobs (dolphin, squid, fish)
-- Flying mobs (bat, parrot, phantom)
-- Modded entities (if the mod adds them properly)
-
-## Known Limitations
-
-1. **Entity AI** - You don't get the entity's AI/behavior, just appearance
-2. **Special abilities** - You don't get entity abilities (creeper explosion, enderman teleport, etc.)
-3. **Animations** - Limited to what the entity's model supports
-4. **Inventory** - Player inventory remains accessible
-
-## Troubleshooting
-
-### Transformation not visible to other players
-- Check that networking is initialized: Look for "Network packets registered" in logs
-- Ensure both client and server have the mod
-
-### Eye height not changing
-- Verify mixin is loading: Look for mixin logs during startup
-- Check that `jttw_engine.mixins.json` is in resources
-
-### Model not rendering
-- Check client logs for rendering errors
-- Some entities may not render correctly (particles, projectiles, etc.)
-
-### Game crashes when transforming
-- Check entity ID is valid: `/jttw transform minecraft:invalid_entity` should fail gracefully
-- Look for `ClassCastException` in crash logs
-
-## Debugging
-
-Enable debug logging in your JVM arguments:
-```
--Dmixin.debug.verbose=true
--Dmixin.debug.export=true
-```
-
-Check transformation state:
-```
-/jttw status
-```
-
-## Future Enhancements
-
-Possible additions:
-- GUI for selecting transformations
-- Entity ability inheritance (optional)
-- Transformation whitelist/blacklist
-- Cooldown system
-- Transformation duration limits
-- Custom entity models beyond vanilla
-
-## Credits
-
-- Built with Minecraft Forge
-- Uses Mixin for bytecode modification
-- Network sync via Forge networking
+- Transformation grants appearance, hitbox, and eye height — not the entity's AI or native abilities.
+- Animation fidelity for vanilla entities is bounded by what their existing models support.
+- Some entities (particles, projectiles) don't render correctly when transformed into.
 
 ## License
 
-All Rights Reserved
+All rights reserved. *Journey to the West* is public-domain source material; Minecraft and Forge are
+the property of their respective owners, and no Mojang assets or source are redistributed here.
