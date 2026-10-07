@@ -9,6 +9,7 @@ import com.jttw.engine.network.s2c.OpenTransformationMenuPacket;
 import com.jttw.engine.network.s2c.SyncAbilitiesPacket;
 import com.jttw.engine.network.s2c.SyncCooldownPacket;
 import com.jttw.engine.network.s2c.SyncEyeOfHeavenPacket;
+import com.jttw.engine.network.s2c.SyncGoldenEyesPacket;
 import com.jttw.engine.network.s2c.SyncLevelPacket;
 import com.jttw.engine.network.s2c.SyncQiPacket;
 import com.jttw.engine.network.s2c.SyncReviveCountPacket;
@@ -163,6 +164,13 @@ public final class NetworkHandler {
                 .encoder(TransmuteItemPacket::encode)
                 .decoder(TransmuteItemPacket::decode)
                 .consumerMainThread(TransmuteItemPacket::handle)
+                .add();
+
+        // Fiery Golden Eyes mode (passive / x-ray) for the eye renderer
+        CHANNEL.messageBuilder(SyncGoldenEyesPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SyncGoldenEyesPacket::encode)
+                .decoder(SyncGoldenEyesPacket::decode)
+                .consumerMainThread(SyncGoldenEyesPacket::handle)
                 .add();
     }
 
