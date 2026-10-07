@@ -7,6 +7,7 @@ import com.jttw.engine.item.ImmortalItems;
 import com.jttw.engine.progression.skilltree.AbilityType;
 import com.jttw.engine.progression.skilltree.SkillTree;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
+import com.jttw.engine.transformation.TransformationSchool;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
@@ -31,6 +32,13 @@ public final class WukongCharacter implements PlayableCharacter {
     @Override
     public List<String> treeColumns() {
         return List.of("Transforms", "Clone", "Ring", "Vitality", "Qi", "Yao Wang", "Flight", "Martial");
+    }
+
+    @Override public TransformationSchool transformationSchool() { return TransformationSchool.SEVENTY_TWO; }
+
+    @Override
+    public int transformationLevel(Set<String> unlocked) {
+        return skillTree().highestTier(unlocked, "wu_transform");
     }
 
     @Override

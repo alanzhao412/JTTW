@@ -27,10 +27,10 @@ class SkillTreesTest {
     }
 
     @Test
-    void nineTreesWithDistinctPrefixes() {
+    void tenTreesWithDistinctPrefixes() {
         List<SkillTree> all = SkillTrees.all();
-        assertEquals(9, all.size());
-        assertEquals(9, all.stream().map(SkillTree::idPrefix).distinct().count());
+        assertEquals(10, all.size());
+        assertEquals(10, all.stream().map(SkillTree::idPrefix).distinct().count());
     }
 
     @Test

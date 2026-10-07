@@ -1,10 +1,14 @@
 package com.jttw.engine.gametest.transformation;
 
 import com.jttw.engine.JTTWEngine;
+import com.jttw.engine.character.marshal.MarshalSkillTree;
+import com.jttw.engine.gametest.character.CharTest;
 import com.jttw.engine.network.c2s.RequestTransformPacket;
+import com.jttw.engine.progression.skilltree.SkillTreeData;
 import com.jttw.engine.reincarnation.AlignmentData;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
-import com.jttw.engine.transformation.TransformTierFilter;
+import com.jttw.engine.transformation.FormCategory;
+import com.jttw.engine.transformation.FormClassifier;
 import com.jttw.engine.transformation.TransformationData;
 import com.jttw.engine.transformation.TransformationManager;
 import net.minecraft.gametest.framework.GameTest;
@@ -15,286 +19,248 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
+import java.util.Map;
+
 import static com.jttw.engine.gametest.GT.*;
+import static com.jttw.engine.transformation.FormCategory.*;
 
 /**
- * Who may take which form: the tier filter (72 Transformations I/II/III), the Marshal of the
- * Heavenly Canopy's separate 36 Transformations filter, and the server's handling of a
- * client's transform request.
+ * Who may take which form: the classifier that sorts mobs into categories, and the server's
+ * check of each request against the player's transformation art (18 / 36 / 72) and level.
  */
 @GameTestHolder(JTTWEngine.MOD_ID)
 @PrefixGameTestTemplate(false)
 public class TransformAccessGameTests {
 
-    // ── TransformTierFilter ───────────────────────────────────────
+    // ── Classification ─────────────────────────────────────────────
 
     @GameTest(template = PLATFORM)
-    public static void tierOneAllowsGroundAndWaterMobsOnly(GameTestHelper h) {
-        for (EntityType<?> t : new EntityType<?>[]{EntityType.COW, EntityType.ZOMBIE, EntityType.SQUID,
-                EntityType.IRON_GOLEM, EntityType.DOLPHIN, EntityType.CREEPER}) {
-            check(h, TransformTierFilter.isAllowedAtTier(t, 1), t + " at tier 1");
-        }
-        for (EntityType<?> t : new EntityType<?>[]{EntityType.GHAST, EntityType.BLAZE, EntityType.PHANTOM,
-                EntityType.BEE, EntityType.PARROT, EntityType.BAT, EntityType.VEX, EntityType.ALLAY}) {
-            check(h, !TransformTierFilter.isAllowedAtTier(t, 1), t + " (flying) refused at tier 1");
-        }
-        for (EntityType<?> t : TransformTierFilter.BOSS_MOBS) {
-            check(h, !TransformTierFilter.isAllowedAtTier(t, 1), t + " (boss) refused at tier 1");
-        }
+    public static void mobsAreSortedByTemperamentAndHabitat(GameTestHelper h) {
+        Map<EntityType<?>, FormCategory> expected = Map.ofEntries(
+                Map.entry(EntityType.COW, NEUTRAL_LAND), Map.entry(EntityType.WOLF, NEUTRAL_LAND),
+                Map.entry(EntityType.VILLAGER, NEUTRAL_LAND), Map.entry(EntityType.IRON_GOLEM, NEUTRAL_LAND),
+                Map.entry(EntityType.TURTLE, NEUTRAL_LAND), Map.entry(EntityType.FROG, NEUTRAL_LAND),
+                Map.entry(EntityType.SQUID, NEUTRAL_WATER), Map.entry(EntityType.COD, NEUTRAL_WATER),
+                Map.entry(EntityType.DOLPHIN, NEUTRAL_WATER), Map.entry(EntityType.AXOLOTL, NEUTRAL_WATER),
+                Map.entry(EntityType.BEE, NEUTRAL_AIR), Map.entry(EntityType.PARROT, NEUTRAL_AIR),
+                Map.entry(EntityType.BAT, NEUTRAL_AIR), Map.entry(EntityType.ALLAY, NEUTRAL_AIR),
+                Map.entry(EntityType.ZOMBIE, HOSTILE_LAND), Map.entry(EntityType.SKELETON, HOSTILE_LAND),
+                Map.entry(EntityType.ENDERMAN, HOSTILE_LAND), Map.entry(EntityType.CREEPER, HOSTILE_LAND),
+                Map.entry(EntityType.DROWNED, HOSTILE_WATER), Map.entry(EntityType.GUARDIAN, HOSTILE_WATER),
+                Map.entry(EntityType.PHANTOM, HOSTILE_AIR), Map.entry(EntityType.GHAST, HOSTILE_AIR),
+                Map.entry(EntityType.BLAZE, HOSTILE_AIR), Map.entry(EntityType.VEX, HOSTILE_AIR),
+                Map.entry(EntityType.ENDER_DRAGON, BOSS), Map.entry(EntityType.WITHER, BOSS),
+                Map.entry(EntityType.ELDER_GUARDIAN, BOSS), Map.entry(EntityType.WARDEN, BOSS),
+                Map.entry(EntityType.MINECART, OBJECT), Map.entry(EntityType.ARROW, OBJECT),
+                Map.entry(EntityType.BOAT, OBJECT));
+        expected.forEach((type, category) ->
+                eq(h, category, FormClassifier.classify(type, type.create(h.getLevel())), type.toShortString()));
+        eq(h, PLAYER, FormClassifier.classify(EntityType.PLAYER, null), "player");
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM)
-    public static void tierTwoAddsFlyersButNotBosses(GameTestHelper h) {
-        for (EntityType<?> t : new EntityType<?>[]{EntityType.GHAST, EntityType.BLAZE, EntityType.PHANTOM,
-                EntityType.BEE, EntityType.PARROT, EntityType.BAT, EntityType.VEX, EntityType.ALLAY, EntityType.COW}) {
-            check(h, TransformTierFilter.isAllowedAtTier(t, 2), t + " at tier 2");
-        }
-        // bosses, flying (dragon, wither) or not (warden, elder guardian)
-        for (EntityType<?> t : new EntityType<?>[]{EntityType.ENDER_DRAGON, EntityType.WITHER,
-                EntityType.WARDEN, EntityType.ELDER_GUARDIAN}) {
-            check(h, !TransformTierFilter.isAllowedAtTier(t, 2), t + " (boss) refused at tier 2");
-        }
-        h.succeed();
+    // ── Requests: 72 Transformations (Wukong / Erlang Shen) ─────────
+
+    private static ServerPlayer wukong(GameTestHelper h, int level) {
+        ServerPlayer p = Tf.player(h);
+        AlignmentData.markReincarnated(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
+        Tf.grantWukongTier(p, level);
+        return p;
     }
 
-    @GameTest(template = PLATFORM)
-    public static void tierThreeAllowsBosses(GameTestHelper h) {
-        for (EntityType<?> t : new EntityType<?>[]{EntityType.ENDER_DRAGON, EntityType.WITHER,
-                EntityType.WARDEN, EntityType.ELDER_GUARDIAN, EntityType.GHAST, EntityType.COW}) {
-            check(h, TransformTierFilter.isAllowedAtTier(t, 3), t + " at tier 3");
-        }
-        h.succeed();
-    }
-
-    @GameTest(template = PLATFORM)
-    public static void tooSmallMeansShorterThanThePlayer(GameTestHelper h) {
-        for (EntityType<?> t : new EntityType<?>[]{EntityType.PIG, EntityType.COW, EntityType.SPIDER,
-                EntityType.WOLF, EntityType.CHICKEN}) {
-            check(h, TransformTierFilter.isTooSmall(t), t + " is too small");
-        }
-        for (EntityType<?> t : new EntityType<?>[]{EntityType.ZOMBIE, EntityType.IRON_GOLEM,
-                EntityType.VILLAGER, EntityType.ENDERMAN}) {
-            check(h, !TransformTierFilter.isTooSmall(t), t + " is tall enough");
-        }
-        // exactly player height (1.8) is not "shorter than the player"
-        check(h, !TransformTierFilter.isTooSmall(EntityType.BLAZE), "blaze (1.8 tall) is not too small");
-        h.succeed();
-    }
-
-    @GameTest(template = PLATFORM)
-    public static void marshalFilterBlocksNetherAndBossFormsAndAllowsTheRest(GameTestHelper h) {
-        for (EntityType<?> t : TransformTierFilter.MARSHAL_BLOCKED_NETHER) {
-            check(h, !TransformTierFilter.isAllowedForMarshal(t), t + " (nether) blocked");
-        }
-        for (EntityType<?> t : TransformTierFilter.MARSHAL_BLOCKED_BOSSES) {
-            check(h, !TransformTierFilter.isAllowedForMarshal(t), t + " (boss) blocked");
-        }
-        for (EntityType<?> t : new EntityType<?>[]{EntityType.ZOMBIE, EntityType.SKELETON, EntityType.SPIDER}) {
-            check(h, TransformTierFilter.isAllowedForMarshal(t), t + " (allow-listed hostile) allowed");
-        }
-        for (EntityType<?> t : new EntityType<?>[]{EntityType.COW, EntityType.SQUID, EntityType.WOLF,
-                EntityType.IRON_GOLEM, EntityType.VILLAGER, EntityType.LLAMA}) {
-            check(h, TransformTierFilter.isAllowedForMarshal(t), t + " (passive/neutral) allowed");
-        }
-        h.succeed();
-    }
-
-    /**
-     * SUSPECTED BUG: isAllowedForMarshal() means to block every hostile (Monster) form except
-     * zombie, skeleton and spider, but it tests {@code Monster.class.isAssignableFrom(type.getBaseClass())}
-     * and EntityType.getBaseClass() is always Entity.class, so no hostile is ever blocked.
-     */
-    @GameTest(template = PLATFORM, required = false)
-    public static void marshalFilterBlocksHostilesOutsideItsAllowList(GameTestHelper h) {
-        for (EntityType<?> t : new EntityType<?>[]{EntityType.CREEPER, EntityType.ENDERMAN,
-                EntityType.WITCH, EntityType.HUSK, EntityType.STRAY, EntityType.CAVE_SPIDER}) {
-            check(h, !TransformTierFilter.isAllowedForMarshal(t), t + " (hostile) should be blocked");
-        }
-        h.succeed();
-    }
-
-    /** SUSPECTED BUG (same cause): a Marshal's request for a tall hostile such as the enderman is granted. */
-    @GameTest(template = PLATFORM, required = false)
-    public static void marshalIsRefusedATallHostileForm(GameTestHelper h) {
+    private static ServerPlayer marshal(GameTestHelper h, int level) {
         ServerPlayer p = Tf.player(h);
         AlignmentData.markReincarnated(p, ReincarnationOutcome.MARSHAL_HEAVENLY_CANOPY);
-        Tf.send(p, Tf.request(EntityType.ENDERMAN));
-        check(h, formOf(p) == null, "enderman should be refused, but became " + formOf(p));
-        h.succeed();
+        String[] nodes = {MarshalSkillTree.TRANSFORM_1, MarshalSkillTree.TRANSFORM_2, MarshalSkillTree.TRANSFORM_3};
+        for (int i = 0; i < level; i++) SkillTreeData.grantNode(p, nodes[i]);
+        return p;
     }
 
-    // ── RequestTransformPacket (server side) ──────────────────────
-
-    @GameTest(template = PLATFORM)
-    public static void requestAtTierOneTakesAGroundForm(GameTestHelper h) {
-        ServerPlayer p = Tf.player(h);
-        AlignmentData.markReincarnated(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
-        Tf.grantWukongTier(p, 1);
-        Tf.send(p, Tf.request(EntityType.COW));
-        eq(h, EntityType.COW, formOf(p), "cow form");
-        h.succeed();
+    /** Sends a request and reports whether the player ended up in that form. */
+    private static boolean takes(ServerPlayer p, EntityType<?> type) {
+        TransformationManager.demorph(p);
+        boolean object = FormClassifier.classify(type, type.create(p.serverLevel())) == OBJECT;
+        Tf.send(p, object ? Tf.requestObject(type) : Tf.request(type));
+        return formOf(p) == type;
     }
 
     @GameTest(template = PLATFORM)
-    public static void requestAtTierOneRefusesFlyersAndBosses(GameTestHelper h) {
-        ServerPlayer p = Tf.player(h);
-        AlignmentData.markReincarnated(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
-        Tf.grantWukongTier(p, 1);
-        Tf.send(p, Tf.request(EntityType.GHAST));
-        check(h, formOf(p) == null, "ghast refused at tier 1");
-        Tf.send(p, Tf.request(EntityType.WARDEN));
-        check(h, formOf(p) == null, "warden refused at tier 1");
+    public static void seventyTwoLevelOneTakesEveryNeutralFormButNoHostiles(GameTestHelper h) {
+        ServerPlayer p = wukong(h, 1);
+        check(h, takes(p, EntityType.COW), "neutral land");
+        check(h, takes(p, EntityType.SQUID), "neutral water");
+        check(h, takes(p, EntityType.BEE), "neutral air");
+        check(h, !takes(p, EntityType.ZOMBIE), "hostile land is level 2");
         h.succeed();
     }
 
     @GameTest(template = PLATFORM)
-    public static void requestAtTierTwoTakesFlyersButNotBosses(GameTestHelper h) {
-        ServerPlayer p = Tf.player(h);
-        AlignmentData.markReincarnated(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
-        Tf.grantWukongTier(p, 2);
-        Tf.send(p, Tf.request(EntityType.ENDER_DRAGON));
-        check(h, formOf(p) == null, "dragon refused at tier 2");
-        Tf.send(p, Tf.request(EntityType.WARDEN));
-        check(h, formOf(p) == null, "warden refused at tier 2");
-        Tf.send(p, Tf.request(EntityType.GHAST));
-        eq(h, EntityType.GHAST, formOf(p), "ghast at tier 2");
+    public static void seventyTwoLevelTwoAddsHostileLandButNoBossesOrHostileSeaAndSky(GameTestHelper h) {
+        ServerPlayer p = wukong(h, 2);
+        check(h, takes(p, EntityType.ZOMBIE), "hostile land");
+        check(h, !takes(p, EntityType.WARDEN), "boss");
+        check(h, !takes(p, EntityType.DROWNED), "hostile sea");
+        check(h, !takes(p, EntityType.PHANTOM), "hostile sky");
+        check(h, !takes(p, EntityType.MINECART), "object");
         h.succeed();
     }
 
     @GameTest(template = PLATFORM)
-    public static void requestAtTierThreeTakesABoss(GameTestHelper h) {
-        ServerPlayer p = Tf.player(h);
-        AlignmentData.markReincarnated(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
-        Tf.grantWukongTier(p, 3);
-        Tf.send(p, Tf.request(EntityType.WITHER));
-        eq(h, EntityType.WITHER, formOf(p), "wither at tier 3");
+    public static void seventyTwoLevelThreeTakesBossesHostileSeaAndSkyAndObjects(GameTestHelper h) {
+        ServerPlayer p = wukong(h, 3);
+        check(h, takes(p, EntityType.WARDEN), "boss");
+        check(h, takes(p, EntityType.DROWNED), "hostile sea");
+        check(h, takes(p, EntityType.PHANTOM), "hostile sky");
+        check(h, takes(p, EntityType.MINECART), "object");
         h.succeed();
     }
 
     @GameTest(template = PLATFORM)
-    public static void erlangShenTransformTierCountsToo(GameTestHelper h) {
+    public static void erlangShenPractisesSeventyTwoToo(GameTestHelper h) {
         ServerPlayer p = Tf.player(h);
         AlignmentData.markReincarnated(p, ReincarnationOutcome.EYE_OF_HEAVEN);
-        Tf.grantErlangTier(p, 2);
-        Tf.send(p, Tf.request(EntityType.BEE));
-        eq(h, EntityType.BEE, formOf(p), "bee at Erlang tier 2");
-        Tf.send(p, Tf.request(EntityType.ELDER_GUARDIAN));
-        eq(h, EntityType.BEE, formOf(p), "elder guardian refused, bee kept");
+        Tf.grantErlangTier(p, 1);
+        check(h, takes(p, EntityType.BEE), "neutral air at level 1");
+        check(h, !takes(p, EntityType.ZOMBIE), "hostile land at level 1");
+        h.succeed();
+    }
+
+    // ── Requests: 36 Transformations (the Marshal) ─────────────────
+
+    @GameTest(template = PLATFORM)
+    public static void thirtySixLevelOneIsNeutralLandAndWater(GameTestHelper h) {
+        ServerPlayer p = marshal(h, 1);
+        check(h, takes(p, EntityType.COW), "neutral land");
+        check(h, takes(p, EntityType.SQUID), "neutral water");
+        check(h, !takes(p, EntityType.BEE), "neutral air is level 2");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void thirtySixLevelTwoAddsNeutralAir(GameTestHelper h) {
+        ServerPlayer p = marshal(h, 2);
+        check(h, takes(p, EntityType.BEE), "neutral air");
+        check(h, !takes(p, EntityType.ZOMBIE), "hostile land is level 3");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void thirtySixLevelThreeAddsHostileLandAndNothingElse(GameTestHelper h) {
+        ServerPlayer p = marshal(h, 3);
+        check(h, takes(p, EntityType.ZOMBIE), "hostile land");
+        check(h, takes(p, EntityType.SPIDER), "small forms are fine");
+        check(h, !takes(p, EntityType.DROWNED), "hostile sea");
+        check(h, !takes(p, EntityType.PHANTOM), "hostile sky");
+        check(h, !takes(p, EntityType.WARDEN), "boss");
+        check(h, !takes(p, EntityType.MINECART), "object");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void wukongsNodesDoNotLevelTheMarshal(GameTestHelper h) {
+        ServerPlayer p = marshal(h, 0);
+        Tf.grantWukongTier(p, 3);
+        check(h, !takes(p, EntityType.COW), "another tree's transform nodes");
+        h.succeed();
+    }
+
+    // ── Refusals ───────────────────────────────────────────────────
+
+    @GameTest(template = PLATFORM)
+    public static void noTransformNodeMeansNoForms(GameTestHelper h) {
+        check(h, !takes(wukong(h, 0), EntityType.COW), "Wukong without a node");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void charactersWithoutAnArtCannotTransform(GameTestHelper h) {
+        ServerPlayer p = Tf.player(h);
+        AlignmentData.markReincarnated(p, ReincarnationOutcome.YUAN_DI);
+        check(h, !takes(p, EntityType.COW), "Yuan Di");
         h.succeed();
     }
 
     @GameTest(template = PLATFORM)
     public static void aRefusedRequestKeepsTheCurrentForm(GameTestHelper h) {
-        ServerPlayer p = Tf.player(h);
-        Tf.grantWukongTier(p, 1);
-        Tf.send(p, Tf.request(EntityType.WOLF));
-        Tf.send(p, Tf.request(EntityType.PHANTOM));
-        eq(h, EntityType.WOLF, formOf(p), "still a wolf");
-        h.succeed();
-    }
-
-    @GameTest(template = PLATFORM)
-    public static void requestForAPlayerFormIsRefused(GameTestHelper h) {
-        ServerPlayer p = Tf.player(h);
-        Tf.grantWukongTier(p, 3);
-        Tf.send(p, Tf.request(EntityType.PLAYER));
-        check(h, formOf(p) == null, "player form refused");
-        h.succeed();
-    }
-
-    @GameTest(template = PLATFORM)
-    public static void entityRequestMustNameALivingThing(GameTestHelper h) {
-        ServerPlayer p = Tf.player(h);
-        Tf.grantWukongTier(p, 3);
-        Tf.send(p, Tf.request(EntityType.MINECART));
-        check(h, formOf(p) == null, "ENTITY request for a minecart refused");
-        h.succeed();
-    }
-
-    @GameTest(template = PLATFORM)
-    public static void objectRequestMustNameANonLivingThing(GameTestHelper h) {
-        ServerPlayer p = Tf.player(h);
-        Tf.grantWukongTier(p, 3);
-        Tf.send(p, Tf.requestObject(EntityType.COW));
-        check(h, formOf(p) == null, "OBJECT_ENTITY request for a cow refused");
-        Tf.send(p, Tf.requestObject(EntityType.MINECART));
-        eq(h, EntityType.MINECART, formOf(p), "minecart object form");
-        h.succeed();
-    }
-
-    @GameTest(template = PLATFORM)
-    public static void marshalTakesTallAllowedForms(GameTestHelper h) {
-        ServerPlayer p = Tf.player(h);
-        AlignmentData.markReincarnated(p, ReincarnationOutcome.MARSHAL_HEAVENLY_CANOPY);
-        Tf.send(p, Tf.request(EntityType.ZOMBIE));
-        eq(h, EntityType.ZOMBIE, formOf(p), "zombie (allow-listed hostile)");
-        Tf.send(p, Tf.request(EntityType.IRON_GOLEM));
-        eq(h, EntityType.IRON_GOLEM, formOf(p), "iron golem (neutral)");
-        h.succeed();
-    }
-
-    @GameTest(template = PLATFORM)
-    public static void marshalIsRefusedSmallNetherAndBossForms(GameTestHelper h) {
-        ServerPlayer p = Tf.player(h);
-        AlignmentData.markReincarnated(p, ReincarnationOutcome.MARSHAL_HEAVENLY_CANOPY);
-        Tf.send(p, Tf.request(EntityType.PIG));
-        check(h, formOf(p) == null, "pig refused (smaller than the player)");
-        Tf.send(p, Tf.request(EntityType.WITHER_SKELETON));
-        check(h, formOf(p) == null, "wither skeleton refused (nether)");
-        Tf.send(p, Tf.request(EntityType.WARDEN));
-        check(h, formOf(p) == null, "warden refused (boss)");
-        h.succeed();
-    }
-
-    @GameTest(template = PLATFORM)
-    public static void marshalIgnoresTransformTiers(GameTestHelper h) {
-        ServerPlayer p = Tf.player(h);
-        AlignmentData.markReincarnated(p, ReincarnationOutcome.MARSHAL_HEAVENLY_CANOPY);
-        Tf.grantWukongTier(p, 3);
-        Tf.send(p, Tf.request(EntityType.ENDER_DRAGON));
-        check(h, formOf(p) == null, "Marshal cannot take a boss even with tier-3 nodes");
-        h.succeed();
-    }
-
-    /**
-     * SUSPECTED BUG: the Marshal filter allow-lists the spider among hostiles, but the size
-     * filter the server applies first (spider is 0.9 tall) always refuses it, so the allow-list
-     * entry can never be used.
-     */
-    @GameTest(template = PLATFORM, required = false)
-    public static void marshalCanTakeTheAllowListedSpider(GameTestHelper h) {
-        ServerPlayer p = Tf.player(h);
-        AlignmentData.markReincarnated(p, ReincarnationOutcome.MARSHAL_HEAVENLY_CANOPY);
-        Tf.send(p, Tf.request(EntityType.SPIDER));
-        eq(h, EntityType.SPIDER, formOf(p), "spider form for the Marshal");
-        h.succeed();
-    }
-
-    /**
-     * SUSPECTED BUG: "72 Transformations I" says it opens the menu for ground and water mobs,
-     * but the server checks only the tier filter, which allows ground mobs at tier 0, so a
-     * player with no transform node (and no character) is granted the form.
-     */
-    @GameTest(template = PLATFORM, required = false)
-    public static void requestWithoutAnyTransformNodeIsRefused(GameTestHelper h) {
-        ServerPlayer p = Tf.player(h);
+        ServerPlayer p = wukong(h, 1);
         Tf.send(p, Tf.request(EntityType.COW));
-        check(h, formOf(p) == null, "no transform node, but became " + formOf(p));
+        Tf.send(p, Tf.request(EntityType.ZOMBIE));
+        eq(h, EntityType.COW, formOf(p), "still a cow");
         h.succeed();
     }
 
-    /**
-     * SUSPECTED BUG: an unregistered id resolves to Forge's default entity type (the pig), so
-     * the "type == null" refusal never fires and the requester becomes a pig.
-     */
-    @GameTest(template = PLATFORM, required = false)
-    public static void requestForAnUnknownEntityIsRefused(GameTestHelper h) {
-        ServerPlayer p = Tf.player(h);
-        Tf.grantWukongTier(p, 3);
+    @GameTest(template = PLATFORM)
+    public static void mobAndObjectRequestsMustMatchWhatTheyName(GameTestHelper h) {
+        ServerPlayer p = wukong(h, 3);
+        Tf.send(p, Tf.requestObject(EntityType.COW));
+        check(h, formOf(p) == null, "object request naming a mob");
+        Tf.send(p, Tf.request(EntityType.MINECART));
+        check(h, formOf(p) == null, "mob request naming an object");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void unknownEntityIdIsRefusedNotAPig(GameTestHelper h) {
+        ServerPlayer p = wukong(h, 3);
         Tf.send(p, new RequestTransformPacket(RequestTransformPacket.Kind.ENTITY,
                 new ResourceLocation("jttw_engine", "no_such_mob")));
         check(h, formOf(p) == null, "unknown id, but became " + formOf(p));
+        h.succeed();
+    }
+
+    // ── Player forms ───────────────────────────────────────────────
+
+    @GameTest(template = PLATFORM)
+    public static void seventyTwoLevelThreeTakesAnotherPlayersAppearance(GameTestHelper h) {
+        ServerPlayer p = wukong(h, 3);
+        ServerPlayer target = Tf.player(h);
+        CharTest.online(h, target);
+        Tf.send(p, RequestTransformPacket.player(target.getUUID()));
+        TransformationData d = TransformationManager.getTransformation(p);
+        check(h, d != null && d.isPlayerForm(), "player form");
+        eq(h, target.getUUID(), d.getDisguiseId(), "whose appearance");
+        eq(h, target.getGameProfile().getName(), d.getDisguiseName(), "name shown");
+        near(h, 1.8, d.getHeight(), "player height");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void playerFormsNeedSeventyTwoLevelThree(GameTestHelper h) {
+        ServerPlayer target = Tf.player(h);
+        CharTest.online(h, target);
+        ServerPlayer w2 = wukong(h, 2);
+        Tf.send(w2, RequestTransformPacket.player(target.getUUID()));
+        check(h, TransformationManager.getTransformation(w2) == null, "72 at level 2");
+        ServerPlayer m3 = marshal(h, 3);
+        Tf.send(m3, RequestTransformPacket.player(target.getUUID()));
+        check(h, TransformationManager.getTransformation(m3) == null, "36 at level 3");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void playerFormNeedsAnotherOnlinePlayer(GameTestHelper h) {
+        ServerPlayer p = wukong(h, 3);
+        CharTest.online(h, p);
+        Tf.send(p, RequestTransformPacket.player(p.getUUID()));
+        check(h, TransformationManager.getTransformation(p) == null, "yourself");
+        Tf.send(p, RequestTransformPacket.player(java.util.UUID.randomUUID()));
+        check(h, TransformationManager.getTransformation(p) == null, "nobody online by that id");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void playerFormSurvivesSaveAndNetworkRoundTrips(GameTestHelper h) {
+        java.util.UUID id = java.util.UUID.randomUUID();
+        TransformationData d = TransformationData.ofPlayer(id, "Somebody");
+        TransformationData loaded = TransformationData.deserialize(d.serialize());
+        check(h, loaded != null && loaded.isPlayerForm(), "saved player form loads");
+        eq(h, id, loaded.getDisguiseId(), "saved id");
+        eq(h, "Somebody", loaded.getDisguiseName(), "saved name");
+        var buf = new net.minecraft.network.FriendlyByteBuf(io.netty.buffer.Unpooled.buffer());
+        d.toNetwork(buf);
+        TransformationData received = TransformationData.fromNetwork(buf);
+        check(h, received != null && id.equals(received.getDisguiseId()) && "Somebody".equals(received.getDisguiseName()), "network");
+        eq(h, 0, buf.readableBytes(), "no bytes left over");
         h.succeed();
     }
 

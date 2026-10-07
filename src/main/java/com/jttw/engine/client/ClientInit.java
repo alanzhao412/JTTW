@@ -7,7 +7,7 @@ import com.jttw.engine.character.AbilitySlot;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.client.gui.CharacterScreen;
 import com.jttw.engine.client.gui.SkillTreeScreen;
-import com.jttw.engine.client.gui.TransformRootScreen;
+import com.jttw.engine.client.gui.TransformationScreen;
 import com.jttw.engine.client.model.XiaotianQuanModel;
 import com.jttw.engine.client.renderer.PlacedStaffRenderer;
 import com.jttw.engine.client.renderer.WuCloneRenderer;
@@ -178,7 +178,7 @@ public final class ClientInit {
 
             // ── GUI openers ────────────────────────────────────────────
             if (OPEN_TRANSFORM_GUI != null) {
-                while (OPEN_TRANSFORM_GUI.consumeClick()) mc.setScreen(new TransformRootScreen());
+                while (OPEN_TRANSFORM_GUI.consumeClick()) TransformationScreen.openForLocalPlayer();
             }
             if (OPEN_CHARACTER_GUI != null) {
                 while (OPEN_CHARACTER_GUI.consumeClick()) mc.setScreen(new CharacterScreen());
@@ -299,9 +299,8 @@ public final class ClientInit {
 
             switch (entry.type()) {
                 case MENU -> {
-                    if ("wu_transform".equals(entry.id()) || "es_transform".equals(entry.id())) {
-                        mc.setScreen(new TransformRootScreen());
-                    }
+                    // 18 / 36 / 72 Transformations: the character's own menu
+                    if (entry.id().endsWith("_transform")) TransformationScreen.openForLocalPlayer();
                 }
                 case TOGGLE -> {
                     NetworkHandler.sendToServer(

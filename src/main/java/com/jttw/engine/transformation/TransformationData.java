@@ -11,6 +11,7 @@ import net.minecraft.world.entity.Pose;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
+import java.util.UUID;
 
 /**
  * Stores transformation state for a player
@@ -24,9 +25,19 @@ public class TransformationData {
 
     // NEW: trait flags
     private final boolean canFly;
-    private final boolean canPhase;
+        private final boolean canPhase;
+    // Player forms only: whose appearance this is
+    @Nullable private final UUID disguiseId;
+    @Nullable private final String disguiseName;
 
     public TransformationData(EntityType<?> entityType, float eyeHeight, float width, float height, boolean canFly, boolean canPhase) {
+        this(entityType, eyeHeight, width, height, canFly, canPhase, null, null);
+    }
+
+    private TransformationData(EntityType<?> entityType, float eyeHeight, float width, float height,
+                               boolean canFly, boolean canPhase, @Nullable UUID disguiseId, @Nullable String disguiseName) {
+        this.disguiseId = disguiseId;
+        this.disguiseName = disguiseName;
         this.entityType = entityType;
         this.entityId = ForgeRegistries.ENTITY_TYPES.getKey(entityType);
         this.eyeHeight = eyeHeight;
@@ -53,37 +64,45 @@ public class TransformationData {
         }
 
         // Flying trait: cover common vanilla flyers + class-based flyers
-        boolean canFly = isFlyer(entity);
+        boolean canFly = FormClassifier.isFlyer(entity);
         boolean canPhase = isPhasingMob(entity);
 
         return new TransformationData(type, eye, dims.width, dims.height, canFly, canPhase);
     }
 
-    /**
-     * Conservative "is this a flyer" heuristic.
-     * This is for granting MAYFLY (player creative-style flight) while morphed.
-     */
-    private static boolean isFlyer(Entity entity) {
-        // Broad class-based checks
-        if (entity instanceof net.minecraft.world.entity.FlyingMob) return true;
-        if (entity instanceof net.minecraft.world.entity.animal.FlyingAnimal) return true;
-
-        // Vanilla flyers that may not match those interfaces in every case/mapping:
-        EntityType<?> t = entity.getType();
-        return t == EntityType.ENDER_DRAGON
-                || t == EntityType.GHAST
-                || t == EntityType.PHANTOM
-                || t == EntityType.BAT
-                || t == EntityType.BEE
-                || t == EntityType.BLAZE
-                || t == EntityType.PARROT
-                || t == EntityType.VEX
-                || t == EntityType.ALLAY;
-    }
 
     private static boolean isPhasingMob(Entity entity) {
         EntityType<?> t = entity.getType();
         return t == EntityType.VEX || t == EntityType.ALLAY;
+    }
+
+        /** A player form: looks like the player {@code id} ({@code name}), at player size. */
+    public static TransformationData ofPlayer(UUID id, String name) {
+        return new TransformationData(EntityType.PLAYER, 1.62f, 0.6f, 1.8f, false, false, id, name);
+    }
+
+    /** True for a player form (another player's appearance). */
+    public boolean isPlayerForm() {
+        return disguiseId != null;
+    }
+
+    /** The player whose appearance this form wears, or null if it isn't a player form. */
+    @Nullable
+    public UUID getDisguiseId() {
+        return disguiseId;
+    }
+
+    /** That player's name, shown over the transformed player's head. */
+    @Nullable
+    public String getDisguiseName() {
+        return disguiseName;
+    }
+
+    /** The entity type for a saved or received id, or null if no such type is registered. */
+    @Nullable
+    private static EntityType<?> knownType(ResourceLocation id) {
+        // The registry returns its default (pig) for unknown ids rather than null
+        return ForgeRegistries.ENTITY_TYPES.containsKey(id) ? ForgeRegistries.ENTITY_TYPES.getValue(id) : null;
     }
 
     public EntityType<?> getEntityType() {
@@ -126,7 +145,11 @@ public class TransformationData {
         tag.putFloat("width", width);
         tag.putFloat("height", height);
         tag.putBoolean("can_fly", canFly);
-        tag.putBoolean("can_phase", canPhase);
+                tag.putBoolean("can_phase", canPhase);
+        if (disguiseId != null) {
+            tag.putUUID("disguise_id", disguiseId);
+            tag.putString("disguise_name", disguiseName == null ? "" : disguiseName);
+        }
         return tag;
     }
 
@@ -135,8 +158,10 @@ public class TransformationData {
         try {
             ResourceLocation entityId = ResourceLocation.parse(tag.getString("entity_id"));
 
-            EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(entityId);
+            EntityType<?> type = knownType(entityId);
             if (type == null) return null;
+            if (tag.hasUUID("disguise_id")) return ofPlayer(tag.getUUID("disguise_id"), tag.getString("disguise_name"));
+            if (type == EntityType.PLAYER) return null; // a player form must say whose
 
             float eyeHeight = tag.getFloat("eye_height");
             float width = tag.contains("width") ? tag.getFloat("width") : type.getDimensions().width;
@@ -157,7 +182,12 @@ public class TransformationData {
         buf.writeFloat(width);
         buf.writeFloat(height);
         buf.writeBoolean(canFly);
-        buf.writeBoolean(canPhase);
+                buf.writeBoolean(canPhase);
+        buf.writeBoolean(disguiseId != null);
+        if (disguiseId != null) {
+            buf.writeUUID(disguiseId);
+            buf.writeUtf(disguiseName == null ? "" : disguiseName);
+        }
     }
 
     @Nullable
@@ -169,10 +199,14 @@ public class TransformationData {
             float height = buf.readFloat();
             boolean canFly = buf.readBoolean();
             boolean canPhase = buf.readBoolean();
+            boolean disguised = buf.readBoolean();
+            UUID disguiseId = disguised ? buf.readUUID() : null;
+            String disguiseName = disguised ? buf.readUtf() : null;
 
-            EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(entityId);
+            EntityType<?> type = knownType(entityId);
             if (type == null) return null;
-
+            if (disguised) return ofPlayer(disguiseId, disguiseName);
+            if (type == EntityType.PLAYER) return null;
             return new TransformationData(type, eyeHeight, width, height, canFly, canPhase);
         } catch (Exception e) {
             return null;
@@ -187,6 +221,7 @@ public class TransformationData {
                 ", dimensions=" + width + "x" + height +
                 ", canFly=" + canFly +
                 ", canPhase=" + canPhase +
+                (disguiseId != null ? ", disguise=" + disguiseName + "/" + disguiseId : "") +
                 '}';
     }
 }

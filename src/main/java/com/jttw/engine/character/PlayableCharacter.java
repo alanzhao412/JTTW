@@ -2,6 +2,7 @@ package com.jttw.engine.character;
 
 import com.jttw.engine.progression.skilltree.SkillTree;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
+import com.jttw.engine.transformation.TransformationSchool;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
@@ -48,6 +49,16 @@ public interface PlayableCharacter {
      */
     default List<AbilitySlot> skillBar(Player player) {
         return skillBar(SkillTreeData.getUnlockedNodes(player));
+    }
+
+    /** The transformation art this character practises, or null if it has none. */
+    default TransformationSchool transformationSchool() {
+        return null;
+    }
+
+    /** This character's level (0-3) in its transformation art, from its unlocked nodes. */
+    default int transformationLevel(Set<String> unlockedNodes) {
+        return 0;
     }
 
     /** Runs the ability in {@code slot} for a key event. Unused slots do nothing. */

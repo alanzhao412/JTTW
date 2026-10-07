@@ -66,6 +66,8 @@ public class PlayerRendererMixin {
 
         TransformationData data = TransformationManager.getTransformation(player);
         if (data == null) { jttw_resetDummy(); return; }
+        // A player form renders as a normal player; AbstractClientPlayerMixin swaps the skin
+        if (data.isPlayerForm()) { jttw_resetDummy(); return; }
 
         EntityType<?> type = data.getEntityType();
         if (type == null) return;

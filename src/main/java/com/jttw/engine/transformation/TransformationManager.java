@@ -47,7 +47,16 @@ public class TransformationManager {
 
         TransformationData data = createAccurateDataFromServerInstance(player, entityType);
         if (data == null) return;
+        become(player, data);
+    }
 
+    /** Takes on another player's appearance (a player form), at player size. */
+    public static void transformIntoPlayer(Player player, java.util.UUID targetId, String targetName) {
+        if (player.level().isClientSide) return;
+        become(player, TransformationData.ofPlayer(targetId, targetName));
+    }
+
+    private static void become(Player player, TransformationData data) {
         TRANSFORMATIONS.put(player.getUUID(), data);
         applyTransformation(player, data);
         saveToPlayer(player, data);

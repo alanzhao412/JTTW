@@ -3,6 +3,7 @@ package com.jttw.engine.progression.skilltree;
 import com.jttw.engine.character.byakko.ByakkoSkillTree;
 import com.jttw.engine.character.dragon.DragonSkillTree;
 import com.jttw.engine.character.erlang.ErlangShenSkillTree;
+import com.jttw.engine.character.marshal.MarshalSkillTree;
 import com.jttw.engine.character.nezha.NezhaSkillTree;
 import com.jttw.engine.character.peng.PengSkillTree;
 import com.jttw.engine.character.phoenix.PhoenixSkillTree;
@@ -22,7 +23,7 @@ public final class SkillTrees {
         return List.of(
                 WukongSkillTree.TREE, ErlangShenSkillTree.TREE, DragonSkillTree.TREE,
                 TurtleSkillTree.TREE, ByakkoSkillTree.TREE, PhoenixSkillTree.TREE,
-                YuanDiSkillTree.TREE, PengSkillTree.TREE, NezhaSkillTree.TREE);
+                YuanDiSkillTree.TREE, PengSkillTree.TREE, NezhaSkillTree.TREE, MarshalSkillTree.TREE);
     }
 
     /** The tree whose prefix names this node, or null if no tree claims it. */

@@ -102,10 +102,11 @@ public class TransformationCoreGameTests {
     }
 
     @GameTest(template = PLATFORM)
-    public static void cannotTransformIntoAPlayer(GameTestHelper h) {
+    public static void playerFormsGoThroughTransformIntoPlayerNotTransform(GameTestHelper h) {
         ServerPlayer p = Tf.player(h);
+        // a bare PLAYER type says nothing about whose appearance, so transform() refuses it
         TransformationManager.transform(p, EntityType.PLAYER);
-        check(h, !TransformationManager.isTransformed(p), "player form refused (cannot be instantiated)");
+        check(h, !TransformationManager.isTransformed(p), "bare player type refused");
         check(h, !p.getPersistentData().contains(NBT_KEY), "nothing saved");
         h.succeed();
     }
@@ -245,7 +246,7 @@ public class TransformationCoreGameTests {
      * (a mob from a removed mod), but Forge's entity registry answers unknown ids with its
      * default, the pig, so the null check never fires and the player wakes up as a pig.
      */
-    @GameTest(template = PLATFORM, required = false)
+    @GameTest(template = PLATFORM)
     public static void unknownSavedEntityIdReadsAsNoTransformation(GameTestHelper h) {
         CompoundTag tag = new TransformationData(EntityType.COW, 1.3f, 0.9f, 1.4f, false, false).serialize();
         tag.putString("entity_id", "jttw_engine:no_such_mob");

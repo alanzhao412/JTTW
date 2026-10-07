@@ -1,7 +1,6 @@
 package com.jttw.engine.network.s2c;
 
 import com.jttw.engine.client.gui.TransformationScreen;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -34,8 +33,6 @@ public class OpenTransformationMenuPacket {
      */
     @OnlyIn(Dist.CLIENT)
     private static void handleClient() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return;
-        mc.setScreen(new TransformationScreen());
+        TransformationScreen.openForLocalPlayer();
     }
 }

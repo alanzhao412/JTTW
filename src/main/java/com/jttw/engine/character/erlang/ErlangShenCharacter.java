@@ -6,6 +6,7 @@ import com.jttw.engine.character.PlayableCharacter;
 import com.jttw.engine.progression.skilltree.AbilityType;
 import com.jttw.engine.progression.skilltree.SkillTree;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
+import com.jttw.engine.transformation.TransformationSchool;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
@@ -26,6 +27,13 @@ public final class ErlangShenCharacter implements PlayableCharacter {
     public List<String> treeColumns() {
         return List.of("Transforms", "Xiaotian Quan", "Eye of Heaven", "Flight", "Hunt",
                 "Hound Growth", "Zhàn Shén", "Tactics", "Spear");
+    }
+
+    @Override public TransformationSchool transformationSchool() { return TransformationSchool.SEVENTY_TWO; }
+
+    @Override
+    public int transformationLevel(Set<String> unlocked) {
+        return skillTree().highestTier(unlocked, "es_transform");
     }
 
     @Override

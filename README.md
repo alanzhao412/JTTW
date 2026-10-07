@@ -79,6 +79,25 @@ is a new node plus its slot in that character's class.
 Levelling runs on a Qi resource system (`QiManager`), with `BiomeLevelBand` and `EnemyTier` scaling
 the world to player level.
 
+### The 18, 36 and 72 Transformations
+
+Three transformation arts, each with its own menu and its own forms per level. A character practises
+at most one (Wukong and Erlang Shen the 72, the Marshal the 36; the 18 is ready for a future
+character), and its level comes from that character's skill tree.
+
+| | Level 1 | Level 2 | Level 3 |
+|---|---|---|---|
+| **18** | neutral land | + neutral water | + neutral air |
+| **36** | neutral land and water | + neutral air | + hostile land |
+| **72** | all neutral forms | + hostile land (no bosses) | + bosses, hostile sea and sky, objects, other players |
+
+[`TransformationSchool`](src/main/java/com/jttw/engine/transformation/TransformationSchool.java) holds
+the table, [`FormClassifier`](src/main/java/com/jttw/engine/transformation/FormClassifier.java) sorts
+every entity into a category, and the menu and the server's check both ask the same
+[`TransformationAccess`](src/main/java/com/jttw/engine/transformation/TransformationAccess.java), so the
+menu only ever shows what the server will grant. A player form wears another online player's skin,
+model and cape, and shows their name.
+
 ### Lore-accurate artifacts and abilities
 
 Abilities and items are drawn from the source material rather than invented:
@@ -204,7 +223,7 @@ src/main/java/com/jttw/engine/
 │   ├── erlang/  nezha/  yuandi/  peng/  marshal/
 │   └── divinebeast/  dragon/  phoenix/  turtle/  byakko/
 ├── reincarnation/   4-axis alignment tracking, 12 evolution outcomes
-├── transformation/  72-entity transformation system + transmutation
+├── transformation/  18 / 36 / 72 Transformations: forms by category, player disguises, transmutation
 ├── mixin/           14 Mixin classes — bytecode instrumentation
 ├── flight/          custom flight, glide, and swim physics (server side)
 ├── network/         c2s/ and s2c/ packets for client–server state sync

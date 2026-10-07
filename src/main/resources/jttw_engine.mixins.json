@@ -17,6 +17,7 @@
     "WalkAnimationStateAccessor"
   ],
   "client": [
+    "AbstractClientPlayerMixin",
     "HumanoidModelMixin",
     "ItemRendererMixin",
     "LocalPlayerMixin",

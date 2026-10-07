@@ -1,100 +1,103 @@
 package com.jttw.engine.network.c2s;
 
 import com.jttw.engine.progression.skilltree.SkillTreeData;
-import com.jttw.engine.transformation.TransformTierFilter;
+import com.jttw.engine.transformation.FormCategory;
+import com.jttw.engine.transformation.FormClassifier;
+import com.jttw.engine.transformation.TransformationAccess;
 import com.jttw.engine.transformation.TransformationManager;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import javax.annotation.Nullable;
+import java.util.UUID;
 import java.util.function.Supplier;
 
+/**
+ * Sent client → server when the player picks a form in their transformation menu.
+ *
+ * <p>The server re-checks the choice against the player's transformation art and level
+ * ({@link TransformationAccess}); the menu only shows what passes the same check.
+ */
 public class RequestTransformPacket {
 
     public enum Kind {
-        ENTITY,          // living entities (your current behavior)
-        OBJECT_ENTITY    // non-living entities (arrows, minecarts, items, etc.)
+        /** A mob (living entity). */
+        ENTITY,
+        /** A non-living entity: minecart, boat, arrow... */
+        OBJECT_ENTITY,
+        /** Another online player's appearance. */
+        PLAYER
     }
 
     private final Kind kind;
-    private final ResourceLocation entityId;
+    @Nullable private final ResourceLocation entityId;
+    @Nullable private final UUID targetPlayer;
 
     public RequestTransformPacket(Kind kind, ResourceLocation entityId) {
+        this(kind, entityId, null);
+    }
+
+    private RequestTransformPacket(Kind kind, @Nullable ResourceLocation entityId, @Nullable UUID targetPlayer) {
         this.kind = kind;
         this.entityId = entityId;
+        this.targetPlayer = targetPlayer;
+    }
+
+    /** A request to take on another player's appearance. */
+    public static RequestTransformPacket player(UUID target) {
+        return new RequestTransformPacket(Kind.PLAYER, null, target);
     }
 
     public static void encode(RequestTransformPacket msg, FriendlyByteBuf buf) {
         buf.writeVarInt(msg.kind.ordinal());
-        buf.writeResourceLocation(msg.entityId);
+        if (msg.kind == Kind.PLAYER) buf.writeUUID(msg.targetPlayer);
+        else buf.writeResourceLocation(msg.entityId);
     }
 
     public static RequestTransformPacket decode(FriendlyByteBuf buf) {
         int ord = buf.readVarInt();
         Kind kind = (ord >= 0 && ord < Kind.values().length) ? Kind.values()[ord] : Kind.ENTITY;
+        if (kind == Kind.PLAYER) return player(buf.readUUID());
         return new RequestTransformPacket(kind, buf.readResourceLocation());
     }
 
     public static void handle(RequestTransformPacket msg, Supplier<NetworkEvent.Context> ctxSupplier) {
         NetworkEvent.Context ctx = ctxSupplier.get();
+        ServerPlayer sender = ctx.getSender();
+        if (sender != null) ctx.enqueueWork(() -> handleServer(sender, msg));
+        ctx.setPacketHandled(true);
+    }
 
-        final ServerPlayer sender = ctx.getSender();
-        if (sender == null) {
-            ctx.setPacketHandled(true);
+    private static void handleServer(ServerPlayer sender, RequestTransformPacket msg) {
+        var unlocked = SkillTreeData.getUnlockedNodes(sender);
+
+        if (msg.kind == Kind.PLAYER) {
+            ServerPlayer target = sender.server.getPlayerList().getPlayer(msg.targetPlayer);
+            if (target == null || target == sender) return;
+            if (!TransformationAccess.mayTake(sender, unlocked, FormCategory.PLAYER)) return;
+            TransformationManager.transformIntoPlayer(sender, target.getUUID(), target.getGameProfile().getName());
             return;
         }
 
-        ctx.enqueueWork(() -> {
-            EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(msg.entityId);
-            if (type == null) return;
+        // The registry returns its default (pig) for unknown ids rather than null
+        if (!ForgeRegistries.ENTITY_TYPES.containsKey(msg.entityId)) return;
+        EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(msg.entityId);
+        if (type == null || type == EntityType.PLAYER) return; // players go through Kind.PLAYER
 
-            // Never allow player
-            if (type == EntityType.PLAYER) return;
+        Entity created = type.create(sender.serverLevel());
+        if (created == null) return;
+        FormCategory category = FormClassifier.classify(type, created);
+        created.discard();
 
-            Entity created = type.create(sender.serverLevel());
-            if (created == null) return;
+        boolean isObject = category == FormCategory.OBJECT;
+        if ((msg.kind == Kind.OBJECT_ENTITY) != isObject) return; // asked for a mob, got an object, or vice versa
+        if (!TransformationAccess.mayTake(sender, unlocked, category)) return;
 
-            boolean isLiving = (created instanceof LivingEntity);
-
-            // Validate based on requested kind
-            if (msg.kind == Kind.ENTITY) {
-                if (!isLiving) return;
-
-                // Marshal of the Heavenly Canopy uses a separate filter (36 Transformations)
-                String outcomeId = sender.getPersistentData()
-                        .getString(com.jttw.engine.reincarnation.AlignmentData.KEY_REINCARNATION_OUTCOME);
-                boolean isMarshal = "marshal_of_the_heavenly_canopy".equals(outcomeId);
-
-                if (isMarshal) {
-                    // Size filter only for 36 Transformations
-                    if (TransformTierFilter.isTooSmall(type)) return;
-                    if (!TransformTierFilter.isAllowedForMarshal(type)) {
-                        return;
-                    }
-                } else {
-                    // Server-side tier validation for entity transforms
-                    int transformTier = Math.max(
-                            SkillTreeData.getTransformTier(sender),
-                            SkillTreeData.getEsTransformTier(sender)
-                    );
-                    if (!TransformTierFilter.isAllowedAtTier(type, transformTier)) {
-                        return;
-                    }
-                }
-            } else if (msg.kind == Kind.OBJECT_ENTITY) {
-                if (isLiving) return;
-            }
-
-            // NOTE: this next call currently assumes “living morph” in your TransformationManager.
-            // We’ll update TransformationManager/TransformationData/PlayerRendererMixin next so non-living works properly.
-            TransformationManager.transform(sender, type);
-        });
-
-        ctx.setPacketHandled(true);
+        TransformationManager.transform(sender, type);
     }
 }

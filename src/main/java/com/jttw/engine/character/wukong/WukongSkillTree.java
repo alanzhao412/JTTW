@@ -69,20 +69,19 @@ public final class WukongSkillTree {
         // ── 72 TRANSFORMATIONS (col 0, MENU type) ───────────────────────
         TREE.add(new SkillNode(
                 TRANSFORM_1, "72 Transformations I",
-                new String[]{ "Press V to open the", "Transformation Menu.",
-                              "Ground & water mobs only." },
+                new String[]{ "Press V to open the", "72 Transformations.",
+                              "Neutral land, water and sky forms." },
                 3, 0, 0, List.of(), AbilityType.MENU, 1, "Transformations"
         ));
         TREE.add(new SkillNode(
                 TRANSFORM_2, "72 Transformations II",
-                new String[]{ "Unlocks flying mob forms.", "Transform your equipped",
-                              "items into same-tier variants." },
+                new String[]{ "Adds hostile land forms", "(no bosses)." },
                 4, 0, 1, List.of(TRANSFORM_1), AbilityType.MENU, 2, "Transformations"
         ));
         TREE.add(new SkillNode(
                 TRANSFORM_3, "72 Transformations III",
-                new String[]{ "Unlocks boss entity forms.", "Qi cost scales with",
-                              "the size of the form." },
+                new String[]{ "Adds bosses, hostile sea and", "sky forms, objects and players.",
+                              "Transmute equipped items." },
                 5, 0, 2, List.of(TRANSFORM_2), AbilityType.MENU, 3, "Transformations"
         ));
 

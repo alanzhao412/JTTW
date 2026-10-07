@@ -2,6 +2,9 @@ package com.jttw.engine.character;
 
 import com.jttw.engine.progression.skilltree.SkillNode;
 import com.jttw.engine.progression.skilltree.SkillTrees;
+import com.jttw.engine.character.marshal.MarshalCharacter;
+import com.jttw.engine.progression.skilltree.AbilityType;
+import com.jttw.engine.transformation.TransformationSchool;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
@@ -49,7 +52,9 @@ class CharacterSkillBarTest {
 
     @TestFactory
     Stream<DynamicTest> barMatchesTheOldBuilder() {
-        return Characters.all().stream().map(c -> DynamicTest.dynamicTest(c.outcomeId(), () -> {
+        // The Marshal changed on purpose: 36 Transformations is now a skill branch, not innate
+        return Characters.all().stream().filter(c -> c != MarshalCharacter.INSTANCE)
+                .map(c -> DynamicTest.dynamicTest(c.outcomeId(), () -> {
             for (Set<String> unlocked : cases(c)) {
                 assertEquals(LegacySkillBar.build(c.outcomeId(), unlocked), c.skillBar(unlocked),
                         c.outcomeId() + " with " + unlocked);
@@ -96,10 +101,27 @@ class CharacterSkillBarTest {
     }
 
     @Test
-    void marshalAlwaysHasThirtySixTransformations() {
-        List<AbilitySlot> bar = Characters.byOutcome("marshal_of_the_heavenly_canopy").skillBar(Set.of());
-        assertEquals("mc_transform", bar.get(0).id());
-        assertEquals("36 Transformations", bar.get(0).displayName());
+    void marshalsThirtySixTransformationsComesWithItsFirstNode() {
+        PlayableCharacter marshal = Characters.byOutcome("marshal_of_the_heavenly_canopy");
+        assertTrue(marshal.skillBar(Set.of()).get(0).isEmpty(), "no node, no menu");
+        AbilitySlot slot = marshal.skillBar(Set.of("mc_transform_1", "mc_transform_2")).get(0);
+        assertEquals("mc_transform", slot.id());
+        assertEquals("36 Transformations", slot.displayName());
+        assertEquals(AbilityType.MENU, slot.type());
+        assertEquals(2, slot.tier());
+    }
+
+    @Test
+    void transformationArtsAndLevelsPerCharacter() {
+        assertEquals(TransformationSchool.SEVENTY_TWO, Characters.byOutcome("celestial_primate").transformationSchool());
+        assertEquals(TransformationSchool.SEVENTY_TWO, Characters.byOutcome("eye_of_heaven").transformationSchool());
+        assertEquals(TransformationSchool.THIRTY_SIX, Characters.byOutcome("marshal_of_the_heavenly_canopy").transformationSchool());
+        for (String other : List.of("yuan_di", "gold_winged_peng", "third_lotus_prince", "dragon", "phoenix", "white_tiger", "turtle")) {
+            assertNull(Characters.byOutcome(other).transformationSchool(), other);
+        }
+        assertEquals(3, Characters.byOutcome("celestial_primate").transformationLevel(Set.of("wu_transform_1", "wu_transform_2", "wu_transform_3")));
+        assertEquals(1, Characters.byOutcome("eye_of_heaven").transformationLevel(Set.of("es_transform_1", "wu_transform_3")));
+        assertEquals(0, Characters.byOutcome("marshal_of_the_heavenly_canopy").transformationLevel(Set.of("wu_transform_1")));
     }
 
     @Test
