@@ -1,5 +1,6 @@
 package com.jttw.engine.client;
 
+import com.jttw.engine.character.AbilitySlot;
 import com.jttw.engine.network.s2c.SyncAbilitiesPacket;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
@@ -157,7 +158,7 @@ public final class SkillBarRenderer {
 
         for (int s = 0; s < 4; s++) {
             int sx = anchorX + s * (SLOT + GAP);
-            SyncAbilitiesPacket.Entry entry = ClientAbilityData.getSlot(s);
+            AbilitySlot entry = ClientAbilityData.getSlot(s);
             drawSlot(gfx, mc, sx, y, s, entry);
         }
 
@@ -173,7 +174,7 @@ public final class SkillBarRenderer {
 
     private static void drawSlot(GuiGraphics gfx, Minecraft mc,
                                  int x, int y, int slotIdx,
-                                 SyncAbilitiesPacket.Entry entry) {
+                                 AbilitySlot entry) {
         // Treat null or EMPTY_SLOT sentinel (id is empty) as unoccupied
         boolean occupied = (entry != null && !entry.id().isEmpty());
 

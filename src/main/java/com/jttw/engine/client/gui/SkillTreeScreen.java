@@ -1,20 +1,15 @@
 package com.jttw.engine.client.gui;
 
+import com.jttw.engine.character.Characters;
+import com.jttw.engine.character.PlayableCharacter;
+import com.jttw.engine.character.erlang.ErlangShenCharacter;
+import com.jttw.engine.character.wukong.WukongCharacter;
 import com.jttw.engine.client.ClientAbilityData;
 import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.progression.skilltree.AbilityType;
-import com.jttw.engine.character.byakko.ByakkoSkillTree;
-import com.jttw.engine.character.dragon.DragonSkillTree;
-import com.jttw.engine.character.erlang.ErlangShenSkillTree;
-import com.jttw.engine.character.phoenix.PhoenixSkillTree;
 import com.jttw.engine.progression.skilltree.SkillNode;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
 import com.jttw.engine.network.c2s.SpendSkillPointPacket;
-import com.jttw.engine.character.turtle.TurtleSkillTree;
-import com.jttw.engine.character.nezha.NezhaSkillTree;
-import com.jttw.engine.character.peng.PengSkillTree;
-import com.jttw.engine.character.wukong.WukongSkillTree;
-import com.jttw.engine.character.yuandi.YuanDiSkillTree;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -208,85 +203,17 @@ public class SkillTreeScreen extends Screen {
 
     private void resolveTree() {
         Minecraft mc = Minecraft.getInstance();
-        String outcomeId = "";
-        if (mc.player != null) {
-            outcomeId = mc.player.getPersistentData()
-                    .getString(com.jttw.engine.reincarnation.AlignmentData.KEY_REINCARNATION_OUTCOME);
-        }
+        PlayableCharacter character = mc.player == null ? null : Characters.of(mc.player);
+        // No character yet (or one without a tree screen): show Wukong's tree as before
+        if (character == null) character = WukongCharacter.INSTANCE;
 
-        if ("eye_of_heaven".equals(outcomeId)) {
-            treeNodes = ErlangShenSkillTree.TREE.allOrdered();
-            nodeLookup = ErlangShenSkillTree.TREE::get;
-            treeTitle = "ERLANG SHEN";
-            columnHeaders = new String[]{ "Transforms", "Xiaotian Quan", "Eye of Heaven",
-                                          "Flight", "Qi", "Hound Growth", "Zhàn Shén", "Tactics", "Spear" };
-            treeBgColors = C_ES_UNLOCKED_BG;
-            treeTextColors = C_ES_UNLOCKED_TEXT;
-        } else if ("dragon".equals(outcomeId)) {
-            treeNodes = DragonSkillTree.TREE.allOrdered();
-            nodeLookup = DragonSkillTree.TREE::get;
-            treeTitle = "DRAGON";
-            columnHeaders = new String[]{ "Lightning", "Weather", "Flight", "Pressure", "Regen" };
-            treeBgColors = C_UNLOCKED_BG;
-            treeTextColors = C_UNLOCKED_TEXT;
-        } else if ("white_tiger".equals(outcomeId)) {
-            treeNodes = ByakkoSkillTree.TREE.allOrdered();
-            nodeLookup = ByakkoSkillTree.TREE::get;
-            treeTitle = "BYAKKO";
-            columnHeaders = new String[]{ "Leap", "Bleed", "Velocity" };
-            treeBgColors = C_UNLOCKED_BG;
-            treeTextColors = C_UNLOCKED_TEXT;
-        } else if ("yuan_di".equals(outcomeId)) {
-            treeNodes = YuanDiSkillTree.TREE.allOrdered();
-            nodeLookup = YuanDiSkillTree.TREE::get;
-            treeTitle = "YUAN DI";
-            columnHeaders = new String[]{ "Transform", "Sovereign", "Breath", "Smite", "Night", "Body", "Qi" };
-            treeBgColors = C_UNLOCKED_BG;
-            treeTextColors = C_UNLOCKED_TEXT;
-        } else if ("phoenix".equals(outcomeId)) {
-            treeNodes = PhoenixSkillTree.TREE.allOrdered();
-            nodeLookup = PhoenixSkillTree.TREE::get;
-            treeTitle = "SOLAR SOVEREIGN";
-            columnHeaders = new String[]{ "Flamethrower", "Life Drain", "Rebirth" };
-            treeBgColors = C_UNLOCKED_BG;
-            treeTextColors = C_UNLOCKED_TEXT;
-        } else if ("turtle".equals(outcomeId)) {
-            treeNodes = TurtleSkillTree.TREE.allOrdered();
-            nodeLookup = TurtleSkillTree.TREE::get;
-            treeTitle = "WORLD TURTLE";
-            columnHeaders = new String[]{ "Shell Guard", "Roots", "Bedrock", "Force", "Tectonic", "Gravity", "Patience" };
-            treeBgColors = C_UNLOCKED_BG;
-            treeTextColors = C_UNLOCKED_TEXT;
-        } else if ("gold_winged_peng".equals(outcomeId)) {
-            treeNodes = PengSkillTree.TREE.allOrdered();
-            nodeLookup = PengSkillTree.TREE::get;
-            treeTitle = "GOLD WINGED PENG";
-            columnHeaders = new String[]{};
-            treeBgColors = C_UNLOCKED_BG;
-            treeTextColors = C_UNLOCKED_TEXT;
-        } else if ("third_lotus_prince".equals(outcomeId)) {
-            treeNodes = NezhaSkillTree.TREE.allOrdered();
-            nodeLookup = NezhaSkillTree.TREE::get;
-            treeTitle = "THIRD LOTUS PRINCE";
-            columnHeaders = new String[]{ "Armaments", "Samadhi", "Detonation", "Three Heads", "Flight", "Fortitude", "Qi", "Combat" };
-            treeBgColors = C_UNLOCKED_BG;
-            treeTextColors = C_UNLOCKED_TEXT;
-        } else if ("marshal_of_the_heavenly_canopy".equals(outcomeId)) {
-            treeNodes = java.util.List.of();
-            nodeLookup = id -> null;
-            treeTitle = "MARSHAL OF THE HEAVENLY CANOPY";
-            columnHeaders = new String[]{};
-            treeBgColors = C_UNLOCKED_BG;
-            treeTextColors = C_UNLOCKED_TEXT;
-        } else {
-            // Default: Wukong (celestial_primate or fallback)
-            treeNodes = WukongSkillTree.TREE.allOrdered();
-            nodeLookup = WukongSkillTree.TREE::get;
-            treeTitle = "WUKONG";
-            columnHeaders = new String[]{ "Transforms", "Clone", "Ring", "Vitality", "Qi", "Yao Wang", "Flight", "Martial" };
-            treeBgColors = C_UNLOCKED_BG;
-            treeTextColors = C_UNLOCKED_TEXT;
-        }
+        treeNodes = character.skillTree().allOrdered();
+        nodeLookup = character.skillTree()::get;
+        treeTitle = character.treeTitle();
+        columnHeaders = character.treeColumns().toArray(new String[0]);
+        boolean erlang = character == ErlangShenCharacter.INSTANCE;
+        treeBgColors = erlang ? C_ES_UNLOCKED_BG : C_UNLOCKED_BG;
+        treeTextColors = erlang ? C_ES_UNLOCKED_TEXT : C_UNLOCKED_TEXT;
     }
 
     @Override

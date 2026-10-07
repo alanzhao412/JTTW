@@ -1,5 +1,6 @@
 package com.jttw.engine.client;
 
+import com.jttw.engine.character.AbilitySlot;
 import com.jttw.engine.progression.skilltree.AbilityType;
 import com.jttw.engine.network.s2c.SyncAbilitiesPacket;
 import net.minecraftforge.api.distmarker.Dist;
@@ -37,10 +38,10 @@ public final class ClientAbilityData {
 
     public static final int PAGE_SIZE = 4;
 
-    private static List<SyncAbilitiesPacket.Entry> abilities = Collections.emptyList();
+    private static List<AbilitySlot> abilities = Collections.emptyList();
     private static int pageOffset = 0;
 
-    public static void setAbilities(List<SyncAbilitiesPacket.Entry> incoming) {
+    public static void setAbilities(List<AbilitySlot> incoming) {
         abilities  = List.copyOf(incoming);
         pageOffset = 0;
     }
@@ -53,7 +54,7 @@ public final class ClientAbilityData {
     public static int totalCount() { return abilities.size(); }
 
     @Nullable
-    public static SyncAbilitiesPacket.Entry getSlot(int slotIndex) {
+    public static AbilitySlot getSlot(int slotIndex) {
         if (slotIndex < 0 || slotIndex >= PAGE_SIZE) return null;
         int idx = pageOffset + slotIndex;
         if (idx >= abilities.size()) return null;
@@ -63,7 +64,7 @@ public final class ClientAbilityData {
     /** Returns the {@link AbilityType} for the given slot, or null if the slot is empty. */
     @Nullable
     public static AbilityType getSlotType(int slotIndex) {
-        SyncAbilitiesPacket.Entry e = getSlot(slotIndex);
+        AbilitySlot e = getSlot(slotIndex);
         return (e != null) ? e.type() : null;
     }
 

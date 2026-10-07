@@ -1,5 +1,7 @@
 package com.jttw.engine.client;
 
+import com.jttw.engine.character.AbilityAction;
+import com.jttw.engine.character.AbilitySlot;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.client.gui.CharacterScreen;
 import com.jttw.engine.client.gui.SkillTreeScreen;
@@ -11,7 +13,6 @@ import com.jttw.engine.client.renderer.XiaotianQuanRenderer;
 import com.jttw.engine.flight.ClientFlightHandler;
 import com.jttw.engine.network.c2s.ActivateAbilityPacket;
 import com.jttw.engine.network.NetworkHandler;
-import com.jttw.engine.network.s2c.SyncAbilitiesPacket;
 import com.jttw.engine.progression.skilltree.AbilityType;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -191,17 +192,17 @@ public final class ClientInit {
             // ── Ability slot 0 (V) — single-press OR held (if HELD type) ──
             if (ABILITY_SLOT_0 != null) {
                 boolean isDown0 = ABILITY_SLOT_0.isDown();
-                SyncAbilitiesPacket.Entry slot0 = ClientAbilityData.getSlot(0);
+                AbilitySlot slot0 = ClientAbilityData.getSlot(0);
                 boolean slot0Active = slot0 != null && !slot0.id().isEmpty();
                 AbilityType slot0Type = slot0Active ? slot0.type() : null;
 
                 if (slot0Type == AbilityType.HELD) {
                     if (isDown0 && !wasSlot0Down) {
                         NetworkHandler.sendToServer(
-                                new ActivateAbilityPacket(0, ActivateAbilityPacket.Action.START));
+                                new ActivateAbilityPacket(0, AbilityAction.START));
                     } else if (!isDown0 && wasSlot0Down) {
                         NetworkHandler.sendToServer(
-                                new ActivateAbilityPacket(0, ActivateAbilityPacket.Action.STOP));
+                                new ActivateAbilityPacket(0, AbilityAction.STOP));
                     }
                     while (ABILITY_SLOT_0.consumeClick()) {}
                 } else {
@@ -215,17 +216,17 @@ public final class ClientInit {
             // ── Ability slot 1 (B) — single-press OR held (if HELD type) ──
             if (ABILITY_SLOT_1 != null) {
                 boolean isDown1 = ABILITY_SLOT_1.isDown();
-                SyncAbilitiesPacket.Entry slot1 = ClientAbilityData.getSlot(1);
+                AbilitySlot slot1 = ClientAbilityData.getSlot(1);
                 boolean slot1Active = slot1 != null && !slot1.id().isEmpty();
                 AbilityType slot1Type = slot1Active ? slot1.type() : null;
 
                 if (slot1Type == AbilityType.HELD) {
                     if (isDown1 && !wasSlot1Down) {
                         NetworkHandler.sendToServer(
-                                new ActivateAbilityPacket(1, ActivateAbilityPacket.Action.START));
+                                new ActivateAbilityPacket(1, AbilityAction.START));
                     } else if (!isDown1 && wasSlot1Down) {
                         NetworkHandler.sendToServer(
-                                new ActivateAbilityPacket(1, ActivateAbilityPacket.Action.STOP));
+                                new ActivateAbilityPacket(1, AbilityAction.STOP));
                     }
                     while (ABILITY_SLOT_1.consumeClick()) {}
                 } else {
@@ -239,14 +240,14 @@ public final class ClientInit {
             // ── Ability slot 2 (N) — held (detect transitions) ─────────
             if (ABILITY_SLOT_2 != null) {
                 boolean isDown = ABILITY_SLOT_2.isDown();
-                SyncAbilitiesPacket.Entry slot2 = ClientAbilityData.getSlot(2);
+                AbilitySlot slot2 = ClientAbilityData.getSlot(2);
                 boolean slot2Active = slot2 != null && !slot2.id().isEmpty();
                 AbilityType slot2Type = slot2Active ? slot2.type() : null;
 
                 if (isDown && !wasSlot2Down) {
                     if (slot2Type == AbilityType.HELD) {
                         NetworkHandler.sendToServer(
-                                new ActivateAbilityPacket(2, ActivateAbilityPacket.Action.START));
+                                new ActivateAbilityPacket(2, AbilityAction.START));
                     } else if (slot2Type != null) {
                         activateSlot(mc, 2);
                         while (ABILITY_SLOT_2.consumeClick()) {}
@@ -254,7 +255,7 @@ public final class ClientInit {
                 } else if (!isDown && wasSlot2Down) {
                     if (slot2Type == AbilityType.HELD) {
                         NetworkHandler.sendToServer(
-                                new ActivateAbilityPacket(2, ActivateAbilityPacket.Action.STOP));
+                                new ActivateAbilityPacket(2, AbilityAction.STOP));
                     }
                 }
                 wasSlot2Down = isDown;
@@ -264,14 +265,14 @@ public final class ClientInit {
             // ── Ability slot 3 (M) — held (detect transitions) ─────────
             if (ABILITY_SLOT_3 != null) {
                 boolean isDown3 = ABILITY_SLOT_3.isDown();
-                SyncAbilitiesPacket.Entry slot3 = ClientAbilityData.getSlot(3);
+                AbilitySlot slot3 = ClientAbilityData.getSlot(3);
                 boolean slot3Active = slot3 != null && !slot3.id().isEmpty();
                 AbilityType slot3Type = slot3Active ? slot3.type() : null;
 
                 if (isDown3 && !wasSlot3Down) {
                     if (slot3Type == AbilityType.HELD) {
                         NetworkHandler.sendToServer(
-                                new ActivateAbilityPacket(3, ActivateAbilityPacket.Action.START));
+                                new ActivateAbilityPacket(3, AbilityAction.START));
                     } else if (slot3Type != null) {
                         activateSlot(mc, 3);
                         while (ABILITY_SLOT_3.consumeClick()) {}
@@ -279,7 +280,7 @@ public final class ClientInit {
                 } else if (!isDown3 && wasSlot3Down) {
                     if (slot3Type == AbilityType.HELD) {
                         NetworkHandler.sendToServer(
-                                new ActivateAbilityPacket(3, ActivateAbilityPacket.Action.STOP));
+                                new ActivateAbilityPacket(3, AbilityAction.STOP));
                     }
                 }
                 wasSlot3Down = isDown3;
@@ -292,7 +293,7 @@ public final class ClientInit {
         // -----------------------------------------------------------------------
 
         private static void activateSlot(Minecraft mc, int slot) {
-            SyncAbilitiesPacket.Entry entry = ClientAbilityData.getSlot(slot);
+            AbilitySlot entry = ClientAbilityData.getSlot(slot);
             if (entry == null || entry.id().isEmpty()) return;
 
             switch (entry.type()) {
@@ -303,7 +304,7 @@ public final class ClientInit {
                 }
                 case TOGGLE -> {
                     NetworkHandler.sendToServer(
-                            new ActivateAbilityPacket(slot, ActivateAbilityPacket.Action.USE));
+                            new ActivateAbilityPacket(slot, AbilityAction.USE));
                 }
                 case HELD -> {} // handled by press/release tracking above
                 case PASSIVE -> {}
