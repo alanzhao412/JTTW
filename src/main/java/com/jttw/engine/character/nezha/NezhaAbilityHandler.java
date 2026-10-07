@@ -22,7 +22,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.SmallFireball;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -44,16 +43,14 @@ public final class NezhaAbilityHandler {
     private static final Set<UUID> ACTIVE_THREE_HEADS = new HashSet<>();
     private static final Map<UUID, Integer> CHARGING_DETONATION = new HashMap<>();
     private static final Set<UUID> DETONATION_IMMUNE = new HashSet<>();
-    // Samadhi Fire: cooldown and the running volley, kept on the player (absent = ready / none)
-    private static final String KEY_FIRE_READY_AT = "jttw_samadhi_ready_at";
-    private static final String KEY_VOLLEY_SHOTS = "jttw_samadhi_shots_left";
-    private static final String KEY_VOLLEY_NEXT_AT = "jttw_samadhi_next_at";
-    private static final String KEY_VOLLEY_DAMAGE = "jttw_samadhi_damage";
-    private static final String KEY_VOLLEY_THREE_HEADS = "jttw_samadhi_three_heads";
-    /** On a Samadhi fireball: the damage it deals. */
-    public static final String KEY_FIREBALL_DAMAGE = "jttw_samadhi_fireball_damage";
-    private static final int SAMADHI_VOLLEY_SHOTS = 5;
-    private static final int SAMADHI_VOLLEY_INTERVAL = 4;
+    // Samadhi Fire: a held stream of fire; whether it is running lives on the player
+    public static final String KEY_STREAMING = "jttw_samadhi_streaming";
+    /** Qi per tick while the stream runs (8 per second). */
+    public static final float SAMADHI_QI_PER_TICK = 0.4f;
+    /** The stream burns what it touches this often, in ticks (4 times a second). */
+    public static final int SAMADHI_HIT_INTERVAL = 5;
+    public static final double SAMADHI_RANGE = 8.0;
+    public static final double SAMADHI_THREE_HEADS_RANGE = 12.0;
 
     // Wind Fire Wheels: +25% movement speed for Nezha while worn
     private static final UUID WHEELS_SPEED_ID = UUID.fromString("5f3a1c2e-8b7d-4e6f-9a0b-1c2d3e4f5a6b");
@@ -110,40 +107,37 @@ public final class NezhaAbilityHandler {
         player.getPersistentData().putInt("jttw_nz_weapon_slot", next);
     }
 
-    public static void castSamadhiFire(ServerPlayer player) {
-        int tier = SkillTreeData.getNzFireTier(player);
-        if (tier < 1) return;
+    /** Samadhi Fire, held: a stream of fire from the spear's tip while Nezha has the Qi. */
+    public static void startSamadhiFire(ServerPlayer player) {
+        if (SkillTreeData.getNzFireTier(player) < 1) return;
         if (!(player.getMainHandItem().getItem() instanceof FireTipSpearItem)) {
             player.sendSystemMessage(Component.literal("§c[JTTW] §7Requires Fire-Tip Spear equipped."));
             return;
         }
-
-        CompoundTag pd = player.getPersistentData();
-        long now = player.level().getGameTime();
-        if (now < pd.getLong(KEY_FIRE_READY_AT)) return;
-        if (pd.getInt(KEY_VOLLEY_SHOTS) > 0) return; // a volley is still firing
-        if (!QiData.spend(player, 8f)) {
+        if (QiData.getCurrent(player) < SAMADHI_QI_PER_TICK) {
             player.sendSystemMessage(Component.literal("§c[JTTW] §7Not enough Qi."));
             return;
         }
-        pd.putLong(KEY_FIRE_READY_AT, now + 40L);
-
-        // Five fireballs in a row, each harder than the spear's own fireball:
-        // its 5 damage plus a share of Nezha's attack that grows with tier
-        float attack = (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
-        pd.putInt(KEY_VOLLEY_SHOTS, SAMADHI_VOLLEY_SHOTS);
-        pd.putLong(KEY_VOLLEY_NEXT_AT, now);
-        pd.putFloat(KEY_VOLLEY_DAMAGE, samadhiFireballDamage(attack, tier));
-        pd.putBoolean(KEY_VOLLEY_THREE_HEADS, ACTIVE_THREE_HEADS.contains(player.getUUID()));
-        tickSamadhiVolley(player);
+        player.getPersistentData().putBoolean(KEY_STREAMING, true);
     }
 
-    /** One Samadhi fireball: the spear fireball's 5, plus 120% / 150% / 180% ATK at tiers 1-3. */
-    public static float samadhiFireballDamage(float attack, int tier) {
+    public static void stopSamadhiFire(ServerPlayer player) {
+        player.getPersistentData().remove(KEY_STREAMING);
+    }
+
+    public static boolean isStreaming(Player player) {
+        return player.getPersistentData().getBoolean(KEY_STREAMING);
+    }
+
+    /**
+     * Burn per second for a target in the stream: the spear fireball's 5, plus 120% / 150% / 180%
+     * ATK at tiers 1-3. Dealt in {@code 20 / SAMADHI_HIT_INTERVAL} equal hits.
+     */
+    public static float samadhiDamagePerSecond(float attack, int tier) {
         return FireTipSpearItem.FIREBALL_DAMAGE + attack * samadhiDamageMultiplier(tier);
     }
 
-    /** Share of Nezha's attack added to each Samadhi fireball: 120% / 150% / 180% at tiers 1-3. */
+    /** Share of Nezha's attack added to the stream's burn per second: 120% / 150% / 180% at tiers 1-3. */
     public static float samadhiDamageMultiplier(int tier) {
         return switch (Math.max(1, Math.min(3, tier))) {
             case 1 -> 1.2f;
@@ -152,48 +146,48 @@ public final class NezhaAbilityHandler {
         };
     }
 
-    /** Fires the next shot of a running Samadhi volley when it is due. */
-    private static void tickSamadhiVolley(ServerPlayer player) {
-        CompoundTag pd = player.getPersistentData();
-        int shots = pd.getInt(KEY_VOLLEY_SHOTS);
-        if (shots <= 0) return;
-        long now = player.level().getGameTime();
-        if (now < pd.getLong(KEY_VOLLEY_NEXT_AT)) return;
-
-        // Three Heads Six Arms: each shot is a spread of three fireballs
-        int perShot = pd.getBoolean(KEY_VOLLEY_THREE_HEADS) ? 3 : 1;
-        float damage = pd.getFloat(KEY_VOLLEY_DAMAGE);
-        Vec3 look = player.getLookAngle();
-        Level level = player.level();
-        for (int i = 0; i < perShot; i++) {
-            double spread = (i == 0) ? 0 : (i == 1 ? -0.15 : 0.15);
-            SmallFireball fb = new SmallFireball(level,
-                    player.getX(), player.getEyeY() - 0.1, player.getZ(),
-                    look.x + spread, look.y, look.z - spread);
-            fb.setOwner(player);
-            fb.getPersistentData().putFloat(KEY_FIREBALL_DAMAGE, damage);
-            level.addFreshEntity(fb);
+    /** One tick of a running stream: drain Qi, draw the fire, and burn what it touches on the beat. */
+    private static void tickSamadhiStream(ServerPlayer player) {
+        if (!isStreaming(player)) return;
+        int tier = SkillTreeData.getNzFireTier(player);
+        if (tier < 1 || !(player.getMainHandItem().getItem() instanceof FireTipSpearItem)
+                || !QiData.spend(player, SAMADHI_QI_PER_TICK)) {
+            stopSamadhiFire(player);
+            return;
         }
-        level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1.0F, 1.0F);
 
-        if (shots - 1 <= 0) {
-            pd.remove(KEY_VOLLEY_SHOTS);
-            pd.remove(KEY_VOLLEY_NEXT_AT);
-            pd.remove(KEY_VOLLEY_DAMAGE);
-            pd.remove(KEY_VOLLEY_THREE_HEADS);
-        } else {
-            pd.putInt(KEY_VOLLEY_SHOTS, shots - 1);
-            pd.putLong(KEY_VOLLEY_NEXT_AT, now + SAMADHI_VOLLEY_INTERVAL);
+        // Three Heads Six Arms: a longer, wider stream
+        boolean threeHeads = ACTIVE_THREE_HEADS.contains(player.getUUID());
+        double range = threeHeads ? SAMADHI_THREE_HEADS_RANGE : SAMADHI_RANGE;
+        double halfWidth = threeHeads ? 1.5 : 0.5;
+        Vec3 eye = player.getEyePosition();
+        Vec3 look = player.getLookAngle().normalize();
+        ServerLevel level = player.serverLevel();
+
+        for (double d = 1.0; d <= range; d += 1.0) {
+            Vec3 at = eye.add(look.scale(d));
+            level.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 2, halfWidth * 0.5, halfWidth * 0.5, halfWidth * 0.5, 0.02);
         }
-    }
+        if (player.tickCount % 10 == 0) {
+            level.playSound(null, player.getX(), player.getY(), player.getZ(),
+                    SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 0.6F, 0.8F);
+        }
+        if (player.tickCount % SAMADHI_HIT_INTERVAL != 0) return;
 
-    /** Samadhi fireballs hit for the damage they were fired with, not a small fireball's flat 5. */
-    @SubscribeEvent
-    public static void onSamadhiFireballHit(LivingHurtEvent event) {
-        if (event.getSource().getDirectEntity() instanceof SmallFireball fb
-                && fb.getPersistentData().contains(KEY_FIREBALL_DAMAGE)) {
-            event.setAmount(fb.getPersistentData().getFloat(KEY_FIREBALL_DAMAGE));
+        float perHit = samadhiDamagePerSecond((float) player.getAttributeValue(Attributes.ATTACK_DAMAGE), tier)
+                * SAMADHI_HIT_INTERVAL / 20f;
+        AABB box = new AABB(eye, eye.add(look.scale(range))).inflate(halfWidth + 1.0);
+        for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, box,
+                e -> e.isAlive() && e != player && !e.isAlliedTo(player))) {
+            Vec3 toTarget = target.position().add(0, target.getBbHeight() / 2, 0).subtract(eye);
+            double along = toTarget.dot(look);
+            if (along < 0 || along > range) continue;
+            double off = toTarget.subtract(look.scale(along)).length();
+            if (off > halfWidth + target.getBbWidth() / 2 + 0.5) continue;
+            // True Samadhi fire: burns even what fire cannot, and ignores i-frames so every beat lands
+            target.invulnerableTime = 0;
+            target.hurt(player.damageSources().indirectMagic(player, player), perHit);
+            target.setSecondsOnFire(5);
         }
     }
 
@@ -331,7 +325,7 @@ public final class NezhaAbilityHandler {
             }
         }
 
-        tickSamadhiVolley(sp);
+        tickSamadhiStream(sp);
         applyWheelsSpeed(sp, hasWheels);
         applyClothResistance(sp, sp.getItemBySlot(EquipmentSlot.CHEST).getItem() instanceof HuntianClothItem);
 
@@ -375,6 +369,7 @@ public final class NezhaAbilityHandler {
     @SubscribeEvent
     public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         UUID id = event.getEntity().getUUID();
+        if (event.getEntity() instanceof ServerPlayer sp) stopSamadhiFire(sp); // the key is not held after logging back in
         ACTIVE_THREE_HEADS.remove(id);
         CHARGING_DETONATION.remove(id);
         DETONATION_IMMUNE.remove(id);

@@ -71,7 +71,7 @@ final class LegacySkillBar {
             int armTier = NezhaSkillTree.TREE.highestTier(unlocked, "nz_arm");
             if (armTier >= 1) slots[0] = new AbilitySlot("nz_cycle", "Weapon Cycle", AbilityType.TOGGLE, armTier);
             int fireTier = NezhaSkillTree.TREE.highestTier(unlocked, "nz_fire");
-            if (fireTier >= 1) slots[1] = new AbilitySlot("nz_fire", "Samadhi Fire", AbilityType.TOGGLE, fireTier);
+            if (fireTier >= 1) slots[1] = new AbilitySlot("nz_fire", "Samadhi Fire", AbilityType.HELD, fireTier);
             int detTier = NezhaSkillTree.TREE.highestTier(unlocked, "nz_det");
             if (detTier >= 1) slots[2] = new AbilitySlot("nz_det", "Lotus Detonation", AbilityType.HELD, detTier);
             int formTier = NezhaSkillTree.TREE.highestTier(unlocked, "nz_form");

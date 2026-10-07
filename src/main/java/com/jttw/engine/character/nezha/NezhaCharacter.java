@@ -42,7 +42,7 @@ public final class NezhaCharacter implements PlayableCharacter {
                 : AbilitySlot.EMPTY;
         return PlayableCharacter.bar(
                 cycle,
-                AbilitySlot.fromBranch(tree, unlocked, "nz_fire", "Samadhi Fire", AbilityType.TOGGLE),
+                AbilitySlot.fromBranch(tree, unlocked, "nz_fire", "Samadhi Fire", AbilityType.HELD),
                 AbilitySlot.fromBranch(tree, unlocked, "nz_det", "Lotus Detonation", AbilityType.HELD),
                 AbilitySlot.fromBranch(tree, unlocked, "nz_form", "Three Heads Six Arms", AbilityType.TOGGLE));
     }
@@ -54,7 +54,8 @@ public final class NezhaCharacter implements PlayableCharacter {
                 if (action == AbilityAction.USE) NezhaAbilityHandler.cycleWeapon(player);
             }
             case 1 -> {
-                if (action == AbilityAction.USE) NezhaAbilityHandler.castSamadhiFire(player);
+                if (action == AbilityAction.START) NezhaAbilityHandler.startSamadhiFire(player);
+                if (action == AbilityAction.STOP) NezhaAbilityHandler.stopSamadhiFire(player);
             }
             case 2 -> {
                 if (action == AbilityAction.START) NezhaAbilityHandler.startDetonationCharge(player);

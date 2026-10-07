@@ -66,14 +66,14 @@ public final class NezhaSkillTree {
 
         // ── TRUE SAMADHI FIRE (col 1) ─────────────────────────────────
         TREE.add(new SkillNode(FIRE_1, "Samadhi Fire I",
-                new String[]{ "Spear fires 5 fireballs,", "each 5 + 120% ATK.", "8 Qi, 2s cooldown." },
-                3, 1, 0, List.of(), AbilityType.TOGGLE, 1, "Samadhi Fire"));
+                new String[]{ "Hold: a stream of fire,", "5 + 120% ATK per second.", "8 Qi per second." },
+                3, 1, 0, List.of(), AbilityType.HELD, 1, "Samadhi Fire"));
         TREE.add(new SkillNode(FIRE_2, "Samadhi Fire II",
-                new String[]{ "Each fireball hits for", "5 + 150% ATK.", "" },
-                4, 1, 1, List.of(FIRE_1), AbilityType.TOGGLE, 2, "Samadhi Fire"));
+                new String[]{ "The stream burns for", "5 + 150% ATK per second.", "" },
+                4, 1, 1, List.of(FIRE_1), AbilityType.HELD, 2, "Samadhi Fire"));
         TREE.add(new SkillNode(FIRE_3, "Samadhi Fire III",
-                new String[]{ "Each fireball hits for", "5 + 180% ATK.", "" },
-                5, 1, 2, List.of(FIRE_2), AbilityType.TOGGLE, 3, "Samadhi Fire"));
+                new String[]{ "The stream burns for", "5 + 180% ATK per second.", "" },
+                5, 1, 2, List.of(FIRE_2), AbilityType.HELD, 3, "Samadhi Fire"));
 
         // ── LOTUS DETONATION (col 2) ──────────────────────────────────
         TREE.add(new SkillNode(DET_1, "Lotus Detonation",
@@ -82,7 +82,7 @@ public final class NezhaSkillTree {
 
         // ── THREE HEADS SIX ARMS (col 3) ──────────────────────────────
         TREE.add(new SkillNode(FORM_1, "Three Heads Six Arms I",
-                new String[]{ "Toggle divine form.", "+50% damage while active.", "Drains Qi." },
+                new String[]{ "Toggle divine form: +50%", "damage, drains Qi. Samadhi", "stream reaches further, wider." },
                 4, 3, 0, List.of(), AbilityType.TOGGLE, 1, "Three Heads"));
         TREE.add(new SkillNode(FORM_2, "Three Heads Six Arms II",
                 new String[]{ "Detonation becomes 30-block", "radius at 200% damage.", "Fireball becomes barrage of 6." },
