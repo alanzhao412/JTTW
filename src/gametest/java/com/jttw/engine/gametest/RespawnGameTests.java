@@ -68,18 +68,26 @@ public class RespawnGameTests {
         h.succeed();
     }
 
-    /**
-     * Alignment earned before the first reincarnation is not copied on death today, so any
-     * death that doesn't reincarnate starts the four counts again from zero. Whether a death
-     * should wipe them is a design decision; until it's made this test reports, not gates.
-     */
-    @GameTest(template = PLATFORM, required = false)
+    @GameTest(template = PLATFORM)
     public static void deathBeforeReincarnatingKeepsAlignment(GameTestHelper h) {
         ServerPlayer p = player(h);
         AlignmentData.setHeavenly(p, 120);
         AlignmentData.setYaoguai(p, 40);
         ServerPlayer after = respawn(h, p);
-        eq(h, 160, AlignmentData.getTotal(after), "alignment after an ordinary death");
+        eq(h, 120, AlignmentData.getHeavenly(after), "heavenly after an ordinary death");
+        eq(h, 40, AlignmentData.getYaoguai(after), "yaoguai after an ordinary death");
+        ServerPlayer again = respawn(h, after);
+        eq(h, 160, AlignmentData.getTotal(again), "still there after a second death");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void afterReincarnatingAlignmentNeverCarriesOver(GameTestHelper h) {
+        ServerPlayer p = player(h);
+        AlignmentData.markReincarnated(p, ReincarnationOutcome.DRAGON);
+        AlignmentData.setHeavenly(p, 50);
+        ServerPlayer after = respawn(h, p);
+        eq(h, 0, AlignmentData.getTotal(after), "alignment after a death in the new life");
         h.succeed();
     }
 }

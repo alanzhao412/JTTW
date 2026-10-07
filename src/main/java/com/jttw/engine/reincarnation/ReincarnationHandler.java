@@ -61,7 +61,12 @@ public final class ReincarnationHandler {
         if (!(event.getEntity() instanceof ServerPlayer newPlayer)) return;
         if (!(event.getOriginal() instanceof ServerPlayer oldPlayer)) return;
 
-        if (!oldPlayer.getPersistentData().contains(KEY_PENDING)) return;
+        if (!oldPlayer.getPersistentData().contains(KEY_PENDING)) {
+            // An ordinary death: alignment carries over until the player reincarnates.
+            // After that it is never earned or carried again.
+            if (!AlignmentData.hasReincarnated(oldPlayer)) AlignmentData.copyTo(oldPlayer, newPlayer);
+            return;
+        }
 
         String outcomeId = oldPlayer.getPersistentData().getString(KEY_PENDING);
         oldPlayer.getPersistentData().remove(KEY_PENDING);

@@ -92,6 +92,11 @@ public final class AlignmentData {
         p.getPersistentData().putString(KEY_REINCARNATION_OUTCOME, outcome.id);
     }
 
+    /** Copies the four alignment counts to the respawned player. */
+    public static void copyTo(Player from, Player to) {
+        to.getPersistentData().put(KEY_ROOT, getRoot(from).copy());
+    }
+
     public static void resetAlignment(Player p) {
         p.getPersistentData().put(KEY_ROOT, new CompoundTag());
     }
