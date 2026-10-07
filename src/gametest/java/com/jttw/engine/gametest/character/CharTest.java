@@ -196,9 +196,8 @@ public final class CharTest {
                 seen = log.stream().map(x -> x.source().getMsgId() + " " + x.amount()).toList();
             }
             throw new net.minecraft.gametest.framework.GameTestAssertException("no " + type.location().getPath()
-                    + " hit on " + target.getType().toShortString() + ": alive=" + target.isAlive()
-                    + " removed=" + target.getRemovalReason() + " health=" + target.getHealth()
-                    + " pos=" + h.relativePos(target.blockPosition()) + " hits=" + seen);
+                    + " hit on " + target.getType().toShortString() + ": health=" + target.getHealth()
+                    + " hits=" + seen + " " + com.jttw.engine.gametest.GT.whereabouts(h, target));
         }
         return matching.get(0);
     }

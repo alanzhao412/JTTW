@@ -36,6 +36,7 @@ public final class GT {
         sweepStrays(helper);
         onEnd(helper, () -> clearPlatform(helper));
         GameProfile profile = new GameProfile(UUID.randomUUID(), "jttw_test_" + PLAYERS.incrementAndGet());
+        requireEntityReady(helper);
         ServerPlayer p = new FakePlayer(helper.getLevel(), profile);
         var pos = helper.absolutePos(new net.minecraft.core.BlockPos(2, 2, 2));
         p.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
@@ -133,5 +134,62 @@ public final class GT {
         var event = new net.minecraftforge.event.entity.living.LivingHurtEvent(e, source, amount);
         com.jttw.engine.progression.stats.ResistanceHandler.onHurt(event);
         return event.getAmount();
+    }
+
+    /**
+     * Where an entity really stands, for failure messages: whether the level knows it, whether
+     * its chunk ticks entities, its age stamp, and what else is within 2 blocks of it.
+     */
+    public static String whereabouts(GameTestHelper h, net.minecraft.world.entity.Entity e) {
+        var level = h.getLevel();
+        var others = level.getEntities(e, e.getBoundingBox().inflate(2.0), x -> true).stream()
+                .map(x -> x.getType().toShortString() + "@" + h.relativePos(x.blockPosition())
+                        + (x.getPersistentData().contains(EntityAge.JOINED_AT)
+                            ? " joined " + x.getPersistentData().getLong(EntityAge.JOINED_AT) : " unstamped"))
+                .toList();
+        return "alive=" + e.isAlive() + " removed=" + e.getRemovalReason()
+                + " inLevel=" + (level.getEntity(e.getUUID()) == e) + " addedToWorld=" + e.isAddedToWorld()
+                + " entityTicking=" + level.isPositionEntityTicking(e.blockPosition())
+                + " pos=" + h.relativePos(e.blockPosition())
+                + " joined=" + e.getPersistentData().getLong(EntityAge.JOINED_AT)
+                + " now=" + level.getGameTime() + " testTick=" + h.getTick()
+                + " nearby=" + others;
+    }
+
+    /**
+     * True once every chunk under this test's platform can hold entities: entities loaded and
+     * ticking. A test's platform is placed (and its chunks force-loaded) the moment it starts,
+     * but fresh chunks load their entities a few ticks later. Until then a mob spawned there
+     * exists but is invisible to area searches (a cleave, a blast, an aura) and does not tick,
+     * so a test would miss it at random. {@link ReadyGate} holds every test until this is true.
+     */
+    public static boolean entityReady(GameTestHelper helper) {
+        return notReadyChunks(helper).isEmpty();
+    }
+
+    private static String notReadyChunks(GameTestHelper helper) {
+        var level = helper.getLevel();
+        StringBuilder bad = new StringBuilder();
+        for (int x = 0; x <= 5; x += 5) for (int z = 0; z <= 5; z += 5) {
+            var pos = helper.absolutePos(new net.minecraft.core.BlockPos(x, 2, z));
+            long chunk = net.minecraft.world.level.ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4);
+            boolean loaded = level.areEntitiesLoaded(chunk);
+            boolean ticking = level.isPositionEntityTicking(pos);
+            if (!loaded || !ticking) bad.append(" (").append(x).append(",").append(z).append(") entities loaded=")
+                    .append(loaded).append(" ticking=").append(ticking);
+        }
+        return bad.toString();
+    }
+
+    /**
+     * Fails the test straight away, saying why, if a chunk under its platform cannot hold
+     * entities yet. {@link ReadyGate} should make this impossible; this keeps a regression loud.
+     */
+    public static void requireEntityReady(GameTestHelper helper) {
+        String bad = notReadyChunks(helper);
+        if (!bad.isEmpty()) {
+            helper.fail("platform chunks not ready for entities at test tick " + helper.getTick() + ":" + bad
+                    + " (is ReadyGate installed?)");
+        }
     }
 }

@@ -91,7 +91,10 @@ final class Tf {
     /** Asserts the entity has {@code effect} at exactly this amplifier and duration. */
     static void hasEffect(GameTestHelper h, LivingEntity e, MobEffect effect, int amplifier, int duration, String what) {
         MobEffectInstance inst = e.getEffect(effect);
-        h.assertTrue(inst != null, what + ": no " + effect.getDescriptionId());
+        if (inst == null) {
+            h.fail(what + ": no " + effect.getDescriptionId() + " effects=" + e.getActiveEffects()
+                    + " " + com.jttw.engine.gametest.GT.whereabouts(h, e));
+        }
         h.assertTrue(inst.getAmplifier() == amplifier,
                 what + ": amplifier expected " + amplifier + " but was " + inst.getAmplifier());
         h.assertTrue(inst.getDuration() == duration,
