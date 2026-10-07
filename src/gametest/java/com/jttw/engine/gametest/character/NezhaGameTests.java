@@ -316,10 +316,22 @@ public class NezhaGameTests {
         // attack 5 x 1.2 x 2 armaments
         near(h, 12.0, firstHit(h, hits, DamageTypes.MAGIC, golem).amount(), "two armaments");
 
+        // Three Heads Six Arms I alone: still x1.2 (the bigger detonation is tier II)
+        ServerPlayer formOne = detonator(h);
+        grant(formOne, "nz_form_1");
+        NezhaAbilityHandler.toggleThreeHeadsSixArms(formOne);
+        IronGolem golem1b = mob(h, EntityType.IRON_GOLEM, 4, 0);
+        List<Hit> hits1b = watch(golem1b);
+        NezhaAbilityHandler.startDetonationCharge(formOne);
+        tick(formOne, NezhaAbilityHandler::onPlayerTick, 20);
+        NezhaAbilityHandler.stopDetonationCharge(formOne);
+        near(h, 7.5 * 1.2, firstHit(h, hits1b, DamageTypes.MAGIC, golem1b).amount(), "tier I: 7.5 x 1.2");
+        NezhaAbilityHandler.toggleThreeHeadsSixArms(formOne);
+
         ServerPlayer formed = detonator(h);
-        grant(formed, "nz_form_1");
+        grant(formed, "nz_form_1", "nz_form_2");
         NezhaAbilityHandler.toggleThreeHeadsSixArms(formed);
-        // three heads: x2.0 instead of x1.2; its own +50% attack modifier also applies
+        // three heads II: x2.0 instead of x1.2; its own +50% attack modifier also applies
         double atk = formed.getAttributeValue(Attributes.ATTACK_DAMAGE);
         near(h, 7.5, atk, "attack with Three Heads");
         IronGolem golem2 = mob(h, EntityType.IRON_GOLEM, 4, 4);

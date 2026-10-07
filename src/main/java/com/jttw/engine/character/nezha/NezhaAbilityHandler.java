@@ -222,7 +222,9 @@ public final class NezhaAbilityHandler {
         }
 
         int armamentCount = countArmaments(player);
-        boolean threeHeads = ACTIVE_THREE_HEADS.contains(player.getUUID());
+        // Three Heads Six Arms II: a 30-block detonation at 200%
+        boolean threeHeads = ACTIVE_THREE_HEADS.contains(player.getUUID())
+                && SkillTreeData.getNzFormTier(player) >= 2;
         double radius = threeHeads ? 30.0 : 20.0;
         double multiplier = threeHeads ? 2.0 : 1.2;
         float atk = (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);

@@ -88,8 +88,9 @@ public class QiAndFlightGameTests {
         h.succeed();
     }
 
+    /** Nezha's Heavenly Qi (like Yuan Di's Qi Flow) says "+15% Qi regen speed", as Wukong's does. */
     @GameTest(template = PLATFORM)
-    public static void otherCharactersQiNodesDoNotBoostRegen(GameTestHelper h) {
+    public static void otherCharactersQiNodesBoostRegenToo(GameTestHelper h) {
         ServerPlayer plain = player(h);
         ServerPlayer withNodes = player(h);
         for (ServerPlayer p : new ServerPlayer[]{plain, withNodes}) {
@@ -101,7 +102,7 @@ public class QiAndFlightGameTests {
             QiData.setCurrent(p, 0f);
             qiTick(p);
         }
-        near(h, QiData.getCurrent(plain), QiData.getCurrent(withNodes), "Nezha's Qi node is max-Qi only");
+        near(h, 1.15, QiData.getCurrent(withNodes) / QiData.getCurrent(plain), "Nezha's Heavenly Qi I");
         h.succeed();
     }
 

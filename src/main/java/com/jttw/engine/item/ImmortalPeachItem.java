@@ -29,9 +29,9 @@ import java.util.UUID;
  */
 public class ImmortalPeachItem extends Item {
 
-    private static final String KEY_PEACH_CONSUMED = "jttw_peach_consumed";
+    public static final String KEY_PEACH_CONSUMED = "jttw_peach_consumed";
     private static final float QI_REFILL = 4700f;
-    private static final float QI_POOL_BONUS = 4700f;
+    public static final float QI_POOL_BONUS = 4700f;
     private static final double PRES_BONUS = 48.0;
     private static final double MRES_BONUS = 40.0;
 

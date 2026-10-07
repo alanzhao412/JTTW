@@ -112,8 +112,13 @@ public class NezhaWeaponsGameTests {
         ServerPlayer p = as(h, com.jttw.engine.reincarnation.ReincarnationOutcome.THIRD_LOTUS_PRINCE);
         p.getPersistentData().putBoolean("jttw_nz_three_heads", true);
         p.setShiftKeyDown(true);
+        com.jttw.engine.progression.skilltree.SkillTreeData.grantNode(p, "nz_form_1");
         eq(h, InteractionResult.CONSUME, use(h, p, fireSpear()), "use result");
-        eq(h, 6, fireballsLaunched(h, p), "six fireballs");
+        eq(h, 1, fireballsLaunched(h, p), "Three Heads I: still one fireball");
+        p.getPersistentData().remove("jttw_fire_spear_ready_at");
+        com.jttw.engine.progression.skilltree.SkillTreeData.grantNode(p, "nz_form_2");
+        eq(h, InteractionResult.CONSUME, use(h, p, fireSpear()), "use result at tier II");
+        eq(h, 6, fireballsLaunched(h, p), "Three Heads II: six fireballs");
         h.succeed();
     }
 

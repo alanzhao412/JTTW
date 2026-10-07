@@ -84,7 +84,7 @@ public final class TurtleSkillTree {
         ));
         TREE.add(new SkillNode(
                 ROOTS_2, "Earthen Roots II",
-                new String[]{ "-30% damage while still.", "Attackers take thorns", "damage." },
+                new String[]{ "-30% damage while still.", "Attackers take 25% of", "the hit back." },
                 3, 1, 1, List.of(ROOTS_1), AbilityType.PASSIVE, 2, "Earthen Roots"
         ));
 
@@ -96,7 +96,7 @@ public final class TurtleSkillTree {
         ));
         TREE.add(new SkillNode(
                 BEDROCK_2, "Bedrock Constitution II",
-                new String[]{ "Stronger regen (+1.0/s).", "+32 phys. resist. Unbreakable", "constitution." },
+                new String[]{ "Stronger regen (+1.0/s).", "+32 phys. resist.", "Immune to knockback." },
                 3, 2, 1, List.of(BEDROCK_1), AbilityType.PASSIVE, 2, "Bedrock Constitution"
         ));
 

@@ -58,9 +58,7 @@ public final class SkillPurchase {
     }
 
     private static void applyPassive(ServerPlayer player, SkillNode node) {
-        // HP passives: +20 max HP (applied as attribute modifier)
-        // Qi passives: +25 max Qi
-        // Combat passives: tracked via SkillTreeData.hasNode() in damage events
+        // Wukong's Vitality is applied once, here; other passives are refreshed continuously
         switch (node.id()) {
             case WukongSkillTree.VITALITY_1, WukongSkillTree.VITALITY_2 -> {
                 // Add 20 max health — using Forge attribute system
@@ -79,9 +77,8 @@ public final class SkillPurchase {
             }
             // Wukong Qi Mastery — passive regen boost, no immediate effect.
             case WukongSkillTree.QI_1, WukongSkillTree.QI_2 -> {}
-            // Yao Wang, Celestial Hunt, Zhàn Shén, Draconic Pressure, Tidal Recovery,
-            // Scent of Blood, Earthen Roots, Bedrock Constitution — all tracked via
-            // SkillTreeData.hasNode() in gameplay event handlers. No immediate effect.
+            // Every other passive is applied continuously from the skills the player has:
+            // see each character's *Passives class, and QiManager for Qi regen and max Qi.
             default -> {}
         }
     }

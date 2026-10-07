@@ -1,6 +1,8 @@
 package com.jttw.engine.progression.qi;
 
 import com.jttw.engine.character.wukong.WukongSkillTree;
+import com.jttw.engine.character.yuandi.YuanDiSkillTree;
+import com.jttw.engine.character.nezha.NezhaSkillTree;
 import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
 import com.jttw.engine.progression.stats.ProgressionClass;
@@ -99,8 +101,8 @@ public final class QiManager {
         int level = PlayerLevel.getLevel(sp);
         StatBlock stats = StatBlock.compute(cls, level);
 
-        // Reconcile max Qi every tick — level-ups change it
-        float maxQi = (float) stats.qi();
+        // Reconcile max Qi every tick — level-ups change it — keeping permanent bonuses
+        float maxQi = (float) stats.qi() + maxQiBonus(sp);
         QiData.setMax(sp, maxQi);
 
         // Regen
@@ -108,11 +110,7 @@ public final class QiManager {
         if (current < maxQi) {
             float regenRate = REGEN_BASE + (float) (stats.will() * REGEN_WILL_FACTOR);
 
-            // Qi Mastery nodes boost regen by 15% each (stacks additively)
-            int qiNodes = countQiMasteryNodes(sp);
-            if (qiNodes > 0) {
-                regenRate *= (1.0f + qiNodes * QI_MASTERY_BONUS);
-            }
+            regenRate *= regenMultiplier(sp);
 
             float next = Math.min(maxQi, current + regenRate);
             QiData.setCurrent(sp, next);
@@ -128,17 +126,45 @@ public final class QiManager {
     // External API
     // -----------------------------------------------------------------------
 
+    /** Yuan Di's Qi Flow: +50 max Qi per node. */
+    public static final float QI_FLOW_MAX_BONUS = 50f;
+
     /**
-     * Counts how many Qi Mastery nodes the player has unlocked (Wukong only).
-     * Each node grants +15% regen speed.
+     * Max Qi on top of the level stats: the Immortal Peach (Wukong, first eat) and
+     * Yuan Di's Qi Flow nodes.
      */
-    private static int countQiMasteryNodes(Player player) {
+    public static float maxQiBonus(Player player) {
+        float bonus = 0f;
+        if (player.getPersistentData().getBoolean(com.jttw.engine.item.ImmortalPeachItem.KEY_PEACH_CONSUMED)
+                && com.jttw.engine.character.wukong.WukongCharacter.is(player)) {
+            bonus += com.jttw.engine.item.ImmortalPeachItem.QI_POOL_BONUS;
+        }
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int count = 0;
-        // Only Wukong's Qi Mastery grants regen; other classes keep +max Qi
-        if (nodes.contains(WukongSkillTree.QI_1)) count++;
-        if (nodes.contains(WukongSkillTree.QI_2)) count++;
-        return count;
+        if (nodes.contains(YuanDiSkillTree.QI_1)) bonus += QI_FLOW_MAX_BONUS;
+        if (nodes.contains(YuanDiSkillTree.QI_2)) bonus += QI_FLOW_MAX_BONUS;
+        return bonus;
+    }
+
+    /**
+     * Regen speed multiplier from skills: +15% for each Qi regen node (Wukong's Qi Mastery,
+     * Nezha's Heavenly Qi, Yuan Di's Qi Flow), and the Dragon's Tidal Recovery: +15% / +30%
+     * while in the water domain.
+     */
+    public static float regenMultiplier(Player player) {
+        Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
+        int qiNodes = 0;
+        for (String id : new String[]{WukongSkillTree.QI_1, WukongSkillTree.QI_2,
+                NezhaSkillTree.QI_1, NezhaSkillTree.QI_2, YuanDiSkillTree.QI_1, YuanDiSkillTree.QI_2}) {
+            if (nodes.contains(id)) qiNodes++;
+        }
+        float mult = 1.0f + qiNodes * QI_MASTERY_BONUS;
+        int tidal = SkillTreeData.getDrTidalTier(player);
+        if (tidal >= 1 && player instanceof ServerPlayer sp
+                && PlayerLevel.getBeastLine(sp) == com.jttw.engine.progression.stats.DivineBeastLine.WATER
+                && com.jttw.engine.progression.stats.DivineBeastLine.WATER.isInDomain(sp)) {
+            mult += tidal >= 2 ? 0.30f : 0.15f;
+        }
+        return mult;
     }
 
     /**

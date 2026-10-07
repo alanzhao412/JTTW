@@ -74,7 +74,9 @@ public class FireTipSpearItem extends Item {
         if (now < sp.getPersistentData().getLong(KEY_FIREBALL_READY_AT)) return InteractionResultHolder.fail(stack);
         sp.getPersistentData().putLong(KEY_FIREBALL_READY_AT, now + FIREBALL_COOLDOWN_TICKS);
 
-        boolean threeHeads = sp.getPersistentData().getBoolean("jttw_nz_three_heads");
+        // Three Heads Six Arms II: a barrage of six
+        boolean threeHeads = sp.getPersistentData().getBoolean("jttw_nz_three_heads")
+                && com.jttw.engine.progression.skilltree.SkillTreeData.getNzFormTier(sp) >= 2;
         int count = threeHeads ? 6 : 1;
         Vec3 look = sp.getLookAngle();
 
