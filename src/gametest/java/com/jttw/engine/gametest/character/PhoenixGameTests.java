@@ -333,8 +333,9 @@ public class PhoenixGameTests {
         ServerPlayer p = phoenix(h);
         grant(p, "ph_talons_1", "ph_talons_2", "ph_talons_3");
         Pig victim = mob(h, EntityType.PIG, 0, 0);
-        Pig neighbour = mob(h, EntityType.PIG, 0, 2);
-        Pig distant = mob(h, EntityType.PIG, 4, 4); // ~5.7 blocks from the victim
+        // golems, so the blast itself does not kill them before the fire spreads
+        IronGolem neighbour = mob(h, EntityType.IRON_GOLEM, 0, 2);
+        IronGolem distant = mob(h, EntityType.IRON_GOLEM, 4, 4); // ~5.7 blocks from the victim
         victim.setRemainingFireTicks(40);
         PhoenixAbilityHandler.onEntityDeath(new LivingDeathEvent(victim, h.getLevel().damageSources().playerAttack(p)));
         eq(h, 100, neighbour.getRemainingFireTicks(), "fire spreads 5 s within 4 blocks");
