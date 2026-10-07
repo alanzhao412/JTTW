@@ -1,6 +1,5 @@
 package com.jttw.engine.progression.stats;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -36,14 +35,7 @@ class BaseStatsTest {
         assertTrue(BaseStats.YAOGUAI.def() < BaseStats.YAOGUAI.str(), "Yaoguai: low DEF");
     }
 
-    /**
-     * BaseStats documents {@code hp + str + def + qi + will == ProgressionClass.bst}, and the
-     * README's class table uses those bst values. The numbers don't agree today: the sums are
-     * 1200 / 1100 / 1000 / 1030 against bst 1000 / 900 / 700 / 750. Stats are computed from the
-     * sums; bst is only shown in chat. Which is intended is a balance call, so this stays off
-     * until one side is changed.
-     */
-    @Disabled("BaseStats sums disagree with ProgressionClass.bst; needs a balance decision")
+    /** BaseStats' invariant: the five base stats add up to the class's advertised total. */
     @ParameterizedTest
     @EnumSource(ProgressionClass.class)
     void sumEqualsTheClassBaseStatTotal(ProgressionClass cls) {

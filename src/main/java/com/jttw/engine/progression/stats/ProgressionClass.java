@@ -19,33 +19,33 @@ import javax.annotation.Nullable;
 public enum ProgressionClass {
 
     /**
-     * Highest BST ceiling (1000).  Punishing early game; dramatically outscales all
+     * Highest BST ceiling (1200).  Punishing early game; dramatically outscales all
      * other classes after level 50.  Form shifts at major milestones.
      * Designed as a long-term investment.
      */
-    PRIMORDIAL(1000, GrowthRate.ERRATIC),
+    PRIMORDIAL(1200, GrowthRate.ERRATIC),
 
     /**
-     * Naturally strong (BST 900).  Stable, consistent scaling curve.
+     * Naturally strong (BST 1100).  Stable, consistent scaling curve.
      * +16% stat bonus at each evolutionary form phase (20/40/60/80/100).
      * Four elemental lines: Water→Dragon King, Earth→World Turtle,
      * Beast→Byakko, Fire→Solar Sovereign.
      */
-    DIVINE_BEAST(900, GrowthRate.MEDIUM_FAST),
+    DIVINE_BEAST(1100, GrowthRate.MEDIUM_FAST),
 
     /**
-     * Widest utility toolkit (BST 700, variable effective power).
+     * Widest utility toolkit (BST 1000, variable effective power).
      * Ability-expansion focused.  Some archetypes are combat-oriented;
      * higher-tier forms gain perception and authority advantages.
      */
-    HEAVENLY(700, GrowthRate.MEDIUM),
+    HEAVENLY(1000, GrowthRate.MEDIUM),
 
     /**
-     * Ability-focused (BST 750).  Lower raw stat floor.
+     * Ability-focused (BST 1030).  Lower raw stat floor.
      * Strong transformation mechanics.  Power comes from abilities
      * rather than raw stat bonuses.
      */
-    YAOGUAI(750, GrowthRate.FLUCTUATING);
+    YAOGUAI(1030, GrowthRate.FLUCTUATING);
 
     /** Sum of all base stats.  Feeds {@link BaseStats} distribution. */
     public final int bst;

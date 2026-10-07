@@ -21,10 +21,10 @@ different numbers:
 
 | Class | BST | Growth curve | Design intent |
 |---|---|---|---|
-| **Primordial** | 1000 | Erratic | Punishing early game, dramatically outscales everything after level 50. A long-term investment. |
-| **Divine Beast** | 900 | Medium-fast | Naturally strong and stable. +16% stats at each form phase (20/40/60/80/100). |
-| **Yaoguai** | 750 | Fluctuating | Lower stat floor, strong transformation mechanics. Power comes from abilities, not raw stats. |
-| **Heavenly** | 700 | Medium | Widest utility toolkit. Ability-expansion focused; higher forms gain perception and authority advantages. |
+| **Primordial** | 1200 | Erratic | Punishing early game, dramatically outscales everything after level 50. A long-term investment. |
+| **Divine Beast** | 1100 | Medium-fast | Naturally strong and stable. +16% stats at each form phase (20/40/60/80/100). |
+| **Yaoguai** | 1030 | Fluctuating | Lower stat floor, strong transformation mechanics. Power comes from abilities, not raw stats. |
+| **Heavenly** | 1000 | Medium | Widest utility toolkit. Ability-expansion focused; higher forms gain perception and authority advantages. |
 
 Stats resolve at runtime through
 [`StatBlock.compute()`](src/main/java/com/jttw/engine/progression/stats/StatBlock.java) from class and
