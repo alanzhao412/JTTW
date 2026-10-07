@@ -143,7 +143,8 @@ public final class WukongAbilityHandler {
         DamageSource fireSrc = player.level().damageSources().magic();
 
         for (LivingEntity entity : nearby) {
-            Vec3 dir = entity.position().subtract(center);
+            // Horizontal only: from the ring's centre straight out, at the mob's own height
+            Vec3 dir = new Vec3(entity.getX() - center.x, 0, entity.getZ() - center.z);
 
             if (dir.lengthSqr() < 1.0e-6) {
                 dir = new Vec3(1, 0, 0);
@@ -164,8 +165,8 @@ public final class WukongAbilityHandler {
             if (tier >= 3) {
                 double dist = entity.distanceTo(player);
                 if (dist < RING_RADIUS - 0.5) {
-                    Vec3 safePos = center.add(dir.scale(RING_RADIUS + 0.5));
-                    entity.teleportTo(safePos.x, safePos.y, safePos.z);
+                    Vec3 edge = dir.scale(RING_RADIUS + 0.5);
+                    entity.teleportTo(player.getX() + edge.x, entity.getY(), player.getZ() + edge.z);
                 }
             }
         }
@@ -225,40 +226,6 @@ public final class WukongAbilityHandler {
         com.jttw.engine.flight.JTTWFlight.setFlightSpeedTier(player, 3);
     }
 
-    // -----------------------------------------------------------------------
-    // Magic resistance — Wukong's armor applies 1:1 against magic damage
-    // -----------------------------------------------------------------------
-
-    /**
-     * Wukong's body is as resistant to magic as it is to physical blows.
-     * When taking magic damage (potions, wither, evoker fangs, guardian lasers, etc.),
-     * his armor stat is applied as if it were physical damage, using Minecraft's
-     * standard armor reduction formula.
-     */
-    @SubscribeEvent(priority = net.minecraftforge.eventbus.api.EventPriority.HIGH)
-    public static void onMagicDamage(net.minecraftforge.event.entity.living.LivingHurtEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        if (!isWukong(player)) return;
-
-        DamageSource source = event.getSource();
-        // Only intercept damage that normally bypasses armor
-        if (!source.is(net.minecraft.world.damagesource.DamageTypes.MAGIC)
-                && !source.is(net.minecraft.world.damagesource.DamageTypes.WITHER)
-                && !source.is(net.minecraft.world.damagesource.DamageTypes.INDIRECT_MAGIC)
-                && !source.is(net.minecraft.world.damagesource.DamageTypes.THORNS)
-                && !source.is(net.minecraft.world.damagesource.DamageTypes.SONIC_BOOM)) return;
-
-        float armor = (float) player.getArmorValue();
-        float toughness = (float) player.getAttributeValue(
-                net.minecraft.world.entity.ai.attributes.Attributes.ARMOR_TOUGHNESS);
-        if (armor <= 0) return;
-
-        // Apply Minecraft's standard armor reduction formula
-        float reduced = net.minecraft.world.damagesource.CombatRules.getDamageAfterAbsorb(
-                event.getAmount(), armor, toughness);
-        event.setAmount(reduced);
-    }
-
     private static boolean isWukong(ServerPlayer player) {
         String outcomeId = player.getPersistentData()
                 .getString(com.jttw.engine.reincarnation.AlignmentData.KEY_REINCARNATION_OUTCOME);
@@ -266,7 +233,7 @@ public final class WukongAbilityHandler {
     }
 
     // -----------------------------------------------------------------------
-    // Martial Arts passive — movement speed, reach, ATK, armor
+    // Martial Arts passive — movement speed, reach, ATK, physical resistance
     // -----------------------------------------------------------------------
 
     private static final UUID UUID_MARTIAL_SPEED = UUID.fromString("c5f4e3d2-9b6a-4e8f-0c7d-3a1e5f9b2d6c");
@@ -291,9 +258,11 @@ public final class WukongAbilityHandler {
         applyOrRemove(sp, Attributes.ATTACK_DAMAGE, UUID_MARTIAL_ATK, "jttw:martial_atk",
                 tier >= 3 ? 0.30 : 0, AttributeModifier.Operation.MULTIPLY_TOTAL);
 
-        // Tier 3: +6 armor
-        applyOrRemove(sp, Attributes.ARMOR, UUID_MARTIAL_ARMOR, "jttw:martial_armor",
-                tier >= 3 ? 6.0 : 0, AttributeModifier.Operation.ADDITION);
+        // Tier 3: +24 physical resistance
+        applyOrRemove(sp, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get(), UUID_MARTIAL_ARMOR,
+                "jttw:martial_pres", tier >= 3 ? 24.0 : 0, AttributeModifier.Operation.ADDITION);
+        applyOrRemove(sp, Attributes.ARMOR, UUID_MARTIAL_ARMOR, "jttw:martial_armor", 0,
+                AttributeModifier.Operation.ADDITION); // the old armor version
     }
 
     private static void applyOrRemove(ServerPlayer sp, net.minecraft.world.entity.ai.attributes.Attribute attr,
@@ -424,20 +393,20 @@ public final class WukongAbilityHandler {
     public static void fireEyeLaser(ServerPlayer player) {
         if (!player.getPersistentData().getBoolean(ImmortalItems.KEY_FIERY_GOLDEN_EYES)) return;
 
-        // 5 second (100 tick) cooldown, tracked server-side in persistent data
-        long lastFire = player.getPersistentData().getLong("jttw_eye_laser_cd");
+        // 5 second (100 tick) cooldown: the game time the laser is ready again (absent = ready)
         long now = player.level().getGameTime();
-        if (now - lastFire < 100) {
+        if (now < player.getPersistentData().getLong("jttw_eye_laser_ready_at")) {
             player.sendSystemMessage(Component.literal("\u00a7cEye Laser is on cooldown!"));
             return;
         }
-        player.getPersistentData().putLong("jttw_eye_laser_cd", now);
 
         // Cost: 10 Qi
         if (!QiData.spend(player, 10f)) {
             player.sendSystemMessage(Component.literal("\u00a7cNot enough Qi!"));
             return;
         }
+        // Only a shot actually fired starts the cooldown
+        player.getPersistentData().putLong("jttw_eye_laser_ready_at", now + 100);
 
         // Sync Qi
         NetworkHandler.sendToPlayer(player,

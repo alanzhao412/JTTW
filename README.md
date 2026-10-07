@@ -28,7 +28,17 @@ different numbers:
 
 Stats resolve at runtime through
 [`StatBlock.compute()`](src/main/java/com/jttw/engine/progression/stats/StatBlock.java) from class and
-level, rather than being hardcoded per form.
+level, rather than being hardcoded per form. There are six: HP, STR, physical resistance (PRES),
+magic resistance (MRES), Qi and Will.
+
+Defence is split in two. Physical resistance reduces blows (anything vanilla armor would block);
+magic resistance reduces magic, wither, thorns, sonic booms and dragon breath. Both are the mod's
+own attributes rather than vanilla armor, so they have no cap: damage taken is multiplied by
+`100 / (100 + resistance)` (100 resistance halves it), and each point is worth a little less than
+the last. Damage that already ignores armor (falls, drowning, fire ticks, the void) ignores
+resistance too. A target marked magic-vulnerable by the Yin-Yang sword's Yang strike takes 25%
+more magic damage for 5 seconds. See
+[`ResistanceHandler`](src/main/java/com/jttw/engine/progression/stats/ResistanceHandler.java).
 
 ### Reincarnation and evolution lines
 
@@ -269,10 +279,11 @@ Then drop the built jar into `mods/` alongside Minecraft Forge 1.20.1 (47.4.10+)
 ### Commands
 
 ```
-/jttw transform <entity_id>      transform into any Minecraft entity
-/jttw transform <player> <id>    transform another player
-/jttw demorph [player]           revert
-/jttw status [player]            inspect current transformation state
+/jttw transform                     open the transformation menu
+/jttw transform <entity_id>         (operators) transform into any entity, skipping the arts' rules
+/jttw transform <entity_id> <players>  (operators) transform other players
+/jttw demorph [players]             revert (others: operators)
+/jttw status [players]              inspect current transformation state (others: operators)
 ```
 
 ---

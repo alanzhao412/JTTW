@@ -21,11 +21,13 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.projectile.SmallFireball;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
@@ -124,25 +126,65 @@ public class NezhaGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM, timeoutTicks = 100, batch = "samadhiFireCostsEightQiShootsOneFireballAndHasATwoSecondCooldown")
-    public static void samadhiFireCostsEightQiShootsOneFireballAndHasATwoSecondCooldown(GameTestHelper h) {
+    /** Counts the player's fireballs in flight, then removes them so they are not counted twice. */
+    private static int takeFireballs(ServerPlayer p) {
+        List<SmallFireball> balls = near(p, SmallFireball.class, 16).stream().filter(f -> f.getOwner() == p).toList();
+        balls.forEach(SmallFireball::discard);
+        return balls.size();
+    }
+
+    @GameTest(template = PLATFORM, timeoutTicks = 100, batch = "samadhiFireIsAFiveShotVolleyForEightQiWithATwoSecondCooldown")
+    public static void samadhiFireIsAFiveShotVolleyForEightQiWithATwoSecondCooldown(GameTestHelper h) {
         ServerPlayer p = nezha(h);
         grant(p, "nz_fire_1");
         holdSpear(p);
+        int[] shot = {0};
         character().activate(p, 1, AbilityAction.USE);
-        eq(h, 1, fireballs(p), "one fireball");
+        shot[0] += takeFireballs(p);
+        eq(h, 1, shot[0], "first fireball at once");
         near(h, 92f, QiData.getCurrent(p), "Qi");
-        NezhaAbilityHandler.castSamadhiFire(p);
-        near(h, 92f, QiData.getCurrent(p), "second cast refused during cooldown");
+        // the rest of the volley comes out on Nezha's own ticks, 4 ticks apart
+        h.onEachTick(() -> {
+            NezhaAbilityHandler.onPlayerTick(new TickEvent.PlayerTickEvent(TickEvent.Phase.END, p));
+            shot[0] += takeFireballs(p);
+        });
+        h.runAfterDelay(10, () -> {
+            NezhaAbilityHandler.castSamadhiFire(p);
+            near(h, 92f, QiData.getCurrent(p), "second cast refused during cooldown");
+        });
+        h.runAfterDelay(30, () -> eq(h, 5, shot[0], "five fireballs in the volley"));
         h.runAfterDelay(38, () -> {
             NezhaAbilityHandler.castSamadhiFire(p);
             near(h, 92f, QiData.getCurrent(p), "still cooling down at 38 ticks");
-            h.runAfterDelay(3, () -> {
-                NezhaAbilityHandler.castSamadhiFire(p);
-                near(h, 84f, QiData.getCurrent(p), "ready again after 40 ticks");
-                h.succeed();
-            });
         });
+        h.runAfterDelay(41, () -> {
+            NezhaAbilityHandler.castSamadhiFire(p);
+            near(h, 84f, QiData.getCurrent(p), "ready again after 40 ticks");
+            h.succeed();
+        });
+    }
+
+    /** Every Samadhi fireball beats the spear's own 5-damage fireball, and grows with STR and tier. */
+    @GameTest(template = PLATFORM, batch = "samadhiFireballsHitHarderThanTheSpearsAndScaleWithStrength")
+    public static void samadhiFireballsHitHarderThanTheSpearsAndScaleWithStrength(GameTestHelper h) {
+        near(h, 5.0 + 10 * 1.2, NezhaAbilityHandler.samadhiFireballDamage(10f, 1), "tier 1: 5 + 120% ATK");
+        near(h, 5.0 + 10 * 1.5, NezhaAbilityHandler.samadhiFireballDamage(10f, 2), "tier 2: 5 + 150% ATK");
+        near(h, 5.0 + 10 * 1.8, NezhaAbilityHandler.samadhiFireballDamage(10f, 3), "tier 3: 5 + 180% ATK");
+        check(h, NezhaAbilityHandler.samadhiFireballDamage(0f, 1) >= FireTipSpearItem.FIREBALL_DAMAGE,
+                "never below the spear's fireball");
+
+        ServerPlayer p = nezha(h);
+        grant(p, "nz_fire_1", "nz_fire_2");
+        holdSpear(p);
+        float atk = (float) p.getAttributeValue(Attributes.ATTACK_DAMAGE);
+        NezhaAbilityHandler.castSamadhiFire(p);
+        SmallFireball fb = near(p, SmallFireball.class, 4).stream().filter(f -> f.getOwner() == p).findFirst().orElseThrow();
+        Pig pig = mob(h, EntityType.PIG, 2, 2);
+        LivingHurtEvent hit = new LivingHurtEvent(pig, h.getLevel().damageSources().fireball(fb, p), 5f);
+        NezhaAbilityHandler.onSamadhiFireballHit(hit);
+        near(h, 5.0 + atk * 1.5, hit.getAmount(), "a tier-2 fireball hits the pig");
+        takeFireballs(p);
+        h.succeed();
     }
 
     @GameTest(template = PLATFORM, batch = "samadhiFireWithoutEightQiIsRefused")
@@ -157,14 +199,14 @@ public class NezhaGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM, batch = "threeHeadsSixArmsShootsSixFireballs")
-    public static void threeHeadsSixArmsShootsSixFireballs(GameTestHelper h) {
+    @GameTest(template = PLATFORM, batch = "threeHeadsSixArmsMakesEachSamadhiShotASpreadOfThree")
+    public static void threeHeadsSixArmsMakesEachSamadhiShotASpreadOfThree(GameTestHelper h) {
         ServerPlayer p = nezha(h);
         grant(p, "nz_fire_1", "nz_form_1");
         holdSpear(p);
         NezhaAbilityHandler.toggleThreeHeadsSixArms(p);
         NezhaAbilityHandler.castSamadhiFire(p);
-        eq(h, 6, fireballs(p), "fireballs");
+        eq(h, 3, fireballs(p), "each shot is a spread of three");
         near(h, 92f, QiData.getCurrent(p), "still one 8-Qi cast");
         NezhaAbilityHandler.toggleThreeHeadsSixArms(p);
         h.succeed();
@@ -336,23 +378,15 @@ public class NezhaGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM, batch = "huntianClothAppliesArmorToMagicDamage")
-    public static void huntianClothAppliesArmorToMagicDamage(GameTestHelper h) {
+    @GameTest(template = PLATFORM, batch = "huntianClothGivesMagicResistance")
+    public static void huntianClothGivesMagicResistance(GameTestHelper h) {
         ServerPlayer p = nezha(h);
-        var armor = p.getAttribute(Attributes.ARMOR);
-        armor.removeModifiers();
-        armor.setBaseValue(10.0);
-        p.getAttribute(Attributes.ARMOR_TOUGHNESS).removeModifiers();
-        p.getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(0.0);
-        LivingHurtEvent bare = new LivingHurtEvent(p, h.getLevel().damageSources().magic(), 10f);
-        NezhaAbilityHandler.onMagicDamage(bare);
-        near(h, 10f, bare.getAmount(), "without the cloth");
+        setResistances(p, 0.0, 0.0);
+        near(h, 10f, afterResistance(p, h.getLevel().damageSources().magic(), 10f), "without the cloth");
         p.setItemSlot(EquipmentSlot.CHEST, new ItemStack(ModItems.HUNTIAN_CLOTH.get()));
-        // the fake player never ticks, so the cloth's own armor points are not applied: armor stays 10
-        LivingHurtEvent clothed = new LivingHurtEvent(p, h.getLevel().damageSources().magic(), 10f);
-        NezhaAbilityHandler.onMagicDamage(clothed);
-        // vanilla armor formula: 10 * (1 - max(10/5, 10 - 10/2) / 25) = 8
-        near(h, 8f, clothed.getAmount(), "magic damage through the cloth");
+        tick(p, NezhaAbilityHandler::onPlayerTick, 1);
+        // 25 magic resistance: 10 x 100/125
+        near(h, 8f, afterResistance(p, h.getLevel().damageSources().magic(), 10f), "magic damage through the cloth");
         h.succeed();
     }
 

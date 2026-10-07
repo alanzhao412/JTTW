@@ -461,7 +461,8 @@ public final class PhoenixAbilityHandler {
     /**
      * Phoenix Rebirth: at 10% HP, fully restore and explode.
      */
-    @SubscribeEvent(priority = EventPriority.LOW)
+    // LOWEST: decide on the damage left after resistances
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onTakeDamage(LivingHurtEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (!isPhoenix(player)) return;

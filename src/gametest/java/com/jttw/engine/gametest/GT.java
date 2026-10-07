@@ -108,4 +108,30 @@ public final class GT {
         helper.assertTrue(Math.abs(expected - actual) < 1e-4,
                 what + ": expected " + expected + " but was " + actual);
     }
+
+    /** Resistances fixed at these values: modifiers cleared, base set. */
+    public static void setResistances(net.minecraft.world.entity.LivingEntity e, double pres, double mres) {
+        var p = e.getAttribute(com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get());
+        p.removeModifiers();
+        p.setBaseValue(pres);
+        var m = e.getAttribute(com.jttw.engine.registry.ModAttributes.MAGIC_RESISTANCE.get());
+        m.removeModifiers();
+        m.setBaseValue(mres);
+    }
+
+    public static double pres(net.minecraft.world.entity.LivingEntity e) {
+        return e.getAttributeValue(com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get());
+    }
+
+    public static double mres(net.minecraft.world.entity.LivingEntity e) {
+        return e.getAttributeValue(com.jttw.engine.registry.ModAttributes.MAGIC_RESISTANCE.get());
+    }
+
+    /** The damage left after the resistance handler sees it. */
+    public static float afterResistance(net.minecraft.world.entity.LivingEntity e,
+                                        net.minecraft.world.damagesource.DamageSource source, float amount) {
+        var event = new net.minecraftforge.event.entity.living.LivingHurtEvent(e, source, amount);
+        com.jttw.engine.progression.stats.ResistanceHandler.onHurt(event);
+        return event.getAmount();
+    }
 }

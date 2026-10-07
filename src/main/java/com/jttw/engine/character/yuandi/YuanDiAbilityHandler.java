@@ -49,11 +49,11 @@ import java.util.UUID;
  * <h3>Primordial Transformation (X)</h3>
  * <ul>
  *   <li><b>T1 — Awakening:</b> auto-triggers at &lt;30% HP. 10s, 30s cooldown.
- *       +10% dmg, +15% speed, +4 armor, +30% KB resist.</li>
+ *       +10% dmg, +15% speed, +16 physical resistance, +30% KB resist.</li>
  *   <li><b>T2 — Controlled Shift:</b> toggle on X. 60s, 90s recharge.
- *       +18% dmg, +20% speed, +6 armor, +40% KB resist.</li>
+ *       +18% dmg, +20% speed, +24 physical resistance, +40% KB resist.</li>
  *   <li><b>T3 — Mastered Form:</b> unlimited, drains 2 Qi/s.
- *       +30% dmg, +25% speed, +8 armor, +50% KB resist. Enhances all abilities.</li>
+ *       +30% dmg, +25% speed, +32 physical resistance, +50% KB resist. Enhances all abilities.</li>
  * </ul>
  *
  * <h3>Sovereign's Command (innate to Transform activation)</h3>
@@ -63,8 +63,8 @@ import java.util.UUID;
  *
  * <p><b>How mob domination works:</b> Dominated mobs get a persistent NBT tag
  * {@code jttw_dominated_by:<uuid>} and a duration tag. Every server tick, dominated
- * mobs have their AI target cleared of the player and redirected to the nearest
- * non-dominated hostile mob within 16 blocks. When the duration expires, the tags
+ * mobs never target the player and instead attack whatever Yuan Di last attacked or
+ * was attacked by, like a tamed wolf. When the duration expires, the tags
  * are removed and normal AI resumes. Bosses (entities where
  * {@code canChangeDimensions()} returns false) are immune.
  *
@@ -281,11 +281,11 @@ public final class YuanDiAbilityHandler {
     }
 
     private static void applyTransformModifiers(ServerPlayer player, int tier) {
-        double dmgMult, speedMult, armorFlat, kbResist;
+        double dmgMult, speedMult, presFlat, kbResist;
         switch (tier) {
-            case 1 -> { dmgMult = 0.10; speedMult = 0.15; armorFlat = 4.0;  kbResist = 0.30; }
-            case 2 -> { dmgMult = 0.18; speedMult = 0.20; armorFlat = 6.0;  kbResist = 0.40; }
-            case 3 -> { dmgMult = 0.30; speedMult = 0.25; armorFlat = 8.0;  kbResist = 0.50; }
+            case 1 -> { dmgMult = 0.10; speedMult = 0.15; presFlat = 16.0; kbResist = 0.30; }
+            case 2 -> { dmgMult = 0.18; speedMult = 0.20; presFlat = 24.0; kbResist = 0.40; }
+            case 3 -> { dmgMult = 0.30; speedMult = 0.25; presFlat = 32.0; kbResist = 0.50; }
             default -> { return; }
         }
 
@@ -293,8 +293,8 @@ public final class YuanDiAbilityHandler {
                 "jttw:yd_transform_dmg", dmgMult, AttributeModifier.Operation.MULTIPLY_TOTAL);
         addOrReplace(player, Attributes.MOVEMENT_SPEED, UUID_TRANSFORM_SPEED,
                 "jttw:yd_transform_speed", speedMult, AttributeModifier.Operation.MULTIPLY_TOTAL);
-        addOrReplace(player, Attributes.ARMOR, UUID_TRANSFORM_ARMOR,
-                "jttw:yd_transform_armor", armorFlat, AttributeModifier.Operation.ADDITION);
+        addOrReplace(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get(), UUID_TRANSFORM_ARMOR,
+                "jttw:yd_transform_pres", presFlat, AttributeModifier.Operation.ADDITION);
         addOrReplace(player, Attributes.KNOCKBACK_RESISTANCE, UUID_TRANSFORM_KB,
                 "jttw:yd_transform_kb", kbResist, AttributeModifier.Operation.ADDITION);
     }
@@ -302,7 +302,7 @@ public final class YuanDiAbilityHandler {
     private static void removeTransformModifiers(ServerPlayer player) {
         removeMod(player, Attributes.ATTACK_DAMAGE, UUID_TRANSFORM_DMG);
         removeMod(player, Attributes.MOVEMENT_SPEED, UUID_TRANSFORM_SPEED);
-        removeMod(player, Attributes.ARMOR, UUID_TRANSFORM_ARMOR);
+        removeMod(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get(), UUID_TRANSFORM_ARMOR);
         removeMod(player, Attributes.KNOCKBACK_RESISTANCE, UUID_TRANSFORM_KB);
     }
 
@@ -323,9 +323,8 @@ public final class YuanDiAbilityHandler {
      *       <ul>
      *         <li>If the mob is currently targeting the dominating player, clear
      *             its target.</li>
-     *         <li>Find the nearest non-dominated hostile mob within 16 blocks and
-     *             set it as the target instead — making dominated mobs fight other
-     *             hostiles on your behalf.</li>
+     *         <li>Target whatever Yuan Di last attacked or was attacked by (like a
+     *             tamed wolf) within 16 blocks, so they fight at your side.</li>
      *         <li>Decrement {@code jttw_dominate_ticks}. When it reaches 0, remove
      *             both tags and the mob resumes normal AI.</li>
      *       </ul>
@@ -645,15 +644,15 @@ public final class YuanDiAbilityHandler {
 
         if (player.level().isDay()) { removeNightModifiers(player); return; }
 
-        double dmgMult, speedMult, armorFlat;
+        double dmgMult, speedMult, presFlat;
         switch (tier) {
-            case 1 -> { dmgMult = 0.10; speedMult = 0.10; armorFlat = 2.0; }
+            case 1 -> { dmgMult = 0.10; speedMult = 0.10; presFlat = 8.0;  }
             case 2 -> {
-                dmgMult = 0.20; speedMult = 0.15; armorFlat = 4.0;
+                dmgMult = 0.20; speedMult = 0.15; presFlat = 16.0;
                 player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 400, 0, false, false));
             }
             case 3 -> {
-                dmgMult = 0.30; speedMult = 0.20; armorFlat = 6.0;
+                dmgMult = 0.30; speedMult = 0.20; presFlat = 24.0;
                 player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 400, 0, false, false));
             }
             default -> { return; }
@@ -663,14 +662,14 @@ public final class YuanDiAbilityHandler {
                 "jttw:yd_night_dmg", dmgMult, AttributeModifier.Operation.MULTIPLY_TOTAL);
         addOrReplace(player, Attributes.MOVEMENT_SPEED, UUID_NIGHT_SPEED,
                 "jttw:yd_night_speed", speedMult, AttributeModifier.Operation.MULTIPLY_TOTAL);
-        addOrReplace(player, Attributes.ARMOR, UUID_NIGHT_ARMOR,
-                "jttw:yd_night_armor", armorFlat, AttributeModifier.Operation.ADDITION);
+        addOrReplace(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get(), UUID_NIGHT_ARMOR,
+                "jttw:yd_night_pres", presFlat, AttributeModifier.Operation.ADDITION);
     }
 
     private static void removeNightModifiers(ServerPlayer player) {
         removeMod(player, Attributes.ATTACK_DAMAGE, UUID_NIGHT_DMG);
         removeMod(player, Attributes.MOVEMENT_SPEED, UUID_NIGHT_SPEED);
-        removeMod(player, Attributes.ARMOR, UUID_NIGHT_ARMOR);
+        removeMod(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get(), UUID_NIGHT_ARMOR);
     }
 
     // =======================================================================
@@ -774,7 +773,7 @@ public final class YuanDiAbilityHandler {
      * For each dominated mob in range:
      * <ul>
      *   <li>Prevents it from targeting the dominating player.</li>
-     *   <li>Finds the nearest non-dominated hostile mob within 16 blocks
+     *   <li>Targets whatever Yuan Di last attacked or was attacked by, within 16 blocks
      *       and sets it as the target — forcing infighting.</li>
      *   <li>Decrements the domination timer. When expired, removes tags
      *       and the mob resumes normal AI.</li>
@@ -804,32 +803,41 @@ public final class YuanDiAbilityHandler {
                 mob.setTarget(null);
             }
 
-            // Find nearest non-dominated hostile to retarget
-            LivingEntity bestTarget = null;
-            double bestDist = 16.0;
-            AABB mobScan = new AABB(mob.position(), mob.position()).inflate(16);
-            for (Entity other : mob.level().getEntities(mob, mobScan,
-                    e -> e instanceof LivingEntity && e.isAlive() && e != mob && e != player)) {
-                if (!(other instanceof LivingEntity otherLiving)) continue;
-
-                // Don't target other dominated mobs
-                if (other instanceof Mob otherMob) {
-                    CompoundTag otherData = otherMob.getPersistentData();
-                    if (playerUuid.equals(otherData.getString(TAG_DOMINATED_BY))) continue;
-                }
-
-                double dist = mob.distanceTo(other);
-                if (dist < bestDist) {
-                    bestDist = dist;
-                    bestTarget = otherLiving;
-                }
-            }
-
-            if (bestTarget != null) {
-                mob.setTarget(bestTarget);
+            // Like a tamed wolf: attack whatever Yuan Di last attacked or was attacked by
+            LivingEntity wanted = sovereignsQuarrel(player, mob, playerUuid);
+            if (wanted != null) {
+                mob.setTarget(wanted);
+            } else if (mob.getTarget() != null && !isFairTarget(mob.getTarget(), mob, player, playerUuid)) {
+                mob.setTarget(null);
             }
         }
     }
+
+    /**
+     * Whoever Yuan Di is fighting, most recent first: the last mob he hurt, or the last that hurt
+     * him. Null if neither is a fair target for his dominated mob.
+     */
+    private static LivingEntity sovereignsQuarrel(ServerPlayer player, Mob mob, String playerUuid) {
+        LivingEntity hurtByHim = player.getLastHurtMob();
+        LivingEntity hurtHim = player.getLastHurtByMob();
+        boolean hisAttackIsNewer = player.getLastHurtMobTimestamp() >= player.getLastHurtByMobTimestamp();
+        LivingEntity first = hisAttackIsNewer ? hurtByHim : hurtHim;
+        LivingEntity second = hisAttackIsNewer ? hurtHim : hurtByHim;
+        if (isFairTarget(first, mob, player, playerUuid)) return first;
+        if (isFairTarget(second, mob, player, playerUuid)) return second;
+        return null;
+    }
+
+    /** Alive, near, and neither Yuan Di, his allies, nor one of his own dominated mobs. */
+    private static boolean isFairTarget(LivingEntity target, Mob mob, ServerPlayer player, String playerUuid) {
+        if (target == null || !target.isAlive() || target == mob || target == player) return false;
+        if (target.isAlliedTo(player)) return false;
+        if (target instanceof Mob otherMob && playerUuid.equals(otherMob.getPersistentData().getString(TAG_DOMINATED_BY))) {
+            return false;
+        }
+        return mob.distanceTo(target) <= 16.0;
+    }
+
 
     // =======================================================================
     // ABYSSAL GRAVITY (M — USE, cooldown)

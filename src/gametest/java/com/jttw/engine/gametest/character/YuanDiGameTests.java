@@ -76,7 +76,7 @@ public class YuanDiGameTests {
         eq(h, 2, YuanDiAbilityHandler.getTransformTier(p), "tier");
         eq(h, 0.18, modifier(p, Attributes.ATTACK_DAMAGE, "jttw:yd_transform_dmg"), "+18% damage");
         eq(h, 0.20, modifier(p, Attributes.MOVEMENT_SPEED, "jttw:yd_transform_speed"), "+20% speed");
-        eq(h, 6.0, modifier(p, Attributes.ARMOR, "jttw:yd_transform_armor"), "+6 armor");
+        eq(h, 24.0, modifier(p, PHYSICAL_RESISTANCE(), "jttw:yd_transform_pres"), "+24 physical resistance");
         eq(h, 0.40, modifier(p, Attributes.KNOCKBACK_RESISTANCE, "jttw:yd_transform_kb"), "+40% KB resist");
 
         character().activate(p, 0, AbilityAction.USE);
@@ -116,7 +116,7 @@ public class YuanDiGameTests {
         YuanDiAbilityHandler.toggleTransform(p);
         eq(h, 0.30, modifier(p, Attributes.ATTACK_DAMAGE, "jttw:yd_transform_dmg"), "+30% damage");
         eq(h, 0.25, modifier(p, Attributes.MOVEMENT_SPEED, "jttw:yd_transform_speed"), "+25% speed");
-        eq(h, 8.0, modifier(p, Attributes.ARMOR, "jttw:yd_transform_armor"), "+8 armor");
+        eq(h, 32.0, modifier(p, PHYSICAL_RESISTANCE(), "jttw:yd_transform_pres"), "+32 physical resistance");
         eq(h, 0.50, modifier(p, Attributes.KNOCKBACK_RESISTANCE, "jttw:yd_transform_kb"), "+50% KB resist");
         ticks(p, 1400);
         check(h, YuanDiAbilityHandler.isTransformed(p), "past tier 2's 60 s limit");
@@ -144,7 +144,7 @@ public class YuanDiGameTests {
         eq(h, 1, YuanDiAbilityHandler.getTransformTier(p), "tier");
         eq(h, 0.10, modifier(p, Attributes.ATTACK_DAMAGE, "jttw:yd_transform_dmg"), "+10% damage");
         eq(h, 0.15, modifier(p, Attributes.MOVEMENT_SPEED, "jttw:yd_transform_speed"), "+15% speed");
-        eq(h, 4.0, modifier(p, Attributes.ARMOR, "jttw:yd_transform_armor"), "+4 armor");
+        eq(h, 16.0, modifier(p, PHYSICAL_RESISTANCE(), "jttw:yd_transform_pres"), "+16 physical resistance");
         eq(h, 0.30, modifier(p, Attributes.KNOCKBACK_RESISTANCE, "jttw:yd_transform_kb"), "+30% KB resist");
         ticks(p, 200);
         check(h, !YuanDiAbilityHandler.isTransformed(p), "faded after 200 ticks");
@@ -212,8 +212,9 @@ public class YuanDiGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM, batch = "dominationTurnsMonstersOnEachOtherThenWearsOff")
-    public static void dominationTurnsMonstersOnEachOtherThenWearsOff(GameTestHelper h) {
+    /** Like a tamed wolf: a dominated mob attacks what Yuan Di attacks. */
+    @GameTest(template = PLATFORM, batch = "dominatedMobsAttackWhatYuanDiAttacksThenWearOff")
+    public static void dominatedMobsAttackWhatYuanDiAttacksThenWearOff(GameTestHelper h) {
         ServerPlayer p = yuanDi(h);
         grant(p, "yd_transform_1", "yd_transform_2", "yd_command_1", "yd_command_2");
         Husk dominated = mob(h, EntityType.HUSK, 0, 0);
@@ -222,28 +223,47 @@ public class YuanDiGameTests {
         // arrives after the pulse, so it is not dominated
         Husk rival = mob(h, EntityType.HUSK, 4, 0);
         ticks(p, 10);
-        check(h, dominated.getTarget() == rival, "dominated husk turns on the other husk, target " + dominated.getTarget());
-        ticks(p, 190);
+        eq(h, null, dominated.getTarget(), "stops hunting Yuan Di, and has no quarrel of its own");
+        p.setLastHurtMob(rival);
+        ticks(p, 10);
+        check(h, dominated.getTarget() == rival, "attacks the husk Yuan Di hit, target " + dominated.getTarget());
+        ticks(p, 180);
         eq(h, "", dominated.getPersistentData().getString(DOMINATED_BY), "domination expired after 200 ticks");
         endIfTransformed(p);
         h.succeed();
     }
 
-    /**
-     * Suspected bug: the docs say dominated mobs are redirected to the nearest non-dominated
-     * <em>hostile</em> mob, but the code picks the nearest living entity of any kind (animals,
-     * villagers, other players).
-     */
-    @GameTest(template = PLATFORM, required = false, batch = "dominatedMobsOnlyTurnOnHostiles")
-    public static void dominatedMobsOnlyTurnOnHostiles(GameTestHelper h) {
+    /** ...and what attacks Yuan Di. */
+    @GameTest(template = PLATFORM, batch = "dominatedMobsDefendYuanDi")
+    public static void dominatedMobsDefendYuanDi(GameTestHelper h) {
         ServerPlayer p = yuanDi(h);
         grant(p, "yd_transform_1", "yd_transform_2", "yd_command_1", "yd_command_2");
         Husk dominated = mob(h, EntityType.HUSK, 0, 0);
         YuanDiAbilityHandler.toggleTransform(p);
+        Husk attacker = mob(h, EntityType.HUSK, 4, 0);
+        p.setLastHurtByMob(attacker);
+        ticks(p, 10);
+        check(h, dominated.getTarget() == attacker, "turns on Yuan Di's attacker, target " + dominated.getTarget());
+        endIfTransformed(p);
+        h.succeed();
+    }
+
+    /** Bystanders, Yuan Di's other dominated mobs, and far-off foes are left alone. */
+    @GameTest(template = PLATFORM, batch = "dominatedMobsLeaveBystandersAndEachOtherAlone")
+    public static void dominatedMobsLeaveBystandersAndEachOtherAlone(GameTestHelper h) {
+        ServerPlayer p = yuanDi(h);
+        grant(p, "yd_transform_1", "yd_transform_2", "yd_command_1", "yd_command_2");
+        Husk dominated = mob(h, EntityType.HUSK, 0, 0);
+        Husk fellow = mob(h, EntityType.HUSK, 1, 0);
+        YuanDiAbilityHandler.toggleTransform(p);
+        eq(h, p.getStringUUID(), fellow.getPersistentData().getString(DOMINATED_BY), "fellow dominated too");
         Pig pig = mob(h, EntityType.PIG, 4, 0);
         ticks(p, 10);
+        check(h, dominated.getTarget() != pig, "no quarrel with the pig");
+        p.setLastHurtMob(fellow);
+        ticks(p, 10);
+        check(h, dominated.getTarget() != fellow, "never turns on another of Yuan Di's dominated mobs");
         endIfTransformed(p);
-        check(h, dominated.getTarget() != pig, "dominated husk should not hunt a pig");
         h.succeed();
     }
 
@@ -497,7 +517,7 @@ public class YuanDiGameTests {
             ticks(p, 1);
             eq(h, 0.30, modifier(p, Attributes.ATTACK_DAMAGE, "jttw:yd_night_dmg"), "tier 3 night damage");
             eq(h, 0.20, modifier(p, Attributes.MOVEMENT_SPEED, "jttw:yd_night_speed"), "tier 3 night speed");
-            eq(h, 6.0, modifier(p, Attributes.ARMOR, "jttw:yd_night_armor"), "tier 3 night armor");
+            eq(h, 24.0, modifier(p, PHYSICAL_RESISTANCE(), "jttw:yd_night_pres"), "tier 3 night physical resistance");
             check(h, p.hasEffect(MobEffects.NIGHT_VISION), "night vision");
 
             level.setDayTime(6000); // noon

@@ -212,12 +212,12 @@ public final class ErlangShenSkillTree {
         ));
         TREE.add(new SkillNode(
                 SPEAR_2, "Spear Mastery II",
-                new String[]{ "Unlock sweeping slash.", "Spear glows while Eye of", "Heaven is active." },
+                new String[]{ "Spear thrusts deal", "25% more damage." },
                 4, 8, 1, List.of(SPEAR_1), AbilityType.PASSIVE, 2, "Spear Mastery"
         ));
         TREE.add(new SkillNode(
                 SPEAR_3, "Spear Mastery III",
-                new String[]{ "Throw creates shockwave on", "impact. Sweeping slash pulls", "enemies inward." },
+                new String[]{ "A fully charged thrust ends", "in a shockwave that pulls", "enemies inward." },
                 5, 8, 2, List.of(SPEAR_2), AbilityType.PASSIVE, 3, "Spear Mastery"
         ));
     }

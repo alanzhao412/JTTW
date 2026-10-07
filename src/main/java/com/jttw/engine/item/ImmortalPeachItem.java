@@ -3,9 +3,8 @@ package com.jttw.engine.item;
 import com.jttw.engine.character.wukong.WukongCheckpoints;
 import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.network.s2c.SyncQiPacket;
-import com.jttw.engine.progression.level.PlayerLevel;
-import com.jttw.engine.progression.stats.ProgressionClass;
 import com.jttw.engine.progression.qi.QiData;
+import com.jttw.engine.registry.ModAttributes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -26,16 +25,17 @@ import java.util.UUID;
  *
  * <p>Everyone: restores 3 hunger bars + refills 4700 Qi.
  * <p>Wukong (first eat only): +4700 max Qi, projectile immunity,
- * +12 armor, +10 armor toughness — permanently.
+ * +48 physical resistance, +40 magic resistance — permanently.
  */
 public class ImmortalPeachItem extends Item {
 
     private static final String KEY_PEACH_CONSUMED = "jttw_peach_consumed";
     private static final float QI_REFILL = 4700f;
     private static final float QI_POOL_BONUS = 4700f;
-    private static final double ARMOR_BONUS = 12.0;
-    private static final double TOUGHNESS_BONUS = 10.0;
+    private static final double PRES_BONUS = 48.0;
+    private static final double MRES_BONUS = 40.0;
 
+    // Ids kept from the armor/toughness version so it can be removed from old saves
     private static final UUID MOD_ARMOR_UUID =
             UUID.nameUUIDFromBytes("jttw_peach_armor".getBytes());
     private static final UUID MOD_TOUGHNESS_UUID =
@@ -64,9 +64,8 @@ public class ImmortalPeachItem extends Item {
         NetworkHandler.sendToPlayer(player,
                 new SyncQiPacket(QiData.getCurrent(player), QiData.getMax(player)));
 
-        // Wukong first-eat bonus
-        ProgressionClass cls = PlayerLevel.getProgressionClass(player);
-        if (cls == ProgressionClass.PRIMORDIAL) {
+        // Wukong first-eat bonus (Wukong only, not the other Primordials)
+        if (com.jttw.engine.character.wukong.WukongCharacter.is(player)) {
             CompoundTag pd = player.getPersistentData();
             if (!pd.getBoolean(KEY_PEACH_CONSUMED)) {
                 pd.putBoolean(KEY_PEACH_CONSUMED, true);
@@ -85,30 +84,14 @@ public class ImmortalPeachItem extends Item {
         NetworkHandler.sendToPlayer(player,
                 new SyncQiPacket(QiData.getCurrent(player), newMax));
 
-        // +12 Armor
-        AttributeInstance armor = player.getAttribute(Attributes.ARMOR);
-        if (armor != null) {
-            armor.removeModifier(MOD_ARMOR_UUID);
-            armor.addPermanentModifier(new AttributeModifier(
-                    MOD_ARMOR_UUID, "JTTW Peach Armor",
-                    ARMOR_BONUS, AttributeModifier.Operation.ADDITION));
-        }
-
-        // +10 Armor Toughness
-        AttributeInstance toughness = player.getAttribute(Attributes.ARMOR_TOUGHNESS);
-        if (toughness != null) {
-            toughness.removeModifier(MOD_TOUGHNESS_UUID);
-            toughness.addPermanentModifier(new AttributeModifier(
-                    MOD_TOUGHNESS_UUID, "JTTW Peach Toughness",
-                    TOUGHNESS_BONUS, AttributeModifier.Operation.ADDITION));
-        }
+        applyResistances(player);
 
         // Projectile immunity flag (checked in damage handler)
         player.getPersistentData().putBoolean("jttw_projectile_immune", true);
 
         player.sendSystemMessage(Component.literal(
                 "§6[JTTW] §eThe Immortality Peach floods your body with celestial energy!"
-                + "\n§b+4700 Max Qi §r| §7+12 Armor §r| §7+10 Toughness §r| §dProjectile Immunity"));
+                + "\n§b+4700 Max Qi §r| §7+48 Physical Resistance §r| §7+40 Magic Resistance §r| §dProjectile Immunity"));
 
         // Set immortal peaches progression flag (for full immortality system)
         ImmortalItems.onPeachConsumedByWukong(player);
@@ -118,24 +101,31 @@ public class ImmortalPeachItem extends Item {
     }
 
     /**
-     * Re-apply peach armor/toughness modifiers after death (new player entity).
+     * Re-apply the peach's resistance modifiers after death (new player entity).
      * Called from LevelManager.onPlayerClone.
      */
     public static void reapplyPeachModifiers(ServerPlayer player) {
-        if (!player.getPersistentData().getBoolean("jttw_peach_consumed")) return;
+        if (!player.getPersistentData().getBoolean(KEY_PEACH_CONSUMED)) return;
+        applyResistances(player);
+    }
 
-        AttributeInstance armor = player.getAttribute(Attributes.ARMOR);
-        if (armor != null && armor.getModifier(MOD_ARMOR_UUID) == null) {
-            armor.addPermanentModifier(new AttributeModifier(
-                    MOD_ARMOR_UUID, "JTTW Peach Armor",
-                    ARMOR_BONUS, AttributeModifier.Operation.ADDITION));
-        }
+    private static void applyResistances(ServerPlayer player) {
+        setMod(player.getAttribute(ModAttributes.PHYSICAL_RESISTANCE.get()), MOD_ARMOR_UUID,
+                "JTTW Peach Physical Resistance", PRES_BONUS);
+        setMod(player.getAttribute(ModAttributes.MAGIC_RESISTANCE.get()), MOD_TOUGHNESS_UUID,
+                "JTTW Peach Magic Resistance", MRES_BONUS);
+        // The armor/toughness version of this bonus, on players who still carry it
+        removeMod(player.getAttribute(Attributes.ARMOR), MOD_ARMOR_UUID);
+        removeMod(player.getAttribute(Attributes.ARMOR_TOUGHNESS), MOD_TOUGHNESS_UUID);
+    }
 
-        AttributeInstance toughness = player.getAttribute(Attributes.ARMOR_TOUGHNESS);
-        if (toughness != null && toughness.getModifier(MOD_TOUGHNESS_UUID) == null) {
-            toughness.addPermanentModifier(new AttributeModifier(
-                    MOD_TOUGHNESS_UUID, "JTTW Peach Toughness",
-                    TOUGHNESS_BONUS, AttributeModifier.Operation.ADDITION));
-        }
+    private static void setMod(AttributeInstance inst, UUID id, String name, double amount) {
+        if (inst == null) return;
+        inst.removeModifier(id);
+        inst.addPermanentModifier(new AttributeModifier(id, name, amount, AttributeModifier.Operation.ADDITION));
+    }
+
+    private static void removeMod(AttributeInstance inst, UUID id) {
+        if (inst != null) inst.removeModifier(id);
     }
 }

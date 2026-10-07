@@ -175,7 +175,7 @@ public class ErlangWeaponsGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM, batch = "thrustHitsOneTargetUnlessSpearTwoPierces")
+    @GameTest(template = PLATFORM, batch = "thrustHitsEverythingInItsArea")
     public static void minimumChargeThrustDealsOneAndAHalfAttackAndStartsCooldown(GameTestHelper h) {
         ServerPlayer p = thruster(h);
         Pig target = pig(h, 2, 3);
@@ -283,29 +283,48 @@ public class ErlangWeaponsGameTests {
         h.succeed();
     }
 
+    /** The thrust is an area: everything in the cone ahead, as far as the lunge, is hit. */
     @GameTest(template = PLATFORM)
-    public static void thrustHitsOneTargetUnlessSpearTwoPierces(GameTestHelper h) {
+    public static void thrustHitsEverythingInItsArea(GameTestHelper h) {
         Pig near = pig(h, 2, 2);
         Pig far = pig(h, 2, 4);
         HurtLog nearLog = HurtLog.on(near);
         HurtLog farLog = HurtLog.on(far);
         try {
             thrust(h, thruster(h), spear(), 40);
-            eq(h, 1, nearLog.playerAttacks().size() + farLog.playerAttacks().size(), "without piercing: one target");
-
-            ServerPlayer piercer = thruster(h);
-            setOutcome(piercer, ReincarnationOutcome.EYE_OF_HEAVEN);
-            SkillTreeData.grantNode(piercer, "es_spear_1");
-            SkillTreeData.grantNode(piercer, "es_spear_2");
-            near.invulnerableTime = 0;
-            far.invulnerableTime = 0;
-            int before = nearLog.playerAttacks().size() + farLog.playerAttacks().size();
-            thrust(h, piercer, spear(), 5);
-            eq(h, before + 2, nearLog.playerAttacks().size() + farLog.playerAttacks().size(), "piercing: both targets");
+            eq(h, 1, nearLog.playerAttacks().size(), "the near pig");
+            eq(h, 1, farLog.playerAttacks().size(), "the pig behind it");
         } finally {
             nearLog.close();
             farLog.close();
         }
+        h.succeed();
+    }
+
+    /** Spear Mastery II: +25% thrust damage. */
+    @GameTest(template = PLATFORM)
+    public static void spearTwoAddsAQuarterToTheThrust(GameTestHelper h) {
+        Pig target = pig(h, 2, 3);
+        target.getAttribute(Attributes.MAX_HEALTH).setBaseValue(200.0);
+        target.setHealth(200f);
+        HurtLog log = HurtLog.on(target);
+        try {
+            ServerPlayer one = thruster(h);
+            setOutcome(one, ReincarnationOutcome.EYE_OF_HEAVEN);
+            SkillTreeData.grantNode(one, "es_spear_1");
+            thrust(h, one, spear(), 5);
+            target.invulnerableTime = 0;
+            ServerPlayer two = thruster(h);
+            setOutcome(two, ReincarnationOutcome.EYE_OF_HEAVEN);
+            SkillTreeData.grantNode(two, "es_spear_1");
+            SkillTreeData.grantNode(two, "es_spear_2");
+            thrust(h, two, spear(), 5);
+        } finally {
+            log.close();
+        }
+        var hits = log.playerAttacks();
+        eq(h, 2, hits.size(), "one thrust each");
+        near(h, hits.get(0).amount() * 1.25, hits.get(1).amount(), 1e-3, "Spear II thrust");
         h.succeed();
     }
 
@@ -342,6 +361,9 @@ public class ErlangWeaponsGameTests {
         // Full charge: lunge 20, so the shockwave centres 20 blocks ahead of the feet.
         Pig target = pig(h, 2, 20);
         target.setNoGravity(true);
+        // the thrust's own area reaches it too; make it survive that to take the shockwave
+        target.getAttribute(Attributes.MAX_HEALTH).setBaseValue(200.0);
+        target.setHealth(200f);
         HurtLog log = HurtLog.on(target);
         try {
             thrust(h, p, spear(), 40);

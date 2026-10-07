@@ -41,11 +41,11 @@ import java.util.UUID;
 /**
  * Server-side handler for World Turtle line (EARTH Divine Beast) abilities:
  * <ul>
- *   <li><b>Innate passive:</b> +100 DEF and +20 toughness at level 100, linear scaling</li>
+ *   <li><b>Innate passive:</b> +1 physical resistance per level (+100 at level 100)</li>
  *   <li><b>Shell Guard (HELD):</b> massive damage reduction, slow, no attacks.
  *       T2: negate projectiles. T3: negate explosions.</li>
  *   <li><b>Unstoppable Force (USE):</b> dash 20 blocks forward, AoE explosion on impact,
- *       knockback scales with tier (20/35/50 blocks). Damage scales with DEF (armor).
+ *       knockback scales with tier (20/35/50 blocks). Damage scales with physical resistance.
  *       T3: stun on hit.</li>
  *   <li><b>Tectonic Slam (USE):</b> stomp the ground, AoE damage centered on player.
  *       T2: lingering damage zone. T3: launch mobs upward.</li>
@@ -62,10 +62,8 @@ public final class TurtleAbilityHandler {
     // Innate passive scaling constants
     // -----------------------------------------------------------------------
 
-    /** +1.0 armor per level (100 at level 100). */
-    private static final double DEF_PER_LEVEL = 1.0;
-    /** +0.2 toughness per level (20 at level 100). */
-    private static final double TOUGHNESS_PER_LEVEL = 0.2;
+    /** +1.0 physical resistance per level (100 at level 100). */
+    private static final double PRES_PER_LEVEL = 1.0;
 
     private static final UUID UUID_TURTLE_DEF =
             UUID.fromString("c3d4e5f6-a7b8-9012-cdef-234567890100");
@@ -193,11 +191,11 @@ public final class TurtleAbilityHandler {
     }
 
     // -----------------------------------------------------------------------
-    // Innate passive — apply DEF/toughness scaling
+    // Innate passive — physical resistance scaling
     // -----------------------------------------------------------------------
 
     /**
-     * Apply or update the World Turtle's innate DEF/toughness bonus.
+     * Apply or update the World Turtle's innate physical resistance bonus.
      * Called from {@link LevelManager#reapplyStats} and on level-up.
      */
     public static void applyPassiveScaling(ServerPlayer player) {
@@ -206,19 +204,18 @@ public final class TurtleAbilityHandler {
         if (line != DivineBeastLine.EARTH) return;
 
         int level = PlayerLevel.getLevel(player);
-        double defBonus = level * DEF_PER_LEVEL;
-        double toughnessBonus = level * TOUGHNESS_PER_LEVEL;
-
-        applyMod(player, Attributes.ARMOR, UUID_TURTLE_DEF,
-                "jttw:turtle_def", defBonus);
-        applyMod(player, Attributes.ARMOR_TOUGHNESS, UUID_TURTLE_TOUGHNESS,
-                "jttw:turtle_toughness", toughnessBonus);
+        applyMod(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get(), UUID_TURTLE_DEF,
+                "jttw:turtle_pres", level * PRES_PER_LEVEL);
+        // The armor/toughness version of this passive, on players who still carry it
+        removeMod(player, Attributes.ARMOR, UUID_TURTLE_DEF);
+        removeMod(player, Attributes.ARMOR_TOUGHNESS, UUID_TURTLE_TOUGHNESS);
     }
 
     /**
      * Remove the World Turtle's innate passive modifiers.
      */
     public static void removePassiveScaling(ServerPlayer player) {
+        removeMod(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get(), UUID_TURTLE_DEF);
         removeMod(player, Attributes.ARMOR, UUID_TURTLE_DEF);
         removeMod(player, Attributes.ARMOR_TOUGHNESS, UUID_TURTLE_TOUGHNESS);
     }
@@ -299,21 +296,20 @@ public final class TurtleAbilityHandler {
     // -----------------------------------------------------------------------
 
     private static void doForceImpact(ServerPlayer player, int tier) {
-        // Damage scales with DEF (armor value)
-        double armor = player.getAttributeValue(Attributes.ARMOR);
-        double toughness = player.getAttributeValue(Attributes.ARMOR_TOUGHNESS);
+        // Damage scales with physical resistance
+        double pres = com.jttw.engine.progression.stats.ResistanceHandler.physicalResistance(player);
 
         float baseDmg;
         double knockbackRadius;
         float defScale;
         switch (tier) {
-            case 2 -> { baseDmg = 10.0f; knockbackRadius = 35.0; defScale = 0.15f; }
-            case 3 -> { baseDmg = 15.0f; knockbackRadius = 50.0; defScale = 0.20f; }
-            default -> { baseDmg = 6.0f;  knockbackRadius = 20.0; defScale = 0.10f; }
+            case 2 -> { baseDmg = 10.0f; knockbackRadius = 35.0; defScale = 0.06f; }
+            case 3 -> { baseDmg = 15.0f; knockbackRadius = 50.0; defScale = 0.08f; }
+            default -> { baseDmg = 6.0f;  knockbackRadius = 20.0; defScale = 0.04f; }
         }
 
-        // Total damage = base + (armor * defScale) + (toughness * defScale * 2)
-        float totalDamage = (float) (baseDmg + armor * defScale + toughness * defScale * 2);
+        // Total damage = base + physical resistance × defScale
+        float totalDamage = (float) (baseDmg + pres * defScale);
 
         // Damage + knockback all entities in radius
         double damageRadius = 8.0; // direct damage radius (close range)
@@ -347,8 +343,8 @@ public final class TurtleAbilityHandler {
 
             if (target instanceof ServerPlayer sp) sp.hurtMarked = true;
 
-            // Tier 3: stun hit targets
-            if (tier >= 3 && target instanceof LivingEntity living) {
+            // Tier 3: stun the targets the impact damaged (not those only knocked back)
+            if (tier >= 3 && dist <= damageRadius && target instanceof LivingEntity living) {
                 living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 4));
                 living.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 30, 0));
             }
@@ -406,9 +402,8 @@ public final class TurtleAbilityHandler {
             default -> radius = 6.0;
         }
 
-        // Calculate damage: 4.0 + 10% of armor value
-        double armor = player.getAttributeValue(Attributes.ARMOR);
-        float damage = (float) (4.0 + armor * 0.10);
+        // Calculate damage: 4.0 + 4% of physical resistance
+        float damage = (float) (4.0 + com.jttw.engine.progression.stats.ResistanceHandler.physicalResistance(player) * 0.04);
 
         // Hit all entities in AoE
         AABB box = new AABB(player.position(), player.position()).inflate(radius);
@@ -784,6 +779,8 @@ public final class TurtleAbilityHandler {
                     ? hurtTarget.level().getServer().getPlayerList().getPlayer(wellOwner)
                     : null;
             if (owner == null) continue;
+            // The well weakens the Turtle's enemies, never the Turtle or its allies
+            if (hurtTarget == owner || hurtTarget.isAlliedTo(owner)) continue;
 
             Set<String> ownerNodes = SkillTreeData.getUnlockedNodes(owner);
             int gravityTier = TurtleSkillTree.TREE.highestTier(ownerNodes, "tu_gravity");

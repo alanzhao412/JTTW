@@ -17,8 +17,9 @@ class StatBlockTest {
         assertEquals(20.0 + 14.4 * 0.145, s.maxHealth(), EPS);
         // base STR 200: raw = 4 + 5 = 9 -> 1 + 9 * 0.072
         assertEquals(1.0 + 9 * 0.072, s.attackDamage(), EPS);
-        // base DEF 130: raw = 2.6 + 5 = 7.6 -> 7.6 * 0.045
-        assertEquals(7.6 * 0.045, s.armor(), EPS);
+        // base PRES 50: raw = 1 + 5 = 6 -> 6 * 0.40; base MRES 80: raw = 1.6 + 5 = 6.6 -> 6.6 * 0.40
+        assertEquals(6 * 0.40, s.physicalResistance(), EPS);
+        assertEquals(6.6 * 0.40, s.magicResistance(), EPS);
         // base QI 270: raw = 5.4 + 5 = 10.4 -> 10.4 * 18.35
         assertEquals(10.4 * 18.35, s.qi(), EPS);
         // base WILL 230: raw = 4.6 + 5 = 9.6 -> 9.6 * 0.10
@@ -38,21 +39,22 @@ class StatBlockTest {
     void primordialGainsOnePointFivePercentPerLevelAboveFifty() {
         StatBlock at50 = StatBlock.compute(ProgressionClass.PRIMORDIAL, 50);
         StatBlock at100 = StatBlock.compute(ProgressionClass.PRIMORDIAL, 100);
-        // armor has no base term, so it scales exactly with the bonus: raw DEF 220
-        double rawDef50 = 2.0 * 220 * 50 / 100 + 5;
-        double rawDef100 = 2.0 * 220 * 100 / 100 + 5;
-        assertEquals(rawDef50 * 0.045 * 1.0, at50.armor(), EPS);
-        assertEquals(rawDef100 * 0.045 * 1.75, at100.armor(), EPS);
+        // resistance has no base term, so it scales exactly with the bonus: raw PRES 140
+        double rawPres50 = 2.0 * 140 * 50 / 100 + 5;
+        double rawPres100 = 2.0 * 140 * 100 / 100 + 5;
+        assertEquals(rawPres50 * 0.40 * 1.0, at50.physicalResistance(), EPS);
+        assertEquals(rawPres100 * 0.40 * 1.75, at100.physicalResistance(), EPS);
     }
 
     @Test
     void divineBeastGainsSixteenPercentPerSpikeReached() {
-        double rawDef = 2.0 * 230 * 19 / 100 + 5;
-        assertEquals(rawDef * 0.045 * 1.0, StatBlock.compute(ProgressionClass.DIVINE_BEAST, 19).armor(), EPS);
-        rawDef = 2.0 * 230 * 20 / 100 + 5;
-        assertEquals(rawDef * 0.045 * 1.16, StatBlock.compute(ProgressionClass.DIVINE_BEAST, 20).armor(), EPS);
-        rawDef = 2.0 * 230 * 100 / 100 + 5;
-        assertEquals(rawDef * 0.045 * 1.80, StatBlock.compute(ProgressionClass.DIVINE_BEAST, 100).armor(), EPS);
+        // raw MRES from base 90
+        double rawMres = 2.0 * 90 * 19 / 100 + 5;
+        assertEquals(rawMres * 0.40 * 1.0, StatBlock.compute(ProgressionClass.DIVINE_BEAST, 19).magicResistance(), EPS);
+        rawMres = 2.0 * 90 * 20 / 100 + 5;
+        assertEquals(rawMres * 0.40 * 1.16, StatBlock.compute(ProgressionClass.DIVINE_BEAST, 20).magicResistance(), EPS);
+        rawMres = 2.0 * 90 * 100 / 100 + 5;
+        assertEquals(rawMres * 0.40 * 1.80, StatBlock.compute(ProgressionClass.DIVINE_BEAST, 100).magicResistance(), EPS);
     }
 
     @ParameterizedTest
@@ -71,7 +73,8 @@ class StatBlockTest {
             StatBlock b = StatBlock.compute(cls, level + 1);
             assertTrue(b.maxHealth() > a.maxHealth(), cls + " hp at " + level);
             assertTrue(b.attackDamage() > a.attackDamage(), cls + " str at " + level);
-            assertTrue(b.armor() > a.armor(), cls + " def at " + level);
+            assertTrue(b.physicalResistance() > a.physicalResistance(), cls + " pres at " + level);
+            assertTrue(b.magicResistance() > a.magicResistance(), cls + " mres at " + level);
             assertTrue(b.qi() > a.qi(), cls + " qi at " + level);
             assertTrue(b.will() > a.will(), cls + " will at " + level);
         }
@@ -83,7 +86,8 @@ class StatBlockTest {
         StatBlock s = StatBlock.compute(cls, 1);
         assertTrue(s.maxHealth() > 20.0);
         assertTrue(s.attackDamage() > 1.0);
-        assertTrue(s.armor() > 0.0);
+        assertTrue(s.physicalResistance() > 0.0);
+        assertTrue(s.magicResistance() > 0.0);
     }
 
     @Test

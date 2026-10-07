@@ -11,6 +11,7 @@ import com.jttw.engine.commands.SkillPointDebugCommand;
 import com.jttw.engine.commands.TransformCommand;
 import com.jttw.engine.item.RuyiJinguBangHandler;
 import com.jttw.engine.network.NetworkHandler;
+import com.jttw.engine.registry.ModAttributes;
 import com.jttw.engine.registry.ModBlocks;
 import com.jttw.engine.registry.ModEntities;
 import com.jttw.engine.registry.ModItems;
@@ -49,6 +50,7 @@ public class JTTWEngine {
         ModBlocks.register(modEventBus);
         ModItems.register(modEventBus);
         ModEntities.register(modEventBus);
+        ModAttributes.register(modEventBus);
 
         modEventBus.addListener(this::commonSetup);
 

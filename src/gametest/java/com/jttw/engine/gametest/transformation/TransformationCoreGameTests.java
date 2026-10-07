@@ -242,9 +242,8 @@ public class TransformationCoreGameTests {
     }
 
     /**
-     * SUSPECTED BUG: deserialize() means to return null for an entity id that is not registered
-     * (a mob from a removed mod), but Forge's entity registry answers unknown ids with its
-     * default, the pig, so the null check never fires and the player wakes up as a pig.
+     * A saved form whose mob is no longer registered (a removed mod) loads as no transformation,
+     * not as the registry's default entity (the pig).
      */
     @GameTest(template = PLATFORM)
     public static void unknownSavedEntityIdReadsAsNoTransformation(GameTestHelper h) {

@@ -44,7 +44,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Server-side handler for Byakko line (BEAST Divine Beast) abilities:
  * <ul>
- *   <li><b>Innate passive:</b> +50% run speed at level 100 (linear), +1.0 step assist at level 100,
+ *   <li><b>Innate passive:</b> +0.8% run speed per level (+80% at level 100) and step height
+ *       1.0 + 0.01 per level (2.0 at level 100),
  *       eating raw foods removes negative effects</li>
  *   <li><b>Predator's Leap (USE):</b> launch forward, AoE explosion on landing (no terrain damage),
  *       damage scales with STR. T2: bigger AoE. T3: stun enemies.</li>
@@ -335,11 +336,6 @@ public final class ByakkoAbilityHandler {
             BleedEntry bleed = entry.getValue();
 
             int remaining = bleed.remainingTicks() - 20;
-            if (remaining <= 0) {
-                it.remove();
-                continue;
-            }
-
             Entity entity = level.getEntity(bleed.entityId());
             if (entity == null || !entity.isAlive()) {
                 it.remove();
@@ -360,7 +356,11 @@ public final class ByakkoAbilityHandler {
                 }
             }
 
-            // Update remaining ticks
+            // This second's hit has landed; stop once the duration is used up
+            if (remaining <= 0) {
+                it.remove();
+                continue;
+            }
             entry.setValue(new BleedEntry(bleed.entityId(), bleed.sourcePlayerId(),
                     bleed.damagePerTick(), remaining, bleed.maxTicks()));
         }

@@ -198,17 +198,16 @@ public class TransmutationGameTests {
         h.succeed();
     }
 
-    /**
-     * SUSPECTED BUG: the "72 Transformations II" node (Wukong and Erlang Shen) says it lets you
-     * "Transform your equipped items into same-tier variants", but both the server packet and
-     * the client key handler require tier 3, so a tier-2 player cannot transmute.
-     */
-    @GameTest(template = PLATFORM, required = false)
-    public static void transmuteWorksAtTierTwoAsTheNodeSays(GameTestHelper h) {
+    /** "72 Transformations III" is the node that says "Transmute equipped items". */
+    @GameTest(template = PLATFORM)
+    public static void transmuteNeedsTierThreeAsTheNodeSays(GameTestHelper h) {
         ServerPlayer p = Tf.player(h);
         Tf.grantWukongTier(p, 2);
         holdAndSend(p, new ItemStack(Items.IRON_SWORD), TransmutationCategory.TOOL, 0);
-        eq(h, Items.IRON_PICKAXE, p.getMainHandItem().getItem(), "tier-2 transmute");
+        eq(h, Items.IRON_SWORD, p.getMainHandItem().getItem(), "tier 2 cannot transmute");
+        Tf.grantWukongTier(p, 3);
+        holdAndSend(p, new ItemStack(Items.IRON_SWORD), TransmutationCategory.TOOL, 0);
+        eq(h, Items.IRON_PICKAXE, p.getMainHandItem().getItem(), "tier 3 transmutes");
         h.succeed();
     }
 

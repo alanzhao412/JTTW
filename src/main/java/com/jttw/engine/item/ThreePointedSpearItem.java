@@ -166,7 +166,7 @@ public class ThreePointedSpearItem extends Item {
         sp.setDeltaMovement(sp.getDeltaMovement().add(look.scale(lungeBase * 0.25)));
         sp.hurtMarked = true;
 
-        // Hit entities in the thrust line
+        // Hit everything in the thrust's area: a cone ahead, as long as the lunge
         net.minecraft.world.phys.Vec3 start = sp.getEyePosition();
         net.minecraft.world.phys.AABB searchBox = sp.getBoundingBox()
                 .expandTowards(look.scale(lungeBase)).inflate(1.0);
@@ -175,7 +175,8 @@ public class ThreePointedSpearItem extends Item {
         java.util.List<LivingEntity> targets = serverLevel.getEntitiesOfClass(
                 LivingEntity.class, searchBox, e -> e != sp && e.isAlive());
 
-        boolean piercing = esPlayer && com.jttw.engine.progression.skilltree.SkillTreeData.getEsSpearTier(sp) >= 2;
+        // Spear Mastery II: +25% thrust damage
+        if (esPlayer && com.jttw.engine.progression.skilltree.SkillTreeData.getEsSpearTier(sp) >= 2) thrustDamage *= 1.25f;
 
         for (LivingEntity target : targets) {
             net.minecraft.world.phys.Vec3 toTarget = target.position().add(0, target.getBbHeight() / 2, 0).subtract(start);
@@ -194,7 +195,6 @@ public class ThreePointedSpearItem extends Item {
                 target.invulnerableTime = oldInvuln;
             }
 
-            if (!piercing) break;
         }
 
         // T3: shockwave at full charge + sprinting
@@ -230,8 +230,8 @@ public class ThreePointedSpearItem extends Item {
         tooltip.add(Component.literal("§e+20% damage (others)"));
         tooltip.add(Component.literal("§b+5 reach (Erlang Shen)"));
         tooltip.add(Component.literal("§aEvery 3rd hit: Triple Strike"));
-        tooltip.add(Component.literal("§7Right-click: Thrust (150% ATK)"));
-        tooltip.add(Component.literal("§7Sprint+right-click: Heavy Thrust (250% ATK)"));
+        tooltip.add(Component.literal("§7Hold right-click: Thrust, 150% to 250% ATK by charge"));
+        tooltip.add(Component.literal("§7Hits everything in front of you"));
     }
 
     public static boolean isErlangShen(Player player) {

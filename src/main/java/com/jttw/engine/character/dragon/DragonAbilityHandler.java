@@ -62,6 +62,7 @@ public final class DragonAbilityHandler {
     private static final float BASE_LIGHTNING_DAMAGE = 4.0f;
     private static final float QI_COST_LIGHTNING = 8.0f;
     private static final int LIGHTNING_COOLDOWN_TICKS = 20; // 1 second
+    private static final String KEY_LIGHTNING_READY_AT = "jttw_lightning_ready_at";
 
     /**
      * Summon lightning at the block the player is looking at (up to 5 blocks).
@@ -72,10 +73,15 @@ public final class DragonAbilityHandler {
         int tier = DragonSkillTree.TREE.highestTier(nodes, "dr_lightning");
         if (tier < 1) return;
 
+        // Cooldown: the game time it is ready again (absent = ready)
+        long now = player.level().getGameTime();
+        if (now < player.getPersistentData().getLong(KEY_LIGHTNING_READY_AT)) return;
+
         if (!QiData.spend(player, QI_COST_LIGHTNING)) {
             player.sendSystemMessage(Component.literal("§cNot enough Qi."));
             return;
         }
+        player.getPersistentData().putLong(KEY_LIGHTNING_READY_AT, now + LIGHTNING_COOLDOWN_TICKS);
         NetworkHandler.sendToPlayer(player, new SyncQiPacket(QiData.getCurrent(player), QiData.getMax(player)));
 
         double attackDamage = player.getAttributeValue(
@@ -603,11 +609,6 @@ public final class DragonAbilityHandler {
             BubbleEntry bubble = entry.getValue();
 
             int remaining = bubble.remainingTicks() - 20;
-            if (remaining <= 0) {
-                it.remove();
-                continue;
-            }
-
             Entity entity = level.getEntity(bubble.entityId());
             if (entity == null || !entity.isAlive()) {
                 it.remove();
@@ -624,7 +625,11 @@ public final class DragonAbilityHandler {
                 }
             }
 
-            // Update remaining ticks
+            // This second's hit has landed; stop once the duration is used up
+            if (remaining <= 0) {
+                it.remove();
+                continue;
+            }
             entry.setValue(new BubbleEntry(bubble.entityId(), bubble.sourcePlayerId(), remaining));
         }
     }

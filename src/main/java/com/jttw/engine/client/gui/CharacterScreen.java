@@ -63,7 +63,8 @@ public class CharacterScreen extends Screen {
     private static final int C_BAR_BG      = 0xFF111928;
     private static final int C_BAR_HP      = 0xFFBB2222;
     private static final int C_BAR_ATK     = 0xFFCC7700;
-    private static final int C_BAR_DEF     = 0xFF2277BB;
+    private static final int C_BAR_PRES    = 0xFF2277BB;
+    private static final int C_BAR_MRES    = 0xFF7755DD;
     private static final int C_BAR_QI      = 0xFF0099BB;
     private static final int C_BAR_WILL    = 0xFF9944CC;
     private static final int C_BAR_SHINE   = 0x44FFFFFF;
@@ -304,8 +305,8 @@ public class CharacterScreen extends Screen {
     private static final int C_RADAR_CUR_LINE = 0xFFDD3333;
 
     /** Stat names for the five axes (starting from top, clockwise). */
-    private static final String[] RADAR_LABELS = {"HP", "STR", "DEF", "QI", "WILL"};
-    private static final int RADAR_AXES = 5;
+    private static final String[] RADAR_LABELS = {"HP", "STR", "PRES", "MRES", "QI", "WILL"};
+    private static final int RADAR_AXES = 6;
 
     /** Angle offset: first axis points straight up (-90°). */
     private static final double ANGLE_OFFSET = -Math.PI / 2.0;
@@ -327,20 +328,14 @@ public class CharacterScreen extends Screen {
         double[] globalMax = computeGlobalMax();
 
         // Current and potential as ratios of global max
-        double[] curRatios = {
-                globalMax[0] > 0 ? current.maxHealth()    / globalMax[0] : 0,
-                globalMax[1] > 0 ? current.attackDamage() / globalMax[1] : 0,
-                globalMax[2] > 0 ? current.armor()        / globalMax[2] : 0,
-                globalMax[3] > 0 ? current.qi()           / globalMax[3] : 0,
-                globalMax[4] > 0 ? current.will()         / globalMax[4] : 0
-        };
-        double[] potRatios = {
-                globalMax[0] > 0 ? potential.maxHealth()    / globalMax[0] : 0,
-                globalMax[1] > 0 ? potential.attackDamage() / globalMax[1] : 0,
-                globalMax[2] > 0 ? potential.armor()        / globalMax[2] : 0,
-                globalMax[3] > 0 ? potential.qi()           / globalMax[3] : 0,
-                globalMax[4] > 0 ? potential.will()         / globalMax[4] : 0
-        };
+        double[] curVals = radarValues(current);
+        double[] potVals = radarValues(potential);
+        double[] curRatios = new double[RADAR_AXES];
+        double[] potRatios = new double[RADAR_AXES];
+        for (int i = 0; i < RADAR_AXES; i++) {
+            curRatios[i] = globalMax[i] > 0 ? curVals[i] / globalMax[i] : 0;
+            potRatios[i] = globalMax[i] > 0 ? potVals[i] / globalMax[i] : 0;
+        }
 
         // Header
         g.drawString(mc.font, "§eStats", cx, cy, C_LABEL, false);
@@ -360,7 +355,7 @@ public class CharacterScreen extends Screen {
             axisY[i] = Math.sin(angle);
         }
 
-        // Draw concentric grid pentagons (25%, 50%, 75%, 100%)
+        // Draw concentric grid hexagons (25%, 50%, 75%, 100%)
         for (int ring = 1; ring <= 4; ring++) {
             double r = radius * ring / 4.0;
             for (int i = 0; i < RADAR_AXES; i++) {
@@ -401,11 +396,7 @@ public class CharacterScreen extends Screen {
         // Draw stat values along the right side
         int infoX = cx + cw - 4;
         int infoY = cy + 14;
-        double[] curVals = {current.maxHealth(), current.attackDamage(), current.armor(),
-                            current.qi(), current.will()};
-        double[] potVals = {potential.maxHealth(), potential.attackDamage(), potential.armor(),
-                            potential.qi(), potential.will()};
-        int[] statColors = {C_BAR_HP, C_BAR_ATK, C_BAR_DEF, C_BAR_QI, C_BAR_WILL};
+        int[] statColors = {C_BAR_HP, C_BAR_ATK, C_BAR_PRES, C_BAR_MRES, C_BAR_QI, C_BAR_WILL};
         for (int i = 0; i < RADAR_AXES; i++) {
             String line = String.format("§7%s §f%.1f§7/§f%.1f",
                     RADAR_LABELS[i], curVals[i], potVals[i]);
@@ -423,14 +414,16 @@ public class CharacterScreen extends Screen {
     private static double[] computeGlobalMax() {
         double[] max = new double[RADAR_AXES];
         for (ProgressionClass c : ProgressionClass.values()) {
-            StatBlock s = StatBlock.compute(c, LevelConstants.MAX_LEVEL);
-            max[0] = Math.max(max[0], s.maxHealth());
-            max[1] = Math.max(max[1], s.attackDamage());
-            max[2] = Math.max(max[2], s.armor());
-            max[3] = Math.max(max[3], s.qi());
-            max[4] = Math.max(max[4], s.will());
+            double[] v = radarValues(StatBlock.compute(c, LevelConstants.MAX_LEVEL));
+            for (int i = 0; i < RADAR_AXES; i++) max[i] = Math.max(max[i], v[i]);
         }
         return max;
+    }
+
+    /** A stat block's values in {@link #RADAR_LABELS} order. */
+    private static double[] radarValues(StatBlock s) {
+        return new double[]{s.maxHealth(), s.attackDamage(), s.physicalResistance(),
+                s.magicResistance(), s.qi(), s.will()};
     }
 
     /**

@@ -158,29 +158,29 @@ public final class YuanDiSkillTree {
         // ── NIGHT POWER (col 4) ─────────────────────────────────────────
         TREE.add(new SkillNode(
                 NIGHT_1, "Dusk Strength I",
-                new String[]{ "At night: +10% damage,", "+10% speed, +2 armor.", "" },
+                new String[]{ "At night: +10% damage,", "+10% speed, +8 phys. resist.", "" },
                 2, 4, 0, List.of(), AbilityType.PASSIVE, 1, "Night"
         ));
         TREE.add(new SkillNode(
                 NIGHT_2, "Dusk Strength II",
-                new String[]{ "At night: +20% damage,", "+15% speed, +4 armor.", "Night vision." },
+                new String[]{ "At night: +20% damage,", "+15% speed, +16 phys. resist.", "Night vision." },
                 3, 4, 1, List.of(NIGHT_1), AbilityType.PASSIVE, 2, "Night"
         ));
         TREE.add(new SkillNode(
                 NIGHT_3, "Moonlit Apex",
-                new String[]{ "At night: +30% damage,", "+20% speed, +6 armor.", "HP regen doubles." },
+                new String[]{ "At night: +30% damage,", "+20% speed, +24 phys. resist.", "HP regen doubles." },
                 4, 4, 2, List.of(NIGHT_2), AbilityType.PASSIVE, 3, "Night"
         ));
 
         // ── PRIMORDIAL BODY + QI (col 5) ─────────────────────────────────
         TREE.add(new SkillNode(
                 BODY_1, "Iron Flesh I",
-                new String[]{ "+20 max HP. +2 armor.", "10% knockback resist." },
+                new String[]{ "+20 max HP. +8 phys. resist.", "10% knockback resist." },
                 1, 5, 0, List.of(), AbilityType.PASSIVE, 0, "Body"
         ));
         TREE.add(new SkillNode(
                 BODY_2, "Iron Flesh II",
-                new String[]{ "+20 max HP. +2 armor.", "25% knockback resist." },
+                new String[]{ "+20 max HP. +8 phys. resist.", "25% knockback resist." },
                 2, 5, 1, List.of(BODY_1), AbilityType.PASSIVE, 0, "Body"
         ));
         TREE.add(new SkillNode(

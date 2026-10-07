@@ -244,10 +244,9 @@ public class RuyiJinguBangGameTests {
 
     /**
      * A too-weak player with the staff in the off hand. Inventory.tick passes the index within
-     * the off-hand list (0), and the item clears main-inventory slot 0 with it.
-     * Not required: it currently fails (see the test report).
+     * the off-hand list (0); dropping the staff must not clear main-inventory slot 0 with it.
      */
-    @GameTest(template = PLATFORM, required = false)
+    @GameTest(template = PLATFORM)
     public static void droppingAnOffhandStaffLeavesTheHotbarAlone(GameTestHelper h) {
         ServerPlayer p = player(h);
         p.getInventory().setItem(0, new ItemStack(Items.DIAMOND, 5));
@@ -272,14 +271,22 @@ public class RuyiJinguBangGameTests {
         ItemStack s = staff(true, false);
         s.inventoryTick(h.getLevel(), p, 0, false);
         near(h, 10f, QiData.getCurrent(p), "not selected: no drain");
+        // vanilla also passes selected=true to the off-hand item while hotbar slot 0 is selected
+        p.setItemInHand(InteractionHand.OFF_HAND, s);
+        s.inventoryTick(h.getLevel(), p, 0, true);
+        near(h, 10f, QiData.getCurrent(p), "in the off hand: no drain");
+        p.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
+        p.setItemInHand(InteractionHand.MAIN_HAND, s);
         s.inventoryTick(h.getLevel(), p, 0, true);
         near(h, 9.85f, QiData.getCurrent(p), "0.15 Qi per tick");
         check(h, RuyiJinguBangItem.isQiEmpowered(s), "still empowered");
 
         ItemStack normal = staff();
+        p.setItemInHand(InteractionHand.MAIN_HAND, normal);
         normal.inventoryTick(h.getLevel(), p, 0, true);
         near(h, 9.85f, QiData.getCurrent(p), "normal mode does not drain");
         ItemStack large = staff(false, true);
+        p.setItemInHand(InteractionHand.MAIN_HAND, large);
         large.inventoryTick(h.getLevel(), p, 0, true);
         near(h, 9.85f, QiData.getCurrent(p), "large mode does not drain");
         h.succeed();
@@ -291,6 +298,7 @@ public class RuyiJinguBangGameTests {
         QiData.setMax(p, 100f);
         QiData.setCurrent(p, 0.1f);
         ItemStack s = staff(true, false);
+        p.setItemInHand(InteractionHand.MAIN_HAND, s);
         s.inventoryTick(h.getLevel(), p, 0, true);
         check(h, !RuyiJinguBangItem.isQiEmpowered(s), "empowerment gone");
         near(h, 0.1f, QiData.getCurrent(p), "failed drain costs nothing");

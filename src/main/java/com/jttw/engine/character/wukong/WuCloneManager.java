@@ -1,5 +1,6 @@
 package com.jttw.engine.character.wukong;
 
+import com.jttw.engine.character.SummonLeash;
 import com.jttw.engine.registry.ModEntities;
 import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
@@ -8,6 +9,8 @@ import com.jttw.engine.progression.stats.ProgressionClass;
 import com.jttw.engine.progression.stats.StatBlock;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.entity.WuCloneEntity;
+import com.jttw.engine.progression.stats.ResistanceHandler;
+import com.jttw.engine.registry.ModAttributes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.nbt.CompoundTag;
@@ -52,8 +55,8 @@ import java.util.*;
  *
  * Because they're not Monsters, iron golems and other mob-targeting systems ignore them.
  *
- * Tier 1 and 2: TOGGLE — summons 1 or 2 clones on press, dismisses on second press.
- * Tier 3: HELD — press once to summon/dismiss, hold to spawn one more per second.
+ * Each press of the key summons one more clone (10 Qi), up to the tier's cap (1 / 2 / 9).
+ * Hitting your own clone dismisses it; clones fade when your Qi runs out.
  */
 @Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class WuCloneManager {
@@ -173,9 +176,9 @@ public final class WuCloneManager {
                 continue;
             }
 
-            // Resolve living clones, clean up dead/missing ones
+            // Resolve living clones in any dimension, clean up dead/missing ones
             ServerLevel level = player.serverLevel();
-            List<Entity> clones = resolveClones(level, cloneIds);
+            List<Entity> clones = resolveClones(server, cloneIds);
 
             if (clones.size() != cloneIds.size()) {
                 List<UUID> newList = new ArrayList<>();
@@ -190,6 +193,15 @@ public final class WuCloneManager {
             int idx = 0;
             for (Entity ent : clones) {
                 if (!(ent instanceof WuCloneEntity clone)) continue;
+
+                // Left behind in another dimension: bring it to the owner
+                if (clone.level() != player.level()) {
+                    double angle = (Math.PI * 2.0 / Math.max(1, clones.size())) * idx;
+                    Entity moved = SummonLeash.bringTo(clone, player,
+                            player.getX() + Math.cos(angle) * FOLLOW_SPREAD, player.getZ() + Math.sin(angle) * FOLLOW_SPREAD);
+                    if (!(moved instanceof WuCloneEntity movedClone)) { idx++; continue; }
+                    clone = movedClone;
+                }
 
                 // Sync held item + attack stat periodically
                 if ((server.getTickCount() & 7) == 0) {
@@ -211,6 +223,12 @@ public final class WuCloneManager {
                 // Only teleport to owner if the clone is idle (no combat, no task)
                 boolean busy = (clone.getTarget() != null && clone.getTarget().isAlive())
                         || !clone.getNavigation().isDone();
+                // A busy clone is still leashed: past twice the follow distance it drops its target
+                if (busy && dist > FOLLOW_TELEPORT_DIST * 2) {
+                    clone.setTarget(null);
+                    clone.getNavigation().stop();
+                    busy = false;
+                }
                 if (!busy && dist > FOLLOW_TELEPORT_DIST) {
                     double angle = (Math.PI * 2.0 / Math.max(1, clones.size())) * idx;
                     double tx = player.getX() + Math.cos(angle) * FOLLOW_SPREAD;
@@ -305,13 +323,15 @@ public final class WuCloneManager {
         clone.setHealth(20.0f);
 
         double playerAtk = player.getAttributeValue(Attributes.ATTACK_DAMAGE);
-        double playerDef = player.getAttributeValue(Attributes.ARMOR);
 
         var atk = clone.getAttribute(Attributes.ATTACK_DAMAGE);
         if (atk != null) atk.setBaseValue(Math.max(1.0, playerAtk));
 
-        var armor = clone.getAttribute(Attributes.ARMOR);
-        if (armor != null) armor.setBaseValue(Math.min(20.0, Math.max(0.0, playerDef)));
+        // Same resistances as the player (uncapped, like theirs)
+        var pres = clone.getAttribute(ModAttributes.PHYSICAL_RESISTANCE.get());
+        if (pres != null) pres.setBaseValue(ResistanceHandler.physicalResistance(player));
+        var mres = clone.getAttribute(ModAttributes.MAGIC_RESISTANCE.get());
+        if (mres != null) mres.setBaseValue(ResistanceHandler.magicResistance(player));
 
         var spd = clone.getAttribute(Attributes.MOVEMENT_SPEED);
         if (spd != null) spd.setBaseValue(Math.max(0.3, player.getAttributeValue(Attributes.MOVEMENT_SPEED)));
@@ -365,10 +385,10 @@ public final class WuCloneManager {
         return sl.getServer().getPlayerList().getPlayer(ownerId);
     }
 
-    private static List<Entity> resolveClones(ServerLevel level, List<UUID> ids) {
+    private static List<Entity> resolveClones(MinecraftServer server, List<UUID> ids) {
         List<Entity> out = new ArrayList<>();
         for (UUID id : ids) {
-            Entity e = level.getEntity(id);
+            Entity e = SummonLeash.find(server, id);
             if (e != null) out.add(e);
         }
         return out;

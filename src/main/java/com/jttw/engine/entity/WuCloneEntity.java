@@ -131,7 +131,10 @@ public class WuCloneEntity extends PathfinderMob {
                 .add(Attributes.ATTACK_DAMAGE, 2.0)
                 .add(Attributes.MOVEMENT_SPEED, 0.3)
                 .add(Attributes.ARMOR, 0.0)
-                .add(Attributes.FOLLOW_RANGE, 32.0);
+                .add(Attributes.FOLLOW_RANGE, 32.0)
+                // Clones carry their owner's resistances (copied on summon)
+                .add(com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get())
+                .add(com.jttw.engine.registry.ModAttributes.MAGIC_RESISTANCE.get());
     }
 
     // Silent — no zombie groaning

@@ -38,8 +38,9 @@ public final class DivineBeastHandler {
     private static final String MOD_DOMAIN_HP  = "jttw:domain_hp";
     private static final String MOD_DOMAIN_STR = "jttw:domain_str";
     private static final String MOD_DOMAIN_DEF = "jttw:domain_def";
+    private static final String MOD_DOMAIN_MRES = "jttw:domain_mres";
 
-    /** Domain buff: +20% to HP, ATK, and DEF when in the beast's domain. */
+    /** Domain buff: +20% to HP, ATK, physical and magic resistance when in the beast's domain. */
     private static final double DOMAIN_BUFF_MULTIPLIER = 0.20;
 
     /** Only re-check domain every N ticks to avoid per-tick biome lookups. */
@@ -162,13 +163,17 @@ public final class DivineBeastHandler {
     private static void applyDomainBuffs(ServerPlayer player) {
         applyDomainMod(player, Attributes.MAX_HEALTH, UUID_DOMAIN_HP, MOD_DOMAIN_HP, DOMAIN_BUFF_MULTIPLIER);
         applyDomainMod(player, Attributes.ATTACK_DAMAGE, UUID_DOMAIN_STR, MOD_DOMAIN_STR, DOMAIN_BUFF_MULTIPLIER);
-        applyDomainMod(player, Attributes.ARMOR, UUID_DOMAIN_DEF, MOD_DOMAIN_DEF, DOMAIN_BUFF_MULTIPLIER);
+        applyDomainMod(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get(), UUID_DOMAIN_DEF, MOD_DOMAIN_DEF, DOMAIN_BUFF_MULTIPLIER);
+        applyDomainMod(player, com.jttw.engine.registry.ModAttributes.MAGIC_RESISTANCE.get(), UUID_DOMAIN_DEF, MOD_DOMAIN_MRES, DOMAIN_BUFF_MULTIPLIER);
+        removeDomainMod(player, Attributes.ARMOR, UUID_DOMAIN_DEF); // the old armor version
     }
 
     private static void removeDomainBuffs(ServerPlayer player) {
         removeDomainMod(player, Attributes.MAX_HEALTH, UUID_DOMAIN_HP);
         removeDomainMod(player, Attributes.ATTACK_DAMAGE, UUID_DOMAIN_STR);
-        removeDomainMod(player, Attributes.ARMOR, UUID_DOMAIN_DEF);
+        removeDomainMod(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get(), UUID_DOMAIN_DEF);
+        removeDomainMod(player, com.jttw.engine.registry.ModAttributes.MAGIC_RESISTANCE.get(), UUID_DOMAIN_DEF);
+        removeDomainMod(player, Attributes.ARMOR, UUID_DOMAIN_DEF); // the old armor version
 
         // Clamp HP if we just lost the health buff
         if (player.getHealth() > player.getMaxHealth()) {

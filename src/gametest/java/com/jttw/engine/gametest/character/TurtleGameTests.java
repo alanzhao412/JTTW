@@ -41,12 +41,9 @@ public class TurtleGameTests {
         return p;
     }
 
-    /** Armor fixed at 10 and toughness at 0, so the DEF-scaled abilities have known damage. */
-    private static void armorTen(ServerPlayer p) {
-        p.getAttribute(Attributes.ARMOR).removeModifiers();
-        p.getAttribute(Attributes.ARMOR).setBaseValue(10.0);
-        p.getAttribute(Attributes.ARMOR_TOUGHNESS).removeModifiers();
-        p.getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(0.0);
+    /** Physical resistance fixed at 25, so the resistance-scaled abilities have known damage. */
+    private static void presTwentyFive(ServerPlayer p) {
+        setResistances(p, 25.0, 0.0);
     }
 
     private static PlayableCharacter character() {
@@ -65,32 +62,43 @@ public class TurtleGameTests {
 
     // ── Innate passive ──────────────────────────────────────────────
 
-    @GameTest(template = PLATFORM, batch = "turtleGainsOneArmorAndAFifthToughnessPerLevel")
-    public static void turtleGainsOneArmorAndAFifthToughnessPerLevel(GameTestHelper h) {
+    @GameTest(template = PLATFORM, batch = "turtleGainsOnePhysicalResistancePerLevel")
+    public static void turtleGainsOnePhysicalResistancePerLevel(GameTestHelper h) {
         ServerPlayer p = turtle(h);
         PlayerLevel.setLevel(p, 20);
         LevelManager.reapplyStats(p);
-        eq(h, 20.0, modifier(p, Attributes.ARMOR, "jttw:turtle_def"), "armor bonus at 20");
-        near(h, 4.0, modifier(p, Attributes.ARMOR_TOUGHNESS, "jttw:turtle_toughness"), "toughness bonus at 20");
+        eq(h, 20.0, modifier(p, PHYSICAL_RESISTANCE(), "jttw:turtle_pres"), "resistance bonus at 20");
+        eq(h, null, modifier(p, Attributes.ARMOR, "jttw:turtle_def"), "no vanilla armor bonus");
+        eq(h, null, modifier(p, Attributes.ARMOR_TOUGHNESS, "jttw:turtle_toughness"), "no toughness bonus");
 
         ServerPlayer tiger = as(h, ReincarnationOutcome.WHITE_TIGER);
         PlayerLevel.setLevel(tiger, 20);
         LevelManager.reapplyStats(tiger);
-        eq(h, null, modifier(tiger, Attributes.ARMOR, "jttw:turtle_def"), "only the Earth line");
+        eq(h, null, modifier(tiger, PHYSICAL_RESISTANCE(), "jttw:turtle_pres"), "only the Earth line");
         h.succeed();
     }
 
-    /**
-     * Suspected bug: the passive is documented as "+100 DEF and +20 toughness at level 100", but
-     * vanilla caps the armor attribute at 30 (and toughness at 20), so most of it is lost.
-     */
-    @GameTest(template = PLATFORM, required = false, batch = "turtleReachesAHundredArmorAtLevelHundred")
-    public static void turtleReachesAHundredArmorAtLevelHundred(GameTestHelper h) {
+    /** The passive's full +100 lands at level 100: resistance has no cap, unlike vanilla armor's 30. */
+    @GameTest(template = PLATFORM, batch = "turtlesPassiveIsNotCappedAtLevelHundred")
+    public static void turtlesPassiveIsNotCappedAtLevelHundred(GameTestHelper h) {
         ServerPlayer p = turtle(h);
         PlayerLevel.setLevel(p, 100);
         LevelManager.reapplyStats(p);
-        check(h, p.getAttributeValue(Attributes.ARMOR) >= 100.0,
-                "armor at level 100 is " + p.getAttributeValue(Attributes.ARMOR));
+        double fromLevels = com.jttw.engine.progression.stats.StatBlock
+                .compute(com.jttw.engine.progression.stats.ProgressionClass.DIVINE_BEAST, 100).physicalResistance();
+        near(h, fromLevels + 100.0, pres(p), "level stats + passive");
+        h.succeed();
+    }
+
+    /** Players who levelled before resistances existed lose the old armor/toughness version. */
+    @GameTest(template = PLATFORM, batch = "turtlesOldArmorPassiveIsRemoved")
+    public static void turtlesOldArmorPassiveIsRemoved(GameTestHelper h) {
+        ServerPlayer p = turtle(h);
+        java.util.UUID id = java.util.UUID.fromString("c3d4e5f6-a7b8-9012-cdef-234567890100");
+        p.getAttribute(Attributes.ARMOR).addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(
+                id, "jttw:turtle_def", 20.0, net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADDITION));
+        LevelManager.reapplyStats(p);
+        eq(h, null, modifier(p, Attributes.ARMOR, "jttw:turtle_def"), "old armor bonus");
         h.succeed();
     }
 
@@ -176,7 +184,7 @@ public class TurtleGameTests {
     public static void unstoppableForceLaunchesThenASecondPressSlamsDown(GameTestHelper h) {
         ServerPlayer p = turtle(h);
         grant(p, "tu_force_1");
-        armorTen(p);
+        presTwentyFive(p);
         p.setYRot(0f);
         p.setXRot(0f);
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 4); // 2 blocks ahead
@@ -188,7 +196,7 @@ public class TurtleGameTests {
         near(h, 0.0, p.getDeltaMovement().length(), "stopped on impact");
         List<Hit> blows = of(hits, DamageTypes.PLAYER_ATTACK);
         eq(h, 1, blows.size(), "impact hits the golem");
-        // tier 1: 6 + armor 10 x 0.10 = 7, falloff 1 - 2/8
+        // tier 1: 6 + resistance 25 x 0.04 = 7, falloff 1 - 2/8
         near(h, 5.25, blows.get(0).amount(), "impact damage");
         check(h, golem.getDeltaMovement().z > 0, "knocked away");
         eq(h, -1, amp(golem, MobEffects.MOVEMENT_SLOWDOWN), "no stun below tier 3");
@@ -199,7 +207,7 @@ public class TurtleGameTests {
     public static void unstoppableForceLandsByItself(GameTestHelper h) {
         ServerPlayer p = turtle(h);
         grant(p, "tu_force_1", "tu_force_2", "tu_force_3");
-        armorTen(p);
+        presTwentyFive(p);
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 4);
         List<Hit> hits = watch(golem);
         TurtleAbilityHandler.castUnstoppableForce(p);
@@ -208,7 +216,7 @@ public class TurtleGameTests {
         check(h, hits.isEmpty(), "still in the air");
         p.setOnGround(true);
         ticks(p, 1);
-        // tier 3: 15 + armor 10 x 0.20 = 17, falloff 1 - 2/8
+        // tier 3: 15 + resistance 25 x 0.08 = 17, falloff 1 - 2/8
         near(h, 12.75, of(hits, DamageTypes.PLAYER_ATTACK).get(0).amount(), "landing impact");
         eq(h, 4, amp(golem, MobEffects.MOVEMENT_SLOWDOWN), "tier 3 stun: Slowness V");
         check(h, golem.hasEffect(MobEffects.BLINDNESS), "tier 3 stun: blind");
@@ -243,12 +251,12 @@ public class TurtleGameTests {
         character().activate(p, 2, AbilityAction.USE);
         near(h, 100f, QiData.getCurrent(p), "needs the node");
         grant(p, "tu_tectonic_1");
-        armorTen(p);
+        presTwentyFive(p);
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 4);
         List<Hit> hits = watch(golem);
         character().activate(p, 2, AbilityAction.USE);
         near(h, 90f, QiData.getCurrent(p), "10 Qi");
-        // 4 + armor 10 x 0.10, no falloff
+        // 4 + resistance 25 x 0.04, no falloff
         near(h, 5.0, of(hits, DamageTypes.PLAYER_ATTACK).get(0).amount(), "slam damage");
         TurtleAbilityHandler.castTectonicSlam(p);
         near(h, 90f, QiData.getCurrent(p), "on cooldown");
@@ -331,11 +339,8 @@ public class TurtleGameTests {
         h.succeed();
     }
 
-    /**
-     * Suspected bug: the Gravity Well's +15% damage applies to anything within 8 blocks of the
-     * Turtle, the Turtle included, so turning it on makes the Turtle take 15% more damage.
-     */
-    @GameTest(template = PLATFORM, required = false, batch = "gravityWellDoesNotMakeTheTurtleItselfVulnerable")
+    /** The Gravity Well's +15% damage taken is for enemies, not the Turtle or allies. */
+    @GameTest(template = PLATFORM, batch = "gravityWellDoesNotMakeTheTurtleItselfVulnerable")
     public static void gravityWellDoesNotMakeTheTurtleItselfVulnerable(GameTestHelper h) {
         ServerPlayer p = turtle(h);
         online(h, p);

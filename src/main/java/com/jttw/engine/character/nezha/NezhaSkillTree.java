@@ -66,13 +66,13 @@ public final class NezhaSkillTree {
 
         // ── TRUE SAMADHI FIRE (col 1) ─────────────────────────────────
         TREE.add(new SkillNode(FIRE_1, "Samadhi Fire I",
-                new String[]{ "Spear shoots fire.", "Costs Qi per cast.", "" },
+                new String[]{ "Spear fires 5 fireballs,", "each 5 + 120% ATK.", "8 Qi, 2s cooldown." },
                 3, 1, 0, List.of(), AbilityType.TOGGLE, 1, "Samadhi Fire"));
         TREE.add(new SkillNode(FIRE_2, "Samadhi Fire II",
-                new String[]{ "Increased range and burn", "duration. Splash on impact.", "" },
+                new String[]{ "Each fireball hits for", "5 + 150% ATK.", "" },
                 4, 1, 1, List.of(FIRE_1), AbilityType.TOGGLE, 2, "Samadhi Fire"));
         TREE.add(new SkillNode(FIRE_3, "Samadhi Fire III",
-                new String[]{ "Pierces targets. Leaves", "a fire trail behind.", "" },
+                new String[]{ "Each fireball hits for", "5 + 180% ATK.", "" },
                 5, 1, 2, List.of(FIRE_2), AbilityType.TOGGLE, 3, "Samadhi Fire"));
 
         // ── LOTUS DETONATION (col 2) ──────────────────────────────────
@@ -120,7 +120,7 @@ public final class NezhaSkillTree {
                 new String[]{ "+20% damage.", "" },
                 3, 7, 1, List.of(COMBAT_1), AbilityType.PASSIVE, 2, "Combat"));
         TREE.add(new SkillNode(COMBAT_3, "Heavenly Warrior III",
-                new String[]{ "+6 armor. Fire immunity.", "" },
+                new String[]{ "+24 phys. resist.", "Fire immunity.", "" },
                 4, 7, 2, List.of(COMBAT_2), AbilityType.PASSIVE, 3, "Combat"));
     }
 }

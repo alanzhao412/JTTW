@@ -89,7 +89,7 @@ public class NezhaWeaponsGameTests {
 
     @GameTest(template = PLATFORM, batch = "yangSwordMissesBeyondFourBlocksButStillCoolsDown", timeoutTicks = 150)
     public static void fireSpearSneakShootsOneFireballEveryTwoSeconds(GameTestHelper h) {
-        ServerPlayer p = player(h);
+        ServerPlayer p = as(h, com.jttw.engine.reincarnation.ReincarnationOutcome.THIRD_LOTUS_PRINCE);
         p.setShiftKeyDown(true);
         ItemStack s = fireSpear();
         eq(h, InteractionResult.CONSUME, use(h, p, s), "first shot");
@@ -109,11 +109,25 @@ public class NezhaWeaponsGameTests {
 
     @GameTest(template = PLATFORM)
     public static void fireSpearShootsSixFireballsWithThreeHeadsSixArms(GameTestHelper h) {
-        ServerPlayer p = player(h);
+        ServerPlayer p = as(h, com.jttw.engine.reincarnation.ReincarnationOutcome.THIRD_LOTUS_PRINCE);
         p.getPersistentData().putBoolean("jttw_nz_three_heads", true);
         p.setShiftKeyDown(true);
         eq(h, InteractionResult.CONSUME, use(h, p, fireSpear()), "use result");
         eq(h, 6, fireballsLaunched(h, p), "six fireballs");
+        h.succeed();
+    }
+
+    /** The fireball is Nezha's own art: anyone else just holds a spear. */
+    @GameTest(template = PLATFORM)
+    public static void fireSpearShootsOnlyForNezha(GameTestHelper h) {
+        ServerPlayer erlang = as(h, com.jttw.engine.reincarnation.ReincarnationOutcome.EYE_OF_HEAVEN);
+        erlang.setShiftKeyDown(true);
+        eq(h, InteractionResult.PASS, use(h, erlang, fireSpear()), "Erlang Shen");
+        eq(h, 0, fireballsLaunched(h, erlang), "Erlang Shen's fireballs");
+        ServerPlayer nobody = player(h);
+        nobody.setShiftKeyDown(true);
+        eq(h, InteractionResult.PASS, use(h, nobody, fireSpear()), "no character");
+        eq(h, 0, fireballsLaunched(h, nobody), "no character's fireballs");
         h.succeed();
     }
 
@@ -166,12 +180,8 @@ public class NezhaWeaponsGameTests {
         h.succeed();
     }
 
-    /**
-     * The ring's tooltip promises "Damage: size x 100% STR", and the thrown projectile is tagged
-     * with the size "for damage scaling (handled elsewhere)", but nothing reads the tag, so the
-     * plain snowball deals no damage. Not required: it currently fails (times out).
-     */
-    @GameTest(template = PLATFORM, batch = "qiankun_flight", required = false, timeoutTicks = 60)
+    /** The thrown ring deals its tooltip's "size x 100% STR" to what it hits. */
+    @GameTest(template = PLATFORM, batch = "qiankun_flight", timeoutTicks = 60)
     public static void thrownRingDamagesWhatItHits(GameTestHelper h) {
         ServerPlayer p = playerAt(h, 2, 0, 0f, 0f);
         setBaseAtk(p, 10.0);
@@ -306,12 +316,10 @@ public class NezhaWeaponsGameTests {
     }
 
     /**
-     * Both swords use the same attribute-modifier UUID, so the off-hand sword's modifier replaces
-     * the main-hand one, and unequipping either removes the bonus of both. Uses a zombie because
-     * equipment changes are only noticed while an entity ticks.
-     * Not required: it currently fails (see the test report).
+     * Each hand's sword has its own attribute modifier, so putting one away leaves the other's
+     * bonus. Uses a zombie because equipment changes are only noticed while an entity ticks.
      */
-    @GameTest(template = PLATFORM, required = false, timeoutTicks = 40)
+    @GameTest(template = PLATFORM, timeoutTicks = 40)
     public static void puttingAwayTheOffhandSwordKeepsTheMainHandBonus(GameTestHelper h) {
         var zombie = h.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(2, 2, 2));
         double base = zombie.getAttributeValue(Attributes.ATTACK_DAMAGE);

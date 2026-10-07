@@ -106,7 +106,7 @@ public class ImmortalItemsGameTests {
         near(h, 4800f, QiData.getCurrent(p), "100 + 4700 Qi refill");
         near(h, 5000f, QiData.getMax(p), "max Qi unchanged");
         eq(h, 6, p.getFoodData().getFoodLevel(), "3 hunger bars");
-        near(h, 0.0, p.getAttributeValue(Attributes.ARMOR), "no armor bonus");
+        eq(h, null, com.jttw.engine.gametest.character.CharTest.modifier(p, com.jttw.engine.gametest.character.CharTest.PHYSICAL_RESISTANCE(), "JTTW Peach Physical Resistance"), "no resistance bonus");
         check(h, !p.getPersistentData().getBoolean(ImmortalItems.KEY_IMMORTAL_PEACHES), "no peach flag");
         check(h, !p.getPersistentData().getBoolean("jttw_projectile_immune"), "no projectile immunity");
         h.succeed();
@@ -130,8 +130,9 @@ public class ImmortalItemsGameTests {
         eatPeach(h, p);
         near(h, 4800f, QiData.getMax(p), "+4700 max Qi");
         near(h, 4800f, QiData.getCurrent(p), "topped up to the new max");
-        near(h, 12.0, p.getAttributeValue(Attributes.ARMOR), "+12 armor");
-        near(h, 10.0, p.getAttributeValue(Attributes.ARMOR_TOUGHNESS), "+10 toughness");
+        eq(h, 48.0, com.jttw.engine.gametest.character.CharTest.modifier(p, com.jttw.engine.gametest.character.CharTest.PHYSICAL_RESISTANCE(), "JTTW Peach Physical Resistance"), "+48 physical resistance");
+        eq(h, 40.0, com.jttw.engine.gametest.character.CharTest.modifier(p, com.jttw.engine.gametest.character.CharTest.MAGIC_RESISTANCE(), "JTTW Peach Magic Resistance"), "+40 magic resistance");
+        near(h, 0.0, p.getAttributeValue(Attributes.ARMOR), "no vanilla armor");
         check(h, p.getPersistentData().getBoolean("jttw_projectile_immune"), "projectile immunity flag");
         check(h, p.getPersistentData().getBoolean("jttw_peach_consumed"), "first-eat flag");
         check(h, p.getPersistentData().getBoolean(ImmortalItems.KEY_IMMORTAL_PEACHES), "peach progression flag");
@@ -148,30 +149,27 @@ public class ImmortalItemsGameTests {
         eatPeach(h, p);
         near(h, 4800f, QiData.getMax(p), "max Qi raised only once");
         near(h, 4700f, QiData.getCurrent(p), "second peach is just the 4700 refill");
-        near(h, 12.0, p.getAttributeValue(Attributes.ARMOR), "armor bonus not stacked");
-        near(h, 10.0, p.getAttributeValue(Attributes.ARMOR_TOUGHNESS), "toughness bonus not stacked");
+        eq(h, 48.0, com.jttw.engine.gametest.character.CharTest.modifier(p, com.jttw.engine.gametest.character.CharTest.PHYSICAL_RESISTANCE(), "JTTW Peach Physical Resistance"), "physical bonus not stacked");
+        eq(h, 40.0, com.jttw.engine.gametest.character.CharTest.modifier(p, com.jttw.engine.gametest.character.CharTest.MAGIC_RESISTANCE(), "JTTW Peach Magic Resistance"), "magic bonus not stacked");
         h.succeed();
     }
 
-    /**
-     * The peach documents its permanent bonus as Wukong's, but it checks the Primordial class,
-     * which Yuan Di and the Gold-Winged Peng share. Not required: it currently fails.
-     */
-    @GameTest(template = PLATFORM, required = false)
+    /** The permanent bonus is Wukong's alone, not every Primordial's. */
+    @GameTest(template = PLATFORM)
     public static void peachBonusIsOnlyForWukongNotOtherPrimordials(GameTestHelper h) {
         ServerPlayer p = as(h, ReincarnationOutcome.YUAN_DI);
         PlayerLevel.setProgressionClass(p, ProgressionClass.PRIMORDIAL);
         QiData.setMax(p, 100f);
         eatPeach(h, p);
         near(h, 100f, QiData.getMax(p), "Yuan Di max Qi");
-        near(h, 0.0, p.getAttributeValue(Attributes.ARMOR), "Yuan Di armor");
+        eq(h, null, com.jttw.engine.gametest.character.CharTest.modifier(p, com.jttw.engine.gametest.character.CharTest.PHYSICAL_RESISTANCE(), "JTTW Peach Physical Resistance"), "Yuan Di resistance");
         check(h, !p.getPersistentData().getBoolean(ImmortalItems.KEY_IMMORTAL_PEACHES), "Yuan Di peach flag");
         check(h, !WukongCheckpoints.isComplete(p, Checkpoint.IMMORTAL_PEACHES), "Wukong checkpoint on Yuan Di");
         h.succeed();
     }
 
     @GameTest(template = PLATFORM)
-    public static void peachArmorIsReappliedToTheRespawnedPlayerOnce(GameTestHelper h) {
+    public static void peachResistanceIsReappliedToTheRespawnedPlayerOnce(GameTestHelper h) {
         ServerPlayer before = wukong(h);
         QiData.setMax(before, 100f);
         eatPeach(h, before);
@@ -179,13 +177,13 @@ public class ImmortalItemsGameTests {
         WukongCheckpoints.copyTo(before, after);
         ImmortalPeachItem.reapplyPeachModifiers(after);
         ImmortalPeachItem.reapplyPeachModifiers(after);
-        near(h, 12.0, after.getAttributeValue(Attributes.ARMOR), "armor after respawn");
-        near(h, 10.0, after.getAttributeValue(Attributes.ARMOR_TOUGHNESS), "toughness after respawn");
+        eq(h, 48.0, com.jttw.engine.gametest.character.CharTest.modifier(after, com.jttw.engine.gametest.character.CharTest.PHYSICAL_RESISTANCE(), "JTTW Peach Physical Resistance"), "physical resistance after respawn");
+        eq(h, 40.0, com.jttw.engine.gametest.character.CharTest.modifier(after, com.jttw.engine.gametest.character.CharTest.MAGIC_RESISTANCE(), "JTTW Peach Magic Resistance"), "magic resistance after respawn");
         check(h, after.getPersistentData().getBoolean("jttw_projectile_immune"), "projectile immunity kept");
 
         ServerPlayer neverAte = player(h);
         ImmortalPeachItem.reapplyPeachModifiers(neverAte);
-        near(h, 0.0, neverAte.getAttributeValue(Attributes.ARMOR), "no armor without the peach");
+        eq(h, null, com.jttw.engine.gametest.character.CharTest.modifier(neverAte, com.jttw.engine.gametest.character.CharTest.PHYSICAL_RESISTANCE(), "JTTW Peach Physical Resistance"), "nothing without the peach");
         h.succeed();
     }
 

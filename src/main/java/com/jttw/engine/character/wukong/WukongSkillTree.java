@@ -195,7 +195,7 @@ public final class WukongSkillTree {
         ));
         TREE.add(new SkillNode(
                 MARTIAL_3, "Iron Body",
-                new String[]{ "+30% attack damage.", "+6 armor. Wukong's body", "is as hard as stone." },
+                new String[]{ "+30% attack damage.", "+24 phys. resist. His body", "is as hard as stone." },
                 4, 7, 2, List.of(MARTIAL_2), AbilityType.PASSIVE, 3, "Martial Arts"
         ));
     }

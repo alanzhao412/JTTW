@@ -5,7 +5,6 @@ import com.jttw.engine.flight.JTTWFlight;
 import com.jttw.engine.transformation.TransformationAbilityHandler;
 import com.jttw.engine.transformation.TransformationData;
 import com.jttw.engine.transformation.TransformationManager;
-import com.jttw.engine.transformation.traits.AbilityTraits;
 import com.jttw.engine.transformation.traits.AnimalSpeedTraits;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
@@ -214,12 +213,8 @@ public class TransformTraitsGameTests {
         h.succeed();
     }
 
-    /**
-     * SUSPECTED BUG: clearing the horse step assist sets 0.6 ("vanilla default"), but a
-     * server-side player's default is 1.0 (ServerPlayer's constructor sets it), so after any
-     * horse form the server-side step height is lower than before transforming.
-     */
-    @GameTest(template = PLATFORM, required = false)
+    /** Leaving a horse form restores the step height the player had before, whatever it was. */
+    @GameTest(template = PLATFORM)
     public static void revertingAHorseFormRestoresTheOriginalStepHeight(GameTestHelper h) {
         ServerPlayer p = Tf.player(h);
         float before = p.maxUpStep();
@@ -255,22 +250,6 @@ public class TransformTraitsGameTests {
         check(h, p.getAbilities().mayfly, "universal flight still applies in cow form");
         TransformationManager.transform(p, EntityType.SALMON);
         check(h, !p.getAbilities().mayfly, "salmon form turns flight off");
-        h.succeed();
-    }
-
-    @GameTest(template = PLATFORM)
-    public static void abilityTraitsGrantFlightFromTheFormOrUniversalFlight(GameTestHelper h) {
-        ServerPlayer p = Tf.player(h);
-        var bat = new TransformationData(EntityType.BAT, 0.45f, 0.5f, 0.9f, true, false);
-        var cow = new TransformationData(EntityType.COW, 1.3f, 0.9f, 1.4f, false, false);
-        AbilityTraits.apply(p, bat);
-        check(h, p.getAbilities().mayfly, "flyer");
-        p.getAbilities().flying = true;
-        AbilityTraits.apply(p, cow);
-        check(h, !p.getAbilities().mayfly && !p.getAbilities().flying, "non-flyer grounded");
-        JTTWFlight.setUniversalFlight(p, true);
-        AbilityTraits.apply(p, null);
-        check(h, p.getAbilities().mayfly, "universal flight without a form");
         h.succeed();
     }
 

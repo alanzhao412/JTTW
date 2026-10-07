@@ -128,12 +128,8 @@ public class WukongGameTests {
         });
     }
 
-    /**
-     * Suspected bug: tier 3 throws a mob along the line from the ring's centre (one block above
-     * Wukong's feet) through the mob's feet, so a mob standing on the same floor is teleported
-     * downward, into the ground.
-     */
-    @GameTest(template = PLATFORM, required = false, batch = "ringOfFireTierThreeDoesNotBuryMobsInTheFloor")
+    /** Tier 3 throws mobs outward horizontally, keeping their height, not down into the floor. */
+    @GameTest(template = PLATFORM, batch = "ringOfFireTierThreeDoesNotBuryMobsInTheFloor")
     public static void ringOfFireTierThreeDoesNotBuryMobsInTheFloor(GameTestHelper h) {
         ServerPlayer p = wukong(h);
         online(h, p);
@@ -255,11 +251,8 @@ public class WukongGameTests {
         h.succeed();
     }
 
-    /**
-     * Suspected bug: the laser stamps its cooldown before checking Qi, so a shot refused for
-     * lack of Qi still puts the laser on a 5-second cooldown.
-     */
-    @GameTest(template = PLATFORM, setupTicks = 100, required = false, batch = "eyeLaserRefusedForQiDoesNotStartTheCooldown")
+    /** A shot refused for lack of Qi does not start the laser's cooldown. */
+    @GameTest(template = PLATFORM, setupTicks = 100, batch = "eyeLaserRefusedForQiDoesNotStartTheCooldown")
     public static void eyeLaserRefusedForQiDoesNotStartTheCooldown(GameTestHelper h) {
         ServerPlayer p = wukong(h);
         p.getPersistentData().putBoolean(ImmortalItems.KEY_FIERY_GOLDEN_EYES, true);
@@ -359,35 +352,27 @@ public class WukongGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM, batch = "wukongsArmorAppliesToMagicDamage")
-    public static void wukongsArmorAppliesToMagicDamage(GameTestHelper h) {
+    @GameTest(template = PLATFORM, batch = "wukongsPhysicalResistanceAlsoGuardsAgainstMagic")
+    public static void wukongsPhysicalResistanceAlsoGuardsAgainstMagic(GameTestHelper h) {
         ServerPlayer p = wukong(h);
-        p.getAttribute(Attributes.ARMOR).setBaseValue(10.0);
-        p.getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(0.0);
-        // Only base armor: drop the level-1 stat modifiers so armor reads exactly 10
-        p.getAttribute(Attributes.ARMOR).removeModifiers();
-        eq(h, 10, p.getArmorValue(), "armor");
-        LivingHurtEvent magic = new LivingHurtEvent(p, h.getLevel().damageSources().magic(), 10f);
-        WukongAbilityHandler.onMagicDamage(magic);
-        // vanilla armor formula: 10 * (1 - max(10/5, 10 - 10/2) / 25) = 8
-        near(h, 8.0, magic.getAmount(), "magic damage after armor");
-        LivingHurtEvent generic = new LivingHurtEvent(p, h.getLevel().damageSources().generic(), 10f);
-        WukongAbilityHandler.onMagicDamage(generic);
-        near(h, 10.0, generic.getAmount(), "non-magic damage left to vanilla");
+        setResistances(p, 50.0, 50.0);
+        var src = h.getLevel().damageSources();
+        // magic: 50 + 50 = 100 resistance -> half
+        near(h, 5.0, afterResistance(p, src.magic(), 10f), "magic");
+        near(h, 5.0, afterResistance(p, src.wither(), 10f), "wither");
+        // physical: 50 -> 10 x 100/150
+        near(h, 10.0 * 100 / 150, afterResistance(p, src.cactus(), 10f), "physical");
 
         ServerPlayer other = as(h, ReincarnationOutcome.YUAN_DI);
-        other.getAttribute(Attributes.ARMOR).removeModifiers();
-        other.getAttribute(Attributes.ARMOR).setBaseValue(10.0);
-        LivingHurtEvent otherMagic = new LivingHurtEvent(other, h.getLevel().damageSources().magic(), 10f);
-        WukongAbilityHandler.onMagicDamage(otherMagic);
-        near(h, 10.0, otherMagic.getAmount(), "other characters take full magic damage");
+        setResistances(other, 50.0, 50.0);
+        near(h, 10.0 * 100 / 150, afterResistance(other, src.magic(), 10f), "others use magic resistance only");
         h.succeed();
     }
 
     // ── Martial Arts passive ────────────────────────────────────────
 
-    @GameTest(template = PLATFORM, batch = "martialArtsTiersAddSpeedThenAttackAndArmor")
-    public static void martialArtsTiersAddSpeedThenAttackAndArmor(GameTestHelper h) {
+    @GameTest(template = PLATFORM, batch = "martialArtsTiersAddSpeedThenAttackAndResistance")
+    public static void martialArtsTiersAddSpeedThenAttackAndResistance(GameTestHelper h) {
         ServerPlayer p = wukong(h);
         p.tickCount = 20;
         TickEvent.PlayerTickEvent tick = new TickEvent.PlayerTickEvent(TickEvent.Phase.START, p);
@@ -403,7 +388,8 @@ public class WukongGameTests {
         grant(p, "wu_martial_2", "wu_martial_3");
         WukongAbilityHandler.onPlayerTickMartial(tick);
         eq(h, 0.30, modifier(p, Attributes.ATTACK_DAMAGE, "jttw:martial_atk"), "tier 3 attack");
-        eq(h, 6.0, modifier(p, Attributes.ARMOR, "jttw:martial_armor"), "tier 3 armor");
+        eq(h, 24.0, modifier(p, PHYSICAL_RESISTANCE(), "jttw:martial_pres"), "tier 3 physical resistance");
+        eq(h, null, modifier(p, Attributes.ARMOR, "jttw:martial_armor"), "no vanilla armor");
         h.succeed();
     }
 
@@ -441,6 +427,22 @@ public class WukongGameTests {
         summon(p, 1);
         eq(h, 1, clones(p).size(), "tier 1 caps at one clone");
         near(h, 90f, QiData.getCurrent(p), "capped press costs nothing");
+        WuCloneManager.dismissAll(p);
+        h.succeed();
+    }
+
+    /** A clone carries its owner's resistances, uncapped (it used to copy armor, capped at 20). */
+    @GameTest(template = PLATFORM, batch = "cloneCopiesItsOwnersResistances")
+    public static void cloneCopiesItsOwnersResistances(GameTestHelper h) {
+        ServerPlayer p = wukong(h);
+        grant(p, "wu_clone_1");
+        setResistances(p, 130.0, 10.0);
+        summon(p, 1);
+        WuCloneEntity clone = clones(p).get(0);
+        near(h, 130.0, pres(clone), "physical resistance");
+        // Wukong's magic resistance counts his physical resistance too: 10 + 130
+        near(h, 140.0, mres(clone), "magic resistance");
+        near(h, 0.0, clone.getAttributeValue(Attributes.ARMOR), "no vanilla armor");
         WuCloneManager.dismissAll(p);
         h.succeed();
     }

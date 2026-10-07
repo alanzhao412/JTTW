@@ -51,7 +51,9 @@ public class LevelingGameTests {
         StatBlock expected = StatBlock.compute(ProgressionClass.HEAVENLY, 1);
         near(h, expected.maxHealth(), p.getAttributeValue(Attributes.MAX_HEALTH), "max health");
         near(h, expected.attackDamage(), p.getAttributeValue(Attributes.ATTACK_DAMAGE), "attack");
-        near(h, expected.armor(), p.getAttributeValue(Attributes.ARMOR), "armor");
+        near(h, expected.physicalResistance(), pres(p), "physical resistance");
+        near(h, expected.magicResistance(), mres(p), "magic resistance");
+        near(h, 0.0, p.getAttributeValue(Attributes.ARMOR), "level stats add no vanilla armor");
         h.succeed();
     }
 
@@ -233,6 +235,8 @@ public class LevelingGameTests {
         LevelManager.reapplyStats(p);
         near(h, 20.0, p.getAttributeValue(Attributes.MAX_HEALTH), "vanilla max health");
         near(h, 0.0, p.getAttributeValue(Attributes.ARMOR), "vanilla armor");
+        near(h, 0.0, pres(p), "physical resistance");
+        near(h, 0.0, mres(p), "magic resistance");
         h.succeed();
     }
 }

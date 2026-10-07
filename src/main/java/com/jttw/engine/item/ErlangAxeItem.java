@@ -90,7 +90,8 @@ public class ErlangAxeItem extends Item {
 
     // ── Ground Cleave (hold right-click) ─────────────────────────────
 
-    private static final java.util.Map<UUID, Long> CLEAVE_COOLDOWNS = new java.util.HashMap<>();
+    /** Game time the cleave is ready again (on the player; absent = ready). */
+    private static final String KEY_CLEAVE_READY_AT = "jttw_axe_cleave_ready_at";
     private static final long CLEAVE_COOLDOWN_TICKS = 60L; // 3 seconds
 
     @Override
@@ -111,9 +112,8 @@ public class ErlangAxeItem extends Item {
         if (!(player instanceof net.minecraft.server.level.ServerPlayer sp))
             return net.minecraft.world.InteractionResultHolder.pass(stack);
 
-        long now = level.getGameTime();
-        Long cd = CLEAVE_COOLDOWNS.get(sp.getUUID());
-        if (cd != null && now < cd) return net.minecraft.world.InteractionResultHolder.fail(stack);
+        if (level.getGameTime() < sp.getPersistentData().getLong(KEY_CLEAVE_READY_AT))
+            return net.minecraft.world.InteractionResultHolder.fail(stack);
 
         player.startUsingItem(hand);
         return net.minecraft.world.InteractionResultHolder.consume(stack);
@@ -126,7 +126,7 @@ public class ErlangAxeItem extends Item {
         int chargeTime = getUseDuration(stack) - timeLeft;
         if (chargeTime < 10) return;
 
-        CLEAVE_COOLDOWNS.put(sp.getUUID(), level.getGameTime() + CLEAVE_COOLDOWN_TICKS);
+        sp.getPersistentData().putLong(KEY_CLEAVE_READY_AT, level.getGameTime() + CLEAVE_COOLDOWN_TICKS);
 
         float atk = (float) sp.getAttributeValue(Attributes.ATTACK_DAMAGE);
         float chargePower = Math.min(1.0f, (float) (chargeTime - 10) / 30f);

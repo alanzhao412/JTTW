@@ -9,13 +9,11 @@ import com.jttw.engine.reincarnation.ReincarnationOutcome;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
@@ -131,49 +129,51 @@ public class NezhaArmorGameTests {
         h.succeed();
     }
 
-    private static float afterClothHandler(ServerPlayer p, DamageSource source, float amount) {
-        LivingHurtEvent event = new LivingHurtEvent(p, source, amount);
-        NezhaAbilityHandler.onMagicDamage(event);
-        return event.getAmount();
-    }
-
+    /** The cloth's 25 magic resistance, on a Nezha with none of his own. */
     @GameTest(template = PLATFORM)
-    public static void clothLetsArmorReduceMagicDamageForNezha(GameTestHelper h) {
+    public static void clothGivesNezhaMagicResistance(GameTestHelper h) {
         ServerPlayer p = nezha(h);
+        setResistances(p, 0.0, 0.0);
         wear(p, cloth(), EquipmentSlot.CHEST);
+        endTick(p);
+        near(h, 25.0, mres(p), "magic resistance");
         var src = p.damageSources();
-        // 3 armor, 0 toughness, 10 damage: vanilla absorption keeps 10 x (1 - 0.6 / 25) = 9.76.
-        near(h, 9.76, afterClothHandler(p, src.magic(), 10f), "magic");
-        near(h, 9.76, afterClothHandler(p, src.indirectMagic(p, null), 10f), "indirect magic");
-        near(h, 9.76, afterClothHandler(p, src.wither(), 10f), "wither");
-        near(h, 10.0, afterClothHandler(p, src.onFire(), 10f), "fire is not magic");
-        near(h, 10.0, afterClothHandler(p, src.generic(), 10f), "generic is not magic");
+        // 10 x 100/125 = 8
+        near(h, 8.0, afterResistance(p, src.magic(), 10f), "magic");
+        near(h, 8.0, afterResistance(p, src.indirectMagic(p, null), 10f), "indirect magic");
+        near(h, 8.0, afterResistance(p, src.wither(), 10f), "wither");
+        near(h, 10.0, afterResistance(p, src.onFire(), 10f), "fire is not magic");
+        near(h, 10.0, afterResistance(p, src.generic(), 10f), "generic is not magic");
         h.succeed();
     }
 
     @GameTest(template = PLATFORM)
-    public static void clothScalesWithTheRestOfNezhasArmor(GameTestHelper h) {
+    public static void clothStacksWithNezhasOwnMagicResistance(GameTestHelper h) {
         ServerPlayer p = nezha(h);
+        setResistances(p, 0.0, 25.0);
         wear(p, cloth(), EquipmentSlot.CHEST);
-        wear(p, wheels(), EquipmentSlot.FEET);
-        // 6 armor, 3 toughness, 10 damage: 10 / (2 + 3/4) = 3.636; 6 - 3.636 = 2.364 armor counts, keeping 9.0545.
-        near(h, 9.0545, afterClothHandler(p, p.damageSources().magic(), 10f), 1e-3, "magic");
+        endTick(p);
+        // 25 + 25 = 50: 10 x 100/150
+        near(h, 10.0 * 100 / 150, afterResistance(p, p.damageSources().magic(), 10f), "magic");
         h.succeed();
     }
 
     @GameTest(template = PLATFORM)
-    public static void clothDoesNothingForOthersOrWhenNotWorn(GameTestHelper h) {
+    public static void clothResistanceIsNezhasAndLeavesWithTheCloth(GameTestHelper h) {
         ServerPlayer erlang = as(h, ReincarnationOutcome.EYE_OF_HEAVEN);
+        setResistances(erlang, 0.0, 0.0);
         wear(erlang, cloth(), EquipmentSlot.CHEST);
-        near(h, 10.0, afterClothHandler(erlang, erlang.damageSources().magic(), 10f), "Erlang Shen in the cloth");
+        endTick(erlang);
+        near(h, 0.0, mres(erlang), "Erlang Shen in the cloth");
 
-        ServerPlayer bare = nezha(h);
-        wear(bare, wheels(), EquipmentSlot.FEET);
-        near(h, 10.0, afterClothHandler(bare, bare.damageSources().magic(), 10f), "Nezha without the cloth");
-
-        ServerPlayer unarmoured = nezha(h);
-        unarmoured.setItemSlot(EquipmentSlot.CHEST, cloth()); // worn but its armour not yet applied
-        near(h, 10.0, afterClothHandler(unarmoured, unarmoured.damageSources().magic(), 10f), "no armour to use");
+        ServerPlayer p = nezha(h);
+        setResistances(p, 0.0, 0.0);
+        wear(p, cloth(), EquipmentSlot.CHEST);
+        endTick(p);
+        near(h, 25.0, mres(p), "worn");
+        p.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
+        endTick(p);
+        near(h, 0.0, mres(p), "taken off");
         h.succeed();
     }
 }

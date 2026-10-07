@@ -1,6 +1,7 @@
 package com.jttw.engine.progression.stats;
 
 import com.jttw.engine.progression.level.LevelConstants;
+import com.jttw.engine.registry.ModAttributes;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -13,10 +14,12 @@ import java.util.UUID;
  * <p><b>Formula (Pokémon-derived):</b>
  * <pre>
  *   rawHP   = floor(2 × baseHP   × level / 100) + level + 10
- *   rawStat = floor(2 × baseStat × level / 100) + 5       (STR, DEF, QI, WILL)
+ *   rawStat = floor(2 × baseStat × level / 100) + 5       (STR, PRES, MRES, QI, WILL)
  * </pre>
  *
  * <p>Raw values are converted to Minecraft attributes via the scale constants below.
+ * Physical and magic resistance go to the mod's own attributes, not vanilla armor, so
+ * they are not capped; see {@link ResistanceHandler} for how they reduce damage.
  * Tune those constants to adjust overall power level without touching the formula.
  *
  * <p><b>Class late-game bonuses:</b>
@@ -29,7 +32,8 @@ import java.util.UUID;
 public record StatBlock(
         double maxHealth,
         double attackDamage,
-        double armor,
+        double physicalResistance,
+        double magicResistance,
         double qi,
         double will
 ) {
@@ -44,8 +48,8 @@ public record StatBlock(
     /** Each raw STR unit → this much MC attack damage added on top of base 1.0. */
     private static final double STR_SCALE = 0.072;
 
-    /** Each raw DEF unit → this much MC armor value (uncapped). */
-    private static final double DEF_SCALE = 0.045;
+    /** Each raw PRES / MRES unit → this many resistance points (uncapped). */
+    private static final double RES_SCALE = 0.40;
 
     /**
      * Each raw QI unit → internal qi points (not a MC attribute).
@@ -76,11 +80,15 @@ public record StatBlock(
 
     public static final UUID UUID_HP  = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567800");
     public static final UUID UUID_STR = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567801");
+    /** The old DEF → vanilla armor modifier. Only removed now, from players who still carry it. */
     public static final UUID UUID_DEF = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567802");
+    public static final UUID UUID_PRES = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567803");
+    public static final UUID UUID_MRES = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567804");
 
     private static final String MOD_HP  = "jttw:level_hp";
     private static final String MOD_STR = "jttw:level_str";
-    private static final String MOD_DEF = "jttw:level_def";
+    private static final String MOD_PRES = "jttw:level_pres";
+    private static final String MOD_MRES = "jttw:level_mres";
 
     // -----------------------------------------------------------------------
     // Factory
@@ -93,7 +101,8 @@ public record StatBlock(
         // Pokémon-style raw values
         double rawHP   = 2.0 * base.hp()   * lv / 100.0 + lv + 10;
         double rawStr  = 2.0 * base.str()  * lv / 100.0 + 5;
-        double rawDef  = 2.0 * base.def()  * lv / 100.0 + 5;
+        double rawPres = 2.0 * base.pres() * lv / 100.0 + 5;
+        double rawMres = 2.0 * base.mres() * lv / 100.0 + 5;
         double rawQi   = 2.0 * base.qi()   * lv / 100.0 + 5;
         double rawWill = 2.0 * base.will() * lv / 100.0 + 5;
 
@@ -102,7 +111,8 @@ public record StatBlock(
         return new StatBlock(
                 20.0 + rawHP   * HP_SCALE   * bonus, // base 20 + earned health
                  1.0 + rawStr  * STR_SCALE  * bonus, // base 1 + earned attack
-                       rawDef  * DEF_SCALE  * bonus, // no base armor; fully earned
+                       rawPres * RES_SCALE  * bonus, // fully earned
+                       rawMres * RES_SCALE  * bonus, // fully earned
                        rawQi   * QI_SCALE   * bonus, // internal stat
                        rawWill * WILL_SCALE * bonus  // internal stat
         );
@@ -134,7 +144,9 @@ public record StatBlock(
     public void applyTo(ServerPlayer player) {
         applyMod(player, Attributes.MAX_HEALTH,    UUID_HP,  MOD_HP,  maxHealth - 20.0);
         applyMod(player, Attributes.ATTACK_DAMAGE, UUID_STR, MOD_STR, attackDamage - 1.0);
-        applyMod(player, Attributes.ARMOR,         UUID_DEF, MOD_DEF, armor);
+        applyMod(player, ModAttributes.PHYSICAL_RESISTANCE.get(), UUID_PRES, MOD_PRES, physicalResistance);
+        applyMod(player, ModAttributes.MAGIC_RESISTANCE.get(),    UUID_MRES, MOD_MRES, magicResistance);
+        removeMod(player, Attributes.ARMOR, UUID_DEF); // DEF no longer feeds vanilla armor
 
         // Clamp current HP to new max (avoids floating above max health after demotion)
         if (player.getHealth() > player.getMaxHealth()) {
@@ -153,6 +165,8 @@ public record StatBlock(
         removeMod(player, Attributes.MAX_HEALTH,    UUID_HP);
         removeMod(player, Attributes.ATTACK_DAMAGE, UUID_STR);
         removeMod(player, Attributes.ARMOR,         UUID_DEF);
+        removeMod(player, ModAttributes.PHYSICAL_RESISTANCE.get(), UUID_PRES);
+        removeMod(player, ModAttributes.MAGIC_RESISTANCE.get(),    UUID_MRES);
     }
 
     // -----------------------------------------------------------------------

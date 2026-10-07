@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
  *
  * <p>Each class defines:
  * <ul>
- *   <li>{@link #bst} — Base Stat Total.  The ceiling of raw power, distributed across HP/ATK/DEF/SPD.</li>
+ *   <li>{@link #bst} — Base Stat Total.  The ceiling of raw power, distributed across HP/STR/PRES/MRES/QI/WILL.</li>
  *   <li>{@link #growthRate} — The XP-to-level curve.  Shapes how hard each level is to reach.</li>
  * </ul>
  *

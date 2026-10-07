@@ -103,7 +103,9 @@ public class DivineBeastGameTests {
         domainTick(p);
         eq(h, 0.20, modifier(p, Attributes.MAX_HEALTH, "jttw:domain_hp"), "+20% health");
         eq(h, 0.20, modifier(p, Attributes.ATTACK_DAMAGE, "jttw:domain_str"), "+20% attack");
-        eq(h, 0.20, modifier(p, Attributes.ARMOR, "jttw:domain_def"), "+20% armor");
+        eq(h, 0.20, modifier(p, PHYSICAL_RESISTANCE(), "jttw:domain_def"), "+20% physical resistance");
+        eq(h, 0.20, modifier(p, MAGIC_RESISTANCE(), "jttw:domain_mres"), "+20% magic resistance");
+        eq(h, null, modifier(p, Attributes.ARMOR, "jttw:domain_def"), "no vanilla armor");
         p.setHealth(p.getMaxHealth());
         p.setPos(p.getX(), 10, p.getZ());
         domainTick(p);

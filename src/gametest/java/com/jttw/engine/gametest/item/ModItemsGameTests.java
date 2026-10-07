@@ -128,9 +128,8 @@ public class ModItemsGameTests {
     /**
      * Every registered item should ship a display name and an item model; without them the
      * client shows the raw translation key and the purple-black missing texture.
-     * Not required: it currently fails (see the test report).
      */
-    @GameTest(template = PLATFORM, required = false)
+    @GameTest(template = PLATFORM)
     public static void everyItemHasALangEntryAndAnItemModel(GameTestHelper h) {
         var modFile = ModList.get().getModFileById(JTTWEngine.MOD_ID).getFile();
         JsonObject lang;

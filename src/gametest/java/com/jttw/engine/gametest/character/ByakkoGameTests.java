@@ -251,11 +251,8 @@ public class ByakkoGameTests {
         h.succeed();
     }
 
-    /**
-     * Suspected bug: a tier-1 bleed is documented as lasting 3 seconds (60 ticks, 1 hit per
-     * second), but the countdown is decremented before the hit, so only two hits land.
-     */
-    @GameTest(template = PLATFORM, required = false, batch = "bleedTierOneHitsThreeTimes")
+    /** A tier-1 bleed lasts 3 seconds: one hit per second, three hits. */
+    @GameTest(template = PLATFORM, batch = "bleedTierOneHitsThreeTimes")
     public static void bleedTierOneHitsThreeTimes(GameTestHelper h) {
         ServerPlayer p = byakko(h);
         grant(p, "bk_bleed_1");
@@ -268,11 +265,10 @@ public class ByakkoGameTests {
     }
 
     /**
-     * Suspected bug: each bleed tick is dealt as a fresh attack by the Byakko, which re-runs the
-     * tier-3 spread; two neighbours can keep re-infecting each other long after the 5-second
-     * bleed should have ended. Runs on real ticks so i-frames and hurt events behave as in play.
+     * Bleed ticks must not re-run the tier-3 spread, or two neighbours keep re-infecting each
+     * other past the 5-second bleed. Runs on real ticks so i-frames and hurt events behave as in play.
      */
-    @GameTest(template = PLATFORM, required = false, timeoutTicks = 400, batch = "bleedSpreadDiesOutAfterFiveSeconds")
+    @GameTest(template = PLATFORM, timeoutTicks = 400, batch = "bleedSpreadDiesOutAfterFiveSeconds")
     public static void bleedSpreadDiesOutAfterFiveSeconds(GameTestHelper h) {
         ServerPlayer p = byakko(h);
         online(h, p);

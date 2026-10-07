@@ -218,7 +218,6 @@ public final class TransformationAbilityHandler {
     private static final float HORSE_SAFE_FALL = 6.0F;
 
     // NBT key to track whether horse jump boost was already applied this jump
-    private static final String NBT_HORSE_JUMP_BOOSTED = "jttw_horse_jump_boosted";
 
     // -------------------------------------------------------------------------
     // Right-click abilities (fireball, sonic boom, arrows, etc.)
@@ -803,19 +802,6 @@ public final class TransformationAbilityHandler {
 
     @SubscribeEvent
     public static void onLivingHurt(LivingHurtEvent event) {
-        // --- Witch passive: immune to poison damage ---
-        if (event.getEntity() instanceof ServerPlayer victim) {
-            if (!victim.level().isClientSide) {
-                TransformationData victimData = TransformationManager.getTransformation(victim);
-                if (victimData != null && victimData.getEntityType() == EntityType.WITCH) {
-                    if (event.getSource().getMsgId().equals("poison")) {
-                        event.setCanceled(true);
-                        return;
-                    }
-                }
-            }
-        }
-
         // --- Melee attack effects (attacker must be a transformed player) ---
         if (!(event.getSource().getEntity() instanceof ServerPlayer attacker)) return;
         if (attacker.level().isClientSide) return;
@@ -926,7 +912,6 @@ public final class TransformationAbilityHandler {
         sp.hasImpulse = true;
         sp.connection.send(new ClientboundSetEntityMotionPacket(sp));
         sp.fallDistance = 0.0F;
-        sp.getPersistentData().putBoolean(NBT_HORSE_JUMP_BOOSTED, true);
     }
 
     // -------------------------------------------------------------------------
@@ -947,14 +932,18 @@ public final class TransformationAbilityHandler {
      * Applies or removes the step height increase for horse morphs.
      * Called from TransformationManager when traits are applied/cleared.
      */
+    /** The step height the player had before a horse form raised it; restored on leaving the form. */
+    private static final String NBT_STEP_BEFORE_HORSE = "jttw_step_before_horse";
+
     public static void applyHorseStepAssist(ServerPlayer sp, TransformationData data) {
+        var pd = sp.getPersistentData();
         if (data != null && HORSE_TYPES.contains(data.getEntityType())) {
-            sp.setMaxUpStep(1.5F + 0.6F); // default 0.6 + 1.5 bonus
-        } else {
-            // Only reset if we were the ones who modified it
-            if (sp.maxUpStep() > 1.0F) {
-                sp.setMaxUpStep(0.6F); // vanilla default
-            }
+            if (!pd.contains(NBT_STEP_BEFORE_HORSE)) pd.putFloat(NBT_STEP_BEFORE_HORSE, sp.maxUpStep());
+            sp.setMaxUpStep(1.5F + 0.6F); // vanilla 0.6 + 1.5 bonus
+        } else if (pd.contains(NBT_STEP_BEFORE_HORSE)) {
+            // Put back exactly what was there (a server player's 1.0, Byakko's bonus, ...)
+            sp.setMaxUpStep(pd.getFloat(NBT_STEP_BEFORE_HORSE));
+            pd.remove(NBT_STEP_BEFORE_HORSE);
         }
     }
 

@@ -125,11 +125,8 @@ public class DragonGameTests {
         h.succeed();
     }
 
-    /**
-     * Suspected bug: Lightning Strike declares a 20-tick cooldown and sends it to the HUD, but
-     * nothing enforces it (the client never checks cooldowns before sending the key either).
-     */
-    @GameTest(template = PLATFORM, required = false, batch = "lightningCannotBeRecastWithinItsOneSecondCooldown")
+    /** Lightning Strike's 20-tick cooldown is enforced on the server, not just shown on the HUD. */
+    @GameTest(template = PLATFORM, batch = "lightningCannotBeRecastWithinItsOneSecondCooldown")
     public static void lightningCannotBeRecastWithinItsOneSecondCooldown(GameTestHelper h) {
         ServerPlayer p = dragon(h);
         grant(p, "dr_lightning_1");
@@ -290,11 +287,8 @@ public class DragonGameTests {
         h.succeed();
     }
 
-    /**
-     * Suspected bug: the bubble is documented as "1 damage/sec for 3 seconds", but the countdown
-     * is decremented before the hit, so only two hits land.
-     */
-    @GameTest(template = PLATFORM, required = false, batch = "tidalWaveBubbleDrownsForThreeSeconds")
+    /** The bubble deals 1 damage per second for 3 seconds: three hits. */
+    @GameTest(template = PLATFORM, batch = "tidalWaveBubbleDrownsForThreeSeconds")
     public static void tidalWaveBubbleDrownsForThreeSeconds(GameTestHelper h) {
         ServerPlayer p = dragon(h);
         grant(p, "dr_wave_1", "dr_wave_2", "dr_wave_3");

@@ -32,8 +32,10 @@ public final class TransformCommand {
                                 // /jttw transform -> open GUI
                                 .executes(TransformCommand::openMenu)
 
-                                // /jttw transform <entity>
+                                // /jttw transform <entity> — a dev/admin tool: it skips the
+                                // transformation arts' rules, so it needs operator permission
                                 .then(Commands.argument("entity", ResourceLocationArgument.id())
+                                        .requires(source -> source.hasPermission(2))
                                         .executes(TransformCommand::transformSelf)
 
                                         // /jttw transform <entity> <targets>

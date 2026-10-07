@@ -1,5 +1,6 @@
 package com.jttw.engine.character.nezha;
 
+import net.minecraft.nbt.CompoundTag;
 import com.jttw.engine.registry.ModItems;
 import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
@@ -14,8 +15,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -45,7 +44,21 @@ public final class NezhaAbilityHandler {
     private static final Set<UUID> ACTIVE_THREE_HEADS = new HashSet<>();
     private static final Map<UUID, Integer> CHARGING_DETONATION = new HashMap<>();
     private static final Set<UUID> DETONATION_IMMUNE = new HashSet<>();
-    private static final Map<UUID, Long> FIRE_COOLDOWNS = new HashMap<>();
+    // Samadhi Fire: cooldown and the running volley, kept on the player (absent = ready / none)
+    private static final String KEY_FIRE_READY_AT = "jttw_samadhi_ready_at";
+    private static final String KEY_VOLLEY_SHOTS = "jttw_samadhi_shots_left";
+    private static final String KEY_VOLLEY_NEXT_AT = "jttw_samadhi_next_at";
+    private static final String KEY_VOLLEY_DAMAGE = "jttw_samadhi_damage";
+    private static final String KEY_VOLLEY_THREE_HEADS = "jttw_samadhi_three_heads";
+    /** On a Samadhi fireball: the damage it deals. */
+    public static final String KEY_FIREBALL_DAMAGE = "jttw_samadhi_fireball_damage";
+    private static final int SAMADHI_VOLLEY_SHOTS = 5;
+    private static final int SAMADHI_VOLLEY_INTERVAL = 4;
+
+    // Wind Fire Wheels: +25% movement speed for Nezha while worn
+    private static final UUID WHEELS_SPEED_ID = UUID.fromString("5f3a1c2e-8b7d-4e6f-9a0b-1c2d3e4f5a6b");
+    private static final UUID CLOTH_MRES_ID = UUID.fromString("5b0e6c1a-8f2d-4e7b-9a31-c4d2e8f6a713");
+    private static final double WHEELS_SPEED_BONUS = 0.25;
     private static final Map<UUID, Long> DET_COOLDOWNS = new HashMap<>();
 
     private static final UUID THREE_HEADS_ATK_UUID =
@@ -98,38 +111,90 @@ public final class NezhaAbilityHandler {
     }
 
     public static void castSamadhiFire(ServerPlayer player) {
-        if (SkillTreeData.getNzFireTier(player) < 1) return;
+        int tier = SkillTreeData.getNzFireTier(player);
+        if (tier < 1) return;
         if (!(player.getMainHandItem().getItem() instanceof FireTipSpearItem)) {
             player.sendSystemMessage(Component.literal("§c[JTTW] §7Requires Fire-Tip Spear equipped."));
             return;
         }
 
+        CompoundTag pd = player.getPersistentData();
         long now = player.level().getGameTime();
-        Long cd = FIRE_COOLDOWNS.get(player.getUUID());
-        if (cd != null && now < cd) return;
+        if (now < pd.getLong(KEY_FIRE_READY_AT)) return;
+        if (pd.getInt(KEY_VOLLEY_SHOTS) > 0) return; // a volley is still firing
         if (!QiData.spend(player, 8f)) {
             player.sendSystemMessage(Component.literal("§c[JTTW] §7Not enough Qi."));
             return;
         }
+        pd.putLong(KEY_FIRE_READY_AT, now + 40L);
 
-        FIRE_COOLDOWNS.put(player.getUUID(), now + 40L);
+        // Five fireballs in a row, each harder than the spear's own fireball:
+        // its 5 damage plus a share of Nezha's attack that grows with tier
+        float attack = (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
+        pd.putInt(KEY_VOLLEY_SHOTS, SAMADHI_VOLLEY_SHOTS);
+        pd.putLong(KEY_VOLLEY_NEXT_AT, now);
+        pd.putFloat(KEY_VOLLEY_DAMAGE, samadhiFireballDamage(attack, tier));
+        pd.putBoolean(KEY_VOLLEY_THREE_HEADS, ACTIVE_THREE_HEADS.contains(player.getUUID()));
+        tickSamadhiVolley(player);
+    }
 
-        boolean threeHeads = ACTIVE_THREE_HEADS.contains(player.getUUID());
-        int count = threeHeads ? 6 : 1;
+    /** One Samadhi fireball: the spear fireball's 5, plus 120% / 150% / 180% ATK at tiers 1-3. */
+    public static float samadhiFireballDamage(float attack, int tier) {
+        return FireTipSpearItem.FIREBALL_DAMAGE + attack * samadhiDamageMultiplier(tier);
+    }
+
+    /** Share of Nezha's attack added to each Samadhi fireball: 120% / 150% / 180% at tiers 1-3. */
+    public static float samadhiDamageMultiplier(int tier) {
+        return switch (Math.max(1, Math.min(3, tier))) {
+            case 1 -> 1.2f;
+            case 2 -> 1.5f;
+            default -> 1.8f;
+        };
+    }
+
+    /** Fires the next shot of a running Samadhi volley when it is due. */
+    private static void tickSamadhiVolley(ServerPlayer player) {
+        CompoundTag pd = player.getPersistentData();
+        int shots = pd.getInt(KEY_VOLLEY_SHOTS);
+        if (shots <= 0) return;
+        long now = player.level().getGameTime();
+        if (now < pd.getLong(KEY_VOLLEY_NEXT_AT)) return;
+
+        // Three Heads Six Arms: each shot is a spread of three fireballs
+        int perShot = pd.getBoolean(KEY_VOLLEY_THREE_HEADS) ? 3 : 1;
+        float damage = pd.getFloat(KEY_VOLLEY_DAMAGE);
         Vec3 look = player.getLookAngle();
         Level level = player.level();
-
-        for (int i = 0; i < count; i++) {
-            double spread = (i == 0) ? 0 : (Math.random() - 0.5) * 0.4;
+        for (int i = 0; i < perShot; i++) {
+            double spread = (i == 0) ? 0 : (i == 1 ? -0.15 : 0.15);
             SmallFireball fb = new SmallFireball(level,
                     player.getX(), player.getEyeY() - 0.1, player.getZ(),
-                    look.x + spread, look.y + spread * 0.3, look.z + spread);
+                    look.x + spread, look.y, look.z - spread);
             fb.setOwner(player);
+            fb.getPersistentData().putFloat(KEY_FIREBALL_DAMAGE, damage);
             level.addFreshEntity(fb);
         }
-
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
                 SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1.0F, 1.0F);
+
+        if (shots - 1 <= 0) {
+            pd.remove(KEY_VOLLEY_SHOTS);
+            pd.remove(KEY_VOLLEY_NEXT_AT);
+            pd.remove(KEY_VOLLEY_DAMAGE);
+            pd.remove(KEY_VOLLEY_THREE_HEADS);
+        } else {
+            pd.putInt(KEY_VOLLEY_SHOTS, shots - 1);
+            pd.putLong(KEY_VOLLEY_NEXT_AT, now + SAMADHI_VOLLEY_INTERVAL);
+        }
+    }
+
+    /** Samadhi fireballs hit for the damage they were fired with, not a small fireball's flat 5. */
+    @SubscribeEvent
+    public static void onSamadhiFireballHit(LivingHurtEvent event) {
+        if (event.getSource().getDirectEntity() instanceof SmallFireball fb
+                && fb.getPersistentData().contains(KEY_FIREBALL_DAMAGE)) {
+            event.setAmount(fb.getPersistentData().getFloat(KEY_FIREBALL_DAMAGE));
+        }
     }
 
     public static void startDetonationCharge(ServerPlayer player) {
@@ -221,6 +286,31 @@ public final class NezhaAbilityHandler {
     // Events
     // =========================================================================
 
+    private static void applyWheelsSpeed(ServerPlayer sp, boolean wearingWheels) {
+        var speed = sp.getAttribute(Attributes.MOVEMENT_SPEED);
+        if (speed == null) return;
+        boolean has = speed.getModifier(WHEELS_SPEED_ID) != null;
+        if (wearingWheels && !has) {
+            speed.addTransientModifier(new AttributeModifier(WHEELS_SPEED_ID, "jttw:wind_fire_wheels",
+                    WHEELS_SPEED_BONUS, AttributeModifier.Operation.MULTIPLY_BASE));
+        } else if (!wearingWheels && has) {
+            speed.removeModifier(WHEELS_SPEED_ID);
+        }
+    }
+
+    /** Huntian Cloth: magic resistance while Nezha wears it. */
+    private static void applyClothResistance(ServerPlayer sp, boolean wearingCloth) {
+        var mres = sp.getAttribute(com.jttw.engine.registry.ModAttributes.MAGIC_RESISTANCE.get());
+        if (mres == null) return;
+        boolean has = mres.getModifier(CLOTH_MRES_ID) != null;
+        if (wearingCloth && !has) {
+            mres.addTransientModifier(new AttributeModifier(CLOTH_MRES_ID, "jttw:huntian_cloth",
+                    HuntianClothItem.MAGIC_RESISTANCE, AttributeModifier.Operation.ADDITION));
+        } else if (!wearingCloth && has) {
+            mres.removeModifier(CLOTH_MRES_ID);
+        }
+    }
+
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
@@ -240,6 +330,10 @@ public final class NezhaAbilityHandler {
                 com.jttw.engine.flight.JTTWFlight.setUniversalFlight(sp, false);
             }
         }
+
+        tickSamadhiVolley(sp);
+        applyWheelsSpeed(sp, hasWheels);
+        applyClothResistance(sp, sp.getItemBySlot(EquipmentSlot.CHEST).getItem() instanceof HuntianClothItem);
 
         // Three Heads Qi drain
         if (ACTIVE_THREE_HEADS.contains(sp.getUUID())) {
@@ -278,36 +372,12 @@ public final class NezhaAbilityHandler {
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onMagicDamage(LivingHurtEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        if (!isNezha(player)) return;
-
-        // Huntian Cloth magic defense
-        ItemStack chest = player.getItemBySlot(EquipmentSlot.CHEST);
-        if (!(chest.getItem() instanceof HuntianClothItem)) return;
-
-        DamageSource source = event.getSource();
-        if (!source.is(DamageTypes.MAGIC) && !source.is(DamageTypes.WITHER)
-                && !source.is(DamageTypes.INDIRECT_MAGIC)) return;
-
-        float armor = (float) player.getArmorValue();
-        float toughness = (float) player.getAttributeValue(
-                net.minecraft.world.entity.ai.attributes.Attributes.ARMOR_TOUGHNESS);
-        if (armor <= 0 && toughness <= 0) return;
-
-        float reduced = net.minecraft.world.damagesource.CombatRules.getDamageAfterAbsorb(
-                event.getAmount(), armor, toughness);
-        event.setAmount(reduced);
-    }
-
     @SubscribeEvent
     public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         UUID id = event.getEntity().getUUID();
         ACTIVE_THREE_HEADS.remove(id);
         CHARGING_DETONATION.remove(id);
         DETONATION_IMMUNE.remove(id);
-        FIRE_COOLDOWNS.remove(id);
         DET_COOLDOWNS.remove(id);
     }
 

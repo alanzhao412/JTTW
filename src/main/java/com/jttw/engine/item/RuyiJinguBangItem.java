@@ -81,7 +81,8 @@ public class RuyiJinguBangItem extends Item {
         // Wukong can always wield the staff
         if (isWukong(sp)) {
             // Still drain Qi in empowered mode
-            if (isQiEmpowered(stack) && selected) {
+            // Only while in the main hand: `selected` is also true for the off hand when hotbar slot 0 is selected
+            if (isQiEmpowered(stack) && sp.getMainHandItem() == stack) {
                 if (!QiData.spend(sp, LARGE_MODE_QI_PER_TICK)) {
                     stack.getOrCreateTag().putBoolean(TAG_QI_EMPOWERED, false);
                     sp.sendSystemMessage(Component.literal(
@@ -94,12 +95,15 @@ public class RuyiJinguBangItem extends Item {
 
         double baseAtk = getBaseAtk(sp);
         if (baseAtk < MIN_ATK) {
-            sp.getInventory().setItem(slot, ItemStack.EMPTY);
-            sp.drop(stack, false);
+            // Drop it from wherever it is. `slot` indexes the list the stack is in (the off hand
+            // and armour lists start at 0 too), so clear the stack itself, not a main-inventory slot.
+            ItemStack dropped = stack.copy();
+            dropped.getOrCreateTag().putBoolean(TAG_QI_EMPOWERED, false);
+            dropped.getOrCreateTag().putBoolean(TAG_LARGE_MODE, false);
+            stack.setCount(0);
+            sp.drop(dropped, false);
             sp.sendSystemMessage(Component.literal(
                     "§4[JTTW] §cYou lack the strength to wield the Ruyi Jingu Bang! (Need 30 ATK)"));
-            stack.getOrCreateTag().putBoolean(TAG_QI_EMPOWERED, false);
-            stack.getOrCreateTag().putBoolean(TAG_LARGE_MODE, false);
             return;
         }
 

@@ -189,4 +189,12 @@ public final class CharTest {
             return log.stream().filter(hit -> hit.is(type)).toList();
         }
     }
+
+    public static Attribute PHYSICAL_RESISTANCE() {
+        return com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get();
+    }
+
+    public static Attribute MAGIC_RESISTANCE() {
+        return com.jttw.engine.registry.ModAttributes.MAGIC_RESISTANCE.get();
+    }
 }

@@ -18,6 +18,11 @@ public final class NezhaCharacter implements PlayableCharacter {
 
     private NezhaCharacter() {}
 
+    /** True if this player is playing Nezha (his armaments' special abilities are his alone). */
+    public static boolean is(net.minecraft.world.entity.player.Player player) {
+        return com.jttw.engine.character.Characters.of(player) == INSTANCE;
+    }
+
     @Override public String outcomeId() { return ReincarnationOutcome.THIRD_LOTUS_PRINCE.id; }
     @Override public SkillTree skillTree() { return NezhaSkillTree.TREE; }
     @Override public String treeTitle() { return "THIRD LOTUS PRINCE"; }

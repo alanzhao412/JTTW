@@ -161,7 +161,7 @@ public final class LevelManager {
         // World Turtle innate passive: +1 DEF and +0.2 toughness per level
         TurtleAbilityHandler.applyPassiveScaling(player);
 
-        // Byakko innate passive: +0.5% speed and +0.01 step height per level
+        // Byakko innate passive: +0.8% speed and +0.01 step height per level
         ByakkoAbilityHandler.applyPassiveScaling(player);
 
         // Phoenix innate passive: higher regen + revive init
@@ -318,7 +318,8 @@ public final class LevelManager {
             // Level-up feedback (with exact stat gains)
             double dHp   = newStats.maxHealth()     - prevStats.maxHealth();
             double dStr  = newStats.attackDamage()  - prevStats.attackDamage();
-            double dDef  = newStats.armor()         - prevStats.armor();
+            double dPres = newStats.physicalResistance() - prevStats.physicalResistance();
+            double dMres = newStats.magicResistance()    - prevStats.magicResistance();
             double dQi   = newStats.qi()            - prevStats.qi();
             double dWill = newStats.will()          - prevStats.will();
 
@@ -326,7 +327,8 @@ public final class LevelManager {
                     "§a✦ Level Up! §r" + cls.name() + " §7→ §aLv " + level
                             + "\n§c+HP: §r" + String.format("%.1f", dHp)
                             + "  §6+ATK: §r" + String.format("%.2f", dStr)
-                            + "  §7+DEF: §r" + String.format("%.2f", dDef)
+                            + "  §7+PRES: §r" + String.format("%.2f", dPres)
+                            + "  §9+MRES: §r" + String.format("%.2f", dMres)
                             + "\n§b+Max Qi: §r" + String.format("%.1f", dQi)
                             + "  §d+Will: §r" + String.format("%.2f", dWill)
             ));

@@ -1,5 +1,6 @@
 package com.jttw.engine.item;
 
+import com.jttw.engine.character.nezha.NezhaCharacter;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.jttw.engine.reincarnation.AlignmentData;
@@ -26,16 +27,17 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public class FireTipSpearItem extends Item {
 
     private static final UUID UUID_ATK = UUID.fromString("c1a2b3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d");
-    private static final Map<UUID, Long> FIREBALL_COOLDOWNS = new HashMap<>();
+    /** Game time the fireball is ready again (on the player; absent = ready). */
+    private static final String KEY_FIREBALL_READY_AT = "jttw_fire_spear_ready_at";
     private static final long FIREBALL_COOLDOWN_TICKS = 40L;
+    /** What the spear's own fireball hits for: a vanilla small fireball's 5. */
+    public static final float FIREBALL_DAMAGE = 5.0f;
 
     public FireTipSpearItem() {
         super(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).fireResistant());
@@ -44,7 +46,7 @@ public class FireTipSpearItem extends Item {
     @Override
     public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
         if (slot != EquipmentSlot.MAINHAND) return ImmutableMultimap.of();
-        // Damage multiplier applied generically — Nezha bonus handled in NezhaAbilityHandler
+        // The attack bonus is for anyone; the sneak fireball (use) is Nezha's alone
         double mult = 0.75; // +75% for everyone holding it; Nezha gets extra from handler
         ImmutableMultimap.Builder<Attribute, AttributeModifier> b = ImmutableMultimap.builder();
         b.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK, "jttw:spear_atk",
@@ -65,10 +67,12 @@ public class FireTipSpearItem extends Item {
         if (level.isClientSide()) return InteractionResultHolder.success(stack);
         if (!(player instanceof ServerPlayer sp)) return InteractionResultHolder.pass(stack);
 
+        // The spear's fireball is Nezha's alone; in other hands it is only a spear
+        if (!NezhaCharacter.is(sp)) return InteractionResultHolder.pass(stack);
+
         long now = sp.level().getGameTime();
-        Long cd = FIREBALL_COOLDOWNS.get(sp.getUUID());
-        if (cd != null && now < cd) return InteractionResultHolder.fail(stack);
-        FIREBALL_COOLDOWNS.put(sp.getUUID(), now + FIREBALL_COOLDOWN_TICKS);
+        if (now < sp.getPersistentData().getLong(KEY_FIREBALL_READY_AT)) return InteractionResultHolder.fail(stack);
+        sp.getPersistentData().putLong(KEY_FIREBALL_READY_AT, now + FIREBALL_COOLDOWN_TICKS);
 
         boolean threeHeads = sp.getPersistentData().getBoolean("jttw_nz_three_heads");
         int count = threeHeads ? 6 : 1;

@@ -8,8 +8,8 @@ import java.util.List;
 /**
  * Skill tree for the World Turtle line (EARTH Divine Beast).
  *
- * <p><b>Innate passive (no skill points):</b> +100 DEF and +20 toughness at level 100,
- * scaling linearly with level (+1 DEF and +0.2 toughness per level).
+ * <p><b>Innate passive (no skill points):</b> +100 physical resistance at level 100,
+ * scaling linearly with level (+1 per level).
  *
  * <p><b>Tree layout — 4 columns, 3 rows max:</b>
  * <pre>
@@ -91,19 +91,19 @@ public final class TurtleSkillTree {
         // ── BEDROCK CONSTITUTION (col 2, PASSIVE) ──────────────────────
         TREE.add(new SkillNode(
                 BEDROCK_1, "Bedrock Constitution I",
-                new String[]{ "Passive HP regen (+0.5/s).", "+4 armor.", "" },
+                new String[]{ "Passive HP regen (+0.5/s).", "+16 phys. resist.", "" },
                 2, 2, 0, List.of(), AbilityType.PASSIVE, 1, "Bedrock Constitution"
         ));
         TREE.add(new SkillNode(
                 BEDROCK_2, "Bedrock Constitution II",
-                new String[]{ "Stronger regen (+1.0/s).", "+8 armor. Unbreakable", "constitution." },
+                new String[]{ "Stronger regen (+1.0/s).", "+32 phys. resist. Unbreakable", "constitution." },
                 3, 2, 1, List.of(BEDROCK_1), AbilityType.PASSIVE, 2, "Bedrock Constitution"
         ));
 
         // ── UNSTOPPABLE FORCE (col 3, TOGGLE/USE type) ───────────────────
         TREE.add(new SkillNode(
                 FORCE_1, "Unstoppable Force I",
-                new String[]{ "Press B: dash 20 blocks", "forward. Explodes on hit,", "damage scales with DEF." },
+                new String[]{ "Press B: dash 20 blocks", "forward. Explodes on hit,", "damage scales with phys. resist." },
                 2, 3, 0, List.of(), AbilityType.TOGGLE, 1, "Unstoppable Force"
         ));
         TREE.add(new SkillNode(
@@ -120,7 +120,7 @@ public final class TurtleSkillTree {
         // ── TECTONIC SLAM (col 4, USE active) ───────────────────────────
         TREE.add(new SkillNode(
                 TECTONIC_1, "Tectonic Slam I",
-                new String[]{ "Press N: stomp the ground.", "6-block AoE. Damage scales", "with armor value. 10s CD." },
+                new String[]{ "Press N: stomp the ground.", "6-block AoE. Damage scales", "with phys. resist. 10s CD." },
                 2, 4, 0, List.of(), AbilityType.TOGGLE, 1, "Tectonic Slam"
         ));
         TREE.add(new SkillNode(

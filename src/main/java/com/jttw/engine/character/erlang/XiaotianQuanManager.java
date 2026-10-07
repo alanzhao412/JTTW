@@ -1,5 +1,6 @@
 package com.jttw.engine.character.erlang;
 
+import com.jttw.engine.character.SummonLeash;
 import com.jttw.engine.registry.ModEntities;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.qi.QiManager;
@@ -46,7 +47,7 @@ import java.util.*;
  * Stats scale with the player's Hound Growth skill tree tier, not player stats.
  *
  * <p>Tier 2+ grants tracking (Glowing effect on nearest hostile).
- * Tier 3 attacks apply Slowness.
+ * Every bite applies Slowness I for 3 seconds.
  */
 @Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class XiaotianQuanManager {
@@ -67,7 +68,7 @@ public final class XiaotianQuanManager {
         { 30.0,  4.0, 0.35, 2.0 },   // Tier 0 (base, no growth nodes)
         { 50.0,  7.0, 0.38, 5.0 },   // Tier 1 (Hound Training I)
         { 50.0,  7.0, 0.38, 5.0 },   // Tier 2 (Hound Training II — tracking unlock, same stats)
-        { 80.0, 12.0, 0.42, 8.0 },   // Tier 3 (Hound Training III — peak stats + slow)
+        { 80.0, 12.0, 0.42, 8.0 },   // Tier 3 (Hound Training III — peak stats)
     };
 
     /** Owner UUID → XTQ entity UUID */
@@ -142,16 +143,14 @@ public final class XiaotianQuanManager {
             // Qi drain
             if (!QiData.spend(player, QI_DRAIN_PER_TICK)) {
                 toRemove.add(ownerId);
-                ServerLevel level = player.serverLevel();
-                Entity ent = level.getEntity(xtqId);
+                Entity ent = SummonLeash.find(server, xtqId);
                 if (ent != null) ent.discard();
                 player.sendSystemMessage(Component.literal("§cNot enough Qi to maintain Xiaotian Quan."));
                 continue;
             }
 
-            // Resolve entity
-            ServerLevel level = player.serverLevel();
-            Entity ent = level.getEntity(xtqId);
+            // Resolve entity, in whichever dimension it is in
+            Entity ent = SummonLeash.find(server, xtqId);
             if (ent == null || !ent.isAlive()) {
                 toRemove.add(ownerId);
                 continue;
@@ -167,13 +166,12 @@ public final class XiaotianQuanManager {
                 xtq.setTarget(null);
             }
 
-            // Teleport if too far
-            double dist = xtq.position().distanceTo(player.position());
-            if (dist > FOLLOW_TELEPORT_DIST) {
-                xtq.teleportTo(
-                        player.getX() + FOLLOW_SPREAD,
-                        player.getY(),
-                        player.getZ() + FOLLOW_SPREAD);
+            // Always with its owner: across dimensions, or teleported when too far (like a wolf)
+            if (xtq.level() != player.level()
+                    || xtq.position().distanceTo(player.position()) > FOLLOW_TELEPORT_DIST) {
+                Entity moved = SummonLeash.bringTo(xtq, player, player.getX() + FOLLOW_SPREAD, player.getZ() + FOLLOW_SPREAD);
+                if (!(moved instanceof XiaotianQuanEntity movedXtq)) continue;
+                xtq = movedXtq;
             }
 
             // Tracking: Tier 2+ applies Glowing to nearest hostile every 20 ticks

@@ -1,5 +1,16 @@
 {
   "item.jttw_engine.ruyi_jingu_bang": "Ruyi Jingu Bang",
   "item.jttw_engine.immortal_peach": "Immortal Peach",
-  "block.jttw_engine.celestial_cloud": "Celestial Cloud"
+  "block.jttw_engine.celestial_cloud": "Celestial Cloud",
+  "item.jttw_engine.jttw_immortal_pill": "Immortality Pill",
+  "item.jttw_engine.three_pointed_spear": "Three-Pointed Double-Edged Spear",
+  "item.jttw_engine.erlang_axe": "Erlang's Divine Axe",
+  "item.jttw_engine.fire_tip_spear": "Fire-Tipped Spear",
+  "item.jttw_engine.qiankun_ring": "Qiankun Ring",
+  "item.jttw_engine.yin_yang_sword": "Yin-Yang Sword",
+  "item.jttw_engine.wind_fire_wheels": "Wind Fire Wheels",
+  "item.jttw_engine.huntian_cloth": "Huntian Cloth",
+  "item.jttw_engine.celestial_cloud": "Celestial Cloud",
+  "attribute.name.jttw_engine.physical_resistance": "Physical Resistance",
+  "attribute.name.jttw_engine.magic_resistance": "Magic Resistance"
 }

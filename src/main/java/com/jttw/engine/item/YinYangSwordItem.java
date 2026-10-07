@@ -32,6 +32,8 @@ import java.util.UUID;
 public class YinYangSwordItem extends Item {
 
     private static final UUID UUID_ATK = UUID.fromString("e3c4d5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f");
+    /** The off-hand sword needs its own id, or the two hands overwrite each other's bonus. */
+    private static final UUID UUID_ATK_OFFHAND = UUID.fromString("e3c4d5f6-a7b8-4c9d-0e1f-2a3b4c5d6e80");
     public static final String TAG_SIDE = "jttw_yy_side";
 
     public YinYangSwordItem() {
@@ -62,7 +64,8 @@ public class YinYangSwordItem extends Item {
     public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
         if (slot != EquipmentSlot.MAINHAND && slot != EquipmentSlot.OFFHAND) return ImmutableMultimap.of();
         ImmutableMultimap.Builder<Attribute, AttributeModifier> b = ImmutableMultimap.builder();
-        b.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK, "jttw:yy_atk",
+        UUID id = slot == EquipmentSlot.MAINHAND ? UUID_ATK : UUID_ATK_OFFHAND;
+        b.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(id, "jttw:yy_atk",
                 0.5, AttributeModifier.Operation.MULTIPLY_TOTAL));
         return b.build();
     }
@@ -70,7 +73,7 @@ public class YinYangSwordItem extends Item {
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (isYin(stack)) {
-            // Yin sword: lower regular defense (Weakness I = reduced attack damage)
+            // Yin sword: Weakness I, lowering the target's attack
             target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 0));
         }
         return true;
@@ -107,12 +110,12 @@ public class YinYangSwordItem extends Item {
         }
 
         if (target != null) {
-            // Deal damage + apply Mining Fatigue (magic defense reduction)
+            // Deal damage + Mining Fatigue II
             float atk = (float) sp.getAttributeValue(Attributes.ATTACK_DAMAGE);
             target.hurt(sp.damageSources().playerAttack(sp), atk);
             target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 100, 1)); // Mining Fatigue II
-            // Mark for magic vulnerability
-            target.getPersistentData().putLong("jttw_magic_vuln", sp.level().getGameTime() + 100);
+            // Magic-vulnerable for 5 s: +25% magic damage taken (ResistanceHandler)
+            target.getPersistentData().putLong(com.jttw.engine.progression.stats.ResistanceHandler.KEY_MAGIC_VULN, sp.level().getGameTime() + 100);
         }
 
         sp.getCooldowns().addCooldown(this, 20);
