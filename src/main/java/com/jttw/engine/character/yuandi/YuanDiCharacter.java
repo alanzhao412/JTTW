@@ -24,7 +24,8 @@ public final class YuanDiCharacter implements PlayableCharacter {
 
     @Override
     public List<String> treeColumns() {
-        return List.of("Transform", "Sovereign", "Breath", "Smite", "Night", "Body", "Qi");
+        return List.of("Transform", "Sovereign", "Breath", "Smite", "Night", "Body", "Qi",
+                "Gravity", "Step", "Dominion");
     }
 
     @Override

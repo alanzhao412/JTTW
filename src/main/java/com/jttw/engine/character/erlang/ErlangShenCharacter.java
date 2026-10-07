@@ -24,7 +24,7 @@ public final class ErlangShenCharacter implements PlayableCharacter {
 
     @Override
     public List<String> treeColumns() {
-        return List.of("Transforms", "Xiaotian Quan", "Eye of Heaven", "Flight", "Qi",
+        return List.of("Transforms", "Xiaotian Quan", "Eye of Heaven", "Flight", "Hunt",
                 "Hound Growth", "Zhàn Shén", "Tactics", "Spear");
     }
 

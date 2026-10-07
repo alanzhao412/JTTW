@@ -21,7 +21,7 @@ public final class PhoenixCharacter implements PlayableCharacter {
     @Override public String outcomeId() { return ReincarnationOutcome.PHOENIX.id; }
     @Override public SkillTree skillTree() { return PhoenixSkillTree.TREE; }
     @Override public String treeTitle() { return "SOLAR SOVEREIGN"; }
-    @Override public List<String> treeColumns() { return List.of("Flamethrower", "Life Drain", "Rebirth"); }
+    @Override public List<String> treeColumns() { return List.of("Flamethrower", "Life Drain", "Rebirth", "Radiance", "Ember", "Talons"); }
 
     @Override
     public List<AbilitySlot> skillBar(Set<String> unlocked) {

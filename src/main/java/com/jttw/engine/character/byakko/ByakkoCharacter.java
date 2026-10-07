@@ -21,7 +21,7 @@ public final class ByakkoCharacter implements PlayableCharacter {
     @Override public String outcomeId() { return ReincarnationOutcome.WHITE_TIGER.id; }
     @Override public SkillTree skillTree() { return ByakkoSkillTree.TREE; }
     @Override public String treeTitle() { return "BYAKKO"; }
-    @Override public List<String> treeColumns() { return List.of("Leap", "Bleed", "Velocity"); }
+    @Override public List<String> treeColumns() { return List.of("Leap", "Scent", "Bleed", "Velocity", "Instinct", "Roar"); }
 
     @Override
     public List<AbilitySlot> skillBar(Set<String> unlocked) {

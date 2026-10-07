@@ -25,7 +25,7 @@ public final class DragonCharacter implements PlayableCharacter {
 
     @Override
     public List<String> treeColumns() {
-        return List.of("Lightning", "Weather", "Flight", "Pressure", "Regen");
+        return List.of("Lightning", "Weather", "Flight", "Pressure", "Regen", "Wave", "Scales", "Force");
     }
 
     @Override
