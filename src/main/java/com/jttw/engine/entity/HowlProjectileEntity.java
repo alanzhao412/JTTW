@@ -1,5 +1,6 @@
 package com.jttw.engine.entity;
 
+import com.jttw.engine.registry.ModEntities;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.character.erlang.XiaotianQuanManager;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -27,7 +28,7 @@ public class HowlProjectileEntity extends ThrowableItemProjectile {
     }
 
     public HowlProjectileEntity(Level level, LivingEntity shooter) {
-        super(JTTWEngine.HOWL_PROJECTILE.get(), shooter, level);
+        super(ModEntities.HOWL_PROJECTILE.get(), shooter, level);
     }
 
     @Override

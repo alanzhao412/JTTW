@@ -1,5 +1,7 @@
 package com.jttw.engine.entity;
 
+import com.jttw.engine.registry.ModEntities;
+import com.jttw.engine.registry.ModItems;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.item.RuyiJinguBangItem;
 import net.minecraft.core.BlockPos;
@@ -72,7 +74,7 @@ public class PlacedStaffEntity extends Entity {
     }
 
     public PlacedStaffEntity(Level level, double x, double y, double z, UUID owner) {
-        this(JTTWEngine.PLACED_STAFF.get(), level);
+        this(ModEntities.PLACED_STAFF.get(), level);
         this.setPos(x, y, z);
         this.entityData.set(OWNER_UUID, Optional.of(owner));
     }
@@ -410,7 +412,7 @@ public class PlacedStaffEntity extends Entity {
             Player owner = level().getPlayerByUUID(ownerUUID);
             if (owner != null) {
                 // Give staff back
-                ItemStack staff = new ItemStack(JTTWEngine.RUYI_JINGU_BANG.get());
+                ItemStack staff = new ItemStack(ModItems.RUYI_JINGU_BANG.get());
                 if (!owner.getInventory().add(staff)) {
                     owner.drop(staff, false);
                 }

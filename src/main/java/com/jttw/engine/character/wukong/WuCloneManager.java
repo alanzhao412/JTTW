@@ -1,5 +1,6 @@
 package com.jttw.engine.character.wukong;
 
+import com.jttw.engine.registry.ModEntities;
 import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
@@ -265,7 +266,7 @@ public final class WuCloneManager {
         }
 
         ServerLevel level = player.serverLevel();
-        WuCloneEntity clone = new WuCloneEntity(JTTWEngine.WU_CLONE.get(), level);
+        WuCloneEntity clone = new WuCloneEntity(ModEntities.WU_CLONE.get(), level);
 
         // Show player's name on hover; sync owner UUID for client-side skin lookup
         clone.setCustomName(player.getDisplayName());

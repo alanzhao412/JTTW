@@ -1,5 +1,7 @@
 package com.jttw.engine.client;
 
+import com.jttw.engine.registry.ModEntities;
+import com.jttw.engine.registry.ModBlocks;
 import com.jttw.engine.character.AbilityAction;
 import com.jttw.engine.character.AbilitySlot;
 import com.jttw.engine.JTTWEngine;
@@ -102,13 +104,13 @@ public final class ClientInit {
     // ── Entity renderers (MOD bus) ─────────────────────────────────
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(JTTWEngine.WU_CLONE.get(), WuCloneRenderer::new);
-        event.registerEntityRenderer(JTTWEngine.XIAOTIAN_QUAN.get(), XiaotianQuanRenderer::new);
-        event.registerEntityRenderer(JTTWEngine.HOWL_PROJECTILE.get(),
+        event.registerEntityRenderer(ModEntities.WU_CLONE.get(), WuCloneRenderer::new);
+        event.registerEntityRenderer(ModEntities.XIAOTIAN_QUAN.get(), XiaotianQuanRenderer::new);
+        event.registerEntityRenderer(ModEntities.HOWL_PROJECTILE.get(),
                 net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
-        event.registerEntityRenderer(JTTWEngine.PLACED_STAFF.get(), PlacedStaffRenderer::new);
+        event.registerEntityRenderer(ModEntities.PLACED_STAFF.get(), PlacedStaffRenderer::new);
         // Qi wave is invisible — rendered via server-sent particles only
-        event.registerEntityRenderer(JTTWEngine.QI_WAVE.get(),
+        event.registerEntityRenderer(ModEntities.QI_WAVE.get(),
                 net.minecraft.client.renderer.entity.NoopRenderer::new);
     }
 
@@ -116,7 +118,7 @@ public final class ClientInit {
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() ->
-                ItemBlockRenderTypes.setRenderLayer(JTTWEngine.CELESTIAL_CLOUD.get(), RenderType.translucent()));
+                ItemBlockRenderTypes.setRenderLayer(ModBlocks.CELESTIAL_CLOUD.get(), RenderType.translucent()));
     }
 
     @SubscribeEvent

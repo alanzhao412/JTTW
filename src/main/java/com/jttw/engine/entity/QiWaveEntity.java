@@ -1,5 +1,6 @@
 package com.jttw.engine.entity;
 
+import com.jttw.engine.registry.ModEntities;
 import com.jttw.engine.JTTWEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -68,7 +69,7 @@ public class QiWaveEntity extends Entity {
     }
 
     public QiWaveEntity(Level level, Player owner, Vec3 direction, float attackDamage) {
-        this(JTTWEngine.QI_WAVE.get(), level);
+        this(ModEntities.QI_WAVE.get(), level);
         Vec3 dir = direction.normalize();
         // STR factor: 0.0 at 30 ATK → 1.0 at 200 ATK
         this.strFactor = Math.min(1.0f, Math.max(0.0f, (attackDamage - ATK_MIN) / (ATK_MAX - ATK_MIN)));

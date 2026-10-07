@@ -1,5 +1,6 @@
 package com.jttw.engine.character.nezha;
 
+import com.jttw.engine.registry.ModItems;
 import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
@@ -77,12 +78,12 @@ public final class NezhaAbilityHandler {
         switch (next) {
             case 0 -> {
                 player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,
-                        new ItemStack(JTTWEngine.FIRE_TIP_SPEAR.get()));
+                        new ItemStack(ModItems.FIRE_TIP_SPEAR.get()));
                 player.sendSystemMessage(Component.literal("§6[JTTW] §eEquipped: Fire-Tip Spear"));
             }
             case 1 -> {
                 player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,
-                        new ItemStack(JTTWEngine.QIANKUN_RING.get()));
+                        new ItemStack(ModItems.QIANKUN_RING.get()));
                 player.sendSystemMessage(Component.literal("§6[JTTW] §eEquipped: Qiankun Ring"));
             }
             case 2 -> {

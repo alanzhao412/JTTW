@@ -1,5 +1,6 @@
 package com.jttw.engine.item;
 
+import com.jttw.engine.registry.ModItems;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
@@ -46,13 +47,13 @@ public class YinYangSwordItem extends Item {
     }
 
     public static ItemStack createYin() {
-        ItemStack stack = new ItemStack(com.jttw.engine.JTTWEngine.YIN_YANG_SWORD.get());
+        ItemStack stack = new ItemStack(ModItems.YIN_YANG_SWORD.get());
         stack.getOrCreateTag().putString(TAG_SIDE, "yin");
         return stack;
     }
 
     public static ItemStack createYang() {
-        ItemStack stack = new ItemStack(com.jttw.engine.JTTWEngine.YIN_YANG_SWORD.get());
+        ItemStack stack = new ItemStack(ModItems.YIN_YANG_SWORD.get());
         stack.getOrCreateTag().putString(TAG_SIDE, "yang");
         return stack;
     }

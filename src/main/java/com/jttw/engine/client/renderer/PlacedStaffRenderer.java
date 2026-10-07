@@ -1,5 +1,6 @@
 package com.jttw.engine.client.renderer;
 
+import com.jttw.engine.registry.ModItems;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.entity.PlacedStaffEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -59,7 +60,7 @@ public class PlacedStaffRenderer extends EntityRenderer<PlacedStaffEntity> {
 
         // Render as the item model (standing upright)
         // Use full brightness so the staff doesn't darken underwater or in shadows
-        ItemStack staffItem = new ItemStack(JTTWEngine.RUYI_JINGU_BANG.get());
+        ItemStack staffItem = new ItemStack(ModItems.RUYI_JINGU_BANG.get());
         Minecraft.getInstance().getItemRenderer().renderStatic(
                 staffItem, ItemDisplayContext.FIXED,
                 LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY,

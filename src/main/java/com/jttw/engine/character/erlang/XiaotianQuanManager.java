@@ -1,5 +1,6 @@
 package com.jttw.engine.character.erlang;
 
+import com.jttw.engine.registry.ModEntities;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.qi.QiManager;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
@@ -236,7 +237,7 @@ public final class XiaotianQuanManager {
         }
 
         ServerLevel level = player.serverLevel();
-        XiaotianQuanEntity xtq = new XiaotianQuanEntity(JTTWEngine.XIAOTIAN_QUAN.get(), level);
+        XiaotianQuanEntity xtq = new XiaotianQuanEntity(ModEntities.XIAOTIAN_QUAN.get(), level);
 
         // Encode owner UUID in custom name for client-side identification
         xtq.setCustomName(Component.literal("jttw_xtq:" + player.getUUID()));
