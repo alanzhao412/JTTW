@@ -10,10 +10,14 @@ import com.jttw.engine.progression.stats.FormStage;
 import com.jttw.engine.progression.stats.ProgressionClass;
 import com.jttw.engine.progression.stats.StatBlock;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
+import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
@@ -144,6 +148,55 @@ public class LevelingGameTests {
         check(h, !WukongCheckpoints.isBlocked(p), "unblocked once complete");
         LevelManager.grantXp(p, xpToReach(ProgressionClass.PRIMORDIAL, 35), "test");
         check(h, PlayerLevel.getLevel(p) > 30, "levels again after the checkpoint");
+        h.succeed();
+    }
+
+    // ── XP from kills ─────────────────────────────────────────────
+
+    private static void kill(GameTestHelper h, ServerPlayer killer, EntityType<? extends LivingEntity> type, String tier) {
+        var victim = h.spawn(type, new BlockPos(3, 1, 3));
+        if (tier != null) victim.getPersistentData().putString("jttw_enemy_tier", tier);
+        LevelManager.onEntityKilled(new LivingDeathEvent(
+                victim, h.getLevel().damageSources().playerAttack(killer)));
+        victim.discard();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void belowTwentyEveryKillPaysVanillaXp(GameTestHelper h) {
+        ServerPlayer p = player(h);
+        LevelManager.initClass(p, ReincarnationOutcome.EYE_OF_HEAVEN);
+        kill(h, p, EntityType.ZOMBIE, null);
+        eq(h, 15L, PlayerLevel.getXp(p), "standard mob (VANILLA_BASE_XP)");
+        kill(h, p, EntityType.WITHER_SKELETON, null);
+        eq(h, 60L, PlayerLevel.getXp(p), "plus a strong mob at 3x");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void fromTwentyOnlyTaggedEnemiesPayXp(GameTestHelper h) {
+        ServerPlayer p = player(h);
+        LevelManager.initClass(p, ReincarnationOutcome.EYE_OF_HEAVEN);
+        PlayerLevel.setLevel(p, 20);
+        long start = PlayerLevel.getXp(p);
+        kill(h, p, EntityType.ZOMBIE, null);
+        eq(h, start, PlayerLevel.getXp(p), "untagged mob at level 20");
+        // no biome bands are registered, so a tagged kill uses the flat fallback: 15 x tier x 3
+        kill(h, p, EntityType.ZOMBIE, "GENERAL");
+        eq(h, start + 15L * 5 * 3, PlayerLevel.getXp(p), "tagged General");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void killsWithoutAClassOrByNonPlayersPayNothing(GameTestHelper h) {
+        ServerPlayer classless = player(h);
+        kill(h, classless, EntityType.ZOMBIE, null);
+        eq(h, 0L, PlayerLevel.getXp(classless), "no class");
+        ServerPlayer p = player(h);
+        LevelManager.initClass(p, ReincarnationOutcome.EYE_OF_HEAVEN);
+        var zombie = h.spawn(EntityType.ZOMBIE, new BlockPos(3, 1, 3));
+        LevelManager.onEntityKilled(new LivingDeathEvent(
+                zombie, h.getLevel().damageSources().generic()));
+        eq(h, 0L, PlayerLevel.getXp(p), "environmental death");
         h.succeed();
     }
 
