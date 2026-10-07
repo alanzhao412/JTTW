@@ -154,7 +154,7 @@ public class LevelingGameTests {
     // ── XP from kills ─────────────────────────────────────────────
 
     private static void kill(GameTestHelper h, ServerPlayer killer, EntityType<? extends LivingEntity> type, String tier) {
-        var victim = h.spawn(type, new BlockPos(3, 1, 3));
+        var victim = h.spawn(type, new BlockPos(3, 2, 3));
         if (tier != null) victim.getPersistentData().putString("jttw_enemy_tier", tier);
         LevelManager.onEntityKilled(new LivingDeathEvent(
                 victim, h.getLevel().damageSources().playerAttack(killer)));
@@ -193,7 +193,7 @@ public class LevelingGameTests {
         eq(h, 0L, PlayerLevel.getXp(classless), "no class");
         ServerPlayer p = player(h);
         LevelManager.initClass(p, ReincarnationOutcome.EYE_OF_HEAVEN);
-        var zombie = h.spawn(EntityType.ZOMBIE, new BlockPos(3, 1, 3));
+        var zombie = h.spawn(EntityType.ZOMBIE, new BlockPos(3, 2, 3));
         LevelManager.onEntityKilled(new LivingDeathEvent(
                 zombie, h.getLevel().damageSources().generic()));
         eq(h, 0L, PlayerLevel.getXp(p), "environmental death");

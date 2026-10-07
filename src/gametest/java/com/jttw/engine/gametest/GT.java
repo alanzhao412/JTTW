@@ -13,7 +13,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Shared helpers for the GameTests.
  *
- * <p>Every test runs in the {@code jttw_engine:platform} structure (a 5x5 stone floor) and
+ * <p>Every test runs in the {@code jttw_engine:platform} structure (a 5x5 stone floor, which
+ * sits at relative y=1, so players and mobs stand at y=2) and
  * gets a fresh mock server player, so no test sees another's saved data.
  */
 public final class GT {
@@ -34,7 +35,7 @@ public final class GT {
     public static ServerPlayer player(GameTestHelper helper) {
         GameProfile profile = new GameProfile(UUID.randomUUID(), "jttw_test_" + PLAYERS.incrementAndGet());
         ServerPlayer p = new FakePlayer(helper.getLevel(), profile);
-        var pos = helper.absolutePos(new net.minecraft.core.BlockPos(2, 1, 2));
+        var pos = helper.absolutePos(new net.minecraft.core.BlockPos(2, 2, 2));
         p.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
         return p;
     }

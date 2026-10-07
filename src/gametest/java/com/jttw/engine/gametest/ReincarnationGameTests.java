@@ -41,7 +41,7 @@ public class ReincarnationGameTests {
     }
 
     private static void kill(GameTestHelper h, ServerPlayer p, EntityType<? extends LivingEntity> type) {
-        LivingEntity victim = h.spawn(type, new BlockPos(3, 1, 3));
+        LivingEntity victim = h.spawn(type, new BlockPos(3, 2, 3));
         AlignmentEarningHandler.onEntityKill(new LivingDeathEvent(victim, h.getLevel().damageSources().playerAttack(p)));
         victim.discard();
     }
@@ -89,7 +89,7 @@ public class ReincarnationGameTests {
     @GameTest(template = PLATFORM)
     public static void killsNotByAPlayerEarnNothing(GameTestHelper h) {
         ServerPlayer p = player(h);
-        LivingEntity zombie = h.spawn(EntityType.ZOMBIE, new BlockPos(3, 1, 3));
+        LivingEntity zombie = h.spawn(EntityType.ZOMBIE, new BlockPos(3, 2, 3));
         AlignmentEarningHandler.onEntityKill(new LivingDeathEvent(zombie, h.getLevel().damageSources().generic()));
         eq(h, 0, AlignmentData.getTotal(p), "total");
         h.succeed();
