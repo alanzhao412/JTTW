@@ -133,6 +133,15 @@ public class QiAndFlightGameTests {
 
     // ── Dimensions ─────────────────────────────────────────────────
 
+    /**
+     * A cross-dimension teleport adds the player to the destination world's player list, and a
+     * fake player is never logged out. Left there, it is the "nearest player" for every mob in
+     * that world, so non-persistent hostile mobs in other tests despawn as too far away.
+     */
+    private static void leaveWorld(ServerPlayer p) {
+        p.serverLevel().removePlayerImmediately(p, net.minecraft.world.entity.Entity.RemovalReason.DISCARDED);
+    }
+
     @GameTest(template = PLATFORM)
     public static void heavenAndHellAreLoaded(GameTestHelper h) {
         check(h, h.getLevel().getServer().getLevel(JTTWDimensions.HEAVEN) != null, "heaven");
@@ -145,6 +154,7 @@ public class QiAndFlightGameTests {
         ServerPlayer p = player(h);
         JTTWDimensions.teleportTo(p, JTTWDimensions.HELL);
         eq(h, JTTWDimensions.HELL, p.level().dimension(), "dimension");
+        leaveWorld(p);
         h.succeed();
     }
 
@@ -157,6 +167,7 @@ public class QiAndFlightGameTests {
         HeavenVoidHandler.onPlayerTick(new TickEvent.PlayerTickEvent(TickEvent.Phase.END, p));
         eq(h, Level.OVERWORLD, p.level().dimension(), "dimension");
         near(h, 0.0, p.fallDistance, "fall damage cancelled");
+        leaveWorld(p);
         h.succeed();
     }
 }

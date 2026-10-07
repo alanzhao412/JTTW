@@ -32,6 +32,8 @@ import static com.jttw.engine.gametest.item.ItemTestSupport.*;
 /** Nezha's Fire-Tipped Spear, Qiankun Ring and Yin-Yang Swords. */
 @GameTestHolder(JTTWEngine.MOD_ID)
 @PrefixGameTestTemplate(false)
+// Line- and area-targeted attacks run in their own batch: in the shared batch a
+// neighbouring test's mob can be first in the line.
 public class NezhaWeaponsGameTests {
 
     private static ItemStack fireSpear() {
@@ -51,14 +53,14 @@ public class NezhaWeaponsGameTests {
 
     // ── Fire-Tipped Spear ─────────────────────────────────────────
 
-    @GameTest(template = PLATFORM)
+    @GameTest(template = PLATFORM, batch = "fireSpearSneakShootsOneFireballEveryTwoSeconds")
     public static void fireSpearAddsSeventyFivePercentAttackInTheMainHand(GameTestHelper h) {
         near(h, 17.5, atkWith(h, fireSpear(), EquipmentSlot.MAINHAND), "main hand");
         near(h, 10.0, atkWith(h, fireSpear(), EquipmentSlot.OFFHAND), "off hand");
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(template = PLATFORM, batch = "fireSpearShootsSixFireballsWithThreeHeadsSixArms")
     public static void fireSpearSetsTargetsAlightForFiveSeconds(GameTestHelper h) {
         Pig target = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(2, 2, 3));
         ItemStack s = fireSpear();
@@ -77,7 +79,7 @@ public class NezhaWeaponsGameTests {
         return balls.size();
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(template = PLATFORM, batch = "yangSwordStrikesTheTargetInFrontAndMarksItForMagic")
     public static void fireSpearRightClickWithoutSneakingDoesNothing(GameTestHelper h) {
         ServerPlayer p = player(h);
         eq(h, InteractionResult.PASS, use(h, p, fireSpear()), "use result");
@@ -85,7 +87,7 @@ public class NezhaWeaponsGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM, timeoutTicks = 150)
+    @GameTest(template = PLATFORM, batch = "yangSwordMissesBeyondFourBlocksButStillCoolsDown", timeoutTicks = 150)
     public static void fireSpearSneakShootsOneFireballEveryTwoSeconds(GameTestHelper h) {
         ServerPlayer p = player(h);
         p.setShiftKeyDown(true);
@@ -240,12 +242,17 @@ public class NezhaWeaponsGameTests {
         ItemStack yang = YinYangSwordItem.createYang();
         HurtLog log = HurtLog.on(golem);
         long now = h.getLevel().getGameTime();
+        boolean visible = h.getLevel().getEntities(p, p.getBoundingBox().inflate(6)).contains(golem);
+        String around = h.getLevel().getEntities(p, p.getBoundingBox().expandTowards(p.getLookAngle().scale(4.0)).inflate(1.0)).stream()
+                .map(e -> e.getType().toShortString() + (e.hasCustomName() ? "[" + e.getCustomName().getString() + "]" : "")
+                        + "@" + String.format("%.1f,%.1f,%.1f", e.getX() - p.getX(), e.getY() - p.getY(), e.getZ() - p.getZ()))
+                .toList().toString();
         try {
             eq(h, InteractionResult.CONSUME, useOffhand(h, p, yang), "use result");
         } finally {
             log.close();
         }
-        eq(h, 1, log.playerAttacks().size(), "one hit");
+        eq(h, 1, log.playerAttacks().size(), "one hit (golem visible to entity queries: " + visible + ", golem health " + golem.getHealth() + "/" + golem.getMaxHealth() + ", player atk " + p.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE) + ", look " + p.getLookAngle() + ", offhand " + p.getOffhandItem() + ", in strike box " + around + ")");
         near(h, 6.0, log.playerAttacks().get(0).amount(), "100% of 6 ATK");
         check(h, log.playerAttacks().get(0).source().is(DamageTypes.PLAYER_ATTACK), "player attack");
         MobEffectInstance fatigue = golem.getEffect(MobEffects.DIG_SLOWDOWN);

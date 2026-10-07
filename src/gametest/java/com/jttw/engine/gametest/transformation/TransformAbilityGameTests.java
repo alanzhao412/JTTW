@@ -362,7 +362,8 @@ public class TransformAbilityGameTests {
             TransformationAbilityHandler.tickGuardianLaser(p);
             check(h, !golem.hasEffect(MobEffects.DIG_SLOWDOWN), "still on cooldown after 2.5s");
         });
-        h.runAfterDelay(61, () -> {
+        // a few ticks past the 60-tick cooldown: callback-vs-tick order varies with load
+        h.runAfterDelay(65, () -> {
             aim(p, golem);
             Tf.rightClick(p);
             TransformationAbilityHandler.tickGuardianLaser(p);
@@ -491,7 +492,7 @@ public class TransformAbilityGameTests {
         eq(h, 0, Tf.near(p, EvokerFangs.class, 8).size(), "sneaking summons vex, not fangs");
         h.runAfterDelay(150, () -> {
             TransformationAbilityHandler.tickVexDespawn(h.getLevel());
-            for (Vex v : vex) check(h, !v.isRemoved(), "vex still here at 7.5s");
+            for (Vex v : vex) check(h, !v.isRemoved(), "vex still here at 7.5s (removed: " + v.getRemovalReason() + ", health " + v.getHealth() + ", last hurt by " + v.getLastDamageSource() + ")");
         });
         h.runAfterDelay(201, () -> {
             TransformationAbilityHandler.tickVexDespawn(h.getLevel());

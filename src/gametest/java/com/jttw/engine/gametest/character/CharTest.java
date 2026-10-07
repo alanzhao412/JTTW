@@ -94,18 +94,7 @@ public final class CharTest {
 
     /** Runs {@code cleanup} when the test finishes, pass or fail. */
     public static void onEnd(GameTestHelper h, Runnable cleanup) {
-        try {
-            Field f = GameTestHelper.class.getDeclaredField("testInfo");
-            f.setAccessible(true);
-            GameTestInfo info = (GameTestInfo) f.get(h);
-            info.addListener(new GameTestListener() {
-                @Override public void testStructureLoaded(GameTestInfo i) {}
-                @Override public void testPassed(GameTestInfo i) { cleanup.run(); }
-                @Override public void testFailed(GameTestInfo i) { cleanup.run(); }
-            });
-        } catch (ReflectiveOperationException e) {
-            throw new IllegalStateException("cannot hook test end", e);
-        }
+        GT.onEnd(h, cleanup);
     }
 
     @SuppressWarnings("unchecked")

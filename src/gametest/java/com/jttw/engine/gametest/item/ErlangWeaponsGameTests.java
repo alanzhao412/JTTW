@@ -32,6 +32,8 @@ import static com.jttw.engine.gametest.item.ItemTestSupport.*;
  */
 @GameTestHolder(JTTWEngine.MOD_ID)
 @PrefixGameTestTemplate(false)
+// Line- and area-targeted attacks run in their own batch: in the shared batch a
+// neighbouring test's mob can be first in the line.
 public class ErlangWeaponsGameTests {
 
     private static final int USE_DURATION = 72000;
@@ -52,7 +54,7 @@ public class ErlangWeaponsGameTests {
 
     // ── Three-Pointed Spear: attributes and triple strike ─────────
 
-    @GameTest(template = PLATFORM)
+    @GameTest(template = PLATFORM, batch = "anyoneCanStartAThrust")
     public static void spearAddsTwentyPercentAttackInTheMainHandOnly(GameTestHelper h) {
         ServerPlayer p = player(h);
         setBaseAtk(p, 10.0);
@@ -64,7 +66,7 @@ public class ErlangWeaponsGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(template = PLATFORM, batch = "minimumChargeThrustDealsOneAndAHalfAttackAndStartsCooldown")
     public static void everyThirdSpearHitStrikesTwiceMoreForHalfAttack(GameTestHelper h) {
         ServerPlayer p = player(h);
         setBaseAtk(p, 4.0);
@@ -94,7 +96,7 @@ public class ErlangWeaponsGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(template = PLATFORM, batch = "fullChargeThrustDealsTwoAndAHalfAttack")
     public static void erlangShenTripleStrikeGetsTheSpearBonus(GameTestHelper h) {
         ServerPlayer p = as(h, ReincarnationOutcome.EYE_OF_HEAVEN);
         setBaseAtk(p, 4.0);
@@ -112,7 +114,7 @@ public class ErlangWeaponsGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM, timeoutTicks = 150)
+    @GameTest(template = PLATFORM, batch = "thrustOnCooldownIsIgnoredForThirtyTicks", timeoutTicks = 150)
     public static void spearComboResetsAfterThreeSecondsIdle(GameTestHelper h) {
         ServerPlayer p = player(h);
         setBaseAtk(p, 4.0);
@@ -135,7 +137,7 @@ public class ErlangWeaponsGameTests {
         });
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(template = PLATFORM, batch = "thrustMissesTargetsOffTheLine")
     public static void spearHitByANonPlayerDoesNothing(GameTestHelper h) {
         var zombie = h.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(0, 2, 0));
         Pig target = pig(h, 2, 3);
@@ -164,7 +166,7 @@ public class ErlangWeaponsGameTests {
         s.releaseUsing(h.getLevel(), p, USE_DURATION - chargeTicks);
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(template = PLATFORM, batch = "wrathShortensThrustCooldownAndLengthensTheLunge")
     public static void anyoneCanStartAThrust(GameTestHelper h) {
         ServerPlayer p = player(h);
         ItemStack s = spear();
@@ -173,7 +175,7 @@ public class ErlangWeaponsGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(template = PLATFORM, batch = "thrustHitsOneTargetUnlessSpearTwoPierces")
     public static void minimumChargeThrustDealsOneAndAHalfAttackAndStartsCooldown(GameTestHelper h) {
         ServerPlayer p = thruster(h);
         Pig target = pig(h, 2, 3);
@@ -195,7 +197,7 @@ public class ErlangWeaponsGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(template = PLATFORM, batch = "eyeOfHeavenAddsThirtyPercentMagicToTheThrust")
     public static void fullChargeThrustDealsTwoAndAHalfAttack(GameTestHelper h) {
         ServerPlayer p = thruster(h);
         Pig target = pig(h, 2, 3);
@@ -211,7 +213,7 @@ public class ErlangWeaponsGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(template = PLATFORM, batch = "erlangShenAxeHitCleavesEnemiesWithinTwoBlocks")
     public static void thrustOnCooldownIsIgnoredForThirtyTicks(GameTestHelper h) {
         ServerPlayer p = thruster(h);
         Pig target = pig(h, 2, 3);
@@ -234,7 +236,7 @@ public class ErlangWeaponsGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(template = PLATFORM, batch = "axeHitDoesNotCleaveForOthers")
     public static void thrustMissesTargetsOffTheLine(GameTestHelper h) {
         ServerPlayer p = thruster(h);
         Pig side = pig(h, 0, 2);
