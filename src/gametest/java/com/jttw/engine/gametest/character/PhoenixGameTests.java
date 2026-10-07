@@ -108,7 +108,7 @@ public class PhoenixGameTests {
         ticks(p, 10);
         near(h, 98.25f, QiData.getCurrent(p), "0.175 Qi per tick from tier 2");
         // 0.5 x 1.5 x 1.5 = 1.125, half physical and half magic
-        near(h, 0.5625, of(hits, DamageTypes.MAGIC).get(0).amount(), "magic half");
+        near(h, 0.5625, firstHit(h, hits, DamageTypes.MAGIC, golem).amount(), "magic half");
         eq(h, 60, golem.getRemainingFireTicks(), "burning for 3 s from tier 2");
         PhoenixAbilityHandler.stopFlame(p);
         h.succeed();

@@ -184,6 +184,25 @@ public final class CharTest {
                 .getHolderOrThrow(type), direct);
     }
 
+    /**
+     * The first hit of this type, or a failure that says what happened to the target instead
+     * (alive? where? what did hit it?), so an intermittent miss can be traced.
+     */
+    public static Hit firstHit(GameTestHelper h, List<Hit> log, ResourceKey<DamageType> type, LivingEntity target) {
+        List<Hit> matching = of(log, type);
+        if (matching.isEmpty()) {
+            List<String> seen;
+            synchronized (log) {
+                seen = log.stream().map(x -> x.source().getMsgId() + " " + x.amount()).toList();
+            }
+            throw new net.minecraft.gametest.framework.GameTestAssertException("no " + type.location().getPath()
+                    + " hit on " + target.getType().toShortString() + ": alive=" + target.isAlive()
+                    + " removed=" + target.getRemovalReason() + " health=" + target.getHealth()
+                    + " pos=" + h.relativePos(target.blockPosition()) + " hits=" + seen);
+        }
+        return matching.get(0);
+    }
+
     public static List<Hit> of(List<Hit> log, ResourceKey<DamageType> type) {
         synchronized (log) {
             return log.stream().filter(hit -> hit.is(type)).toList();

@@ -61,6 +61,15 @@ public final class ModEntities {
                             .updateInterval(1)
                             .build(new ResourceLocation(JTTWEngine.MOD_ID, "qi_wave").toString()));
 
+    public static final RegistryObject<EntityType<com.jttw.engine.entity.ThrownSpearEntity>> THROWN_SPEAR =
+            ENTITIES.register("thrown_spear", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.ThrownSpearEntity>of(
+                                    com.jttw.engine.entity.ThrownSpearEntity::new, MobCategory.MISC)
+                            .sized(0.5F, 0.5F)
+                            .clientTrackingRange(8)
+                            .updateInterval(1)
+                            .build(new ResourceLocation(JTTWEngine.MOD_ID, "thrown_spear").toString()));
+
     public static void register(IEventBus modEventBus) {
         ENTITIES.register(modEventBus);
         modEventBus.addListener(ModEntities::onAttributeCreate);

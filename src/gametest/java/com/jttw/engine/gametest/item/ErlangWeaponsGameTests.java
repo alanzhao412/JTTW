@@ -1,5 +1,10 @@
 package com.jttw.engine.gametest.item;
 
+import java.util.List;
+import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.level.block.Blocks;
+import com.jttw.engine.item.SpearReturn;
+import com.jttw.engine.entity.ThrownSpearEntity;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.character.erlang.ErlangShenAbilityHandler;
 import com.jttw.engine.item.ErlangAxeItem;
@@ -374,6 +379,181 @@ public class ErlangWeaponsGameTests {
         eq(h, 1, magic.size(), "shockwave hit");
         near(h, 1.0, magic.get(0).amount(), 1e-3, "half of 2 ATK");
         target.discard();
+        h.succeed();
+    }
+
+    // ── Three-Pointed Spear: throw (Spear Mastery I) ──────────────
+
+    /**
+     * Erlang Shen with Spear Mastery I at (2,2,0) looking straight south, sneaking. The spear
+     * flies at eye height, through blocks at y=3. ATK 2 (the fake player does not tick, so the
+     * spear's own bonus is not applied): a budget of 8 hardness and 5 damage.
+     */
+    private static ServerPlayer thrower(GameTestHelper h) {
+        ServerPlayer p = playerAt(h, 2, 0, 0f, 0f);
+        setBaseAtk(p, 2.0);
+        setOutcome(p, ReincarnationOutcome.EYE_OF_HEAVEN);
+        SkillTreeData.grantNode(p, "es_spear_1");
+        p.setShiftKeyDown(true);
+        return p;
+    }
+
+    /** Spears thrown by these players only: tests in a batch run side by side. */
+    private static List<ThrownSpearEntity> thrownSpears(GameTestHelper h, ServerPlayer... by) {
+        List<ServerPlayer> owners = List.of(by);
+        return entitiesNear(h, ThrownSpearEntity.class, 120, e -> owners.contains(e.getOwner()));
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void throwNeedsErlangShenTheNodeAndSneaking(GameTestHelper h) {
+        ServerPlayer standing = thrower(h);
+        standing.setShiftKeyDown(false);
+        ItemStack s1 = spear();
+        thrust(h, standing, s1, 20);
+        eq(h, 0, thrownSpears(h, standing).size(), "not sneaking: a thrust");
+        check(h, !standing.getMainHandItem().isEmpty(), "spear still in hand");
+
+        ServerPlayer untrained = playerAt(h, 2, 0, 0f, 0f);
+        setOutcome(untrained, ReincarnationOutcome.EYE_OF_HEAVEN);
+        untrained.setShiftKeyDown(true);
+        thrust(h, untrained, spear(), 20);
+        eq(h, 0, thrownSpears(h, untrained).size(), "no Spear Mastery I");
+
+        ServerPlayer other = playerAt(h, 2, 0, 0f, 0f);
+        setOutcome(other, ReincarnationOutcome.YUAN_DI);
+        SkillTreeData.grantNode(other, "es_spear_1");
+        other.setShiftKeyDown(true);
+        thrust(h, other, spear(), 20);
+        eq(h, 0, thrownSpears(h, other).size(), "not Erlang Shen");
+
+        ServerPlayer quick = thrower(h);
+        thrust(h, quick, spear(), 9);
+        eq(h, 0, thrownSpears(h, quick).size(), "drawn under 10 ticks");
+        h.succeed();
+    }
+
+    /** Stone costs its hardness of 1.5 each; bedrock cannot be broken at all. */
+    @GameTest(template = PLATFORM, timeoutTicks = 40)
+    public static void throwTearsThroughTerrainAndStopsAtWhatItCannotBreak(GameTestHelper h) {
+        h.setBlock(new BlockPos(2, 3, 2), Blocks.STONE);
+        h.setBlock(new BlockPos(2, 3, 3), Blocks.STONE);
+        h.setBlock(new BlockPos(2, 3, 4), Blocks.BEDROCK);
+        ServerPlayer p = thrower(h);
+        thrust(h, p, spear(), 20);
+        check(h, p.getMainHandItem().isEmpty(), "the spear left the hand");
+        check(h, SpearReturn.isOut(p), "the spear is out");
+        eq(h, 1, thrownSpears(h, p).size(), "one spear in flight");
+        h.runAfterDelay(5, () -> {
+            h.assertBlockPresent(Blocks.AIR, new BlockPos(2, 3, 2));
+            h.assertBlockPresent(Blocks.AIR, new BlockPos(2, 3, 3));
+            h.assertBlockPresent(Blocks.BEDROCK, new BlockPos(2, 3, 4));
+            ThrownSpearEntity thrown = thrownSpears(h, p).get(0);
+            check(h, thrown.isStuck(), "stopped at the bedrock");
+            near(h, 8.0 - 3.0, thrown.budgetLeft(), "two stone blocks spent 3 of the 8");
+            check(h, thrown.travelled() < 4.0, "did not pass the bedrock: " + thrown.travelled());
+            h.succeed();
+        });
+    }
+
+    /** A weak throw (ATK 0.3: 1.2 hardness) cannot get through even one stone block. */
+    @GameTest(template = PLATFORM, timeoutTicks = 40)
+    public static void throwStopsWhenTheThrowersStrengthRunsOut(GameTestHelper h) {
+        h.setBlock(new BlockPos(2, 3, 2), Blocks.STONE);
+        ServerPlayer p = thrower(h);
+        setBaseAtk(p, 0.3);
+        thrust(h, p, spear(), 20);
+        h.runAfterDelay(5, () -> {
+            h.assertBlockPresent(Blocks.STONE, new BlockPos(2, 3, 2));
+            check(h, thrownSpears(h, p).get(0).isStuck(), "stopped at the stone");
+            h.succeed();
+        });
+    }
+
+    /** Everything on the line is hit once, for 250% ATK. */
+    @GameTest(template = PLATFORM, timeoutTicks = 40)
+    public static void throwHitsEverythingOnItsLine(GameTestHelper h) {
+        IronGolem first = h.spawnWithNoFreeWill(EntityType.IRON_GOLEM, new BlockPos(2, 2, 2));
+        IronGolem second = h.spawnWithNoFreeWill(EntityType.IRON_GOLEM, new BlockPos(2, 2, 4));
+        HurtLog firstLog = HurtLog.on(first);
+        HurtLog secondLog = HurtLog.on(second);
+        ServerPlayer p = thrower(h);
+        thrust(h, p, spear(), 20);
+        h.runAfterDelay(5, () -> {
+            try {
+                var a = firstLog.matching(src -> src.is(DamageTypes.TRIDENT));
+                var b = secondLog.matching(src -> src.is(DamageTypes.TRIDENT));
+                eq(h, 1, a.size(), "first golem hit once");
+                eq(h, 1, b.size(), "second golem hit once");
+                near(h, 5.0, a.get(0).amount(), 1e-3, "2 ATK x 2.5");
+            } finally {
+                firstLog.close();
+                secondLog.close();
+            }
+            h.succeed();
+        });
+    }
+
+    /** No wall: the spear stops after 100 blocks. */
+    @GameTest(template = PLATFORM, timeoutTicks = 80)
+    public static void throwFliesAtMostAHundredBlocks(GameTestHelper h) {
+        // straight up from y 200, in open sky (test platforms are buried in terrain),
+        // staying in the same loaded chunk column
+        ServerPlayer p = playerAt(h, 2, 0, 0f, -90f);
+        p.moveTo(p.getX(), 200, p.getZ(), 0f, -90f);
+        setBaseAtk(p, 2.0);
+        setOutcome(p, ReincarnationOutcome.EYE_OF_HEAVEN);
+        SkillTreeData.grantNode(p, "es_spear_1");
+        p.setShiftKeyDown(true);
+        thrust(h, p, spear(), 20);
+        ThrownSpearEntity thrown = h.getLevel().getEntitiesOfClass(ThrownSpearEntity.class,
+                p.getBoundingBox().inflate(4), e -> e.getOwner() == p).get(0);
+        h.runAfterDelay(40, () -> {
+            check(h, thrown.isStuck(), "stopped, travelled " + thrown.travelled());
+            near(h, ThrownSpearEntity.MAX_DISTANCE, thrown.travelled(), "100 blocks");
+            thrown.discard();
+            h.succeed();
+        });
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void thrownSpearReturnsToTheInventoryAfterTwentySeconds(GameTestHelper h) {
+        ServerPlayer p = thrower(h);
+        ItemStack s = spear();
+        s.setHoverName(net.minecraft.network.chat.Component.literal("Named"));
+        thrust(h, p, s, 20);
+        long now = h.getLevel().getGameTime();
+        eq(h, now + 400, SpearReturn.returnAt(p), "returns 400 ticks after the throw");
+        SpearReturn.returnIfDue(p);
+        check(h, SpearReturn.isOut(p), "not yet");
+
+        // a second throw while one is out is refused
+        ItemStack other = spear();
+        thrust(h, p, other, 20);
+        eq(h, 1, thrownSpears(h, p).size(), "only one spear out at a time");
+
+        p.getPersistentData().getCompound(SpearReturn.KEY).putLong("return_at", now);
+        p.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        SpearReturn.returnIfDue(p);
+        check(h, !SpearReturn.isOut(p), "returned");
+        eq(h, 0, thrownSpears(h, p).size(), "the flying spear is gone");
+        boolean found = false;
+        for (ItemStack inv : p.getInventory().items) {
+            if (inv.getItem() instanceof ThreePointedSpearItem && inv.getHoverName().getString().equals("Named")) found = true;
+        }
+        check(h, found, "the same spear, name and all, is back in the inventory");
+        h.succeed();
+    }
+
+    /** A spear still out when its thrower dies comes back to the respawned player. */
+    @GameTest(template = PLATFORM)
+    public static void thrownSpearSurvivesTheThrowersDeath(GameTestHelper h) {
+        ServerPlayer before = thrower(h);
+        thrust(h, before, spear(), 20);
+        ServerPlayer after = player(h);
+        SpearReturn.onPlayerClone(new net.minecraftforge.event.entity.player.PlayerEvent.Clone(after, before, true));
+        check(h, SpearReturn.isOut(after), "the note moved to the respawned player");
+        eq(h, SpearReturn.returnAt(before), SpearReturn.returnAt(after), "same return time");
+        thrownSpears(h, before).forEach(e -> e.discard());
         h.succeed();
     }
 

@@ -28,7 +28,8 @@ import java.util.UUID;
  *   <li>+100% damage for Erlang Shen, +20% for others</li>
  *   <li>+5 reach for Erlang Shen</li>
  *   <li>Triple-hit combo: every 3rd consecutive hit strikes 3 times</li>
- *   <li>Shift+right-click: throw (pierces, returns) — TODO</li>
+ *   <li>Sneak + hold right-click, release: throw (Erlang Shen with Spear Mastery I). Tears
+ *       through terrain in a straight line, returns after 20 s — see {@link com.jttw.engine.entity.ThrownSpearEntity}</li>
  *   <li>Right-click: sweeping slash (180° arc, 3 blocks) — TODO</li>
  *   <li>Eye of Heaven synergy: bonus magic damage while active — TODO</li>
  *   <li>Wrath synergy: faster attacks, 360° slash — TODO</li>
@@ -140,6 +141,13 @@ public class ThreePointedSpearItem extends Item {
         // Cooldown check
         if (sp.getCooldowns().isOnCooldown(this)) return;
 
+        // Spear Mastery I: sneaking turns the release into a throw
+        if (sp.isShiftKeyDown() && isErlangShen(sp)
+                && com.jttw.engine.progression.skilltree.SkillTreeData.getEsSpearTier(sp) >= 1) {
+            if (chargeTime >= THROW_MIN_CHARGE_TICKS) throwSpear(sp, stack);
+            return;
+        }
+
         boolean esPlayer = isErlangShen(sp);
         boolean inWrath = esPlayer && sp.getHealth() / sp.getMaxHealth() < 0.4f
                 && com.jttw.engine.progression.skilltree.SkillTreeData.getEsWrathTier(sp) >= 1;
@@ -223,6 +231,30 @@ public class ThreePointedSpearItem extends Item {
         sp.getCooldowns().addCooldown(this, (int) cooldown);
     }
 
+    /** How long the throw must be drawn, like a trident. */
+    public static final int THROW_MIN_CHARGE_TICKS = 10;
+    /** Hardness the throw can tear through per point of the thrower's ATK. */
+    public static final double THROW_BUDGET_PER_ATK = 4.0;
+    /** What the thrown spear deals to everything it passes through, as a multiple of ATK. */
+    public static final float THROW_DAMAGE_MULTIPLIER = 2.5f;
+
+    private void throwSpear(net.minecraft.server.level.ServerPlayer sp, ItemStack stack) {
+        if (SpearReturn.isOut(sp)) {
+            sp.sendSystemMessage(Component.literal("§7[JTTW] Your other spear has not returned yet."));
+            return;
+        }
+        float atk = (float) sp.getAttributeValue(Attributes.ATTACK_DAMAGE);
+        ItemStack thrownStack = stack.copy();
+        com.jttw.engine.entity.ThrownSpearEntity thrown = new com.jttw.engine.entity.ThrownSpearEntity(
+                sp.level(), sp, thrownStack, sp.getLookAngle(),
+                atk * THROW_BUDGET_PER_ATK, atk * THROW_DAMAGE_MULTIPLIER);
+        sp.level().addFreshEntity(thrown);
+        SpearReturn.recordThrow(sp, thrownStack, thrown);
+        stack.setCount(0); // it is in flight now
+        sp.level().playSound(null, sp.getX(), sp.getY(), sp.getZ(),
+                net.minecraft.sounds.SoundEvents.TRIDENT_THROW, net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 1.0F);
+    }
+
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.literal("§6Three-Pointed Double-Edged Spear").withStyle(ChatFormatting.GOLD));
@@ -232,6 +264,7 @@ public class ThreePointedSpearItem extends Item {
         tooltip.add(Component.literal("§aEvery 3rd hit: Triple Strike"));
         tooltip.add(Component.literal("§7Hold right-click: Thrust, 150% to 250% ATK by charge"));
         tooltip.add(Component.literal("§7Hits everything in front of you"));
+        tooltip.add(Component.literal("§7Sneak + hold, release: Throw (Erlang Shen, Spear Mastery I)"));
     }
 
     public static boolean isErlangShen(Player player) {

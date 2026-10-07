@@ -108,6 +108,8 @@ public final class ClientInit {
         event.registerEntityRenderer(ModEntities.HOWL_PROJECTILE.get(),
                 net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         event.registerEntityRenderer(ModEntities.PLACED_STAFF.get(), PlacedStaffRenderer::new);
+        event.registerEntityRenderer(ModEntities.THROWN_SPEAR.get(),
+                net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         // Qi wave is invisible — rendered via server-sent particles only
         event.registerEntityRenderer(ModEntities.QI_WAVE.get(),
                 net.minecraft.client.renderer.entity.NoopRenderer::new);

@@ -207,7 +207,7 @@ public final class ErlangShenSkillTree {
         // ── THREE-POINTED SPEAR (col 8, PASSIVE — weapon mastery) ────────
         TREE.add(new SkillNode(
                 SPEAR_1, "Spear Mastery I",
-                new String[]{ "Unlock spear throw.", "Pierces enemies, returns", "to your hand." },
+                new String[]{ "Sneak, hold, release: throw.", "Tears through terrain up to", "100 blocks. Back in 20s." },
                 3, 8, 0, List.of(), AbilityType.PASSIVE, 1, "Spear Mastery"
         ));
         TREE.add(new SkillNode(
