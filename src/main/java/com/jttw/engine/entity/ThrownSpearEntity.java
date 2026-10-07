@@ -148,6 +148,12 @@ public class ThrownSpearEntity extends Projectile implements ItemSupplier {
         level().playSound(null, getX(), getY(), getZ(), SoundEvents.TRIDENT_HIT_GROUND, SoundSource.PLAYERS, 1.0F, 1.0F);
     }
 
+    /** The model is about 3 blocks long; keep it drawn while any of it is on screen. */
+    @Override
+    public AABB getBoundingBoxForCulling() {
+        return getBoundingBox().inflate(2.0);
+    }
+
     /** The thrower's note brings the spear back, so the entity itself is never saved. */
     @Override
     public boolean shouldBeSaved() {
