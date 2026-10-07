@@ -178,17 +178,26 @@ public final class ImmortalItems {
 
         // After 100 ticks (5 seconds), grant Fiery Golden Eyes
         if (elapsed >= 100) {
-            player.getPersistentData().putBoolean(KEY_FIERY_GOLDEN_EYES, true);
             player.getPersistentData().remove(KEY_SAMADHI_FIRE_TICK);
             player.sendSystemMessage(Component.literal(
                     "\u00a76[JTTW] \u00a7c\u00a7lThe True Samadhi Fire refines your eyes! "
                     + "\u00a7eYou have gained \u00a76\u00a7lFiery Golden Eyes\u00a7e!"));
-
-            // Rebuild ability slots to include golden eyes
-            com.jttw.engine.network.s2c.SyncAbilitiesPacket pkt =
-                    com.jttw.engine.network.s2c.SyncAbilitiesPacket.build(player);
-            NetworkHandler.sendToPlayer(player, pkt);
+            grantFieryGoldenEyes(player);
         }
+    }
+
+    /** True once Wukong has been granted Fiery Golden Eyes. */
+    public static boolean hasFieryGoldenEyes(net.minecraft.world.entity.player.Player player) {
+        return player.getPersistentData().getBoolean(KEY_FIERY_GOLDEN_EYES);
+    }
+
+    /**
+     * Grants Fiery Golden Eyes: unlocks the eye laser and x-ray and puts them on Wukong's skill
+     * bar (slot M). The story event that awards the eyes calls this.
+     */
+    public static void grantFieryGoldenEyes(ServerPlayer player) {
+        player.getPersistentData().putBoolean(KEY_FIERY_GOLDEN_EYES, true);
+        NetworkHandler.sendToPlayer(player, com.jttw.engine.network.s2c.SyncAbilitiesPacket.build(player));
     }
 
     /**

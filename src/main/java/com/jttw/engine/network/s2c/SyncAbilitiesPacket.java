@@ -4,7 +4,6 @@ import com.jttw.engine.character.AbilitySlot;
 import com.jttw.engine.character.Characters;
 import com.jttw.engine.character.PlayableCharacter;
 import com.jttw.engine.progression.skilltree.AbilityType;
-import com.jttw.engine.progression.skilltree.SkillTreeData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
@@ -77,7 +76,7 @@ public class SyncAbilitiesPacket {
         PlayableCharacter character = Characters.of(player);
         List<AbilitySlot> bar = character == null
                 ? PlayableCharacter.emptyBar()
-                : character.skillBar(SkillTreeData.getUnlockedNodes(player));
+                : character.skillBar(player);
         return new SyncAbilitiesPacket(player.getUUID(), bar);
     }
 }

@@ -1,7 +1,9 @@
 package com.jttw.engine.character;
 
 import com.jttw.engine.progression.skilltree.SkillTree;
+import com.jttw.engine.progression.skilltree.SkillTreeData;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,6 +40,14 @@ public interface PlayableCharacter {
      */
     default List<AbilitySlot> skillBar(Set<String> unlockedNodes) {
         return emptyBar();
+    }
+
+    /**
+     * This player's skill bar. Usually just {@link #skillBar(Set)} over their unlocked nodes;
+     * characters with slots earned through the story rather than the tree override this.
+     */
+    default List<AbilitySlot> skillBar(Player player) {
+        return skillBar(SkillTreeData.getUnlockedNodes(player));
     }
 
     /** Runs the ability in {@code slot} for a key event. Unused slots do nothing. */
