@@ -18,9 +18,13 @@ import net.minecraftforge.fml.common.Mod;
 /**
  * Turns physical and magic resistance into damage reduction, and applies magic vulnerability.
  *
- * <p>Damage taken is multiplied by {@code 100 / (100 + resistance)}: 50 resistance takes a third
- * off, 100 takes half, 300 takes three quarters. There is no cap, but each point is worth less
- * than the last. Vanilla armor from worn gear still applies on top, as usual.
+ * <p>Tuned for fighting mobs, whose hits are fixed sizes. A hit first loses a flat
+ * {@code resistance / 10}, then what is left is multiplied by {@code 100 / (100 + resistance)}.
+ * So a strong character shrugs off a zombie's 4 while a Warden's 30 still lands: at 100
+ * resistance the zombie does almost nothing and the Warden does 10. Every hit keeps at least
+ * {@value #MIN_DAMAGE_FRACTION} of its damage, so nothing is fully immune. There is no cap, and
+ * each point is worth a little less than the last. Vanilla armor from worn gear still applies
+ * on top, as usual.
  *
  * <ul>
  *   <li><b>Magic</b> damage — what witches resist (magic, indirect magic, thorns, sonic boom),
@@ -43,10 +47,22 @@ public final class ResistanceHandler {
     /** Persistent-data key: game time until which the entity takes extra magic damage. */
     public static final String KEY_MAGIC_VULN = "jttw_magic_vuln";
     public static final double MAGIC_VULNERABILITY_BONUS = 1.25;
+    /** Resistance blocks this much of each hit outright, per point. */
+    public static final double FLAT_BLOCK_PER_POINT = 0.1;
+    /** Every hit keeps at least this fraction of its damage. */
+    public static final double MIN_DAMAGE_FRACTION = 0.05;
 
-    /** Fraction of damage that gets through this much resistance. */
+    /** The percentage part: the fraction of what is left after the flat block that gets through. */
     public static double damageMultiplier(double resistance) {
         return 100.0 / (100.0 + Math.max(0.0, resistance));
+    }
+
+    /** Damage left of a hit of this size after this much resistance. */
+    public static double damageAfter(double amount, double resistance) {
+        if (amount <= 0) return amount;
+        double res = Math.max(0.0, resistance);
+        double afterFlat = Math.max(0.0, amount - res * FLAT_BLOCK_PER_POINT);
+        return Math.max(amount * MIN_DAMAGE_FRACTION, afterFlat * damageMultiplier(res));
     }
 
     public static boolean isMagic(DamageSource source) {
@@ -83,9 +99,9 @@ public final class ResistanceHandler {
         double amount = event.getAmount();
         if (isMagic(source)) {
             if (isMagicVulnerable(target)) amount *= MAGIC_VULNERABILITY_BONUS;
-            amount *= damageMultiplier(magicResistance(target));
+            amount = damageAfter(amount, magicResistance(target));
         } else if (isPhysical(source)) {
-            amount *= damageMultiplier(physicalResistance(target));
+            amount = damageAfter(amount, physicalResistance(target));
         }
         event.setAmount((float) amount);
     }

@@ -23,14 +23,16 @@ import static com.jttw.engine.gametest.GT.*;
 @PrefixGameTestTemplate(false)
 public class ResistanceGameTests {
 
+    // 40-damage hits against 100 resistance: (40 - 10) x 100/200 = 15
+
     @GameTest(template = PLATFORM)
     public static void physicalResistanceReducesBlowsNotMagic(GameTestHelper h) {
         ServerPlayer p = player(h);
         setResistances(p, 100.0, 0.0);
         var src = p.damageSources();
-        near(h, 5.0, afterResistance(p, src.cactus(), 10f), "cactus");
-        near(h, 5.0, afterResistance(p, src.sweetBerryBush(), 10f), "berry bush");
-        near(h, 10.0, afterResistance(p, src.magic(), 10f), "magic");
+        near(h, 15.0, afterResistance(p, src.cactus(), 40f), "cactus");
+        near(h, 15.0, afterResistance(p, src.sweetBerryBush(), 40f), "berry bush");
+        near(h, 40.0, afterResistance(p, src.magic(), 40f), "magic");
         h.succeed();
     }
 
@@ -39,13 +41,23 @@ public class ResistanceGameTests {
         ServerPlayer p = player(h);
         setResistances(p, 0.0, 100.0);
         var src = p.damageSources();
-        near(h, 5.0, afterResistance(p, src.magic(), 10f), "magic");
-        near(h, 5.0, afterResistance(p, src.indirectMagic(p, null), 10f), "indirect magic");
-        near(h, 5.0, afterResistance(p, src.wither(), 10f), "wither");
-        near(h, 5.0, afterResistance(p, src.dragonBreath(), 10f), "dragon breath");
-        near(h, 5.0, afterResistance(p, src.thorns(p), 10f), "thorns");
-        near(h, 5.0, afterResistance(p, src.sonicBoom(p), 10f), "sonic boom");
-        near(h, 10.0, afterResistance(p, src.cactus(), 10f), "cactus is physical");
+        near(h, 15.0, afterResistance(p, src.magic(), 40f), "magic");
+        near(h, 15.0, afterResistance(p, src.indirectMagic(p, null), 40f), "indirect magic");
+        near(h, 15.0, afterResistance(p, src.wither(), 40f), "wither");
+        near(h, 15.0, afterResistance(p, src.dragonBreath(), 40f), "dragon breath");
+        near(h, 15.0, afterResistance(p, src.thorns(p), 40f), "thorns");
+        near(h, 15.0, afterResistance(p, src.sonicBoom(p), 40f), "sonic boom");
+        near(h, 40.0, afterResistance(p, src.cactus(), 40f), "cactus is physical");
+        h.succeed();
+    }
+
+    /** Small hits shrink to the 5% floor: a zombie's 4 against 100 resistance. */
+    @GameTest(template = PLATFORM)
+    public static void smallHitsAreShruggedOffButNeverToNothing(GameTestHelper h) {
+        ServerPlayer p = player(h);
+        setResistances(p, 100.0, 100.0);
+        near(h, 0.2, afterResistance(p, p.damageSources().cactus(), 4f), "4 -> floor of 5%");
+        near(h, 0.2, afterResistance(p, p.damageSources().magic(), 4f), "magic too");
         h.succeed();
     }
 
@@ -63,11 +75,12 @@ public class ResistanceGameTests {
         h.succeed();
     }
 
+    /** (200 - 90) x 100/1000 = 11. */
     @GameTest(template = PLATFORM)
     public static void resistanceHasNoCap(GameTestHelper h) {
         ServerPlayer p = player(h);
         setResistances(p, 900.0, 0.0);
-        near(h, 1.0, afterResistance(p, p.damageSources().cactus(), 10f), "900 resistance keeps a tenth");
+        near(h, 11.0, afterResistance(p, p.damageSources().cactus(), 200f), "900 resistance");
         h.succeed();
     }
 
@@ -84,13 +97,13 @@ public class ResistanceGameTests {
         h.succeed();
     }
 
-    /** The vulnerable mark applies before resistance: (10 x 1.25) x 100/200. */
+    /** The vulnerable mark applies before resistance: (40 x 1.25 - 10) x 100/200 = 20. */
     @GameTest(template = PLATFORM)
     public static void magicVulnerabilityStacksWithResistance(GameTestHelper h) {
         ServerPlayer p = player(h);
         setResistances(p, 0.0, 100.0);
         p.getPersistentData().putLong(ResistanceHandler.KEY_MAGIC_VULN, h.getLevel().getGameTime() + 100);
-        near(h, 6.25, afterResistance(p, p.damageSources().magic(), 10f), "magic");
+        near(h, 20.0, afterResistance(p, p.damageSources().magic(), 40f), "magic");
         h.succeed();
     }
 

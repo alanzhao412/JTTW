@@ -138,10 +138,10 @@ public class NezhaArmorGameTests {
         endTick(p);
         near(h, 25.0, mres(p), "magic resistance");
         var src = p.damageSources();
-        // 10 x 100/125 = 8
-        near(h, 8.0, afterResistance(p, src.magic(), 10f), "magic");
-        near(h, 8.0, afterResistance(p, src.indirectMagic(p, null), 10f), "indirect magic");
-        near(h, 8.0, afterResistance(p, src.wither(), 10f), "wither");
+        // (10 - 2.5) x 100/125 = 6
+        near(h, 6.0, afterResistance(p, src.magic(), 10f), "magic");
+        near(h, 6.0, afterResistance(p, src.indirectMagic(p, null), 10f), "indirect magic");
+        near(h, 6.0, afterResistance(p, src.wither(), 10f), "wither");
         near(h, 10.0, afterResistance(p, src.onFire(), 10f), "fire is not magic");
         near(h, 10.0, afterResistance(p, src.generic(), 10f), "generic is not magic");
         h.succeed();
@@ -153,8 +153,8 @@ public class NezhaArmorGameTests {
         setResistances(p, 0.0, 25.0);
         wear(p, cloth(), EquipmentSlot.CHEST);
         endTick(p);
-        // 25 + 25 = 50: 10 x 100/150
-        near(h, 10.0 * 100 / 150, afterResistance(p, p.damageSources().magic(), 10f), "magic");
+        // 25 + 25 = 50: (10 - 5) x 100/150
+        near(h, 5.0 * 100 / 150, afterResistance(p, p.damageSources().magic(), 10f), "magic");
         h.succeed();
     }
 

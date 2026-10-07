@@ -357,15 +357,15 @@ public class WukongGameTests {
         ServerPlayer p = wukong(h);
         setResistances(p, 50.0, 50.0);
         var src = h.getLevel().damageSources();
-        // magic: 50 + 50 = 100 resistance -> half
-        near(h, 5.0, afterResistance(p, src.magic(), 10f), "magic");
-        near(h, 5.0, afterResistance(p, src.wither(), 10f), "wither");
-        // physical: 50 -> 10 x 100/150
-        near(h, 10.0 * 100 / 150, afterResistance(p, src.cactus(), 10f), "physical");
+        // magic: 50 + 50 = 100 resistance -> (40 - 10) x 100/200
+        near(h, 15.0, afterResistance(p, src.magic(), 40f), "magic");
+        near(h, 15.0, afterResistance(p, src.wither(), 40f), "wither");
+        // physical: 50 -> (40 - 5) x 100/150
+        near(h, 35.0 * 100 / 150, afterResistance(p, src.cactus(), 40f), "physical");
 
         ServerPlayer other = as(h, ReincarnationOutcome.YUAN_DI);
         setResistances(other, 50.0, 50.0);
-        near(h, 10.0 * 100 / 150, afterResistance(other, src.magic(), 10f), "others use magic resistance only");
+        near(h, 35.0 * 100 / 150, afterResistance(other, src.magic(), 40f), "others use magic resistance only");
         h.succeed();
     }
 

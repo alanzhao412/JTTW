@@ -33,9 +33,10 @@ magic resistance (MRES), Qi and Will.
 
 Defence is split in two. Physical resistance reduces blows (anything vanilla armor would block);
 magic resistance reduces magic, wither, thorns, sonic booms and dragon breath. Both are the mod's
-own attributes rather than vanilla armor, so they have no cap: damage taken is multiplied by
-`100 / (100 + resistance)` (100 resistance halves it), and each point is worth a little less than
-the last. Damage that already ignores armor (falls, drowning, fire ticks, the void) ignores
+own attributes rather than vanilla armor, so they have no cap. The formula is tuned for fighting
+mobs, whose hits are fixed sizes: a hit first loses a flat `resistance / 10`, then the rest is
+multiplied by `100 / (100 + resistance)`, and at least 5% of every hit always lands. So at 100
+resistance a zombie's 4 does 0.2 while a Warden's 30 still does 10. Damage that already ignores armor (falls, drowning, fire ticks, the void) ignores
 resistance too. A target marked magic-vulnerable by the Yin-Yang sword's Yang strike takes 25%
 more magic damage for 5 seconds. See
 [`ResistanceHandler`](src/main/java/com/jttw/engine/progression/stats/ResistanceHandler.java).
