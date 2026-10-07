@@ -76,6 +76,20 @@ dependencies {
     minecraft "net.minecraftforge:forge:1.20.1-47.4.10"
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+
+    testImplementation platform('org.junit:junit-bom:5.10.2')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// Unit tests: game logic that runs without a Minecraft world.
+// Behaviour inside a running world is covered by GameTests (./gradlew runGameTestServer).
+tasks.named('test', Test).configure {
+    useJUnitPlatform()
+    testLogging {
+        events 'failed'
+        exceptionFormat 'full'
+    }
 }
 
 tasks.named('processResources', ProcessResources).configure {
