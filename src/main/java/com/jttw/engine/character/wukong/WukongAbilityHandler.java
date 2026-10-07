@@ -424,17 +424,14 @@ public final class WukongAbilityHandler {
     public static void fireEyeLaser(ServerPlayer player) {
         if (!player.getPersistentData().getBoolean(ImmortalItems.KEY_FIERY_GOLDEN_EYES)) return;
 
-        // Check cooldown — 5 second (100 tick) cooldown
-        if (com.jttw.engine.client.ClientAbilityData.class != null) {
-            // Server-side cooldown tracking via persistent data
-            long lastFire = player.getPersistentData().getLong("jttw_eye_laser_cd");
-            long now = player.level().getGameTime();
-            if (now - lastFire < 100) {
-                player.sendSystemMessage(Component.literal("\u00a7cEye Laser is on cooldown!"));
-                return;
-            }
-            player.getPersistentData().putLong("jttw_eye_laser_cd", now);
+        // 5 second (100 tick) cooldown, tracked server-side in persistent data
+        long lastFire = player.getPersistentData().getLong("jttw_eye_laser_cd");
+        long now = player.level().getGameTime();
+        if (now - lastFire < 100) {
+            player.sendSystemMessage(Component.literal("\u00a7cEye Laser is on cooldown!"));
+            return;
         }
+        player.getPersistentData().putLong("jttw_eye_laser_cd", now);
 
         // Cost: 10 Qi
         if (!QiData.spend(player, 10f)) {

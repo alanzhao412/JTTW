@@ -12,7 +12,6 @@ import com.jttw.engine.client.model.XiaotianQuanModel;
 import com.jttw.engine.client.renderer.PlacedStaffRenderer;
 import com.jttw.engine.client.renderer.WuCloneRenderer;
 import com.jttw.engine.client.renderer.XiaotianQuanRenderer;
-import com.jttw.engine.flight.ClientFlightHandler;
 import com.jttw.engine.network.c2s.ActivateAbilityPacket;
 import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.progression.skilltree.AbilityType;
