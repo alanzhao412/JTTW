@@ -272,8 +272,8 @@ public final class LevelManager {
         boolean anyLevelUp = false;
 
         while (level < LevelConstants.MAX_LEVEL) {
-            // Stop at checkpoint levels for Wukong
-            if (cls == ProgressionClass.PRIMORDIAL
+            // Stop at Wukong's story checkpoints (his alone)
+            if (com.jttw.engine.character.wukong.WukongCharacter.is(player)
                     && com.jttw.engine.character.wukong.WukongCheckpoints.getCheckpointForLevel(level) != null
                     && !com.jttw.engine.character.wukong.WukongCheckpoints.isComplete(player,
                             com.jttw.engine.character.wukong.WukongCheckpoints.getCheckpointForLevel(level))) {
@@ -332,7 +332,7 @@ public final class LevelManager {
             ));
 
             // Auto-transport Wukong to Hell at level 30
-            if (cls == ProgressionClass.PRIMORDIAL && level == 30) {
+            if (com.jttw.engine.character.wukong.WukongCharacter.is(player) && level == 30) {
                 player.sendSystemMessage(Component.literal(
                         "§4[JTTW] §cThe gates of the Underworld open before you..."));
                 com.jttw.engine.dimension.JTTWDimensions.teleportTo(player,

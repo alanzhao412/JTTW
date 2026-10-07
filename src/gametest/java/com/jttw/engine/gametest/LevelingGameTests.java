@@ -151,6 +151,20 @@ public class LevelingGameTests {
         h.succeed();
     }
 
+    @GameTest(template = PLATFORM)
+    public static void otherPrimordialsHaveNoCheckpointsOrHellTrip(GameTestHelper h) {
+        ServerPlayer p = player(h);
+        com.jttw.engine.reincarnation.AlignmentData.markReincarnated(p, ReincarnationOutcome.YUAN_DI);
+        LevelManager.initClass(p, ReincarnationOutcome.YUAN_DI);
+        PlayerLevel.setLevel(p, 29);
+        PlayerLevel.setXp(p, xpToReach(ProgressionClass.PRIMORDIAL, 29));
+        LevelManager.grantXp(p, xpToReach(ProgressionClass.PRIMORDIAL, 45) - xpToReach(ProgressionClass.PRIMORDIAL, 29), "test");
+        eq(h, 45, PlayerLevel.getLevel(p), "Yuan Di passes 30 and 40 without Wukong's checkpoints");
+        check(h, !WukongCheckpoints.isBlocked(p), "never blocked");
+        eq(h, net.minecraft.world.level.Level.OVERWORLD, p.level().dimension(), "not sent to Hell at 30");
+        h.succeed();
+    }
+
     // ── XP from kills ─────────────────────────────────────────────
 
     private static void kill(GameTestHelper h, ServerPlayer killer, EntityType<? extends LivingEntity> type, String tier) {

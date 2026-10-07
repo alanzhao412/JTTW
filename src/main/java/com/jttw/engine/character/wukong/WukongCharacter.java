@@ -3,6 +3,7 @@ package com.jttw.engine.character.wukong;
 import com.jttw.engine.character.AbilityAction;
 import com.jttw.engine.character.AbilitySlot;
 import com.jttw.engine.character.PlayableCharacter;
+import com.jttw.engine.item.ImmortalItems;
 import com.jttw.engine.progression.skilltree.AbilityType;
 import com.jttw.engine.progression.skilltree.SkillTree;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
@@ -17,6 +18,11 @@ public final class WukongCharacter implements PlayableCharacter {
     public static final WukongCharacter INSTANCE = new WukongCharacter();
 
     private WukongCharacter() {}
+
+    /** True if this player is playing Wukong (the story checkpoints and Hell trip are his alone). */
+    public static boolean is(net.minecraft.world.entity.player.Player player) {
+        return com.jttw.engine.character.Characters.of(player) == INSTANCE;
+    }
 
     @Override public String outcomeId() { return ReincarnationOutcome.CELESTIAL_PRIMATE.id; }
     @Override public SkillTree skillTree() { return WukongSkillTree.TREE; }
@@ -35,6 +41,17 @@ public final class WukongCharacter implements PlayableCharacter {
                 // each press summons one more clone
                 AbilitySlot.fromBranch(tree, unlocked, "wu_clone", "Shadow Clone", AbilityType.TOGGLE),
                 AbilitySlot.fromBranch(tree, unlocked, "wu_ring", "Ring of Fire", AbilityType.HELD));
+    }
+
+    /** Slot 3 (M): Fiery Golden Eyes, once the story has granted them. Not a skill-tree ability. */
+    public static final AbilitySlot GOLDEN_EYES =
+            new AbilitySlot("wu_golden_eyes", "Fiery Golden Eyes", AbilityType.TOGGLE, 1);
+
+    @Override
+    public List<AbilitySlot> skillBar(net.minecraft.world.entity.player.Player player) {
+        List<AbilitySlot> bar = skillBar(com.jttw.engine.progression.skilltree.SkillTreeData.getUnlockedNodes(player));
+        if (!ImmortalItems.hasFieryGoldenEyes(player)) return bar;
+        return PlayableCharacter.bar(bar.get(0), bar.get(1), bar.get(2), GOLDEN_EYES);
     }
 
     @Override

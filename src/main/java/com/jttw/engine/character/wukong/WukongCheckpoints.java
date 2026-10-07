@@ -2,7 +2,6 @@ package com.jttw.engine.character.wukong;
 
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.progression.level.PlayerLevel;
-import com.jttw.engine.progression.stats.ProgressionClass;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -53,11 +52,10 @@ public final class WukongCheckpoints {
 
     /**
      * Returns true if XP gain is currently blocked for this player.
-     * Only applies to PRIMORDIAL (Wukong) class.
+     * Only applies to Wukong; other Primordial characters (Yuan Di, Peng) have no checkpoints.
      */
     public static boolean isBlocked(Player player) {
-        ProgressionClass cls = PlayerLevel.getProgressionClass(player);
-        if (cls != ProgressionClass.PRIMORDIAL) return false;
+        if (!WukongCharacter.is(player)) return false;
 
         int level = PlayerLevel.getLevel(player);
         Checkpoint cp = getCheckpointForLevel(level);
