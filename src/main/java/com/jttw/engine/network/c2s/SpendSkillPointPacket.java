@@ -1,5 +1,7 @@
 package com.jttw.engine.network.c2s;
 
+import com.jttw.engine.character.Characters;
+import com.jttw.engine.character.PlayableCharacter;
 import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.network.s2c.SyncAbilitiesPacket;
 import com.jttw.engine.network.s2c.SyncSkillTreePacket;
@@ -57,6 +59,11 @@ public class SpendSkillPointPacket {
     }
 
     private static void handleServer(ServerPlayer player, String nodeId) {
+        // Only the player's own tree. The client only offers those nodes, but the id comes
+        // off the wire, and flight takes the best tier across every tree.
+        PlayableCharacter character = Characters.of(player);
+        if (character == null || !character.skillTree().owns(nodeId)) return;
+
         boolean success = SkillTreeData.tryUnlock(player, nodeId);
         if (!success) return;
 
