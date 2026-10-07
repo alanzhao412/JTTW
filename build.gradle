@@ -15,6 +15,19 @@ base {
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
+// GameTests: in-world tests run by ./gradlew runGameTestServer. A separate source set so
+// the test code and its structure files stay out of the mod jar.
+sourceSets {
+    gametest {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+configurations {
+    gametestImplementation.extendsFrom implementation
+    gametestRuntimeOnly.extendsFrom runtimeOnly
+}
+
 minecraft {
     mappings channel: 'official', version: '1.20.1'
 
@@ -28,7 +41,7 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
             
             property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            property 'mixin.env.refMapRemappingFile', "${layout.buildDirectory.get().asFile}/createSrgToMcp/output.srg"
 
             mods {
                 jttw_engine {
@@ -48,6 +61,11 @@ minecraft {
 
         gameTestServer {
             property 'forge.enabledGameTestNamespaces', 'jttw_engine'
+            mods {
+                jttw_engine {
+                    source sourceSets.gametest
+                }
+            }
         }
 
         data {
@@ -86,6 +104,11 @@ dependencies {
 // Behaviour inside a running world is covered by GameTests (./gradlew runGameTestServer).
 tasks.named('test', Test).configure {
     useJUnitPlatform()
+    // Forge's logging writes a logs/ folder into the working directory; keep it in the build dir
+    def testRunDir = layout.buildDirectory.dir('test-run').get().asFile
+    workingDir = testRunDir
+    doFirst { testRunDir.mkdirs() }
+    systemProperty 'jttw.projectDir', projectDir.absolutePath
     testLogging {
         events 'failed'
         exceptionFormat 'full'

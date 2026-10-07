@@ -121,7 +121,7 @@ class PacketRoundTripTest {
     void everyRegisteredPacketTypeHasASample() throws Exception {
         // NetworkHandler registers the packets; keep this list in step with it
         String source = new String(java.nio.file.Files.readAllBytes(
-                java.nio.file.Path.of("src/main/java/com/jttw/engine/network/NetworkHandler.java")));
+                java.nio.file.Path.of(System.getProperty("jttw.projectDir", "."), "src/main/java/com/jttw/engine/network/NetworkHandler.java")));
         List<String> registered = java.util.regex.Pattern.compile("messageBuilder\\((\\w+)\\.class")
                 .matcher(source).results().map(m -> m.group(1)).toList();
         Set<String> sampled = new java.util.HashSet<>(samples().stream().map(o -> o.getClass().getSimpleName()).toList());
