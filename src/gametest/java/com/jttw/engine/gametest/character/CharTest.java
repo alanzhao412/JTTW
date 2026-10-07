@@ -121,9 +121,9 @@ public final class CharTest {
 
     // ── World ────────────────────────────────────────────────────────
 
-    /** A mob with no AI standing on the platform at relative (x, 1, z). It stays where it is put. */
+    /** A mob with no AI standing on the platform at relative (x, 2, z), level with the player. It stays where it is put. */
     public static <T extends Mob> T mob(GameTestHelper h, EntityType<T> type, int x, int z) {
-        return h.spawnWithNoFreeWill(type, new BlockPos(x, 1, z));
+        return h.spawnWithNoFreeWill(type, new BlockPos(x, 2, z));
     }
 
     public static <T extends Entity> List<T> near(ServerPlayer p, Class<T> type, double radius) {

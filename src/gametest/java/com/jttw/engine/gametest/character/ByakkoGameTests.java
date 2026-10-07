@@ -284,9 +284,11 @@ public class ByakkoGameTests {
         strike(h, p, a, 2f);
         h.onEachTick(() -> ticks(p, 1));
         h.runAfterDelay(160, () -> {
-            int before = hitsA.size() + hitsB.size();
+            // bleed is dealt as the (online) Byakko's player attack; ignore any other damage
+            int before = of(hitsA, DamageTypes.PLAYER_ATTACK).size() + of(hitsB, DamageTypes.PLAYER_ATTACK).size();
             h.runAfterDelay(160, () -> {
-                eq(h, before, hitsA.size() + hitsB.size(), "bleed hits between 8 s and 16 s after the strike");
+                int after = of(hitsA, DamageTypes.PLAYER_ATTACK).size() + of(hitsB, DamageTypes.PLAYER_ATTACK).size();
+                eq(h, before, after, "bleed hits between 8 s and 16 s after the strike");
                 h.succeed();
             });
         });

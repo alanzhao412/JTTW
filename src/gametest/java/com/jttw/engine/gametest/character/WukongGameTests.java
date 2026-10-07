@@ -186,7 +186,7 @@ public class WukongGameTests {
     // ── Fiery Golden Eyes (slot 3) ─────────────────────────────────
 
     private static Pig pigOverhead(GameTestHelper h, ServerPlayer p) {
-        Pig pig = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(2, 3, 2));
+        Pig pig = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(2, 4, 2));
         p.setXRot(-90f); // look straight up, so the beam only crosses open air
         return pig;
     }
