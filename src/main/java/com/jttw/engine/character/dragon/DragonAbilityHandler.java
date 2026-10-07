@@ -69,7 +69,7 @@ public final class DragonAbilityHandler {
      */
     public static void castLightning(ServerPlayer player) {
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int tier = DragonSkillTree.getHighestTier(nodes, "dr_lightning");
+        int tier = DragonSkillTree.TREE.highestTier(nodes, "dr_lightning");
         if (tier < 1) return;
 
         if (!QiData.spend(player, QI_COST_LIGHTNING)) {
@@ -159,7 +159,7 @@ public final class DragonAbilityHandler {
      */
     public static void toggleWeather(ServerPlayer player) {
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int tier = DragonSkillTree.getHighestTier(nodes, "dr_weather");
+        int tier = DragonSkillTree.TREE.highestTier(nodes, "dr_weather");
         if (tier < 1) return;
 
         if (!QiData.spend(player, QI_COST_WEATHER)) {
@@ -210,7 +210,7 @@ public final class DragonAbilityHandler {
 
     /** Called from client scroll handler — cycles the selected dimension. */
     public static void scrollDimension(ServerPlayer player, int direction) {
-        int drFlightTier = DragonSkillTree.getHighestTier(
+        int drFlightTier = DragonSkillTree.TREE.highestTier(
                 SkillTreeData.getUnlockedNodes(player), "dr_flight");
         if (drFlightTier < 3) return;
 
@@ -224,7 +224,7 @@ public final class DragonAbilityHandler {
 
     /** Teleport to the currently selected dimension. */
     public static void travelDimension(ServerPlayer player) {
-        int drFlightTier = DragonSkillTree.getHighestTier(
+        int drFlightTier = DragonSkillTree.TREE.highestTier(
                 SkillTreeData.getUnlockedNodes(player), "dr_flight");
         if (drFlightTier < 3) return;
 
@@ -292,7 +292,7 @@ public final class DragonAbilityHandler {
      */
     public static void castTidalWave(ServerPlayer player) {
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int tier = DragonSkillTree.getHighestTier(nodes, "dr_wave");
+        int tier = DragonSkillTree.TREE.highestTier(nodes, "dr_wave");
         if (tier < 1) return;
 
         // Cooldown check
@@ -415,7 +415,7 @@ public final class DragonAbilityHandler {
         if (!isDragon(player)) return;
 
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int tier = DragonSkillTree.getHighestTier(nodes, "dr_scales");
+        int tier = DragonSkillTree.TREE.highestTier(nodes, "dr_scales");
         if (tier < 1) return;
 
         float amount = event.getAmount();
@@ -535,7 +535,7 @@ public final class DragonAbilityHandler {
         if (event.getSource().getDirectEntity() != attacker) return;
 
         Set<String> nodes = SkillTreeData.getUnlockedNodes(attacker);
-        int tier = DragonSkillTree.getHighestTier(nodes, "dr_force");
+        int tier = DragonSkillTree.TREE.highestTier(nodes, "dr_force");
         if (tier < 1) return;
 
         LivingEntity target = event.getEntity();

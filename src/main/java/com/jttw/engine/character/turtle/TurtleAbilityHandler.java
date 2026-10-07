@@ -164,7 +164,7 @@ public final class TurtleAbilityHandler {
 
     public static void startGuard(ServerPlayer player) {
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int tier = TurtleSkillTree.getHighestTier(nodes, "tu_shell");
+        int tier = TurtleSkillTree.TREE.highestTier(nodes, "tu_shell");
         if (tier < 1) return;
 
         ACTIVE_GUARDS.add(player.getUUID());
@@ -261,7 +261,7 @@ public final class TurtleAbilityHandler {
         }
 
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int tier = TurtleSkillTree.getHighestTier(nodes, "tu_force");
+        int tier = TurtleSkillTree.TREE.highestTier(nodes, "tu_force");
         if (tier < 1) return;
 
         // Cooldown check
@@ -380,7 +380,7 @@ public final class TurtleAbilityHandler {
         UUID uuid = player.getUUID();
 
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int tier = TurtleSkillTree.getHighestTier(nodes, "tu_tectonic");
+        int tier = TurtleSkillTree.TREE.highestTier(nodes, "tu_tectonic");
         if (tier < 1) return;
 
         // Cooldown check
@@ -464,7 +464,7 @@ public final class TurtleAbilityHandler {
         UUID uuid = player.getUUID();
 
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int tier = TurtleSkillTree.getHighestTier(nodes, "tu_gravity");
+        int tier = TurtleSkillTree.TREE.highestTier(nodes, "tu_gravity");
         if (tier < 1) return;
 
         if (ACTIVE_WELLS.contains(uuid)) {
@@ -648,7 +648,7 @@ public final class TurtleAbilityHandler {
 
         // Only track for EARTH turtle players who have the patience node
         Set<String> nodes = SkillTreeData.getUnlockedNodes(sp);
-        int tier = TurtleSkillTree.getHighestTier(nodes, "tu_patience");
+        int tier = TurtleSkillTree.TREE.highestTier(nodes, "tu_patience");
         if (tier < 1) {
             // Clean up if they don't have the skill
             PATIENCE_STILL_TICKS.remove(uuid);
@@ -716,7 +716,7 @@ public final class TurtleAbilityHandler {
         if (event.getEntity() instanceof ServerPlayer sp
                 && ACTIVE_GUARDS.contains(sp.getUUID())) {
             Set<String> nodes = SkillTreeData.getUnlockedNodes(sp);
-            int tier = TurtleSkillTree.getHighestTier(nodes, "tu_shell");
+            int tier = TurtleSkillTree.TREE.highestTier(nodes, "tu_shell");
 
             // Tier 2: completely negate projectiles
             if (tier >= 2 && (event.getSource().is(DamageTypes.ARROW)
@@ -747,7 +747,7 @@ public final class TurtleAbilityHandler {
 
             if (bonus > 0.0f) {
                 Set<String> attackerNodes = SkillTreeData.getUnlockedNodes(attackerSp);
-                int patienceTier = TurtleSkillTree.getHighestTier(attackerNodes, "tu_patience");
+                int patienceTier = TurtleSkillTree.TREE.highestTier(attackerNodes, "tu_patience");
 
                 if (patienceTier >= 1) {
                     float multiplier = 1.0f + bonus;
@@ -786,7 +786,7 @@ public final class TurtleAbilityHandler {
             if (owner == null) continue;
 
             Set<String> ownerNodes = SkillTreeData.getUnlockedNodes(owner);
-            int gravityTier = TurtleSkillTree.getHighestTier(ownerNodes, "tu_gravity");
+            int gravityTier = TurtleSkillTree.TREE.highestTier(ownerNodes, "tu_gravity");
             if (gravityTier < 2) continue;
 
             double dist = owner.distanceTo(hurtTarget);

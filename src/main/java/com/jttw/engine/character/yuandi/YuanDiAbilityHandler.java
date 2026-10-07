@@ -194,7 +194,7 @@ public final class YuanDiAbilityHandler {
 
     public static void toggleTransform(ServerPlayer player) {
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int tier = YuanDiSkillTree.getHighestTier(nodes, "yd_transform");
+        int tier = YuanDiSkillTree.TREE.highestTier(nodes, "yd_transform");
         if (tier < 2) return;
 
         TransformState state = STATES.computeIfAbsent(player.getUUID(), k -> new TransformState());
@@ -235,7 +235,7 @@ public final class YuanDiAbilityHandler {
 
     private static void checkAutoTrigger(ServerPlayer player) {
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int tier = YuanDiSkillTree.getHighestTier(nodes, "yd_transform");
+        int tier = YuanDiSkillTree.TREE.highestTier(nodes, "yd_transform");
         if (tier != 1) return;
 
         TransformState state = STATES.computeIfAbsent(player.getUUID(), k -> new TransformState());
@@ -336,7 +336,7 @@ public final class YuanDiAbilityHandler {
      */
     private static void fireSovereignPulse(ServerPlayer player) {
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int cmdTier = YuanDiSkillTree.getHighestTier(nodes, "yd_command");
+        int cmdTier = YuanDiSkillTree.TREE.highestTier(nodes, "yd_command");
         if (cmdTier < 1) return;
 
         boolean transformed = isTransformed(player);
@@ -416,7 +416,7 @@ public final class YuanDiAbilityHandler {
 
     public static void startBreath(ServerPlayer player) {
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int tier = YuanDiSkillTree.getHighestTier(nodes, "yd_breath");
+        int tier = YuanDiSkillTree.TREE.highestTier(nodes, "yd_breath");
         if (tier < 1) return;
 
         ACTIVE_BREATHS.add(player.getUUID());
@@ -439,7 +439,7 @@ public final class YuanDiAbilityHandler {
     private static void tickBreath(ServerPlayer player) {
         // Drain Qi
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int tier = YuanDiSkillTree.getHighestTier(nodes, "yd_breath");
+        int tier = YuanDiSkillTree.TREE.highestTier(nodes, "yd_breath");
 
         float qiDrain = (tier >= 2) ? BREATH_QI_PER_TICK * 0.7f : BREATH_QI_PER_TICK;
         float current = QiData.getCurrent(player);
@@ -535,7 +535,7 @@ public final class YuanDiAbilityHandler {
 
     public static void usePrimordialSmite(ServerPlayer player) {
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int tier = YuanDiSkillTree.getHighestTier(nodes, "yd_smite");
+        int tier = YuanDiSkillTree.TREE.highestTier(nodes, "yd_smite");
         if (tier < 1) return;
 
         UUID uuid = player.getUUID();
@@ -640,7 +640,7 @@ public final class YuanDiAbilityHandler {
 
     private static void applyNightPower(ServerPlayer player) {
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int tier = YuanDiSkillTree.getHighestTier(nodes, "yd_night");
+        int tier = YuanDiSkillTree.TREE.highestTier(nodes, "yd_night");
         if (tier < 1) { removeNightModifiers(player); return; }
 
         if (player.level().isDay()) { removeNightModifiers(player); return; }
@@ -691,7 +691,7 @@ public final class YuanDiAbilityHandler {
 
         // --- Night T3 bonus regen (every second) ---
         if (sp.tickCount % 20 == 0) {
-            int nightTier = YuanDiSkillTree.getHighestTier(
+            int nightTier = YuanDiSkillTree.TREE.highestTier(
                     SkillTreeData.getUnlockedNodes(sp), "yd_night");
             if (nightTier >= 3 && !sp.level().isDay()) sp.heal(1.0f);
         }
@@ -842,7 +842,7 @@ public final class YuanDiAbilityHandler {
      */
     public static void useAbyssalGravity(ServerPlayer player) {
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int tier = YuanDiSkillTree.getHighestTier(nodes, "yd_gravity");
+        int tier = YuanDiSkillTree.TREE.highestTier(nodes, "yd_gravity");
         if (tier < 1) return;
 
         UUID uuid = player.getUUID();
@@ -986,7 +986,7 @@ public final class YuanDiAbilityHandler {
      */
     private static void tickPrimordialStep(ServerPlayer player) {
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int tier = YuanDiSkillTree.getHighestTier(nodes, "yd_step");
+        int tier = YuanDiSkillTree.TREE.highestTier(nodes, "yd_step");
         if (tier < 1) return;
 
         // Only trigger when sprinting and sneaking at the same time
@@ -1084,7 +1084,7 @@ public final class YuanDiAbilityHandler {
         if (!isYuanDi(attacker)) return;
 
         Set<String> nodes = SkillTreeData.getUnlockedNodes(attacker);
-        int dominionTier = YuanDiSkillTree.getHighestTier(nodes, "yd_dominion");
+        int dominionTier = YuanDiSkillTree.TREE.highestTier(nodes, "yd_dominion");
         if (dominionTier < 1) return;
 
         LivingEntity target = event.getEntity();
@@ -1117,7 +1117,7 @@ public final class YuanDiAbilityHandler {
         if (marker == null) return;
 
         Set<String> nodes = SkillTreeData.getUnlockedNodes(marker);
-        int dominionTier = YuanDiSkillTree.getHighestTier(nodes, "yd_dominion");
+        int dominionTier = YuanDiSkillTree.TREE.highestTier(nodes, "yd_dominion");
         if (dominionTier < 1) return;
 
         // T1: reduce damage to the Yuan Di player only

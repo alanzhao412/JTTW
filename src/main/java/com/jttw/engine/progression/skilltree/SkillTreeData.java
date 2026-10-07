@@ -4,7 +4,6 @@ import com.jttw.engine.character.byakko.ByakkoSkillTree;
 import com.jttw.engine.character.dragon.DragonSkillTree;
 import com.jttw.engine.character.erlang.ErlangShenSkillTree;
 import com.jttw.engine.character.nezha.NezhaSkillTree;
-import com.jttw.engine.character.peng.PengSkillTree;
 import com.jttw.engine.character.phoenix.PhoenixSkillTree;
 import com.jttw.engine.character.turtle.TurtleSkillTree;
 import com.jttw.engine.character.wukong.WukongSkillTree;
@@ -110,22 +109,10 @@ public final class SkillTreeData {
     // Unlock (spend a point)
     // -----------------------------------------------------------------------
 
-    /**
-     * Resolves a skill node by ID across all registered skill trees.
-     * Routes by ID prefix: "wu_" → Wukong, "es_" → Erlang Shen.
-     */
+    /** Resolves a skill node by ID across all registered skill trees. */
     @Nullable
     public static SkillNode resolveNode(String nodeId) {
-        if (nodeId.startsWith("wu_")) return WukongSkillTree.get(nodeId);
-        if (nodeId.startsWith("es_")) return ErlangShenSkillTree.get(nodeId);
-        if (nodeId.startsWith("dr_")) return DragonSkillTree.get(nodeId);
-        if (nodeId.startsWith("tu_")) return TurtleSkillTree.get(nodeId);
-        if (nodeId.startsWith("bk_")) return ByakkoSkillTree.get(nodeId);
-        if (nodeId.startsWith("ph_")) return PhoenixSkillTree.get(nodeId);
-        if (nodeId.startsWith("yd_")) return YuanDiSkillTree.get(nodeId);
-        if (nodeId.startsWith("gp_")) return PengSkillTree.get(nodeId);
-        if (nodeId.startsWith("nz_")) return NezhaSkillTree.get(nodeId);
-        return null;
+        return SkillTrees.resolveNode(nodeId);
     }
 
     /**
@@ -178,22 +165,22 @@ public final class SkillTreeData {
 
     /** Highest unlocked transformation tier (0 = none unlocked). */
     public static int getTransformTier(Player p) {
-        return WukongSkillTree.getHighestTier(getUnlockedNodes(p), "wu_transform");
+        return WukongSkillTree.TREE.highestTier(getUnlockedNodes(p), "wu_transform");
     }
 
     /** Highest unlocked flight tier (0 = flight not unlocked). */
     public static int getFlightTier(Player p) {
-        return WukongSkillTree.getHighestTier(getUnlockedNodes(p), "wu_flight");
+        return WukongSkillTree.TREE.highestTier(getUnlockedNodes(p), "wu_flight");
     }
 
     /** Highest unlocked ring-of-fire tier (0 = not unlocked). */
     public static int getRingTier(Player p) {
-        return WukongSkillTree.getHighestTier(getUnlockedNodes(p), "wu_ring");
+        return WukongSkillTree.TREE.highestTier(getUnlockedNodes(p), "wu_ring");
     }
 
     /** Highest unlocked shadow-clone tier (0 = not unlocked). */
     public static int getCloneTier(Player p) {
-        return WukongSkillTree.getHighestTier(getUnlockedNodes(p), "wu_clone");
+        return WukongSkillTree.TREE.highestTier(getUnlockedNodes(p), "wu_clone");
     }
 
     // -----------------------------------------------------------------------
@@ -202,12 +189,12 @@ public final class SkillTreeData {
 
     /** Highest unlocked Yao Wang (Demon King) tier (0 = not unlocked). */
     public static int getYaoWangTier(Player p) {
-        return WukongSkillTree.getHighestTier(getUnlockedNodes(p), "wu_combat");
+        return WukongSkillTree.TREE.highestTier(getUnlockedNodes(p), "wu_combat");
     }
 
     /** Highest unlocked Martial Arts tier (0 = not unlocked). */
     public static int getMartialTier(Player p) {
-        return WukongSkillTree.getHighestTier(getUnlockedNodes(p), "wu_martial");
+        return WukongSkillTree.TREE.highestTier(getUnlockedNodes(p), "wu_martial");
     }
 
     // -----------------------------------------------------------------------
@@ -216,22 +203,22 @@ public final class SkillTreeData {
 
     /** Highest unlocked Erlang Shen transformation tier (0 = none). */
     public static int getEsTransformTier(Player p) {
-        return ErlangShenSkillTree.getHighestTier(getUnlockedNodes(p), "es_transform");
+        return ErlangShenSkillTree.TREE.highestTier(getUnlockedNodes(p), "es_transform");
     }
 
     /** Highest unlocked Xiaotian Quan ability tier (0 = not unlocked). */
     public static int getXtqTier(Player p) {
-        return ErlangShenSkillTree.getHighestTier(getUnlockedNodes(p), "es_xtq");
+        return ErlangShenSkillTree.TREE.highestTier(getUnlockedNodes(p), "es_xtq");
     }
 
     /** Highest unlocked Eye of Heaven tier (0 = not unlocked). */
     public static int getEyeTier(Player p) {
-        return ErlangShenSkillTree.getHighestTier(getUnlockedNodes(p), "es_eye");
+        return ErlangShenSkillTree.TREE.highestTier(getUnlockedNodes(p), "es_eye");
     }
 
     /** Highest unlocked Erlang Shen flight tier (0 = not unlocked). */
     public static int getEsFlightTier(Player p) {
-        return ErlangShenSkillTree.getHighestTier(getUnlockedNodes(p), "es_flight");
+        return ErlangShenSkillTree.TREE.highestTier(getUnlockedNodes(p), "es_flight");
     }
 
     /** Effective Xiaotian Quan growth tier based on Hound Growth passives. */
@@ -245,17 +232,17 @@ public final class SkillTreeData {
 
     /** Highest unlocked Celestial Hunt tier (0 = not unlocked). */
     public static int getEsHuntTier(Player p) {
-        return ErlangShenSkillTree.getHighestTier(getUnlockedNodes(p), "es_hunt");
+        return ErlangShenSkillTree.TREE.highestTier(getUnlockedNodes(p), "es_hunt");
     }
 
     /** Highest unlocked Zhàn Shén (God of War) tier (0 = not unlocked). */
     public static int getEsWrathTier(Player p) {
-        return ErlangShenSkillTree.getHighestTier(getUnlockedNodes(p), "es_wrath");
+        return ErlangShenSkillTree.TREE.highestTier(getUnlockedNodes(p), "es_wrath");
     }
 
     /** Highest unlocked Celestial Tactics tier (0 = not unlocked). */
     public static int getEsTacticsTier(Player p) {
-        return ErlangShenSkillTree.getHighestTier(getUnlockedNodes(p), "es_tactics");
+        return ErlangShenSkillTree.TREE.highestTier(getUnlockedNodes(p), "es_tactics");
     }
 
     // -----------------------------------------------------------------------
@@ -264,17 +251,17 @@ public final class SkillTreeData {
 
     /** Highest unlocked Abyssal Gravity tier (0 = not unlocked). */
     public static int getYdGravityTier(Player p) {
-        return YuanDiSkillTree.getHighestTier(getUnlockedNodes(p), "yd_gravity");
+        return YuanDiSkillTree.TREE.highestTier(getUnlockedNodes(p), "yd_gravity");
     }
 
     /** Highest unlocked Primordial Step tier (0 = not unlocked). */
     public static int getYdStepTier(Player p) {
-        return YuanDiSkillTree.getHighestTier(getUnlockedNodes(p), "yd_step");
+        return YuanDiSkillTree.TREE.highestTier(getUnlockedNodes(p), "yd_step");
     }
 
     /** Highest unlocked Ancient Dominion tier (0 = not unlocked). */
     public static int getYdDominionTier(Player p) {
-        return YuanDiSkillTree.getHighestTier(getUnlockedNodes(p), "yd_dominion");
+        return YuanDiSkillTree.TREE.highestTier(getUnlockedNodes(p), "yd_dominion");
     }
 
     // -----------------------------------------------------------------------
@@ -283,42 +270,42 @@ public final class SkillTreeData {
 
     /** Highest unlocked Dragon lightning tier (0 = not unlocked). */
     public static int getDrLightningTier(Player p) {
-        return DragonSkillTree.getHighestTier(getUnlockedNodes(p), "dr_lightning");
+        return DragonSkillTree.TREE.highestTier(getUnlockedNodes(p), "dr_lightning");
     }
 
     /** Highest unlocked Dragon weather tier (0 = not unlocked). */
     public static int getDrWeatherTier(Player p) {
-        return DragonSkillTree.getHighestTier(getUnlockedNodes(p), "dr_weather");
+        return DragonSkillTree.TREE.highestTier(getUnlockedNodes(p), "dr_weather");
     }
 
     /** Highest unlocked Dragon flight tier (0 = not unlocked). */
     public static int getDrFlightTier(Player p) {
-        return DragonSkillTree.getHighestTier(getUnlockedNodes(p), "dr_flight");
+        return DragonSkillTree.TREE.highestTier(getUnlockedNodes(p), "dr_flight");
     }
 
     /** Highest unlocked Draconic Pressure tier (0 = not unlocked). */
     public static int getDrPressureTier(Player p) {
-        return DragonSkillTree.getHighestTier(getUnlockedNodes(p), "dr_pressure");
+        return DragonSkillTree.TREE.highestTier(getUnlockedNodes(p), "dr_pressure");
     }
 
     /** Highest unlocked Tidal Recovery tier (0 = not unlocked). */
     public static int getDrTidalTier(Player p) {
-        return DragonSkillTree.getHighestTier(getUnlockedNodes(p), "dr_tidal");
+        return DragonSkillTree.TREE.highestTier(getUnlockedNodes(p), "dr_tidal");
     }
 
     /** Highest unlocked Tidal Wave tier (0 = not unlocked). */
     public static int getDrWaveTier(Player p) {
-        return DragonSkillTree.getHighestTier(getUnlockedNodes(p), "dr_wave");
+        return DragonSkillTree.TREE.highestTier(getUnlockedNodes(p), "dr_wave");
     }
 
     /** Highest unlocked Dragon Scales tier (0 = not unlocked). */
     public static int getDrScalesTier(Player p) {
-        return DragonSkillTree.getHighestTier(getUnlockedNodes(p), "dr_scales");
+        return DragonSkillTree.TREE.highestTier(getUnlockedNodes(p), "dr_scales");
     }
 
     /** Highest unlocked Tidal Force tier (0 = not unlocked). */
     public static int getDrForceTier(Player p) {
-        return DragonSkillTree.getHighestTier(getUnlockedNodes(p), "dr_force");
+        return DragonSkillTree.TREE.highestTier(getUnlockedNodes(p), "dr_force");
     }
 
     // -----------------------------------------------------------------------
@@ -327,32 +314,32 @@ public final class SkillTreeData {
 
     /** Highest unlocked Shell Guard tier (0 = not unlocked). */
     public static int getTuShellTier(Player p) {
-        return TurtleSkillTree.getHighestTier(getUnlockedNodes(p), "tu_shell");
+        return TurtleSkillTree.TREE.highestTier(getUnlockedNodes(p), "tu_shell");
     }
 
     /** Highest unlocked Earthen Roots tier (0 = not unlocked). */
     public static int getTuRootsTier(Player p) {
-        return TurtleSkillTree.getHighestTier(getUnlockedNodes(p), "tu_roots");
+        return TurtleSkillTree.TREE.highestTier(getUnlockedNodes(p), "tu_roots");
     }
 
     /** Highest unlocked Bedrock Constitution tier (0 = not unlocked). */
     public static int getTuBedrockTier(Player p) {
-        return TurtleSkillTree.getHighestTier(getUnlockedNodes(p), "tu_bedrock");
+        return TurtleSkillTree.TREE.highestTier(getUnlockedNodes(p), "tu_bedrock");
     }
 
     /** Highest unlocked Tectonic Slam tier (0 = not unlocked). */
     public static int getTuTectonicTier(Player p) {
-        return TurtleSkillTree.getHighestTier(getUnlockedNodes(p), "tu_tectonic");
+        return TurtleSkillTree.TREE.highestTier(getUnlockedNodes(p), "tu_tectonic");
     }
 
     /** Highest unlocked Gravity Well tier (0 = not unlocked). */
     public static int getTuGravityTier(Player p) {
-        return TurtleSkillTree.getHighestTier(getUnlockedNodes(p), "tu_gravity");
+        return TurtleSkillTree.TREE.highestTier(getUnlockedNodes(p), "tu_gravity");
     }
 
     /** Highest unlocked Mountain's Patience tier (0 = not unlocked). */
     public static int getTuPatienceTier(Player p) {
-        return TurtleSkillTree.getHighestTier(getUnlockedNodes(p), "tu_patience");
+        return TurtleSkillTree.TREE.highestTier(getUnlockedNodes(p), "tu_patience");
     }
 
     // -----------------------------------------------------------------------
@@ -361,32 +348,32 @@ public final class SkillTreeData {
 
     /** Highest unlocked Byakko leap tier (0 = not unlocked). */
     public static int getBkLeapTier(Player p) {
-        return ByakkoSkillTree.getHighestTier(getUnlockedNodes(p), "bk_leap");
+        return ByakkoSkillTree.TREE.highestTier(getUnlockedNodes(p), "bk_leap");
     }
 
     /** Highest unlocked Byakko bleed tier (0 = not unlocked). */
     public static int getBkBleedTier(Player p) {
-        return ByakkoSkillTree.getHighestTier(getUnlockedNodes(p), "bk_bleed");
+        return ByakkoSkillTree.TREE.highestTier(getUnlockedNodes(p), "bk_bleed");
     }
 
     /** Highest unlocked Byakko velocity tier (0 = not unlocked). */
     public static int getBkVelocityTier(Player p) {
-        return ByakkoSkillTree.getHighestTier(getUnlockedNodes(p), "bk_velocity");
+        return ByakkoSkillTree.TREE.highestTier(getUnlockedNodes(p), "bk_velocity");
     }
 
     /** Highest unlocked Scent of Blood tier (0 = not unlocked). */
     public static int getBkScentTier(Player p) {
-        return ByakkoSkillTree.getHighestTier(getUnlockedNodes(p), "bk_scent");
+        return ByakkoSkillTree.TREE.highestTier(getUnlockedNodes(p), "bk_scent");
     }
 
     /** Highest unlocked Predator's Instinct tier (0 = not unlocked). */
     public static int getBkInstinctTier(Player p) {
-        return ByakkoSkillTree.getHighestTier(getUnlockedNodes(p), "bk_instinct");
+        return ByakkoSkillTree.TREE.highestTier(getUnlockedNodes(p), "bk_instinct");
     }
 
     /** Highest unlocked Territorial Roar tier (0 = not unlocked). */
     public static int getBkRoarTier(Player p) {
-        return ByakkoSkillTree.getHighestTier(getUnlockedNodes(p), "bk_roar");
+        return ByakkoSkillTree.TREE.highestTier(getUnlockedNodes(p), "bk_roar");
     }
 
     // -----------------------------------------------------------------------
@@ -395,26 +382,26 @@ public final class SkillTreeData {
 
     /** Highest unlocked Solar Radiance tier (0 = not unlocked). */
     public static int getPhRadianceTier(Player p) {
-        return PhoenixSkillTree.getHighestTier(getUnlockedNodes(p), "ph_radiance");
+        return PhoenixSkillTree.TREE.highestTier(getUnlockedNodes(p), "ph_radiance");
     }
 
     /** Highest unlocked Rising Ember tier (0 = not unlocked). */
     public static int getPhEmberTier(Player p) {
-        return PhoenixSkillTree.getHighestTier(getUnlockedNodes(p), "ph_ember");
+        return PhoenixSkillTree.TREE.highestTier(getUnlockedNodes(p), "ph_ember");
     }
 
     /** Highest unlocked Molten Talons tier (0 = not unlocked). */
     public static int getPhTalonsTier(Player p) {
-        return PhoenixSkillTree.getHighestTier(getUnlockedNodes(p), "ph_talons");
+        return PhoenixSkillTree.TREE.highestTier(getUnlockedNodes(p), "ph_talons");
     }
 
-    public static int getEsSpearTier(Player p) { return ErlangShenSkillTree.getHighestTier(getUnlockedNodes(p), "es_spear"); }
+    public static int getEsSpearTier(Player p) { return ErlangShenSkillTree.TREE.highestTier(getUnlockedNodes(p), "es_spear"); }
 
     // ── Nezha ────────────────────────────────────────────────────────
-    public static int getNzArmTier(Player p)    { return NezhaSkillTree.getHighestTier(getUnlockedNodes(p), "nz_arm"); }
-    public static int getNzFireTier(Player p)   { return NezhaSkillTree.getHighestTier(getUnlockedNodes(p), "nz_fire"); }
-    public static int getNzDetTier(Player p)    { return NezhaSkillTree.getHighestTier(getUnlockedNodes(p), "nz_det"); }
-    public static int getNzFormTier(Player p)   { return NezhaSkillTree.getHighestTier(getUnlockedNodes(p), "nz_form"); }
-    public static int getNzFlightTier(Player p) { return NezhaSkillTree.getHighestTier(getUnlockedNodes(p), "nz_flight"); }
-    public static int getNzCombatTier(Player p) { return NezhaSkillTree.getHighestTier(getUnlockedNodes(p), "nz_combat"); }
+    public static int getNzArmTier(Player p)    { return NezhaSkillTree.TREE.highestTier(getUnlockedNodes(p), "nz_arm"); }
+    public static int getNzFireTier(Player p)   { return NezhaSkillTree.TREE.highestTier(getUnlockedNodes(p), "nz_fire"); }
+    public static int getNzDetTier(Player p)    { return NezhaSkillTree.TREE.highestTier(getUnlockedNodes(p), "nz_det"); }
+    public static int getNzFormTier(Player p)   { return NezhaSkillTree.TREE.highestTier(getUnlockedNodes(p), "nz_form"); }
+    public static int getNzFlightTier(Player p) { return NezhaSkillTree.TREE.highestTier(getUnlockedNodes(p), "nz_flight"); }
+    public static int getNzCombatTier(Player p) { return NezhaSkillTree.TREE.highestTier(getUnlockedNodes(p), "nz_combat"); }
 }

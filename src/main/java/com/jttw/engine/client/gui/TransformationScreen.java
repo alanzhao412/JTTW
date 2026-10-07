@@ -97,8 +97,8 @@ public class TransformationScreen extends Screen {
      */
     private static int getClientTransformTier() {
         Set<String> nodes = ClientAbilityData.getUnlockedNodes();
-        int wuTier = WukongSkillTree.getHighestTier(nodes, "wu_transform");
-        int esTier = ErlangShenSkillTree.getHighestTier(nodes, "es_transform");
+        int wuTier = WukongSkillTree.TREE.highestTier(nodes, "wu_transform");
+        int esTier = ErlangShenSkillTree.TREE.highestTier(nodes, "es_transform");
         return Math.max(wuTier, esTier);
     }
 

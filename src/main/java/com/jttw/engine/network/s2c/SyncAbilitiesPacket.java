@@ -136,18 +136,18 @@ public class SyncAbilitiesPacket {
 
         if ("celestial_primate".equals(outcomeId)) {
             // Slot 0 (V) — 72 Transformations
-            int transformTier = WukongSkillTree.getHighestTier(unlocked, "wu_transform");
+            int transformTier = WukongSkillTree.TREE.highestTier(unlocked, "wu_transform");
             if (transformTier >= 1) {
                 slots[0] = new Entry("wu_transform", "72 Transformations",
                         AbilityType.MENU, transformTier);
             }
             // Slot 1 (B) — Shadow Clone (each press summons one more)
-            int cloneTier = WukongSkillTree.getHighestTier(unlocked, "wu_clone");
+            int cloneTier = WukongSkillTree.TREE.highestTier(unlocked, "wu_clone");
             if (cloneTier >= 1) {
                 slots[1] = new Entry("wu_clone", "Shadow Clone", AbilityType.TOGGLE, cloneTier);
             }
             // Slot 2 (N) — Ring of Fire (HELD)
-            int ringTier = WukongSkillTree.getHighestTier(unlocked, "wu_ring");
+            int ringTier = WukongSkillTree.TREE.highestTier(unlocked, "wu_ring");
             if (ringTier >= 1) {
                 slots[2] = new Entry("wu_ring", "Ring of Fire", AbilityType.HELD, ringTier);
             }
@@ -166,13 +166,13 @@ public class SyncAbilitiesPacket {
 
         // Third Lotus Prince (Nezha)
         if ("third_lotus_prince".equals(outcomeId)) {
-            int armTier = NezhaSkillTree.getHighestTier(unlocked, "nz_arm");
+            int armTier = NezhaSkillTree.TREE.highestTier(unlocked, "nz_arm");
             if (armTier >= 1) slots[0] = new Entry("nz_cycle", "Weapon Cycle", AbilityType.TOGGLE, armTier);
-            int fireTier = NezhaSkillTree.getHighestTier(unlocked, "nz_fire");
+            int fireTier = NezhaSkillTree.TREE.highestTier(unlocked, "nz_fire");
             if (fireTier >= 1) slots[1] = new Entry("nz_fire", "Samadhi Fire", AbilityType.TOGGLE, fireTier);
-            int detTier = NezhaSkillTree.getHighestTier(unlocked, "nz_det");
+            int detTier = NezhaSkillTree.TREE.highestTier(unlocked, "nz_det");
             if (detTier >= 1) slots[2] = new Entry("nz_det", "Lotus Detonation", AbilityType.HELD, detTier);
-            int formTier = NezhaSkillTree.getHighestTier(unlocked, "nz_form");
+            int formTier = NezhaSkillTree.TREE.highestTier(unlocked, "nz_form");
             if (formTier >= 1) slots[3] = new Entry("nz_form", "Three Heads Six Arms", AbilityType.TOGGLE, formTier);
         }
 
@@ -189,19 +189,19 @@ public class SyncAbilitiesPacket {
         }
         if ("eye_of_heaven".equals(outcomeId)) {
             // Slot 0 (V) — 72 Transformations
-            int esTransformTier = ErlangShenSkillTree.getHighestTier(unlocked, "es_transform");
+            int esTransformTier = ErlangShenSkillTree.TREE.highestTier(unlocked, "es_transform");
             if (esTransformTier >= 1) {
                 slots[0] = new Entry("es_transform", "72 Transformations",
                         AbilityType.MENU, esTransformTier);
             }
             // Slot 1 (B) — Xiaotian Quan
-            int xtqTier = ErlangShenSkillTree.getHighestTier(unlocked, "es_xtq");
+            int xtqTier = ErlangShenSkillTree.TREE.highestTier(unlocked, "es_xtq");
             if (xtqTier >= 1) {
                 slots[1] = new Entry("es_xtq", "Xiaotian Quan",
                         AbilityType.TOGGLE, xtqTier);
             }
             // Slot 2 (N) — Eye of Heaven (TOGGLE)
-            int eyeTier = ErlangShenSkillTree.getHighestTier(unlocked, "es_eye");
+            int eyeTier = ErlangShenSkillTree.TREE.highestTier(unlocked, "es_eye");
             if (eyeTier >= 1) {
                 slots[2] = new Entry("es_eye", "Eye of Heaven",
                         AbilityType.TOGGLE, eyeTier);
@@ -245,25 +245,25 @@ public class SyncAbilitiesPacket {
 
     private static void buildTurtleSlots(Entry[] slots, Set<String> unlocked) {
         // Slot 0 (V) — Shell Guard
-        int shellTier = TurtleSkillTree.getHighestTier(unlocked, "tu_shell");
+        int shellTier = TurtleSkillTree.TREE.highestTier(unlocked, "tu_shell");
         if (shellTier >= 1) {
             slots[0] = new Entry("tu_shell", "Shell Guard",
                     AbilityType.HELD, shellTier);
         }
         // Slot 1 (B) — Unstoppable Force
-        int forceTier = TurtleSkillTree.getHighestTier(unlocked, "tu_force");
+        int forceTier = TurtleSkillTree.TREE.highestTier(unlocked, "tu_force");
         if (forceTier >= 1) {
             slots[1] = new Entry("tu_force", "Unstoppable Force",
                     AbilityType.TOGGLE, forceTier);
         }
         // Slot 2 (N) — Tectonic Slam (USE)
-        int tectonicTier = TurtleSkillTree.getHighestTier(unlocked, "tu_tectonic");
+        int tectonicTier = TurtleSkillTree.TREE.highestTier(unlocked, "tu_tectonic");
         if (tectonicTier >= 1) {
             slots[2] = new Entry("tu_tectonic", "Tectonic Slam",
                     AbilityType.TOGGLE, tectonicTier);
         }
         // Slot 3 (M) — Gravity Well (TOGGLE)
-        int gravityTier = TurtleSkillTree.getHighestTier(unlocked, "tu_gravity");
+        int gravityTier = TurtleSkillTree.TREE.highestTier(unlocked, "tu_gravity");
         if (gravityTier >= 1) {
             slots[3] = new Entry("tu_gravity", "Gravity Well",
                     AbilityType.TOGGLE, gravityTier);
@@ -272,13 +272,13 @@ public class SyncAbilitiesPacket {
 
     private static void buildByakkoSlots(Entry[] slots, Set<String> unlocked) {
         // Slot 0 (V) — Predator's Leap
-        int leapTier = ByakkoSkillTree.getHighestTier(unlocked, "bk_leap");
+        int leapTier = ByakkoSkillTree.TREE.highestTier(unlocked, "bk_leap");
         if (leapTier >= 1) {
             slots[0] = new Entry("bk_leap", "Predator's Leap",
                     AbilityType.TOGGLE, leapTier);
         }
         // Slot 1 (B) — Territorial Roar
-        int roarTier = ByakkoSkillTree.getHighestTier(unlocked, "bk_roar");
+        int roarTier = ByakkoSkillTree.TREE.highestTier(unlocked, "bk_roar");
         if (roarTier >= 1) {
             slots[1] = new Entry("bk_roar", "Territorial Roar",
                     AbilityType.TOGGLE, roarTier);
@@ -287,24 +287,24 @@ public class SyncAbilitiesPacket {
 
     private static void buildDragonSlots(Entry[] slots, Set<String> unlocked) {
         // Slot 0 (V) — Lightning Strike
-        int lightningTier = DragonSkillTree.getHighestTier(unlocked, "dr_lightning");
+        int lightningTier = DragonSkillTree.TREE.highestTier(unlocked, "dr_lightning");
         if (lightningTier >= 1) {
             slots[0] = new Entry("dr_lightning", "Lightning Strike",
                     AbilityType.TOGGLE, lightningTier);
         }
         // Slot 1 (B) — Weather Control
-        int weatherTier = DragonSkillTree.getHighestTier(unlocked, "dr_weather");
+        int weatherTier = DragonSkillTree.TREE.highestTier(unlocked, "dr_weather");
         if (weatherTier >= 1) {
             slots[1] = new Entry("dr_weather", "Weather Control",
                     AbilityType.TOGGLE, weatherTier);
         }
         // Slot 2 (N) — Tidal Wave (priority) or Dimension Travel (fallback at flight T3)
-        int waveTier = DragonSkillTree.getHighestTier(unlocked, "dr_wave");
+        int waveTier = DragonSkillTree.TREE.highestTier(unlocked, "dr_wave");
         if (waveTier >= 1) {
             slots[2] = new Entry("dr_wave", "Tidal Wave",
                     AbilityType.TOGGLE, waveTier);
         } else {
-            int dimTier = DragonSkillTree.getHighestTier(unlocked, "dr_flight");
+            int dimTier = DragonSkillTree.TREE.highestTier(unlocked, "dr_flight");
             if (dimTier >= 3) {
                 slots[2] = new Entry("dr_dimension", "Dimension Travel",
                         AbilityType.TOGGLE, dimTier);
@@ -314,25 +314,25 @@ public class SyncAbilitiesPacket {
 
     private static void buildYuanDiSlots(Entry[] slots, Set<String> unlocked) {
         // Slot 0 (V) — Primordial Transformation (TOGGLE at T2+, passive at T1)
-        int transformTier = YuanDiSkillTree.getHighestTier(unlocked, "yd_transform");
+        int transformTier = YuanDiSkillTree.TREE.highestTier(unlocked, "yd_transform");
         if (transformTier >= 2) {
             slots[0] = new Entry("yd_transform", "Primordial Form",
                     AbilityType.TOGGLE, transformTier);
         }
         // Slot 1 (B) — Demon's Breath (HELD)
-        int breathTier = YuanDiSkillTree.getHighestTier(unlocked, "yd_breath");
+        int breathTier = YuanDiSkillTree.TREE.highestTier(unlocked, "yd_breath");
         if (breathTier >= 1) {
             slots[1] = new Entry("yd_breath", "Demon's Breath",
                     AbilityType.HELD, breathTier);
         }
         // Slot 2 (N) — Primordial Smite
-        int smiteTier = YuanDiSkillTree.getHighestTier(unlocked, "yd_smite");
+        int smiteTier = YuanDiSkillTree.TREE.highestTier(unlocked, "yd_smite");
         if (smiteTier >= 1) {
             slots[2] = new Entry("yd_smite", "Primordial Smite",
                     AbilityType.TOGGLE, smiteTier);
         }
         // Slot 3 (M) — Abyssal Gravity
-        int gravityTier = YuanDiSkillTree.getHighestTier(unlocked, "yd_gravity");
+        int gravityTier = YuanDiSkillTree.TREE.highestTier(unlocked, "yd_gravity");
         if (gravityTier >= 1) {
             slots[3] = new Entry("yd_gravity", "Abyssal Gravity",
                     AbilityType.TOGGLE, gravityTier);
@@ -341,13 +341,13 @@ public class SyncAbilitiesPacket {
 
     private static void buildPhoenixSlots(Entry[] slots, Set<String> unlocked) {
         // Slot 0 (V) — Flamethrower (HELD)
-        int flameTier = PhoenixSkillTree.getHighestTier(unlocked, "ph_flame");
+        int flameTier = PhoenixSkillTree.TREE.highestTier(unlocked, "ph_flame");
         if (flameTier >= 1) {
             slots[0] = new Entry("ph_flame", "Flamethrower",
                     AbilityType.HELD, flameTier);
         }
         // Slot 1 (B) — Solar Radiance (TOGGLE)
-        int radianceTier = PhoenixSkillTree.getHighestTier(unlocked, "ph_radiance");
+        int radianceTier = PhoenixSkillTree.TREE.highestTier(unlocked, "ph_radiance");
         if (radianceTier >= 1) {
             slots[1] = new Entry("ph_radiance", "Solar Radiance",
                     AbilityType.TOGGLE, radianceTier);

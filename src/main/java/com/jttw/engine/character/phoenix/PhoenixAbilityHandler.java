@@ -107,7 +107,7 @@ public final class PhoenixAbilityHandler {
 
     public static void startFlame(ServerPlayer player) {
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int tier = PhoenixSkillTree.getHighestTier(nodes, "ph_flame");
+        int tier = PhoenixSkillTree.TREE.highestTier(nodes, "ph_flame");
         if (tier < 1) return;
 
         ACTIVE_FLAMES.add(player.getUUID());
@@ -138,7 +138,7 @@ public final class PhoenixAbilityHandler {
      */
     public static void toggleRadiance(ServerPlayer player) {
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int tier = PhoenixSkillTree.getHighestTier(nodes, "ph_radiance");
+        int tier = PhoenixSkillTree.TREE.highestTier(nodes, "ph_radiance");
         if (tier < 1) return;
 
         UUID uuid = player.getUUID();
@@ -233,7 +233,7 @@ public final class PhoenixAbilityHandler {
         }
 
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int tier = PhoenixSkillTree.getHighestTier(nodes, "ph_flame");
+        int tier = PhoenixSkillTree.TREE.highestTier(nodes, "ph_flame");
 
         // Reduced Qi drain at tier 2+
         float qiDrain = (tier >= 2) ? FLAME_QI_PER_TICK * 0.7f : FLAME_QI_PER_TICK;
@@ -331,7 +331,7 @@ public final class PhoenixAbilityHandler {
         long lastGainDay = PhoenixReviveData.getLastGainDay(player);
 
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int rebirthTier = PhoenixSkillTree.getHighestTier(nodes, "ph_rebirth");
+        int rebirthTier = PhoenixSkillTree.TREE.highestTier(nodes, "ph_rebirth");
         int daysPerRevive = PhoenixReviveData.DAYS_PER_REVIVE;
         int revivesPerGain = 1;
 
@@ -369,7 +369,7 @@ public final class PhoenixAbilityHandler {
         Set<String> nodes = SkillTreeData.getUnlockedNodes(attacker);
 
         // --- Life Drain ---
-        int drainTier = PhoenixSkillTree.getHighestTier(nodes, "ph_drain");
+        int drainTier = PhoenixSkillTree.TREE.highestTier(nodes, "ph_drain");
         if (drainTier >= 2) {
             attacker.heal(2.0f); // 1 heart
         } else if (drainTier >= 1) {
@@ -377,7 +377,7 @@ public final class PhoenixAbilityHandler {
         }
 
         // --- Molten Talons T1: melee attacks set targets on fire ---
-        int talonsTier = PhoenixSkillTree.getHighestTier(nodes, "ph_talons");
+        int talonsTier = PhoenixSkillTree.TREE.highestTier(nodes, "ph_talons");
         if (talonsTier >= 1) {
             // Only melee attacks (not projectiles / indirect)
             DamageSource src = event.getSource();
@@ -421,7 +421,7 @@ public final class PhoenixAbilityHandler {
         if (!ACTIVE_RADIANCE.contains(player.getUUID())) return;
 
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int radianceTier = PhoenixSkillTree.getHighestTier(nodes, "ph_radiance");
+        int radianceTier = PhoenixSkillTree.TREE.highestTier(nodes, "ph_radiance");
         if (radianceTier < 1) return;
 
         // Only trigger on melee (direct entity = attacker, not projectile)
@@ -557,7 +557,7 @@ public final class PhoenixAbilityHandler {
         float maxHp = player.getMaxHealth();
 
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int rebirthTier = PhoenixSkillTree.getHighestTier(nodes, "ph_rebirth");
+        int rebirthTier = PhoenixSkillTree.TREE.highestTier(nodes, "ph_rebirth");
 
         // Explosion radius scales with Rebirth Mastery tier
         double radius;

@@ -167,7 +167,7 @@ public final class ByakkoAbilityHandler {
 
     public static void castLeap(ServerPlayer player) {
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int tier = ByakkoSkillTree.getHighestTier(nodes, "bk_leap");
+        int tier = ByakkoSkillTree.TREE.highestTier(nodes, "bk_leap");
         if (tier < 1) return;
 
         // Cooldown check
@@ -379,13 +379,13 @@ public final class ByakkoAbilityHandler {
         Set<String> nodes = SkillTreeData.getUnlockedNodes(attacker);
 
         // --- Savage Bleed ---
-        int bleedTier = ByakkoSkillTree.getHighestTier(nodes, "bk_bleed");
+        int bleedTier = ByakkoSkillTree.TREE.highestTier(nodes, "bk_bleed");
         if (bleedTier >= 1) {
             applyBleed(attacker, event.getEntity(), bleedTier);
         }
 
         // --- Velocity Strike — bonus damage based on horizontal movement speed ---
-        int velocityTier = ByakkoSkillTree.getHighestTier(nodes, "bk_velocity");
+        int velocityTier = ByakkoSkillTree.TREE.highestTier(nodes, "bk_velocity");
         if (velocityTier >= 1) {
             Vec3 motion = attacker.getDeltaMovement();
             double horizontalSpeed = Math.sqrt(motion.x * motion.x + motion.z * motion.z);
@@ -445,7 +445,7 @@ public final class ByakkoAbilityHandler {
      */
     private static void tickInstinct(ServerPlayer player) {
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int tier = ByakkoSkillTree.getHighestTier(nodes, "bk_instinct");
+        int tier = ByakkoSkillTree.TREE.highestTier(nodes, "bk_instinct");
         if (tier < 1) return;
 
         long now = player.level().getGameTime();
@@ -481,7 +481,7 @@ public final class ByakkoAbilityHandler {
     private static void handleInstinctBonusDamage(ServerPlayer attacker, LivingEntity target,
                                                    LivingHurtEvent event) {
         Set<String> nodes = SkillTreeData.getUnlockedNodes(attacker);
-        int instinctTier = ByakkoSkillTree.getHighestTier(nodes, "bk_instinct");
+        int instinctTier = ByakkoSkillTree.TREE.highestTier(nodes, "bk_instinct");
         if (instinctTier < 2) return;
 
         // Only proc if target currently has Glowing effect
@@ -513,7 +513,7 @@ public final class ByakkoAbilityHandler {
 
     public static void castRoar(ServerPlayer player) {
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int tier = ByakkoSkillTree.getHighestTier(nodes, "bk_roar");
+        int tier = ByakkoSkillTree.TREE.highestTier(nodes, "bk_roar");
         if (tier < 1) return;
 
         // Cooldown check

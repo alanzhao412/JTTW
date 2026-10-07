@@ -215,58 +215,58 @@ public class SkillTreeScreen extends Screen {
         }
 
         if ("eye_of_heaven".equals(outcomeId)) {
-            treeNodes = ErlangShenSkillTree.getAllOrdered();
-            nodeLookup = ErlangShenSkillTree::get;
+            treeNodes = ErlangShenSkillTree.TREE.allOrdered();
+            nodeLookup = ErlangShenSkillTree.TREE::get;
             treeTitle = "ERLANG SHEN";
             columnHeaders = new String[]{ "Transforms", "Xiaotian Quan", "Eye of Heaven",
                                           "Flight", "Qi", "Hound Growth", "Zhàn Shén", "Tactics", "Spear" };
             treeBgColors = C_ES_UNLOCKED_BG;
             treeTextColors = C_ES_UNLOCKED_TEXT;
         } else if ("dragon".equals(outcomeId)) {
-            treeNodes = DragonSkillTree.getAllOrdered();
-            nodeLookup = DragonSkillTree::get;
+            treeNodes = DragonSkillTree.TREE.allOrdered();
+            nodeLookup = DragonSkillTree.TREE::get;
             treeTitle = "DRAGON";
             columnHeaders = new String[]{ "Lightning", "Weather", "Flight", "Pressure", "Regen" };
             treeBgColors = C_UNLOCKED_BG;
             treeTextColors = C_UNLOCKED_TEXT;
         } else if ("white_tiger".equals(outcomeId)) {
-            treeNodes = ByakkoSkillTree.getAllOrdered();
-            nodeLookup = ByakkoSkillTree::get;
+            treeNodes = ByakkoSkillTree.TREE.allOrdered();
+            nodeLookup = ByakkoSkillTree.TREE::get;
             treeTitle = "BYAKKO";
             columnHeaders = new String[]{ "Leap", "Bleed", "Velocity" };
             treeBgColors = C_UNLOCKED_BG;
             treeTextColors = C_UNLOCKED_TEXT;
         } else if ("yuan_di".equals(outcomeId)) {
-            treeNodes = YuanDiSkillTree.getAllOrdered();
-            nodeLookup = YuanDiSkillTree::get;
+            treeNodes = YuanDiSkillTree.TREE.allOrdered();
+            nodeLookup = YuanDiSkillTree.TREE::get;
             treeTitle = "YUAN DI";
             columnHeaders = new String[]{ "Transform", "Sovereign", "Breath", "Smite", "Night", "Body", "Qi" };
             treeBgColors = C_UNLOCKED_BG;
             treeTextColors = C_UNLOCKED_TEXT;
         } else if ("phoenix".equals(outcomeId)) {
-            treeNodes = PhoenixSkillTree.getAllOrdered();
-            nodeLookup = PhoenixSkillTree::get;
+            treeNodes = PhoenixSkillTree.TREE.allOrdered();
+            nodeLookup = PhoenixSkillTree.TREE::get;
             treeTitle = "SOLAR SOVEREIGN";
             columnHeaders = new String[]{ "Flamethrower", "Life Drain", "Rebirth" };
             treeBgColors = C_UNLOCKED_BG;
             treeTextColors = C_UNLOCKED_TEXT;
         } else if ("turtle".equals(outcomeId)) {
-            treeNodes = TurtleSkillTree.getAllOrdered();
-            nodeLookup = TurtleSkillTree::get;
+            treeNodes = TurtleSkillTree.TREE.allOrdered();
+            nodeLookup = TurtleSkillTree.TREE::get;
             treeTitle = "WORLD TURTLE";
             columnHeaders = new String[]{ "Shell Guard", "Roots", "Bedrock", "Force", "Tectonic", "Gravity", "Patience" };
             treeBgColors = C_UNLOCKED_BG;
             treeTextColors = C_UNLOCKED_TEXT;
         } else if ("gold_winged_peng".equals(outcomeId)) {
-            treeNodes = PengSkillTree.getAllOrdered();
-            nodeLookup = PengSkillTree::get;
+            treeNodes = PengSkillTree.TREE.allOrdered();
+            nodeLookup = PengSkillTree.TREE::get;
             treeTitle = "GOLD WINGED PENG";
             columnHeaders = new String[]{};
             treeBgColors = C_UNLOCKED_BG;
             treeTextColors = C_UNLOCKED_TEXT;
         } else if ("third_lotus_prince".equals(outcomeId)) {
-            treeNodes = NezhaSkillTree.getAllOrdered();
-            nodeLookup = NezhaSkillTree::get;
+            treeNodes = NezhaSkillTree.TREE.allOrdered();
+            nodeLookup = NezhaSkillTree.TREE::get;
             treeTitle = "THIRD LOTUS PRINCE";
             columnHeaders = new String[]{ "Armaments", "Samadhi", "Detonation", "Three Heads", "Flight", "Fortitude", "Qi", "Combat" };
             treeBgColors = C_UNLOCKED_BG;
@@ -280,8 +280,8 @@ public class SkillTreeScreen extends Screen {
             treeTextColors = C_UNLOCKED_TEXT;
         } else {
             // Default: Wukong (celestial_primate or fallback)
-            treeNodes = WukongSkillTree.getAllOrdered();
-            nodeLookup = WukongSkillTree::get;
+            treeNodes = WukongSkillTree.TREE.allOrdered();
+            nodeLookup = WukongSkillTree.TREE::get;
             treeTitle = "WUKONG";
             columnHeaders = new String[]{ "Transforms", "Clone", "Ring", "Vitality", "Qi", "Yao Wang", "Flight", "Martial" };
             treeBgColors = C_UNLOCKED_BG;

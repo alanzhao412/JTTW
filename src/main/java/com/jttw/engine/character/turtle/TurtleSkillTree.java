@@ -2,11 +2,8 @@ package com.jttw.engine.character.turtle;
 
 import com.jttw.engine.progression.skilltree.AbilityType;
 import com.jttw.engine.progression.skilltree.SkillNode;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
+import com.jttw.engine.progression.skilltree.SkillTree;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Skill tree for the World Turtle line (EARTH Divine Beast).
@@ -59,139 +56,106 @@ public final class TurtleSkillTree {
     // Registry
     // -----------------------------------------------------------------------
 
-    private static final Map<String, SkillNode> NODES = new LinkedHashMap<>();
+    public static final SkillTree TREE = new SkillTree("tu_");
 
     static {
         // ── SHELL GUARD (col 0, HELD type) ──────────────────────────────
-        reg(new SkillNode(
+        TREE.add(new SkillNode(
                 SHELL_1, "Shell Guard I",
                 new String[]{ "Hold V: hunker down.", "Greatly reduces damage taken.", "Slows you. Cannot attack." },
                 2, 0, 0, List.of(), AbilityType.HELD, 1, "Shell Guard"
         ));
-        reg(new SkillNode(
+        TREE.add(new SkillNode(
                 SHELL_2, "Shell Guard II",
                 new String[]{ "Projectiles are completely", "negated while guarding.", "" },
                 3, 0, 1, List.of(SHELL_1), AbilityType.HELD, 2, "Shell Guard"
         ));
-        reg(new SkillNode(
+        TREE.add(new SkillNode(
                 SHELL_3, "Shell Guard III",
                 new String[]{ "Explosions are completely", "negated while guarding.", "Immovable mountain." },
                 4, 0, 2, List.of(SHELL_2), AbilityType.HELD, 3, "Shell Guard"
         ));
 
         // ── EARTHEN ROOTS (col 1, PASSIVE) ─────────────────────────────
-        reg(new SkillNode(
+        TREE.add(new SkillNode(
                 ROOTS_1, "Earthen Roots I",
                 new String[]{ "Standing still: -15%", "damage taken after 1s.", "" },
                 2, 1, 0, List.of(), AbilityType.PASSIVE, 1, "Earthen Roots"
         ));
-        reg(new SkillNode(
+        TREE.add(new SkillNode(
                 ROOTS_2, "Earthen Roots II",
                 new String[]{ "-30% damage while still.", "Attackers take thorns", "damage." },
                 3, 1, 1, List.of(ROOTS_1), AbilityType.PASSIVE, 2, "Earthen Roots"
         ));
 
         // ── BEDROCK CONSTITUTION (col 2, PASSIVE) ──────────────────────
-        reg(new SkillNode(
+        TREE.add(new SkillNode(
                 BEDROCK_1, "Bedrock Constitution I",
                 new String[]{ "Passive HP regen (+0.5/s).", "+4 armor.", "" },
                 2, 2, 0, List.of(), AbilityType.PASSIVE, 1, "Bedrock Constitution"
         ));
-        reg(new SkillNode(
+        TREE.add(new SkillNode(
                 BEDROCK_2, "Bedrock Constitution II",
                 new String[]{ "Stronger regen (+1.0/s).", "+8 armor. Unbreakable", "constitution." },
                 3, 2, 1, List.of(BEDROCK_1), AbilityType.PASSIVE, 2, "Bedrock Constitution"
         ));
 
         // ── UNSTOPPABLE FORCE (col 3, TOGGLE/USE type) ───────────────────
-        reg(new SkillNode(
+        TREE.add(new SkillNode(
                 FORCE_1, "Unstoppable Force I",
                 new String[]{ "Press B: dash 20 blocks", "forward. Explodes on hit,", "damage scales with DEF." },
                 2, 3, 0, List.of(), AbilityType.TOGGLE, 1, "Unstoppable Force"
         ));
-        reg(new SkillNode(
+        TREE.add(new SkillNode(
                 FORCE_2, "Unstoppable Force II",
                 new String[]{ "Increased knockback range.", "Enemies within 35 blocks", "are blasted away." },
                 3, 3, 1, List.of(FORCE_1), AbilityType.TOGGLE, 2, "Unstoppable Force"
         ));
-        reg(new SkillNode(
+        TREE.add(new SkillNode(
                 FORCE_3, "Unstoppable Force III",
                 new String[]{ "Max knockback (50 blocks).", "Enemies are stunned on hit.", "Immovable meets unstoppable." },
                 4, 3, 2, List.of(FORCE_2), AbilityType.TOGGLE, 3, "Unstoppable Force"
         ));
 
         // ── TECTONIC SLAM (col 4, USE active) ───────────────────────────
-        reg(new SkillNode(
+        TREE.add(new SkillNode(
                 TECTONIC_1, "Tectonic Slam I",
                 new String[]{ "Press N: stomp the ground.", "6-block AoE. Damage scales", "with armor value. 10s CD." },
                 2, 4, 0, List.of(), AbilityType.TOGGLE, 1, "Tectonic Slam"
         ));
-        reg(new SkillNode(
+        TREE.add(new SkillNode(
                 TECTONIC_2, "Tectonic Slam II",
                 new String[]{ "Creates earth spikes that", "linger 5s. Mobs walking", "over them take damage." },
                 3, 4, 1, List.of(TECTONIC_1), AbilityType.TOGGLE, 2, "Tectonic Slam"
         ));
-        reg(new SkillNode(
+        TREE.add(new SkillNode(
                 TECTONIC_3, "Tectonic Slam III",
                 new String[]{ "Stomp launches mobs into", "the air. Fall damage", "applies on landing." },
                 4, 4, 2, List.of(TECTONIC_2), AbilityType.TOGGLE, 3, "Tectonic Slam"
         ));
 
         // ── GRAVITY WELL (col 5, TOGGLE) ────────────────────────────────
-        reg(new SkillNode(
+        TREE.add(new SkillNode(
                 GRAVITY_1, "Gravity Well I",
                 new String[]{ "Pull all mobs within 8", "blocks toward you slowly.", "Reverse knockback." },
                 2, 5, 0, List.of(), AbilityType.TOGGLE, 1, "Gravity Well"
         ));
-        reg(new SkillNode(
+        TREE.add(new SkillNode(
                 GRAVITY_2, "Gravity Well II",
                 new String[]{ "Pulled mobs take 15%", "more damage from all", "sources." },
                 3, 5, 1, List.of(GRAVITY_1), AbilityType.TOGGLE, 2, "Gravity Well"
         ));
 
         // ── MOUNTAIN'S PATIENCE (col 6, PASSIVE) ────────────────────────
-        reg(new SkillNode(
+        TREE.add(new SkillNode(
                 PATIENCE_1, "Mountain's Patience I",
                 new String[]{ "Standing still: +5% damage", "per second (max 25%).", "Resets on movement." },
                 2, 6, 0, List.of(), AbilityType.PASSIVE, 1, "Mountain's Patience"
         ));
-        reg(new SkillNode(
+        TREE.add(new SkillNode(
                 PATIENCE_2, "Mountain's Patience II",
                 new String[]{ "At max stacks, next hit is", "a guaranteed crit and", "stuns for 2 seconds." },
                 3, 6, 1, List.of(PATIENCE_1), AbilityType.PASSIVE, 2, "Mountain's Patience"
         ));
-    }
-
-    private static void reg(SkillNode node) {
-        NODES.put(node.id(), node);
-    }
-
-    // -----------------------------------------------------------------------
-    // Public API
-    // -----------------------------------------------------------------------
-
-    public static Map<String, SkillNode> getNodes() {
-        return Collections.unmodifiableMap(NODES);
-    }
-
-    public static SkillNode get(String id) {
-        return NODES.get(id);
-    }
-
-    public static List<SkillNode> getAllOrdered() {
-        List<SkillNode> list = new ArrayList<>(NODES.values());
-        list.sort((a, b) -> a.col() != b.col() ? Integer.compare(a.col(), b.col())
-                                                 : Integer.compare(a.row(), b.row()));
-        return list;
-    }
-
-    public static int getHighestTier(java.util.Set<String> unlockedNodeIds, String idPrefix) {
-        int tier = 0;
-        for (SkillNode node : NODES.values()) {
-            if (node.id().startsWith(idPrefix) && unlockedNodeIds.contains(node.id())) {
-                tier = Math.max(tier, node.tier());
-            }
-        }
-        return tier;
     }
 }
