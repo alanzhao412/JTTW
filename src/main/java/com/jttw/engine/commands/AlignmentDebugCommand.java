@@ -1,7 +1,7 @@
 package com.jttw.engine.commands;
 
 import com.jttw.engine.flight.JTTWFlight;
-import com.jttw.engine.progression.LevelManager;
+import com.jttw.engine.progression.level.LevelManager;
 import com.jttw.engine.reincarnation.AlignmentData;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
 import com.jttw.engine.reincarnation.ReincarnationResolver;
@@ -241,7 +241,7 @@ public final class AlignmentDebugCommand {
                                 final ReincarnationOutcome result = found;
                                 ctx.getSource().sendSuccess(
                                     () -> Component.literal("§aCharacter set to: §e" + result.id
-                                            + " §a(" + com.jttw.engine.progression.ProgressionClass.fromOutcome(result).name() + ")"),
+                                            + " §a(" + com.jttw.engine.progression.stats.ProgressionClass.fromOutcome(result).name() + ")"),
                                     false
                                 );
                                 return 1;
@@ -297,7 +297,7 @@ public final class AlignmentDebugCommand {
     /** Tab-completion for class names (primordial, heavenly, divine_beast, yaoguai). */
     private static final SuggestionProvider<CommandSourceStack> CLASS_SUGGESTIONS =
             (ctx, builder) -> SharedSuggestionProvider.suggest(
-                    Arrays.stream(com.jttw.engine.progression.ProgressionClass.values())
+                    Arrays.stream(com.jttw.engine.progression.stats.ProgressionClass.values())
                             .map(c -> c.name().toLowerCase()),
                     builder
             );
@@ -306,17 +306,17 @@ public final class AlignmentDebugCommand {
     private static final SuggestionProvider<CommandSourceStack> SUBCLASS_SUGGESTIONS =
             (ctx, builder) -> {
                 String className = StringArgumentType.getString(ctx, "class");
-                com.jttw.engine.progression.ProgressionClass cls = null;
-                for (com.jttw.engine.progression.ProgressionClass c : com.jttw.engine.progression.ProgressionClass.values()) {
+                com.jttw.engine.progression.stats.ProgressionClass cls = null;
+                for (com.jttw.engine.progression.stats.ProgressionClass c : com.jttw.engine.progression.stats.ProgressionClass.values()) {
                     if (c.name().equalsIgnoreCase(className)) {
                         cls = c;
                         break;
                     }
                 }
-                final com.jttw.engine.progression.ProgressionClass finalCls = cls;
+                final com.jttw.engine.progression.stats.ProgressionClass finalCls = cls;
                 return SharedSuggestionProvider.suggest(
                         Arrays.stream(ReincarnationOutcome.values())
-                                .filter(o -> finalCls == null || com.jttw.engine.progression.ProgressionClass.fromOutcome(o) == finalCls)
+                                .filter(o -> finalCls == null || com.jttw.engine.progression.stats.ProgressionClass.fromOutcome(o) == finalCls)
                                 .map(o -> o.id),
                         builder
                 );

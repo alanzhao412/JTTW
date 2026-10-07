@@ -1,5 +1,5 @@
 package com.jttw.engine.entity;
-import com.jttw.engine.progression.WuCloneManager;
+import com.jttw.engine.character.wukong.WuCloneManager;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;

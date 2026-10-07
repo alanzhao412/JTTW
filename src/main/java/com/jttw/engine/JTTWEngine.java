@@ -177,35 +177,35 @@ public class JTTWEngine {
         MinecraftForge.EVENT_BUS.register(TransformationManager.class);
 
         // Wukong ability server tick & logout cleanup
-        MinecraftForge.EVENT_BUS.register(com.jttw.engine.progression.WukongAbilityHandler.class);
+        MinecraftForge.EVENT_BUS.register(com.jttw.engine.character.wukong.WukongAbilityHandler.class);
 
         // Wukong shadow clone server-side manager
-        MinecraftForge.EVENT_BUS.register(com.jttw.engine.progression.WuCloneManager.class);
+        MinecraftForge.EVENT_BUS.register(com.jttw.engine.character.wukong.WuCloneManager.class);
 
         // Ruyi Jingu Bang reach handler
         MinecraftForge.EVENT_BUS.register(RuyiJinguBangHandler.class);
 
         // Erlang Shen ability handlers
-        MinecraftForge.EVENT_BUS.register(com.jttw.engine.progression.XiaotianQuanManager.class);
-        MinecraftForge.EVENT_BUS.register(com.jttw.engine.progression.ErlangShenAbilityHandler.class);
+        MinecraftForge.EVENT_BUS.register(com.jttw.engine.character.erlang.XiaotianQuanManager.class);
+        MinecraftForge.EVENT_BUS.register(com.jttw.engine.character.erlang.ErlangShenAbilityHandler.class);
 
         // Divine Beast mining + domain buffs
-        MinecraftForge.EVENT_BUS.register(com.jttw.engine.progression.DivineBeastHandler.class);
+        MinecraftForge.EVENT_BUS.register(com.jttw.engine.character.divinebeast.DivineBeastHandler.class);
 
         // Dragon line ability handler
-        MinecraftForge.EVENT_BUS.register(com.jttw.engine.progression.DragonAbilityHandler.class);
+        MinecraftForge.EVENT_BUS.register(com.jttw.engine.character.dragon.DragonAbilityHandler.class);
 
         // World Turtle ability handler
-        MinecraftForge.EVENT_BUS.register(com.jttw.engine.progression.TurtleAbilityHandler.class);
+        MinecraftForge.EVENT_BUS.register(com.jttw.engine.character.turtle.TurtleAbilityHandler.class);
 
         // Byakko ability handler
-        MinecraftForge.EVENT_BUS.register(com.jttw.engine.progression.ByakkoAbilityHandler.class);
+        MinecraftForge.EVENT_BUS.register(com.jttw.engine.character.byakko.ByakkoAbilityHandler.class);
 
         // Phoenix / Solar Sovereign ability handler
-        MinecraftForge.EVENT_BUS.register(com.jttw.engine.progression.PhoenixAbilityHandler.class);
+        MinecraftForge.EVENT_BUS.register(com.jttw.engine.character.phoenix.PhoenixAbilityHandler.class);
 
         // Yuan Di ability handler
-        MinecraftForge.EVENT_BUS.register(com.jttw.engine.progression.YuanDiAbilityHandler.class);
+        MinecraftForge.EVENT_BUS.register(com.jttw.engine.character.yuandi.YuanDiAbilityHandler.class);
 
         // T3 transmutation handler is auto-registered via @Mod.EventBusSubscriber
 

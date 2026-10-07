@@ -2,9 +2,9 @@ package com.jttw.engine.client.gui;
 
 import com.jttw.engine.client.ClientAbilityData;
 import com.jttw.engine.network.NetworkHandler;
-import com.jttw.engine.network.RequestTransformPacket;
-import com.jttw.engine.progression.ErlangShenSkillTree;
-import com.jttw.engine.progression.WukongSkillTree;
+import com.jttw.engine.network.c2s.RequestTransformPacket;
+import com.jttw.engine.character.erlang.ErlangShenSkillTree;
+import com.jttw.engine.character.wukong.WukongSkillTree;
 import com.jttw.engine.reincarnation.AlignmentData;
 import com.jttw.engine.transformation.TransformTierFilter;
 import net.minecraft.client.Minecraft;

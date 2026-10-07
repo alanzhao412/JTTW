@@ -1,9 +1,9 @@
 package com.jttw.engine.client;
 
 import com.jttw.engine.JTTWEngine;
-import com.jttw.engine.network.DimensionSelectPacket;
+import com.jttw.engine.network.c2s.DimensionSelectPacket;
 import com.jttw.engine.network.NetworkHandler;
-import com.jttw.engine.progression.DragonSkillTree;
+import com.jttw.engine.character.dragon.DragonSkillTree;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;

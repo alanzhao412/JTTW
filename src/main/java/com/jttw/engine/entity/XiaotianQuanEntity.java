@@ -1,9 +1,9 @@
 package com.jttw.engine.entity;
 
 import com.jttw.engine.network.NetworkHandler;
-import com.jttw.engine.network.SyncXtqStatsPacket;
-import com.jttw.engine.progression.SkillTreeData;
-import com.jttw.engine.progression.XiaotianQuanManager;
+import com.jttw.engine.network.s2c.SyncXtqStatsPacket;
+import com.jttw.engine.progression.skilltree.SkillTreeData;
+import com.jttw.engine.character.erlang.XiaotianQuanManager;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;

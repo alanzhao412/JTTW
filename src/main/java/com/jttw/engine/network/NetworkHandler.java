@@ -1,8 +1,25 @@
 package com.jttw.engine.network;
 
+import com.jttw.engine.network.c2s.ActivateAbilityPacket;
+import com.jttw.engine.network.c2s.DimensionSelectPacket;
+import com.jttw.engine.network.c2s.RequestTransformPacket;
+import com.jttw.engine.network.c2s.SpendSkillPointPacket;
+import com.jttw.engine.network.c2s.StaffScalePacket;
+import com.jttw.engine.network.s2c.OpenTransformationMenuPacket;
+import com.jttw.engine.network.s2c.SyncAbilitiesPacket;
+import com.jttw.engine.network.s2c.SyncCooldownPacket;
+import com.jttw.engine.network.s2c.SyncEyeOfHeavenPacket;
+import com.jttw.engine.network.s2c.SyncLevelPacket;
+import com.jttw.engine.network.s2c.SyncQiPacket;
+import com.jttw.engine.network.s2c.SyncReviveCountPacket;
+import com.jttw.engine.network.s2c.SyncRingStatePacket;
+import com.jttw.engine.network.s2c.SyncSkillTreePacket;
+import com.jttw.engine.network.s2c.SyncTransformStatePacket;
+import com.jttw.engine.network.s2c.SyncTransformationPacket;
+import com.jttw.engine.network.s2c.SyncXtqStatsPacket;
 import com.jttw.engine.JTTWEngine;
-import com.jttw.engine.reincarnation.SyncReincarnationPacket;
-import com.jttw.engine.transformation.transmute.TransmuteItemPacket;
+import com.jttw.engine.network.s2c.SyncReincarnationPacket;
+import com.jttw.engine.network.c2s.TransmuteItemPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkDirection;

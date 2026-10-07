@@ -3,7 +3,7 @@ package com.jttw.engine.client;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.entity.PlacedStaffEntity;
 import com.jttw.engine.network.NetworkHandler;
-import com.jttw.engine.network.StaffScalePacket;
+import com.jttw.engine.network.c2s.StaffScalePacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.EntityHitResult;

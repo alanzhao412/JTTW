@@ -1,10 +1,11 @@
 package com.jttw.engine.item;
 
+import com.jttw.engine.character.wukong.WukongCheckpoints;
 import com.jttw.engine.network.NetworkHandler;
-import com.jttw.engine.network.SyncQiPacket;
-import com.jttw.engine.progression.PlayerLevel;
-import com.jttw.engine.progression.ProgressionClass;
-import com.jttw.engine.progression.QiData;
+import com.jttw.engine.network.s2c.SyncQiPacket;
+import com.jttw.engine.progression.level.PlayerLevel;
+import com.jttw.engine.progression.stats.ProgressionClass;
+import com.jttw.engine.progression.qi.QiData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -184,8 +185,8 @@ public final class ImmortalItems {
                     + "\u00a7eYou have gained \u00a76\u00a7lFiery Golden Eyes\u00a7e!"));
 
             // Rebuild ability slots to include golden eyes
-            com.jttw.engine.network.SyncAbilitiesPacket pkt =
-                    com.jttw.engine.network.SyncAbilitiesPacket.build(player);
+            com.jttw.engine.network.s2c.SyncAbilitiesPacket pkt =
+                    com.jttw.engine.network.s2c.SyncAbilitiesPacket.build(player);
             NetworkHandler.sendToPlayer(player, pkt);
         }
     }

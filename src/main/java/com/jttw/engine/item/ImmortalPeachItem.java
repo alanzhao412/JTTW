@@ -1,10 +1,11 @@
 package com.jttw.engine.item;
 
+import com.jttw.engine.character.wukong.WukongCheckpoints;
 import com.jttw.engine.network.NetworkHandler;
-import com.jttw.engine.network.SyncQiPacket;
-import com.jttw.engine.progression.PlayerLevel;
-import com.jttw.engine.progression.ProgressionClass;
-import com.jttw.engine.progression.QiData;
+import com.jttw.engine.network.s2c.SyncQiPacket;
+import com.jttw.engine.progression.level.PlayerLevel;
+import com.jttw.engine.progression.stats.ProgressionClass;
+import com.jttw.engine.progression.qi.QiData;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;

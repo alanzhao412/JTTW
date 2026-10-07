@@ -1,6 +1,10 @@
 package com.jttw.engine.client.gui;
 
-import com.jttw.engine.progression.*;
+import com.jttw.engine.progression.level.LevelConstants;
+import com.jttw.engine.progression.level.PlayerLevel;
+import com.jttw.engine.progression.skilltree.AbilityUnlock;
+import com.jttw.engine.progression.stats.ProgressionClass;
+import com.jttw.engine.progression.stats.StatBlock;
 import com.jttw.engine.reincarnation.AlignmentData;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
 import com.mojang.blaze3d.systems.RenderSystem;

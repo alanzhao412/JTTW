@@ -2,7 +2,7 @@ package com.jttw.engine.client.gui;
 
 import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.transformation.transmute.TransmutationCategory;
-import com.jttw.engine.transformation.transmute.TransmuteItemPacket;
+import com.jttw.engine.network.c2s.TransmuteItemPacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;

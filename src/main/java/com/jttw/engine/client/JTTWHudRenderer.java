@@ -1,8 +1,8 @@
 package com.jttw.engine.client;
 
-import com.jttw.engine.network.SyncTransformStatePacket;
-import com.jttw.engine.progression.PhoenixReviveData;
-import com.jttw.engine.progression.QiData;
+import com.jttw.engine.network.s2c.SyncTransformStatePacket;
+import com.jttw.engine.character.phoenix.PhoenixReviveData;
+import com.jttw.engine.progression.qi.QiData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;

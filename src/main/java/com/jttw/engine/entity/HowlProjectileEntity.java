@@ -1,7 +1,7 @@
 package com.jttw.engine.entity;
 
 import com.jttw.engine.JTTWEngine;
-import com.jttw.engine.progression.XiaotianQuanManager;
+import com.jttw.engine.character.erlang.XiaotianQuanManager;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;

@@ -142,7 +142,7 @@ public class ThreePointedSpearItem extends Item {
 
         boolean esPlayer = isErlangShen(sp);
         boolean inWrath = esPlayer && sp.getHealth() / sp.getMaxHealth() < 0.4f
-                && com.jttw.engine.progression.SkillTreeData.getEsWrathTier(sp) >= 1;
+                && com.jttw.engine.progression.skilltree.SkillTreeData.getEsWrathTier(sp) >= 1;
 
         // Charge power: 0.0 → 1.0
         float chargePower = Math.min(1.0f, (float)(chargeTime - MIN_CHARGE_TICKS) / (MAX_CHARGE_TICKS - MIN_CHARGE_TICKS));
@@ -159,7 +159,7 @@ public class ThreePointedSpearItem extends Item {
         double speed = sp.getDeltaMovement().horizontalDistance() * 20.0;
         thrustDamage *= (float) (1.0 + speed * 0.05);
 
-        boolean eyeActive = esPlayer && com.jttw.engine.progression.ErlangShenAbilityHandler.isEyeActive(sp.getUUID());
+        boolean eyeActive = esPlayer && com.jttw.engine.character.erlang.ErlangShenAbilityHandler.isEyeActive(sp.getUUID());
 
         // Lunge forward
         net.minecraft.world.phys.Vec3 look = sp.getLookAngle().normalize();
@@ -175,7 +175,7 @@ public class ThreePointedSpearItem extends Item {
         java.util.List<LivingEntity> targets = serverLevel.getEntitiesOfClass(
                 LivingEntity.class, searchBox, e -> e != sp && e.isAlive());
 
-        boolean piercing = esPlayer && com.jttw.engine.progression.SkillTreeData.getEsSpearTier(sp) >= 2;
+        boolean piercing = esPlayer && com.jttw.engine.progression.skilltree.SkillTreeData.getEsSpearTier(sp) >= 2;
 
         for (LivingEntity target : targets) {
             net.minecraft.world.phys.Vec3 toTarget = target.position().add(0, target.getBbHeight() / 2, 0).subtract(start);
@@ -198,7 +198,7 @@ public class ThreePointedSpearItem extends Item {
         }
 
         // T3: shockwave at full charge + sprinting
-        if (esPlayer && com.jttw.engine.progression.SkillTreeData.getEsSpearTier(sp) >= 3 && chargePower >= 0.8f) {
+        if (esPlayer && com.jttw.engine.progression.skilltree.SkillTreeData.getEsSpearTier(sp) >= 3 && chargePower >= 0.8f) {
             net.minecraft.world.phys.Vec3 shockPos = sp.position().add(look.scale(lungeBase));
             java.util.List<LivingEntity> shockTargets = serverLevel.getEntitiesOfClass(
                     LivingEntity.class,

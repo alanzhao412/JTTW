@@ -1,7 +1,7 @@
 package com.jttw.engine.commands;
 
-import com.jttw.engine.progression.LevelManager;
-import com.jttw.engine.progression.SkillTreeData;
+import com.jttw.engine.progression.level.LevelManager;
+import com.jttw.engine.progression.skilltree.SkillTreeData;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.minecraft.commands.CommandSourceStack;

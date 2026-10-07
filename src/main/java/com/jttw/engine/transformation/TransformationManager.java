@@ -3,7 +3,7 @@ package com.jttw.engine.transformation;
 
 import com.jttw.engine.flight.JTTWFlight;
 import com.jttw.engine.network.NetworkHandler;
-import com.jttw.engine.network.SyncTransformationPacket;
+import com.jttw.engine.network.s2c.SyncTransformationPacket;
 import com.jttw.engine.transformation.traits.AggroTraits;
 import com.jttw.engine.transformation.traits.AnimalSpeedTraits;
 import com.jttw.engine.transformation.traits.JumpTraits;

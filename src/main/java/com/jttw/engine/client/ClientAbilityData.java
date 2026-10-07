@@ -1,7 +1,7 @@
 package com.jttw.engine.client;
 
-import com.jttw.engine.progression.AbilityType;
-import com.jttw.engine.network.SyncAbilitiesPacket;
+import com.jttw.engine.progression.skilltree.AbilityType;
+import com.jttw.engine.network.s2c.SyncAbilitiesPacket;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -18,9 +18,9 @@ import java.util.Set;
  *
  * <p>Data sources:
  * <ul>
- *   <li>{@link com.jttw.engine.network.SyncAbilitiesPacket}  — skill-bar slot list.</li>
- *   <li>{@link com.jttw.engine.network.SyncCooldownPacket}   — per-ability cooldowns.</li>
- *   <li>{@link com.jttw.engine.network.SyncSkillTreePacket}  — skill point count + unlocked nodes.</li>
+ *   <li>{@link com.jttw.engine.network.s2c.SyncAbilitiesPacket}  — skill-bar slot list.</li>
+ *   <li>{@link com.jttw.engine.network.s2c.SyncCooldownPacket}   — per-ability cooldowns.</li>
+ *   <li>{@link com.jttw.engine.network.s2c.SyncSkillTreePacket}  — skill point count + unlocked nodes.</li>
  * </ul>
  *
  * <p>All reads are on the client main thread. {@link #tickCooldowns()} is called once per
@@ -121,7 +121,7 @@ public final class ClientAbilityData {
     private static Set<String> unlockedNodes = new HashSet<>();
 
     /**
-     * Called by {@link com.jttw.engine.network.SyncSkillTreePacket}.
+     * Called by {@link com.jttw.engine.network.s2c.SyncSkillTreePacket}.
      * Replaces the full tree state with authoritative server data.
      */
     public static void setSkillTree(int points, Set<String> nodes) {
@@ -142,7 +142,7 @@ public final class ClientAbilityData {
     /**
      * Applies an optimistic unlock immediately on the client before the server responds.
      * This gives instant feedback when clicking a node. The server's authoritative
-     * {@link com.jttw.engine.network.SyncSkillTreePacket} will correct any mismatch.
+     * {@link com.jttw.engine.network.s2c.SyncSkillTreePacket} will correct any mismatch.
      */
     public static void optimisticUnlock(String nodeId, int cost) {
         unlockedNodes.add(nodeId);

@@ -132,7 +132,7 @@ public class ErlangAxeItem extends Item {
         float chargePower = Math.min(1.0f, (float) (chargeTime - 10) / 30f);
         float cleaveDamage = atk * (1.0f + chargePower * 1.5f);
 
-        int playerLevel = com.jttw.engine.progression.PlayerLevel.getLevel(sp);
+        int playerLevel = com.jttw.engine.progression.level.PlayerLevel.getLevel(sp);
         double levelFrac = Math.min(playerLevel, 100) / 100.0;
 
         // Range: 10 at lv1 → 70 at lv100, scaled by charge

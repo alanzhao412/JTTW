@@ -1,6 +1,6 @@
 package com.jttw.engine.item;
 
-import com.jttw.engine.progression.SkillTreeData;
+import com.jttw.engine.progression.skilltree.SkillTreeData;
 import com.jttw.engine.reincarnation.AlignmentData;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;

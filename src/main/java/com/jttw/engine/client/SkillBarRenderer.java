@@ -1,6 +1,6 @@
 package com.jttw.engine.client;
 
-import com.jttw.engine.network.SyncAbilitiesPacket;
+import com.jttw.engine.network.s2c.SyncAbilitiesPacket;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;

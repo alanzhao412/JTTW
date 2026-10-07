@@ -1,7 +1,7 @@
 package com.jttw.engine.reincarnation;
 
 import com.jttw.engine.JTTWEngine;
-import com.jttw.engine.progression.LevelManager;
+import com.jttw.engine.progression.level.LevelManager;
 import com.jttw.engine.transformation.TransformationManager;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.resources.ResourceLocation;

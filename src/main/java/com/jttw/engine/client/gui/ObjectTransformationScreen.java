@@ -1,7 +1,7 @@
 package com.jttw.engine.client.gui;
 
 import com.jttw.engine.network.NetworkHandler;
-import com.jttw.engine.network.RequestTransformPacket;
+import com.jttw.engine.network.c2s.RequestTransformPacket;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;

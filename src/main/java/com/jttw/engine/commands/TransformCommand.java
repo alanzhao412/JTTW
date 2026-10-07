@@ -1,7 +1,7 @@
 package com.jttw.engine.commands;
 
 import com.jttw.engine.network.NetworkHandler;
-import com.jttw.engine.network.OpenTransformationMenuPacket;
+import com.jttw.engine.network.s2c.OpenTransformationMenuPacket;
 import com.jttw.engine.transformation.TransformationData;
 import com.jttw.engine.transformation.TransformationManager;
 import com.mojang.brigadier.CommandDispatcher;

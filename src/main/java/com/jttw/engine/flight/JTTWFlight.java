@@ -82,7 +82,7 @@ public final class JTTWFlight {
 
     /**
      * Sets the flight speed tier (1, 2, or 3) stored in the player's persistent data.
-     * Called from {@link com.jttw.engine.network.SpendSkillPointPacket} when a
+     * Called from {@link com.jttw.engine.network.c2s.SpendSkillPointPacket} when a
      * flight node is unlocked.
      */
     public static void setFlightSpeedTier(ServerPlayer player, int tier) {

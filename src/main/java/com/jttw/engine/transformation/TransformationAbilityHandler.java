@@ -1,8 +1,8 @@
 package com.jttw.engine.transformation;
 
 import com.jttw.engine.JTTWEngine;
-import com.jttw.engine.progression.QiData;
-import com.jttw.engine.progression.QiManager;
+import com.jttw.engine.progression.qi.QiData;
+import com.jttw.engine.progression.qi.QiManager;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerLevel;

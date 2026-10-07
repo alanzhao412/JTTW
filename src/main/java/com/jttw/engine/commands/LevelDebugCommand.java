@@ -1,8 +1,8 @@
 package com.jttw.engine.commands;
 
-import com.jttw.engine.progression.LevelManager;
-import com.jttw.engine.progression.PlayerLevel;
-import com.jttw.engine.progression.ProgressionClass;
+import com.jttw.engine.progression.level.LevelManager;
+import com.jttw.engine.progression.level.PlayerLevel;
+import com.jttw.engine.progression.stats.ProgressionClass;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.minecraft.commands.CommandSourceStack;
