@@ -229,6 +229,7 @@ public final class LevelManager {
         PlayerLevel.copyTo(event.getOriginal(), newPlayer);
         SkillTreeData.copyTo(event.getOriginal(), newPlayer);
         com.jttw.engine.character.wukong.WukongCheckpoints.copyTo(event.getOriginal(), newPlayer);
+        com.jttw.engine.item.ImmortalItems.copyTo(event.getOriginal(), newPlayer);
 
         // Copy reincarnation outcome and reincarnated flag so ability routing
         // and SyncAbilitiesPacket.build() keep working after every death —
