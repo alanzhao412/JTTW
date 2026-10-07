@@ -15,7 +15,7 @@ implemented directly.
 
 ### Four class archetypes
 
-Each class in [`ProgressionClass`](src/main/java/com/jttw/engine/progression/ProgressionClass.java)
+Each class in [`ProgressionClass`](src/main/java/com/jttw/engine/progression/stats/ProgressionClass.java)
 carries a Base Stat Total and its own XP curve, so they scale differently rather than just having
 different numbers:
 
@@ -27,7 +27,7 @@ different numbers:
 | **Heavenly** | 700 | Medium | Widest utility toolkit. Ability-expansion focused; higher forms gain perception and authority advantages. |
 
 Stats resolve at runtime through
-[`StatBlock.compute()`](src/main/java/com/jttw/engine/progression/StatBlock.java) from class and
+[`StatBlock.compute()`](src/main/java/com/jttw/engine/progression/stats/StatBlock.java) from class and
 level, rather than being hardcoded per form.
 
 ### Reincarnation and evolution lines
@@ -53,7 +53,7 @@ end up Heavenly-dominant can reach entirely different forms.
 
 The Spirit Beast line maps to the **Four Symbols** (四象) — Azure Dragon, Vermilion Bird, White
 Tiger, Black Tortoise — and each of the four
-[`DivineBeastLine`](src/main/java/com/jttw/engine/progression/DivineBeastLine.java) elemental paths
+[`DivineBeastLine`](src/main/java/com/jttw/engine/progression/stats/DivineBeastLine.java) elemental paths
 grants a stat buff while you're in its domain:
 
 - **Water** (Dragon King) — oceans, rivers, and during rain
@@ -64,13 +64,17 @@ grants a stat buff while you're in its domain:
 ### Skill trees
 
 Nine per-subclass trees — Wukong, Nezha, Erlang Shen, Yuan Di, Peng, Dragon, Phoenix, Turtle, Byakko
-— built from [`SkillNode`](src/main/java/com/jttw/engine/progression/SkillNode.java) records with
+— built from [`SkillNode`](src/main/java/com/jttw/engine/progression/skilltree/SkillNode.java) records with
 prerequisites, skill-point cost, tier, branch grouping, and grid position.
 
-The same node definitions drive three things: unlock tracking in `SkillTreeData`, rendering in
-[`SkillTreeScreen`](src/main/java/com/jttw/engine/client/gui/SkillTreeScreen.java), and activation
-behaviour via `AbilityType` (`MENU`, `TOGGLE`, `HELD`, `PASSIVE`). Adding an ability means adding a
-record, not touching the UI or the input handling.
+The same node definitions drive unlock tracking in `SkillTreeData` and rendering in
+[`SkillTreeScreen`](src/main/java/com/jttw/engine/client/gui/SkillTreeScreen.java). Each character
+is one [`PlayableCharacter`](src/main/java/com/jttw/engine/character/PlayableCharacter.java) in its
+own package, which owns its tree, which unlocked branch sits in each skill-bar slot and how it
+activates (`MENU`, `TOGGLE`, `HELD`, `PASSIVE`), and what each slot's key does.
+[`Characters`](src/main/java/com/jttw/engine/character/Characters.java) is the one place a player's
+reincarnation outcome is mapped to their character. A passive ability is a new node; an active one
+is a new node plus its slot in that character's class.
 
 Levelling runs on a Qi resource system (`QiManager`), with `BiomeLevelBand` and `EnemyTier` scaling
 the world to player level.
@@ -84,7 +88,7 @@ Abilities and items are drawn from the source material rather than invented:
 - **Three-Pointed Spear · Erlang Axe** — Erlang Shen, whose form is *Eye of Heaven* after his third eye
 - **Immortal Peach · Yin Yang Sword**
 - **Wu Clones** — Wukong's hair-clone technique, implemented as summoned entities with their own
-  pathfinding goals ([`WuCloneManager`](src/main/java/com/jttw/engine/progression/WuCloneManager.java))
+  pathfinding goals ([`WuCloneManager`](src/main/java/com/jttw/engine/character/wukong/WuCloneManager.java))
 - **Xiaotian Quan** — Erlang Shen's hound, a custom entity with hand-authored model and animation
 - **Phoenix revival** — death-and-rebirth mechanic tied to the Phoenix line
 
@@ -123,7 +127,7 @@ invariant in two places.
 ### 2. A custom flight and movement system
 
 613 lines across [`JTTWFlight`](src/main/java/com/jttw/engine/flight/JTTWFlight.java) and
-[`ClientFlightHandler`](src/main/java/com/jttw/engine/flight/ClientFlightHandler.java), written
+[`ClientFlightHandler`](src/main/java/com/jttw/engine/client/ClientFlightHandler.java), written
 because vanilla creative flight and elytra gliding both felt wrong for cloud-riding.
 
 It maintains a persistent velocity vector in player NBT rather than applying motion directly, which
@@ -150,9 +154,11 @@ Transformation, progression, and ability state has to agree between the server a
 can see the player — otherwise your model desyncs from your hitbox, or a cooldown looks ready on one
 screen and isn't on another.
 
-18 packet types in [`network/`](src/main/java/com/jttw/engine/network/) handle this, most of them
+19 packet types in [`network/`](src/main/java/com/jttw/engine/network/) handle this, most of them
 one-way server→client syncs for a specific slice of state (level, Qi, cooldowns, skill tree, ring
-state, transformation), plus client→server requests for actions the server must authorize.
+state, transformation), plus client→server requests for actions the server must authorize. They are
+split into `network/s2c` and `network/c2s`; packets only encode and route, and the rules they trigger
+live with the system they belong to.
 
 State persists in three places deliberately — server memory, player NBT, and a client-side mirror —
 so progression and transformations survive logout, death, and dimension changes.
@@ -186,16 +192,26 @@ drive the entity directly. There is no GeckoLib or other animation library in `b
 
 ```
 src/main/java/com/jttw/engine/
-├── progression/     4 classes, 9 skill trees, Qi, levelling, divine beast lines
+├── JTTWEngine.java  mod entry point: wires registries, handlers, network, config
+├── registry/        blocks, items, entity types, worldgen types
+├── progression/
+│   ├── level/       levels, XP curves, kill XP, biome bands
+│   ├── stats/       classes, base stats, stat formula, beast lines, forms
+│   ├── qi/          Qi pool and regeneration
+│   └── skilltree/   SkillNode/SkillTree, unlock state, purchases, level milestones
+├── character/       one package per playable character: its skill tree, skill bar,
+│   ├── wukong/      ability keys and ability handlers (Characters maps outcome -> character)
+│   ├── erlang/  nezha/  yuandi/  peng/  marshal/
+│   └── divinebeast/  dragon/  phoenix/  turtle/  byakko/
 ├── reincarnation/   4-axis alignment tracking, 12 evolution outcomes
 ├── transformation/  72-entity transformation system + transmutation
 ├── mixin/           14 Mixin classes — bytecode instrumentation
-├── flight/          custom flight, glide, and swim physics
-├── network/         18 packet types for client–server state sync
+├── flight/          custom flight, glide, and swim physics (server side)
+├── network/         c2s/ and s2c/ packets for client–server state sync
 ├── dimension/       Heaven and Hell dimensions with custom worldgen
 ├── entity/          custom entities, projectiles, summons
 ├── item/            lore artifacts and weapons
-├── client/          renderers, GUI screens, HUD overlays
+├── client/          renderers, GUI screens, HUD overlays, client input and flight
 └── commands/        /jttw command tree
 ```
 
@@ -209,14 +225,27 @@ Largest components: `TransformationAbilityHandler` (1,385 lines), `YuanDiAbility
 Requires **JDK 17**.
 
 ```bash
-./gradlew build          # jar lands in build/libs/
-./gradlew runClient      # launch a dev client
+./gradlew build             # jar lands in build/libs/
+./gradlew runClient         # launch a dev client
 ```
 
-> **Note:** the Gradle wrapper is not yet committed. Until it is, run `gradle wrapper` once with a
-> local Gradle install (8.x), or open the project in an IDE with Gradle support and let it generate.
-
 Then drop the built jar into `mods/` alongside Minecraft Forge 1.20.1 (47.4.10+).
+
+## Testing
+
+```bash
+./gradlew test              # unit tests: game logic, no Minecraft world needed
+./gradlew runGameTestServer # GameTests: boots a headless server and runs in-world tests
+```
+
+- **Unit tests** (`src/test`) cover pure logic: XP curves, the stat formula, class and form
+  rules, every skill tree's structure, each character's skill bar, reincarnation outcomes,
+  level milestones, and the encoding of every network packet.
+- **GameTests** (`src/gametest`) run against a real server: saved player data, levelling and
+  kill XP, skill purchases, alignment and reincarnation, what survives death, Qi, flight,
+  dimensions, items, transformations and each character's abilities. They live in their own
+  source set, so nothing from them ships in the mod jar. Each test runs in a small platform
+  structure with its own Forge `FakePlayer`.
 
 ### Commands
 
