@@ -158,7 +158,7 @@ public final class LevelManager {
         int level = PlayerLevel.getLevel(player);
         StatBlock.compute(cls, level).applyTo(player);
 
-        // World Turtle innate passive: +1 DEF and +0.2 toughness per level
+        // World Turtle innate passive: +1 physical resistance per level
         TurtleAbilityHandler.applyPassiveScaling(player);
 
         // Byakko innate passive: +0.8% speed and +0.01 step height per level
