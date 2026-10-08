@@ -161,6 +161,7 @@ public class ErlangAxeItem extends Item {
         net.minecraft.world.phys.Vec3 localUp = right.cross(look).normalize();
 
         java.util.Random rng = new java.util.Random(sp.level().getGameTime());
+        java.util.List<net.minecraft.core.BlockPos> cleaved = new java.util.ArrayList<>();
 
         int steps = (int) cleaveRange;
         for (int i = 0; i < steps && budgetRemaining > 0; i++) {
@@ -197,7 +198,7 @@ public class ErlangAxeItem extends Item {
 
                     // Fluids: free to clear
                     if (!state.getFluidState().isEmpty()) {
-                        level.setBlockAndUpdate(bp, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+                        cleaved.add(bp);
                         continue;
                     }
 
@@ -213,7 +214,7 @@ public class ErlangAxeItem extends Item {
                     }
                     budgetRemaining -= cost;
 
-                    level.setBlockAndUpdate(bp, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+                    cleaved.add(bp);
                 }
             }
 
@@ -223,6 +224,9 @@ public class ErlangAxeItem extends Item {
                         cx, cy, cz, 1, 0.3, 0.3, 0.3, 0.0);
             }
         }
+
+        // The cut, spread over the next ticks rather than all in this one
+        com.jttw.engine.world.TerrainBreaker.breakBlocks(serverLevel, cleaved);
 
         // Explosion at end point
         net.minecraft.world.phys.Vec3 endPos = eyeStart.add(look.scale(cleaveRange));

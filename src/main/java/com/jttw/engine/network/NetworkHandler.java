@@ -168,6 +168,12 @@ public final class NetworkHandler {
                 .consumerMainThread(StaffScalePacket::handle)
                 .add();
 
+        CHANNEL.messageBuilder(com.jttw.engine.network.c2s.StaffTopplePacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.jttw.engine.network.c2s.StaffTopplePacket::encode)
+                .decoder(com.jttw.engine.network.c2s.StaffTopplePacket::decode)
+                .consumerMainThread(com.jttw.engine.network.c2s.StaffTopplePacket::handle)
+                .add();
+
         CHANNEL.messageBuilder(DimensionSelectPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(DimensionSelectPacket::encode)
                 .decoder(DimensionSelectPacket::decode)

@@ -91,6 +91,8 @@ minecraft {
             property 'jttw.chunkBench', 'true'
             // e.g. ./gradlew runWorldgenBench -Pbench.view=6 (the server's view distance, in chunks)
             property 'jttw.chunkBench.view', (project.findProperty('bench.view') ?: '0').toString()
+            // -Pbench.mode=terrain measures the abilities that break terrain instead (see TerrainBench)
+            property 'jttw.chunkBench.mode', (project.findProperty('bench.mode') ?: '').toString()
             mods {
                 jttw_engine {
                     source sourceSets.main

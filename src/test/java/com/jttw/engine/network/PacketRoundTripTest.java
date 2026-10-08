@@ -88,6 +88,7 @@ class PacketRoundTripTest {
                 new com.jttw.engine.network.s2c.SyncLeadHeadPacket(2),
                 new com.jttw.engine.network.s2c.SyncLeadHeadPacket(-1),
                 new com.jttw.engine.network.s2c.SyncStomachPacket(13),
+                new com.jttw.engine.network.c2s.StaffTopplePacket(4321),
                 new com.jttw.engine.network.s2c.SyncFlightPacket(new com.jttw.engine.flight.FlightProfile(2.75, false, 2.5, true)),
                 new com.jttw.engine.network.s2c.SyncFlightPacket(new com.jttw.engine.flight.FlightProfile(1.25, true, 1.0, false)),
                 new com.jttw.engine.network.s2c.SyncStomachPacket(-1),

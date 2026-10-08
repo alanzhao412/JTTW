@@ -48,6 +48,11 @@ public class QiWaveEntity extends Entity {
     private float chargePower = 1.0f;
     /** STR factor 0.0–1.0 derived from ATK — interpolates between min and max values. */
     private float strFactor = 0.0f;
+    /** When each creature was last struck, so it is struck once per damage window, not every step. */
+    private final java.util.Map<Integer, Long> struckAt = new java.util.HashMap<>();
+    /** The last step's sphere: the next step only needs what lies outside it. */
+    private BlockPos lastCenter;
+    private double lastRadius;
     /** Blocks processed per tick for smooth travel. */
     private static final int BLOCKS_PER_TICK = 8;
     /** Distance range: 5 blocks at 1 ATK → 200 blocks at max ATK. */
@@ -124,11 +129,13 @@ public class QiWaveEntity extends Entity {
         // Charge power scales the end radius (min charge = smaller cone)
         double maxRadius = coneStart + (coneEnd - coneStart) * chargePower;
 
+        java.util.List<BlockPos> carved = new java.util.ArrayList<>();
         for (int step = 0; step < BLOCKS_PER_TICK; step++) {
             if (distanceTraveled >= maxDistance) {
                 // Final explosion at termination point
                 Vec3 pos = position();
-                level().explode(owner, pos.x, pos.y, pos.z, 3.0f, Level.ExplosionInteraction.TNT);
+                com.jttw.engine.world.TerrainBreaker.breakBlocks(serverLevel, carved);
+                com.jttw.engine.world.TerrainBreaker.explode(serverLevel, owner, pos.x, pos.y, pos.z, 3.0f);
                 discard();
                 return;
             }
@@ -152,25 +159,16 @@ public class QiWaveEntity extends Entity {
                         if (dx * dx + dy * dy + dz * dz > effectiveRadius * effectiveRadius) continue;
 
                         BlockPos bp = center.offset(dx, dy, dz);
-                        BlockState state = level().getBlockState(bp);
-
-                        if (state.isAir()) continue;
-
-                        // Bedrock and similar are indestructible
-                        float hardness = state.getDestroySpeed(level(), bp);
-                        if (hardness < 0) continue;
-
-                        // Fluids (water, lava) — remove by setting to air
-                        if (!state.getFluidState().isEmpty()) {
-                            level().setBlock(bp, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
-                            continue;
-                        }
-
-                        // Destroy the block
-                        level().destroyBlock(bp, true, owner);
+                        // Inside the last step's sphere: already carved
+                        if (lastCenter != null && bp.distSqr(lastCenter) <= lastRadius * lastRadius) continue;
+                        // Fluids and blocks alike; the breaker leaves air and bedrock
+                        carved.add(bp);
                     }
                 }
             }
+
+            lastCenter = center;
+            lastRadius = effectiveRadius;
 
             // Damage entities in the beam corridor
             AABB damageBox = new AABB(
@@ -182,13 +180,18 @@ public class QiWaveEntity extends Entity {
 
             List<LivingEntity> targets = level().getEntitiesOfClass(LivingEntity.class, damageBox,
                     e -> e != owner && e.isAlive());
+            long now = level().getGameTime();
             for (LivingEntity target : targets) {
+                // Once per damage window (vanilla ignores hits inside it), not on every step
+                Long last = struckAt.get(target.getId());
+                if (last != null && now - last < 10) continue;
+                struckAt.put(target.getId(), now);
                 target.hurt(dmgSource, attackDamage);
                 target.setSecondsOnFire(5);
 
                 // Massive explosion on impact
-                level().explode(owner, target.getX(), target.getY(), target.getZ(),
-                        4.0f + 2.0f * chargePower, Level.ExplosionInteraction.TNT);
+                com.jttw.engine.world.TerrainBreaker.explode(serverLevel, owner,
+                        target.getX(), target.getY(), target.getZ(), 4.0f + 2.0f * chargePower);
 
                 // 10-block knockback in the wave's travel direction
                 Vec3 knockback = direction.normalize().scale(10.0);
@@ -205,6 +208,8 @@ public class QiWaveEntity extends Entity {
                     newPos.x, newPos.y, newPos.z, particleCount / 2,
                     effectiveRadius * 0.3, effectiveRadius * 0.3, effectiveRadius * 0.3, 0.01);
         }
+
+        com.jttw.engine.world.TerrainBreaker.breakBlocks(serverLevel, carved);
 
         // Sound every few ticks
         if (tickCount % 3 == 0) {

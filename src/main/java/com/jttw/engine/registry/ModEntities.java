@@ -48,7 +48,7 @@ public final class ModEntities {
     public static final RegistryObject<EntityType<PlacedStaffEntity>> PLACED_STAFF =
             ENTITIES.register("placed_staff", () ->
                     EntityType.Builder.<PlacedStaffEntity>of(PlacedStaffEntity::new, MobCategory.MISC)
-                            .sized(1.5F, 3.0F)
+                            .sized(0.6F, 1.47F) // its size at scale 1 (getDimensions), so it is right from the start
                             .clientTrackingRange(64)
                             .updateInterval(20)
                             .build(new ResourceLocation(JTTWEngine.MOD_ID, "placed_staff").toString()));

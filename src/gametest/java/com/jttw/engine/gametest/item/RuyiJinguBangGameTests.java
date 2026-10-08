@@ -427,8 +427,8 @@ public class RuyiJinguBangGameTests {
         near(h, 15.0, magic.get(0).amount(), "half of 30 ATK");
         check(h, magic.get(0).source().is(DamageTypeTags.BYPASSES_ARMOR), "bypasses armour");
         check(h, magic.get(0).source().getEntity() == p, "credited to the wielder");
-        h.assertBlockNotPresent(Blocks.DIRT, new BlockPos(4, 2, 2));
-        h.succeed();
+        // The blast carves over the next ticks, not all on the one it goes off
+        h.succeedWhen(() -> h.assertBlockNotPresent(Blocks.DIRT, new BlockPos(4, 2, 2)));
     }
 
     // ── Attack multiplier ─────────────────────────────────────────

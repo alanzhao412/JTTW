@@ -133,6 +133,52 @@ public class PlacedStaffEntity extends Entity {
         return this.entityData.get(FALLING);
     }
 
+    // ── Being aimed at ───────────────────────────────────────────────
+
+    /** How far its owner can reach it from: as far as it can be planted from. */
+    public static final double REACH = 5.0;
+    /** Slack on the server's distance check, for the owner's movement in flight to it. */
+    private static final double REACH_SLACK = 1.5;
+
+    /**
+     * The staff as it is drawn, standing: a thin pillar a little wider than the visual, from
+     * the base to the tip. The entity's own box only handles collision: it is capped, and the
+     * game finds entities near their base, so it cannot be aimed at along a tall staff.
+     */
+    public AABB standingBox() {
+        float scale = getStaffScale();
+        double half = Math.max(0.3, 0.06 * scale + 0.15); // the drawn staff is 0.11 x scale wide
+        double height = VISUAL_HEIGHT * scale;
+        return new AABB(getX() - half, getY(), getZ() - half, getX() + half, getY() + height, getZ() + half);
+    }
+
+    /** Whether it can be aimed at now: standing, not falling or on its way back. */
+    public boolean isStanding() {
+        return !isFalling() && returnTimer < 0;
+    }
+
+    /** Distance along the look to where it is hit, or -1 if the look misses it within reach. */
+    public double aimDistance(net.minecraft.world.phys.Vec3 eye, net.minecraft.world.phys.Vec3 look) {
+        if (!isStanding()) return -1;
+        net.minecraft.world.phys.Vec3 end = eye.add(look.normalize().scale(REACH));
+        return standingBox().clip(eye, end).map(eye::distanceTo).orElse(-1.0);
+    }
+
+    /** Server-side check that a player is close enough to have reached it. */
+    public boolean withinReachOf(Player player) {
+        double r = REACH + REACH_SLACK;
+        return standingBox().distanceToSqr(player.getEyePosition()) <= r * r;
+    }
+
+    /** The owner strikes it: it topples the way they face. Returns false if it could not. */
+    public boolean toppleBy(ServerPlayer player) {
+        if (!isOwner(player) || !isStanding()) return false;
+        this.entityData.set(FALLING, true);
+        this.entityData.set(TOPPLE_YAW, player.getYRot());
+        topple(player);
+        return true;
+    }
+
     @Nullable
     public UUID getOwnerUUID() {
         return this.entityData.get(OWNER_UUID).orElse(null);
@@ -181,20 +227,18 @@ public class PlacedStaffEntity extends Entity {
         int minBY = net.minecraft.util.Mth.floor(getY());
         int maxBY = net.minecraft.util.Mth.ceil(getY() + staffHeight);
 
-        boolean destroyedAny = false;
+        java.util.List<BlockPos> column = new java.util.ArrayList<>();
         for (int bx = minBX; bx <= maxBX; bx++) {
             for (int bz = minBZ; bz <= maxBZ; bz++) {
                 for (int by = minBY; by <= maxBY; by++) {
                     BlockPos pos = new BlockPos(bx, by, bz);
                     BlockState state = level().getBlockState(pos);
-                    if (!state.isAir() && state.getDestroySpeed(level(), pos) >= 0) {
-                        level().destroyBlock(pos, true);
-                        destroyedAny = true;
-                    }
+                    if (!state.isAir() && state.getDestroySpeed(level(), pos) >= 0) column.add(pos);
                 }
             }
         }
-        if (destroyedAny && level() instanceof ServerLevel sl) {
+        if (!column.isEmpty() && level() instanceof ServerLevel sl) {
+            com.jttw.engine.world.TerrainBreaker.breakBlocks(sl, column); // no drops, spread over ticks
             sl.sendParticles(ParticleTypes.CLOUD,
                     getX(), getY() + staffHeight, getZ(),
                     (int)(scale * 0.5f + 2), 0.4, 0.4, 0.4, 0.02);
@@ -212,15 +256,7 @@ public class PlacedStaffEntity extends Entity {
         if (isFalling() || returnTimer >= 0) return false;
 
         Entity attacker = source.getEntity();
-        if (!(attacker instanceof ServerPlayer player) || !isOwner(player)) {
-            return false;
-        }
-
-        // Start the topple — fall in the direction the owner is looking
-        this.entityData.set(FALLING, true);
-        this.entityData.set(TOPPLE_YAW, player.getYRot());
-        topple(player);
-        return true;
+        return attacker instanceof ServerPlayer player && toppleBy(player);
     }
 
     // Staff length in blocks at scale 1 (model is 47 units / 16 ≈ 2.9375 blocks).
@@ -256,6 +292,7 @@ public class PlacedStaffEntity extends Entity {
         float staffRadius = 0.25f + scale * 0.05f;
         int staffSegments = Math.max(2, (int)(length / 2.0f)); // sample points along staff
         float skipDist = 3.0f; // don't destroy blocks within 3 blocks of the base
+        java.util.List<BlockPos> arc = new java.util.ArrayList<>();
 
         for (int step = 0; step <= ARC_STEPS; step++) {
             float theta = (float)(Math.PI / 2.0 * step / ARC_STEPS); // 0 → π/2
@@ -282,16 +319,14 @@ public class PlacedStaffEntity extends Entity {
                 for (int ix = minBX; ix <= maxBX; ix++) {
                     for (int iz = minBZ; iz <= maxBZ; iz++) {
                         for (int iy = minBY; iy <= maxBY; iy++) {
-                            BlockPos pos = new BlockPos(ix, iy, iz);
-                            BlockState state = level().getBlockState(pos);
-                            if (!state.isAir() && state.getDestroySpeed(level(), pos) >= 0) {
-                                level().destroyBlock(pos, true);
-                            }
+                            arc.add(new BlockPos(ix, iy, iz)); // the breaker skips air and the unbreakable
                         }
                     }
                 }
             }
         }
+
+        com.jttw.engine.world.TerrainBreaker.breakBlocks(serverLevel, arc);
 
         // ── Phase 2: Final impact explosions along the horizontal line ──
         // Start explosions 3 blocks out from the base
@@ -304,8 +339,7 @@ public class PlacedStaffEntity extends Entity {
             // Power ramps up toward the tip: base gets 30%, tip gets full
             float ramp = 0.3f + t * 0.7f;
             float pointPower = totalPower * ramp;
-            level().explode(owner, ex, getY(), ez,
-                    pointPower, Level.ExplosionInteraction.TNT);
+            com.jttw.engine.world.TerrainBreaker.explode(serverLevel, owner, ex, getY(), ez, pointPower);
         }
 
         // ── Phase 3: Entity damage in the full swept area ──
@@ -336,6 +370,7 @@ public class PlacedStaffEntity extends Entity {
         }
 
         // ── Phase 4: Fire and particles along impact line ──
+        java.util.List<BlockPos> firePoints = new java.util.ArrayList<>();
         for (int i = 0; i <= explosionCount; i++) {
             float t = (float) i / explosionCount;
             if (length * t < skipDist) continue;
@@ -343,15 +378,20 @@ public class PlacedStaffEntity extends Entity {
             double pz = getZ() + dirZ * length * t;
             serverLevel.sendParticles(ParticleTypes.EXPLOSION_EMITTER,
                     px, getY(), pz, 1, 0.5, 0.3, 0.5, 0.0);
-            BlockPos firePos = BlockPos.containing(px, getY(), pz);
-            for (int dy = -1; dy <= 1; dy++) {
-                BlockPos pos = firePos.above(dy);
-                if (level().getBlockState(pos).isAir()
-                        && level().getBlockState(pos.below()).isSolidRender(level(), pos.below())) {
-                    level().setBlockAndUpdate(pos, Blocks.FIRE.defaultBlockState());
+            firePoints.add(BlockPos.containing(px, getY(), pz));
+        }
+        // Fire takes once the craters are carved, as it did when they were carved at once
+        com.jttw.engine.world.TerrainBreaker.afterQueued(serverLevel, () -> {
+            for (BlockPos firePos : firePoints) {
+                for (int dy = -1; dy <= 1; dy++) {
+                    BlockPos pos = firePos.above(dy);
+                    if (serverLevel.isLoaded(pos) && serverLevel.getBlockState(pos).isAir()
+                            && serverLevel.getBlockState(pos.below()).isSolidRender(serverLevel, pos.below())) {
+                        serverLevel.setBlockAndUpdate(pos, Blocks.FIRE.defaultBlockState());
+                    }
                 }
             }
-        }
+        });
         serverLevel.sendParticles(ParticleTypes.FLAME,
                 getX() + dirX * length * 0.5, getY() + 1, getZ() + dirZ * length * 0.5,
                 (int)(scale * 2), length * 0.4, 1.0, length * 0.4, 0.02);
@@ -455,15 +495,8 @@ public class PlacedStaffEntity extends Entity {
     public boolean skipAttackInteraction(Entity attacker) {
         // Handle the topple directly here — for non-LivingEntity,
         // this is the only reliable attack entry point
-        if (attacker instanceof ServerPlayer player && isOwner(player)) {
-            if (!isFalling() && returnTimer < 0) {
-                this.entityData.set(FALLING, true);
-                this.entityData.set(TOPPLE_YAW, player.getYRot());
-                topple(player);
-            }
-            return true; // we handled it
-        }
-        return true; // ignore non-owner attacks
+        if (attacker instanceof ServerPlayer player) toppleBy(player);
+        return true; // handled here, or a non-owner's swing that does nothing
     }
 
     // ── Serialization ────────────────────────────────────────────────

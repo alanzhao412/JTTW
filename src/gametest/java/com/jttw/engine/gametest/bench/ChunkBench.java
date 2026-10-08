@@ -53,6 +53,8 @@ public final class ChunkBench {
     private ChunkBench() {}
 
     private static final boolean ENABLED = Boolean.getBoolean("jttw.chunkBench");
+    /** "terrain" runs {@link TerrainBench} instead of the generation and flight measurements. */
+    private static final boolean TERRAIN = "terrain".equals(System.getProperty("jttw.chunkBench.mode", ""));
     private static final TicketType<ChunkPos> BENCH = TicketType.create("jttw_bench", Comparator.comparingLong(ChunkPos::toLong));
     private static final int GRID = 12;
     private static final int FLIGHT_TICKS = 400;
@@ -108,6 +110,11 @@ public final class ChunkBench {
     }
 
     @SubscribeEvent
+    public static void onItemJoin(net.minecraftforge.event.entity.EntityJoinLevelEvent event) {
+        if (ENABLED && TERRAIN && !event.getLevel().isClientSide()) TerrainBench.onItemJoin(event);
+    }
+
+    @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent event) {
         if (!ENABLED || event.phase != TickEvent.Phase.END || step == null || step == Step.DONE) return;
         MinecraftServer server = event.getServer();
@@ -115,6 +122,15 @@ public final class ChunkBench {
         ServerPlayer p = server.getPlayerList().getPlayers().get(0);
         ServerLevel level = p.serverLevel();
         ticks++;
+        if (TERRAIN) {
+            if (p.tickCount < 100) return;
+            if (TerrainBench.tick(p)) {
+                report.addAll(TerrainBench.report());
+                write();
+                next(Step.DONE);
+            }
+            return;
+        }
         switch (step) {
             case WAIT -> {
                 if (p.tickCount < 100) return;

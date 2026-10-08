@@ -39,8 +39,8 @@ public class StaffScalePacket {
             Entity entity = player.serverLevel().getEntity(pkt.entityId);
             if (!(entity instanceof PlacedStaffEntity staff)) return;
 
-            // Only the owner can scale it
-            if (!staff.isOwner(player)) return;
+            // Only the owner, within reach of it
+            if (!staff.isOwner(player) || !staff.withinReachOf(player)) return;
 
             staff.adjustScale(pkt.delta);
         });

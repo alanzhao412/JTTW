@@ -25,15 +25,17 @@ public class FlightLookAheadGameTests {
      * (In untouched land at top speed it cannot: ChunkBench measures that ceiling.) Nothing else
      * loads this chunk: the test's fake player is in no one's view.
      */
-    @GameTest(template = PLATFORM, timeoutTicks = 300, batch = "flightLookAhead") // alone: other tests' load is not the question
+    @GameTest(template = PLATFORM, timeoutTicks = 320, batch = "flightLookAhead") // alone: other tests' load is not the question
     public static void theWorldAheadOfAFastFlierIsLoadedBeforeHeGetsThere(GameTestHelper h) {
         ServerPlayer p = as(h, ReincarnationOutcome.GOLD_WINGED_PENG);
         p.getAbilities().flying = true;
         Vec3 start = h.absoluteVec(new Vec3(2.5, 2, 2.5));
         p.setPos(start.x, start.y, start.z);
         FlightLookAhead.tick(p);
-        double speed = 1.6; // fast enough to look ahead (32 blocks a second), slow enough for the test server to keep up
-        ChunkPos ahead = new ChunkPos(net.minecraft.core.BlockPos.containing(start.add(0, 0, 160)));
+        // 20 blocks a second, steadily: the chunk 200 blocks on joins the path partway, so it gets
+        // the look-ahead's full lead, not the burst of the first tick (ChunkBench measures that)
+        double speed = FlightLookAhead.MIN_SPEED;
+        ChunkPos ahead = new ChunkPos(net.minecraft.core.BlockPos.containing(start.add(0, 0, 200)));
         check(h, h.getLevel().getChunkSource().getChunkNow(ahead.x, ahead.z) == null, "not loaded before");
         // He flies south, as his client would carry him, until he is in that chunk
         h.onEachTick(() -> {
@@ -42,7 +44,7 @@ public class FlightLookAheadGameTests {
             FlightLookAhead.tick(p);
             if (new ChunkPos(p.blockPosition()).equals(ahead)
                     && h.getLevel().getChunkSource().getChunkNow(ahead.x, ahead.z) == null) {
-                h.fail("he reached " + ahead + ", 160 blocks on, before it loaded");
+                h.fail("he reached " + ahead + ", 200 blocks on, before it loaded");
             }
         });
         h.succeedWhen(() -> h.assertTrue(new ChunkPos(p.blockPosition()).equals(ahead), "still flying"));

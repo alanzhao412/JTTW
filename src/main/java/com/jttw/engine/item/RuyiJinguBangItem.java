@@ -273,11 +273,9 @@ public class RuyiJinguBangItem extends Item {
                 target.level().explode(
                         attacker, target.getX(), target.getY(), target.getZ(),
                         EXPLOSION_POWER, Level.ExplosionInteraction.NONE);
-            } else if (isLargeMode(stack)) {
-                // Large mode: destructive explosion (breaks blocks)
-                target.level().explode(
-                        attacker, target.getX(), target.getY(), target.getZ(),
-                        EXPLOSION_POWER, Level.ExplosionInteraction.TNT);
+            } else if (isLargeMode(stack) && target.level() instanceof net.minecraft.server.level.ServerLevel sl) {
+                // Large mode: destructive explosion (breaks blocks, drops nothing)
+                com.jttw.engine.world.TerrainBreaker.explode(sl, attacker, target.getX(), target.getY(), target.getZ(), EXPLOSION_POWER);
             }
             // Large mode: extra hit that bypasses armor (magic damage)
             if (isLargeMode(stack) && attacker instanceof Player player) {
