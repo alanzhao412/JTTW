@@ -26,6 +26,7 @@ public final class ReincarnationConfig {
     public static final ForgeConfigSpec.ConfigValue<String> ENTITY_TURTLE;
     public static final ForgeConfigSpec.ConfigValue<String> ENTITY_BULL_DEMON;
     public static final ForgeConfigSpec.ConfigValue<String> ENTITY_SAURIAN_DEMON_KING;
+    public static final ForgeConfigSpec.ConfigValue<String> ENTITY_GRAND_SAINT_NINE_SPIRITS;
     public static final ForgeConfigSpec.ConfigValue<String> ENTITY_GOLD_WINGED_PENG;
 
     static {
@@ -51,6 +52,7 @@ public final class ReincarnationConfig {
         ENTITY_TURTLE = b.define("turtle", "");
         ENTITY_BULL_DEMON = b.define("bullDemon", "");
         ENTITY_SAURIAN_DEMON_KING = b.define("saurianDemonKing", "");
+        ENTITY_GRAND_SAINT_NINE_SPIRITS = b.define("grandSaintNineSpirits", "");
         ENTITY_GOLD_WINGED_PENG = b.define("goldWingedPeng", "");
 
         b.pop();

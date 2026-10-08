@@ -38,7 +38,7 @@ class ReincarnationResolverTest {
             // yaoguai-dominant
             "yaoguai+heavenly,        50, 20, 10, 90, BULL_DEMON_KING",
             "yaoguai+spirit beast,    10, 50, 20, 90, SAURIAN_DEMON_KING",
-            "yaoguai+primordial,      10, 20, 50, 90, SAURIAN_DEMON_KING",
+            "yaoguai+primordial,      10, 20, 50, 90, GRAND_SAINT_NINE_SPIRITS",
     })
     void primaryAndSecondaryPickTheForm(String name, int h, int sb, int p, int y, ReincarnationOutcome expected) {
         assertEquals(expected, r(h, sb, p, y));

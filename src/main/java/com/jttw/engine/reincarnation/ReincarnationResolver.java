@@ -75,7 +75,7 @@ public final class ReincarnationResolver {
             case YAOGUAI -> switch (secondary) {
                 case HEAVENLY -> ReincarnationOutcome.BULL_DEMON_KING;
                 case SPIRIT_BEAST -> ReincarnationOutcome.SAURIAN_DEMON_KING;
-                case PRIMORDIAL -> ReincarnationOutcome.SAURIAN_DEMON_KING;
+                case PRIMORDIAL -> ReincarnationOutcome.GRAND_SAINT_NINE_SPIRITS;
                 case YAOGUAI -> ReincarnationOutcome.BULL_DEMON_KING;
             };
         };

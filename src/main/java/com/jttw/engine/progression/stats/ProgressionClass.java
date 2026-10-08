@@ -79,7 +79,8 @@ public enum ProgressionClass {
                  TURTLE                                   -> DIVINE_BEAST;
 
             case BULL_DEMON_KING,
-                 SAURIAN_DEMON_KING                       -> YAOGUAI;
+                 SAURIAN_DEMON_KING,
+                 GRAND_SAINT_NINE_SPIRITS                 -> YAOGUAI;
         };
     }
 

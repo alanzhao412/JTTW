@@ -36,11 +36,13 @@ class CharactersTest {
         assertEquals(outcome.id, c.outcomeId());
     }
 
+    /** The Bull and Saurian Demon Kings have no character yet; the Yaoguai stand-in plays them. */
     @ParameterizedTest
     @EnumSource(value = ReincarnationOutcome.class, names = {"BULL_DEMON_KING", "SAURIAN_DEMON_KING"})
-    void yaoguaiOutcomesHaveNoCharacterYet(ReincarnationOutcome outcome) {
+    void unbuiltYaoguaiPlayTheGrandSaintOfNineSpirits(ReincarnationOutcome outcome) {
         assertNull(Characters.byOutcome(outcome.id));
-        assertNull(Characters.resolve(outcome.id, ProgressionClass.YAOGUAI, null));
+        assertSame(com.jttw.engine.character.ninespirits.NineSpiritsCharacter.INSTANCE,
+                Characters.resolve(outcome.id, ProgressionClass.YAOGUAI, null));
     }
 
     @Test
@@ -63,7 +65,9 @@ class CharactersTest {
     void classStandsInWhenNoOutcomeIsSaved() {
         assertSame(WukongCharacter.INSTANCE, Characters.resolve("", ProgressionClass.PRIMORDIAL, null));
         assertSame(ErlangShenCharacter.INSTANCE, Characters.resolve("", ProgressionClass.HEAVENLY, null));
-        assertNull(Characters.resolve("", ProgressionClass.YAOGUAI, null));
+        assertSame(com.jttw.engine.character.ninespirits.NineSpiritsCharacter.INSTANCE,
+                Characters.resolve("", ProgressionClass.YAOGUAI, null));
+        assertNull(Characters.resolve("", null, null), "no class, no character");
     }
 
     @Test

@@ -23,7 +23,8 @@ public final class SkillTrees {
         return List.of(
                 WukongSkillTree.TREE, ErlangShenSkillTree.TREE, DragonSkillTree.TREE,
                 TurtleSkillTree.TREE, ByakkoSkillTree.TREE, PhoenixSkillTree.TREE,
-                YuanDiSkillTree.TREE, PengSkillTree.TREE, NezhaSkillTree.TREE, MarshalSkillTree.TREE);
+                YuanDiSkillTree.TREE, PengSkillTree.TREE, NezhaSkillTree.TREE, MarshalSkillTree.TREE,
+                com.jttw.engine.character.ninespirits.NineSpiritsSkillTree.TREE);
     }
 
     /** The tree whose prefix names this node, or null if no tree claims it. */

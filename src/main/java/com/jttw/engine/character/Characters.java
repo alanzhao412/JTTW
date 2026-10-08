@@ -5,6 +5,7 @@ import com.jttw.engine.character.dragon.DragonCharacter;
 import com.jttw.engine.character.erlang.ErlangShenCharacter;
 import com.jttw.engine.character.marshal.MarshalCharacter;
 import com.jttw.engine.character.nezha.NezhaCharacter;
+import com.jttw.engine.character.ninespirits.NineSpiritsCharacter;
 import com.jttw.engine.character.peng.PengCharacter;
 import com.jttw.engine.character.phoenix.PhoenixCharacter;
 import com.jttw.engine.character.turtle.TurtleCharacter;
@@ -24,8 +25,8 @@ import java.util.List;
  *
  * <p>A player's character is their reincarnation outcome. Players given a class with a debug
  * command never reincarnate, so when the outcome is missing or has no character yet the class
- * stands in: Primordial plays Wukong, Heavenly plays Erlang Shen, and a Divine Beast plays the
- * beast of its line.
+ * stands in: Primordial plays Wukong, Heavenly plays Erlang Shen, a Divine Beast plays the
+ * beast of its line, and Yaoguai plays the Grand Saint of Nine Spirits.
  */
 public final class Characters {
 
@@ -35,7 +36,7 @@ public final class Characters {
             WukongCharacter.INSTANCE, YuanDiCharacter.INSTANCE, PengCharacter.INSTANCE,
             ErlangShenCharacter.INSTANCE, NezhaCharacter.INSTANCE, MarshalCharacter.INSTANCE,
             DragonCharacter.INSTANCE, PhoenixCharacter.INSTANCE, ByakkoCharacter.INSTANCE,
-            TurtleCharacter.INSTANCE);
+            TurtleCharacter.INSTANCE, NineSpiritsCharacter.INSTANCE);
 
     public static List<PlayableCharacter> all() {
         return ALL;
@@ -54,7 +55,7 @@ public final class Characters {
      * Resolves a character from a player's saved progression state.
      *
      * @return the character, or null if neither the outcome nor the class names one
-     *         (e.g. Yaoguai, whose characters aren't built yet, or no class at all)
+     *         (no class at all)
      */
     @Nullable
     public static PlayableCharacter resolve(String outcomeId, @Nullable ProgressionClass cls,
@@ -71,7 +72,7 @@ public final class Characters {
                 case BEAST -> ByakkoCharacter.INSTANCE;
                 case FIRE -> PhoenixCharacter.INSTANCE;
             };
-            case YAOGUAI -> null;
+            case YAOGUAI -> NineSpiritsCharacter.INSTANCE;
         };
     }
 

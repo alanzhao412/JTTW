@@ -24,7 +24,8 @@ public enum ReincarnationOutcome {
 
     // Yaoguai-dominant
     BULL_DEMON_KING("bull_demon_king", ReincarnationConfig.ENTITY_BULL_DEMON),
-    SAURIAN_DEMON_KING("saurian_demon_king", ReincarnationConfig.ENTITY_SAURIAN_DEMON_KING);
+    SAURIAN_DEMON_KING("saurian_demon_king", ReincarnationConfig.ENTITY_SAURIAN_DEMON_KING),
+    GRAND_SAINT_NINE_SPIRITS("grand_saint_of_nine_spirits", ReincarnationConfig.ENTITY_GRAND_SAINT_NINE_SPIRITS);
 
     public final String id;
     private final ForgeConfigSpec.ConfigValue<String> entityIdConfig;

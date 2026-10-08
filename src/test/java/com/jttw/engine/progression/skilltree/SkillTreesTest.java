@@ -27,10 +27,10 @@ class SkillTreesTest {
     }
 
     @Test
-    void tenTreesWithDistinctPrefixes() {
+    void elevenTreesWithDistinctPrefixes() {
         List<SkillTree> all = SkillTrees.all();
-        assertEquals(10, all.size());
-        assertEquals(10, all.stream().map(SkillTree::idPrefix).distinct().count());
+        assertEquals(11, all.size());
+        assertEquals(11, all.stream().map(SkillTree::idPrefix).distinct().count());
     }
 
     @Test
@@ -149,9 +149,9 @@ class SkillTreesTest {
     }
 
     @Test
-    void onlyPengHasAnEmptyTree() {
+    void onlyPengAndTheGrandSaintHaveEmptyTrees() {
         for (SkillTree t : SkillTrees.all()) {
-            if (t.idPrefix().equals("gp_")) assertTrue(t.nodes().isEmpty());
+            if (t.idPrefix().equals("gp_") || t.idPrefix().equals("ns_")) assertTrue(t.nodes().isEmpty());
             else assertFalse(t.nodes().isEmpty(), t.idPrefix());
         }
     }
