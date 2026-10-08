@@ -93,8 +93,15 @@ public final class JTTWHudRenderer {
                 C_HP_BG, lowFlash ? C_HP_LOW : C_HP_FILL, C_HP_SHINE);
 
         // HP label stays normal size (your original behavior)
-        drawCenteredLabel(gfx, mc, x, y, HP_BAR_WIDTH, HP_BAR_HEIGHT,
-                "HP  " + (int) Math.ceil(current) + " / " + (int) max);
+        drawCenteredLabel(gfx, mc, x, y, HP_BAR_WIDTH, HP_BAR_HEIGHT, hpLabel(current, max));
+    }
+
+    /**
+     * The HP bar's text. Max health is fractional (it grows with level), so both numbers are
+     * rounded the same way: a full bar always reads "n / n".
+     */
+    public static String hpLabel(float current, float max) {
+        return "HP  " + (int) Math.ceil(Math.min(current, max)) + " / " + (int) Math.ceil(max);
     }
 
     private static void renderQiBar(GuiGraphics gfx, Minecraft mc,
