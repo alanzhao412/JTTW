@@ -3,6 +3,7 @@ package com.jttw.engine.registry;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.item.ErlangAxeItem;
 import com.jttw.engine.item.FireTipSpearItem;
+import com.jttw.engine.item.BellOfTaiyiItem;
 import com.jttw.engine.item.HuntianClothItem;
 import com.jttw.engine.item.ImmortalItems;
 import com.jttw.engine.item.ImmortalPeachItem;
@@ -62,6 +63,10 @@ public final class ModItems {
             ITEMS.register("wind_fire_wheels", WindFireWheelsItem::new);
     public static final RegistryObject<Item> HUNTIAN_CLOTH =
             ITEMS.register("huntian_cloth", HuntianClothItem::new);
+
+    // ── Grand Saint of Nine Spirits ───────────────────────────────
+    public static final RegistryObject<Item> BELL_OF_TAIYI =
+            ITEMS.register("bell_of_taiyi", BellOfTaiyiItem::new);
 
     public static void register(IEventBus modEventBus) {
         ITEMS.register(modEventBus);

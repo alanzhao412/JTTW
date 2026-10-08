@@ -85,6 +85,8 @@ class PacketRoundTripTest {
                 new SyncReincarnationPacket(PLAYER, true, "eye_of_heaven"),
                 new SyncReincarnationPacket(PLAYER, false, ""),
                 new SyncReviveCountPacket(2),
+                new com.jttw.engine.network.s2c.SyncLeadHeadPacket(2),
+                new com.jttw.engine.network.s2c.SyncLeadHeadPacket(-1),
                 new SyncRingStatePacket(PLAYER, true),
                 new SyncSkillTreePacket(PLAYER, 4, Set.of("wu_ring_1", "wu_ring_2", "wu_clone_1")),
                 new SyncSkillTreePacket(PLAYER, 0, Set.of()),

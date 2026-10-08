@@ -149,9 +149,9 @@ class SkillTreesTest {
     }
 
     @Test
-    void onlyPengAndTheGrandSaintHaveEmptyTrees() {
+    void onlyPengHasAnEmptyTree() {
         for (SkillTree t : SkillTrees.all()) {
-            if (t.idPrefix().equals("gp_") || t.idPrefix().equals("ns_")) assertTrue(t.nodes().isEmpty());
+            if (t.idPrefix().equals("gp_")) assertTrue(t.nodes().isEmpty());
             else assertFalse(t.nodes().isEmpty(), t.idPrefix());
         }
     }

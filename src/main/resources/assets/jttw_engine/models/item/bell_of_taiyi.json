@@ -1,0 +1,4 @@
+{
+  "_comment": "Temporary stand-in: the vanilla bell, until this item has its own art.",
+  "parent": "minecraft:item/bell"
+}

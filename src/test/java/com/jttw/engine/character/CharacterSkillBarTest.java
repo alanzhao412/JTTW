@@ -53,7 +53,9 @@ class CharacterSkillBarTest {
     @TestFactory
     Stream<DynamicTest> barMatchesTheOldBuilder() {
         // The Marshal changed on purpose: 36 Transformations is now a skill branch, not innate
-        return Characters.all().stream().filter(c -> c != MarshalCharacter.INSTANCE)
+        // Characters newer than the old builder have no legacy bar to match
+        return Characters.all().stream().filter(c -> c != MarshalCharacter.INSTANCE
+                        && c != com.jttw.engine.character.ninespirits.NineSpiritsCharacter.INSTANCE)
                 .map(c -> DynamicTest.dynamicTest(c.outcomeId(), () -> {
             for (Set<String> unlocked : cases(c)) {
                 assertEquals(LegacySkillBar.build(c.outcomeId(), unlocked), c.skillBar(unlocked),

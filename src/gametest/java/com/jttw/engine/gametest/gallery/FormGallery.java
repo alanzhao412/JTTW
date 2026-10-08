@@ -59,11 +59,12 @@ public final class FormGallery {
 
     private static final boolean ENABLED = Boolean.getBoolean("jttw.formGallery");
     private static final int SETTLE_TICKS = 15;
+    private static final int SCENE_SETTLE_TICKS = 50;
     private static final float UP_PITCH = -40f;
 
     private enum View { FRONT, SIDE, UP }
     /** What a shot shows: a form, or a form in a particular state. */
-    private enum Kind { ENTITY, BLOCK, LIT_TNT, BOAT_ON_WATER }
+    private enum Kind { ENTITY, BLOCK, LIT_TNT, BOAT_ON_WATER, SCENE }
 
     private record Shot(ResourceLocation form, View view, Kind kind) {
         String key() {
@@ -72,6 +73,7 @@ public final class FormGallery {
                 case BLOCK -> "block__" + form.getPath();
                 case LIT_TNT -> "special__tnt_lit";
                 case BOAT_ON_WATER -> "special__boat_on_water";
+                case SCENE -> "scene__" + form.getPath();
             };
         }
     }
@@ -100,7 +102,7 @@ public final class FormGallery {
         rules.getRule(GameRules.RULE_DAYLIGHT).set(false, null);
         rules.getRule(GameRules.RULE_WEATHER_CYCLE).set(false, null);
         LevelSettings settings = new LevelSettings("jttw_gallery_" + System.currentTimeMillis(), GameType.CREATIVE,
-                false, Difficulty.PEACEFUL, true, rules, WorldDataConfiguration.DEFAULT);
+                false, Difficulty.EASY, true, rules, WorldDataConfiguration.DEFAULT); // Peaceful deletes scene targets
         mc.createWorldOpenFlows().createFreshLevel(settings.levelName(), settings,
                 new WorldOptions(0L, false, false),
                 access -> access.registryOrThrow(Registries.WORLD_PRESET).getHolderOrThrow(WorldPresets.FLAT)
@@ -131,6 +133,9 @@ public final class FormGallery {
                 all.add(new Shot(new ResourceLocation("minecraft", "tnt"), v, Kind.LIT_TNT));
                 all.add(new Shot(new ResourceLocation("minecraft", "boat"), v, Kind.BOAT_ON_WATER));
             }
+            for (AbilityScenes.Scene scene : AbilityScenes.all()) {
+                all.add(new Shot(new ResourceLocation(JTTWEngine.MOD_ID, scene.name()), View.FRONT, Kind.SCENE));
+            }
             all.sort(java.util.Comparator.comparing(Shot::key));
             for (Shot shot : all) {
                 if (ONLY.isEmpty() || java.util.Arrays.stream(ONLY.split(",")).anyMatch(o -> shot.key().contains(o.trim()))) {
@@ -154,6 +159,14 @@ public final class FormGallery {
             for (Entity e : mc.level.entitiesForRendering()) {
                 if (e.getUUID().equals(cameraId)) mc.setCameraEntity(e);
             }
+        }
+        if (shot.kind() == Kind.SCENE && wait == scene(shot).triggerBefore()) {
+            UUID id = mc.player.getUUID();
+            AbilityScenes.Scene sc = scene(shot);
+            mc.getSingleplayerServer().execute(() -> {
+                ServerPlayer sp = mc.getSingleplayerServer().getPlayerList().getPlayer(id);
+                if (sp != null) sc.trigger().accept(sp);
+            });
         }
         if (--wait > 0) return;
 
@@ -184,10 +197,19 @@ public final class FormGallery {
         if (still) p.setDeltaMovement(0, 0, 0); // a boat on water is left to float
     }
 
+    private static AbilityScenes.Scene scene(Shot shot) {
+        for (AbilityScenes.Scene sc : AbilityScenes.all()) if (sc.name().equals(shot.form().getPath())) return sc;
+        throw new IllegalStateException("no scene " + shot.form());
+    }
+
     private static void startShot(Minecraft mc) {
         Shot shot = shots.get(next);
-        wait = SETTLE_TICKS;
+        // scenes wait longer, so one ability's particles are gone before the next picture
+        wait = shot.kind() == Kind.SCENE ? SCENE_SETTLE_TICKS : SETTLE_TICKS;
         mc.setCameraEntity(mc.player);
+        boolean firstPerson = shot.kind() == Kind.SCENE && scene(shot).firstPerson();
+        mc.options.hideGui = !firstPerson; // first-person scenes show the HUD
+        if (firstPerson) cameraId = null;
         UUID playerId = mc.player.getUUID();
         mc.getSingleplayerServer().execute(() -> {
             ServerPlayer sp = mc.getSingleplayerServer().getPlayerList().getPlayer(playerId);
@@ -214,7 +236,10 @@ public final class FormGallery {
             for (Entity e : level.getEntities((Entity) null, sp.getBoundingBox().inflate(40), e -> !(e instanceof Player))) {
                 e.discard();
             }
+            AbilityScenes.reset(sp);
+            TransformationManager.demorph(sp);
             switch (shot.kind()) {
+                case SCENE -> scene(shot).setup().accept(sp);
                 case ENTITY, BOAT_ON_WATER -> TransformationManager.transform(sp, ForgeRegistries.ENTITY_TYPES.getValue(shot.form()));
                 case BLOCK -> {
                     var block = ForgeRegistries.BLOCKS.getValue(shot.form());
@@ -231,6 +256,18 @@ public final class FormGallery {
                             .withLitUntil(level.getGameTime() + 100_000));
                 }
             }
+            if (shot.kind() == Kind.SCENE) {
+                if (!scene(shot).firstPerson()) {
+                    // Three-quarter view: from the south-east, onto the player and the ground in front
+                    double tx = 0.5, ty = ground + 1.0, tz = 3.0;
+                    double cx = 7.0, cy = ground + 3.5, cz = 8.0;
+                    double dx = tx - cx, dy = ty - cy, dz = tz - cz;
+                    float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
+                    float pitch = (float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)));
+                    placeCamera(level, cx, cy, cz, yaw, pitch);
+                }
+                return;
+            }
             TransformationData data = TransformationManager.getTransformation(sp);
             float h = data == null ? 1.8f : data.getHeight(), w = data == null ? 0.6f : data.getWidth();
 
@@ -242,6 +279,13 @@ public final class FormGallery {
             float yaw;
             if (shot.view() == View.SIDE) { cx += dist; yaw = 90f; } else { cz += dist; yaw = 180f; }
             float pitch = (float) Math.toDegrees(Math.atan2(camY - centreY, dist));
+            placeCamera(level, cx, camY, cz, yaw, pitch);
+        });
+    }
+
+    /** An invisible marker armor stand as the camera: its eye is at its feet. */
+    private static void placeCamera(ServerLevel level, double cx, double camY, double cz, float yaw, float pitch) {
+        {
             ArmorStand camera = EntityType.ARMOR_STAND.create(level);
             camera.setInvisible(true);
             camera.setNoGravity(true);
@@ -252,7 +296,7 @@ public final class FormGallery {
             camera.setYHeadRot(yaw);
             level.addFreshEntity(camera);
             cameraId = camera.getUUID();
-        });
+        }
     }
 
     private static void setMarker(ArmorStand stand) {
