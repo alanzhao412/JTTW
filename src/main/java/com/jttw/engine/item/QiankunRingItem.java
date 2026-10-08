@@ -66,6 +66,10 @@ public class QiankunRingItem extends Item {
         ItemStack stack = player.getItemInHand(hand);
         if (level.isClientSide()) return InteractionResultHolder.success(stack);
         if (!(player instanceof ServerPlayer sp)) return InteractionResultHolder.pass(stack);
+        if (!WieldRules.canThrowRing(sp)) {
+            sp.displayClientMessage(Component.literal("§cThe Qiankun Ring answers only to Nezha."), true);
+            return InteractionResultHolder.fail(stack);
+        }
 
         int size = getSize(stack);
         Snowball proj = new Snowball(level, sp);

@@ -625,6 +625,7 @@ public class ErlangWeaponsGameTests {
     @GameTest(template = PLATFORM, batch = "axe_cleave_short")
     public static void groundCleaveNeedsTenTicksOfCharge(GameTestHelper h) {
         ServerPlayer p = playerAt(h, 2, 1, 0f, 0f);
+        com.jttw.engine.reincarnation.AlignmentData.markReincarnated(p, com.jttw.engine.reincarnation.ReincarnationOutcome.EYE_OF_HEAVEN); // the cleave is Erlang's alone
         setBaseAtk(p, 4.0);
         ItemStack a = axe();
         Pig target = cleaveTarget(h);
@@ -645,6 +646,7 @@ public class ErlangWeaponsGameTests {
     @GameTest(template = PLATFORM, batch = "axe_cleave_min", timeoutTicks = 150)
     public static void groundCleaveHitsForOneAttackAndLocksTheAxeForThreeSeconds(GameTestHelper h) {
         ServerPlayer p = playerAt(h, 2, 1, 0f, 0f);
+        com.jttw.engine.reincarnation.AlignmentData.markReincarnated(p, com.jttw.engine.reincarnation.ReincarnationOutcome.EYE_OF_HEAVEN); // the cleave is Erlang's alone
         setBaseAtk(p, 4.0);
         ItemStack a = axe();
         Pig target = cleaveTarget(h);
@@ -657,7 +659,8 @@ public class ErlangWeaponsGameTests {
         }
         var cleave = log.matching(src -> src.is(DamageTypes.PLAYER_ATTACK));
         eq(h, 1, cleave.size(), "cleave hit");
-        near(h, 4.0, cleave.get(0).amount(), "minimum charge: 100% of 4 ATK");
+        // 100% of 4 ATK, and Erlang's x1.667 with his own axe (it is his cleave now)
+        near(h, 4.0 * 1.667, cleave.get(0).amount(), "minimum charge: 100% of 4 ATK, x1.667 in Erlang's hand");
         check(h, p.getCooldowns().isOnCooldown(a.getItem()), "item cooldown");
         p.stopUsingItem();
         eq(h, InteractionResult.FAIL, use(h, p, a), "refused right after");
@@ -671,6 +674,7 @@ public class ErlangWeaponsGameTests {
     @GameTest(template = PLATFORM, batch = "axe_cleave_full")
     public static void fullyChargedGroundCleaveHitsForTwoAndAHalfAttack(GameTestHelper h) {
         ServerPlayer p = playerAt(h, 2, 1, 0f, 0f);
+        com.jttw.engine.reincarnation.AlignmentData.markReincarnated(p, com.jttw.engine.reincarnation.ReincarnationOutcome.EYE_OF_HEAVEN); // the cleave is Erlang's alone
         setBaseAtk(p, 4.0);
         ItemStack a = axe();
         Pig target = cleaveTarget(h);
@@ -683,7 +687,7 @@ public class ErlangWeaponsGameTests {
         }
         var cleave = log.matching(src -> src.is(DamageTypes.PLAYER_ATTACK));
         eq(h, 1, cleave.size(), "cleave hit");
-        near(h, 10.0, cleave.get(0).amount(), "full charge: 250% of 4 ATK");
+        near(h, 10.0 * 1.667, cleave.get(0).amount(), "full charge: 250% of 4 ATK, x1.667 in Erlang's hand");
         h.succeed();
     }
 

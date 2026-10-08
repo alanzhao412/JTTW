@@ -99,6 +99,9 @@ final class TerrainBench {
         }, p -> {}));
         all.add(new Scenario("Erlang axe cleave, level 100, full charge", p -> {
             PlayerLevel.setLevel(p, 100);
+            // The cleave is Erlang's alone
+            com.jttw.engine.reincarnation.AlignmentData.markReincarnated(p,
+                    com.jttw.engine.reincarnation.ReincarnationOutcome.EYE_OF_HEAVEN);
             ItemStack axe = new ItemStack(ModItems.ERLANG_AXE.get());
             p.getPersistentData().remove("jttw_axe_cleave_ready_at");
             axe.releaseUsing(p.level(), p, axe.getUseDuration() - 60);

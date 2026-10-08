@@ -79,14 +79,11 @@ public class ImmortalItemsGameTests {
     }
 
     @GameTest(template = PLATFORM)
-    public static void pillOnlyNauseatesEveryoneElse(GameTestHelper h) {
+    public static void pillGivesEveryoneElseQiButNotImmortality(GameTestHelper h) {
         for (ServerPlayer p : new ServerPlayer[] {
                 player(h), as(h, ReincarnationOutcome.EYE_OF_HEAVEN), as(h, ReincarnationOutcome.YUAN_DI)}) {
             eatPill(h, p);
-            MobEffectInstance nausea = p.getEffect(MobEffects.CONFUSION);
-            check(h, nausea != null, "nausea applied");
-            eq(h, 600, nausea.getDuration(), "nausea lasts 30 seconds");
-            eq(h, 0, nausea.getAmplifier(), "nausea level I");
+            check(h, !p.hasEffect(MobEffects.CONFUSION), "no nausea");
             check(h, !p.getPersistentData().getBoolean(ImmortalItems.KEY_IMMORTAL_PILLS), "no pill flag");
             check(h, !WukongCheckpoints.isComplete(p, Checkpoint.IMMORTALITY_PILLS), "no checkpoint");
         }

@@ -114,6 +114,10 @@ public class ErlangAxeItem extends Item {
 
         if (level.getGameTime() < sp.getPersistentData().getLong(KEY_CLEAVE_READY_AT))
             return net.minecraft.world.InteractionResultHolder.fail(stack);
+        if (!WieldRules.canCleave(sp)) {
+            sp.displayClientMessage(net.minecraft.network.chat.Component.literal("§cThe cleave answers only to Erlang Shen."), true);
+            return net.minecraft.world.InteractionResultHolder.fail(stack);
+        }
 
         player.startUsingItem(hand);
         return net.minecraft.world.InteractionResultHolder.consume(stack);
@@ -122,6 +126,7 @@ public class ErlangAxeItem extends Item {
     @Override
     public void releaseUsing(ItemStack stack, Level level, LivingEntity entity, int timeLeft) {
         if (level.isClientSide() || !(entity instanceof net.minecraft.server.level.ServerPlayer sp)) return;
+        if (!WieldRules.canCleave(sp)) return;
 
         int chargeTime = getUseDuration(stack) - timeLeft;
         if (chargeTime < 10) return;

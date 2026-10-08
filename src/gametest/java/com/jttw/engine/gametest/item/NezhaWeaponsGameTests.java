@@ -166,6 +166,7 @@ public class NezhaWeaponsGameTests {
     @GameTest(template = PLATFORM)
     public static void ringThrowLaunchesATaggedProjectileKeepsTheRingAndCoolsDownTwoSeconds(GameTestHelper h) {
         ServerPlayer p = player(h);
+        com.jttw.engine.reincarnation.AlignmentData.markReincarnated(p, com.jttw.engine.reincarnation.ReincarnationOutcome.THIRD_LOTUS_PRINCE); // only Nezha throws the ring
         ItemStack r = ring();
         QiankunRingItem.setSize(r, 4);
         eq(h, InteractionResult.CONSUME, use(h, p, r), "use result");
@@ -189,6 +190,7 @@ public class NezhaWeaponsGameTests {
     @GameTest(template = PLATFORM, batch = "qiankun_flight", timeoutTicks = 60)
     public static void thrownRingDamagesWhatItHits(GameTestHelper h) {
         ServerPlayer p = playerAt(h, 2, 0, 0f, 0f);
+        com.jttw.engine.reincarnation.AlignmentData.markReincarnated(p, com.jttw.engine.reincarnation.ReincarnationOutcome.THIRD_LOTUS_PRINCE); // only Nezha throws the ring
         setBaseAtk(p, 10.0);
         IronGolem golem = h.spawnWithNoFreeWill(EntityType.IRON_GOLEM, new BlockPos(2, 2, 3));
         float full = golem.getHealth();

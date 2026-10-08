@@ -55,6 +55,9 @@ public final class ImmortalItems {
 
     public static class ImmortalPillItem extends Item {
 
+        /** Qi it gives, as much as the Immortal Peach. */
+        public static final float PILL_QI = 4700f;
+
         private static final FoodProperties FOOD = new FoodProperties.Builder()
                 .nutrition(2)
                 .saturationMod(0.5F)
@@ -73,11 +76,14 @@ public final class ImmortalItems {
             ItemStack result = super.finishUsingItem(stack, level, entity);
             if (level.isClientSide() || !(entity instanceof ServerPlayer player)) return result;
 
+            // Everyone: Qi, as much as the Immortal Peach gives
+            com.jttw.engine.progression.qi.QiData.restore(player, PILL_QI);
+            com.jttw.engine.network.NetworkHandler.sendToPlayer(player, new com.jttw.engine.network.s2c.SyncQiPacket(
+                    com.jttw.engine.progression.qi.QiData.getCurrent(player),
+                    com.jttw.engine.progression.qi.QiData.getMax(player)));
             if (!isWukong(player)) {
-                // Non-Wukong: just Nausea for 30 seconds (600 ticks)
-                player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 600, 0, false, true));
                 player.sendSystemMessage(Component.literal(
-                        "\u00a76[JTTW] \u00a7cThe elixir burns your stomach... you feel nauseous."));
+                        "\u00a76[JTTW] \u00a7eThe elixir floods you with Qi."));
                 return result;
             }
 
