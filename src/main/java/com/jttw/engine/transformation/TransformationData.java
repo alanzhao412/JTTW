@@ -59,8 +59,7 @@ public class TransformationData {
         if (entity instanceof LivingEntity le) {
             eye = le.getEyeHeight(pose);
         } else {
-            // Non-living: no real "eye height". Use a conservative camera height.
-            eye = Math.min(1.62f, dims.height * 0.85f);
+            eye = objectEyeHeight(dims.height);
         }
 
         // Flying trait: cover common vanilla flyers + class-based flyers
@@ -70,6 +69,19 @@ public class TransformationData {
         return new TransformationData(type, eye, dims.width, dims.height, canFly, canPhase);
     }
 
+
+    /** An object form's camera never sits lower than this above the feet. */
+    public static final float MIN_OBJECT_EYE_HEIGHT = 0.25f;
+
+    /**
+     * Objects have no eyes: the camera goes at 85% of their height, never above a player's eyes,
+     * and never below {@link #MIN_OBJECT_EYE_HEIGHT}. Zero-height objects (displays, markers,
+     * lightning) would otherwise put the camera at the feet, where the game sees the head inside
+     * the floor block and covers the screen with its texture.
+     */
+    public static float objectEyeHeight(float height) {
+        return Math.max(MIN_OBJECT_EYE_HEIGHT, Math.min(1.62f, height * 0.85f));
+    }
 
     private static boolean isPhasingMob(Entity entity) {
         EntityType<?> t = entity.getType();

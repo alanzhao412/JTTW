@@ -24,8 +24,9 @@ import net.minecraft.world.entity.player.Player;
  * <ul>
  *   <li>The dummy faces where the player faces: yaw, body yaw and head yaw are copied, plus a
  *       per-model offset for models built facing backwards ({@link #yawOffset}).</li>
- *   <li>Living dummies tilt with the player's pitch; a few models tilt the other way
- *       ({@link #invertsPitch}). Objects stay level.</li>
+ *   <li>Living dummies tilt with the player's pitch; the phantom's model tilts the other way
+ *       ({@link #invertsPitch}). Objects stay level. (The ender dragon's renderer ignores pitch
+ *       altogether: it tilts from its own climbing and diving.)</li>
  *   <li>In water the dummy swims; in the air or flying it is never on the ground; it jumps when
  *       the player jumps.</li>
  *   <li>Walking and attack animations are the player's, except for models that animate
@@ -41,9 +42,12 @@ public final class MorphPose {
         return type == EntityType.ENDER_DRAGON ? 180.0F : 0.0F;
     }
 
-    /** Models whose pitch runs the other way from the player's. */
+    /**
+     * Models whose pitch runs the other way from the player's: the phantom (checked in the form
+     * gallery: looking up shows its belly).
+     */
     public static boolean invertsPitch(EntityType<?> type) {
-        return type == EntityType.PHANTOM || type == EntityType.ENDER_DRAGON;
+        return type == EntityType.PHANTOM;
     }
 
     /**

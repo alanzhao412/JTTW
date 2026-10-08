@@ -276,6 +276,13 @@ Then drop the built jar into `mods/` alongside Minecraft Forge 1.20.1 (47.4.10+)
   dimensions, items, transformations and each character's abilities. They live in their own
   source set, so nothing from them ships in the mod jar. Each test runs in a small platform
   structure with its own Forge `FakePlayer`.
+- **The form gallery** checks what tests can't: how each transformation looks.
+  `./gradlew runFormGallery` opens a real client and photographs every form from the front, the
+  side, and the front while looking up. It saves the photos to
+  `run-gallery/screenshots/gallery-<time>/` and then closes. `python tools/form_sheets.py` lays
+  them out as contact sheets and lists the forms that draw nothing. In the front view a model's
+  face should point at you, in the side view its head should point left, and in the looking-up
+  view it should tilt up.
 
 ### Commands
 

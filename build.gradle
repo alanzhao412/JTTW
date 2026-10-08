@@ -68,6 +68,19 @@ minecraft {
             }
         }
 
+        // Photographs every transformation form in a real client (see FormGallery)
+        formGallery {
+            parent runs.client
+            workingDirectory project.file('run-gallery')
+            property 'jttw.formGallery', 'true'
+            mods {
+                jttw_engine {
+                    source sourceSets.main
+                    source sourceSets.gametest
+                }
+            }
+        }
+
         data {
             workingDirectory project.file('run-data')
             args '--mod', 'jttw_engine', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')

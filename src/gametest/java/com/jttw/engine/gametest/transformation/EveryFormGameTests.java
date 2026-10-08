@@ -136,7 +136,11 @@ public class EveryFormGameTests {
         h.succeed();
     }
 
-    /** Objects take their own hitbox, a camera at 85% of their height (never above a player's), and never fly. */
+    /**
+     * Objects take their own hitbox and a camera at 85% of their height, never above a player's
+     * eyes nor below a quarter block (a zero-height display at the feet would see "inside" the
+     * floor); they never fly.
+     */
     @GameTest(template = PLATFORM, timeoutTicks = 200)
     public static void everyObjectFormTakesItsOwnBodyAndRevertsCleanly(GameTestHelper h) {
         ServerPlayer p = Tf.player(h);
@@ -155,13 +159,36 @@ public class EveryFormGameTests {
             if (!near(dims.width, p.getBbWidth()) || !near(dims.height, p.getBbHeight())) {
                 broken.add(id + " hitbox " + p.getBbWidth() + "x" + p.getBbHeight() + " not " + dims.width + "x" + dims.height);
             }
-            float eye = Math.min(1.62f, dims.height * 0.85f);
+            float eye = Math.max(0.25f, Math.min(1.62f, dims.height * 0.85f));
             if (!near(eye, p.getEyeHeight())) broken.add(id + " camera " + p.getEyeHeight() + " not " + eye);
             if (p.getAbilities().mayfly) broken.add(id + " may fly");
             TransformationManager.demorph(p);
             if (TransformationManager.isTransformed(p) || !near(1.8, p.getBbHeight())) broken.add(id + " did not revert");
         }
         report(h, "object bodies", checked, broken);
+        h.succeed();
+    }
+
+    /**
+     * The in-wall screen effect samples the eye position 0.05 below and above eye level; a
+     * camera any lower than that is "inside" the floor and blacks out the screen. Every form's
+     * eye must clear it.
+     */
+    @GameTest(template = PLATFORM, timeoutTicks = 200)
+    public static void noFormPutsTheCameraInsideTheFloor(GameTestHelper h) {
+        ServerPlayer p = Tf.player(h);
+        List<String> broken = new ArrayList<>();
+        List<ResourceLocation> forms = allMobForms(h);
+        forms.addAll(FormCatalog.objectForms(h.getLevel()));
+        int checked = 0;
+        for (ResourceLocation id : forms) {
+            if (type(id).create(h.getLevel()) == null) continue;
+            checked++;
+            TransformationManager.transform(p, type(id));
+            if (p.getEyeHeight() <= 0.05f) broken.add(id + " eye " + p.getEyeHeight());
+            TransformationManager.demorph(p);
+        }
+        report(h, "camera above the floor", checked, broken);
         h.succeed();
     }
 
@@ -223,9 +250,12 @@ public class EveryFormGameTests {
         h.succeed();
     }
 
-    /** Only the models built backwards or upside down get corrections, and nothing else does. */
+    /**
+     * Only the models built backwards get corrections: the ender dragon is turned half a turn,
+     * the phantom tilts against the player's pitch. Both were checked in the form gallery.
+     */
     @GameTest(template = PLATFORM)
-    public static void onlyTheEnderDragonIsTurnedAndOnlyItAndThePhantomTiltBackwards(GameTestHelper h) {
+    public static void onlyTheEnderDragonIsTurnedAndOnlyThePhantomTiltsBackwards(GameTestHelper h) {
         List<String> turned = new ArrayList<>(), inverted = new ArrayList<>();
         for (ResourceLocation id : ForgeRegistries.ENTITY_TYPES.getKeys()) {
             if (MorphPose.yawOffset(type(id)) != 0f) turned.add(id.getPath());
@@ -233,8 +263,7 @@ public class EveryFormGameTests {
         }
         eq(h, List.of("ender_dragon"), turned, "turned 180 degrees");
         eq(h, 180f, MorphPose.yawOffset(EntityType.ENDER_DRAGON), "by half a turn");
-        inverted.sort(String::compareTo);
-        eq(h, List.of("ender_dragon", "phantom"), inverted, "pitch inverted");
+        eq(h, List.of("phantom"), inverted, "pitch inverted");
         h.succeed();
     }
 
