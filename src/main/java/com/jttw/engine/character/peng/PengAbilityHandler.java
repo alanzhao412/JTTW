@@ -4,7 +4,6 @@ import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.flight.JTTWFlight;
 import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.network.s2c.SyncCooldownPacket;
-import com.jttw.engine.network.s2c.SyncFlightBoostPacket;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.qi.QiManager;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
@@ -68,8 +67,8 @@ public final class PengAbilityHandler {
     // ── keys and numbers ───────────────────────────────────────────
 
     public static final String KEY_SOARING = "jttw_gp_soaring";
-    public static final String KEY_BOOST = "jttw_gp_boost";
-    private static final String KEY_BOOST_SENT = "jttw_gp_boost_sent";
+    /** Set while he plays the Peng, so what the Peng changed is undone once, when he stops. */
+    private static final String KEY_WAS_PENG = "jttw_gp_was_peng";
     /** Set while Peng's own innate flight is what lets him fly, so only that is taken back. */
     private static final String KEY_FLIGHT_GRANTED = "jttw_gp_flight_granted";
     private static final String KEY_LAST_X = "jttw_gp_last_x", KEY_LAST_Y = "jttw_gp_last_y", KEY_LAST_Z = "jttw_gp_last_z";
@@ -145,9 +144,8 @@ public final class PengAbilityHandler {
         return tier >= 3 ? 0.08 : tier >= 2 ? 0.06 : 0.04;
     }
 
-    public static double boost(Player p) {
-        double b = p.getPersistentData().getDouble(KEY_BOOST);
-        return b < 1 ? 1 : b;
+    public static double boost(ServerPlayer p) {
+        return JTTWFlight.boost(p);
     }
 
     public static void startSoaring(ServerPlayer p) {
@@ -185,17 +183,7 @@ public final class PengAbilityHandler {
         } else {
             b = Math.max(1.0, b - BOOST_DECAY);
         }
-        pd.putDouble(KEY_BOOST, b);
-        float sent = pd.getFloat(KEY_BOOST_SENT);
-        boolean thrustSent = sent < 0;
-        if (Math.abs(Math.abs(sent) - b) > 0.05 || thrustSent != soaring || (b == 1.0 && Math.abs(sent) != 1f)) {
-            syncBoost(p, (float) b, soaring);
-        }
-    }
-
-    private static void syncBoost(ServerPlayer p, float boost, boolean thrust) {
-        p.getPersistentData().putFloat(KEY_BOOST_SENT, thrust ? -boost : boost); // sign carries thrust
-        NetworkHandler.sendToPlayer(p, new SyncFlightBoostPacket(boost, thrust));
+        JTTWFlight.setBoost(p, b, soaring); // the flight system sends it to his client
     }
 
     // ── Wingstrike ─────────────────────────────────────────────────
@@ -451,17 +439,18 @@ public final class PengAbilityHandler {
         if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p)) return;
         CompoundTag pd = p.getPersistentData();
         if (!PengCharacter.is(p)) {
+            if (pd.getBoolean(KEY_WAS_PENG)) {
+                pd.remove(KEY_WAS_PENG);
+                pd.remove(KEY_SOARING);
+                JTTWFlight.setBoost(p, 1, false);
+            }
             if (pd.getBoolean(KEY_FLIGHT_GRANTED)) {
                 pd.remove(KEY_FLIGHT_GRANTED);
                 JTTWFlight.setUniversalFlight(p, false);
             }
-            if (pd.contains(KEY_BOOST)) {
-                pd.remove(KEY_BOOST);
-                pd.remove(KEY_SOARING);
-                syncBoost(p, 1f, false);
-            }
             return;
         }
+        pd.putBoolean(KEY_WAS_PENG, true);
         // He flies from the start
         if (!JTTWFlight.hasUniversalFlight(p)) {
             JTTWFlight.setUniversalFlight(p, true);
@@ -484,7 +473,7 @@ public final class PengAbilityHandler {
         if (event.getEntity() instanceof ServerPlayer p) {
             p.getPersistentData().remove(KEY_SOARING);
             p.getPersistentData().remove(KEY_LAST_X);
-            syncBoost(p, 1f, false);
+            JTTWFlight.setBoost(p, 1, false);
         }
     }
 
@@ -492,9 +481,8 @@ public final class PengAbilityHandler {
     public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (event.getEntity() instanceof ServerPlayer p) {
             p.getPersistentData().remove(KEY_SOARING);
-            p.getPersistentData().remove(KEY_BOOST);
             p.getPersistentData().remove(KEY_LAST_X);
-            syncBoost(p, 1f, false);
+            JTTWFlight.setBoost(p, 1, false);
         }
     }
 }
