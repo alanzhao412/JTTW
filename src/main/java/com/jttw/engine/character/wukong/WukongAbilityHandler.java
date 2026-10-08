@@ -505,6 +505,48 @@ public final class WukongAbilityHandler {
     }
 
     // -----------------------------------------------------------------------
+    // Somersault momentum (Flight III)
+    // -----------------------------------------------------------------------
+
+    private static final String KEY_LAST_X = "jttw_wu_last_x", KEY_LAST_Y = "jttw_wu_last_y", KEY_LAST_Z = "jttw_wu_last_z";
+
+    /** Momentum at its height: Wukong's 2.8 built up to the top speed anyone flies. */
+    public static double momentumMax() {
+        return com.jttw.engine.flight.FlightSteering.TOP_SPEED / com.jttw.engine.flight.FlightSteering.WUKONG_FAST_SPEED;
+    }
+
+    /** Flying at his full speed builds momentum, over 10 seconds; falling short loses it in 2. */
+    public static void tickMomentum(ServerPlayer player) {
+        if (!isWukong(player)) return; // someone else's boost (the Peng's wingbeats) is not his to touch
+        var pd = player.getPersistentData();
+        Vec3 last = pd.contains(KEY_LAST_X)
+                ? new Vec3(pd.getDouble(KEY_LAST_X), pd.getDouble(KEY_LAST_Y), pd.getDouble(KEY_LAST_Z)) : player.position();
+        pd.putDouble(KEY_LAST_X, player.getX());
+        pd.putDouble(KEY_LAST_Y, player.getY());
+        pd.putDouble(KEY_LAST_Z, player.getZ());
+
+        com.jttw.engine.flight.FlightProfile profile = com.jttw.engine.flight.JTTWFlight.profile(player);
+        boolean flightThree = player.getAbilities().flying && !profile.glide()
+                && profile.speed() >= com.jttw.engine.flight.FlightSteering.WUKONG_FAST_SPEED;
+        double max = momentumMax();
+        double b = profile.boost(); // exact: rounding is only for sending
+        if (!flightThree) {
+            if (b > 1) com.jttw.engine.flight.JTTWFlight.setBoost(player, 1, false);
+            return;
+        }
+        // The server sees where the client put him, not his keys: full speed is how far he went
+        double moved = player.position().distanceTo(last);
+        if (moved >= 0.9 * profile.effectiveSpeed()) b = Math.min(max, b + (max - 1) / com.jttw.engine.flight.FlightSteering.BUILD_UP_TICKS);
+        else b = Math.max(1, b - (max - 1) / 40);
+        com.jttw.engine.flight.JTTWFlight.setBoost(player, b, false);
+    }
+
+    @SubscribeEvent
+    public static void onPlayerTickMomentum(TickEvent.PlayerTickEvent event) {
+        if (event.phase == TickEvent.Phase.END && event.player instanceof ServerPlayer sp) tickMomentum(sp);
+    }
+
+    // -----------------------------------------------------------------------
     // Logout cleanup
     // -----------------------------------------------------------------------
 

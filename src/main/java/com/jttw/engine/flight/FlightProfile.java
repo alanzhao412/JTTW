@@ -11,7 +11,12 @@ public record FlightProfile(double speed, boolean glide, double boost, boolean t
     public static final FlightProfile DEFAULT = new FlightProfile(FlightSteering.CRUISE_SPEED, false, 1.0, false);
 
     public FlightProfile {
-        boost = Math.max(1.0, Math.round(boost * 100) / 100.0); // to the hundredth: a ramp re-sends only as it moves
+        boost = Math.max(1.0, boost);
+    }
+
+    /** As sent to the client: the boost to the hundredth, so a slow ramp is not re-sent every tick. */
+    public FlightProfile forSending() {
+        return new FlightProfile(speed, glide, Math.round(boost * 100) / 100.0, thrust);
     }
 
     /** Speed with the boost. */

@@ -96,7 +96,7 @@ public final class JTTWFlight {
 
     /** Sends the client its flight profile if it has changed since it last got one. */
     public static void syncProfile(ServerPlayer player) {
-        FlightProfile now = profile(player);
+        FlightProfile now = profile(player).forSending();
         if (now.equals(SENT.get(player))) return;
         SENT.put(player, now);
         NetworkHandler.sendToPlayer(player, new SyncFlightPacket(now));

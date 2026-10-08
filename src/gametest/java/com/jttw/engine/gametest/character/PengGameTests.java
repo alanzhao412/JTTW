@@ -101,12 +101,14 @@ public class PengGameTests {
         ServerPlayer p = peng(h, "gp_soar_1");
         PengCharacter.INSTANCE.activate(p, 0, AbilityAction.START);
         check(h, p.getAbilities().flying, "takes off");
-        tick(p, PengAbilityHandler::onPlayerTick, 10);
-        double early = PengAbilityHandler.boost(p);
-        check(h, early > 1.2 && early < 2.0, "accelerating: " + early);
-        tick(p, PengAbilityHandler::onPlayerTick, 30);
-        near(h, 2.0, PengAbilityHandler.boost(p), "I tops out at 2x");
-        check(h, QiData.getCurrent(p) < 200f - 39 * PengAbilityHandler.SOAR_QI_PER_TICK + 0.01f, "drains Qi");
+        qi(p, 1000f, 1000f);
+        tick(p, PengAbilityHandler::onPlayerTick, 100);
+        near(h, 1.5, PengAbilityHandler.boost(p), "halfway after 5 seconds");
+        tick(p, PengAbilityHandler::onPlayerTick, 99);
+        check(h, PengAbilityHandler.boost(p) < 2.0, "not quite there before 10: " + PengAbilityHandler.boost(p));
+        tick(p, PengAbilityHandler::onPlayerTick, 1);
+        near(h, 2.0, PengAbilityHandler.boost(p), "I tops out at 2x after 10 seconds");
+        check(h, QiData.getCurrent(p) < 1000f - 199 * PengAbilityHandler.SOAR_QI_PER_TICK + 0.01f, "drains Qi");
 
         PengCharacter.INSTANCE.activate(p, 0, AbilityAction.STOP);
         tick(p, PengAbilityHandler::onPlayerTick, 20);

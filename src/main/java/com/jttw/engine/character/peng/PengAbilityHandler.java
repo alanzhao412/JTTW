@@ -1,6 +1,7 @@
 package com.jttw.engine.character.peng;
 
 import com.jttw.engine.JTTWEngine;
+import com.jttw.engine.flight.FlightSteering;
 import com.jttw.engine.flight.JTTWFlight;
 import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.network.s2c.SyncCooldownPacket;
@@ -47,8 +48,8 @@ import java.util.Arrays;
  *
  * <ul>
  *   <li><b>V (hold), Ninety-Thousand-Li Flight:</b> takes off if grounded, then beats his
- *       wings and accelerates while held, up to 2.0 / 2.8 / 3.6 times his flying speed;
- *       drains Qi. Let go and he slows back to cruising.</li>
+ *       wings and builds speed while held, over 10 seconds, to 2.0 / 2.8 / 3.6 times his flying
+ *       speed; drains Qi. Let go and he slows back to cruising.</li>
  *   <li><b>Wingstrike</b> (passive): in flight, everything he passes through is struck, harder
  *       the faster he flies.</li>
  *   <li><b>B, Feather Storm:</b> a fan of 5 / 7 / 9 golden feathers, flying or not; III's
@@ -134,14 +135,14 @@ public final class PengAbilityHandler {
 
     // ── V: Ninety-Thousand-Li Flight ───────────────────────────────
 
-    /** Top boost: 2.0 / 2.8 / 3.6 times flying speed. */
+    /** Top boost: 2.0 / 2.8 times flying speed; III reaches the top speed anyone flies. */
     public static double maxBoost(int tier) {
-        return tier >= 3 ? 3.6 : tier >= 2 ? 2.8 : tier >= 1 ? 2.0 : 1.0;
+        return tier >= 3 ? FlightSteering.TOP_SPEED / FlightSteering.CRUISE_SPEED : tier >= 2 ? 2.8 : tier >= 1 ? 2.0 : 1.0;
     }
 
-    /** How much the boost climbs each tick held. */
+    /** How much the boost climbs each tick held: the top takes 10 seconds to reach at any tier. */
     public static double boostRamp(int tier) {
-        return tier >= 3 ? 0.08 : tier >= 2 ? 0.06 : 0.04;
+        return (maxBoost(tier) - 1) / FlightSteering.BUILD_UP_TICKS;
     }
 
     public static double boost(ServerPlayer p) {

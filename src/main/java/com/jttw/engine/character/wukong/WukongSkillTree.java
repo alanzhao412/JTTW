@@ -99,8 +99,8 @@ public final class WukongSkillTree {
         ));
         TREE.add(new SkillNode(
                 FLIGHT_3, "Somersault Cloud",
-                new String[]{ "Cycles Overworld/Nether/End", "while airborne. Press B",
-                              "to dimension-travel." },
+                new String[]{ "Faster; held at full speed,", "builds over 10s to the fastest",
+                              "flight. B: travel realms." },
                 4, 6, 2, List.of(FLIGHT_2), AbilityType.PASSIVE, 3, "Flight"
         ));
 

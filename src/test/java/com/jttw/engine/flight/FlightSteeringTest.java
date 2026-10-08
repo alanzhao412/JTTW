@@ -84,10 +84,11 @@ class FlightSteeringTest {
     }
 
     @Test
-    void theBoostMultipliesTheSpeedAndRoundsToTheHundredth() {
+    void theBoostMultipliesTheSpeedAndIsSentToTheHundredth() {
         FlightProfile p = new FlightProfile(FlightSteering.CRUISE_SPEED, false, 2.004, true);
-        assertEquals(2.0, p.boost());
-        assertEquals(FlightSteering.CRUISE_SPEED * 2, p.effectiveSpeed(), 1e-9);
+        assertEquals(2.004, p.boost(), "exact, so a slow ramp can build");
+        assertEquals(FlightSteering.CRUISE_SPEED * 2.004, p.effectiveSpeed(), 1e-9);
+        assertEquals(2.0, p.forSending().boost(), "rounded only to send");
         assertEquals(1.0, new FlightProfile(1.55, false, 0.4, false).boost(), "never below 1");
     }
 }

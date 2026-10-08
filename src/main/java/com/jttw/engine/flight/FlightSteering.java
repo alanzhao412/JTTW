@@ -24,6 +24,13 @@ public final class FlightSteering {
     /** Wukong outflies everyone at each tier. */
     public static final double WUKONG_CRUISE_SPEED = 1.85;
     public static final double WUKONG_FAST_SPEED = 2.80;
+    /**
+     * The fastest anyone flies: the Peng at the height of his wingbeats, Wukong at full
+     * somersault momentum. 112 blocks a second.
+     */
+    public static final double TOP_SPEED = 5.58;
+    /** Ticks a flier holding top speed takes to build all the way to {@link #TOP_SPEED}: 10 seconds. */
+    public static final int BUILD_UP_TICKS = 200;
     /** A flying form's own wings, without a flight tier. */
     public static final double FORM_SPEED = 1.10;
     public static final double GLIDE_SPEED = 1.20;
