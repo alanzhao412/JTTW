@@ -36,6 +36,20 @@ public final class ClientFlightHandler {
 
     private static Vec3 swimVector = Vec3.ZERO;
 
+    /** Flight boost from the server (the Peng's wingbeats): 1 = cruising. */
+    private static double boost = 1.0;
+    /** While the wings beat, he flies forward with no key held. */
+    private static boolean thrust = false;
+
+    public static void setBoost(float value, boolean beating) {
+        boost = Math.max(1.0, value);
+        thrust = beating;
+    }
+
+    public static double boost() {
+        return boost;
+    }
+
     private static Vec3 clampSpeed(Vec3 v, double maxXZ, double maxY) {
         double xz = Math.sqrt(v.x * v.x + v.z * v.z);
         if (xz > maxXZ && xz > 1.0e-9) {
@@ -80,12 +94,13 @@ public final class ClientFlightHandler {
         }
 
         wasFlying = true;
-        tickFlightSteering(p, FLIGHT_SPEED, MAX_XZ, MAX_Y);
+        tickFlightSteering(p, FLIGHT_SPEED * boost, MAX_XZ * boost, MAX_Y * boost);
     }
 
     private static void tickFlightSteering(LocalPlayer p, double speed, double maxXZ, double maxY) {
         double forward = p.zza;
         double strafe  = p.xxa;
+        if (thrust && forward <= 0.01) forward = 1.0; // beating wings carry him forward
 
         boolean hasMoveInput = (Math.abs(forward) > 0.01) || (Math.abs(strafe) > 0.01);
 
@@ -110,8 +125,9 @@ public final class ClientFlightHandler {
 
         Vec3 delta = desired.subtract(flightVector);
         double deltaLen = delta.length();
-        if (deltaLen > FLIGHT_FLEX_PER_TICK && deltaLen > 1.0e-9) {
-            delta = delta.scale(FLIGHT_FLEX_PER_TICK / deltaLen);
+        double flex = FLIGHT_FLEX_PER_TICK * boost; // a boosted flier also turns and speeds up harder
+        if (deltaLen > flex && deltaLen > 1.0e-9) {
+            delta = delta.scale(flex / deltaLen);
         }
 
         flightVector = flightVector.add(delta);

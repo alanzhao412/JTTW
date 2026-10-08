@@ -88,6 +88,8 @@ class PacketRoundTripTest {
                 new com.jttw.engine.network.s2c.SyncLeadHeadPacket(2),
                 new com.jttw.engine.network.s2c.SyncLeadHeadPacket(-1),
                 new com.jttw.engine.network.s2c.SyncStomachPacket(13),
+                new com.jttw.engine.network.s2c.SyncFlightBoostPacket(2.8f, true),
+                new com.jttw.engine.network.s2c.SyncFlightBoostPacket(1f, false),
                 new com.jttw.engine.network.s2c.SyncStomachPacket(-1),
                 new com.jttw.engine.network.s2c.TruffleScentPacket(400, new int[]{7, 301},
                         new long[]{new net.minecraft.core.BlockPos(4, -12, 9).asLong()}, new int[]{0xFF00BBFF}),

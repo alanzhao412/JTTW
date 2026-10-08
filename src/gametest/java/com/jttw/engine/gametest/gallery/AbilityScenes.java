@@ -2,6 +2,8 @@ package com.jttw.engine.gametest.gallery;
 
 import com.jttw.engine.character.marshal.MarshalAbilityHandler;
 import com.jttw.engine.character.ninespirits.NineSpiritsAbilityHandler;
+import com.jttw.engine.character.peng.PengAbilityHandler;
+import com.jttw.engine.item.YinYangVaseItem;
 import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.network.s2c.TruffleScentPacket;
 import com.jttw.engine.progression.level.LevelManager;
@@ -101,7 +103,30 @@ final class AbilityScenes {
                 }, p -> p.serverLevel().getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(3)).stream()
                         .min(java.util.Comparator.comparingDouble(m -> m.distanceToSqr(p))).ifPresent(p::attack), 6, false),
                 new Scene("nine_tooth_rake_in_hand", p -> p.setItemInHand(InteractionHand.MAIN_HAND,
-                        new ItemStack(ModItems.NINE_TOOTH_RAKE.get())), p -> {}, 1, true));
+                        new ItemStack(ModItems.NINE_TOOTH_RAKE.get())), p -> {}, 1, true),
+
+                // ── Gold-Winged Peng ──
+                new Scene("gp_feather_storm", p -> {
+                    peng(p, "gp_feathers_1", "gp_feathers_2", "gp_feathers_3");
+                    targets(p, 0, 9, 3, 9, -3, 9);
+                }, p -> PengAbilityHandler.featherStorm(p), 3, false),
+                new Scene("gp_eclipse_wings", p -> {
+                    peng(p, "gp_eclipse_1", "gp_eclipse_2");
+                    targets(p, 0, 4, 3, 2, -3, 2, 2, -2);
+                }, p -> PengAbilityHandler.eclipse(p), 8, false),
+                new Scene("gp_vase_burst", p -> {
+                    peng(p);
+                    targets(p, 1, 4, -1, 5, 2, 6);
+                    ItemStack vase = new ItemStack(ModItems.YIN_YANG_VASE.get());
+                    p.setItemInHand(InteractionHand.MAIN_HAND, vase);
+                    Mob husk = EntityType.HUSK.create(p.serverLevel());
+                    husk.moveTo(p.getX(), p.getY(), p.getZ() + 4);
+                    p.serverLevel().addFreshEntity(husk);
+                    vase.interactLivingEntity(p, husk, InteractionHand.MAIN_HAND);
+                }, p -> YinYangVaseItem.release(p.getMainHandItem(), p.serverLevel(),
+                        p.position().add(0, 0, 4), p), 6, false),
+                new Scene("yin_yang_vase_in_hand", p -> p.setItemInHand(InteractionHand.MAIN_HAND,
+                        new ItemStack(ModItems.YIN_YANG_VASE.get())), p -> {}, 1, true));
     }
 
     /** Makes the player the Grand Saint with these nodes, this head leading, and Qi to spend. */
@@ -125,6 +150,17 @@ final class AbilityScenes {
         for (String k : List.of("jttw_mc_slam_ready_at", "jttw_mc_snout_ready_at", "jttw_mc_rake_next")) {
             p.getPersistentData().remove(k);
         }
+        QiData.setMax(p, 1000f);
+        QiData.setCurrent(p, 1000f);
+    }
+
+    /** Makes the player the Gold-Winged Peng with these nodes and Qi to spend, his abilities ready. */
+    private static void peng(ServerPlayer p, String... nodes) {
+        AlignmentData.markReincarnated(p, ReincarnationOutcome.GOLD_WINGED_PENG);
+        LevelManager.initClass(p, ReincarnationOutcome.GOLD_WINGED_PENG);
+        for (String n : nodes) SkillTreeData.grantNode(p, n);
+        for (String k : List.of("jttw_gp_feathers_ready_at", "jttw_gp_eclipse_ready_at")) p.getPersistentData().remove(k);
+        p.getCooldowns().removeCooldown(ModItems.YIN_YANG_VASE.get());
         QiData.setMax(p, 1000f);
         QiData.setCurrent(p, 1000f);
     }

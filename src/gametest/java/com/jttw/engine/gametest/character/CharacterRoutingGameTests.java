@@ -47,8 +47,8 @@ public class CharacterRoutingGameTests {
         near(h, 100f, QiData.getCurrent(p), outcome.id + ": Qi unchanged");
     }
 
-    @GameTest(template = PLATFORM, batch = "pengHasNoAbilitiesSoEveryKeyDoesNothing")
-    public static void pengHasNoAbilitiesSoEveryKeyDoesNothing(GameTestHelper h) {
+    @GameTest(template = PLATFORM, batch = "pengsKeysNeedTheirNodes")
+    public static void pengsKeysNeedTheirNodes(GameTestHelper h) {
         assertKeysDoNothing(h, ReincarnationOutcome.GOLD_WINGED_PENG, PengCharacter.INSTANCE);
         h.succeed();
     }

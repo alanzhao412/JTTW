@@ -149,11 +149,8 @@ class SkillTreesTest {
     }
 
     @Test
-    void onlyPengHasAnEmptyTree() {
-        for (SkillTree t : SkillTrees.all()) {
-            if (t.idPrefix().equals("gp_")) assertTrue(t.nodes().isEmpty());
-            else assertFalse(t.nodes().isEmpty(), t.idPrefix());
-        }
+    void noTreeIsEmpty() {
+        for (SkillTree t : SkillTrees.all()) assertFalse(t.nodes().isEmpty(), t.idPrefix());
     }
 
     @Test

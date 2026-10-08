@@ -71,6 +71,9 @@ public final class ModItems {
     public static final RegistryObject<Item> NINE_TOOTH_RAKE =
             ITEMS.register("nine_tooth_rake", com.jttw.engine.item.NineToothRakeItem::new);
 
+    public static final RegistryObject<Item> YIN_YANG_VASE =
+            ITEMS.register("yin_yang_vase", com.jttw.engine.item.YinYangVaseItem::new);
+
     public static void register(IEventBus modEventBus) {
         ITEMS.register(modEventBus);
     }

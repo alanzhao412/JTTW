@@ -50,12 +50,19 @@ class CharacterSkillBarTest {
         return cases;
     }
 
+    /**
+     * Kits built after the old builder, which have no legacy bar to match: the Marshal's changed
+     * on purpose (36 Transformations became a skill branch, then gained abilities), and the
+     * Peng's was empty.
+     */
+    private static final Set<PlayableCharacter> NEWER_THAN_THE_OLD_BUILDER = Set.of(
+            MarshalCharacter.INSTANCE,
+            com.jttw.engine.character.ninespirits.NineSpiritsCharacter.INSTANCE,
+            com.jttw.engine.character.peng.PengCharacter.INSTANCE);
+
     @TestFactory
     Stream<DynamicTest> barMatchesTheOldBuilder() {
-        // The Marshal changed on purpose: 36 Transformations is now a skill branch, not innate
-        // Characters newer than the old builder have no legacy bar to match
-        return Characters.all().stream().filter(c -> c != MarshalCharacter.INSTANCE
-                        && c != com.jttw.engine.character.ninespirits.NineSpiritsCharacter.INSTANCE)
+        return Characters.all().stream().filter(c -> !NEWER_THAN_THE_OLD_BUILDER.contains(c))
                 .map(c -> DynamicTest.dynamicTest(c.outcomeId(), () -> {
             for (Set<String> unlocked : cases(c)) {
                 assertEquals(LegacySkillBar.build(c.outcomeId(), unlocked), c.skillBar(unlocked),
@@ -127,8 +134,12 @@ class CharacterSkillBarTest {
     }
 
     @Test
-    void pengHasNothingYet() {
-        assertEquals(PlayableCharacter.emptyBar(), Characters.byOutcome("gold_winged_peng")
-                .skillBar(new HashSet<>(EVERY_NODE)));
+    void pengSoarsOnVThrowsFeathersOnBAndEclipsesOnN() {
+        List<AbilitySlot> bar = Characters.byOutcome("gold_winged_peng").skillBar(new HashSet<>(EVERY_NODE));
+        assertEquals("gp_soar", bar.get(0).id());
+        assertEquals(AbilityType.HELD, bar.get(0).type());
+        assertEquals("gp_feathers", bar.get(1).id());
+        assertEquals("gp_eclipse", bar.get(2).id());
+        assertTrue(bar.get(3).isEmpty());
     }
 }

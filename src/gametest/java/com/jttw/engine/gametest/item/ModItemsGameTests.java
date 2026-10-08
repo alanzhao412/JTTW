@@ -55,7 +55,8 @@ public class ModItemsGameTests {
             Map.entry("wind_fire_wheels", WindFireWheelsItem.class),
             Map.entry("huntian_cloth", HuntianClothItem.class),
             Map.entry("bell_of_taiyi", com.jttw.engine.item.BellOfTaiyiItem.class),
-            Map.entry("nine_tooth_rake", com.jttw.engine.item.NineToothRakeItem.class));
+            Map.entry("nine_tooth_rake", com.jttw.engine.item.NineToothRakeItem.class),
+            Map.entry("yin_yang_vase", com.jttw.engine.item.YinYangVaseItem.class));
 
     @GameTest(template = PLATFORM)
     public static void everyModItemIsRegisteredUnderItsIdAsTheRightClass(GameTestHelper h) {
@@ -106,14 +107,14 @@ public class ModItemsGameTests {
         for (RegistryObject<Item> artifact : List.of(ModItems.RUYI_JINGU_BANG, ModItems.THREE_POINTED_SPEAR,
                 ModItems.ERLANG_AXE, ModItems.FIRE_TIP_SPEAR, ModItems.QIANKUN_RING, ModItems.YIN_YANG_SWORD,
                 ModItems.WIND_FIRE_WHEELS, ModItems.HUNTIAN_CLOTH, ModItems.BELL_OF_TAIYI,
-                ModItems.NINE_TOOTH_RAKE)) {
+                ModItems.NINE_TOOTH_RAKE, ModItems.YIN_YANG_VASE)) {
             eq(h, 1, artifact.get().getMaxStackSize(), artifact.getId().getPath() + " stack size");
         }
         for (RegistryObject<Item> epic : List.of(ModItems.IMMORTAL_PEACH, ModItems.IMMORTAL_PILL,
                 ModItems.RUYI_JINGU_BANG, ModItems.THREE_POINTED_SPEAR, ModItems.ERLANG_AXE,
                 ModItems.FIRE_TIP_SPEAR, ModItems.QIANKUN_RING, ModItems.YIN_YANG_SWORD,
                 ModItems.WIND_FIRE_WHEELS, ModItems.HUNTIAN_CLOTH, ModItems.BELL_OF_TAIYI,
-                ModItems.NINE_TOOTH_RAKE)) {
+                ModItems.NINE_TOOTH_RAKE, ModItems.YIN_YANG_VASE)) {
             eq(h, Rarity.EPIC, new ItemStack(epic.get()).getRarity(), epic.getId().getPath() + " rarity");
         }
         for (RegistryObject<Item> fireproof : List.of(ModItems.RUYI_JINGU_BANG, ModItems.THREE_POINTED_SPEAR,

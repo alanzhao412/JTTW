@@ -194,6 +194,12 @@ public final class NetworkHandler {
                 .consumerMainThread(com.jttw.engine.network.s2c.SyncStomachPacket::handle)
                 .add();
 
+        CHANNEL.messageBuilder(com.jttw.engine.network.s2c.SyncFlightBoostPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.jttw.engine.network.s2c.SyncFlightBoostPacket::encode)
+                .decoder(com.jttw.engine.network.s2c.SyncFlightBoostPacket::decode)
+                .consumerMainThread(com.jttw.engine.network.s2c.SyncFlightBoostPacket::handle)
+                .add();
+
         CHANNEL.messageBuilder(com.jttw.engine.network.s2c.TruffleScentPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.jttw.engine.network.s2c.TruffleScentPacket::encode)
                 .decoder(com.jttw.engine.network.s2c.TruffleScentPacket::decode)
