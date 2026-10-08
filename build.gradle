@@ -83,6 +83,22 @@ minecraft {
             }
         }
 
+        // Measures world generation and flight look-ahead in a real client (see ChunkBench).
+        // Runs are set up in name order, so a child of 'client' must sort after it to inherit its main class.
+        worldgenBench {
+            parent runs.client
+            workingDirectory project.file('run-bench')
+            property 'jttw.chunkBench', 'true'
+            // e.g. ./gradlew runWorldgenBench -Pbench.view=6 (the server's view distance, in chunks)
+            property 'jttw.chunkBench.view', (project.findProperty('bench.view') ?: '0').toString()
+            mods {
+                jttw_engine {
+                    source sourceSets.main
+                    source sourceSets.gametest
+                }
+            }
+        }
+
         data {
             workingDirectory project.file('run-data')
             args '--mod', 'jttw_engine', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
