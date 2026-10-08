@@ -74,6 +74,12 @@ public final class ModItems {
     public static final RegistryObject<Item> YIN_YANG_VASE =
             ITEMS.register("yin_yang_vase", com.jttw.engine.item.YinYangVaseItem::new);
 
+    public static final RegistryObject<Item> MIXED_IRON_CUDGEL =
+            ITEMS.register("mixed_iron_cudgel", com.jttw.engine.item.MixedIronCudgelItem::new);
+
+    public static final RegistryObject<Item> BANANA_LEAF_FAN =
+            ITEMS.register("banana_leaf_fan", com.jttw.engine.item.BananaLeafFanItem::new);
+
     public static void register(IEventBus modEventBus) {
         ITEMS.register(modEventBus);
     }

@@ -29,16 +29,16 @@ class CharactersTest {
 
     @ParameterizedTest
     @EnumSource(value = ReincarnationOutcome.class,
-            names = {"BULL_DEMON_KING", "SAURIAN_DEMON_KING"}, mode = EnumSource.Mode.EXCLUDE)
+            names = {"SAURIAN_DEMON_KING"}, mode = EnumSource.Mode.EXCLUDE)
     void everyBuiltOutcomeHasItsCharacter(ReincarnationOutcome outcome) {
         PlayableCharacter c = Characters.byOutcome(outcome.id);
         assertNotNull(c, outcome.id);
         assertEquals(outcome.id, c.outcomeId());
     }
 
-    /** The Bull and Saurian Demon Kings have no character yet; the Yaoguai stand-in plays them. */
+    /** The Saurian Demon King has no character yet; the Yaoguai stand-in plays him. */
     @ParameterizedTest
-    @EnumSource(value = ReincarnationOutcome.class, names = {"BULL_DEMON_KING", "SAURIAN_DEMON_KING"})
+    @EnumSource(value = ReincarnationOutcome.class, names = {"SAURIAN_DEMON_KING"})
     void unbuiltYaoguaiPlayTheGrandSaintOfNineSpirits(ReincarnationOutcome outcome) {
         assertNull(Characters.byOutcome(outcome.id));
         assertSame(com.jttw.engine.character.ninespirits.NineSpiritsCharacter.INSTANCE,
@@ -73,7 +73,7 @@ class CharactersTest {
     @Test
     void classStandsInWhenTheOutcomeHasNoCharacter() {
         assertSame(WukongCharacter.INSTANCE,
-                Characters.resolve("bull_demon_king", ProgressionClass.PRIMORDIAL, null));
+                Characters.resolve("saurian_demon_king", ProgressionClass.PRIMORDIAL, null));
         assertSame(WukongCharacter.INSTANCE,
                 Characters.resolve("not_an_outcome", ProgressionClass.PRIMORDIAL, null));
     }

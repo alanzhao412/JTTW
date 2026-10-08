@@ -56,7 +56,9 @@ public class ModItemsGameTests {
             Map.entry("huntian_cloth", HuntianClothItem.class),
             Map.entry("bell_of_taiyi", com.jttw.engine.item.BellOfTaiyiItem.class),
             Map.entry("nine_tooth_rake", com.jttw.engine.item.NineToothRakeItem.class),
-            Map.entry("yin_yang_vase", com.jttw.engine.item.YinYangVaseItem.class));
+            Map.entry("yin_yang_vase", com.jttw.engine.item.YinYangVaseItem.class),
+            Map.entry("mixed_iron_cudgel", com.jttw.engine.item.MixedIronCudgelItem.class),
+            Map.entry("banana_leaf_fan", com.jttw.engine.item.BananaLeafFanItem.class));
 
     @GameTest(template = PLATFORM)
     public static void everyModItemIsRegisteredUnderItsIdAsTheRightClass(GameTestHelper h) {
@@ -107,19 +109,19 @@ public class ModItemsGameTests {
         for (RegistryObject<Item> artifact : List.of(ModItems.RUYI_JINGU_BANG, ModItems.THREE_POINTED_SPEAR,
                 ModItems.ERLANG_AXE, ModItems.FIRE_TIP_SPEAR, ModItems.QIANKUN_RING, ModItems.YIN_YANG_SWORD,
                 ModItems.WIND_FIRE_WHEELS, ModItems.HUNTIAN_CLOTH, ModItems.BELL_OF_TAIYI,
-                ModItems.NINE_TOOTH_RAKE, ModItems.YIN_YANG_VASE)) {
+                ModItems.NINE_TOOTH_RAKE, ModItems.YIN_YANG_VASE, ModItems.MIXED_IRON_CUDGEL, ModItems.BANANA_LEAF_FAN)) {
             eq(h, 1, artifact.get().getMaxStackSize(), artifact.getId().getPath() + " stack size");
         }
         for (RegistryObject<Item> epic : List.of(ModItems.IMMORTAL_PEACH, ModItems.IMMORTAL_PILL,
                 ModItems.RUYI_JINGU_BANG, ModItems.THREE_POINTED_SPEAR, ModItems.ERLANG_AXE,
                 ModItems.FIRE_TIP_SPEAR, ModItems.QIANKUN_RING, ModItems.YIN_YANG_SWORD,
                 ModItems.WIND_FIRE_WHEELS, ModItems.HUNTIAN_CLOTH, ModItems.BELL_OF_TAIYI,
-                ModItems.NINE_TOOTH_RAKE, ModItems.YIN_YANG_VASE)) {
+                ModItems.NINE_TOOTH_RAKE, ModItems.YIN_YANG_VASE, ModItems.MIXED_IRON_CUDGEL, ModItems.BANANA_LEAF_FAN)) {
             eq(h, Rarity.EPIC, new ItemStack(epic.get()).getRarity(), epic.getId().getPath() + " rarity");
         }
         for (RegistryObject<Item> fireproof : List.of(ModItems.RUYI_JINGU_BANG, ModItems.THREE_POINTED_SPEAR,
                 ModItems.ERLANG_AXE, ModItems.FIRE_TIP_SPEAR, ModItems.WIND_FIRE_WHEELS,
-                ModItems.NINE_TOOTH_RAKE)) {
+                ModItems.NINE_TOOTH_RAKE, ModItems.MIXED_IRON_CUDGEL)) {
             check(h, fireproof.get().isFireResistant(), fireproof.getId().getPath() + " survives lava");
         }
         for (RegistryObject<Item> burnable : List.of(ModItems.QIANKUN_RING, ModItems.YIN_YANG_SWORD,

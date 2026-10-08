@@ -1,6 +1,8 @@
 package com.jttw.engine.gametest.gallery;
 
+import com.jttw.engine.character.bulldemon.BullDemonAbilityHandler;
 import com.jttw.engine.character.marshal.MarshalAbilityHandler;
+import com.jttw.engine.item.BananaLeafFanItem;
 import com.jttw.engine.character.ninespirits.NineSpiritsAbilityHandler;
 import com.jttw.engine.character.peng.PengAbilityHandler;
 import com.jttw.engine.item.YinYangVaseItem;
@@ -126,7 +128,36 @@ final class AbilityScenes {
                 }, p -> YinYangVaseItem.release(p.getMainHandItem(), p.serverLevel(),
                         p.position().add(0, 0, 4), p), 6, false),
                 new Scene("yin_yang_vase_in_hand", p -> p.setItemInHand(InteractionHand.MAIN_HAND,
-                        new ItemStack(ModItems.YIN_YANG_VASE.get())), p -> {}, 1, true));
+                        new ItemStack(ModItems.YIN_YANG_VASE.get())), p -> {}, 1, true),
+
+                // ── Bull Demon King ──
+                new Scene("bdk_wall_ram", p -> {
+                    bull(p, "bdk_rush_1", "bdk_rush_2", "bdk_rush_3");
+                    for (int x = -2; x <= 2; x++) for (int y = 0; y <= 1; y++) {
+                        // north of him, so the camera in the south-east sees him hit it
+                        p.serverLevel().setBlock(BlockPos.containing(p.getX() + x, p.getY() + y, p.getZ() - 2),
+                                Blocks.STONE_BRICKS.defaultBlockState(), 3);
+                    }
+                    targets(p, 2, -1, -2, -1);
+                }, p -> BullDemonAbilityHandler.wallImpact(p, new net.minecraft.world.phys.Vec3(0, 0, -1), 3), 6, false),
+                new Scene("bdk_great_white_bull", p -> {
+                    bull(p, "bdk_bull_1", "bdk_bull_2", "bdk_bull_3");
+                    BullDemonAbilityHandler.toggleGreatBull(p);
+                }, p -> {}, 1, false),
+                new Scene("bdk_cudgel_shockwave", p -> {
+                    bull(p);
+                    p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.MIXED_IRON_CUDGEL.get()));
+                    targets(p, 0, 3, 0, 6, 1, 9);
+                }, p -> BullDemonAbilityHandler.startShockwave(p, 3), 6, false),
+                new Scene("bdk_fan_gust", p -> {
+                    bull(p);
+                    p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.BANANA_LEAF_FAN.get()));
+                    targets(p, 0, 3, 2, 4, -2, 4);
+                }, p -> BananaLeafFanItem.fan(p), 4, false),
+                new Scene("banana_leaf_fan_in_hand", p -> p.setItemInHand(InteractionHand.MAIN_HAND,
+                        new ItemStack(ModItems.BANANA_LEAF_FAN.get())), p -> {}, 1, true),
+                new Scene("mixed_iron_cudgel_in_hand", p -> p.setItemInHand(InteractionHand.MAIN_HAND,
+                        new ItemStack(ModItems.MIXED_IRON_CUDGEL.get())), p -> {}, 1, true));
     }
 
     /** Makes the player the Grand Saint with these nodes, this head leading, and Qi to spend. */
@@ -165,6 +196,16 @@ final class AbilityScenes {
         QiData.setCurrent(p, 1000f);
     }
 
+    /** Makes the player the Bull Demon King with these nodes and Qi to spend, his abilities ready. */
+    private static void bull(ServerPlayer p, String... nodes) {
+        AlignmentData.markReincarnated(p, ReincarnationOutcome.BULL_DEMON_KING);
+        LevelManager.initClass(p, ReincarnationOutcome.BULL_DEMON_KING);
+        for (String n : nodes) SkillTreeData.grantNode(p, n);
+        p.getPersistentData().remove("jttw_bdk_rush_ready_at");
+        QiData.setMax(p, 1000f);
+        QiData.setCurrent(p, 1000f);
+    }
+
     /** A block two below the surface at this (x, z) offset, out of sight unless smelt. */
     private static void bury(ServerPlayer p, int x, int z, net.minecraft.world.level.block.Block block) {
         p.serverLevel().setBlock(BlockPos.containing(p.getX() + x, p.getY() - 2, p.getZ() + z), block.defaultBlockState(), 3);
@@ -184,6 +225,7 @@ final class AbilityScenes {
     /** Puts a player back to an ordinary state between scenes. */
     static void reset(ServerPlayer p) {
         if (NineSpiritsAbilityHandler.inTrueForm(p)) NineSpiritsAbilityHandler.endTrueForm(p);
+        if (BullDemonAbilityHandler.inGreatBull(p)) BullDemonAbilityHandler.endGreatBull(p);
         p.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         p.removeAllEffects();
         p.clearFire();

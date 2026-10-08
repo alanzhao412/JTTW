@@ -1,5 +1,6 @@
 package com.jttw.engine.character;
 
+import com.jttw.engine.character.bulldemon.BullDemonCharacter;
 import com.jttw.engine.character.byakko.ByakkoCharacter;
 import com.jttw.engine.character.dragon.DragonCharacter;
 import com.jttw.engine.character.erlang.ErlangShenCharacter;
@@ -26,7 +27,8 @@ import java.util.List;
  * <p>A player's character is their reincarnation outcome. Players given a class with a debug
  * command never reincarnate, so when the outcome is missing or has no character yet the class
  * stands in: Primordial plays Wukong, Heavenly plays Erlang Shen, a Divine Beast plays the
- * beast of its line, and Yaoguai plays the Grand Saint of Nine Spirits.
+ * beast of its line, and Yaoguai plays the Grand Saint of Nine Spirits (so the Saurian Demon
+ * King, who has no character yet, plays him too).
  */
 public final class Characters {
 
@@ -36,7 +38,7 @@ public final class Characters {
             WukongCharacter.INSTANCE, YuanDiCharacter.INSTANCE, PengCharacter.INSTANCE,
             ErlangShenCharacter.INSTANCE, NezhaCharacter.INSTANCE, MarshalCharacter.INSTANCE,
             DragonCharacter.INSTANCE, PhoenixCharacter.INSTANCE, ByakkoCharacter.INSTANCE,
-            TurtleCharacter.INSTANCE, NineSpiritsCharacter.INSTANCE);
+            TurtleCharacter.INSTANCE, NineSpiritsCharacter.INSTANCE, BullDemonCharacter.INSTANCE);
 
     public static List<PlayableCharacter> all() {
         return ALL;

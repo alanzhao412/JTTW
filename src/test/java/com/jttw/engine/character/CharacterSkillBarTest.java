@@ -52,13 +52,14 @@ class CharacterSkillBarTest {
 
     /**
      * Kits built after the old builder, which have no legacy bar to match: the Marshal's changed
-     * on purpose (36 Transformations became a skill branch, then gained abilities), and the
-     * Peng's was empty.
+     * on purpose (36 Transformations became a skill branch, then gained abilities), the Peng's
+     * was empty, and the Grand Saint and the Bull Demon King had no character.
      */
     private static final Set<PlayableCharacter> NEWER_THAN_THE_OLD_BUILDER = Set.of(
             MarshalCharacter.INSTANCE,
             com.jttw.engine.character.ninespirits.NineSpiritsCharacter.INSTANCE,
-            com.jttw.engine.character.peng.PengCharacter.INSTANCE);
+            com.jttw.engine.character.peng.PengCharacter.INSTANCE,
+            com.jttw.engine.character.bulldemon.BullDemonCharacter.INSTANCE);
 
     @TestFactory
     Stream<DynamicTest> barMatchesTheOldBuilder() {
@@ -125,6 +126,8 @@ class CharacterSkillBarTest {
         assertEquals(TransformationSchool.SEVENTY_TWO, Characters.byOutcome("celestial_primate").transformationSchool());
         assertEquals(TransformationSchool.SEVENTY_TWO, Characters.byOutcome("eye_of_heaven").transformationSchool());
         assertEquals(TransformationSchool.THIRTY_SIX, Characters.byOutcome("marshal_of_the_heavenly_canopy").transformationSchool());
+        assertEquals(TransformationSchool.SEVENTY_TWO, Characters.byOutcome("bull_demon_king").transformationSchool());
+        assertEquals(2, Characters.byOutcome("bull_demon_king").transformationLevel(Set.of("bdk_transform_1", "bdk_transform_2")));
         for (String other : List.of("yuan_di", "gold_winged_peng", "third_lotus_prince", "dragon", "phoenix", "white_tiger", "turtle")) {
             assertNull(Characters.byOutcome(other).transformationSchool(), other);
         }
