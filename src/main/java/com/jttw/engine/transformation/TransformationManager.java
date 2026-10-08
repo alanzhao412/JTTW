@@ -50,6 +50,26 @@ public class TransformationManager {
         become(player, data);
     }
 
+    /** Becomes a block (a block form): a chest, a sign, TNT. */
+    public static void transformIntoBlock(Player player, net.minecraft.world.level.block.Block block) {
+        if (player.level().isClientSide) return;
+        become(player, TransformationData.ofBlock(block));
+    }
+
+    /**
+     * Replaces the player's current form with a changed copy of it (a sign's new text, a TNT
+     * form lit), saving it and telling everyone who can see them.
+     */
+    public static void update(Player player, TransformationData data) {
+        if (player.level().isClientSide || !TRANSFORMATIONS.containsKey(player.getUUID())) return;
+        TRANSFORMATIONS.put(player.getUUID(), data);
+        saveToPlayer(player, data);
+        if (player instanceof ServerPlayer sp) {
+            NetworkHandler.sendToPlayer(sp, new SyncTransformationPacket(player.getUUID(), data));
+            NetworkHandler.sendToTrackingPlayers(sp, new SyncTransformationPacket(player.getUUID(), data));
+        }
+    }
+
     /** Takes on another player's appearance (a player form), at player size. */
     public static void transformIntoPlayer(Player player, java.util.UUID targetId, String targetName) {
         if (player.level().isClientSide) return;
@@ -66,6 +86,7 @@ public class TransformationManager {
             NetworkHandler.sendToPlayer(sp, new SyncTransformationPacket(player.getUUID(), data));
             NetworkHandler.sendToTrackingPlayers(sp, new SyncTransformationPacket(player.getUUID(), data));
         }
+        BlockForms.onFormChanged(player);
     }
 
     public static void demorph(Player player) {
@@ -80,6 +101,7 @@ public class TransformationManager {
             NetworkHandler.sendToPlayer(sp, new SyncTransformationPacket(player.getUUID(), null));
             NetworkHandler.sendToTrackingPlayers(sp, new SyncTransformationPacket(player.getUUID(), null));
         }
+        BlockForms.onFormChanged(player);
     }
 
     /** Apply all trait side-effects when a player gains a transformation. */

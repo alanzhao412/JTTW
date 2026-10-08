@@ -1,6 +1,7 @@
 package com.jttw.engine.network.c2s;
 
 import com.jttw.engine.progression.skilltree.SkillTreeData;
+import com.jttw.engine.transformation.FormCatalog;
 import com.jttw.engine.transformation.FormCategory;
 import com.jttw.engine.transformation.FormClassifier;
 import com.jttw.engine.transformation.TransformationAccess;
@@ -31,7 +32,9 @@ public class RequestTransformPacket {
         /** A non-living entity: minecart, boat, arrow... */
         OBJECT_ENTITY,
         /** Another online player's appearance. */
-        PLAYER
+        PLAYER,
+        /** A block: a chest, a sign, TNT ({@link FormCatalog#BLOCK_FORMS}). */
+        BLOCK
     }
 
     private final Kind kind;
@@ -46,6 +49,11 @@ public class RequestTransformPacket {
         this.kind = kind;
         this.entityId = entityId;
         this.targetPlayer = targetPlayer;
+    }
+
+    /** A request to become a block. */
+    public static RequestTransformPacket block(ResourceLocation blockId) {
+        return new RequestTransformPacket(Kind.BLOCK, blockId, null);
     }
 
     /** A request to take on another player's appearance. */
@@ -63,6 +71,7 @@ public class RequestTransformPacket {
         int ord = buf.readVarInt();
         Kind kind = (ord >= 0 && ord < Kind.values().length) ? Kind.values()[ord] : Kind.ENTITY;
         if (kind == Kind.PLAYER) return player(buf.readUUID());
+        if (kind == Kind.BLOCK) return block(buf.readResourceLocation());
         return new RequestTransformPacket(kind, buf.readResourceLocation());
     }
 
@@ -84,6 +93,15 @@ public class RequestTransformPacket {
             return;
         }
 
+        if (msg.kind == Kind.BLOCK) {
+            if (!ForgeRegistries.BLOCKS.containsKey(msg.entityId)) return;
+            var block = ForgeRegistries.BLOCKS.getValue(msg.entityId);
+            if (!FormCatalog.BLOCK_FORMS.contains(block)) return; // only the blocks that are forms
+            if (!TransformationAccess.mayTake(sender, unlocked, FormCategory.OBJECT)) return;
+            TransformationManager.transformIntoBlock(sender, block);
+            return;
+        }
+
         // The registry returns its default (pig) for unknown ids rather than null
         if (!ForgeRegistries.ENTITY_TYPES.containsKey(msg.entityId)) return;
         EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(msg.entityId);
@@ -92,7 +110,9 @@ public class RequestTransformPacket {
         Entity created = type.create(sender.serverLevel());
         if (created == null) return;
         FormCategory category = FormClassifier.classify(type, created);
+        boolean offered = FormCatalog.isOffered(msg.entityId, created);
         created.discard();
+        if (!offered) return; // not a form (lightning, primed TNT, the mod's machinery...)
 
         boolean isObject = category == FormCategory.OBJECT;
         if ((msg.kind == Kind.OBJECT_ENTITY) != isObject) return; // asked for a mob, got an object, or vice versa

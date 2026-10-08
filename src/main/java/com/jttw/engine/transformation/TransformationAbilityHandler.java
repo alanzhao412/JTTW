@@ -232,6 +232,11 @@ public final class TransformationAbilityHandler {
     public static void onRightClickItem(PlayerInteractEvent.RightClickItem event) {
         if (event.getEntity().level().isClientSide) return;
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
+        useFormAbilities(sp);
+    }
+
+    /** A form's right-click abilities (also used for empty-hand clicks, see UseFormPacket). */
+    public static void useFormAbilities(ServerPlayer sp) {
         tryShootFireball(sp);
         trySonicBoom(sp);
         tryShootArrow(sp);
@@ -1113,8 +1118,10 @@ public final class TransformationAbilityHandler {
             // Store HP, do explosion, restore HP (player doesn't die)
             float hpBefore = sp.getHealth();
             float absorptionBefore = sp.getAbsorptionAmount();
+            // Breaks blocks like a creeper's blast (the mobGriefing rule applies); the player is
+            // the explosion's source, which an explosion never damages or pushes
             level.explode(sp, sp.getX(), sp.getY(), sp.getZ(),
-                    power, Level.ExplosionInteraction.NONE);
+                    power, Level.ExplosionInteraction.MOB);
             sp.setHealth(hpBefore);
             sp.setAbsorptionAmount(absorptionBefore);
             sp.clearFire();

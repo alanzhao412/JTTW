@@ -12,6 +12,7 @@
     "LivingEntityJumpingAccessor",
     "LivingEntityJumpInvoker",
     "PlayerMixin",
+    "PlayerRidingMixin",
     "RabbitJumpAccessor",
     "ServerGamePacketListenerMixin",
     "WalkAnimationStateAccessor"

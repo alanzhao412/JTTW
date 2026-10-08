@@ -116,7 +116,7 @@ final class Tf {
      * package-private; it is reached reflectively so the packet's public handle() runs exactly
      * as it does for a real client message (on the server thread, so the work runs at once).
      */
-    static NetworkEvent.Context serverContext(ServerPlayer p) {
+    public static NetworkEvent.Context serverContext(ServerPlayer p) {
         try {
             Connection connection = new Connection(PacketFlow.SERVERBOUND);
             connection.setListener(p.connection);

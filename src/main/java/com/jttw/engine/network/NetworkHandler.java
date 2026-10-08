@@ -3,6 +3,8 @@ package com.jttw.engine.network;
 import com.jttw.engine.network.c2s.ActivateAbilityPacket;
 import com.jttw.engine.network.c2s.DimensionSelectPacket;
 import com.jttw.engine.network.c2s.RequestTransformPacket;
+import com.jttw.engine.network.c2s.SetSignTextPacket;
+import com.jttw.engine.network.c2s.UseFormPacket;
 import com.jttw.engine.network.c2s.SpendSkillPointPacket;
 import com.jttw.engine.network.c2s.StaffScalePacket;
 import com.jttw.engine.network.s2c.OpenTransformationMenuPacket;
@@ -145,6 +147,18 @@ public final class NetworkHandler {
                 .encoder(RequestTransformPacket::encode)
                 .decoder(RequestTransformPacket::decode)
                 .consumerMainThread(RequestTransformPacket::handle)
+                .add();
+
+        CHANNEL.messageBuilder(UseFormPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(UseFormPacket::encode)
+                .decoder(UseFormPacket::decode)
+                .consumerMainThread(UseFormPacket::handle)
+                .add();
+
+        CHANNEL.messageBuilder(SetSignTextPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(SetSignTextPacket::encode)
+                .decoder(SetSignTextPacket::decode)
+                .consumerMainThread(SetSignTextPacket::handle)
                 .add();
 
         CHANNEL.messageBuilder(StaffScalePacket.class, id++, NetworkDirection.PLAY_TO_SERVER)

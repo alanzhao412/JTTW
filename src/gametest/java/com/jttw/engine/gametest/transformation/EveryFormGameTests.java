@@ -75,8 +75,12 @@ public class EveryFormGameTests {
 
     // ── the catalog the menus read ──────────────────────────────────
 
+    /**
+     * Every entity is offered once, except the player and the entities that are no form: the
+     * listed non-forms and the mod's own non-living machinery.
+     */
     @GameTest(template = PLATFORM)
-    public static void theMenusOfferEveryEntityExceptThePlayerExactlyOnce(GameTestHelper h) {
+    public static void theMenusOfferEveryEntityExceptNonFormsExactlyOnce(GameTestHelper h) {
         Map<FormCategory, List<ResourceLocation>> mobs = FormCatalog.mobForms(h.getLevel());
         List<ResourceLocation> objects = FormCatalog.objectForms(h.getLevel());
         List<ResourceLocation> offered = new ArrayList<>(objects);
@@ -86,7 +90,13 @@ public class EveryFormGameTests {
             if (type(id) == EntityType.PLAYER) continue;
             if (!offered.contains(id)) missing.add(id);
         }
-        check(h, missing.isEmpty(), "entities offered nowhere: " + missing);
+        List<ResourceLocation> expectedMissing = new ArrayList<>(FormCatalog.NOT_FORMS);
+        for (String machinery : List.of("howl_projectile", "placed_staff", "qi_wave", "thrown_spear")) {
+            expectedMissing.add(new ResourceLocation(JTTWEngine.MOD_ID, machinery));
+        }
+        missing.sort(java.util.Comparator.comparing(ResourceLocation::toString));
+        expectedMissing.sort(java.util.Comparator.comparing(ResourceLocation::toString));
+        eq(h, expectedMissing, missing, "entities offered nowhere");
         eq(h, offered.size(), new java.util.HashSet<>(offered).size(), "no form offered twice");
         check(h, !offered.contains(ForgeRegistries.ENTITY_TYPES.getKey(EntityType.PLAYER)), "the player is not a mob form");
         check(h, !mobs.containsKey(FormCategory.OBJECT) && !mobs.containsKey(FormCategory.PLAYER),

@@ -62,7 +62,22 @@ public final class FormGallery {
     private static final float UP_PITCH = -40f;
 
     private enum View { FRONT, SIDE, UP }
-    private record Shot(ResourceLocation form, View view) {}
+    /** What a shot shows: a form, or a form in a particular state. */
+    private enum Kind { ENTITY, BLOCK, LIT_TNT, BOAT_ON_WATER }
+
+    private record Shot(ResourceLocation form, View view, Kind kind) {
+        String key() {
+            return switch (kind) {
+                case ENTITY -> form.getNamespace() + "__" + form.getPath();
+                case BLOCK -> "block__" + form.getPath();
+                case LIT_TNT -> "special__tnt_lit";
+                case BOAT_ON_WATER -> "special__boat_on_water";
+            };
+        }
+    }
+
+    /** Only shots whose key contains one of these (comma-separated), if set: {@code -Djttw.formGallery.only=block,special}. */
+    private static final String ONLY = System.getProperty("jttw.formGallery.only", "");
 
     private static boolean worldRequested;
     private static List<Shot> shots;
@@ -109,7 +124,19 @@ public final class FormGallery {
             List<ResourceLocation> forms = new ArrayList<>();
             FormCatalog.mobForms(mc.level).values().forEach(forms::addAll);
             forms.addAll(FormCatalog.objectForms(mc.level));
-            for (ResourceLocation id : forms) for (View v : View.values()) shots.add(new Shot(id, v));
+            List<Shot> all = new ArrayList<>();
+            for (View v : View.values()) {
+                for (ResourceLocation id : forms) all.add(new Shot(id, v, Kind.ENTITY));
+                for (ResourceLocation id : FormCatalog.blockForms()) all.add(new Shot(id, v, Kind.BLOCK));
+                all.add(new Shot(new ResourceLocation("minecraft", "tnt"), v, Kind.LIT_TNT));
+                all.add(new Shot(new ResourceLocation("minecraft", "boat"), v, Kind.BOAT_ON_WATER));
+            }
+            all.sort(java.util.Comparator.comparing(Shot::key));
+            for (Shot shot : all) {
+                if (ONLY.isEmpty() || java.util.Arrays.stream(ONLY.split(",")).anyMatch(o -> shot.key().contains(o.trim()))) {
+                    shots.add(shot);
+                }
+            }
             mc.options.hideGui = true;
             mc.options.pauseOnLostFocus = false; // the window may lose focus while it runs
             mc.options.setCameraType(CameraType.FIRST_PERSON);
@@ -122,7 +149,7 @@ public final class FormGallery {
         if (next >= shots.size()) return;
         if (mc.screen != null) mc.setScreen(null); // a pause menu or chat would cover the picture
         Shot shot = shots.get(next);
-        holdPose(mc.player, shot.view());
+        holdPose(mc.player, shot.view(), shot.kind() != Kind.BOAT_ON_WATER);
         if (cameraId != null && mc.getCameraEntity() == mc.player) {
             for (Entity e : mc.level.entitiesForRendering()) {
                 if (e.getUUID().equals(cameraId)) mc.setCameraEntity(e);
@@ -132,12 +159,12 @@ public final class FormGallery {
 
         File dir = new File(mc.gameDirectory, "screenshots/" + RUN_DIR);
         dir.mkdirs();
-        String file = shot.form().getNamespace() + "__" + shot.form().getPath() + "__" + shot.view().name().toLowerCase() + ".png";
+        String file = shot.key() + "__" + shot.view().name().toLowerCase() + ".png";
         boolean onCamera = mc.getCameraEntity() != mc.player;
         Screenshot.grab(mc.gameDirectory, RUN_DIR + "/" + file, mc.getMainRenderTarget(), msg -> {});
         TransformationData data = TransformationManager.getTransformation(mc.player);
         index.add(file + "\t" + shot.form() + "\t" + shot.view()
-                + "\tclientForm=" + (data == null ? "none" : data.getEntityId())
+                + "\tclientForm=" + (data == null ? "none" : data.getFormId())
                 + "\tcamera=" + onCamera);
         next++;
         if (next < shots.size()) {
@@ -148,13 +175,13 @@ public final class FormGallery {
     }
 
     /** The player faces south; for the UP view they look up. Body and head follow. */
-    private static void holdPose(Player p, View view) {
+    private static void holdPose(Player p, View view, boolean still) {
         float pitch = view == View.UP ? UP_PITCH : 0f;
         p.setYRot(0f); p.yRotO = 0f;
         p.setXRot(pitch); p.xRotO = pitch;
         p.yBodyRot = 0f; p.yBodyRotO = 0f;
         p.yHeadRot = 0f; p.yHeadRotO = 0f;
-        p.setDeltaMovement(0, 0, 0);
+        if (still) p.setDeltaMovement(0, 0, 0); // a boat on water is left to float
     }
 
     private static void startShot(Minecraft mc) {
@@ -174,14 +201,36 @@ public final class FormGallery {
                 var pos = new net.minecraft.core.BlockPos(x, ground + y, z);
                 if (!level.getBlockState(pos).isAir()) level.setBlock(pos, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
             }
+            // a pool for the boat, grass again for everything else
+            for (int x = -3; x <= 3; x++) for (int z = -3; z <= 3; z++) {
+                var below = new net.minecraft.core.BlockPos(x, ground - 1, z);
+                boolean pool = shot.kind() == Kind.BOAT_ON_WATER;
+                level.setBlock(below, (pool ? net.minecraft.world.level.block.Blocks.WATER
+                        : net.minecraft.world.level.block.Blocks.GRASS_BLOCK).defaultBlockState(), 3);
+            }
             sp.getAbilities().flying = false;
             sp.teleportTo(level, 0.5, ground, 0.5, 0f, shot.view() == View.UP ? UP_PITCH : 0f);
             // clear anything else from the stage (flat worlds spawn animals at generation)
             for (Entity e : level.getEntities((Entity) null, sp.getBoundingBox().inflate(40), e -> !(e instanceof Player))) {
                 e.discard();
             }
-            EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(shot.form());
-            TransformationManager.transform(sp, type);
+            switch (shot.kind()) {
+                case ENTITY, BOAT_ON_WATER -> TransformationManager.transform(sp, ForgeRegistries.ENTITY_TYPES.getValue(shot.form()));
+                case BLOCK -> {
+                    var block = ForgeRegistries.BLOCKS.getValue(shot.form());
+                    TransformationManager.transformIntoBlock(sp, block);
+                    if (block instanceof net.minecraft.world.level.block.SignBlock) {
+                        TransformationManager.update(sp, TransformationManager.getTransformation(sp)
+                                .withSignLines(List.of("Hello from", "a sign form", "", "facing you")));
+                    }
+                }
+                case LIT_TNT -> {
+                    TransformationManager.transformIntoBlock(sp, net.minecraft.world.level.block.Blocks.TNT);
+                    // a long fuse, so it is still burning when photographed
+                    TransformationManager.update(sp, TransformationManager.getTransformation(sp)
+                            .withLitUntil(level.getGameTime() + 100_000));
+                }
+            }
             TransformationData data = TransformationManager.getTransformation(sp);
             float h = data == null ? 1.8f : data.getHeight(), w = data == null ? 0.6f : data.getWidth();
 

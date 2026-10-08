@@ -73,6 +73,8 @@ minecraft {
             parent runs.client
             workingDirectory project.file('run-gallery')
             property 'jttw.formGallery', 'true'
+            // e.g. ./gradlew runFormGallery -Pgallery.only=block,special
+            property 'jttw.formGallery.only', (project.findProperty('gallery.only') ?: '').toString()
             mods {
                 jttw_engine {
                     source sourceSets.main

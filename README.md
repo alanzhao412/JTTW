@@ -109,6 +109,21 @@ every entity into a category, and the menu and the server's check both ask the s
 menu only ever shows what the server will grant. A player form wears another online player's skin,
 model and cape, and shows their name.
 
+**Objects** (72, level III) are entities, such as minecarts, arrows and boats. Some entities
+aren't offered: the ones with no body to be (lightning, a fishing bobber, markers, empty display
+frames), primed TNT, and the mod's own machinery (Qi Wave, the thrown spear).
+[`FormCatalog`](src/main/java/com/jttw/engine/transformation/FormCatalog.java) is the one list that
+the menus, the server and the tests share. Some objects and blocks behave like the real thing.
+Right-click with an empty hand to use them:
+
+| Form | What it does |
+|---|---|
+| **Chest** | Opens your own 27-slot chest, kept on you through death and form changes, like a shulker box. |
+| **Sign** | Write up to four lines; the sign shows them. |
+| **TNT** | Light it yourself, or another player lights it with flint and steel. After 4 s it explodes like TNT, without hurting you, and you return to your own form. |
+| **Boat** | Two players can ride in you (sneak to get off) while you steer; on water you float and sail at a boat's 8 blocks a second. A chest boat seats one and opens your chest. |
+| **Creeper** | Its blast breaks blocks like a creeper's (the mobGriefing rule applies), and you stay a creeper. |
+
 ### Lore-accurate artifacts and abilities
 
 Abilities and items are drawn from the source material rather than invented:

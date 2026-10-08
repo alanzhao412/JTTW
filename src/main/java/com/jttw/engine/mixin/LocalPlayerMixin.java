@@ -25,5 +25,7 @@ public class LocalPlayerMixin {
         if (data != null && data.canPhase()) {
             self.getAbilities().flying = true;
         }
+        // A boat form floats and sails on water (movement is this client's to decide)
+        com.jttw.engine.transformation.BoatForms.sail(self);
     }
 }

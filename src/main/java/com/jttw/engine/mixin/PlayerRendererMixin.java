@@ -69,6 +69,16 @@ public class PlayerRendererMixin {
         if (data == null) { jttw_resetDummy(); return; }
         // A player form renders as a normal player; AbstractClientPlayerMixin swaps the skin
         if (data.isPlayerForm()) { jttw_resetDummy(); return; }
+        if (data.isBlockForm()) {
+            jttw_resetDummy();
+            try {
+                jttw_renderBlockForm(player, data, partialTicks, poseStack, buffer, light);
+                ci.cancel();
+            } catch (Throwable t) {
+                jttw_reportOnce(data.getFormId(), t);
+            }
+            return;
+        }
 
         EntityType<?> type = data.getEntityType();
         if (type == null) return;
@@ -218,6 +228,71 @@ public class PlayerRendererMixin {
 
             ci.cancel();
         } catch (Throwable ignored) {}
+    }
+
+    // -------------------------------------------------------------------------
+    // Block forms
+    // -------------------------------------------------------------------------
+
+    @Unique private net.minecraft.world.entity.item.PrimedTnt jttw_litTnt;
+
+    /**
+     * A block form: the block, its front (the chest's latch, the sign's text) turned to where the
+     * player faces; a sign shows the player's text; a lit TNT is a flashing primed TNT.
+     */
+    @Unique
+    private void jttw_renderBlockForm(AbstractClientPlayer player, TransformationData data, float partialTicks,
+                                      PoseStack poseStack, MultiBufferSource buffer, int light) {
+        Minecraft mc = Minecraft.getInstance();
+        net.minecraft.world.level.block.Block block = data.getBlock();
+        if (data.isLit()) {
+            if (jttw_litTnt == null || jttw_litTnt.level() != player.level()) {
+                jttw_litTnt = new net.minecraft.world.entity.item.PrimedTnt(EntityType.TNT, player.level());
+            }
+            jttw_litTnt.setFuse((int) Math.max(0, data.getLitUntil() - player.level().getGameTime()));
+            @SuppressWarnings("unchecked")
+            EntityRenderer<Entity> tntRenderer = (EntityRenderer<Entity>) mc.getEntityRenderDispatcher().getRenderer(jttw_litTnt);
+            tntRenderer.render(jttw_litTnt, 0f, partialTicks, poseStack, buffer, light);
+            return;
+        }
+        // Blocks are modelled with their front to the south (+z), as an unrotated entity faces
+        float yaw = Mth.lerp(partialTicks, player.yBodyRotO, player.yBodyRot);
+        poseStack.pushPose();
+        try {
+        poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-yaw));
+        poseStack.translate(-0.5, 0.0, -0.5);
+        var state = block.defaultBlockState();
+        int overlay = net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY;
+        if (block instanceof net.minecraft.world.level.block.SignBlock) {
+            var sign = new net.minecraft.world.level.block.entity.SignBlockEntity(player.blockPosition(), state);
+            var text = new net.minecraft.world.level.block.entity.SignText();
+            var lines = data.getSignLines();
+            for (int i = 0; i < lines.size(); i++) {
+                text = text.setMessage(i, net.minecraft.network.chat.Component.literal(lines.get(i)));
+            }
+            // Load the text as a saved sign does: setText would tell a level about the change,
+            // and this stand-in sign is in none
+            var tag = new net.minecraft.nbt.CompoundTag();
+            tag.put("front_text", net.minecraft.world.level.block.entity.SignText.DIRECT_CODEC
+                    .encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, text).getOrThrow(false, e -> {}));
+            sign.load(tag);
+            mc.getBlockEntityRenderDispatcher().renderItem(sign, poseStack, buffer, light, overlay);
+        } else {
+            mc.getBlockRenderer().renderSingleBlock(state, poseStack, buffer, light, overlay);
+        }
+        } finally {
+            poseStack.popPose(); // an error mid-render must not leave the frame's pose stack unbalanced
+        }
+    }
+
+    /** Forms that failed to render, reported once each rather than silently or every frame. */
+    @Unique private static final java.util.Set<ResourceLocation> jttw_reported = new java.util.HashSet<>();
+
+    @Unique
+    private static void jttw_reportOnce(ResourceLocation form, Throwable t) {
+        if (jttw_reported.add(form)) {
+            com.jttw.engine.JTTWEngine.LOGGER.error("Could not render the {} form; the player is drawn as themselves", form, t);
+        }
     }
 
     // -------------------------------------------------------------------------

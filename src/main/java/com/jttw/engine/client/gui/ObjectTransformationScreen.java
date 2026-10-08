@@ -37,6 +37,8 @@ public class ObjectTransformationScreen extends Screen {
 
     private final List<ResourceLocation> all = new ArrayList<>();
     private final List<ResourceLocation> filtered = new ArrayList<>();
+    /** Ids in the list that are blocks (chest, sign, TNT) rather than entities. */
+    private final java.util.Set<ResourceLocation> blockIds = new java.util.HashSet<>();
 
     // Keep references so we can remove widgets safely (no narratables access in 1.20.1)
     private final List<AbstractWidget> gridWidgets = new ArrayList<>();
@@ -74,6 +76,10 @@ public class ObjectTransformationScreen extends Screen {
             System.out.println("[JTTW] ObjectTransformationScreen opened with null level.");
             return;
         }
+        // Block forms first, then entity objects
+        blockIds.clear();
+        blockIds.addAll(com.jttw.engine.transformation.FormCatalog.blockForms());
+        all.addAll(com.jttw.engine.transformation.FormCatalog.blockForms());
         all.addAll(com.jttw.engine.transformation.FormCatalog.objectForms(mc.level));
     }
 
@@ -145,7 +151,9 @@ public class ObjectTransformationScreen extends Screen {
     }
 
     private void requestObjectTransform(ResourceLocation id) {
-        NetworkHandler.sendToServer(new RequestTransformPacket(RequestTransformPacket.Kind.OBJECT_ENTITY, id));
+        NetworkHandler.sendToServer(blockIds.contains(id)
+                ? RequestTransformPacket.block(id)
+                : new RequestTransformPacket(RequestTransformPacket.Kind.OBJECT_ENTITY, id));
         this.minecraft.setScreen(null);
     }
 
@@ -195,6 +203,19 @@ public class ObjectTransformationScreen extends Screen {
         protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTicks) {
             int bg = this.isHovered ? 0x55FFFFFF : 0x33000000;
             g.fill(getX(), getY(), getX() + width, getY() + height, bg);
+
+            if (blockIds.contains(entityId)) {
+                // A block form: its item icon, twice the usual size
+                var block = ForgeRegistries.BLOCKS.getValue(entityId);
+                g.pose().pushPose();
+                g.pose().translate(getX() + width / 2f - 16, getY() + 8, 0);
+                g.pose().scale(2f, 2f, 1f);
+                g.renderItem(new net.minecraft.world.item.ItemStack(block), 0, 0);
+                g.pose().popPose();
+                String label = entityId.getPath();
+                g.drawCenteredString(font, Component.literal(label), getX() + width / 2, getY() + height - 10, 0xFFFFFF);
+                return;
+            }
 
             Entity preview = getOrCreatePreview(entityId);
             if (preview != null) {
