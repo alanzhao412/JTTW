@@ -111,7 +111,7 @@ model and cape, and shows their name.
 
 **Objects** (72, level III) are entities, such as minecarts, arrows and boats. Some entities
 aren't offered: the ones with no body to be (lightning, a fishing bobber, markers, empty display
-frames), primed TNT, and the mod's own machinery (Qi Wave, the thrown spear).
+frames, a dropped item with no item, evoker fangs), primed TNT, and the mod's own machinery (Qi Wave, the thrown spear).
 [`FormCatalog`](src/main/java/com/jttw/engine/transformation/FormCatalog.java) is the one list that
 the menus, the server and the tests share. Some objects and blocks behave like the real thing.
 Right-click with an empty hand to use them:

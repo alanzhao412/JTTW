@@ -64,7 +64,7 @@ public class ObjectFormsGameTests {
     public static void nonFormsAreNotOfferedAndBlocksAre(GameTestHelper h) {
         List<ResourceLocation> objects = FormCatalog.objectForms(h.getLevel());
         for (String gone : List.of("lightning_bolt", "fishing_bobber", "marker", "interaction",
-                "block_display", "item_display", "text_display", "tnt")) {
+                "block_display", "item_display", "text_display", "tnt", "item", "evoker_fangs")) {
             check(h, !objects.contains(id(gone)), gone + " is not a form");
         }
         for (String mod : List.of("qi_wave", "thrown_spear", "howl_projectile", "placed_staff")) {

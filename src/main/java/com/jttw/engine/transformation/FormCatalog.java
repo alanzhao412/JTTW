@@ -36,14 +36,17 @@ public final class FormCatalog {
 
     /**
      * Entities that are never forms: they draw nothing, or are not a thing to be (lightning, a
-     * fishing line's bobber, empty display frames), or are a block in another state (primed
-     * TNT; the TNT block form lights instead).
+     * fishing line's bobber, empty display frames, a dropped item with no item, evoker fangs
+     * that show only as they bite), or are a block in another state (primed TNT; the TNT block
+     * form lights instead).
      */
     public static final Set<ResourceLocation> NOT_FORMS = Set.of(
             new ResourceLocation("minecraft", "lightning_bolt"),
             new ResourceLocation("minecraft", "fishing_bobber"),
             new ResourceLocation("minecraft", "marker"),
             new ResourceLocation("minecraft", "interaction"),
+            new ResourceLocation("minecraft", "item"),
+            new ResourceLocation("minecraft", "evoker_fangs"),
             new ResourceLocation("minecraft", "block_display"),
             new ResourceLocation("minecraft", "item_display"),
             new ResourceLocation("minecraft", "text_display"),
