@@ -69,35 +69,12 @@ public class ObjectTransformationScreen extends Screen {
 
     private void buildObjectList() {
         all.clear();
-
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) {
             System.out.println("[JTTW] ObjectTransformationScreen opened with null level.");
             return;
         }
-
-        for (ResourceLocation key : ForgeRegistries.ENTITY_TYPES.getKeys()) {
-            EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(key);
-            if (type == null) continue;
-
-            // skip player
-            if (type == EntityType.PLAYER) continue;
-
-            // “Objects” = NOT LivingEntity (arrow, item, minecart, etc.)
-            boolean isLiving = false;
-            try {
-                Entity e = type.create(mc.level);
-                if (e != null) isLiving = (e instanceof LivingEntity);
-                else isLiving = LivingEntity.class.isAssignableFrom(type.getBaseClass());
-            } catch (Throwable t) {
-                isLiving = LivingEntity.class.isAssignableFrom(type.getBaseClass());
-            }
-            if (isLiving) continue;
-
-            all.add(key);
-        }
-
-        all.sort(Comparator.comparing(ResourceLocation::toString));
+        all.addAll(com.jttw.engine.transformation.FormCatalog.objectForms(mc.level));
     }
 
     private void applyFilter(String query) {

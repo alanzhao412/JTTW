@@ -1,5 +1,6 @@
 package com.jttw.engine.mixin;
 
+import com.jttw.engine.transformation.MorphPose;
 import com.jttw.engine.transformation.TransformationData;
 import com.jttw.engine.transformation.TransformationManager;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -92,19 +93,15 @@ public class PlayerRendererMixin {
         try {
             EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
 
-            boolean inWater  = player.isInWaterOrBubble();
-            boolean onGround = player.onGround();
-            boolean isFlying = player.getAbilities().flying
-                    && (player.getAbilities().instabuild || player.isSpectator() || data.canFly());
-            boolean airborne = !inWater && !onGround;
-
             boolean playerJumpingFlag = false;
             try { playerJumpingFlag = ((LivingEntityJumpingAccessor)(Object)player).jttw_isJumping(); }
             catch (Throwable ignored) {}
 
-            double vy = player.getDeltaMovement().y;
-            boolean heuristicJump = airborne && !isFlying && vy > 0.02D;
-            boolean shouldBeAirborne = airborne || isFlying;
+            MorphPose.State state = MorphPose.State.of(player, data.canFly(), playerJumpingFlag);
+            boolean inWater  = state.inWater();
+            boolean onGround = state.onGround();
+            boolean isFlying = state.flying();
+            boolean heuristicJump = !inWater && !onGround && !isFlying && player.getDeltaMovement().y > 0.02D;
 
             double px = player.getX(), py = player.getY(), pz = player.getZ();
             dummy.setPos(px, py, pz);
@@ -114,16 +111,16 @@ public class PlayerRendererMixin {
 
             // Copy walk animation state for limb-swing based models (goat, etc.)
             // Excluded: Rabbit (uses jumpTicks bobbing) and Frog (uses AnimationState keyframes)
-            if (dummy instanceof LivingEntity dummyLiving && jttw_usesStandardLimbSwing(dummy)) {
-                jttw_copyWalkAnim(player.walkAnimation, dummyLiving.walkAnimation);
+            if (dummy instanceof LivingEntity dummyLiving && MorphPose.usesStandardLimbSwing(dummy)) {
+                MorphPose.copyWalkAnim(player.walkAnimation, dummyLiving.walkAnimation);
             }
 
             // Copy attack animation state so mob models play their attack anims
             if (dummy instanceof LivingEntity dummyLiving2) {
-                jttw_copyAttackAnim(player, dummyLiving2);
+                MorphPose.copyAttackAnim(player, dummyLiving2);
             }
 
-            applyStateFromPlayer(player, dummy, inWater, shouldBeAirborne, isFlying, playerJumpingFlag, heuristicJump);
+            MorphPose.apply(player, dummy, state);
 
             long gameTime = player.level().getGameTime();
             if (gameTime != jttw_lastDummyTickGameTime) {
@@ -166,16 +163,16 @@ public class PlayerRendererMixin {
                 dummy.setOnGround(onGround);
 
                 // Re-copy walk anim after tick() for standard limb-swing mobs
-                if (dummy instanceof LivingEntity dummyLiving && jttw_usesStandardLimbSwing(dummy)) {
-                    jttw_copyWalkAnim(player.walkAnimation, dummyLiving.walkAnimation);
+                if (dummy instanceof LivingEntity dummyLiving && MorphPose.usesStandardLimbSwing(dummy)) {
+                    MorphPose.copyWalkAnim(player.walkAnimation, dummyLiving.walkAnimation);
                 }
 
                 // Re-copy attack anim after tick() so mob keeps showing the swing
                 if (dummy instanceof LivingEntity dummyLiving3) {
-                    jttw_copyAttackAnim(player, dummyLiving3);
+                    MorphPose.copyAttackAnim(player, dummyLiving3);
                 }
 
-                applyStateFromPlayer(player, dummy, inWater, shouldBeAirborne, isFlying, playerJumpingFlag, heuristicJump);
+                MorphPose.apply(player, dummy, state);
 
                 // RABBIT: set jumpTicks/jumpDuration AFTER tick() so tick()'s own
                 // aiStep() decrement can't interfere. We own the counter entirely.
@@ -201,12 +198,12 @@ public class PlayerRendererMixin {
             } else {
                 dummy.tickCount = player.tickCount;
                 // Still copy walk anim every render frame (between ticks) for smooth lerp
-                if (dummy instanceof LivingEntity dummyLiving && jttw_usesStandardLimbSwing(dummy)) {
-                    jttw_copyWalkAnim(player.walkAnimation, dummyLiving.walkAnimation);
+                if (dummy instanceof LivingEntity dummyLiving && MorphPose.usesStandardLimbSwing(dummy)) {
+                    MorphPose.copyWalkAnim(player.walkAnimation, dummyLiving.walkAnimation);
                 }
                 // Copy attack anim every render frame for smooth swing interpolation
                 if (dummy instanceof LivingEntity dummyLiving4) {
-                    jttw_copyAttackAnim(player, dummyLiving4);
+                    MorphPose.copyAttackAnim(player, dummyLiving4);
                 }
             }
 
@@ -227,50 +224,6 @@ public class PlayerRendererMixin {
     // Helpers
     // -------------------------------------------------------------------------
 
-    // Mobs whose models use standard WalkAnimationState (limb swing) for walking.
-    // Rabbit walks via jumpTicks/jumpDuration bobbing — copying the player's walk state
-    // overwrites the dummy's own anim and breaks it. Frog uses AnimationState keyframes.
-    // For excluded mobs, let dummy.tick() drive walkAnimation naturally.
-    @Unique
-    private static boolean jttw_usesStandardLimbSwing(Entity dummy) {
-        return !(dummy instanceof Rabbit) && !(dummy instanceof Frog);
-    }
-
-    /**
-     * Copy the player's attack/swing animation state onto the dummy so mob models
-     * play their built-in attack animations (zombie arm-raise, spider lunge, etc.).
-     *
-     * Fields copied:
-     *   swinging        — whether a swing is in progress
-     *   swingTime       — current swing tick counter (counts up)
-     *   oAttackAnim     — previous-frame interpolation value
-     *   attackAnim      — current-frame interpolation value (0..1)
-     *   hurtTime        — red flash / knockback anim timer (some models use this)
-     *   hurtDuration    — total hurt flash duration
-     */
-    @Unique
-    private static void jttw_copyAttackAnim(LivingEntity src, LivingEntity dst) {
-        dst.swinging    = src.swinging;
-        dst.swingTime   = src.swingTime;
-        dst.oAttackAnim = src.oAttackAnim;
-        dst.attackAnim  = src.attackAnim;
-        dst.hurtTime    = src.hurtTime;
-        dst.hurtDuration = src.hurtDuration;
-        // For mobs that check isAggressive() to trigger attack poses (zombies, etc.)
-        if (dst instanceof Mob mob) {
-            mob.setAggressive(src.swinging);
-        }
-    }
-
-    @Unique
-    private static void jttw_copyWalkAnim(WalkAnimationState src, WalkAnimationState dst) {
-        WalkAnimationStateAccessor s = (WalkAnimationStateAccessor) src;
-        WalkAnimationStateAccessor d = (WalkAnimationStateAccessor) dst;
-        d.jttw_setPosition(s.jttw_getPosition());
-        d.jttw_setSpeed(s.jttw_getSpeed());
-        d.jttw_setSpeedOld(s.jttw_getSpeedOld());
-    }
-
     @Unique
     private void jttw_resetDummy() {
         jttw_dummy   = null;
@@ -285,66 +238,5 @@ public class PlayerRendererMixin {
         jttw_prevHeuristicJump = false;
         jttw_rabbitJumpTick      = 0;
         jttw_rabbitCycleDuration = 0;
-    }
-
-    @Unique
-    private static float jttw_yawOffset(Entity dummy) {
-        return dummy.getType() == EntityType.ENDER_DRAGON ? 180.0F : 0.0F;
-    }
-
-    @Unique
-    private static boolean jttw_invertPitch(Entity dummy) {
-        EntityType<?> t = dummy.getType();
-        return t == EntityType.PHANTOM || t == EntityType.ENDER_DRAGON;
-    }
-
-    @Unique
-    private static void applyStateFromPlayer(AbstractClientPlayer player, Entity dummy,
-                                             boolean inWater, boolean shouldBeAirborne,
-                                             boolean isFlying, boolean playerJumpingFlag,
-                                             boolean heuristicJump) {
-        float yawOffset     = jttw_yawOffset(dummy);
-        boolean invertPitch = jttw_invertPitch(dummy);
-
-        dummy.yRotO = player.yRotO + yawOffset;
-        dummy.setYRot(player.getYRot() + yawOffset);
-
-        if (dummy instanceof LivingEntity living) {
-            if (inWater) {
-                living.setOnGround(false);
-                living.setSwimming(true);
-                living.setPose(Pose.SWIMMING);
-            } else {
-                living.setSwimming(false);
-                if (living.getPose() == Pose.SWIMMING) living.setPose(Pose.STANDING);
-                living.setOnGround(player.onGround());
-            }
-            if (shouldBeAirborne) living.setOnGround(false);
-
-            boolean jumpAnim = playerJumpingFlag || heuristicJump;
-            try { ((LivingEntityJumpingAccessor)(Object)living).jttw_setJumping(jumpAnim); }
-            catch (Throwable ignored) {}
-            if (living instanceof Mob mob) mob.setJumping(jumpAnim);
-
-            float x = player.getXRot(), xO = player.xRotO;
-            if (invertPitch) { x = -x; xO = -xO; }
-            living.xRotO = xO;
-            living.setXRot(x);
-            living.yBodyRotO = player.yBodyRotO + yawOffset;
-            living.yBodyRot  = player.yBodyRot  + yawOffset;
-            living.yHeadRotO = player.yHeadRotO + yawOffset;
-            living.yHeadRot  = player.yHeadRot  + yawOffset;
-
-            // Axolotl model has a slight body rotation offset; force body yaw
-            // to match head yaw exactly so the model faces straight ahead.
-            if (living instanceof Axolotl) {
-                living.yBodyRotO = living.yHeadRotO;
-                living.yBodyRot  = living.yHeadRot;
-            }
-        } else {
-            dummy.xRotO = 0f;
-            dummy.setXRot(0f);
-            if (shouldBeAirborne || isFlying) dummy.setOnGround(false);
-        }
     }
 }

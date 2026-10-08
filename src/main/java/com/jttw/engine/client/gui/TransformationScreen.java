@@ -4,7 +4,7 @@ import com.jttw.engine.client.ClientAbilityData;
 import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.network.c2s.RequestTransformPacket;
 import com.jttw.engine.transformation.FormCategory;
-import com.jttw.engine.transformation.FormClassifier;
+import com.jttw.engine.transformation.FormCatalog;
 import com.jttw.engine.transformation.TransformationAccess;
 import com.jttw.engine.transformation.TransformationSchool;
 import net.minecraft.client.Minecraft;
@@ -145,20 +145,7 @@ public class TransformationScreen extends Screen {
         byCategory.clear();
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) return;
-        for (ResourceLocation key : ForgeRegistries.ENTITY_TYPES.getKeys()) {
-            EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(key);
-            if (type == null || type == EntityType.PLAYER) continue;
-            Entity e;
-            try {
-                e = type.create(mc.level);
-            } catch (Throwable t) {
-                continue;
-            }
-            if (!(e instanceof LivingEntity)) continue; // objects have their own picker
-            FormCategory c = FormClassifier.classify(type, e);
-            byCategory.computeIfAbsent(c, k -> new ArrayList<>()).add(key);
-        }
-        byCategory.values().forEach(l -> l.sort(Comparator.comparing(ResourceLocation::toString)));
+        byCategory.putAll(FormCatalog.mobForms(mc.level));
     }
 
     private void applyFilter(String query) {
