@@ -188,6 +188,18 @@ public final class NetworkHandler {
                 .consumerMainThread(SyncLeadHeadPacket::handle)
                 .add();
 
+        CHANNEL.messageBuilder(com.jttw.engine.network.s2c.SyncStomachPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.jttw.engine.network.s2c.SyncStomachPacket::encode)
+                .decoder(com.jttw.engine.network.s2c.SyncStomachPacket::decode)
+                .consumerMainThread(com.jttw.engine.network.s2c.SyncStomachPacket::handle)
+                .add();
+
+        CHANNEL.messageBuilder(com.jttw.engine.network.s2c.TruffleScentPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.jttw.engine.network.s2c.TruffleScentPacket::encode)
+                .decoder(com.jttw.engine.network.s2c.TruffleScentPacket::decode)
+                .consumerMainThread(com.jttw.engine.network.s2c.TruffleScentPacket::handle)
+                .add();
+
         CHANNEL.messageBuilder(SyncGoldenEyesPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(SyncGoldenEyesPacket::encode)
                 .decoder(SyncGoldenEyesPacket::decode)

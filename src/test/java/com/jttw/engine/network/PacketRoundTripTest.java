@@ -87,6 +87,11 @@ class PacketRoundTripTest {
                 new SyncReviveCountPacket(2),
                 new com.jttw.engine.network.s2c.SyncLeadHeadPacket(2),
                 new com.jttw.engine.network.s2c.SyncLeadHeadPacket(-1),
+                new com.jttw.engine.network.s2c.SyncStomachPacket(13),
+                new com.jttw.engine.network.s2c.SyncStomachPacket(-1),
+                new com.jttw.engine.network.s2c.TruffleScentPacket(400, new int[]{7, 301},
+                        new long[]{new net.minecraft.core.BlockPos(4, -12, 9).asLong()}, new int[]{0xFF00BBFF}),
+                new com.jttw.engine.network.s2c.TruffleScentPacket(200, new int[0], new long[0], new int[0]),
                 new SyncRingStatePacket(PLAYER, true),
                 new SyncSkillTreePacket(PLAYER, 4, Set.of("wu_ring_1", "wu_ring_2", "wu_clone_1")),
                 new SyncSkillTreePacket(PLAYER, 0, Set.of()),
@@ -118,7 +123,11 @@ class PacketRoundTripTest {
             for (java.lang.reflect.Field f : p.getClass().getDeclaredFields()) {
                 if (Modifier.isStatic(f.getModifiers())) continue;
                 f.setAccessible(true);
-                assertEquals(f.get(p), f.get(decoded), f.getName());
+                if (f.getType().isArray()) {
+                    assertTrue(java.util.Objects.deepEquals(f.get(p), f.get(decoded)), f.getName());
+                } else {
+                    assertEquals(f.get(p), f.get(decoded), f.getName());
+                }
             }
         }));
     }

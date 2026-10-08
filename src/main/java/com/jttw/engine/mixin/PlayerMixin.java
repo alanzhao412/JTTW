@@ -1,5 +1,6 @@
 package com.jttw.engine.mixin;
 
+import com.jttw.engine.character.marshal.MarshalAbilityHandler;
 import com.jttw.engine.transformation.TransformationData;
 import com.jttw.engine.transformation.TransformationManager;
 import net.minecraft.world.entity.EntityDimensions;
@@ -41,5 +42,11 @@ public class PlayerMixin {
         if (data == null) return;
 
         cir.setReturnValue(data.getEyeHeight());
+    }
+
+    /** The Marshal of the Heavenly Canopy's bottomless stomach: he can always eat. */
+    @Inject(method = "canEat(Z)Z", at = @At("HEAD"), cancellable = true)
+    private void jttw_bottomlessStomach(boolean canAlwaysEat, CallbackInfoReturnable<Boolean> cir) {
+        if (MarshalAbilityHandler.canAlwaysEat((Player) (Object) this)) cir.setReturnValue(true);
     }
 }

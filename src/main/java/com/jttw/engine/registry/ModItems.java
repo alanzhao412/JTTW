@@ -68,6 +68,9 @@ public final class ModItems {
     public static final RegistryObject<Item> BELL_OF_TAIYI =
             ITEMS.register("bell_of_taiyi", BellOfTaiyiItem::new);
 
+    public static final RegistryObject<Item> NINE_TOOTH_RAKE =
+            ITEMS.register("nine_tooth_rake", com.jttw.engine.item.NineToothRakeItem::new);
+
     public static void register(IEventBus modEventBus) {
         ITEMS.register(modEventBus);
     }

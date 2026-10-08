@@ -32,8 +32,10 @@ public class CharacterRoutingGameTests {
         }
     }
 
-    private static void assertKeysDoNothing(GameTestHelper h, ReincarnationOutcome outcome, PlayableCharacter expected) {
+    private static void assertKeysDoNothing(GameTestHelper h, ReincarnationOutcome outcome, PlayableCharacter expected,
+                                            String... nodes) {
         ServerPlayer p = as(h, outcome);
+        grant(p, nodes);
         qi(p, 100f, 100f);
         PlayableCharacter c = Characters.of(p);
         eq(h, expected, c, "character for " + outcome.id);
@@ -51,10 +53,11 @@ public class CharacterRoutingGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM, batch = "marshalKeysDoNothingServerSide")
-    public static void marshalKeysDoNothingServerSide(GameTestHelper h) {
-        // the 36 Transformations slot is a menu opened on the client
-        assertKeysDoNothing(h, ReincarnationOutcome.MARSHAL_HEAVENLY_CANOPY, MarshalCharacter.INSTANCE);
+    @GameTest(template = PLATFORM, batch = "marshalsMenuNeverReachesTheServer")
+    public static void marshalsMenuNeverReachesTheServer(GameTestHelper h) {
+        // the 36 Transformations slot is a menu opened on the client; his other keys need their own nodes
+        assertKeysDoNothing(h, ReincarnationOutcome.MARSHAL_HEAVENLY_CANOPY, MarshalCharacter.INSTANCE,
+                "mc_transform_1", "mc_transform_2", "mc_transform_3");
         h.succeed();
     }
 

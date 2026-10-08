@@ -154,13 +154,15 @@ public final class FormGallery {
         if (next >= shots.size()) return;
         if (mc.screen != null) mc.setScreen(null); // a pause menu or chat would cover the picture
         Shot shot = shots.get(next);
-        holdPose(mc.player, shot.view(), shot.kind() != Kind.BOAT_ON_WATER);
+        holdPose(mc.player, shot.kind() == Kind.SCENE ? scene(shot).pitch() : shot.view() == View.UP ? UP_PITCH : 0f,
+                shot.kind() != Kind.BOAT_ON_WATER);
         if (cameraId != null && mc.getCameraEntity() == mc.player) {
             for (Entity e : mc.level.entitiesForRendering()) {
                 if (e.getUUID().equals(cameraId)) mc.setCameraEntity(e);
             }
         }
         if (shot.kind() == Kind.SCENE && wait == scene(shot).triggerBefore()) {
+            mc.gui.getChat().clearMessages(false); // setup chatter would cover a first-person HUD
             UUID id = mc.player.getUUID();
             AbilityScenes.Scene sc = scene(shot);
             mc.getSingleplayerServer().execute(() -> {
@@ -187,9 +189,8 @@ public final class FormGallery {
         }
     }
 
-    /** The player faces south; for the UP view they look up. Body and head follow. */
-    private static void holdPose(Player p, View view, boolean still) {
-        float pitch = view == View.UP ? UP_PITCH : 0f;
+    /** The player faces south at this pitch (looking up for the UP view, as a scene asks). Body and head follow. */
+    private static void holdPose(Player p, float pitch, boolean still) {
         p.setYRot(0f); p.yRotO = 0f;
         p.setXRot(pitch); p.xRotO = pitch;
         p.yBodyRot = 0f; p.yBodyRotO = 0f;

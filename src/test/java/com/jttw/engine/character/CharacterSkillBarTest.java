@@ -105,8 +105,8 @@ class CharacterSkillBarTest {
     @Test
     void marshalsThirtySixTransformationsComesWithItsFirstNode() {
         PlayableCharacter marshal = Characters.byOutcome("marshal_of_the_heavenly_canopy");
-        assertTrue(marshal.skillBar(Set.of()).get(0).isEmpty(), "no node, no menu");
-        AbilitySlot slot = marshal.skillBar(Set.of("mc_transform_1", "mc_transform_2")).get(0);
+        assertTrue(marshal.skillBar(Set.of()).get(3).isEmpty(), "no node, no menu");
+        AbilitySlot slot = marshal.skillBar(Set.of("mc_transform_1", "mc_transform_2")).get(3); // on M
         assertEquals("mc_transform", slot.id());
         assertEquals("36 Transformations", slot.displayName());
         assertEquals(AbilityType.MENU, slot.type());
