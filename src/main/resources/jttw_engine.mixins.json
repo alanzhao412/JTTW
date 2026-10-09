@@ -9,6 +9,8 @@
     "EntityPhaseMixin",
     "FoodDataMixin",
     "LivingEntityMixin",
+    "MultiNoiseBiomeSourceMixin",
+    "OverworldBiomeBuilderMixin",
     "EntityEyeHeightInvoker",
     "LivingEntityJumpingAccessor",
     "LivingEntityJumpInvoker",

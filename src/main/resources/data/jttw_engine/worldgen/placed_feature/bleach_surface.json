@@ -1,0 +1,8 @@
+{
+  "feature": "jttw_engine:bleach_surface",
+  "placement": [
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}
