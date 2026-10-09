@@ -19,11 +19,11 @@ import javax.annotation.Nullable;
 public enum ProgressionClass {
 
     /**
-     * Highest BST ceiling (1200).  Punishing early game; dramatically outscales all
-     * other classes after level 50.  Form shifts at major milestones.
-     * Designed as a long-term investment.
+     * Highest BST ceiling (1200).  The hardest to level, harder with every level;
+     * dramatically outscales all other classes after level 50.  Form shifts at major
+     * milestones.  Designed as a long-term investment.
      */
-    PRIMORDIAL(1200, GrowthRate.ERRATIC),
+    PRIMORDIAL(1200, GrowthRate.STEEPENING),
 
     /**
      * Naturally strong (BST 1100).  Stable, consistent scaling curve.
@@ -34,18 +34,18 @@ public enum ProgressionClass {
     DIVINE_BEAST(1100, GrowthRate.MEDIUM_FAST),
 
     /**
-     * Widest utility toolkit (BST 1000, variable effective power).
+     * Widest utility toolkit (BST 1000, variable effective power), and the quickest to level.
      * Ability-expansion focused.  Some archetypes are combat-oriented;
      * higher-tier forms gain perception and authority advantages.
      */
-    HEAVENLY(1000, GrowthRate.MEDIUM),
+    HEAVENLY(1000, GrowthRate.FAST),
 
     /**
      * Ability-focused (BST 1030).  Lower raw stat floor.
      * Strong transformation mechanics.  Power comes from abilities
      * rather than raw stat bonuses.
      */
-    YAOGUAI(1030, GrowthRate.FLUCTUATING);
+    YAOGUAI(1030, GrowthRate.MEDIUM);
 
     /** Sum of all base stats.  Feeds {@link BaseStats} distribution. */
     public final int bst;

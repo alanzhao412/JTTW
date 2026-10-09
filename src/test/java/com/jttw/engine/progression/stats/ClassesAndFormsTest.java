@@ -14,10 +14,10 @@ class ClassesAndFormsTest {
 
     @Test
     void classesUseTheirDesignedGrowthCurves() {
-        assertEquals(GrowthRate.ERRATIC, ProgressionClass.PRIMORDIAL.growthRate);
+        assertEquals(GrowthRate.STEEPENING, ProgressionClass.PRIMORDIAL.growthRate);
         assertEquals(GrowthRate.MEDIUM_FAST, ProgressionClass.DIVINE_BEAST.growthRate);
-        assertEquals(GrowthRate.MEDIUM, ProgressionClass.HEAVENLY.growthRate);
-        assertEquals(GrowthRate.FLUCTUATING, ProgressionClass.YAOGUAI.growthRate);
+        assertEquals(GrowthRate.FAST, ProgressionClass.HEAVENLY.growthRate);
+        assertEquals(GrowthRate.MEDIUM, ProgressionClass.YAOGUAI.growthRate);
     }
 
     @ParameterizedTest

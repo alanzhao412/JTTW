@@ -43,13 +43,13 @@ public record StatBlock(
     // -----------------------------------------------------------------------
 
     /** Each raw HP unit → this many MC health points added on top of the base 20. */
-    private static final double HP_SCALE = 0.145;
+    private static final double HP_SCALE = 0.435; // a high-scaling game: x3 the old 0.145
 
     /** Each raw STR unit → this much MC attack damage added on top of base 1.0. */
-    private static final double STR_SCALE = 0.072;
+    private static final double STR_SCALE = 0.216; // x3 the old 0.072
 
     /** Each raw PRES / MRES unit → this many resistance points (uncapped). */
-    private static final double RES_SCALE = 0.40;
+    private static final double RES_SCALE = 0.60; // x1.5 the old 0.40
 
     /**
      * Each raw QI unit → internal qi points (not a MC attribute).

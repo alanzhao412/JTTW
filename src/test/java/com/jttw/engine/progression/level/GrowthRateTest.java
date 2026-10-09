@@ -12,10 +12,10 @@ class GrowthRateTest {
     /** The reference table in GrowthRate's javadoc, used to design XP drops. */
     @ParameterizedTest
     @CsvSource({
-            "MEDIUM_FAST, 10,    200", "MEDIUM, 10,    240", "ERRATIC, 10,    400", "FLUCTUATING, 10,    220",
-            "MEDIUM_FAST, 20,   1600", "MEDIUM, 20,   1920", "ERRATIC, 20,   3200", "FLUCTUATING, 20,   1760",
-            "MEDIUM_FAST, 50,  25000", "MEDIUM, 50,  30000", "ERRATIC, 50,  50000", "FLUCTUATING, 50,  27500",
-            "MEDIUM_FAST, 100, 200000", "MEDIUM, 100, 240000", "ERRATIC, 100, 190000", "FLUCTUATING, 100, 220000",
+            "FAST, 10,    160", "MEDIUM_FAST, 10,    200", "MEDIUM, 10,    250", "STEEPENING, 10,    330",
+            "FAST, 20,   1280", "MEDIUM_FAST, 20,   1600", "MEDIUM, 20,   2000", "STEEPENING, 20,   2880",
+            "FAST, 50,  20000", "MEDIUM_FAST, 50,  25000", "MEDIUM, 50,  31250", "STEEPENING, 50,  56250",
+            "FAST, 100, 160000", "MEDIUM_FAST, 100, 200000", "MEDIUM, 100, 250000", "STEEPENING, 100, 600000",
     })
     void matchesDocumentedTotals(GrowthRate rate, int level, long totalXp) {
         assertEquals(totalXp, rate.totalXpForLevel(level));
@@ -53,26 +53,27 @@ class GrowthRateTest {
     }
 
     @Test
-    void erraticCostsDoubleMediumFastUpToFifty() {
-        for (int level = 1; level <= 50; level++) {
-            long mf = GrowthRate.MEDIUM_FAST.totalXpForLevel(level);
-            long erratic = GrowthRate.ERRATIC.totalXpForLevel(level);
-            // 2 * n^3 / 5 vs n^3 / 5, each floored separately
-            assertTrue(Math.abs(erratic - 2 * mf) <= 1, "level " + level);
+    void fastIsTheQuickestAndSteepeningTheSlowestAtEveryLevel() {
+        for (int level = 5; level < 100; level++) {
+            long fast = GrowthRate.FAST.xpToNextLevel(level);
+            long mf = GrowthRate.MEDIUM_FAST.xpToNextLevel(level);
+            long medium = GrowthRate.MEDIUM.xpToNextLevel(level);
+            long steep = GrowthRate.STEEPENING.xpToNextLevel(level);
+            assertTrue(fast < mf && mf < medium && medium < steep,
+                    "level " + level + ": " + fast + " " + mf + " " + medium + " " + steep);
         }
     }
 
     @Test
-    void erraticLevelsAreCheaperThanMediumFastAfterFifty() {
-        for (int level = 51; level < 100; level++) {
-            assertTrue(GrowthRate.ERRATIC.xpToNextLevel(level) < GrowthRate.MEDIUM_FAST.xpToNextLevel(level),
-                    "level " + level);
+    void steepeningGetsHarderRelativeToTheOthersWithEveryLevel() {
+        // Primordial's design: no late relief; the gap to MEDIUM_FAST only widens
+        // (ten levels apart: whole-number XP makes neighbouring levels wobble by a hair)
+        double last = 0;
+        for (int level = 10; level < 100; level += 10) {
+            double ratio = (double) GrowthRate.STEEPENING.xpToNextLevel(level) / GrowthRate.MEDIUM_FAST.xpToNextLevel(level);
+            assertTrue(ratio > last, "level " + level + ": " + ratio + " after " + last);
+            last = ratio;
         }
-    }
-
-    @Test
-    void erraticEndsCheaperOverallThanMediumFast() {
-        // The design note: Primordial pays up front and finishes with less total XP
-        assertTrue(GrowthRate.ERRATIC.totalXpForLevel(100) < GrowthRate.MEDIUM_FAST.totalXpForLevel(100));
+        assertTrue(last > 2.9, "near 3x by the end: " + last);
     }
 }

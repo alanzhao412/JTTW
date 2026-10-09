@@ -72,9 +72,9 @@ class ResistanceHandlerTest {
     }
 
     @Test
-    void primordialAtLevelHundredBlocksAboutTwoThirdsOfBlows() {
+    void primordialAtLevelHundredBlocksAboutThreeQuartersOfBlows() {
         StatBlock s = StatBlock.compute(ProgressionClass.PRIMORDIAL, 100);
         double taken = ResistanceHandler.damageMultiplier(s.physicalResistance());
-        assertTrue(taken > 0.3 && taken < 0.4, "takes " + taken);
+        assertTrue(taken > 0.2 && taken < 0.3, "takes " + taken);
     }
 }
