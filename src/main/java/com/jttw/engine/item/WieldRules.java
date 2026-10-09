@@ -40,6 +40,11 @@ import javax.annotation.Nullable;
  *   <li><b>Huntian Cloth:</b> binds and wounds whoever wears it, unless Nezha.</li>
  * </ul>
  * STR is the strength the player's class and level give them, as the character screen shows it.
+ *
+ * <p>Every enhanced form of a weapon draws Qi each second it is held in the main hand, and falls
+ * back to its plain form when the Qi runs out: the Ruyi's Qi Empowered ({@value #RUYI_EMPOWERED_QI})
+ * and Large ({@value #RUYI_LARGE_QI}), Erlang's large axe ({@value ErlangAxeItem#LARGE_QI_PER_SECOND}),
+ * Nezha's lit spear ({@value FireTipSpearItem#AFLAME_QI_PER_SECOND}).
  */
 @Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class WieldRules {
@@ -50,6 +55,58 @@ public final class WieldRules {
     public static final double AXE_STR = 40;
     /** Set on a Yin-Yang sword this drew into the off hand, so it goes back when the pair is put away. */
     public static final String TAG_DRAWN = "jttw_yy_drawn";
+    public static final float RUYI_EMPOWERED_QI = 3f;
+    public static final float RUYI_LARGE_QI = 5f;
+
+    /** An enhanced form a weapon is in: its name and what it costs each second. */
+    public record Form(String name, float qiPerSecond) {}
+
+    /** The enhanced form this weapon is in, or null if it is plain. */
+    @Nullable
+    public static Form enhancedForm(ItemStack s) {
+        if (s.getItem() instanceof RuyiJinguBangItem) {
+            if (RuyiJinguBangItem.isLargeMode(s)) return new Form("The Ruyi Jingu Bang's immense size", RUYI_LARGE_QI);
+            if (RuyiJinguBangItem.isQiEmpowered(s)) return new Form("The Ruyi Jingu Bang's Qi", RUYI_EMPOWERED_QI);
+        }
+        if (s.getItem() instanceof ErlangAxeItem && ErlangAxeItem.isLarge(s)) {
+            return new Form("The axe's great size", ErlangAxeItem.LARGE_QI_PER_SECOND);
+        }
+        if (s.getItem() instanceof FireTipSpearItem && FireTipSpearItem.isAflame(s)) {
+            return new Form("The spear's fire", FireTipSpearItem.AFLAME_QI_PER_SECOND);
+        }
+        return null;
+    }
+
+    /** Back to the plain form. */
+    public static void revert(ItemStack s) {
+        if (s.getItem() instanceof RuyiJinguBangItem) RuyiJinguBangItem.revert(s);
+        if (s.getItem() instanceof ErlangAxeItem) ErlangAxeItem.setLarge(s, false);
+        if (s.getItem() instanceof FireTipSpearItem) FireTipSpearItem.setAflame(s, false);
+    }
+
+    /** Whether this player may hold this weapon in its enhanced form at all. */
+    private static boolean ownsForm(Player p, ItemStack s) {
+        if (s.getItem() instanceof RuyiJinguBangItem) return WukongCharacter.is(p);
+        if (s.getItem() instanceof ErlangAxeItem) return isErlang(p);
+        if (s.getItem() instanceof FireTipSpearItem) return NezhaCharacter.is(p);
+        return true;
+    }
+
+    /** One second's draw on the main-hand weapon's form: it falls back when the Qi runs out. */
+    public static void drawFormQi(ServerPlayer p) {
+        ItemStack main = p.getMainHandItem();
+        Form form = enhancedForm(main);
+        if (form == null) return;
+        if (!ownsForm(p, main)) { // in the wrong hands it is only itself
+            revert(main);
+            return;
+        }
+        if (!com.jttw.engine.progression.qi.QiData.spend(p, form.qiPerSecond())) {
+            revert(main);
+            p.displayClientMessage(Component.literal("§e" + form.name() + " fades: out of Qi."), true);
+        }
+        com.jttw.engine.progression.qi.QiManager.syncNow(p);
+    }
 
     /** The player's STR: their class's strength at their level, 1 before they have a class. */
     public static double strength(Player p) {
@@ -119,6 +176,12 @@ public final class WieldRules {
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p)) return;
         pairSwords(p);
+        if (p.tickCount % 20 == 0) drawFormQi(p);
+        if (p.tickCount % 4 == 0 && FireTipSpearItem.isAflame(p.getMainHandItem())) {
+            // The lit spear trails flame from the wielder's hand
+            net.minecraft.world.phys.Vec3 tip = p.getEyePosition().add(p.getLookAngle().scale(0.8)).add(0, -0.4, 0);
+            p.serverLevel().sendParticles(net.minecraft.core.particles.ParticleTypes.FLAME, tip.x, tip.y, tip.z, 3, 0.1, 0.1, 0.1, 0.01);
+        }
         boolean nezha = NezhaCharacter.is(p);
         if (nezha) return;
 

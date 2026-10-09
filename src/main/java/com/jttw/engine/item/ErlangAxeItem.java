@@ -25,11 +25,25 @@ import java.util.UUID;
  * Erlang Shen's divine axe — raw power weapon.
  * High attack damage, slower but devastating hits.
  * Erlang Shen gets +150% damage, others get +50%.
+ *
+ * <p>Erlang, sneak + right-click: grows it to twice its size (and back). Large, it swings at half
+ * speed and hits twice as hard, and only large does it charge the ground cleave (hold
+ * right-click). It draws {@value #LARGE_QI_PER_SECOND} Qi a second while held so.
  */
 public class ErlangAxeItem extends Item {
 
     private static final UUID UUID_ATK = UUID.fromString("b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6f");
     private static final UUID UUID_SPEED = UUID.fromString("b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d70");
+    public static final String TAG_LARGE = "jttw_axe_large";
+    public static final float LARGE_QI_PER_SECOND = 4f;
+
+    public static boolean isLarge(ItemStack stack) {
+        return stack.hasTag() && stack.getTag().getBoolean(TAG_LARGE);
+    }
+
+    public static void setLarge(ItemStack stack, boolean large) {
+        stack.getOrCreateTag().putBoolean(TAG_LARGE, large);
+    }
 
     public ErlangAxeItem() {
         super(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).fireResistant());
@@ -40,12 +54,13 @@ public class ErlangAxeItem extends Item {
         if (slot != EquipmentSlot.MAINHAND) return ImmutableMultimap.of();
 
         ImmutableMultimap.Builder<Attribute, AttributeModifier> b = ImmutableMultimap.builder();
-        // Base +50% for everyone. Erlang Shen bonus applied via handler event.
+        // Base +50% for everyone (large: twice that, x3); Erlang Shen bonus applied via handler event.
+        boolean large = isLarge(stack);
         b.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK, "jttw:axe_atk",
-                0.50, AttributeModifier.Operation.MULTIPLY_TOTAL));
-        // Slower attack speed (-20%)
+                large ? 2.0 : 0.50, AttributeModifier.Operation.MULTIPLY_TOTAL));
+        // Slower attack speed (-20%; large: half speed)
         b.put(Attributes.ATTACK_SPEED, new AttributeModifier(UUID_SPEED, "jttw:axe_speed",
-                -0.2, AttributeModifier.Operation.MULTIPLY_TOTAL));
+                large ? -0.5 : -0.2, AttributeModifier.Operation.MULTIPLY_TOTAL));
         return b.build();
     }
 
@@ -112,12 +127,31 @@ public class ErlangAxeItem extends Item {
         if (!(player instanceof net.minecraft.server.level.ServerPlayer sp))
             return net.minecraft.world.InteractionResultHolder.pass(stack);
 
-        if (level.getGameTime() < sp.getPersistentData().getLong(KEY_CLEAVE_READY_AT))
-            return net.minecraft.world.InteractionResultHolder.fail(stack);
         if (!WieldRules.canCleave(sp)) {
-            sp.displayClientMessage(net.minecraft.network.chat.Component.literal("§cThe cleave answers only to Erlang Shen."), true);
+            sp.displayClientMessage(net.minecraft.network.chat.Component.literal("§cThe axe answers only to Erlang Shen."), true);
             return net.minecraft.world.InteractionResultHolder.fail(stack);
         }
+        // Sneak + right-click: grow it, or bring it back
+        if (sp.isShiftKeyDown()) {
+            if (isLarge(stack)) {
+                setLarge(stack, false);
+                sp.displayClientMessage(net.minecraft.network.chat.Component.literal("§eThe axe returns to its size."), true);
+            } else if (com.jttw.engine.progression.qi.QiData.getCurrent(sp) >= LARGE_QI_PER_SECOND) {
+                setLarge(stack, true);
+                sp.displayClientMessage(net.minecraft.network.chat.Component.literal("§6The axe grows to twice its size!"), true);
+                level.playSound(null, sp.getX(), sp.getY(), sp.getZ(),
+                        net.minecraft.sounds.SoundEvents.ANVIL_USE, net.minecraft.sounds.SoundSource.PLAYERS, 0.8f, 0.5f);
+            } else {
+                sp.displayClientMessage(net.minecraft.network.chat.Component.literal("§cNot enough Qi."), true);
+            }
+            return net.minecraft.world.InteractionResultHolder.success(stack);
+        }
+        if (!isLarge(stack)) {
+            sp.displayClientMessage(net.minecraft.network.chat.Component.literal("§7Only the enlarged axe cleaves (sneak + right-click)."), true);
+            return net.minecraft.world.InteractionResultHolder.fail(stack);
+        }
+        if (level.getGameTime() < sp.getPersistentData().getLong(KEY_CLEAVE_READY_AT))
+            return net.minecraft.world.InteractionResultHolder.fail(stack);
 
         player.startUsingItem(hand);
         return net.minecraft.world.InteractionResultHolder.consume(stack);
@@ -126,7 +160,7 @@ public class ErlangAxeItem extends Item {
     @Override
     public void releaseUsing(ItemStack stack, Level level, LivingEntity entity, int timeLeft) {
         if (level.isClientSide() || !(entity instanceof net.minecraft.server.level.ServerPlayer sp)) return;
-        if (!WieldRules.canCleave(sp)) return;
+        if (!WieldRules.canCleave(sp) || !isLarge(stack)) return;
 
         int chargeTime = getUseDuration(stack) - timeLeft;
         if (chargeTime < 10) return;

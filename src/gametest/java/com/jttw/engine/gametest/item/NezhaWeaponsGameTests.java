@@ -61,11 +61,14 @@ public class NezhaWeaponsGameTests {
     }
 
     @GameTest(template = PLATFORM, batch = "fireSpearShootsSixFireballsWithThreeHeadsSixArms")
-    public static void fireSpearSetsTargetsAlightForFiveSeconds(GameTestHelper h) {
+    public static void aLitFireSpearSetsTargetsAlightForFiveSeconds(GameTestHelper h) {
         Pig target = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(2, 2, 3));
         ItemStack s = fireSpear();
         check(h, s.getItem().hurtEnemy(s, target, player(h)), "returns true");
-        eq(h, 100, target.getRemainingFireTicks(), "fire ticks");
+        check(h, !target.isOnFire(), "unlit, it does not ignite");
+        com.jttw.engine.item.FireTipSpearItem.setAflame(s, true);
+        s.getItem().hurtEnemy(s, target, player(h));
+        eq(h, 100, target.getRemainingFireTicks(), "lit: fire ticks");
         h.succeed();
     }
 
@@ -80,7 +83,7 @@ public class NezhaWeaponsGameTests {
     }
 
     @GameTest(template = PLATFORM, batch = "yangSwordStrikesTheTargetInFrontAndMarksItForMagic")
-    public static void fireSpearRightClickWithoutSneakingDoesNothing(GameTestHelper h) {
+    public static void fireSpearRightClickDoesNothingForSomeoneElse(GameTestHelper h) {
         ServerPlayer p = player(h);
         eq(h, InteractionResult.PASS, use(h, p, fireSpear()), "use result");
         eq(h, 0, fireballsLaunched(h, p), "fireballs");
@@ -88,9 +91,8 @@ public class NezhaWeaponsGameTests {
     }
 
     @GameTest(template = PLATFORM, batch = "yangSwordMissesBeyondFourBlocksButStillCoolsDown", timeoutTicks = 150)
-    public static void fireSpearSneakShootsOneFireballEveryTwoSeconds(GameTestHelper h) {
-        ServerPlayer p = as(h, com.jttw.engine.reincarnation.ReincarnationOutcome.THIRD_LOTUS_PRINCE);
-        p.setShiftKeyDown(true);
+    public static void fireSpearShootsOneFireballEveryTwoSeconds(GameTestHelper h) {
+        ServerPlayer p = as(h, com.jttw.engine.reincarnation.ReincarnationOutcome.THIRD_LOTUS_PRINCE); // a plain right-click
         ItemStack s = fireSpear();
         eq(h, InteractionResult.CONSUME, use(h, p, s), "first shot");
         eq(h, 1, fireballsLaunched(h, p), "one fireball");
@@ -111,7 +113,6 @@ public class NezhaWeaponsGameTests {
     public static void fireSpearShootsSixFireballsWithThreeHeadsSixArms(GameTestHelper h) {
         ServerPlayer p = as(h, com.jttw.engine.reincarnation.ReincarnationOutcome.THIRD_LOTUS_PRINCE);
         p.getPersistentData().putBoolean("jttw_nz_three_heads", true);
-        p.setShiftKeyDown(true);
         com.jttw.engine.progression.skilltree.SkillTreeData.grantNode(p, "nz_form_1");
         eq(h, InteractionResult.CONSUME, use(h, p, fireSpear()), "use result");
         eq(h, 1, fireballsLaunched(h, p), "Three Heads I: still one fireball");

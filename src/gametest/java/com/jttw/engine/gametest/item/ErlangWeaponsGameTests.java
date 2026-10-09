@@ -53,6 +53,13 @@ public class ErlangWeaponsGameTests {
         return new ItemStack(ModItems.ERLANG_AXE.get());
     }
 
+    /** Only the enlarged axe charges the ground cleave. */
+    private static ItemStack largeAxe() {
+        ItemStack a = axe();
+        com.jttw.engine.item.ErlangAxeItem.setLarge(a, true);
+        return a;
+    }
+
     private static Pig pig(GameTestHelper h, int x, int z) {
         return h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(x, 2, z));
     }
@@ -627,7 +634,7 @@ public class ErlangWeaponsGameTests {
         ServerPlayer p = playerAt(h, 2, 1, 0f, 0f);
         com.jttw.engine.reincarnation.AlignmentData.markReincarnated(p, com.jttw.engine.reincarnation.ReincarnationOutcome.EYE_OF_HEAVEN); // the cleave is Erlang's alone
         setBaseAtk(p, 4.0);
-        ItemStack a = axe();
+        ItemStack a = largeAxe();
         Pig target = cleaveTarget(h);
         HurtLog log = HurtLog.on(target);
         try {
@@ -648,7 +655,7 @@ public class ErlangWeaponsGameTests {
         ServerPlayer p = playerAt(h, 2, 1, 0f, 0f);
         com.jttw.engine.reincarnation.AlignmentData.markReincarnated(p, com.jttw.engine.reincarnation.ReincarnationOutcome.EYE_OF_HEAVEN); // the cleave is Erlang's alone
         setBaseAtk(p, 4.0);
-        ItemStack a = axe();
+        ItemStack a = largeAxe();
         Pig target = cleaveTarget(h);
         HurtLog log = HurtLog.on(target);
         try {
@@ -676,7 +683,7 @@ public class ErlangWeaponsGameTests {
         ServerPlayer p = playerAt(h, 2, 1, 0f, 0f);
         com.jttw.engine.reincarnation.AlignmentData.markReincarnated(p, com.jttw.engine.reincarnation.ReincarnationOutcome.EYE_OF_HEAVEN); // the cleave is Erlang's alone
         setBaseAtk(p, 4.0);
-        ItemStack a = axe();
+        ItemStack a = largeAxe();
         Pig target = cleaveTarget(h);
         HurtLog log = HurtLog.on(target);
         try {
@@ -696,7 +703,7 @@ public class ErlangWeaponsGameTests {
         ServerPlayer p = playerAt(h, 2, 1, 0f, 0f);
         setOutcome(p, ReincarnationOutcome.EYE_OF_HEAVEN);
         setBaseAtk(p, 4.0);
-        ItemStack a = axe();
+        ItemStack a = largeAxe();
         Pig target = cleaveTarget(h);
         HurtLog log = HurtLog.on(target);
         try {

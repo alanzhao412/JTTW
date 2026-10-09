@@ -39,6 +39,23 @@ public class FireTipSpearItem extends Item {
     /** What the spear's own fireball hits for: a vanilla small fireball's 5. */
     public static final float FIREBALL_DAMAGE = 5.0f;
 
+    /** Lit (Nezha, sneak + right-click): every hit ignites and hits harder; draws Qi while held. */
+    public static final String TAG_AFLAME = "jttw_spear_aflame";
+    public static final float AFLAME_QI_PER_SECOND = 3f;
+
+    public static boolean isAflame(ItemStack stack) {
+        return stack.hasTag() && stack.getTag().getBoolean(TAG_AFLAME);
+    }
+
+    public static void setAflame(ItemStack stack, boolean aflame) {
+        stack.getOrCreateTag().putBoolean(TAG_AFLAME, aflame);
+    }
+
+    @Override
+    public boolean isFoil(ItemStack stack) {
+        return isAflame(stack);
+    }
+
     public FireTipSpearItem() {
         super(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).fireResistant());
     }
@@ -47,7 +64,7 @@ public class FireTipSpearItem extends Item {
     public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
         if (slot != EquipmentSlot.MAINHAND) return ImmutableMultimap.of();
         // The attack bonus is for anyone; the sneak fireball (use) is Nezha's alone
-        double mult = 0.75; // +75% for everyone holding it; Nezha gets extra from handler
+        double mult = isAflame(stack) ? 1.25 : 0.75; // +75% for everyone holding it, +125% lit; Nezha gets extra from handler
         ImmutableMultimap.Builder<Attribute, AttributeModifier> b = ImmutableMultimap.builder();
         b.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK, "jttw:spear_atk",
                 mult, AttributeModifier.Operation.MULTIPLY_TOTAL));
@@ -56,19 +73,33 @@ public class FireTipSpearItem extends Item {
 
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        target.setRemainingFireTicks(100); // 5 seconds
+        if (isAflame(stack)) target.setRemainingFireTicks(100); // lit: 5 seconds of fire
         return true;
     }
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (!player.isShiftKeyDown()) return InteractionResultHolder.pass(stack);
         if (level.isClientSide()) return InteractionResultHolder.success(stack);
         if (!(player instanceof ServerPlayer sp)) return InteractionResultHolder.pass(stack);
 
-        // The spear's fireball is Nezha's alone; in other hands it is only a spear
+        // The spear's fire is Nezha's alone; in other hands it is only a spear
         if (!NezhaCharacter.is(sp)) return InteractionResultHolder.pass(stack);
+
+        // Sneak + right-click: light the spear, or put it out
+        if (sp.isShiftKeyDown()) {
+            if (isAflame(stack)) {
+                setAflame(stack, false);
+                sp.displayClientMessage(Component.literal("§7The spear's fire dies down."), true);
+            } else if (com.jttw.engine.progression.qi.QiData.getCurrent(sp) >= AFLAME_QI_PER_SECOND) {
+                setAflame(stack, true);
+                sp.displayClientMessage(Component.literal("§6The Fire-Tip Spear blazes!"), true);
+                level.playSound(null, sp.getX(), sp.getY(), sp.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 1f, 1f);
+            } else {
+                sp.displayClientMessage(Component.literal("§cNot enough Qi."), true);
+            }
+            return InteractionResultHolder.success(stack);
+        }
 
         long now = sp.level().getGameTime();
         if (now < sp.getPersistentData().getLong(KEY_FIREBALL_READY_AT)) return InteractionResultHolder.fail(stack);
@@ -97,7 +128,8 @@ public class FireTipSpearItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.literal("§6Fire-Tipped Spear of Nezha").withStyle(ChatFormatting.GOLD));
-        tooltip.add(Component.literal("§e+75% damage, sets enemies on fire"));
-        tooltip.add(Component.literal("§7Shift+right-click: Fireball"));
+        tooltip.add(Component.literal(isAflame(stack) ? "§c+125% damage, every hit ignites (lit)" : "§e+75% damage"));
+        tooltip.add(Component.literal("§7Nezha: right-click: Fireball"));
+        tooltip.add(Component.literal("§7Nezha: sneak + right-click: light it (Qi each second)"));
     }
 }

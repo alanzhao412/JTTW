@@ -74,6 +74,7 @@ public class WieldRulesGameTests {
         ServerPlayer erlang = as(h, ReincarnationOutcome.EYE_OF_HEAVEN);
         check(h, !swingRefused(h, erlang, new ItemStack(ModItems.ERLANG_AXE.get())), "Erlang swings it at any strength");
         ItemStack his = new ItemStack(ModItems.ERLANG_AXE.get());
+        com.jttw.engine.item.ErlangAxeItem.setLarge(his, true); // the cleave is the large axe's
         erlang.setItemInHand(InteractionHand.MAIN_HAND, his);
         his.use(erlang.level(), erlang, InteractionHand.MAIN_HAND);
         check(h, erlang.isUsingItem(), "and charges its cleave");
@@ -161,6 +162,115 @@ public class WieldRulesGameTests {
         nezha.setItemSlot(EquipmentSlot.CHEST, new ItemStack(ModItems.HUNTIAN_CLOTH.get()));
         tickRules(nezha, 20);
         check(h, !nezha.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "not Nezha");
+        h.succeed();
+    }
+
+    // ── Enhanced forms ─────────────────────────────────────────────
+
+    private static ItemStack sneakUse(ServerPlayer p, ItemStack stack) {
+        p.setItemInHand(InteractionHand.MAIN_HAND, stack);
+        p.setShiftKeyDown(true);
+        stack.use(p.level(), p, InteractionHand.MAIN_HAND);
+        p.setShiftKeyDown(false);
+        return stack;
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void erlangGrowsHisAxeAndOnlyTheLargeAxeCleaves(GameTestHelper h) {
+        ServerPlayer erlang = as(h, ReincarnationOutcome.EYE_OF_HEAVEN);
+        qi(erlang, 100f, 100f);
+        ItemStack axe = new ItemStack(ModItems.ERLANG_AXE.get());
+        erlang.setItemInHand(InteractionHand.MAIN_HAND, axe);
+        axe.use(erlang.level(), erlang, InteractionHand.MAIN_HAND);
+        check(h, !erlang.isUsingItem(), "regular: no cleave");
+
+        sneakUse(erlang, axe);
+        check(h, com.jttw.engine.item.ErlangAxeItem.isLarge(axe), "sneak + right-click: twice the size");
+        double large = modOf(axe, net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
+        double slow = modOf(axe, net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_SPEED);
+        check(h, large > 0.5 && slow < -0.2, "harder and slower: " + large + " " + slow);
+        axe.use(erlang.level(), erlang, InteractionHand.MAIN_HAND);
+        check(h, erlang.isUsingItem(), "large: charges the cleave");
+        erlang.stopUsingItem();
+
+        sneakUse(erlang, axe);
+        check(h, !com.jttw.engine.item.ErlangAxeItem.isLarge(axe), "and back");
+
+        ServerPlayer other = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
+        qi(other, 100f, 100f);
+        ItemStack theirs = sneakUse(other, new ItemStack(ModItems.ERLANG_AXE.get()));
+        check(h, !com.jttw.engine.item.ErlangAxeItem.isLarge(theirs), "only Erlang grows it");
+        h.succeed();
+    }
+
+    private static double modOf(ItemStack stack, net.minecraft.world.entity.ai.attributes.Attribute attr) {
+        return stack.getAttributeModifiers(EquipmentSlot.MAINHAND).get(attr).stream()
+                .mapToDouble(net.minecraft.world.entity.ai.attributes.AttributeModifier::getAmount).sum();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void nezhaLightsTheSpearAndOnlyALitSpearIgnites(GameTestHelper h) {
+        ServerPlayer nezha = as(h, ReincarnationOutcome.THIRD_LOTUS_PRINCE);
+        qi(nezha, 100f, 100f);
+        ItemStack spear = new ItemStack(ModItems.FIRE_TIP_SPEAR.get());
+        Zombie z = mob(h, EntityType.ZOMBIE, 2, 3);
+        spear.getItem().hurtEnemy(spear, z, nezha);
+        check(h, !z.isOnFire(), "unlit: no fire");
+        double plain = modOf(spear, net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
+
+        sneakUse(nezha, spear);
+        check(h, com.jttw.engine.item.FireTipSpearItem.isAflame(spear), "sneak + right-click: lit");
+        check(h, modOf(spear, net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE) > plain, "hits harder");
+        spear.getItem().hurtEnemy(spear, z, nezha);
+        check(h, z.isOnFire(), "and ignites");
+        z.discard();
+
+        ServerPlayer other = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
+        qi(other, 100f, 100f);
+        check(h, !com.jttw.engine.item.FireTipSpearItem.isAflame(sneakUse(other, new ItemStack(ModItems.FIRE_TIP_SPEAR.get()))),
+                "only Nezha lights it");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void theSpearsFireballIsAPlainRightClick(GameTestHelper h) {
+        ServerPlayer nezha = as(h, ReincarnationOutcome.THIRD_LOTUS_PRINCE);
+        ItemStack spear = new ItemStack(ModItems.FIRE_TIP_SPEAR.get());
+        nezha.setItemInHand(InteractionHand.MAIN_HAND, spear);
+        spear.use(nezha.level(), nezha, InteractionHand.MAIN_HAND);
+        check(h, !near(nezha, net.minecraft.world.entity.projectile.SmallFireball.class, 4).isEmpty(), "a fireball");
+        near(nezha, net.minecraft.world.entity.projectile.SmallFireball.class, 4).forEach(f -> f.discard());
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void everyEnhancedFormDrawsQiAndFallsBackWhenItRunsOut(GameTestHelper h) {
+        ServerPlayer erlang = as(h, ReincarnationOutcome.EYE_OF_HEAVEN);
+        ItemStack axe = new ItemStack(ModItems.ERLANG_AXE.get());
+        com.jttw.engine.item.ErlangAxeItem.setLarge(axe, true);
+        erlang.setItemInHand(InteractionHand.MAIN_HAND, axe);
+        qi(erlang, 10f, 100f);
+        WieldRules.drawFormQi(erlang);
+        near(h, 10f - com.jttw.engine.item.ErlangAxeItem.LARGE_QI_PER_SECOND, QiData.getCurrent(erlang), "a second's Qi");
+        qi(erlang, 1f, 100f);
+        WieldRules.drawFormQi(erlang);
+        check(h, !com.jttw.engine.item.ErlangAxeItem.isLarge(axe), "out of Qi: back to its size");
+
+        ServerPlayer wukong = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
+        ItemStack staff = new ItemStack(ModItems.RUYI_JINGU_BANG.get());
+        staff.getOrCreateTag().putBoolean(com.jttw.engine.item.RuyiJinguBangItem.TAG_LARGE_MODE, true);
+        wukong.setItemInHand(InteractionHand.MAIN_HAND, staff);
+        qi(wukong, 20f, 100f);
+        WieldRules.drawFormQi(wukong);
+        near(h, 20f - WieldRules.RUYI_LARGE_QI, QiData.getCurrent(wukong), "the Ruyi's large form draws Qi too");
+
+        ServerPlayer nezha = as(h, ReincarnationOutcome.THIRD_LOTUS_PRINCE);
+        ItemStack spear = new ItemStack(ModItems.FIRE_TIP_SPEAR.get());
+        com.jttw.engine.item.FireTipSpearItem.setAflame(spear, true);
+        nezha.setItemInHand(InteractionHand.MAIN_HAND, spear);
+        qi(nezha, 2f, 100f);
+        WieldRules.drawFormQi(nezha);
+        check(h, !com.jttw.engine.item.FireTipSpearItem.isAflame(spear), "the spear's fire goes out without Qi");
         h.succeed();
     }
 

@@ -264,31 +264,29 @@ public class RuyiJinguBangGameTests {
     // ── Qi drain while empowered ──────────────────────────────────
 
     @GameTest(template = PLATFORM)
-    public static void empoweredStaffDrainsQiOnlyWhileSelected(GameTestHelper h) {
+    public static void empoweredStaffDrawsQiEachSecondOnlyInTheMainHand(GameTestHelper h) {
         ServerPlayer p = wukong(h);
         QiData.setMax(p, 100f);
         QiData.setCurrent(p, 10f);
         ItemStack s = staff(true, false);
-        s.inventoryTick(h.getLevel(), p, 0, false);
-        near(h, 10f, QiData.getCurrent(p), "not selected: no drain");
-        // vanilla also passes selected=true to the off-hand item while hotbar slot 0 is selected
         p.setItemInHand(InteractionHand.OFF_HAND, s);
-        s.inventoryTick(h.getLevel(), p, 0, true);
-        near(h, 10f, QiData.getCurrent(p), "in the off hand: no drain");
+        com.jttw.engine.item.WieldRules.drawFormQi(p);
+        near(h, 10f, QiData.getCurrent(p), "in the off hand: no draw");
         p.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
         p.setItemInHand(InteractionHand.MAIN_HAND, s);
-        s.inventoryTick(h.getLevel(), p, 0, true);
-        near(h, 9.85f, QiData.getCurrent(p), "0.15 Qi per tick");
+        com.jttw.engine.item.WieldRules.drawFormQi(p);
+        near(h, 10f - com.jttw.engine.item.WieldRules.RUYI_EMPOWERED_QI, QiData.getCurrent(p), "3 Qi a second");
         check(h, RuyiJinguBangItem.isQiEmpowered(s), "still empowered");
 
+        float after = QiData.getCurrent(p);
         ItemStack normal = staff();
         p.setItemInHand(InteractionHand.MAIN_HAND, normal);
-        normal.inventoryTick(h.getLevel(), p, 0, true);
-        near(h, 9.85f, QiData.getCurrent(p), "normal mode does not drain");
+        com.jttw.engine.item.WieldRules.drawFormQi(p);
+        near(h, after, QiData.getCurrent(p), "normal mode draws nothing");
         ItemStack large = staff(false, true);
         p.setItemInHand(InteractionHand.MAIN_HAND, large);
-        large.inventoryTick(h.getLevel(), p, 0, true);
-        near(h, 9.85f, QiData.getCurrent(p), "large mode does not drain");
+        com.jttw.engine.item.WieldRules.drawFormQi(p);
+        near(h, after - com.jttw.engine.item.WieldRules.RUYI_LARGE_QI, QiData.getCurrent(p), "large mode draws 5 a second");
         h.succeed();
     }
 
@@ -299,7 +297,7 @@ public class RuyiJinguBangGameTests {
         QiData.setCurrent(p, 0.1f);
         ItemStack s = staff(true, false);
         p.setItemInHand(InteractionHand.MAIN_HAND, s);
-        s.inventoryTick(h.getLevel(), p, 0, true);
+        com.jttw.engine.item.WieldRules.drawFormQi(p);
         check(h, !RuyiJinguBangItem.isQiEmpowered(s), "empowerment gone");
         near(h, 0.1f, QiData.getCurrent(p), "failed drain costs nothing");
         h.succeed();
