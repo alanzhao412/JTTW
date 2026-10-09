@@ -26,11 +26,20 @@ public final class ModWorldgen {
     public static final DeferredRegister<net.minecraft.world.level.levelgen.feature.Feature<?>> FEATURES =
             DeferredRegister.create(Registries.FEATURE, JTTWEngine.MOD_ID);
 
-    public static final RegistryObject<net.minecraft.world.level.levelgen.feature.Feature<?>> BLEACH_SURFACE =
-            FEATURES.register("bleach_surface", () -> new com.jttw.engine.world.feature.BleachSurfaceFeature(
+    public static final RegistryObject<net.minecraft.world.level.levelgen.feature.Feature<?>> BONE_MASSIF =
+            FEATURES.register("bone_massif", () -> new com.jttw.engine.world.feature.BoneMassifFeature(
                     net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
     public static final RegistryObject<net.minecraft.world.level.levelgen.feature.Feature<?>> BONE_SPIRE =
             FEATURES.register("bone_spire", () -> new com.jttw.engine.world.feature.BoneSpireFeature(
+                    net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+    public static final RegistryObject<net.minecraft.world.level.levelgen.feature.Feature<?>> DEAD_TREE =
+            FEATURES.register("dead_tree", () -> new com.jttw.engine.world.feature.DeadTreeFeature(
+                    net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+    public static final RegistryObject<net.minecraft.world.level.levelgen.feature.Feature<?>> BOULDER =
+            FEATURES.register("boulder", () -> new com.jttw.engine.world.feature.BoulderFeature(
+                    net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+    public static final RegistryObject<net.minecraft.world.level.levelgen.feature.Feature<?>> RIBCAGE =
+            FEATURES.register("ribcage", () -> new com.jttw.engine.world.feature.RibcageFeature(
                     net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
 
     public static void register(IEventBus modEventBus) {

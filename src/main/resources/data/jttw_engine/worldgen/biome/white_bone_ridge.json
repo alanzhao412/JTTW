@@ -9,12 +9,18 @@
       "block_search_extent": 8,
       "offset": 2.0
     },
-    "sky_color": 14275522,
-    "fog_color": 14933195,
-    "grass_color": 12761499,
-    "foliage_color": 11116681,
-    "water_color": 9413530,
-    "water_fog_color": 3885636
+    "sky_color": 13223615,
+    "fog_color": 14078924,
+    "grass_color": 11710374,
+    "foliage_color": 10723221,
+    "water_color": 9344659,
+    "water_fog_color": 3817534,
+    "particle": {
+      "options": {
+        "type": "minecraft:white_ash"
+      },
+      "probability": 0.012
+    }
   },
   "carvers": {
     "air": [
@@ -24,10 +30,11 @@
     ]
   },
   "features": [
-    [],
     [
-      "minecraft:lake_lava_underground",
-      "minecraft:lake_lava_surface"
+      "jttw_engine:bone_massif"
+    ],
+    [
+      "minecraft:lake_lava_underground"
     ],
     [
       "minecraft:amethyst_geode"
@@ -36,9 +43,7 @@
       "minecraft:monster_room",
       "minecraft:monster_room_deep"
     ],
-    [
-      "jttw_engine:bleach_surface"
-    ],
+    [],
     [],
     [
       "minecraft:ore_dirt",
@@ -73,13 +78,15 @@
     ],
     [],
     [
-      "minecraft:spring_water",
       "minecraft:spring_lava"
     ],
     [
-      "minecraft:glow_lichen",
-      "minecraft:patch_dead_bush_badlands",
-      "jttw_engine:bone_spire"
+      "jttw_engine:ribcage",
+      "jttw_engine:boulder",
+      "jttw_engine:dead_tree",
+      "jttw_engine:bone_spire",
+      "jttw_engine:dead_shrubs",
+      "minecraft:glow_lichen"
     ],
     [
       "minecraft:freeze_top_layer"

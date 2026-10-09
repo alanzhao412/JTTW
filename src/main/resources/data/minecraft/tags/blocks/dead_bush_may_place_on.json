@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:calcite",
+    "minecraft:tuff",
+    "minecraft:bone_block",
+    "minecraft:gravel"
+  ]
+}

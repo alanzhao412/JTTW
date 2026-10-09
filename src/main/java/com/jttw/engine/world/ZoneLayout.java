@@ -17,20 +17,41 @@ public record ZoneLayout(int cellSize, double chance, int radius, int wobble, lo
 
     /** Whether a region covers the block column at (x, z) in a world of this seed. */
     public boolean covers(long seed, int x, int z) {
+        return depth(seed, x, z) > 0;
+    }
+
+    /** The cell holding (x, z), as one number: the key to its region. */
+    public long cellOf(int x, int z) {
+        return ((long) Math.floorDiv(x, cellSize) << 32) ^ (Math.floorDiv(z, cellSize) & 0xFFFFFFFFL);
+    }
+
+    /** The centre of the region in the cell holding (x, z), as {x, z}; null if that cell holds none. */
+    public int[] centre(long seed, int x, int z) {
         int cx = Math.floorDiv(x, cellSize), cz = Math.floorDiv(z, cellSize);
         long h = mix(seed ^ salt, cx, cz);
-        if (unit(h) >= chance) return false;
+        if (unit(h) >= chance) return null;
         double margin = radius + wobble;
-        double centreX = (double) cx * cellSize + margin + unit(mix(h, 1, 0)) * (cellSize - 2 * margin);
-        double centreZ = (double) cz * cellSize + margin + unit(mix(h, 2, 0)) * (cellSize - 2 * margin);
+        return new int[]{(int) (cx * (double) cellSize + margin + unit(mix(h, 1, 0)) * (cellSize - 2 * margin)),
+                (int) (cz * (double) cellSize + margin + unit(mix(h, 2, 0)) * (cellSize - 2 * margin))};
+    }
+
+    /** How far into a region (x, z) lies: 0 at its edge or outside, rising to 1 at its centre. */
+    public double depth(long seed, int x, int z) {
+        int cx = Math.floorDiv(x, cellSize), cz = Math.floorDiv(z, cellSize);
+        long h = mix(seed ^ salt, cx, cz);
+        if (unit(h) >= chance) return 0;
+        double margin = radius + wobble;
+        double centreX = (int) (cx * (double) cellSize + margin + unit(mix(h, 1, 0)) * (cellSize - 2 * margin));
+        double centreZ = (int) (cz * (double) cellSize + margin + unit(mix(h, 2, 0)) * (cellSize - 2 * margin));
         double dx = x - centreX, dz = z - centreZ;
         double d2 = dx * dx + dz * dz;
-        if (d2 > margin * margin) return false;
+        if (d2 > margin * margin) return 0;
         double a = Math.atan2(dz, dx);
         double edge = radius + wobble * (0.5 * Math.sin(3 * a + 6.283 * unit(mix(h, 3, 0)))
                 + 0.3 * Math.sin(5 * a + 6.283 * unit(mix(h, 4, 0)))
                 + 0.2 * Math.sin(7 * a + 6.283 * unit(mix(h, 5, 0))));
-        return d2 <= edge * edge;
+        double d = Math.sqrt(d2);
+        return d >= edge ? 0 : 1 - d / edge;
     }
 
     static long mix(long base, long a, long b) {

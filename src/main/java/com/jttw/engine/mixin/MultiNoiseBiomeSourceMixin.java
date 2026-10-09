@@ -18,8 +18,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Puts the mod's zone biomes where their zones lie ({@link Zones}): where vanilla chose one of a
- * zone's host biomes and the zone covers the spot. Only in a biome source that lists the zone
+ * Puts the mod's zone biomes where their zones lie ({@link Zones}): a zone whose centre falls in
+ * one of its host biomes takes its whole footprint, water and all, so it stands whole, not in
+ * scraps. Only in a biome source that lists the zone
  * biome, which the overworld's does (OverworldBiomeBuilderMixin); the Nether's and others' are
  * left alone.
  */
@@ -34,6 +35,10 @@ public abstract class MultiNoiseBiomeSourceMixin {
     /** This source's zone biomes, found once: empty when it lists none. */
     @Unique
     private volatile Map<Zones.Zone, Holder<Biome>> jttw$zones;
+
+    /** For each zone's cell, whether its centre is in host country: found once, then reused. */
+    @Unique
+    private final Map<Long, Boolean> jttw$hostCentres = new java.util.concurrent.ConcurrentHashMap<>();
 
     @Unique
     private Map<Zones.Zone, Holder<Biome>> jttw$zones() {
@@ -56,10 +61,19 @@ public abstract class MultiNoiseBiomeSourceMixin {
         Map<Zones.Zone, Holder<Biome>> zones = jttw$zones();
         if (zones.isEmpty()) return;
         Holder<Biome> vanilla = cir.getReturnValue();
+        long seed = Zones.seed();
         int bx = QuartPos.toBlock(x), bz = QuartPos.toBlock(z);
         for (Map.Entry<Zones.Zone, Holder<Biome>> e : zones.entrySet()) {
             Zones.Zone zone = e.getKey();
-            if (vanilla.is(zone.hosts()) && zone.covers(Zones.seed(), bx, bz)) {
+            if (!zone.covers(seed, bx, bz)) continue;
+            long key = zone.layout().cellOf(bx, bz) ^ zone.layout().salt();
+            boolean hosted = jttw$hostCentres.computeIfAbsent(key, k -> {
+                int[] c = zone.layout().centre(seed, bx, bz);
+                Holder<Biome> atCentre = ((MultiNoiseBiomeSource) (Object) this).getNoiseBiome(
+                        sampler.sample(QuartPos.fromBlock(c[0]), QuartPos.fromBlock(80), QuartPos.fromBlock(c[1])));
+                return atCentre.is(zone.hosts());
+            });
+            if (hosted) {
                 cir.setReturnValue(e.getValue());
                 return;
             }

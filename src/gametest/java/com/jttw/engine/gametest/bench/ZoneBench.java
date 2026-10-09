@@ -1,6 +1,7 @@
 package com.jttw.engine.gametest.bench;
 
 import com.jttw.engine.world.Zones;
+import com.jttw.engine.world.feature.BoneMassifFeature;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.core.BlockPos;
@@ -32,6 +33,7 @@ final class ZoneBench {
     private static final List<String> report = new ArrayList<>();
     private static int stage, ticks;
     private static BlockPos nearest;
+    private static BlockPos centre, highest, lowest;
 
     static List<String> report() {
         return report;
@@ -41,6 +43,12 @@ final class ZoneBench {
         var source = level.getChunkSource().getGenerator().getBiomeSource();
         var sampler = level.getChunkSource().randomState().sampler();
         return source.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(64), QuartPos.fromBlock(z), sampler);
+    }
+
+    /** The ground's height at (x, z), its chunk made first if it is not yet (a read of unmade ground says the world's floor). */
+    private static int groundAt(ServerLevel level, int x, int z) {
+        level.getChunk(x >> 4, z >> 4);
+        return level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
     }
 
     /** One server tick of the bench. Returns true when done. */
@@ -93,50 +101,82 @@ final class ZoneBench {
                         sizes.isEmpty() ? "-" : sizes.get(0), sizes.isEmpty() ? "-" : sizes.get(sizes.size() / 2),
                         sizes.isEmpty() ? "-" : sizes.get(sizes.size() - 1), best, nearest));
                 if (nearest == null) return true;
-                p.teleportTo(level, nearest.getX() + 0.5, 200, nearest.getZ() + 0.5, 0f, 60f);
                 p.getAbilities().flying = true;
                 p.onUpdateAbilities();
                 stage = 1;
                 ticks = 0;
             }
             case 1 -> {
-                // wait for the ground around the ridge to be made
-                int cx = nearest.getX() >> 4, cz = nearest.getZ() >> 4;
+                // the region's centre, and the ground around it once made
+                int[] c = Zones.WHITE_BONE.layout().centre(Zones.seed(), nearest.getX(), nearest.getZ());
+                centre = new BlockPos(c[0], 0, c[1]);
+                int cx = c[0] >> 4, cz = c[1] >> 4;
                 boolean loaded = true;
-                for (int x = cx - 6; x <= cx + 6 && loaded; x++) for (int z = cz - 6; z <= cz + 6; z++) {
+                for (int x = cx - 12; x <= cx + 12 && loaded; x++) for (int z = cz - 12; z <= cz + 12; z++) {
                     if (level.getChunkSource().getChunkNow(x, z) == null) { loaded = false; break; }
                 }
-                if (!loaded && ticks < 20 * 120) return false;
+                if (ticks == 1) p.teleportTo(level, c[0] + 0.5, 250, c[1] + 0.5, 0f, 60f);
+                if (!loaded && ticks < 20 * 240) return false;
                 Map<String, Integer> tops = new TreeMap<>();
-                int spires = 0, ridgeColumns = 0;
-                for (int dx = -48; dx <= 48; dx += 2) for (int dz = -48; dz <= 48; dz += 2) {
-                    int x = nearest.getX() + dx, z = nearest.getZ() + dz;
+                int[] kinds = new int[3];
+                int columns = 0, water = 0, peak = 0;
+                long sumIn = 0;
+                for (int dx = -160; dx <= 160; dx += 4) for (int dz = -160; dz <= 160; dz += 4) {
+                    int x = c[0] + dx, z = c[1] + dz;
                     int y = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1;
                     BlockPos top = new BlockPos(x, y, z);
                     if (!level.getBiome(top).is(Zones.WHITE_BONE_RIDGE)) continue;
-                    ridgeColumns++;
+                    columns++;
+                    sumIn += y;
+                    peak = Math.max(peak, y);
+                    int kind = BoneMassifFeature.kindAt(Zones.seed(), x, z);
+                    kinds[kind]++;
+                    // the views: the highest terrace (a crag's top is a spike's side), the deepest basin floor
+                    if (kind == BoneMassifFeature.MESA && (highest == null || y > highest.getY())) highest = top;
+                    if (kind == BoneMassifFeature.BASIN && BoneMassifFeature.riseAt(Zones.seed(), x, z) > 0
+                            && (lowest == null || y < lowest.getY())) lowest = top;
+                    if (!level.getFluidState(top).isEmpty()) water++;
                     tops.merge(level.getBlockState(top).getBlock().getName().getString(), 1, Integer::sum);
-                    if (level.getBlockState(top).is(Blocks.BONE_BLOCK) && level.getBlockState(top.below()).is(Blocks.BONE_BLOCK)) spires++;
                 }
-                report.add("the nearest region's ground, made: " + ridgeColumns + " sampled columns; top blocks " + tops
-                        + "; bone columns two or more high " + spires);
-                int y = level.getHeight(Heightmap.Types.WORLD_SURFACE, nearest.getX(), nearest.getZ());
-                p.teleportTo(level, nearest.getX() + 0.5, y + 45, nearest.getZ() - 40.5, 0f, 40f); // looking down onto it
+                long sumOut = 0;
+                int outside = 0;
+                for (int k = 0; k < 64; k++) {
+                    double a = k * Math.PI / 32;
+                    int x = c[0] + (int) (Math.cos(a) * 420), z = c[1] + (int) (Math.sin(a) * 420);
+                    sumOut += groundAt(level, x, z);
+                    outside++;
+                }
+                report.add(String.format("the region at %d %d: %d columns of it sampled; ground there averages y %.0f (highest %d) "
+                                + "against y %.0f around it; highest terrace %d, deepest basin %d; ground: crags %d, mesas %d, basins %d; water on top in %d of them; top blocks %s",
+                        c[0], c[1], columns, (double) sumIn / Math.max(1, columns), peak, (double) sumOut / outside,
+                        highest.getY(), lowest.getY(), kinds[0], kinds[1], kinds[2], water, tops));
+                int far = groundAt(level, c[0], c[1] + 360);
+                p.setGameMode(net.minecraft.world.level.GameType.SPECTATOR); // a camera: no falling between the move and the picture
+                p.teleportTo(level, c[0] + 0.5, far + 45, c[1] + 360.5, 180f, 8f); // from afar, to the south
                 stage = 2;
                 ticks = 0;
             }
             case 2 -> {
-                if (ticks == 60) shoot("white_bone_ridge_from_above");
-                if (ticks == 70) {
-                    int y = level.getHeight(Heightmap.Types.WORLD_SURFACE, nearest.getX(), nearest.getZ() - 20);
-                    p.teleportTo(level, nearest.getX() + 0.5, y + 1.7, nearest.getZ() - 20.5, 0f, 5f); // standing in it
+                if (ticks == 160) shoot("white_bone_ridge_from_afar");
+                if (ticks == 170) {
+                    // well outside the massif, under the clouds (y 192), looking down on it
+                    p.teleportTo(level, centre.getX() + 0.5, 180, centre.getZ() + 420.5, 180f, 14f);
                 }
-                if (ticks == 130) shoot("white_bone_ridge_on_the_ground");
-                if (ticks == 140) return true;
+                if (ticks == 260) shoot("white_bone_ridge_from_above");
+                if (ticks == 270) p.teleportTo(level, highest.getX() + 0.5, highest.getY() + 3, highest.getZ() + 0.5, towards(highest, centre), 18f);
+                if (ticks == 350) shoot("white_bone_ridge_from_the_crest");
+                if (ticks == 360) p.teleportTo(level, lowest.getX() + 0.5, lowest.getY() + 2.7, lowest.getZ() + 0.5, towards(lowest, centre), 0f);
+                if (ticks == 440) shoot("white_bone_ridge_in_the_low_ground");
+                if (ticks == 450) return true;
             }
             default -> { return true; }
         }
         return false;
+    }
+
+    /** The yaw that looks from one place to another. */
+    private static float towards(BlockPos from, BlockPos to) {
+        return (float) Math.toDegrees(Math.atan2(to.getZ() - from.getZ(), to.getX() - from.getX())) - 90f;
     }
 
     private static void shoot(String name) {

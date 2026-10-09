@@ -25,7 +25,7 @@ public class BoneSpireFeature extends Feature<NoneFeatureConfiguration> {
     }
 
     private static boolean ground(BlockState s) {
-        return s.is(Blocks.CALCITE) || s.is(Blocks.BONE_BLOCK) || s.is(Blocks.COARSE_DIRT) || s.is(Blocks.WHITE_TERRACOTTA)
+        return s.is(Blocks.CALCITE) || s.is(Blocks.BONE_BLOCK) || s.is(Blocks.TUFF) || s.is(Blocks.GRAVEL)
                 || s.is(net.minecraft.tags.BlockTags.DIRT) || s.is(net.minecraft.tags.BlockTags.SAND)
                 || s.is(net.minecraft.tags.BlockTags.TERRACOTTA);
     }
