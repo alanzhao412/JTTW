@@ -51,6 +51,40 @@ final class AbilityScenes {
 
     static List<Scene> all() {
         return List.of(
+                // ── HUD: the Heavenly's minimap, Zhu Bajie's Keen Ears ──
+                new Scene("hud_minimap", p -> {
+                    AlignmentData.markReincarnated(p, ReincarnationOutcome.EYE_OF_HEAVEN);
+                    LevelManager.initClass(p, ReincarnationOutcome.EYE_OF_HEAVEN);
+                    // something on the land to map: a pond, a sand path, a stone yard
+                    var level = p.serverLevel();
+                    BlockPos ground = p.blockPosition().below();
+                    for (int dx = -14; dx <= -6; dx++) for (int dz = 4; dz <= 12; dz++) {
+                        level.setBlockAndUpdate(ground.offset(dx, 0, dz), Blocks.WATER.defaultBlockState());
+                    }
+                    for (int dz = -20; dz <= 20; dz++) {
+                        level.setBlockAndUpdate(ground.offset(3, 0, dz), Blocks.SAND.defaultBlockState());
+                        level.setBlockAndUpdate(ground.offset(4, 0, dz), Blocks.SAND.defaultBlockState());
+                    }
+                    for (int dx = 8; dx <= 16; dx++) for (int dz = -16; dz <= -8; dz++) {
+                        level.setBlockAndUpdate(ground.offset(dx, 1, dz), Blocks.STONE.defaultBlockState());
+                    }
+                    targets(p, 6, 14, -10, 18); // husks: hostile, red on the map
+                    Mob pig = EntityType.PIG.create(level);
+                    pig.moveTo(p.getX() - 4, p.getY(), p.getZ() + 20, 0f, 0f);
+                    pig.setNoAi(true);
+                    level.addFreshEntity(pig);
+                }, p -> {}, 1, true),
+                new Scene("hud_keen_ears", p -> {
+                    AlignmentData.markReincarnated(p, ReincarnationOutcome.MARSHAL_HEAVENLY_CANOPY);
+                    LevelManager.initClass(p, ReincarnationOutcome.MARSHAL_HEAVENLY_CANOPY);
+                }, p -> {
+                    // sounds round him, out of sight: a zombie to his left, a creeper to his right, steps behind
+                    var level = p.serverLevel();
+                    level.playSound(null, p.getX() + 8, p.getY(), p.getZ() + 3, net.minecraft.sounds.SoundEvents.ZOMBIE_AMBIENT, net.minecraft.sounds.SoundSource.HOSTILE, 1f, 1f);
+                    level.playSound(null, p.getX() - 6, p.getY(), p.getZ() + 4, net.minecraft.sounds.SoundEvents.CREEPER_PRIMED, net.minecraft.sounds.SoundSource.HOSTILE, 1f, 1f);
+                    level.playSound(null, p.getX(), p.getY(), p.getZ() - 5, net.minecraft.sounds.SoundEvents.IRON_GOLEM_STEP, net.minecraft.sounds.SoundSource.NEUTRAL, 1f, 1f);
+                    level.playSound(null, p.getX() + 1, p.getY(), p.getZ() + 10, net.minecraft.sounds.SoundEvents.CHEST_OPEN, net.minecraft.sounds.SoundSource.BLOCKS, 1f, 1f);
+                }, 6, true),
                 // ── White Bone Ridge's dead ──
                 new Scene("ridge_servants", p -> {
                     ridge(p, com.jttw.engine.registry.ModEntities.BONE_SERVANT.get(), -3, 1, false);

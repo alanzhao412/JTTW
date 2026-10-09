@@ -125,14 +125,19 @@ public final class ClientInit {
     @SuppressWarnings("removal")
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
-        event.enqueueWork(() ->
-                ItemBlockRenderTypes.setRenderLayer(ModBlocks.CELESTIAL_CLOUD.get(), RenderType.translucent()));
+        event.enqueueWork(() -> {
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.CELESTIAL_CLOUD.get(), RenderType.translucent());
+            // Zhu Bajie's Keen Ears hear what the sound engine plays
+            Minecraft.getInstance().getSoundManager().addListener(KeenEarsOverlay.INSTANCE);
+        });
     }
 
     @SubscribeEvent
     public static void registerOverlays(RegisterGuiOverlaysEvent event) {
         event.registerAboveAll("jttw_hud",       JTTWHudRenderer.OVERLAY);
         event.registerAboveAll("jttw_skill_bar", SkillBarRenderer.OVERLAY);
+        event.registerAboveAll("jttw_keen_ears", KeenEarsOverlay.OVERLAY);
+        event.registerAboveAll("jttw_minimap",   MinimapOverlay.OVERLAY);
         event.registerBelowAll("jttw_head_tint", HeadTintOverlay.OVERLAY);
         event.registerAbove(net.minecraftforge.client.gui.overlay.VanillaGuiOverlay.FOOD_LEVEL.id(),
                 "jttw_second_stomach", StomachOverlay.OVERLAY);
