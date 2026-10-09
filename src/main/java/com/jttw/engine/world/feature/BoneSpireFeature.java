@@ -35,6 +35,7 @@ public class BoneSpireFeature extends Feature<NoneFeatureConfiguration> {
         WorldGenLevel level = context.level();
         RandomSource r = context.random();
         BlockPos base = context.origin();
+        if (BoneMassifFeature.onLairFloor(level.getSeed(), base.getX(), base.getZ())) return false;
         if (!level.isEmptyBlock(base) || !ground(level.getBlockState(base.below()))) return false;
 
         int height = 2 + r.nextInt(5);

@@ -32,6 +32,7 @@ public class RibcageFeature extends Feature<NoneFeatureConfiguration> {
         WorldGenLevel level = context.level();
         RandomSource r = context.random();
         BlockPos origin = context.origin();
+        if (BoneMassifFeature.onLairFloor(level.getSeed(), origin.getX(), origin.getZ())) return false;
         Direction along = r.nextBoolean() ? Direction.EAST : Direction.SOUTH;
         Direction side = along.getClockWise();
         int length = 11 + r.nextInt(6), half = length / 2;

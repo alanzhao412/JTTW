@@ -59,6 +59,8 @@ public final class LevelManager {
     private LevelManager() {}
 
     private static final String TIER_TAG = "jttw_enemy_tier";
+    /** The zone (biome id) a tiered enemy belongs to; its kill pays by that zone's band wherever it dies. */
+    private static final String ZONE_TAG = "jttw_enemy_zone";
 
     // -----------------------------------------------------------------------
     // Base XP values for vanilla phase (levels 1–20)
@@ -196,7 +198,9 @@ public final class LevelManager {
         if (tierStr.isEmpty()) return; // not a tiered mob; no XP
 
         EnemyTier tier = EnemyTier.parse(tierStr);
-        BiomeLevelBand band = BiomeLevelBand.forPlayer(killer);
+        String zone = event.getEntity().getPersistentData().getString(ZONE_TAG);
+        BiomeLevelBand band = zone.isEmpty() ? BiomeLevelBand.forPlayer(killer)
+                : BiomeLevelBand.forBiome(new net.minecraft.resources.ResourceLocation(zone));
 
         if (band == null) {
             // Mob was tagged but player isn't in a registered biome band.

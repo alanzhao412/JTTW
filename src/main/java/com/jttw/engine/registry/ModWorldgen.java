@@ -42,6 +42,10 @@ public final class ModWorldgen {
             FEATURES.register("ribcage", () -> new com.jttw.engine.world.feature.RibcageFeature(
                     net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
 
+    public static final RegistryObject<net.minecraft.world.level.levelgen.feature.Feature<?>> LADY_LAIR =
+            FEATURES.register("lady_lair", () -> new com.jttw.engine.world.feature.LairFeature(
+                    net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
     public static void register(IEventBus modEventBus) {
         DENSITY_FUNCTION_TYPES.register(modEventBus);
         FEATURES.register(modEventBus);

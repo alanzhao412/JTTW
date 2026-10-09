@@ -70,13 +70,61 @@ public final class ModEntities {
                             .updateInterval(1)
                             .build(new ResourceLocation(JTTWEngine.MOD_ID, "thrown_spear").toString()));
 
+    // ── White Bone Ridge ──────────────────────────────────────────
+
+    public static final RegistryObject<EntityType<com.jttw.engine.entity.ridge.BoneServantEntity>> BONE_SERVANT =
+            ENTITIES.register("bone_servant", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.ridge.BoneServantEntity>of(com.jttw.engine.entity.ridge.BoneServantEntity::new, MobCategory.MONSTER)
+                            .sized(1.3F, 3.98F)
+                            .clientTrackingRange(10)
+                            .build(new ResourceLocation(JTTWEngine.MOD_ID, "bone_servant").toString()));
+
+    public static final RegistryObject<EntityType<com.jttw.engine.entity.ridge.WraithEntity>> WRAITH =
+            ENTITIES.register("wraith", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.ridge.WraithEntity>of(com.jttw.engine.entity.ridge.WraithEntity::new, MobCategory.MONSTER)
+                            .sized(0.6F, 1.9F)
+                            .clientTrackingRange(8)
+                            .build(new ResourceLocation(JTTWEngine.MOD_ID, "wraith").toString()));
+
+    public static final RegistryObject<EntityType<com.jttw.engine.entity.ridge.LadyWhiteBoneEntity>> LADY_WHITE_BONE =
+            ENTITIES.register("lady_white_bone", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.ridge.LadyWhiteBoneEntity>of(com.jttw.engine.entity.ridge.LadyWhiteBoneEntity::new, MobCategory.MONSTER)
+                            .sized(0.9F, 2.9F)
+                            .clientTrackingRange(10)
+                            .fireImmune()
+                            .build(new ResourceLocation(JTTWEngine.MOD_ID, "lady_white_bone").toString()));
+
+    public static final RegistryObject<EntityType<com.jttw.engine.entity.ridge.BoneShardEntity>> BONE_SHARD =
+            ENTITIES.register("bone_shard", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.ridge.BoneShardEntity>of(com.jttw.engine.entity.ridge.BoneShardEntity::new, MobCategory.MISC)
+                            .sized(0.3F, 0.3F)
+                            .clientTrackingRange(4)
+                            .updateInterval(5)
+                            .build(new ResourceLocation(JTTWEngine.MOD_ID, "bone_shard").toString()));
+
     public static void register(IEventBus modEventBus) {
         ENTITIES.register(modEventBus);
         modEventBus.addListener(ModEntities::onAttributeCreate);
+        modEventBus.addListener(ModEntities::onSpawnPlacements);
+    }
+
+    /** The ridge's dead rise in any light (their spawn lists are the ridge's alone). */
+    private static void onSpawnPlacements(net.minecraftforge.event.entity.SpawnPlacementRegisterEvent event) {
+        event.register(BONE_SERVANT.get(), net.minecraft.world.entity.SpawnPlacements.Type.ON_GROUND,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
+                net.minecraftforge.event.entity.SpawnPlacementRegisterEvent.Operation.REPLACE);
+        event.register(WRAITH.get(), net.minecraft.world.entity.SpawnPlacements.Type.ON_GROUND,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
+                net.minecraftforge.event.entity.SpawnPlacementRegisterEvent.Operation.REPLACE);
     }
 
     private static void onAttributeCreate(EntityAttributeCreationEvent event) {
         event.put(WU_CLONE.get(), WuCloneEntity.createAttributes().build());
         event.put(XIAOTIAN_QUAN.get(), XiaotianQuanEntity.createAttributes().build());
+        event.put(BONE_SERVANT.get(), com.jttw.engine.entity.ridge.BoneServantEntity.createAttributes().build());
+        event.put(WRAITH.get(), com.jttw.engine.entity.ridge.WraithEntity.createAttributes().build());
+        event.put(LADY_WHITE_BONE.get(), com.jttw.engine.entity.ridge.LadyWhiteBoneEntity.createAttributes().build());
     }
 }

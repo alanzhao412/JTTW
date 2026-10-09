@@ -31,6 +31,10 @@ import net.minecraft.world.level.levelgen.synth.SimplexNoise;
  * land's broad shape, as the terrain noise lays it out before any cave, canyon or cave mouth opens
  * in it, so none under the massif leaves a pit in it.
  *
+ * <p>At the heart of each region it lays a round, level floor for Lady White Bone's lair, at a
+ * height worked out from the centre alone, so every chunk under it agrees whichever is made first
+ * ({@link LairFeature} raises its pillars on it, and puts her there).
+ *
  * <p>Runs first among the zone's features, so ores, the remains and the brush all come after.
  * Later features must find the ground with the live heightmaps ({@code WORLD_SURFACE}): the
  * worldgen ones ({@code _WG}) still hold the ground from before the massif rose.
@@ -51,6 +55,11 @@ public class BoneMassifFeature extends Feature<NoneFeatureConfiguration> {
     private static final int STEEP = 3;
 
     public static final int CRAG = 0, MESA = 1, BASIN = 2;
+
+    /** The lair floor's radius. */
+    public static final int LAIR_RADIUS = 8;
+    /** The lair floor's height for each region, by its centre (worked out once). */
+    private static final java.util.Map<Long, Integer> FLOORS = new java.util.concurrent.ConcurrentHashMap<>();
 
     private static long noiseSeed = Long.MIN_VALUE;
     private static SimplexNoise noise;
@@ -117,6 +126,29 @@ public class BoneMassifFeature extends Feature<NoneFeatureConfiguration> {
         return Math.max(y, minY);
     }
 
+    /**
+     * How far (x, z) is from the centre of its region, where the lair stands; MAX_VALUE where
+     * there is no region.
+     */
+    public static double lairDistance(long seed, int x, int z) {
+        int[] c = Zones.WHITE_BONE.layout().centre(seed, x, z);
+        return c == null ? Double.MAX_VALUE : Math.hypot(x - c[0], z - c[1]);
+    }
+
+    /** Whether (x, z) is on an lair floor, where nothing else is put. */
+    public static boolean onLairFloor(long seed, int x, int z) {
+        return lairDistance(seed, x, z) <= LAIR_RADIUS + 1.5;
+    }
+
+    /** The top of the lair floor of the region centred at (cx, cz): the massif's own height there. */
+    private static int lairFloor(long seed, DensityFunction shape, int cx, int cz, int minY, int maxY) {
+        return FLOORS.computeIfAbsent(seed * 31 + (((long) cx) << 32 ^ (cz & 0xFFFFFFFFL)),
+                k -> Math.min(maxY - HEADROOM, landAt(shape, cx, cz, minY, maxY) + riseAt(seed, cx, cz)));
+    }
+
+    /** The clear air kept over the lair floor. */
+    private static final int HEADROOM = 16;
+
     /** The stone inside, in uneven bands of tuff and andesite. */
     private static BlockState inner(int y, int x, int z) {
         int band = Math.floorMod(y + ((x * 31 + z * 17) >> 5), 9);
@@ -170,6 +202,9 @@ public class BoneMassifFeature extends Feature<NoneFeatureConfiguration> {
         for (int i = 0; i < 5; i++) for (int j = 0; j < 5; j++) {
             made[i][j] = landAt(shape, x0 + i * 4, z0 + j * 4, level.getMinBuildHeight(), level.getMaxBuildHeight());
         }
+        int[] centre = Zones.WHITE_BONE.layout().centre(seed, x0 + 8, z0 + 8); // a chunk lies in one cell
+        int floor = centre != null && Math.hypot(Math.max(Math.abs(centre[0] - x0 - 8) - 8, 0), Math.max(Math.abs(centre[1] - z0 - 8) - 8, 0)) <= LAIR_RADIUS + 1
+                ? lairFloor(seed, shape, centre[0], centre[1], level.getMinBuildHeight(), level.getMaxBuildHeight()) : Integer.MIN_VALUE;
         boolean any = false;
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
         for (int dx = 0; dx < 16; dx++) {
@@ -188,10 +223,22 @@ public class BoneMassifFeature extends Feature<NoneFeatureConfiguration> {
                 boolean face = step >= STEEP;
                 // at least as high as any water stood, so none is left on it
                 int top = Math.min(level.getMaxBuildHeight() - 2, Math.max(Math.max(land, ground) + rise, surface));
-                for (int y = ground; y <= top; y++) {
+                double fromLair = floor == Integer.MIN_VALUE ? Double.MAX_VALUE : Math.hypot(x - centre[0], z - centre[1]);
+                boolean lair = fromLair <= LAIR_RADIUS + 0.5;
+                if (lair) {
+                    // the lair floor: level, in rings of bone and calcite, open to the sky
+                    top = floor;
+                    face = false;
+                    for (int y = top + 1; y <= Math.max(surface, top + HEADROOM); y++) {
+                        BlockState s = level.getBlockState(p.set(x, y, z));
+                        if (!s.isAir() && !s.is(Blocks.BONE_BLOCK) && !s.is(Blocks.SKELETON_SKULL)) level.setBlock(p, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+                    }
+                }
+                for (int y = Math.min(ground, top); y <= top; y++) {
                     p.set(x, y, z);
                     BlockState s;
-                    if (face || y < top - 3) s = inner(y, x, z);
+                    if (lair && y == top) s = ((int) fromLair) % 3 == 0 ? Blocks.BONE_BLOCK.defaultBlockState() : Blocks.CALCITE.defaultBlockState();
+                    else if (face || y < top - 3) s = inner(y, x, z);
                     else if (y == top) s = topOf(kind, x, z);
                     else s = kind == BASIN && y == top - 1 ? Blocks.GRAVEL.defaultBlockState() : Blocks.CALCITE.defaultBlockState();
                     level.setBlock(p, s, Block.UPDATE_CLIENTS);

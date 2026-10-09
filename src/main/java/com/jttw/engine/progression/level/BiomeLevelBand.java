@@ -82,6 +82,15 @@ public record BiomeLevelBand(
         return null;
     }
 
+    /** The registered band for a biome, or null. */
+    @Nullable
+    public static BiomeLevelBand forBiome(ResourceLocation biomeId) {
+        for (BiomeLevelBand band : REGISTRY) {
+            if (band.biome.equals(biomeId)) return band;
+        }
+        return null;
+    }
+
     // -----------------------------------------------------------------------
     // XP calculation
     // -----------------------------------------------------------------------

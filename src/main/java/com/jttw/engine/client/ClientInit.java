@@ -98,6 +98,8 @@ public final class ClientInit {
     @SubscribeEvent
     public static void registerLayers(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(XiaotianQuanModel.LAYER_LOCATION, XiaotianQuanModel::createBodyLayer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.RidgeRenderers.WRAITH_LAYER, com.jttw.engine.client.renderer.RidgeRenderers::wraithLayer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.RidgeRenderers.VEIL_LAYER, com.jttw.engine.client.renderer.RidgeRenderers::veilLayer);
     }
 
     // ── Entity renderers (MOD bus) ─────────────────────────────────
@@ -108,6 +110,11 @@ public final class ClientInit {
         event.registerEntityRenderer(ModEntities.HOWL_PROJECTILE.get(),
                 net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         event.registerEntityRenderer(ModEntities.PLACED_STAFF.get(), PlacedStaffRenderer::new);
+        // White Bone Ridge
+        event.registerEntityRenderer(ModEntities.BONE_SERVANT.get(), com.jttw.engine.client.renderer.RidgeRenderers.BoneServantRenderer::new);
+        event.registerEntityRenderer(ModEntities.WRAITH.get(), com.jttw.engine.client.renderer.RidgeRenderers.WraithRenderer::new);
+        event.registerEntityRenderer(ModEntities.LADY_WHITE_BONE.get(), com.jttw.engine.client.renderer.RidgeRenderers.LadyWhiteBoneRenderer::new);
+        event.registerEntityRenderer(ModEntities.BONE_SHARD.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         event.registerEntityRenderer(ModEntities.THROWN_SPEAR.get(),
                 com.jttw.engine.client.renderer.ThrownSpearRenderer::new);
         // Qi wave is invisible — rendered via server-sent particles only

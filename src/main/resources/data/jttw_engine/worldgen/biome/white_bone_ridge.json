@@ -81,6 +81,7 @@
       "minecraft:spring_lava"
     ],
     [
+      "jttw_engine:lady_lair",
       "jttw_engine:ribcage",
       "jttw_engine:boulder",
       "jttw_engine:dead_tree",
@@ -99,20 +100,14 @@
     "misc": [],
     "monster": [
       {
-        "type": "minecraft:skeleton",
-        "weight": 100,
-        "minCount": 2,
-        "maxCount": 4
+        "type": "jttw_engine:bone_servant",
+        "weight": 60,
+        "minCount": 1,
+        "maxCount": 2
       },
       {
-        "type": "minecraft:husk",
+        "type": "jttw_engine:wraith",
         "weight": 80,
-        "minCount": 2,
-        "maxCount": 4
-      },
-      {
-        "type": "minecraft:spider",
-        "weight": 40,
         "minCount": 1,
         "maxCount": 2
       }

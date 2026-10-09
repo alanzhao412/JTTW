@@ -29,6 +29,7 @@ public class BoulderFeature extends Feature<NoneFeatureConfiguration> {
         WorldGenLevel level = context.level();
         RandomSource r = context.random();
         BlockPos base = context.origin();
+        if (BoneMassifFeature.onLairFloor(level.getSeed(), base.getX(), base.getZ())) return false;
         if (!level.isEmptyBlock(base) || !level.getBlockState(base.below()).isFaceSturdy(level, base.below(), Direction.UP)) return false;
 
         float rx = 1.2f + r.nextFloat() * 1.6f, ry = 1.0f + r.nextFloat() * 1.2f, rz = 1.2f + r.nextFloat() * 1.6f;

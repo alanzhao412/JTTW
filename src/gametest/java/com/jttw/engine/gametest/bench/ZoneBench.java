@@ -167,7 +167,17 @@ final class ZoneBench {
                 if (ticks == 350) shoot("white_bone_ridge_from_the_crest");
                 if (ticks == 360) p.teleportTo(level, lowest.getX() + 0.5, lowest.getY() + 2.7, lowest.getZ() + 0.5, towards(lowest, centre), 0f);
                 if (ticks == 440) shoot("white_bone_ridge_in_the_low_ground");
-                if (ticks == 450) return true;
+                if (ticks == 450) {
+                    // the lair at the centre, and whoever is in it
+                    int y = groundAt(level, centre.getX(), centre.getZ());
+                    var ladies = level.getEntitiesOfClass(com.jttw.engine.entity.ridge.LadyWhiteBoneEntity.class,
+                            new net.minecraft.world.phys.AABB(centre.atY(y)).inflate(24, 32, 24));
+                    report.add(String.format("the lair at %d %d %d: Lady White Bone %s", centre.getX(), y, centre.getZ(),
+                            ladies.isEmpty() ? "NOT there" : ladies.size() + " of her, at " + ladies.get(0).blockPosition()));
+                    p.teleportTo(level, centre.getX() + 0.5, y + 7, centre.getZ() + 15.5, 180f, 20f);
+                }
+                if (ticks == 530) shoot("white_bone_ridge_lair");
+                if (ticks == 540) return true;
             }
             default -> { return true; }
         }

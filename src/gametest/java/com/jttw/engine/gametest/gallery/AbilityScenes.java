@@ -51,6 +51,28 @@ final class AbilityScenes {
 
     static List<Scene> all() {
         return List.of(
+                // ── White Bone Ridge's dead ──
+                new Scene("ridge_servants", p -> {
+                    ridge(p, com.jttw.engine.registry.ModEntities.BONE_SERVANT.get(), -3, 1, false);
+                    ridge(p, com.jttw.engine.registry.ModEntities.BONE_SERVANT.get(), -6, 5, true);
+                }, p -> {}, 1, false),
+                new Scene("ridge_wraiths", p -> {
+                    ridge(p, com.jttw.engine.registry.ModEntities.WRAITH.get(), -2, 2, false);
+                    ridge(p, com.jttw.engine.registry.ModEntities.WRAITH.get(), -4, 5, true);
+                }, p -> {}, 1, false),
+                new Scene("ridge_names", p -> {
+                    ridge(p, com.jttw.engine.registry.ModEntities.BONE_SERVANT.get(), -3, 9, false);
+                    ridge(p, com.jttw.engine.registry.ModEntities.WRAITH.get(), 0, 6, false);
+                    ridge(p, com.jttw.engine.registry.ModEntities.WRAITH.get(), 3, 8, true);
+                }, p -> {}, 1, true, -8f),
+                new Scene("ridge_lady", p -> {
+                    var lady = com.jttw.engine.registry.ModEntities.LADY_WHITE_BONE.get().create(p.serverLevel());
+                    lady.moveTo(p.getX() + 1, p.getY(), p.getZ() + 5, -63f, 0f);
+                    lady.setYHeadRot(-63f);
+                    lady.setYBodyRot(-63f);
+                    lady.setNoAi(true);
+                    p.serverLevel().addFreshEntity(lady);
+                }, p -> {}, 1, false),
                 // ── Grand Saint of Nine Spirits ──
                 new Scene("ns_fire_head", p -> saint(p, NineSpiritsAbilityHandler.FIRE, "ns_heads_1"),
                         NineSpiritsAbilityHandler::fireHead, 4, false),
@@ -220,6 +242,19 @@ final class AbilityScenes {
             z.setPersistenceRequired();
             p.serverLevel().addFreshEntity(z);
         }
+    }
+
+    /** One of the ridge's dead, standing still at (dx, dz) from the player, facing them (a captain if asked). */
+    private static void ridge(ServerPlayer p, net.minecraft.world.entity.EntityType<? extends com.jttw.engine.entity.ridge.RidgeMonster> type,
+                              int dx, int dz, boolean captain) {
+        var m = com.jttw.engine.entity.ridge.RidgeMonster.summon(p.serverLevel(), type,
+                net.minecraft.core.BlockPos.containing(p.getX() + dx, p.getY() + (type == com.jttw.engine.registry.ModEntities.WRAITH.get() ? 1 : 0), p.getZ() + dz), captain);
+        if (m == null) return;
+        m.setNoAi(true);
+        m.moveTo(m.getX(), m.getY(), m.getZ(), 180f, 0f);
+        m.setYHeadRot(180f);
+        m.setYBodyRot(180f);
+        m.setPersistenceRequired();
     }
 
     /** Puts a player back to an ordinary state between scenes. */

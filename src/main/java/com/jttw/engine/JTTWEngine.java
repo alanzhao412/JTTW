@@ -41,6 +41,8 @@ import org.slf4j.LoggerFactory;
 public class JTTWEngine {
     public static final String MOD_ID = "jttw_engine";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+    /** The highest max health anything may have. */
+    public static final double MAX_HEALTH_CAP = 1_000_000;
 
     public JTTWEngine() {
         @SuppressWarnings("removal")
@@ -51,6 +53,11 @@ public class JTTWEngine {
         ModItems.register(modEventBus);
         ModEntities.register(modEventBus);
         ModAttributes.register(modEventBus);
+        com.jttw.engine.registry.ModEffects.register(modEventBus);
+
+        // A high-scaling game outgrows vanilla's cap of 1024 max health (Lady White Bone has 2400,
+        // a ridge captain over 1000, and characters keep growing): lift it.
+        ((com.jttw.engine.mixin.RangedAttributeAccessor) net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).jttw$setMaxValue(MAX_HEALTH_CAP);
 
         modEventBus.addListener(this::commonSetup);
 
@@ -73,6 +80,9 @@ public class JTTWEngine {
     private void commonSetup(final FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
             NetworkHandler.register();
+            // White Bone Ridge: where a character goes on from level 20
+            com.jttw.engine.progression.level.BiomeLevelBand.register(new com.jttw.engine.progression.level.BiomeLevelBand(
+                    com.jttw.engine.world.Zones.WHITE_BONE_RIDGE.location(), 20, 36, 80));
             LOGGER.info("Network handlers registered");
         });
     }

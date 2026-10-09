@@ -35,6 +35,14 @@ public final class ModItems {
             ITEMS.register("celestial_cloud", () -> new BlockItem(
                     ModBlocks.CELESTIAL_CLOUD.get(), new Item.Properties()));
 
+    // ── White Bone Ridge spawn eggs ───────────────────────────────
+    public static final RegistryObject<Item> BONE_SERVANT_SPAWN_EGG = ITEMS.register("bone_servant_spawn_egg",
+            () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.jttw.engine.registry.ModEntities.BONE_SERVANT, 0xE8E4D8, 0x6B6458, new Item.Properties()));
+    public static final RegistryObject<Item> WRAITH_SPAWN_EGG = ITEMS.register("wraith_spawn_egg",
+            () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.jttw.engine.registry.ModEntities.WRAITH, 0xF4F6FA, 0x9AA3B5, new Item.Properties()));
+    public static final RegistryObject<Item> LADY_WHITE_BONE_SPAWN_EGG = ITEMS.register("lady_white_bone_spawn_egg",
+            () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.jttw.engine.registry.ModEntities.LADY_WHITE_BONE, 0xF2EFE6, 0x5A2D82, new Item.Properties()));
+
     public static final RegistryObject<Item> IMMORTAL_PILL =
             ITEMS.register("jttw_immortal_pill", ImmortalItems.ImmortalPillItem::new);
 

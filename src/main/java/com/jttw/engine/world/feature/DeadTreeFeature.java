@@ -28,6 +28,7 @@ public class DeadTreeFeature extends Feature<NoneFeatureConfiguration> {
         WorldGenLevel level = context.level();
         RandomSource r = context.random();
         BlockPos base = context.origin();
+        if (BoneMassifFeature.onLairFloor(level.getSeed(), base.getX(), base.getZ())) return false;
         if (!level.isEmptyBlock(base) || !level.getBlockState(base.below()).isFaceSturdy(level, base.below(), Direction.UP)) return false;
 
         Block wood = r.nextInt(3) == 0 ? Blocks.DARK_OAK_LOG : Blocks.STRIPPED_BIRCH_LOG;

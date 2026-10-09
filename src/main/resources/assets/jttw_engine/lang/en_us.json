@@ -17,5 +17,15 @@
   "item.jttw_engine.nine_tooth_rake": "Nine-Tooth Rake",
   "item.jttw_engine.yin_yang_vase": "Yin-Yang Two-Qi Vase",
   "item.jttw_engine.mixed_iron_cudgel": "Mixed-Iron Cudgel",
-  "item.jttw_engine.banana_leaf_fan": "Banana-Leaf Fan"
+  "item.jttw_engine.banana_leaf_fan": "Banana-Leaf Fan",
+  "entity.jttw_engine.bone_servant": "Bone Servant",
+  "entity.jttw_engine.wraith": "Wraith",
+  "entity.jttw_engine.lady_white_bone": "Lady White Bone",
+  "entity.jttw_engine.bone_shard": "Bone Shard",
+  "entity.jttw_engine.captain": "%s Captain",
+  "effect.jttw_engine.curse_of_the_dead": "Curse of the Dead",
+  "item.jttw_engine.bone_servant_spawn_egg": "Bone Servant Spawn Egg",
+  "item.jttw_engine.wraith_spawn_egg": "Wraith Spawn Egg",
+  "item.jttw_engine.lady_white_bone_spawn_egg": "Lady White Bone Spawn Egg",
+  "biome.jttw_engine.white_bone_ridge": "White Bone Ridge"
 }
