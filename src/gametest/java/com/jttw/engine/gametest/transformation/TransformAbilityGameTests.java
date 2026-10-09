@@ -1,7 +1,9 @@
 package com.jttw.engine.gametest.transformation;
 
 import com.jttw.engine.JTTWEngine;
+import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
+import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.transformation.TransformationAbilityHandler;
 import com.jttw.engine.transformation.TransformationManager;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
@@ -267,15 +269,17 @@ public class TransformAbilityGameTests {
         });
     }
 
+    /** At level 20 the boom's 10 grows by the level's power (the transformed player is the owner). */
     @GameTest(template = PLATFORM)
     public static void wardenSonicBoomFiresWithoutEnoughQi(GameTestHelper h) {
         IronGolem golem = h.spawnWithNoFreeWill(EntityType.IRON_GOLEM, new BlockPos(2, 2, 4));
         ServerPlayer p = Tf.playerAs(h, EntityType.WARDEN);
+        PlayerLevel.setLevel(p, 20);
         QiData.setMax(p, 100f);
         QiData.setCurrent(p, 3f);
         aim(p, golem);
         Tf.rightClick(p);
-        near(h, golem.getMaxHealth() - 10.0, golem.getHealth(), "boom still lands");
+        near(h, golem.getMaxHealth() - 10.0 * LevelPower.of(20), golem.getHealth(), "boom still lands, at power");
         near(h, 3f, QiData.getCurrent(p), "Qi untouched when short");
         h.succeed();
     }

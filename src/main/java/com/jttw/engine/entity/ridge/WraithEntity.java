@@ -1,5 +1,6 @@
 package com.jttw.engine.entity.ridge;
 
+import com.jttw.engine.entity.MobScaling;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -32,7 +33,8 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public class WraithEntity extends RidgeMonster {
 
-    public static final double HEALTH = 80, DAMAGE = 12;
+    /** Two of a same-level character's ordinary hits to kill; a touch of 12% of their health, before resistance. */
+    public static final double HITS = 2, TOUCH = 0.12;
     /** How long its touch slows, in ticks. */
     public static final int CHILL = 60;
 
@@ -44,11 +46,22 @@ public class WraithEntity extends RidgeMonster {
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
-                .add(Attributes.MAX_HEALTH, HEALTH)
-                .add(Attributes.ATTACK_DAMAGE, DAMAGE)
+                // as a level-20 one; each sets its own by its level (become)
+                .add(Attributes.MAX_HEALTH, HITS * MobScaling.typicalHit(LEVEL))
+                .add(Attributes.ATTACK_DAMAGE, TOUCH * MobScaling.typicalHealth(LEVEL))
                 .add(Attributes.MOVEMENT_SPEED, 0.3)
                 .add(Attributes.FLYING_SPEED, 0.5)
                 .add(Attributes.FOLLOW_RANGE, 32);
+    }
+
+    @Override
+    protected double hitsToKill() {
+        return HITS;
+    }
+
+    @Override
+    protected double blowShare() {
+        return TOUCH;
     }
 
     @Override

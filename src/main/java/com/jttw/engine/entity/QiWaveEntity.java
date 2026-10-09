@@ -2,6 +2,7 @@ package com.jttw.engine.entity;
 
 import com.jttw.engine.registry.ModEntities;
 import com.jttw.engine.JTTWEngine;
+import com.jttw.engine.progression.stats.LevelPower;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -46,7 +47,10 @@ public class QiWaveEntity extends Entity {
     private double distanceTraveled = 0;
     /** Charge power from 0.0–1.0, affects all wave properties. */
     private float chargePower = 1.0f;
-    /** STR factor 0.0–1.0 derived from ATK — interpolates between min and max values. */
+    /**
+     * STR factor 0.0–1.0 derived from ATK with level power taken out — interpolates between min
+     * and max values, so the wave's size follows the build, not the level.
+     */
     private float strFactor = 0.0f;
     /** When each creature was last struck, so it is struck once per damage window, not every step. */
     private final java.util.Map<Integer, Long> struckAt = new java.util.HashMap<>();
@@ -64,7 +68,7 @@ public class QiWaveEntity extends Entity {
     /** Cone end radius range. */
     private static final double MIN_CONE_END = 3.0;
     private static final double MAX_CONE_END = 40.0;
-    /** ATK range for scaling: 1 = minimum (0.0), 80 = maximum (1.0). */
+    /** ATK range for scaling, as attack at level 1: 1 = minimum (0.0), 80 = maximum (1.0). */
     private static final float ATK_MIN = 1.0f;
     private static final float ATK_MAX = 80.0f;
 
@@ -76,8 +80,9 @@ public class QiWaveEntity extends Entity {
     public QiWaveEntity(Level level, Player owner, Vec3 direction, float attackDamage) {
         this(ModEntities.QI_WAVE.get(), level);
         Vec3 dir = direction.normalize();
-        // STR factor: 0.0 at 30 ATK → 1.0 at 200 ATK
-        this.strFactor = Math.min(1.0f, Math.max(0.0f, (attackDamage - ATK_MIN) / (ATK_MAX - ATK_MIN)));
+        // STR factor: 0.0 at 1 ATK → 1.0 at 80 ATK, by attack without level power (damage keeps it)
+        float sizeAtk = (float) (attackDamage / LevelPower.of(owner));
+        this.strFactor = Math.min(1.0f, Math.max(0.0f, (sizeAtk - ATK_MIN) / (ATK_MAX - ATK_MIN)));
         // Offset spawn point forward so the wave doesn't destroy where the player stands
         double startRadius = MIN_CONE_START + (MAX_CONE_START - MIN_CONE_START) * strFactor;
         double offset = startRadius + 2.0;

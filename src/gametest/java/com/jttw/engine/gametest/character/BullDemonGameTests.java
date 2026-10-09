@@ -8,8 +8,11 @@ import com.jttw.engine.character.bulldemon.BullDemonAbilityHandler;
 import com.jttw.engine.character.bulldemon.BullDemonCharacter;
 import com.jttw.engine.item.BananaLeafFanItem;
 import com.jttw.engine.item.MixedIronCudgelItem;
+import com.jttw.engine.progression.level.LevelManager;
+import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.skilltree.AbilityType;
+import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.registry.ModItems;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
 import com.jttw.engine.transformation.TransformationData;
@@ -127,13 +130,17 @@ public class BullDemonGameTests {
     @GameTest(template = PLATFORM)
     public static void theGreatWhiteBullIsBigToughAndDrainsQi(GameTestHelper h) {
         ServerPlayer p = bull(h, "bdk_bull_1", "bdk_bull_2");
+        PlayerLevel.setLevel(p, 20);
+        LevelManager.reapplyStats(p);
         double baseHealth = p.getMaxHealth();
+        double baseAttack = p.getAttributeValue(Attributes.ATTACK_DAMAGE);
         BullDemonCharacter.INSTANCE.activate(p, 3, AbilityAction.USE);
         check(h, BullDemonAbilityHandler.inGreatBull(p), "the bull");
         TransformationData data = TransformationManager.getTransformation(p);
         check(h, data != null && data.getEntityType() == EntityType.RAVAGER, "giant form");
-        near(h, baseHealth + 30, p.getMaxHealth(), "II: +30 health");
+        near(h, baseHealth + 30 * LevelPower.of(p), p.getMaxHealth(), "II: +30 health, at his level's power");
         near(h, 0.5, modifier(p, Attributes.ATTACK_DAMAGE, "bdk_bull_attack"), "II: +50% attack");
+        near(h, baseAttack * 1.5, p.getAttributeValue(Attributes.ATTACK_DAMAGE), "half again his whole attack");
         near(h, 1.0, modifier(p, Attributes.KNOCKBACK_RESISTANCE, "bdk_bull_steady"), "unmoved by blows");
         tick(p, BullDemonAbilityHandler::onPlayerTick, 10);
         check(h, QiData.getCurrent(p) < 200f - 2.9f, "drains Qi");
@@ -206,6 +213,14 @@ public class BullDemonGameTests {
         near(h, 37.0, BullDemonAbilityHandler.fanReach(1f), "weak: 37 blocks");
         near(h, 1000.0, BullDemonAbilityHandler.fanReach(27.03f), "strong: 1000");
         near(h, 1000.0, BullDemonAbilityHandler.fanReach(200f), "never more than 1000");
+
+        // His reach follows his build, not his level: attack x6.7 at level 20, the same reach
+        double reach = BullDemonAbilityHandler.fanReach(p);
+        double attack = p.getAttributeValue(Attributes.ATTACK_DAMAGE);
+        PlayerLevel.setLevel(p, 20);
+        LevelManager.reapplyStats(p);
+        check(h, p.getAttributeValue(Attributes.ATTACK_DAMAGE) > attack * 6, "far stronger at level 20");
+        near(h, reach, BullDemonAbilityHandler.fanReach(p), "and the fan blows as far");
         h.succeed();
     }
 

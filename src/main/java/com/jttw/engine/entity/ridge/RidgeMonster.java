@@ -1,5 +1,6 @@
 package com.jttw.engine.entity.ridge;
 
+import com.jttw.engine.entity.MobScaling;
 import com.jttw.engine.progression.level.EnemyTier;
 import com.jttw.engine.world.Zones;
 import net.minecraft.core.BlockPos;
@@ -18,15 +19,12 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 
 import javax.annotation.Nullable;
-import java.util.UUID;
 
 /**
  * A monster of White Bone Ridge: it has a level, shown with its name over its head, and now and
@@ -45,8 +43,7 @@ public abstract class RidgeMonster extends Monster {
     public static final float CAPTAIN_CHANCE = 0.08f;
     /** How many of its kind a captain brings. */
     public static final int ESCORTS = 3;
-    /** Each level over 20 adds this share to health and damage. */
-    public static final double PER_LEVEL = 0.06;
+    /** A captain's health and blow over a regular one's of its level. */
     public static final double CAPTAIN_HEALTH = 2.5, CAPTAIN_DAMAGE = 1.2;
     /** How much larger a captain is. */
     public static final float CAPTAIN_SCALE = 1.15f;
@@ -55,9 +52,6 @@ public abstract class RidgeMonster extends Monster {
     public static final String KEY_TIER = "jttw_enemy_tier", KEY_ZONE = "jttw_enemy_zone";
 
     public static final int WHITE = 0xFFFFFF, PURPLE = 0xB04DFF;
-
-    private static final UUID LEVEL_HEALTH = UUID.fromString("5e6d0b1e-0000-4a1d-9e11-000000000001");
-    private static final UUID LEVEL_DAMAGE = UUID.fromString("5e6d0b1e-0000-4a1d-9e11-000000000002");
 
     private static final EntityDataAccessor<Boolean> CAPTAIN = SynchedEntityData.defineId(RidgeMonster.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> MOB_LEVEL = SynchedEntityData.defineId(RidgeMonster.class, EntityDataSerializers.INT);
@@ -82,25 +76,33 @@ public abstract class RidgeMonster extends Monster {
         return entityData.get(MOB_LEVEL);
     }
 
+    /** How many of a typical same-level character's ordinary hits it takes to kill (see MobScaling). */
+    protected abstract double hitsToKill();
+
+    /** Its blow, as a share of a typical same-level character's health (before their resistance). */
+    protected abstract double blowShare();
+
+    /** Its health at a level: so many ordinary hits of a character of that level. */
+    public double healthAt(int level, boolean captain) {
+        return hitsToKill() * MobScaling.typicalHit(level) * (captain ? CAPTAIN_HEALTH : 1);
+    }
+
+    /** Its blow at a level: a share of the health of a character of that level. */
+    public double blowAt(int level, boolean captain) {
+        return blowShare() * MobScaling.typicalHealth(level) * (captain ? CAPTAIN_DAMAGE : 1);
+    }
+
     /** Sets what it is: its level, whether a captain, and the health and damage and XP that go with them. */
     public void become(int level, boolean captain) {
         entityData.set(CAPTAIN, captain);
         entityData.set(MOB_LEVEL, level);
-        double scale = 1 + PER_LEVEL * (level - LEVEL);
-        setModifier(Attributes.MAX_HEALTH, LEVEL_HEALTH, scale * (captain ? CAPTAIN_HEALTH : 1) - 1);
-        setModifier(Attributes.ATTACK_DAMAGE, LEVEL_DAMAGE, scale * (captain ? CAPTAIN_DAMAGE : 1) - 1);
+        getAttribute(Attributes.MAX_HEALTH).setBaseValue(healthAt(level, captain));
+        getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(blowAt(level, captain));
         setHealth(getMaxHealth());
         getPersistentData().putString(KEY_TIER, (captain ? EnemyTier.GENERAL : EnemyTier.GRUNT).name());
         getPersistentData().putString(KEY_ZONE, Zones.WHITE_BONE_RIDGE.location().toString());
         xpReward = captain ? 40 : 10;
         refreshDimensions();
-    }
-
-    private void setModifier(net.minecraft.world.entity.ai.attributes.Attribute attribute, UUID id, double share) {
-        AttributeInstance a = getAttribute(attribute);
-        if (a == null) return;
-        a.removeModifier(id);
-        if (share != 0) a.addPermanentModifier(new AttributeModifier(id, "jttw ridge level", share, AttributeModifier.Operation.MULTIPLY_TOTAL));
     }
 
     /** A regular one's level: about 20. */

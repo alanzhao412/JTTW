@@ -1,20 +1,36 @@
 package com.jttw.engine.progression.skilltree;
 
+import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.character.Characters;
 import com.jttw.engine.character.PlayableCharacter;
 import com.jttw.engine.character.wukong.WukongSkillTree;
 import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.network.s2c.SyncAbilitiesPacket;
 import com.jttw.engine.network.s2c.SyncSkillTreePacket;
+import com.jttw.engine.progression.stats.LevelPower;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Spending a skill point: validate the node, unlock it, apply what it does immediately,
  * and sync the tree and skill bar back to the client.
  */
+@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class SkillPurchase {
 
     private SkillPurchase() {}
+
+    /** Max health each Vitality node gives at level 1: grows with level power. */
+    public static final double VITALITY_HEALTH = 20.0;
 
     /**
      * Unlocks {@code nodeId} for the player if it is in their character's tree and they can
@@ -58,22 +74,13 @@ public final class SkillPurchase {
     }
 
     private static void applyPassive(ServerPlayer player, SkillNode node) {
-        // Wukong's Vitality is applied once, here; other passives are refreshed continuously
+        // Wukong's Vitality heals on purchase, here; its bonus and every other passive are
+        // refreshed continuously
         switch (node.id()) {
             case WukongSkillTree.VITALITY_1, WukongSkillTree.VITALITY_2 -> {
-                // Add 20 max health — using Forge attribute system
-                net.minecraft.world.entity.ai.attributes.AttributeInstance attr =
-                        player.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
-                if (attr != null) {
-                    String modId = "jttw_vitality_" + node.id();
-                    java.util.UUID modUUID = java.util.UUID.nameUUIDFromBytes(modId.getBytes());
-                    attr.removeModifier(modUUID);
-                    attr.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(
-                            modUUID, "JTTW Vitality " + node.tier(),
-                            20.0, net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADDITION
-                    ));
-                    player.setHealth(Math.min(player.getHealth() + 20f, player.getMaxHealth()));
-                }
+                refreshVitality(player);
+                player.setHealth(Math.min(player.getHealth() + LevelPower.scaled(player, VITALITY_HEALTH),
+                        player.getMaxHealth()));
             }
             // Wukong Qi Mastery — passive regen boost, no immediate effect.
             case WukongSkillTree.QI_1, WukongSkillTree.QI_2 -> {}
@@ -81,5 +88,34 @@ public final class SkillPurchase {
             // see each character's *Passives class, and QiManager for Qi regen and max Qi.
             default -> {}
         }
+    }
+
+    /**
+     * Sets Wukong's Vitality bonus: {@link #VITALITY_HEALTH} max health per node held, at the
+     * player's level power. Refreshed once a second, so it follows a level-up, and a node no
+     * longer held gives nothing.
+     */
+    public static void refreshVitality(ServerPlayer player) {
+        AttributeInstance attr = player.getAttribute(Attributes.MAX_HEALTH);
+        if (attr == null) return;
+        Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
+        for (String id : List.of(WukongSkillTree.VITALITY_1, WukongSkillTree.VITALITY_2)) {
+            UUID modUUID = UUID.nameUUIDFromBytes(("jttw_vitality_" + id).getBytes());
+            double amount = nodes.contains(id) ? VITALITY_HEALTH * LevelPower.of(player) : 0;
+            AttributeModifier existing = attr.getModifier(modUUID);
+            if (existing != null && existing.getAmount() == amount) continue;
+            if (existing != null) attr.removeModifier(modUUID);
+            if (amount != 0) {
+                attr.addPermanentModifier(new AttributeModifier(modUUID, "JTTW Vitality " + id,
+                        amount, AttributeModifier.Operation.ADDITION));
+            }
+        }
+        if (player.getHealth() > player.getMaxHealth()) player.setHealth(player.getMaxHealth());
+    }
+
+    @SubscribeEvent
+    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer sp)) return;
+        if (sp.tickCount % 20 == 0) refreshVitality(sp);
     }
 }

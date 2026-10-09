@@ -8,6 +8,7 @@ import com.jttw.engine.character.turtle.TurtleAbilityHandler;
 import com.jttw.engine.progression.level.LevelManager;
 import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
+import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -44,6 +45,12 @@ public class TurtleGameTests {
     /** Physical resistance fixed at 25, so the resistance-scaled abilities have known damage. */
     private static void presTwentyFive(ServerPlayer p) {
         setResistances(p, 25.0, 0.0);
+    }
+
+    /** Level 20 with its stats, so a level-1 damage shows up multiplied by the level's power. */
+    private static void levelTwenty(ServerPlayer p) {
+        PlayerLevel.setLevel(p, 20);
+        LevelManager.reapplyStats(p);
     }
 
     private static PlayableCharacter character() {
@@ -184,6 +191,7 @@ public class TurtleGameTests {
     public static void unstoppableForceLaunchesThenASecondPressSlamsDown(GameTestHelper h) {
         ServerPlayer p = turtle(h);
         grant(p, "tu_force_1");
+        levelTwenty(p);
         presTwentyFive(p);
         p.setYRot(0f);
         p.setXRot(0f);
@@ -196,8 +204,8 @@ public class TurtleGameTests {
         near(h, 0.0, p.getDeltaMovement().length(), "stopped on impact");
         List<Hit> blows = of(hits, DamageTypes.PLAYER_ATTACK);
         eq(h, 1, blows.size(), "impact hits the golem");
-        // tier 1: 6 + resistance 25 x 0.04 = 7, falloff 1 - 2/8
-        near(h, 5.25, blows.get(0).amount(), "impact damage");
+        // tier 1: (6 + resistance 25 x 0.04 = 7) x power, falloff 1 - 2/8
+        near(h, 7.0 * LevelPower.of(20) * 0.75, blows.get(0).amount(), "impact damage");
         check(h, golem.getDeltaMovement().z > 0, "knocked away");
         eq(h, -1, amp(golem, MobEffects.MOVEMENT_SLOWDOWN), "no stun below tier 3");
         h.succeed();
@@ -251,13 +259,14 @@ public class TurtleGameTests {
         character().activate(p, 2, AbilityAction.USE);
         near(h, 100f, QiData.getCurrent(p), "needs the node");
         grant(p, "tu_tectonic_1");
+        levelTwenty(p);
         presTwentyFive(p);
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 4);
         List<Hit> hits = watch(golem);
         character().activate(p, 2, AbilityAction.USE);
         near(h, 90f, QiData.getCurrent(p), "10 Qi");
-        // 4 + resistance 25 x 0.04, no falloff
-        near(h, 5.0, of(hits, DamageTypes.PLAYER_ATTACK).get(0).amount(), "slam damage");
+        // (4 + resistance 25 x 0.04) x power, no falloff
+        near(h, 5.0 * LevelPower.of(20), of(hits, DamageTypes.PLAYER_ATTACK).get(0).amount(), "slam damage");
         TurtleAbilityHandler.castTectonicSlam(p);
         near(h, 90f, QiData.getCurrent(p), "on cooldown");
         h.runAfterDelay(201, () -> {
@@ -272,6 +281,7 @@ public class TurtleGameTests {
         ServerPlayer p = turtle(h);
         online(h, p);
         grant(p, "tu_tectonic_1", "tu_tectonic_2", "tu_tectonic_3");
+        levelTwenty(p);
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 4);
         List<Hit> hits = watch(golem);
         TurtleAbilityHandler.castTectonicSlam(p);
@@ -281,7 +291,7 @@ public class TurtleGameTests {
         h.runAfterDelay(45, () -> {
             List<Hit> zone = of(hits, DamageTypes.PLAYER_ATTACK).subList(slamHits, of(hits, DamageTypes.PLAYER_ATTACK).size());
             check(h, zone.size() >= 2, "zone pulses once a second, " + zone.size() + " pulses");
-            near(h, 1.0, zone.get(0).amount(), "1 damage per pulse");
+            near(h, LevelPower.of(20), zone.get(0).amount(), "1 x power per pulse");
             h.succeed();
         });
     }

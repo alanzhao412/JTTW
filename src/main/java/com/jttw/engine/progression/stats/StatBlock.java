@@ -11,21 +11,32 @@ import java.util.UUID;
 /**
  * Computed stat snapshot for a player at a specific class and level.
  *
- * <p><b>Formula (Pokémon-derived):</b>
+ * <p><b>Health and attack: class shape x power.</b> The class's base stats give its shape
+ * (its health and attack as the Pokémon-derived formula below puts them at level
+ * {@value #SHAPE_LEVEL}); the level gives the power, by the class's and the character's own
+ * curve ({@link LevelPower}, about x1.10 a level). Health is
+ * set so the frailest class has 20 at level 1, attack so characters of a level take three or four
+ * ordinary hits to kill each other. So level 40 one-shots level 20, and 100 one-shots 80.
+ *
+ * <p><b>Everything else: the Pokémon-derived formula.</b>
  * <pre>
  *   rawHP   = floor(2 × baseHP   × level / 100) + level + 10
  *   rawStat = floor(2 × baseStat × level / 100) + 5       (STR, PRES, MRES, QI, WILL)
  * </pre>
+ * Resistance grows by it to level {@value LevelPower#RESISTANCE_LEVELS} and holds there; Qi and
+ * Will grow by it to 100. {@link #strength()} is STR by it: the number the wield requirements
+ * name ("30 STR") and the Character screen shows; attack is what a blow does.
  *
  * <p>Raw values are converted to Minecraft attributes via the scale constants below.
  * Physical and magic resistance go to the mod's own attributes, not vanilla armor, so
  * they are not capped; see {@link ResistanceHandler} for how they reduce damage.
  * Tune those constants to adjust overall power level without touching the formula.
  *
- * <p><b>Class late-game bonuses:</b>
+ * <p><b>Class late-game bonuses</b>, on resistance, Qi, Will and STR (health and attack carry
+ * them in the class's power curve instead):
  * <ul>
- *   <li>PRIMORDIAL   — +1.5% all stats per level above 50 (up to +75% at level 100).</li>
- *   <li>DIVINE_BEAST — +16% all stats per power spike milestone passed (20/40/60/80/100).</li>
+ *   <li>PRIMORDIAL   — +1.5% per level above 50 (up to +75% at level 100).</li>
+ *   <li>DIVINE_BEAST — +16% per evolution passed (20/40/60/80/100).</li>
  *   <li>YAOGUAI / HEAVENLY — 1.0× (power comes from abilities, not raw stats).</li>
  * </ul>
  */
@@ -35,8 +46,14 @@ public record StatBlock(
         double physicalResistance,
         double magicResistance,
         double qi,
-        double will
+        double will,
+        double strength
 ) {
+
+    /** The level a class's shape is read at. */
+    private static final int SHAPE_LEVEL = 50;
+    /** Attack, as a share of the class's attack shape: sets how many hits a same-level fight takes. */
+    private static final double ATTACK_SHARE = 0.13;
 
     // -----------------------------------------------------------------------
     // Scale constants — tune these to adjust MC attribute output / internal stats
@@ -94,29 +111,62 @@ public record StatBlock(
     // Factory
     // -----------------------------------------------------------------------
 
+    /** A player's stats: their character's at their level, or null without a class. */
+    @javax.annotation.Nullable
+    public static StatBlock of(net.minecraft.world.entity.player.Player p) {
+        ProgressionClass cls = com.jttw.engine.progression.level.PlayerLevel.getProgressionClass(p);
+        if (cls == null) return null;
+        var who = com.jttw.engine.reincarnation.ReincarnationOutcome.byId(
+                p.getPersistentData().getString(com.jttw.engine.reincarnation.AlignmentData.KEY_REINCARNATION_OUTCOME));
+        return compute(cls, who, com.jttw.engine.progression.level.PlayerLevel.getLevel(p));
+    }
+
+    /** A class's stats at a level, before any one character's measure. */
     public static StatBlock compute(ProgressionClass cls, int level) {
+        return compute(cls, null, level);
+    }
+
+    /** A character's stats at a level: its class's shape, at its own power (see {@link LevelPower}). */
+    public static StatBlock compute(ProgressionClass cls, @javax.annotation.Nullable com.jttw.engine.reincarnation.ReincarnationOutcome who, int level) {
         int lv = Math.max(1, Math.min(level, LevelConstants.MAX_LEVEL));
         BaseStats base = BaseStats.forClass(cls);
 
         // Pokémon-style raw values
-        double rawHP   = 2.0 * base.hp()   * lv / 100.0 + lv + 10;
         double rawStr  = 2.0 * base.str()  * lv / 100.0 + 5;
-        double rawPres = 2.0 * base.pres() * lv / 100.0 + 5;
-        double rawMres = 2.0 * base.mres() * lv / 100.0 + 5;
         double rawQi   = 2.0 * base.qi()   * lv / 100.0 + 5;
         double rawWill = 2.0 * base.will() * lv / 100.0 + 5;
+        // resistance only grows so far: past it, power alone separates levels
+        int rl = Math.min(lv, LevelPower.RESISTANCE_LEVELS);
+        double rawPres = 2.0 * base.pres() * rl / 100.0 + 5;
+        double rawMres = 2.0 * base.mres() * rl / 100.0 + 5;
 
         double bonus = computeBonus(cls, lv);
+        double resBonus = computeBonus(cls, rl);
+        double power = LevelPower.of(cls, who, lv); // each class's own curve (it carries the class's late growth and leaps)
 
         return new StatBlock(
-                20.0 + rawHP   * HP_SCALE   * bonus, // base 20 + earned health
-                 1.0 + rawStr  * STR_SCALE  * bonus, // base 1 + earned attack
-                       rawPres * RES_SCALE  * bonus, // fully earned
-                       rawMres * RES_SCALE  * bonus, // fully earned
-                       rawQi   * QI_SCALE   * bonus, // internal stat
-                       rawWill * WILL_SCALE * bonus  // internal stat
+                hpShape(base) * HP_NORM * power,                   // class shape x level power
+                atkShape(base) * ATTACK_SHARE * power,
+                rawPres * RES_SCALE  * resBonus,                   // fully earned, to level 40
+                rawMres * RES_SCALE  * resBonus,
+                rawQi   * QI_SCALE   * bonus,                      // internal stat
+                rawWill * WILL_SCALE * bonus,                      // internal stat
+                1.0 + rawStr * STR_SCALE * bonus                   // STR, for wield requirements
         );
     }
+
+    /** A class's health shape: its health at the shape level by the Pokémon-derived formula. */
+    private static double hpShape(BaseStats b) {
+        return 20.0 + (2.0 * b.hp() * SHAPE_LEVEL / 100.0 + SHAPE_LEVEL + 10) * HP_SCALE;
+    }
+
+    /** A class's attack shape: its attack at the shape level by the Pokémon-derived formula. */
+    private static double atkShape(BaseStats b) {
+        return 1.0 + (2.0 * b.str() * SHAPE_LEVEL / 100.0 + 5) * STR_SCALE;
+    }
+
+    /** So that the frailest class has 20 health at level 1, as a vanilla player does. */
+    private static final double HP_NORM = 20.0 / hpShape(BaseStats.HEAVENLY);
 
     private static double computeBonus(ProgressionClass cls, int level) {
         return switch (cls) {

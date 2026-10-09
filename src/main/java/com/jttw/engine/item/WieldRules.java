@@ -111,13 +111,13 @@ public final class WieldRules {
     /** The player's STR: their class's strength at their level, 1 before they have a class. */
     public static double strength(Player p) {
         ProgressionClass cls = PlayerLevel.getProgressionClass(p);
-        return cls == null ? 1.0 : StatBlock.compute(cls, PlayerLevel.getLevel(p)).attackDamage();
+        return cls == null ? 1.0 : StatBlock.compute(cls, PlayerLevel.getLevel(p)).strength();
     }
 
     /** The first level at which this class has {@code str} STR, or -1 if it never does. */
     public static int levelFor(ProgressionClass cls, double str) {
         for (int lv = 1; lv <= 100; lv++) {
-            if (StatBlock.compute(cls, lv).attackDamage() >= str) return lv;
+            if (StatBlock.compute(cls, lv).strength() >= str) return lv;
         }
         return -1;
     }

@@ -7,6 +7,7 @@ import com.jttw.engine.network.s2c.SyncCooldownPacket;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.qi.QiManager;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
+import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.registry.ModAttributes;
 import com.jttw.engine.transformation.TransformationData;
 import com.jttw.engine.transformation.TransformationManager;
@@ -222,7 +223,9 @@ public final class BullDemonAbilityHandler {
 
     // ── M: Great White Bull ────────────────────────────────────────
 
+    /** The bull's extra health at level 1, also healed on taking the form: grows with level power. */
     public static double greatBullHealth(int tier) { return tier >= 3 ? 40 : tier >= 2 ? 30 : 20; }
+    /** The bull's extra attack, a share of his whole attack. */
     public static double greatBullAttack(int tier) { return tier >= 3 ? 0.7 : tier >= 2 ? 0.5 : 0.3; }
 
     public static boolean inGreatBull(Player p) {
@@ -243,22 +246,24 @@ public final class BullDemonAbilityHandler {
         p.getPersistentData().putBoolean(KEY_GREAT_BULL, true);
         TransformationManager.transform(p, EntityType.RAVAGER); // stand-in for the white bull
         applyGreatBull(p, tier);
-        p.heal((float) greatBullHealth(tier));
+        p.heal(LevelPower.scaled(p, greatBullHealth(tier)));
         p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 1.5f, 0.6f);
         p.serverLevel().sendParticles(ParticleTypes.CLOUD, p.getX(), p.getY() + 1, p.getZ(), 30, 1, 1, 1, 0.05);
     }
 
+    /** Re-applied every tick of the form, so the health bonus keeps pace with level power. */
     private static void applyGreatBull(ServerPlayer p, int tier) {
-        PassiveModifiers.add(p, Attributes.MAX_HEALTH, "bdk_bull_health", greatBullHealth(tier));
+        PassiveModifiers.add(p, Attributes.MAX_HEALTH, "bdk_bull_health", greatBullHealth(tier) * LevelPower.of(p));
+        // A share of his whole attack: his base is 1, so MULTIPLY_BASE would add only the fraction
         PassiveModifiers.set(p, Attributes.ATTACK_DAMAGE, "bdk_bull_attack", greatBullAttack(tier),
-                AttributeModifier.Operation.MULTIPLY_BASE);
+                AttributeModifier.Operation.MULTIPLY_TOTAL);
         PassiveModifiers.add(p, Attributes.KNOCKBACK_RESISTANCE, "bdk_bull_steady", 1.0);
     }
 
     public static void endGreatBull(ServerPlayer p) {
         p.getPersistentData().remove(KEY_GREAT_BULL);
         PassiveModifiers.add(p, Attributes.MAX_HEALTH, "bdk_bull_health", 0);
-        PassiveModifiers.set(p, Attributes.ATTACK_DAMAGE, "bdk_bull_attack", 0, AttributeModifier.Operation.MULTIPLY_BASE);
+        PassiveModifiers.set(p, Attributes.ATTACK_DAMAGE, "bdk_bull_attack", 0, AttributeModifier.Operation.MULTIPLY_TOTAL);
         PassiveModifiers.add(p, Attributes.KNOCKBACK_RESISTANCE, "bdk_bull_steady", 0);
         TransformationData data = TransformationManager.getTransformation(p);
         if (data != null && data.getEntityType() == EntityType.RAVAGER) TransformationManager.demorph(p);
@@ -283,9 +288,18 @@ public final class BullDemonAbilityHandler {
 
     // ── Banana-Leaf Fan, in his hands ──────────────────────────────
 
-    /** How far his fan blows: 37 blocks per point of ATK, 16 to 1000. */
+    /**
+     * How far his fan blows: 37 blocks per point of ATK, 16 to 1000. {@code atk} is his attack with
+     * level power taken out (his attack as it would be at level 1), so the reach follows his build,
+     * not the power curve; see {@link #fanReach(ServerPlayer)}.
+     */
     public static double fanReach(float atk) {
         return Math.max(FAN_MIN_REACH, Math.min(FAN_MAX_REACH, FAN_REACH_PER_ATK * atk));
+    }
+
+    /** How far this player's fan blows, by their attack without level power. */
+    public static double fanReach(ServerPlayer p) {
+        return fanReach((float) (atk(p) / LevelPower.of(p)));
     }
 
     /** Blows {@code e} away along {@code dir}: seen flying, then landing {@code reach} blocks off. */

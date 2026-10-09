@@ -143,8 +143,9 @@ public class XiaotianQuanEntity extends PathfinderMob {
     }
 
     /**
-     * Base attributes (Tier 0 defaults). The manager overrides these at summon
-     * time based on the owner's Hound Growth skill tree tier.
+     * Base attributes (Tier 0 defaults, at level 1). The manager overrides these at summon
+     * time based on the owner's Hound Growth skill tree tier, with health and attack
+     * scaled by the owner's level power.
      */
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()

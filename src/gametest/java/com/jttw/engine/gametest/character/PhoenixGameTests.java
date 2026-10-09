@@ -6,8 +6,10 @@ import com.jttw.engine.character.Characters;
 import com.jttw.engine.character.PlayableCharacter;
 import com.jttw.engine.character.phoenix.PhoenixAbilityHandler;
 import com.jttw.engine.character.phoenix.PhoenixReviveData;
+import com.jttw.engine.progression.level.LevelManager;
 import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
+import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -102,13 +104,14 @@ public class PhoenixGameTests {
     public static void flamethrowerTierThreeBurnsHotterLongerAndCheaper(GameTestHelper h) {
         ServerPlayer p = phoenix(h);
         grant(p, "ph_flame_1", "ph_flame_2", "ph_flame_3");
+        PlayerLevel.setLevel(p, 20); // the flame's damage is set at level 1, scaled by the player's power
         IronGolem golem = golemInFlame(h, p);
         List<Hit> hits = watch(golem);
         PhoenixAbilityHandler.startFlame(p);
         ticks(p, 10);
         near(h, 98.25f, QiData.getCurrent(p), "0.175 Qi per tick from tier 2");
-        // 0.5 x 1.5 x 1.5 = 1.125, half physical and half magic
-        near(h, 0.5625, firstHit(h, hits, DamageTypes.MAGIC, golem).amount(), "magic half");
+        // 0.5 x 1.5 x 1.5 = 1.125 at level 1, half physical and half magic, scaled to level 20
+        near(h, 0.5625 * LevelPower.of(20), firstHit(h, hits, DamageTypes.MAGIC, golem).amount(), "magic half at level 20");
         eq(h, 60, golem.getRemainingFireTicks(), "burning for 3 s from tier 2");
         PhoenixAbilityHandler.stopFlame(p);
         h.succeed();
@@ -272,25 +275,31 @@ public class PhoenixGameTests {
 
     // ── Passives ────────────────────────────────────────────────────
 
-    @GameTest(template = PLATFORM, batch = "phoenixRegeneratesTwoHealthPerSecondAtLevelHundred")
-    public static void phoenixRegeneratesTwoHealthPerSecondAtLevelHundred(GameTestHelper h) {
+    /** Regen is 0.5 + 0.015 a level per second, times the player's power. */
+    @GameTest(template = PLATFORM, batch = "phoenixRegenGrowsWithLevelAndPower")
+    public static void phoenixRegenGrowsWithLevelAndPower(GameTestHelper h) {
         ServerPlayer p = phoenix(h);
-        PlayerLevel.setLevel(p, 100);
+        PlayerLevel.setLevel(p, 20);
+        LevelManager.reapplyStats(p); // room above 10 health for the heal to show
         p.setHealth(10f);
         p.tickCount = 19;
         ticks(p, 1);
-        near(h, 12f, p.getHealth(), "+2.0 at level 100");
+        near(h, 10f + LevelPower.scaled(p, 0.5), p.getHealth(), "0.5 x power at level 20");
         PlayerLevel.setLevel(p, 1);
+        LevelManager.reapplyStats(p);
         p.setHealth(10f);
         p.tickCount = 39;
         ticks(p, 1);
-        close(h, 10.5, p.getHealth(), 0.02, "about +0.5 at level 1");
+        close(h, 10.5, p.getHealth(), 0.02, "+0.5 at level 1");
         h.succeed();
     }
 
     @GameTest(template = PLATFORM, batch = "lifeDrainHealsOnEveryHit")
     public static void lifeDrainHealsOnEveryHit(GameTestHelper h) {
         ServerPlayer p = phoenix(h);
+        PlayerLevel.setLevel(p, 20); // the heals are set at level 1, scaled by the player's power
+        LevelManager.reapplyStats(p);
+        float power = (float) LevelPower.of(20);
         Pig pig = mob(h, EntityType.PIG, 0, 0);
         var ds = h.getLevel().damageSources();
         p.setHealth(10f);
@@ -298,10 +307,10 @@ public class PhoenixGameTests {
         near(h, 10f, p.getHealth(), "no node, no heal");
         grant(p, "ph_drain_1");
         PhoenixAbilityHandler.onDealDamage(new LivingHurtEvent(pig, ds.playerAttack(p), 3f));
-        near(h, 11f, p.getHealth(), "tier 1: half a heart");
+        near(h, 10f + power, p.getHealth(), "tier 1: half a heart at level 1, scaled to 20");
         grant(p, "ph_drain_2");
         PhoenixAbilityHandler.onDealDamage(new LivingHurtEvent(pig, ds.playerAttack(p), 3f));
-        near(h, 13f, p.getHealth(), "tier 2: a heart");
+        near(h, 10f + 3 * power, p.getHealth(), "tier 2: a heart at level 1, scaled to 20");
         h.succeed();
     }
 

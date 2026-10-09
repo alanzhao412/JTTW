@@ -8,6 +8,7 @@ import com.jttw.engine.character.byakko.ByakkoAbilityHandler;
 import com.jttw.engine.progression.level.LevelManager;
 import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
+import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -51,6 +52,12 @@ public class ByakkoGameTests {
         var atk = p.getAttribute(Attributes.ATTACK_DAMAGE);
         atk.removeModifiers();
         atk.setBaseValue(4.0);
+    }
+
+    /** Level 20 with its stats, so a level-1 damage shows up multiplied by the level's power. */
+    private static void levelTwenty(ServerPlayer p) {
+        PlayerLevel.setLevel(p, 20);
+        LevelManager.reapplyStats(p);
     }
 
     private static PlayableCharacter character() {
@@ -100,6 +107,7 @@ public class ByakkoGameTests {
     public static void leapLaunchesForTenQiAndCrashesDownOnLanding(GameTestHelper h) {
         ServerPlayer p = byakko(h);
         grant(p, "bk_leap_1");
+        levelTwenty(p);
         attackFour(p);
         p.setYRot(0f);
         p.setXRot(0f);
@@ -112,8 +120,8 @@ public class ByakkoGameTests {
         land(p);
         List<Hit> blows = of(hits, DamageTypes.PLAYER_ATTACK);
         eq(h, 1, blows.size(), "landing impact");
-        // tier 1: 5 + attack 4 x 0.5 = 7, falloff 1 - 1/3
-        near(h, 7.0 * (2.0 / 3.0), blows.get(0).amount(), "impact damage");
+        // tier 1: 5 x power + attack 4 x 0.5, falloff 1 - 1/3
+        near(h, (5.0 * LevelPower.of(20) + 2.0) * (2.0 / 3.0), blows.get(0).amount(), "impact damage");
         land(p);
         eq(h, 1, of(hits, DamageTypes.PLAYER_ATTACK).size(), "only one impact per leap");
         h.succeed();
@@ -214,6 +222,7 @@ public class ByakkoGameTests {
     @GameTest(template = PLATFORM, batch = "bleedDealsDamageEverySecondScaledByAttack")
     public static void bleedDealsDamageEverySecondScaledByAttack(GameTestHelper h) {
         ServerPlayer p = byakko(h);
+        levelTwenty(p);
         attackFour(p);
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 4);
         List<Hit> hits = watch(golem);
@@ -225,8 +234,8 @@ public class ByakkoGameTests {
         strike(h, p, golem, 2f);
         ticks(p, 20);
         eq(h, 1, hits.size(), "first bleed tick after a second");
-        // tier 1: 1 + attack 4 x 0.10
-        near(h, 1.4, hits.get(0).amount(), "bleed damage");
+        // tier 1: 1 x power + attack 4 x 0.10
+        near(h, LevelPower.of(20) + 0.4, hits.get(0).amount(), "bleed damage");
         ticks(p, 100);
         int total = hits.size();
         ticks(p, 40);

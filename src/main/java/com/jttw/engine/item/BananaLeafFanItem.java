@@ -12,7 +12,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -67,7 +66,7 @@ public class BananaLeafFanItem extends Item {
             return to.length() <= range && to.normalize().dot(look) >= 0.5; // a 120-degree sweep
         });
         Vec3 flat = new Vec3(look.x, 0, look.z).normalize();
-        double reach = BullDemonAbilityHandler.fanReach((float) p.getAttributeValue(Attributes.ATTACK_DAMAGE));
+        double reach = BullDemonAbilityHandler.fanReach(p);
         for (LivingEntity e : caught) {
             if (bull) {
                 BullDemonAbilityHandler.blowAway(p, e, flat, reach);

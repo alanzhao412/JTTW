@@ -10,6 +10,7 @@ import com.jttw.engine.network.s2c.TruffleScentPacket;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.qi.QiManager;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
+import com.jttw.engine.progression.stats.LevelPower;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -329,7 +330,7 @@ public final class MarshalAbilityHandler {
         return MarshalCharacter.is(p) && tier(p, "mc_stomach") >= 1;
     }
 
-    /** Healing per point of food that fits in neither stomach. */
+    /** Healing per point of food that fits in neither stomach, at level 1: grows with level power. */
     public static float overeatHealing(int tier) {
         return tier >= 3 ? 2f : tier >= 2 ? 1.5f : 1f;
     }
@@ -347,11 +348,12 @@ public final class MarshalAbilityHandler {
         if (stored > 0) setReserve(p, reserve(p) + stored);
         int surplus = overflow - stored;
         if (surplus <= 0) return;
-        float heal = surplus * overeatHealing(tier);
+        float heal = LevelPower.scaled(p, surplus * overeatHealing(tier));
         float missing = p.getMaxHealth() - p.getHealth();
         p.heal(heal);
         if (tier >= 3 && heal > missing) {
-            p.setAbsorptionAmount(Math.min(20f, p.getAbsorptionAmount() + (heal - missing)));
+            // Golden hearts up to 20 at level 1, a cap that grows with the heal
+            p.setAbsorptionAmount(Math.min(LevelPower.scaled(p, 20f), p.getAbsorptionAmount() + (heal - missing)));
         }
         p.serverLevel().sendParticles(ParticleTypes.HEART, p.getX(), p.getY() + 1.8, p.getZ(), 3, 0.4, 0.2, 0.4, 0);
         p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 1f, 0.8f);

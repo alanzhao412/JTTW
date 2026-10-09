@@ -1,6 +1,7 @@
 package com.jttw.engine.gametest.world;
 
 import com.jttw.engine.JTTWEngine;
+import com.jttw.engine.entity.MobScaling;
 import com.jttw.engine.entity.ridge.BoneServantEntity;
 import com.jttw.engine.entity.ridge.BoneShardEntity;
 import com.jttw.engine.entity.ridge.LadyWhiteBoneEntity;
@@ -44,6 +45,11 @@ import static com.jttw.engine.gametest.GT.*;
 @PrefixGameTestTemplate(false)
 public class RidgeGameTests {
 
+    /** Equal to within a part in ten thousand: these run into the hundreds, stored as floats. */
+    private static void close(GameTestHelper h, double expected, double actual, String what) {
+        check(h, Math.abs(expected - actual) <= Math.abs(expected) * 1e-4 + 1e-3, what + ": expected " + expected + " but was " + actual);
+    }
+
     /**
      * Removes, when the test ends, the ridge's dead this test brought: those it holds, and any
      * within a few blocks of them (escorts, summons). Never a sweep of the whole area: tests run
@@ -83,10 +89,11 @@ public class RidgeGameTests {
         check(h, captain.getDisplayName().getString().contains("Captain") && captain.getDisplayName().getString().contains("Lv 27"),
                 "a captain's name says so, and its level: " + captain.getDisplayName().getString());
         check(h, regular.getDisplayName().getString().contains("Lv 20"), "a regular's level: " + regular.getDisplayName().getString());
-        near(h, BoneServantEntity.HEALTH, regular.getMaxHealth(), "a level-20 servant's health");
-        double scale = 1 + RidgeMonster.PER_LEVEL * 7;
-        near(h, BoneServantEntity.HEALTH * scale * RidgeMonster.CAPTAIN_HEALTH, captain.getMaxHealth(), "a level-27 captain's health");
-        near(h, BoneServantEntity.DAMAGE * scale * RidgeMonster.CAPTAIN_DAMAGE, captain.getAttributeValue(Attributes.ATTACK_DAMAGE), "its blow");
+        // measured against a typical character of its level
+        close(h, BoneServantEntity.HITS * MobScaling.typicalHit(20), regular.getMaxHealth(), "a level-20 servant takes eight ordinary hits");
+        close(h, BoneServantEntity.HITS * MobScaling.typicalHit(27) * RidgeMonster.CAPTAIN_HEALTH, captain.getMaxHealth(), "a level-27 captain's health");
+        close(h, BoneServantEntity.BLOW * MobScaling.typicalHealth(27) * RidgeMonster.CAPTAIN_DAMAGE,
+                captain.getAttributeValue(Attributes.ATTACK_DAMAGE), "its blow");
         near(h, regular.getBbHeight() * RidgeMonster.CAPTAIN_SCALE, captain.getBbHeight(), "it stands taller");
         eq(h, EnemyTier.GENERAL.name(), captain.getPersistentData().getString(RidgeMonster.KEY_TIER), "a captain pays as a General");
         eq(h, EnemyTier.GRUNT.name(), regular.getPersistentData().getString(RidgeMonster.KEY_TIER), "a regular as a Grunt");
@@ -128,11 +135,12 @@ public class RidgeGameTests {
         var golem = h.spawn(EntityType.IRON_GOLEM, new BlockPos(3, 2, 3));
         float before = golem.getHealth();
         servant.doHurtTarget(golem);
-        near(h, BoneServantEntity.DAMAGE, before - golem.getHealth(), "one blow, in full on a mob without resistance");
+        double blow = servant.blowAt(20, false);
+        close(h, blow, before - golem.getHealth(), "one blow, in full on a mob without resistance");
         // what that blow does to a level-20 character of each class, after their physical resistance
         for (ProgressionClass cls : ProgressionClass.values()) {
             StatBlock s = StatBlock.compute(cls, 20);
-            double taken = ResistanceHandler.damageAfter(BoneServantEntity.DAMAGE, s.physicalResistance());
+            double taken = ResistanceHandler.damageAfter(blow, s.physicalResistance());
             check(h, taken >= s.maxHealth() / 5 && taken < s.maxHealth() * 0.6,
                     cls + " at 20 loses a fifth to (for the frailest) over half its health to one blow: " + taken + " of " + s.maxHealth());
         }
@@ -168,11 +176,9 @@ public class RidgeGameTests {
         float full = golem.getHealth();
         servant.setTarget(golem);
         int[] raisedAt = {-1};
-        h.onEachTick(() -> {
-            if (raisedAt[0] < 0 && servant.isRaising()) raisedAt[0] = (int) h.getTick();
-        });
-        h.runAfterDelay(4, () -> check(h, golem.getHealth() == full, "no blow before the club is up"));
         h.succeedWhen(() -> {
+            if (raisedAt[0] < 0 && servant.isRaising()) raisedAt[0] = (int) h.getTick();
+            if (raisedAt[0] < 0) check(h, golem.getHealth() == full, "no blow before the club is up");
             check(h, raisedAt[0] >= 0, "it raised its club (alive " + servant.isAlive() + ", target " + servant.getTarget()
                     + ", in reach " + servant.inReach(golem) + ", at " + whereabouts(h, servant) + ")");
             check(h, golem.getHealth() < full, "the blow landed (alive " + servant.isAlive() + ", raising " + servant.isRaising()
@@ -190,7 +196,7 @@ public class RidgeGameTests {
         float before = golem.getHealth();
         wraith.doHurtTarget(golem);
         DamageSource took = golem.getLastDamageSource();
-        near(h, WraithEntity.DAMAGE, before - golem.getHealth(), "its touch");
+        close(h, wraith.blowAt(20, false), before - golem.getHealth(), "its touch");
         check(h, took != null && ResistanceHandler.isMagic(took), "is magic, for magic resistance to take");
         check(h, golem.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "and chilled");
         check(h, wraith.isNoGravity(), "it floats");

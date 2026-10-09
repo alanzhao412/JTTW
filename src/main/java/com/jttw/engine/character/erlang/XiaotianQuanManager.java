@@ -5,6 +5,7 @@ import com.jttw.engine.registry.ModEntities;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.qi.QiManager;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
+import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.entity.HowlProjectileEntity;
 import com.jttw.engine.entity.XiaotianQuanEntity;
@@ -44,7 +45,8 @@ import java.util.*;
  * Manages Erlang Shen's Xiaotian Quan companion.
  *
  * <p>Only one companion per player at a time (unlike Wukong's 1-9 clones).
- * Stats scale with the player's Hound Growth skill tree tier, not player stats.
+ * Stats scale with the player's Hound Growth skill tree tier, not player stats; its health and
+ * attack also grow with its owner's level power, kept current while it is out.
  *
  * <p>Tier 2+ grants tracking (Glowing effect on nearest hostile).
  * Every bite applies Slowness I for 3 seconds.
@@ -63,7 +65,7 @@ public final class XiaotianQuanManager {
     private static final double FOLLOW_SPREAD        = 2.0;
     private static final double TRACKING_RANGE       = 32.0;
 
-    /** Tier-based stat table: {HP, ATK, SPEED, ARMOR} */
+    /** Tier-based stat table: {HP, ATK, SPEED, ARMOR}. HP and ATK are at level 1, times the owner's level power. */
     private static final double[][] TIER_STATS = {
         { 30.0,  4.0, 0.35, 2.0 },   // Tier 0 (base, no growth nodes)
         { 50.0,  7.0, 0.38, 5.0 },   // Tier 1 (Hound Training I)
@@ -180,6 +182,9 @@ public final class XiaotianQuanManager {
                 applyTracking(xtq);
             }
 
+            // Its health and attack keep pace with its owner's level
+            if (server.getTickCount() % 20 == 0) refreshStats(player, xtq);
+
             // Periodic Qi sync — only if changed
             if (player.tickCount % 10 == 0) {
                 QiManager.syncIfChanged(player);
@@ -251,7 +256,8 @@ public final class XiaotianQuanManager {
 
         // Apply tier-based stats + init XTQ's own Qi/Will pools
         int growthTier = SkillTreeData.getXtqGrowthTier(player);
-        applyTierStats(xtq, growthTier);
+        applyTierStats(xtq, growthTier, LevelPower.of(player));
+        xtq.setHealth(xtq.getMaxHealth());
         xtq.initXtqStats(growthTier);
 
         xtq.setDropChance(net.minecraft.world.entity.EquipmentSlot.MAINHAND, 0f);
@@ -265,16 +271,29 @@ public final class XiaotianQuanManager {
         player.sendSystemMessage(Component.literal("§aXiaotian Quan summoned!"));
     }
 
-    private static void applyTierStats(XiaotianQuanEntity xtq, int growthTier) {
+    /** Brings an out hound's stats up to its owner's current level and growth tier. Public for tests. */
+    public static void refreshStats(ServerPlayer owner, XiaotianQuanEntity xtq) {
+        applyTierStats(xtq, SkillTreeData.getXtqGrowthTier(owner), LevelPower.of(owner));
+    }
+
+    /**
+     * Sets the hound's stats for a growth tier, its health and attack at {@code power}. A change
+     * of max health keeps the hound at the same share of it.
+     */
+    private static void applyTierStats(XiaotianQuanEntity xtq, int growthTier, double power) {
         int idx = Math.max(0, Math.min(TIER_STATS.length - 1, growthTier));
         double[] stats = TIER_STATS[idx];
 
         var maxHp = xtq.getAttribute(Attributes.MAX_HEALTH);
-        if (maxHp != null) maxHp.setBaseValue(stats[0]);
-        xtq.setHealth((float) stats[0]);
+        double hp = stats[0] * power;
+        if (maxHp != null && maxHp.getBaseValue() != hp) {
+            float share = xtq.getHealth() / xtq.getMaxHealth();
+            maxHp.setBaseValue(hp);
+            xtq.setHealth(share * xtq.getMaxHealth());
+        }
 
         var atk = xtq.getAttribute(Attributes.ATTACK_DAMAGE);
-        if (atk != null) atk.setBaseValue(stats[1]);
+        if (atk != null) atk.setBaseValue(stats[1] * power);
 
         var spd = xtq.getAttribute(Attributes.MOVEMENT_SPEED);
         if (spd != null) spd.setBaseValue(stats[2]);

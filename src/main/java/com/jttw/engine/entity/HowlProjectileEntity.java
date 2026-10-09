@@ -3,6 +3,7 @@ package com.jttw.engine.entity;
 import com.jttw.engine.registry.ModEntities;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.character.erlang.XiaotianQuanManager;
+import com.jttw.engine.progression.stats.LevelPower;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
@@ -21,6 +22,7 @@ public class HowlProjectileEntity extends ThrowableItemProjectile {
 
     private static final int NAUSEA_DURATION = 100; // 5 seconds
     private static final int NAUSEA_AMPLIFIER = 0;
+    /** Damage at level 1; it grows with the hound's owner's level power. */
     private static final float DAMAGE = 3.0F;
 
     public HowlProjectileEntity(EntityType<? extends ThrowableItemProjectile> type, Level level) {
@@ -42,15 +44,18 @@ public class HowlProjectileEntity extends ThrowableItemProjectile {
         if (this.level().isClientSide()) return;
 
         if (result.getEntity() instanceof LivingEntity target) {
+            float damage = DAMAGE;
             // Don't hurt owner or allied XTQ
             if (this.getOwner() instanceof XiaotianQuanEntity xtq) {
                 if (target == xtq) return;
                 var owner = XiaotianQuanManager.resolveOwner(xtq);
                 if (target == owner) return;
                 if (owner != null && XiaotianQuanManager.isAllyXtq(target, owner.getUUID())) return;
+                // The hound hits at its owner's power (level 1 if the owner is offline)
+                if (owner != null) damage = LevelPower.scaled(owner, DAMAGE);
             }
 
-            target.hurt(this.damageSources().mobProjectile(this, (LivingEntity) this.getOwner()), DAMAGE);
+            target.hurt(this.damageSources().mobProjectile(this, (LivingEntity) this.getOwner()), damage);
             target.addEffect(new MobEffectInstance(MobEffects.CONFUSION, NAUSEA_DURATION, NAUSEA_AMPLIFIER));
         }
     }

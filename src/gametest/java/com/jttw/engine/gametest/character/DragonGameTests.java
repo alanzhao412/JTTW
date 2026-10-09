@@ -5,7 +5,10 @@ import com.jttw.engine.character.AbilityAction;
 import com.jttw.engine.character.Characters;
 import com.jttw.engine.character.PlayableCharacter;
 import com.jttw.engine.character.dragon.DragonAbilityHandler;
+import com.jttw.engine.progression.level.LevelManager;
+import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
+import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -65,10 +68,13 @@ public class DragonGameTests {
         h.succeed();
     }
 
+    /** At level 20 the fixed 4 grows by the level's power; the attack share is the attribute's own. */
     @GameTest(template = PLATFORM, batch = "lightningCostsEightQiAndScalesWithAttack")
     public static void lightningCostsEightQiAndScalesWithAttack(GameTestHelper h) {
         ServerPlayer p = dragon(h);
         grant(p, "dr_lightning_1");
+        PlayerLevel.setLevel(p, 20);
+        LevelManager.reapplyStats(p);
         attackThree(p);
         p.setXRot(90f); // strike the floor at the player's feet
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 3);
@@ -78,7 +84,7 @@ public class DragonGameTests {
         eq(h, 1, near(p, LightningBolt.class, 6).size(), "one bolt");
         List<Hit> magic = of(hits, DamageTypes.INDIRECT_MAGIC);
         eq(h, 1, magic.size(), "one strike hit");
-        near(h, 5.5, magic.get(0).amount(), "4 + attack x 0.5");
+        near(h, 4.0 * LevelPower.of(20) + 1.5, magic.get(0).amount(), "4 x power + attack x 0.5");
         eq(h, -1, amp(golem, MobEffects.MOVEMENT_SLOWDOWN), "no slow at tier 1");
         h.succeed();
     }
@@ -271,10 +277,13 @@ public class DragonGameTests {
         h.succeed();
     }
 
+    /** The drowning damage is 1 at level 1, grown by the caster's power (online, so the tick finds them). */
     @GameTest(template = PLATFORM, batch = "tidalWaveTierThreeTrapsTargetsInADrowningBubble")
     public static void tidalWaveTierThreeTrapsTargetsInADrowningBubble(GameTestHelper h) {
         ServerPlayer p = dragon(h);
         grant(p, "dr_wave_1", "dr_wave_2", "dr_wave_3");
+        PlayerLevel.setLevel(p, 20);
+        online(h, p);
         faceSouth(p);
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 4);
         List<Hit> hits = watch(golem);
@@ -283,7 +292,7 @@ public class DragonGameTests {
         tick(p, DragonAbilityHandler::onPlayerTick, 80);
         List<Hit> drown = of(hits, DamageTypes.DROWN);
         check(h, !drown.isEmpty(), "bubble drowns its prisoner");
-        near(h, 1.0, drown.get(0).amount(), "1 drowning damage per second");
+        near(h, LevelPower.of(20), drown.get(0).amount(), "1 x power drowning damage per second");
         h.succeed();
     }
 

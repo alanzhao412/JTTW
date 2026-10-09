@@ -157,8 +157,7 @@ public final class LevelManager {
             ByakkoAbilityHandler.removePassiveScaling(player);
             return;
         }
-        int level = PlayerLevel.getLevel(player);
-        StatBlock.compute(cls, level).applyTo(player);
+        StatBlock.of(player).applyTo(player); // the character's own curve, not only the class's
 
         // World Turtle innate passive: +1 physical resistance per level
         TurtleAbilityHandler.applyPassiveScaling(player);
@@ -294,8 +293,10 @@ public final class LevelManager {
             PlayerLevel.setLevel(player, level);
 
             // Compute stat deltas (based on StatBlock, not MC attributes)
-            StatBlock prevStats = StatBlock.compute(cls, prevLevel);
-            StatBlock newStats  = StatBlock.compute(cls, level);
+            var who = com.jttw.engine.reincarnation.ReincarnationOutcome.byId(
+                    player.getPersistentData().getString(com.jttw.engine.reincarnation.AlignmentData.KEY_REINCARNATION_OUTCOME));
+            StatBlock prevStats = StatBlock.compute(cls, who, prevLevel);
+            StatBlock newStats  = StatBlock.compute(cls, who, level);
 
             // Apply new stats immediately
             newStats.applyTo(player);

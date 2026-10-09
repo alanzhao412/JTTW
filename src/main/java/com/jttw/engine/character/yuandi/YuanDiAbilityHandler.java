@@ -1,6 +1,7 @@
 package com.jttw.engine.character.yuandi;
 
 import com.jttw.engine.progression.level.PlayerLevel;
+import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.qi.QiManager;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
@@ -132,6 +133,7 @@ public final class YuanDiAbilityHandler {
 
     private static final Set<UUID> ACTIVE_BREATHS = new HashSet<>();
     private static final float BREATH_QI_PER_TICK = 0.2f;
+    /** The breath's damage each tick at level 1; scaled by Yuan Di's power when it lands. */
     private static final float BREATH_DAMAGE_PER_TICK = 0.4f;
 
     // -----------------------------------------------------------------------
@@ -464,8 +466,8 @@ public final class YuanDiAbilityHandler {
         double width = (tier >= 3) ? 2.0 : 1.0;
         double halfWidth = width / 2.0;
 
-        // Damage
-        float damage = BREATH_DAMAGE_PER_TICK;
+        // Damage: set at level 1, scaled by his power
+        float damage = LevelPower.scaled(player, BREATH_DAMAGE_PER_TICK);
         if (tier >= 2) damage *= 1.3f;
         if (tier >= 3) damage *= 1.3f; // total ~1.7x at T3
         if (transformed) damage *= 1.5f;
@@ -553,6 +555,7 @@ public final class YuanDiAbilityHandler {
 
         boolean transformed = isTransformed(player);
 
+        // Damage at level 1 (scaled by his power below); radius does not scale
         double radius;
         float damage;
         switch (tier) {
@@ -564,6 +567,7 @@ public final class YuanDiAbilityHandler {
             }
             default -> { radius = 5.0; damage = 8.0f; }
         }
+        damage = LevelPower.scaled(player, damage);
 
         // Shockwave — no terrain damage (mobAttack only affects entities)
         AABB box = new AABB(player.position(), player.position()).inflate(radius);
@@ -692,7 +696,7 @@ public final class YuanDiAbilityHandler {
         if (sp.tickCount % 20 == 0) {
             int nightTier = YuanDiSkillTree.TREE.highestTier(
                     SkillTreeData.getUnlockedNodes(sp), "yd_night");
-            if (nightTier >= 3 && !sp.level().isDay()) sp.heal(1.0f);
+            if (nightTier >= 3 && !sp.level().isDay()) sp.heal(LevelPower.scaled(sp, 1.0)); // 1 at level 1
         }
 
         // --- T1 auto-trigger ---
@@ -965,9 +969,9 @@ public final class YuanDiAbilityHandler {
                 target.setDeltaMovement(target.getDeltaMovement().add(pullDir));
                 if (target instanceof ServerPlayer sp2) sp2.hurtMarked = true;
 
-                // T2+: 2 magic damage per second (every 20 ticks)
+                // T2+: 2 magic damage per second at level 1 (every 20 ticks), scaled by his power
                 if (well.tier >= 2 && well.ticksRemaining % 20 == 0) {
-                    target.hurt(player.damageSources().magic(), 2.0f);
+                    target.hurt(player.damageSources().magic(), LevelPower.scaled(player, 2.0));
                 }
             }
 

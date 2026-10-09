@@ -3,6 +3,7 @@ package com.jttw.engine.character.dragon;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.character.Characters;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
+import com.jttw.engine.progression.stats.LevelPower;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -20,7 +21,8 @@ import net.minecraftforge.fml.common.Mod;
  *   <li><b>Draconic Pressure</b> I: hostile mobs within 6 blocks are slowed (Slowness I).
  *       II: within 8 blocks, and weakened too (Weakness I).</li>
  *   <li><b>Tidal Recovery</b> I: +0.5 HP/s while in water or rain. II: +1.0 HP/s in water or
- *       rain, and +0.5 HP/s anywhere else.</li>
+ *       rain, and +0.5 HP/s anywhere else. These are level-1 rates, scaled by the player's
+ *       level power.</li>
  * </ul>
  */
 @Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
@@ -35,6 +37,7 @@ public final class DragonPassives {
         return tier >= 2 ? 8.0 : 6.0;
     }
 
+    /** Tidal Recovery's heal per second at level 1 (the tick scales it by level power). */
     public static float tidalRegenPerSecond(int tier, boolean wet) {
         if (tier >= 2) return wet ? 1.0f : 0.5f;
         if (tier == 1) return wet ? 0.5f : 0f;
@@ -58,6 +61,6 @@ public final class DragonPassives {
         }
 
         float regen = tidalRegenPerSecond(SkillTreeData.getDrTidalTier(sp), sp.isInWaterOrRain());
-        if (regen > 0 && sp.isAlive() && sp.getHealth() < sp.getMaxHealth()) sp.heal(regen);
+        if (regen > 0 && sp.isAlive() && sp.getHealth() < sp.getMaxHealth()) sp.heal(LevelPower.scaled(sp, regen));
     }
 }

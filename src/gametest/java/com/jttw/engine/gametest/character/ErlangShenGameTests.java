@@ -7,7 +7,10 @@ import com.jttw.engine.character.PlayableCharacter;
 import com.jttw.engine.character.erlang.ErlangShenAbilityHandler;
 import com.jttw.engine.character.erlang.XiaotianQuanManager;
 import com.jttw.engine.entity.XiaotianQuanEntity;
+import com.jttw.engine.progression.level.LevelManager;
+import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
+import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.registry.ModItems;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
 import net.minecraft.gametest.framework.GameTest;
@@ -167,6 +170,15 @@ public class ErlangShenGameTests {
         near(h, 12.0, peak.getAttributeBaseValue(Attributes.ATTACK_DAMAGE), "tier 3 attack");
         near(h, 0.42, peak.getAttributeBaseValue(Attributes.MOVEMENT_SPEED), "tier 3 speed");
         near(h, 8.0, peak.getAttributeBaseValue(Attributes.ARMOR), "tier 3 armor");
+
+        // Its health and attack follow its owner's level while it is out; armor and speed do not
+        PlayerLevel.setLevel(p, 20);
+        LevelManager.reapplyStats(p);
+        XiaotianQuanManager.refreshStats(p, peak);
+        near(h, 80.0 * LevelPower.of(p), peak.getMaxHealth(), "level 20 hp");
+        near(h, peak.getMaxHealth(), peak.getHealth(), "still at full health");
+        near(h, 12.0 * LevelPower.of(p), peak.getAttributeBaseValue(Attributes.ATTACK_DAMAGE), "level 20 attack");
+        near(h, 8.0, peak.getAttributeBaseValue(Attributes.ARMOR), "armor as before");
         XiaotianQuanManager.dismiss(p);
         h.succeed();
     }

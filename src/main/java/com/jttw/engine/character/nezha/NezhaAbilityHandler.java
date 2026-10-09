@@ -5,6 +5,7 @@ import com.jttw.engine.registry.ModItems;
 import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
+import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.item.*;
 import com.jttw.engine.network.NetworkHandler;
@@ -130,11 +131,12 @@ public final class NezhaAbilityHandler {
     }
 
     /**
-     * Burn per second for a target in the stream: the spear fireball's 5, plus 120% / 150% / 180%
-     * ATK at tiers 1-3. Dealt in {@code 20 / SAMADHI_HIT_INTERVAL} equal hits.
+     * Burn per second for a target in the stream: the spear fireball's 5 (at level 1, times Nezha's
+     * level {@code power}), plus 120% / 150% / 180% ATK at tiers 1-3. Dealt in
+     * {@code 20 / SAMADHI_HIT_INTERVAL} equal hits.
      */
-    public static float samadhiDamagePerSecond(float attack, int tier) {
-        return FireTipSpearItem.FIREBALL_DAMAGE + attack * samadhiDamageMultiplier(tier);
+    public static float samadhiDamagePerSecond(float attack, int tier, double power) {
+        return (float) (FireTipSpearItem.FIREBALL_DAMAGE * power) + attack * samadhiDamageMultiplier(tier);
     }
 
     /** Share of Nezha's attack added to the stream's burn per second: 120% / 150% / 180% at tiers 1-3. */
@@ -174,8 +176,8 @@ public final class NezhaAbilityHandler {
         }
         if (player.tickCount % SAMADHI_HIT_INTERVAL != 0) return;
 
-        float perHit = samadhiDamagePerSecond((float) player.getAttributeValue(Attributes.ATTACK_DAMAGE), tier)
-                * SAMADHI_HIT_INTERVAL / 20f;
+        float perHit = samadhiDamagePerSecond((float) player.getAttributeValue(Attributes.ATTACK_DAMAGE), tier,
+                LevelPower.of(player)) * SAMADHI_HIT_INTERVAL / 20f;
         AABB box = new AABB(eye, eye.add(look.scale(range))).inflate(halfWidth + 1.0);
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, box,
                 e -> e.isAlive() && e != player && !e.isAlliedTo(player))) {

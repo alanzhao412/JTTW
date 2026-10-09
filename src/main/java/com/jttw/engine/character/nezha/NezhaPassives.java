@@ -3,6 +3,7 @@ package com.jttw.engine.character.nezha;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.character.PassiveModifiers;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
+import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.registry.ModAttributes;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
@@ -17,7 +18,7 @@ import net.minecraftforge.fml.common.Mod;
  * Nezha's passive skills (Heavenly Qi's regen is in {@link com.jttw.engine.progression.qi.QiManager}).
  *
  * <ul>
- *   <li><b>Lotus Body</b> I/II: +20 max HP each.</li>
+ *   <li><b>Lotus Body</b> I/II: +20 max HP each at level 1, growing with level power.</li>
  *   <li><b>Heavenly Warrior</b> I: +15% movement speed. II: +20% damage. III: +24 physical
  *       resistance and immunity to fire and lava.</li>
  * </ul>
@@ -40,11 +41,13 @@ public final class NezhaPassives {
         }
         int warrior = nezha ? SkillTreeData.getNzCombatTier(sp) : 0;
 
-        PassiveModifiers.add(sp, Attributes.MAX_HEALTH, "nz_fort_hp", 20.0 * body);
+        // Refreshed every second, so the bonus keeps pace with level power
+        PassiveModifiers.add(sp, Attributes.MAX_HEALTH, "nz_fort_hp", 20.0 * body * LevelPower.of(sp));
         PassiveModifiers.set(sp, Attributes.MOVEMENT_SPEED, "nz_combat_speed", warrior >= 1 ? 0.15 : 0,
                 AttributeModifier.Operation.MULTIPLY_BASE);
+        // A share of his whole attack: his base is 1, so MULTIPLY_BASE would add only 0.2
         PassiveModifiers.set(sp, Attributes.ATTACK_DAMAGE, "nz_combat_dmg", warrior >= 2 ? 0.20 : 0,
-                AttributeModifier.Operation.MULTIPLY_BASE);
+                AttributeModifier.Operation.MULTIPLY_TOTAL);
         PassiveModifiers.add(sp, ModAttributes.PHYSICAL_RESISTANCE.get(), "nz_combat_pres", warrior >= 3 ? 24.0 : 0);
         if (warrior >= 3 && sp.isOnFire()) sp.clearFire();
     }

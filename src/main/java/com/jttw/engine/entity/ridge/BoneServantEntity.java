@@ -1,5 +1,6 @@
 package com.jttw.engine.entity.ridge;
 
+import com.jttw.engine.entity.MobScaling;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -53,7 +54,8 @@ public class BoneServantEntity extends RidgeMonster {
     /** How far its blow reaches from its edge. */
     public static final double REACH = 2.6;
 
-    public static final double HEALTH = 300, DAMAGE = 40, SPEED = 0.17;
+    /** Eight of a same-level character's ordinary hits to kill; a blow of half their health, before resistance. */
+    public static final double HITS = 8, BLOW = 0.5, SPEED = 0.17;
 
     private static final EntityDataAccessor<Boolean> RAISING = SynchedEntityData.defineId(BoneServantEntity.class, EntityDataSerializers.BOOLEAN);
 
@@ -64,13 +66,24 @@ public class BoneServantEntity extends RidgeMonster {
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
-                .add(Attributes.MAX_HEALTH, HEALTH)
-                .add(Attributes.ATTACK_DAMAGE, DAMAGE)
+                // as a level-20 one; each sets its own by its level (become)
+                .add(Attributes.MAX_HEALTH, HITS * MobScaling.typicalHit(LEVEL))
+                .add(Attributes.ATTACK_DAMAGE, BLOW * MobScaling.typicalHealth(LEVEL))
                 .add(Attributes.ATTACK_KNOCKBACK, 2.0)
                 .add(Attributes.MOVEMENT_SPEED, SPEED)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.9)
                 .add(Attributes.ARMOR, 4)
                 .add(Attributes.FOLLOW_RANGE, 32);
+    }
+
+    @Override
+    protected double hitsToKill() {
+        return HITS;
+    }
+
+    @Override
+    protected double blowShare() {
+        return BLOW;
     }
 
     @Override

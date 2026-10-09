@@ -4,6 +4,7 @@ import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.character.Characters;
 import com.jttw.engine.character.PassiveModifiers;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
+import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.registry.ModAttributes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
@@ -22,7 +23,8 @@ import net.minecraftforge.fml.common.Mod;
  *
  * <ul>
  *   <li><b>Bedrock Constitution</b> I: +0.5 HP/s regen, +16 physical resistance. II: +1.0 HP/s,
- *       +32 physical resistance, and an unbreakable constitution: no knockback.</li>
+ *       +32 physical resistance, and an unbreakable constitution: no knockback. The regen is
+ *       a level-1 rate, scaled by the player's level power; the resistance is not.</li>
  *   <li><b>Earthen Roots</b> I: after standing still for 1 s, -15% damage taken. II: -30%, and
  *       attackers take a quarter of the hit back as thorns.</li>
  * </ul>
@@ -42,7 +44,7 @@ public final class TurtlePassives {
         return Characters.of(p) == TurtleCharacter.INSTANCE;
     }
 
-    /** Bedrock Constitution's regen, in HP per second. */
+    /** Bedrock Constitution's regen, in HP per second at level 1 (the tick scales it by level power). */
     public static float bedrockRegenPerSecond(int tier) {
         return tier >= 2 ? 1.0f : tier == 1 ? 0.5f : 0f;
     }
@@ -78,7 +80,7 @@ public final class TurtlePassives {
         PassiveModifiers.add(sp, ModAttributes.PHYSICAL_RESISTANCE.get(), "tu_bedrock_pres", bedrockResistance(bedrock));
         PassiveModifiers.add(sp, Attributes.KNOCKBACK_RESISTANCE, "tu_bedrock_kb", bedrock >= 2 ? 1.0 : 0.0);
         if (bedrock >= 1 && sp.isAlive() && sp.getHealth() < sp.getMaxHealth()) {
-            sp.heal(bedrockRegenPerSecond(bedrock));
+            sp.heal(LevelPower.scaled(sp, bedrockRegenPerSecond(bedrock)));
         }
     }
 

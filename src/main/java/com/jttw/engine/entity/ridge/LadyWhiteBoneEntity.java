@@ -1,5 +1,6 @@
 package com.jttw.engine.entity.ridge;
 
+import com.jttw.engine.entity.MobScaling;
 import com.jttw.engine.progression.level.EnemyTier;
 import com.jttw.engine.registry.ModEntities;
 import com.jttw.engine.world.CurseOfTheDead;
@@ -62,7 +63,9 @@ import java.util.UUID;
 public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
 
     public static final int LEVEL = 33;
-    public static final double HEALTH = 2400, SHARD_DAMAGE = 16;
+    /** Sixty of a level-33 character's ordinary hits to kill; each shard a sixth of their health, before resistance. */
+    public static final double HITS = 60, SHARD = 1.0 / 6, CLAW = 0.25;
+    public static final double HEALTH = HITS * MobScaling.typicalHit(LEVEL), SHARD_DAMAGE = SHARD * MobScaling.typicalHealth(LEVEL);
     /** How often the veil falls, and how long it blinds, in ticks. */
     public static final int VEIL_EVERY = 280, VEIL_BLINDS = 100;
     /** How far the veil reaches. */
@@ -94,7 +97,7 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, HEALTH)
-                .add(Attributes.ATTACK_DAMAGE, 20)
+                .add(Attributes.ATTACK_DAMAGE, CLAW * MobScaling.typicalHealth(LEVEL))
                 .add(Attributes.MOVEMENT_SPEED, 0.26)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.8)
                 .add(Attributes.ARMOR, 8)

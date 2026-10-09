@@ -5,6 +5,7 @@ import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.qi.QiManager;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
 import com.jttw.engine.progression.stats.DivineBeastLine;
+import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.progression.stats.ProgressionClass;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.network.NetworkHandler;
@@ -43,7 +44,7 @@ import java.util.UUID;
  * Server-side handler for Solar Sovereign line (FIRE Divine Beast) abilities:
  * <ul>
  *   <li><b>Innate passive — Regen:</b> higher base HP regen than other classes,
- *       scaling from +0.5/s at level 1 to +2.0/s at level 100.</li>
+ *       +0.5/s at level 1, times the player's power: the same share of their health at every level.</li>
  *   <li><b>Innate passive — Phoenix Rebirth:</b> at 10% HP, fully restore HP,
  *       trigger fire explosion (5 block radius, scales with max HP).
  *       Start with 5 revive charges; gain 1 per Minecraft week.</li>
@@ -51,7 +52,7 @@ import java.util.UUID;
  *       Range: 5 blocks at level 1, 20 at level 100. Width: 1 block, 3 at level 100 with T3.
  *       Cannot move while active. Drains Qi.</li>
  *   <li><b>Life Drain (PASSIVE):</b> T1: heal 0.5 hearts per damaging attack.
- *       T2: heal 1 heart per attack.</li>
+ *       T2: heal 1 heart per attack. (At level 1; scaled by the player's power.)</li>
  *   <li><b>Rebirth Mastery (PASSIVE):</b> T1: 8 block explosion. T2: 12 blocks + 2 revives/week.</li>
  *   <li><b>Solar Radiance (TOGGLE aura):</b> T1: emit light, fire thorns 3s.
  *       T2: doubled light radius, fire thorns 5s. T3: 2x fire thorns damage + Weakness I.</li>
@@ -68,10 +69,8 @@ public final class PhoenixAbilityHandler {
     // Innate passive — regen scaling
     // -----------------------------------------------------------------------
 
-    /** Base regen per second at level 1. */
+    /** Regen per second at level 1, multiplied by the player's power so it keeps pace with their health. */
     private static final float REGEN_BASE = 0.5f;
-    /** Additional regen per level (so level 100 = 0.5 + 99*0.015 ≈ 2.0/s). */
-    private static final float REGEN_PER_LEVEL = 0.015f;
 
     // -----------------------------------------------------------------------
     // Flamethrower state
@@ -81,7 +80,7 @@ public final class PhoenixAbilityHandler {
 
     /** Qi drain per tick while flamethrower is active (0.25 = 5/sec). */
     private static final float FLAME_QI_PER_TICK = 0.25f;
-    /** Base damage per tick (0.5 = 10 damage/sec). */
+    /** Base damage per tick at level 1 (0.5 = 10 damage/sec); scaled by the player's power when it lands. */
     private static final float FLAME_DAMAGE_PER_TICK = 0.5f;
     /** Fire ticks applied to targets. */
     private static final int FLAME_FIRE_TICKS = 40; // 2 seconds
@@ -196,8 +195,7 @@ public final class PhoenixAbilityHandler {
 
         // --- Passive HP regen (every 20 ticks = 1 second) ---
         if (sp.tickCount % 20 == 0 && sp.isAlive()) {
-            int level = PlayerLevel.getLevel(sp);
-            float regenPerSec = REGEN_BASE + level * REGEN_PER_LEVEL;
+            float regenPerSec = LevelPower.scaled(sp, REGEN_BASE);
             float newHp = Math.min(sp.getHealth() + regenPerSec, sp.getMaxHealth());
             sp.setHealth(newHp);
         }
@@ -257,8 +255,8 @@ public final class PhoenixAbilityHandler {
         }
         double halfWidth = width / 2.0;
 
-        // Damage scaling
-        float damage = FLAME_DAMAGE_PER_TICK;
+        // Damage scaling: set at level 1, scaled by the player's power
+        float damage = LevelPower.scaled(player, FLAME_DAMAGE_PER_TICK);
         int fireTicks = FLAME_FIRE_TICKS;
         if (tier >= 2) {
             damage *= 1.5f;
@@ -370,10 +368,11 @@ public final class PhoenixAbilityHandler {
 
         // --- Life Drain ---
         int drainTier = PhoenixSkillTree.TREE.highestTier(nodes, "ph_drain");
+        // A heart (II) or half a heart (I) at level 1, scaled by the player's power
         if (drainTier >= 2) {
-            attacker.heal(2.0f); // 1 heart
+            attacker.heal(LevelPower.scaled(attacker, 2.0));
         } else if (drainTier >= 1) {
-            attacker.heal(1.0f); // half heart
+            attacker.heal(LevelPower.scaled(attacker, 1.0));
         }
 
         // --- Molten Talons T1: melee attacks set targets on fire ---

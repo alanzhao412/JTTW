@@ -11,7 +11,9 @@ import com.jttw.engine.character.yuandi.YuanDiPassives;
 import com.jttw.engine.item.ImmortalPeachItem;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.qi.QiManager;
+import com.jttw.engine.progression.level.LevelManager;
 import com.jttw.engine.progression.level.PlayerLevel;
+import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.progression.stats.StatBlock;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
 import net.minecraft.gametest.framework.GameTest;
@@ -120,9 +122,15 @@ public class PassiveSkillsGameTests {
         eq(h, 40.0, modifier(p, Attributes.MAX_HEALTH, "nz_fort_hp"), "Lotus Body II");
         eq(h, 0.15, modifier(p, Attributes.MOVEMENT_SPEED, "nz_combat_speed"), "Warrior I: speed");
         eq(h, null, modifier(p, Attributes.ATTACK_DAMAGE, "nz_combat_dmg"), "no damage bonus yet");
+        PlayerLevel.setLevel(p, 20);
+        LevelManager.reapplyStats(p);
+        second(p, NezhaPassives::onPlayerTick);
+        near(h, 40.0 * LevelPower.of(p), modifier(p, Attributes.MAX_HEALTH, "nz_fort_hp"), "Lotus Body grows with level");
+        double attack = p.getAttributeValue(Attributes.ATTACK_DAMAGE);
         grant(p, "nz_combat_2", "nz_combat_3");
         second(p, NezhaPassives::onPlayerTick);
         eq(h, 0.20, modifier(p, Attributes.ATTACK_DAMAGE, "nz_combat_dmg"), "Warrior II: damage");
+        near(h, attack * 1.2, p.getAttributeValue(Attributes.ATTACK_DAMAGE), "+20% of his whole attack");
         eq(h, 24.0, modifier(p, PHYSICAL_RESISTANCE(), "nz_combat_pres"), "Warrior III: resistance");
         h.succeed();
     }

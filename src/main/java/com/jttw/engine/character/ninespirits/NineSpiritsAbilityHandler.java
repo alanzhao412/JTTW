@@ -8,6 +8,7 @@ import com.jttw.engine.network.s2c.SyncLeadHeadPacket;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.qi.QiManager;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
+import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.registry.ModAttributes;
 import com.jttw.engine.transformation.FormClassifier;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -101,6 +102,7 @@ public final class NineSpiritsAbilityHandler {
     public static final float FLARE_QI = 12f;
     public static final float FORM_QI_PER_TICK = 0.25f;
     public static final int LIFE_RECHARGE_TICKS = 6000;
+    /** Health a saved life leaves him on, at level 1: grows with level power. */
     public static final float LIFE_SAVED_HEALTH = 8f;
 
     private static boolean onCooldown(ServerPlayer p, String key) {
@@ -398,7 +400,7 @@ public final class NineSpiritsAbilityHandler {
         int used = pd.getInt(KEY_LIVES_USED) + 1;
         pd.putInt(KEY_LIVES_USED, used);
         if (used == 1 || !pd.contains(KEY_LIFE_BACK_AT)) pd.putLong(KEY_LIFE_BACK_AT, p.level().getGameTime() + LIFE_RECHARGE_TICKS);
-        p.setHealth(LIFE_SAVED_HEALTH);
+        p.setHealth(LevelPower.scaled(p, LIFE_SAVED_HEALTH));
         p.clearFire();
         p.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 40, 4));
         p.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 100, 1));

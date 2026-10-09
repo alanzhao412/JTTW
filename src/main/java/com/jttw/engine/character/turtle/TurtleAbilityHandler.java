@@ -5,6 +5,7 @@ import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.qi.QiManager;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
 import com.jttw.engine.progression.stats.DivineBeastLine;
+import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.progression.stats.ProgressionClass;
 import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.network.s2c.SyncCooldownPacket;
@@ -45,7 +46,8 @@ import java.util.UUID;
  *   <li><b>Shell Guard (HELD):</b> massive damage reduction, slow, no attacks.
  *       T2: negate projectiles. T3: negate explosions.</li>
  *   <li><b>Unstoppable Force (USE):</b> dash 20 blocks forward, AoE explosion on impact,
- *       knockback scales with tier (20/35/50 blocks). Damage scales with physical resistance.
+ *       knockback scales with tier (20/35/50 blocks). Damage scales with physical resistance
+ *       and the player's level power.
  *       T3: stun on hit.</li>
  *   <li><b>Tectonic Slam (USE):</b> stomp the ground, AoE damage centered on player.
  *       T2: lingering damage zone. T3: launch mobs upward.</li>
@@ -105,6 +107,9 @@ public final class TurtleAbilityHandler {
     private static final Map<UUID, Long> TECTONIC_COOLDOWNS = new HashMap<>();
     private static final int TECTONIC_COOLDOWN_TICKS = 200; // 10 seconds
     private static final float TECTONIC_QI_COST = 10.0f;
+
+    /** A lingering zone's damage per second at level 1; it grows with the owner's level power. */
+    private static final float LINGERING_DAMAGE = 1.0f;
 
     /**
      * Lingering damage zones: maps a zone key to its state.
@@ -308,8 +313,9 @@ public final class TurtleAbilityHandler {
             default -> { baseDmg = 6.0f;  knockbackRadius = 20.0; defScale = 0.04f; }
         }
 
-        // Total damage = base + physical resistance × defScale
-        float totalDamage = (float) (baseDmg + pres * defScale);
+        // Total damage = (base + physical resistance × defScale) × level power. Resistance stops
+        // growing at level 40, so the whole sum scales, not just the base.
+        float totalDamage = LevelPower.scaled(player, baseDmg + pres * defScale);
 
         // Damage + knockback all entities in radius
         double damageRadius = 8.0; // direct damage radius (close range)
@@ -402,8 +408,9 @@ public final class TurtleAbilityHandler {
             default -> radius = 6.0;
         }
 
-        // Calculate damage: 4.0 + 4% of physical resistance
-        float damage = (float) (4.0 + com.jttw.engine.progression.stats.ResistanceHandler.physicalResistance(player) * 0.04);
+        // Calculate damage: (4.0 + 4% of physical resistance) × level power
+        float damage = LevelPower.scaled(player,
+                4.0 + com.jttw.engine.progression.stats.ResistanceHandler.physicalResistance(player) * 0.04);
 
         // Hit all entities in AoE
         AABB box = new AABB(player.position(), player.position()).inflate(radius);
@@ -606,7 +613,7 @@ public final class TurtleAbilityHandler {
                 continue;
             }
 
-            // Apply 1 damage/sec (every 20 ticks) to mobs in the zone
+            // Apply LINGERING_DAMAGE x the owner's power each second (every 20 ticks) to mobs in the zone
             if (elapsed % 20 != 0) continue;
 
             // Find the owner player (needed for damage source)
@@ -621,7 +628,7 @@ public final class TurtleAbilityHandler {
                     e -> e.isAlive() && e != owner && e instanceof LivingEntity)) {
                 double dist = target.position().distanceTo(zone.center());
                 if (dist <= zone.radius()) {
-                    target.hurt(owner.damageSources().playerAttack(owner), 1.0f);
+                    target.hurt(owner.damageSources().playerAttack(owner), LevelPower.scaled(owner, LINGERING_DAMAGE));
                 }
             }
 

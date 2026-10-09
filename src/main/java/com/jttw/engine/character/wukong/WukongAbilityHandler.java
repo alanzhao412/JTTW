@@ -58,7 +58,8 @@ public final class WukongAbilityHandler {
     private static final float  QI_REGEN_T2_TICK    = 0.15f;  // 3/sec
     private static final int    FIRE_TICKS_T1       = 40;     // 2s
     private static final int    FIRE_TICKS_T3       = 60;     // 3s
-    private static final float  RING_DAMAGE         = 1.0f;   // 0.5 hearts
+    /** Burn per pulse at level 1 (half a heart); scaled by Wukong's power when it lands. */
+    private static final float  RING_DAMAGE         = 1.0f;
 
     public static void startRing(ServerPlayer player) {
         if (SkillTreeData.getRingTier(player) < 1) return;
@@ -141,6 +142,7 @@ public final class WukongAbilityHandler {
         );
 
         DamageSource fireSrc = player.level().damageSources().magic();
+        float ringDamage = com.jttw.engine.progression.stats.LevelPower.scaled(player, RING_DAMAGE);
 
         for (LivingEntity entity : nearby) {
             // Horizontal only: from the ring's centre straight out, at the mob's own height
@@ -160,7 +162,7 @@ public final class WukongAbilityHandler {
             );
 
             entity.setRemainingFireTicks(fireTicks);
-            entity.hurt(fireSrc, RING_DAMAGE);
+            entity.hurt(fireSrc, ringDamage);
 
             if (tier >= 3) {
                 double dist = entity.distanceTo(player);
@@ -363,6 +365,8 @@ public final class WukongAbilityHandler {
 
     private static final Set<UUID> ACTIVE_GOLDEN_EYES_XRAY = new HashSet<>();
     private static final float GOLDEN_EYES_QI_DRAIN = 0.05f; // per tick, same as Eye of Heaven T3
+    /** The Eye Laser's hit on each entity in its path at level 1; scaled by Wukong's power. */
+    private static final float EYE_LASER_DAMAGE = 8.0f;
 
     /**
      * Toggle xray mode for Fiery Golden Eyes.
@@ -416,7 +420,8 @@ public final class WukongAbilityHandler {
         NetworkHandler.sendToPlayer(player,
                 new SyncCooldownPacket(player.getUUID(), "wu_golden_eyes", 100, 100));
 
-        // Fire the beam
+        // Fire the beam: 8 damage at level 1, scaled by his power
+        float laserDamage = com.jttw.engine.progression.stats.LevelPower.scaled(player, EYE_LASER_DAMAGE);
         Vec3 eye = player.getEyePosition();
         Vec3 look = player.getLookAngle();
         ServerLevel level = player.serverLevel();
@@ -460,7 +465,7 @@ public final class WukongAbilityHandler {
             List<LivingEntity> hit = level.getEntitiesOfClass(LivingEntity.class, hitBox,
                     e -> e != player && e.isAlive());
             for (LivingEntity entity : hit) {
-                entity.hurt(level.damageSources().magic(), 8.0f);
+                entity.hurt(level.damageSources().magic(), laserDamage);
                 entity.setRemainingFireTicks(60); // 3 seconds
             }
         }

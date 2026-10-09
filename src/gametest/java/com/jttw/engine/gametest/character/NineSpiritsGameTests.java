@@ -6,7 +6,10 @@ import com.jttw.engine.character.Characters;
 import com.jttw.engine.character.ninespirits.NineSpiritsAbilityHandler;
 import com.jttw.engine.character.ninespirits.NineSpiritsCharacter;
 import com.jttw.engine.item.BellOfTaiyiItem;
+import com.jttw.engine.progression.level.LevelManager;
+import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
+import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
@@ -255,7 +258,11 @@ public class NineSpiritsGameTests {
         eq(h, 2, NineSpiritsAbilityHandler.livesLeft(p), "two lives");
         check(h, killed(p).isCanceled(), "first death cheated");
         near(h, NineSpiritsAbilityHandler.LIFE_SAVED_HEALTH, p.getHealth(), "back at 4 hearts");
+        PlayerLevel.setLevel(p, 20);
+        LevelManager.reapplyStats(p);
         check(h, killed(p).isCanceled(), "second death cheated");
+        near(h, NineSpiritsAbilityHandler.LIFE_SAVED_HEALTH * LevelPower.of(p), p.getHealth(),
+                "at level 20, 4 hearts at his power");
         check(h, !killed(p).isCanceled(), "the third is real");
         LivingDeathEvent kill = new LivingDeathEvent(p, p.damageSources().genericKill());
         NineSpiritsAbilityHandler.onDeath(kill);

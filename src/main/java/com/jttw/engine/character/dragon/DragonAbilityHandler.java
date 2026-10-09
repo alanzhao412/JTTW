@@ -4,6 +4,7 @@ import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
 import com.jttw.engine.progression.stats.DivineBeastLine;
+import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.progression.stats.ProgressionClass;
 import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.network.s2c.SyncCooldownPacket;
@@ -59,6 +60,7 @@ public final class DragonAbilityHandler {
     // -----------------------------------------------------------------------
 
     private static final double LIGHTNING_RANGE = 5.0;
+    /** The fixed part of a bolt's damage at level 1; it grows with the caster's level power. */
     private static final float BASE_LIGHTNING_DAMAGE = 4.0f;
     private static final float QI_COST_LIGHTNING = 8.0f;
     private static final int LIGHTNING_COOLDOWN_TICKS = 20; // 1 second
@@ -66,7 +68,7 @@ public final class DragonAbilityHandler {
 
     /**
      * Summon lightning at the block the player is looking at (up to 5 blocks).
-     * Damage scales with the player's attack damage attribute (STR).
+     * Damage is a fixed base (scaled by the caster's level power) plus half their attack.
      */
     public static void castLightning(ServerPlayer player) {
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
@@ -108,7 +110,7 @@ public final class DragonAbilityHandler {
             default -> 1.0f;
         };
 
-        float totalDamage = (float) (BASE_LIGHTNING_DAMAGE + attackDamage * 0.5) * damageMultiplier;
+        float totalDamage = (float) (LevelPower.scaled(player, BASE_LIGHTNING_DAMAGE) + attackDamage * 0.5) * damageMultiplier;
 
         for (int i = 0; i < boltCount; i++) {
             // Tier 3: spread bolts in a small cone
@@ -392,6 +394,9 @@ public final class DragonAbilityHandler {
 
     private static final Map<Integer, BubbleEntry> BUBBLE_TARGETS = new ConcurrentHashMap<>();
 
+    /** Drowning damage per second inside the bubble at level 1; it grows with the caster's level power. */
+    private static final float BUBBLE_DROWN_DAMAGE = 1.0f;
+
     private record BubbleEntry(int entityId, UUID sourcePlayerId, int remainingTicks) {}
 
     // -----------------------------------------------------------------------
@@ -600,7 +605,8 @@ public final class DragonAbilityHandler {
     }
 
     /**
-     * Tick bubble drowning: deal 1 damage per second to trapped entities.
+     * Tick bubble drowning: deal {@link #BUBBLE_DROWN_DAMAGE} (at the caster's power) per second
+     * to trapped entities.
      */
     private static void tickBubbleDrowning(ServerLevel level) {
         Iterator<Map.Entry<Integer, BubbleEntry>> it = BUBBLE_TARGETS.entrySet().iterator();
@@ -615,13 +621,13 @@ public final class DragonAbilityHandler {
                 continue;
             }
 
-            // Deal 1 drowning damage per second
+            // Deal the drowning damage for this second, at the caster's level power
             if (entity instanceof LivingEntity living) {
                 ServerPlayer source = level.getServer().getPlayerList().getPlayer(bubble.sourcePlayerId());
                 if (source != null) {
-                    living.hurt(source.damageSources().drown(), 1.0f);
+                    living.hurt(source.damageSources().drown(), LevelPower.scaled(source, BUBBLE_DROWN_DAMAGE));
                 } else {
-                    living.hurt(level.damageSources().drown(), 1.0f);
+                    living.hurt(level.damageSources().drown(), BUBBLE_DROWN_DAMAGE);
                 }
             }
 

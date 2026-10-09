@@ -9,8 +9,10 @@ import com.jttw.engine.flight.JTTWFlight;
 import com.jttw.engine.item.FireTipSpearItem;
 import com.jttw.engine.item.QiankunRingItem;
 import com.jttw.engine.item.YinYangSwordItem;
+import com.jttw.engine.progression.level.LevelManager;
 import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
+import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.registry.ModItems;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
 import net.minecraft.gametest.framework.GameTest;
@@ -113,7 +115,8 @@ public class NezhaGameTests {
 
     /** One burn of the stream: a quarter of a second's damage. */
     private static double perHit(ServerPlayer p, int tier) {
-        return NezhaAbilityHandler.samadhiDamagePerSecond((float) p.getAttributeValue(Attributes.ATTACK_DAMAGE), tier) / 4.0;
+        return NezhaAbilityHandler.samadhiDamagePerSecond((float) p.getAttributeValue(Attributes.ATTACK_DAMAGE), tier,
+                LevelPower.of(p)) / 4.0;
     }
 
     @GameTest(template = PLATFORM, batch = "samadhiFireNeedsTheNodeAndTheSpearInHand")
@@ -138,13 +141,15 @@ public class NezhaGameTests {
         holdSpear(p);
         Pig pig = mob(h, EntityType.PIG, 2, 6); // 4 blocks straight ahead
         List<Hit> hits = watch(pig);
+        // as she is when the stream starts: the pig's death can level her up before the second is out
+        double expected = perHit(p, 1);
         character().activate(p, 1, AbilityAction.START);
         check(h, NezhaAbilityHandler.isStreaming(p), "streaming");
         nezhaTicks(p, 20);
         near(h, 92f, QiData.getCurrent(p), "0.4 Qi per tick");
         List<Hit> burns = of(hits, DamageTypes.INDIRECT_MAGIC);
         eq(h, 4, burns.size(), "four burns in a second");
-        near(h, perHit(p, 1), burns.get(0).amount(), "a quarter of 5 + 120% ATK");
+        near(h, expected, burns.get(0).amount(), "a quarter of 5 + 120% ATK");
         check(h, pig.isOnFire(), "set alight");
         character().activate(p, 1, AbilityAction.STOP);
         nezhaTicks(p, 10);
@@ -183,14 +188,18 @@ public class NezhaGameTests {
         h.succeed();
     }
 
-    /** Every second of the stream beats the spear's own 5-damage fireball, and grows with STR and tier. */
+    /** Every second of the stream beats the spear's own 5-damage fireball, and grows with STR, tier and level. */
     @GameTest(template = PLATFORM, batch = "samadhiStreamHitsHarderThanTheSpearsFireballAndScales")
     public static void samadhiStreamHitsHarderThanTheSpearsFireballAndScales(GameTestHelper h) {
-        near(h, 5.0 + 10 * 1.2, NezhaAbilityHandler.samadhiDamagePerSecond(10f, 1), "tier 1: 5 + 120% ATK");
-        near(h, 5.0 + 10 * 1.5, NezhaAbilityHandler.samadhiDamagePerSecond(10f, 2), "tier 2: 5 + 150% ATK");
-        near(h, 5.0 + 10 * 1.8, NezhaAbilityHandler.samadhiDamagePerSecond(10f, 3), "tier 3: 5 + 180% ATK");
-        check(h, NezhaAbilityHandler.samadhiDamagePerSecond(0f, 1) >= FireTipSpearItem.FIREBALL_DAMAGE,
+        near(h, 5.0 + 10 * 1.2, NezhaAbilityHandler.samadhiDamagePerSecond(10f, 1, 1.0), "tier 1: 5 + 120% ATK");
+        near(h, 5.0 + 10 * 1.5, NezhaAbilityHandler.samadhiDamagePerSecond(10f, 2, 1.0), "tier 2: 5 + 150% ATK");
+        near(h, 5.0 + 10 * 1.8, NezhaAbilityHandler.samadhiDamagePerSecond(10f, 3, 1.0), "tier 3: 5 + 180% ATK");
+        check(h, NezhaAbilityHandler.samadhiDamagePerSecond(0f, 1, 1.0) >= FireTipSpearItem.FIREBALL_DAMAGE,
                 "never below the spear's fireball");
+        // The fireball's 5 is a level-1 number: a stronger Nezha's base burns harder too
+        double power = LevelPower.of(20);
+        near(h, 5.0 * power + 10 * 1.2, NezhaAbilityHandler.samadhiDamagePerSecond(10f, 1, power),
+                "level 20: 5 x power + 120% ATK");
         h.succeed();
     }
 

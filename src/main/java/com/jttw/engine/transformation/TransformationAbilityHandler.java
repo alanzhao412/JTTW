@@ -3,6 +3,7 @@ package com.jttw.engine.transformation;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.qi.QiManager;
+import com.jttw.engine.progression.stats.LevelPower;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerLevel;
@@ -82,6 +83,7 @@ public final class TransformationAbilityHandler {
 
     private static final Map<UUID, Long> SONIC_BOOM_COOLDOWNS = new HashMap<>();
     private static final long SONIC_BOOM_COOLDOWN_TICKS = 100L; // 5 seconds
+    /** Sonic boom damage at level 1; it grows with the transformed player's level power. */
     private static final float SONIC_BOOM_DAMAGE = 10.0F;
     private static final double SONIC_BOOM_RANGE = 15.0D;
     private static final float SONIC_BOOM_QI_COST = 5.0F;
@@ -127,7 +129,8 @@ public final class TransformationAbilityHandler {
 
     private static final Map<UUID, Long> GUARDIAN_LASER_COOLDOWNS = new HashMap<>();
     private static final long GUARDIAN_LASER_COOLDOWN_TICKS = 60L; // 3 seconds
-    private static final float GUARDIAN_LASER_TICK_DAMAGE = 1.0F; // 1 damage per interval
+    /** Laser damage per interval at level 1; it grows with the transformed player's level power. */
+    private static final float GUARDIAN_LASER_TICK_DAMAGE = 1.0F;
     private static final int GUARDIAN_LASER_DAMAGE_INTERVAL = 10; // ticks between damage
     private static final double GUARDIAN_LASER_RANGE = 15.0D;
     private static final int GUARDIAN_LASER_MAX_TICKS = 100; // 5 seconds max channel
@@ -138,10 +141,12 @@ public final class TransformationAbilityHandler {
 
     private static final Map<UUID, Long> SNOWBALL_COOLDOWNS = new HashMap<>();
     private static final long SNOWBALL_COOLDOWN_TICKS = 10L; // 0.5 seconds
+    /** Snowball impact damage at level 1; it grows with the thrower's level power. */
     private static final float SNOWBALL_DAMAGE = 3.0F;
 
     private static final Map<UUID, Long> IRON_GOLEM_SLAM_COOLDOWNS = new HashMap<>();
     private static final long IRON_GOLEM_SLAM_COOLDOWN_TICKS = 100L; // 5 seconds
+    /** Slam damage at level 1; it grows with the transformed player's level power. */
     private static final float IRON_GOLEM_SLAM_DAMAGE = 6.0F;
     private static final double IRON_GOLEM_SLAM_RADIUS = 4.0D;
     private static final double IRON_GOLEM_SLAM_LAUNCH_Y = 0.8D;
@@ -321,7 +326,7 @@ public final class TransformationAbilityHandler {
         // Apply sonic boom damage (bypasses armor)
         ServerLevel serverLevel = sp.serverLevel();
         DamageSource sonicBoomDamage = serverLevel.damageSources().sonicBoom(sp);
-        target.hurt(sonicBoomDamage, SONIC_BOOM_DAMAGE);
+        target.hurt(sonicBoomDamage, LevelPower.scaled(sp, SONIC_BOOM_DAMAGE));
 
         // Knockback the target away from the player
         double dx = target.getX() - sp.getX();
@@ -571,9 +576,9 @@ public final class TransformationAbilityHandler {
                     pos.x, pos.y, pos.z, 1, 0.05, 0.05, 0.05, 0.0);
         }
 
-        // --- Deal 1 damage every 10 ticks ---
+        // --- Deal the laser's damage (at the player's power) every 10 ticks ---
         if (elapsed > 0 && elapsed % GUARDIAN_LASER_DAMAGE_INTERVAL == 0) {
-            target.hurt(level.damageSources().magic(), GUARDIAN_LASER_TICK_DAMAGE);
+            target.hurt(level.damageSources().magic(), LevelPower.scaled(sp, GUARDIAN_LASER_TICK_DAMAGE));
         }
 
         // --- Apply Mining Fatigue I to target each tick (refresh duration) ---
@@ -642,7 +647,7 @@ public final class TransformationAbilityHandler {
                     DamageSource src = thrower != null
                             ? level.damageSources().playerAttack(thrower)
                             : level.damageSources().generic();
-                    hit.hurt(src, SNOWBALL_DAMAGE);
+                    hit.hurt(src, thrower != null ? LevelPower.scaled(thrower, SNOWBALL_DAMAGE) : SNOWBALL_DAMAGE);
                 }
                 return true; // remove from list
             }
@@ -676,7 +681,7 @@ public final class TransformationAbilityHandler {
 
         for (LivingEntity target : nearby) {
             // Deal damage
-            target.hurt(serverLevel.damageSources().playerAttack(sp), IRON_GOLEM_SLAM_DAMAGE);
+            target.hurt(serverLevel.damageSources().playerAttack(sp), LevelPower.scaled(sp, IRON_GOLEM_SLAM_DAMAGE));
 
             // Launch upward
             Vec3 motion = target.getDeltaMovement();

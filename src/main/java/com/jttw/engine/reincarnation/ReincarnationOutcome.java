@@ -35,6 +35,13 @@ public enum ReincarnationOutcome {
         this.entityIdConfig = entityIdConfig;
     }
 
+    /** The outcome with this id, or null (none, or not one of these). */
+    @javax.annotation.Nullable
+    public static ReincarnationOutcome byId(String id) {
+        for (ReincarnationOutcome o : values()) if (o.id.equals(id)) return o;
+        return null;
+    }
+
     /** Returns the configured entity id string, or blank if unset. */
     public String configuredEntityId() {
         String v = entityIdConfig.get();

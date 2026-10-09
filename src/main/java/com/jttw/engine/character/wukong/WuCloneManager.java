@@ -6,6 +6,7 @@ import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
 import com.jttw.engine.progression.stats.ProgressionClass;
+import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.progression.stats.StatBlock;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.entity.WuCloneEntity;
@@ -317,10 +318,15 @@ public final class WuCloneManager {
         player.sendSystemMessage(Component.literal("§a" + total + " shadow " + word + " active."));
     }
 
+    /** A clone's max health at its owner's level 1; scaled by the owner's power on summon. */
+    static final double CLONE_HEALTH = 20.0;
+
     private static void applyPlayerStats(WuCloneEntity clone, ServerPlayer player) {
+        // A clone's health is 20 at level 1, scaled by its owner's power
+        float cloneHp = LevelPower.scaled(player, CLONE_HEALTH);
         var maxHp = clone.getAttribute(Attributes.MAX_HEALTH);
-        if (maxHp != null) maxHp.setBaseValue(20.0);
-        clone.setHealth(20.0f);
+        if (maxHp != null) maxHp.setBaseValue(cloneHp);
+        clone.setHealth(cloneHp);
 
         double playerAtk = player.getAttributeValue(Attributes.ATTACK_DAMAGE);
 

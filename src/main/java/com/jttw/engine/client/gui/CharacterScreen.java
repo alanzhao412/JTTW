@@ -305,7 +305,7 @@ public class CharacterScreen extends Screen {
     private static final int C_RADAR_CUR_LINE = 0xFFDD3333;
 
     /** Stat names for the five axes (starting from top, clockwise). */
-    private static final String[] RADAR_LABELS = {"HP", "STR", "PRES", "MRES", "QI", "WILL"};
+    private static final String[] RADAR_LABELS = {"HP", "ATK", "PRES", "MRES", "QI", "WILL"};
     private static final int RADAR_AXES = 6;
 
     /** Angle offset: first axis points straight up (-90°). */
@@ -333,8 +333,8 @@ public class CharacterScreen extends Screen {
         double[] curRatios = new double[RADAR_AXES];
         double[] potRatios = new double[RADAR_AXES];
         for (int i = 0; i < RADAR_AXES; i++) {
-            curRatios[i] = globalMax[i] > 0 ? curVals[i] / globalMax[i] : 0;
-            potRatios[i] = globalMax[i] > 0 ? potVals[i] / globalMax[i] : 0;
+            curRatios[i] = chartRatio(i, curVals[i], globalMax[i]);
+            potRatios[i] = chartRatio(i, potVals[i], globalMax[i]);
         }
 
         // Header
@@ -397,11 +397,15 @@ public class CharacterScreen extends Screen {
         int infoX = cx + cw - 4;
         int infoY = cy + 14;
         int[] statColors = {C_BAR_HP, C_BAR_ATK, C_BAR_PRES, C_BAR_MRES, C_BAR_QI, C_BAR_WILL};
-        for (int i = 0; i < RADAR_AXES; i++) {
-            String line = String.format("§7%s §f%.1f§7/§f%.1f",
-                    RADAR_LABELS[i], curVals[i], potVals[i]);
+        for (int i = 0; i < RADAR_AXES + 1; i++) {
+            // health and attack run into the hundreds of thousands: whole numbers, grouped
+            String line = i == RADAR_AXES
+                    ? String.format("§7STR §f%.1f§7/§f%.1f", current.strength(), potential.strength())
+                    : i < 2 ? String.format("§7%s §f%,.0f§7/§f%,.0f", RADAR_LABELS[i], curVals[i], potVals[i])
+                    : String.format("§7%s §f%.1f§7/§f%.1f", RADAR_LABELS[i], curVals[i], potVals[i]);
+            int color = i == RADAR_AXES ? C_BAR_ATK : statColors[i];
             int sw = mc.font.width(line);
-            g.drawString(mc.font, line, infoX - sw, infoY, statColors[i], false);
+            g.drawString(mc.font, line, infoX - sw, infoY, color, false);
             infoY += mc.font.lineHeight + 2;
         }
 
@@ -418,6 +422,17 @@ public class CharacterScreen extends Screen {
             for (int i = 0; i < RADAR_AXES; i++) max[i] = Math.max(max[i], v[i]);
         }
         return max;
+    }
+
+    /**
+     * Where a value sits on its axis. Health and attack grow by the level power curve (level 100
+     * is ~12,500x level 1), so they are charted by order of magnitude, or a level-20 character
+     * would be a speck; the rest grow by level and are charted as they are.
+     */
+    private static double chartRatio(int axis, double value, double max) {
+        if (max <= 0) return 0;
+        if (axis < 2) return value <= 1 ? 0 : Math.log(value) / Math.log(max);
+        return value / max;
     }
 
     /** A stat block's values in {@link #RADAR_LABELS} order. */

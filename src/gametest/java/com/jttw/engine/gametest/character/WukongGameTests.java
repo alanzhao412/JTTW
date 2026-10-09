@@ -14,6 +14,7 @@ import com.jttw.engine.gametest.GT;
 import com.jttw.engine.item.ImmortalItems;
 import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
+import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
@@ -207,13 +208,14 @@ public class WukongGameTests {
     public static void eyeLaserCostsTenQiAndBurnsWhatItHitsForEight(GameTestHelper h) {
         ServerPlayer p = wukong(h);
         p.getPersistentData().putBoolean(ImmortalItems.KEY_FIERY_GOLDEN_EYES, true);
+        PlayerLevel.setLevel(p, 20); // 8 at level 1, scaled by his power
         Pig pig = pigOverhead(h, p);
         List<Hit> hits = watch(pig);
         WukongCharacter.INSTANCE.activate(p, 3, AbilityAction.USE);
         near(h, 90f, QiData.getCurrent(p), "Qi after the laser");
         List<Hit> magic = of(hits, DamageTypes.MAGIC);
         check(h, !magic.isEmpty(), "pig in the beam is hit");
-        near(h, 8.0, magic.get(0).amount(), "laser damage");
+        near(h, 8.0 * LevelPower.of(p), magic.get(0).amount(), "laser damage at level 20, by his own power");
         eq(h, 60, pig.getRemainingFireTicks(), "pig set on fire for 3 s");
         h.succeed();
     }
@@ -418,12 +420,13 @@ public class WukongGameTests {
     public static void tierOneSummonsOneCloneForTenQi(GameTestHelper h) {
         ServerPlayer p = wukong(h);
         grant(p, "wu_clone_1");
+        PlayerLevel.setLevel(p, 20); // clone health is 20 at level 1, scaled by its owner's power
         summon(p, 1);
         List<WuCloneEntity> one = clones(p);
         eq(h, 1, one.size(), "clones after one press");
         near(h, 90f, QiData.getCurrent(p), "Qi after summoning");
         check(h, WuCloneManager.isActive(p.getUUID()), "manager tracks the clone");
-        near(h, 20.0, one.get(0).getMaxHealth(), "clone max health");
+        near(h, 20.0 * LevelPower.of(p), one.get(0).getMaxHealth(), "clone max health at level 20, by his own power");
         summon(p, 1);
         eq(h, 1, clones(p).size(), "tier 1 caps at one clone");
         near(h, 90f, QiData.getCurrent(p), "capped press costs nothing");

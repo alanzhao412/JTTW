@@ -4,6 +4,7 @@ import com.jttw.engine.registry.ModEntities;
 import com.jttw.engine.registry.ModItems;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.item.RuyiJinguBangItem;
+import com.jttw.engine.progression.stats.LevelPower;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -59,8 +60,9 @@ public class PlacedStaffEntity extends Entity {
     // Damage/explosion scaling — the staff should obliterate everything in its path
     private static final float BASE_EXPLOSION_POWER = 6.0f;
     private static final float EXPLOSION_SCALE_FACTOR = 0.5f; // at 100x → 6 + 50 = 56
+    /** Strike damage is BASE_DAMAGE + size × DAMAGE_SCALE_FACTOR at level 1, times the owner's level power. */
     private static final float BASE_DAMAGE = 20.0f;
-    private static final float DAMAGE_SCALE_FACTOR = 3.0f;     // at 100x → 20 + 300 = 320
+    private static final float DAMAGE_SCALE_FACTOR = 3.0f;     // at 100x → 20 + 300 = 320 at level 1
 
     public PlacedStaffEntity(EntityType<?> type, Level level) {
         super(type, level);
@@ -344,7 +346,7 @@ public class PlacedStaffEntity extends Entity {
 
         // ── Phase 3: Entity damage in the full swept area ──
         float damageRadius = 2.0f + scale * 0.3f;
-        float damage = BASE_DAMAGE + scale * DAMAGE_SCALE_FACTOR;
+        float damage = LevelPower.scaled(owner, BASE_DAMAGE + scale * DAMAGE_SCALE_FACTOR);
 
         double tipX = getX() + dirX * length;
         double tipZ = getZ() + dirZ * length;

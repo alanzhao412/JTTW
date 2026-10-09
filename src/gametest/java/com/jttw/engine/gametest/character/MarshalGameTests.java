@@ -6,8 +6,11 @@ import com.jttw.engine.character.AbilitySlot;
 import com.jttw.engine.character.Characters;
 import com.jttw.engine.character.marshal.MarshalAbilityHandler;
 import com.jttw.engine.character.marshal.MarshalCharacter;
+import com.jttw.engine.progression.level.LevelManager;
+import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.skilltree.AbilityType;
+import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.registry.ModItems;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
 import net.minecraft.core.BlockPos;
@@ -244,6 +247,14 @@ public class MarshalGameTests {
         three.eat(three.level(), new ItemStack(Items.COOKED_BEEF));
         near(h, three.getMaxHealth(), three.getHealth(), "III: healed to full");
         near(h, 14f, three.getAbsorptionAmount(), "and the rest of 16 as golden hearts");
+
+        ServerPlayer strong = marshal(h, "mc_stomach_1");
+        PlayerLevel.setLevel(strong, 20);
+        LevelManager.reapplyStats(strong);
+        fill(strong, 20, 20);
+        strong.setHealth(4f);
+        strong.eat(strong.level(), new ItemStack(Items.COOKED_BEEF));
+        near(h, 4 + 8 * LevelPower.of(strong), strong.getHealth(), "level 20: 8 surplus heals 8 at his power");
         h.succeed();
     }
 

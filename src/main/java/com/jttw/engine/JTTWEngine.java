@@ -41,8 +41,8 @@ import org.slf4j.LoggerFactory;
 public class JTTWEngine {
     public static final String MOD_ID = "jttw_engine";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-    /** The highest max health anything may have. */
-    public static final double MAX_HEALTH_CAP = 1_000_000;
+    /** The highest max health or attack anything may have (see LevelPower: level 100 is ~12,500x level 1). */
+    public static final double STAT_CAP = 1_000_000_000;
 
     public JTTWEngine() {
         @SuppressWarnings("removal")
@@ -55,9 +55,9 @@ public class JTTWEngine {
         ModAttributes.register(modEventBus);
         com.jttw.engine.registry.ModEffects.register(modEventBus);
 
-        // A high-scaling game outgrows vanilla's cap of 1024 max health (Lady White Bone has 2400,
-        // a ridge captain over 1000, and characters keep growing): lift it.
-        ((com.jttw.engine.mixin.RangedAttributeAccessor) net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).jttw$setMaxValue(MAX_HEALTH_CAP);
+        // The campaign's power curve outgrows vanilla's caps of 1024 max health and 2048 attack: lift them.
+        ((com.jttw.engine.mixin.RangedAttributeAccessor) net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).jttw$setMaxValue(STAT_CAP);
+        ((com.jttw.engine.mixin.RangedAttributeAccessor) net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE).jttw$setMaxValue(STAT_CAP);
 
         modEventBus.addListener(this::commonSetup);
 

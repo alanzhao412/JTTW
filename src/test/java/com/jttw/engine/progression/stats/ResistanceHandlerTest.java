@@ -72,9 +72,10 @@ class ResistanceHandlerTest {
     }
 
     @Test
-    void primordialAtLevelHundredBlocksAboutThreeQuartersOfBlows() {
+    void primordialFromLevelFortyBlocksAboutTwoFifthsOfBlows() {
+        // resistance stops at level 40: past it, a character's toughness grows as health
         StatBlock s = StatBlock.compute(ProgressionClass.PRIMORDIAL, 100);
         double taken = ResistanceHandler.damageMultiplier(s.physicalResistance());
-        assertTrue(taken > 0.2 && taken < 0.3, "takes " + taken);
+        assertTrue(taken > 0.55 && taken < 0.65, "takes " + taken);
     }
 }

@@ -5,7 +5,9 @@ import com.jttw.engine.character.AbilityAction;
 import com.jttw.engine.character.Characters;
 import com.jttw.engine.character.PlayableCharacter;
 import com.jttw.engine.character.yuandi.YuanDiAbilityHandler;
+import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
+import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -363,14 +365,15 @@ public class YuanDiGameTests {
     public static void smiteTierOneHitsWithinFiveBlocksAndHasA20SecondCooldown(GameTestHelper h) {
         ServerPlayer p = yuanDi(h);
         grant(p, "yd_smite_1");
+        PlayerLevel.setLevel(p, 20); // the shockwave's damage is set at level 1, scaled by his power
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 4); // exactly 2 blocks away
         List<Hit> hits = watch(golem);
         YuanDiAbilityHandler.usePrimordialSmite(p);
         near(h, 80f, QiData.getCurrent(p), "20 Qi");
         List<Hit> blows = of(hits, DamageTypes.MOB_ATTACK);
         eq(h, 1, blows.size(), "one blow");
-        // 8 damage, falloff 1 - 2/5
-        near(h, 4.8, blows.get(0).amount(), "damage at 2 blocks");
+        // 8 damage at level 1, scaled to level 20, falloff 1 - 2/5
+        near(h, LevelPower.scaled(p, 8.0) * 0.6f, blows.get(0).amount(), "damage at 2 blocks, level 20");
         check(h, golem.getDeltaMovement().z > 0 && golem.getDeltaMovement().y > 0, "launched away");
         eq(h, -1, amp(golem, MobEffects.MOVEMENT_SLOWDOWN), "no slow field at tier 1");
 
@@ -464,6 +467,7 @@ public class YuanDiGameTests {
     public static void abyssalGravityTierThreeCollapsesForThirtyPercentMaxHealth(GameTestHelper h) {
         ServerPlayer p = yuanDi(h);
         grant(p, "yd_gravity_1", "yd_gravity_2", "yd_gravity_3");
+        PlayerLevel.setLevel(p, 20); // the pulses are set at level 1, scaled by his power; the collapse is not
         p.setXRot(90f);
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 4);
         List<Hit> hits = watch(golem);
@@ -471,7 +475,7 @@ public class YuanDiGameTests {
         ticks(p, 59);
         List<Hit> pulses = of(hits, DamageTypes.MAGIC);
         check(h, !pulses.isEmpty(), "tier 2+ well deals damage while pulling");
-        near(h, 2.0, pulses.get(0).amount(), "2 magic per second");
+        near(h, 2.0 * LevelPower.of(p), pulses.get(0).amount(), "2 magic per second at level 1, scaled by his power at 20");
         int before = pulses.size();
         ticks(p, 1);
         List<Hit> after = of(hits, DamageTypes.MAGIC);

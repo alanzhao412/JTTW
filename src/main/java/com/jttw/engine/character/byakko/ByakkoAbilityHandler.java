@@ -4,6 +4,7 @@ import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
 import com.jttw.engine.progression.stats.DivineBeastLine;
+import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.progression.stats.ProgressionClass;
 import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.network.s2c.SyncCooldownPacket;
@@ -48,8 +49,8 @@ import java.util.concurrent.ConcurrentHashMap;
  *       1.0 + 0.01 per level (2.0 at level 100),
  *       eating raw foods removes negative effects</li>
  *   <li><b>Predator's Leap (USE):</b> launch forward, AoE explosion on landing (no terrain damage),
- *       damage scales with STR. T2: bigger AoE. T3: stun enemies.</li>
- *   <li><b>Savage Bleed (passive):</b> attacks apply bleed DOT scaling with STR.
+ *       damage scales with STR and level power. T2: bigger AoE. T3: stun enemies.</li>
+ *   <li><b>Savage Bleed (passive):</b> attacks apply bleed DOT scaling with STR and level power.
  *       T2: stronger/longer. T3: spreads to nearby enemies.</li>
  *   <li><b>Velocity Strike (passive):</b> bonus attack damage based on movement speed.</li>
  * </ul>
@@ -221,7 +222,8 @@ public final class ByakkoAbilityHandler {
             default -> 0.5f;
         };
 
-        float totalDamage = (float) (baseDmg + attackDamage * strScale);
+        // The fixed base is a level-1 number and grows with level power; the STR share already does
+        float totalDamage = (float) (LevelPower.scaled(player, baseDmg) + attackDamage * strScale);
 
         // Damage entities in radius (no terrain destruction)
         AABB box = new AABB(player.position(), player.position()).inflate(radius);
@@ -270,7 +272,8 @@ public final class ByakkoAbilityHandler {
             default -> { bleedPerSec = 1.0f; durationTicks = 60; strScale = 0.10f; }  // 3 sec
         }
 
-        float totalPerSec = (float) (bleedPerSec + attackDamage * strScale);
+        // The fixed per-second base is a level-1 number and grows with level power; the STR share already does
+        float totalPerSec = (float) (LevelPower.scaled(attacker, bleedPerSec) + attackDamage * strScale);
         // Damage every 20 ticks (1 second), so per-tick for tracking = totalPerSec
         // We'll apply damage every 20 ticks, storing damage per application
         BLEEDS.put(target.getId(), new BleedEntry(

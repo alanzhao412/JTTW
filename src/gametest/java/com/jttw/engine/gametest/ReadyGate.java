@@ -21,6 +21,11 @@ import java.util.function.Consumer;
  * test server starts, before the first test runs. The runner's batches hold the same
  * {@link TestFunction} objects, so they run the gated bodies. A test whose platform never
  * becomes ready within {@value #MAX_WAIT_TICKS} ticks fails, saying so.
+ *
+ * <p>A held test's body runs once, however it is reached. The wait is a chain of one-tick
+ * callbacks, added while the runner walks the test's table of callbacks; such a walk can come to
+ * an entry again, and before this guard a held test's body could run two or three times (its
+ * scene set up twice, its end declared twice: "This test already has final clause").
  */
 @Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class ReadyGate {
@@ -54,18 +59,22 @@ public final class ReadyGate {
     private record Gated(Consumer<GameTestHelper> body) implements Consumer<GameTestHelper> {
         @Override
         public void accept(GameTestHelper h) {
-            runWhenReady(h, body, 0);
+            runWhenReady(h, body, 0, new java.util.concurrent.atomic.AtomicBoolean());
         }
     }
 
-    private static void runWhenReady(GameTestHelper h, Consumer<GameTestHelper> body, int waited) {
+    private static void runWhenReady(GameTestHelper h, Consumer<GameTestHelper> body, int waited,
+                                     java.util.concurrent.atomic.AtomicBoolean done) {
+        if (done.get()) return; // reached again: it has run, or failed, already
         if (GT.entityReady(h)) {
+            done.set(true);
             if (waited > 0) JTTWEngine.LOGGER.info("ReadyGate: held a test {} ticks for its platform", waited);
             body.accept(h);
         } else if (waited >= MAX_WAIT_TICKS) {
+            done.set(true);
             GT.requireEntityReady(h); // fails, naming the chunks
         } else {
-            h.runAfterDelay(1, () -> runWhenReady(h, body, waited + 1));
+            h.runAfterDelay(1, () -> runWhenReady(h, body, waited + 1, done));
         }
     }
 }

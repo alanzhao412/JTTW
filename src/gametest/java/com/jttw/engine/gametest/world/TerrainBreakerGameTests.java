@@ -46,8 +46,17 @@ public class TerrainBreakerGameTests {
                 new AABB(h.absolutePos(BlockPos.ZERO), h.absolutePos(new BlockPos(5, 7, 5))).inflate(1), e -> true);
     }
 
+    /**
+     * Clears items already lying on this test's platform. The test world is kept between runs, so
+     * a run that stops before its drops despawn leaves them for the next run to count.
+     */
+    private static void clearItems(GameTestHelper h) {
+        items(h).forEach(net.minecraft.world.entity.Entity::discard);
+    }
+
     @GameTest(template = PLATFORM, batch = "terrainBreaker")
     public static void aVolumeIsClearedWithNoDrops(GameTestHelper h) {
+        clearItems(h);
         List<BlockPos> cube = cube(h, 1, 2, 1, 3);
         cube.forEach(p -> h.getLevel().setBlockAndUpdate(p, Blocks.STONE.defaultBlockState()));
         h.getLevel().setBlockAndUpdate(cube.get(4), Blocks.BEDROCK.defaultBlockState()); // unbreakable
@@ -64,6 +73,7 @@ public class TerrainBreakerGameTests {
 
     @GameTest(template = PLATFORM, batch = "terrainBreaker")
     public static void aChestSpillsWhatIsInItButDropsNothingOfItsOwn(GameTestHelper h) {
+        clearItems(h);
         BlockPos at = h.absolutePos(new BlockPos(2, 2, 2));
         h.getLevel().setBlockAndUpdate(at, Blocks.CHEST.defaultBlockState());
         ((ChestBlockEntity) h.getLevel().getBlockEntity(at)).setItem(0, new ItemStack(Items.DIAMOND, 3));
@@ -100,6 +110,7 @@ public class TerrainBreakerGameTests {
 
     @GameTest(template = PLATFORM, batch = "terrainBreakerPlants")
     public static void whatCanNoLongerStandGoesTooWithoutDropping(GameTestHelper h) {
+        clearItems(h);
         BlockPos soil = h.absolutePos(new BlockPos(2, 2, 2));
         BlockPos flower = soil.above();
         BlockPos soil2 = h.absolutePos(new BlockPos(3, 2, 2));
@@ -119,6 +130,7 @@ public class TerrainBreakerGameTests {
 
     @GameTest(template = PLATFORM, batch = "terrainBreakerKelp")
     public static void kelpLosingItsFootGoesBeforeVanillaCanDropIt(GameTestHelper h) {
+        clearItems(h);
         BlockPos foot = h.absolutePos(new BlockPos(2, 2, 2));
         h.getLevel().setBlockAndUpdate(foot, Blocks.KELP_PLANT.defaultBlockState());
         h.getLevel().setBlockAndUpdate(foot.above(), Blocks.KELP_PLANT.defaultBlockState());
@@ -136,6 +148,7 @@ public class TerrainBreakerGameTests {
 
     @GameTest(template = PLATFORM, batch = "terrainBreakerBlast")
     public static void aBlastHurtsNowAndCarvesWithoutDrops(GameTestHelper h) {
+        clearItems(h);
         var golem = mob(h, EntityType.IRON_GOLEM, 3, 2); // lives through it, so drops no loot of its own
         List<Hit> log = watch(golem);
         BlockPos floor = h.absolutePos(new BlockPos(2, 1, 2));
