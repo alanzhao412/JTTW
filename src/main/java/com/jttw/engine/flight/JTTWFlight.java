@@ -56,6 +56,20 @@ public final class JTTWFlight {
         return player.getPersistentData().getBoolean(UNIVERSAL_FLIGHT_TAG);
     }
 
+    /**
+     * Flight that is part of who the player is, checked every tick rather than granted: the Peng
+     * flies from the start. Kept out of the universal-flight flag, which other systems grant and
+     * take away, so that no one's revoking can take it, or take theirs.
+     */
+    public static boolean fliesInnately(ServerPlayer player) {
+        return com.jttw.engine.character.peng.PengCharacter.is(player);
+    }
+
+    /** Whether this player may fly now, by any means but a form's wings. */
+    public static boolean canFly(ServerPlayer player) {
+        return hasUniversalFlight(player) || fliesInnately(player);
+    }
+
     public static void setGlideOnly(ServerPlayer player, boolean glide) {
         player.getPersistentData().putBoolean(GLIDE_ONLY_TAG, glide);
     }
@@ -90,7 +104,9 @@ public final class JTTWFlight {
         CompoundTag tag = player.getPersistentData();
         boolean wukong = "celestial_primate".equals(
                 tag.getString(com.jttw.engine.reincarnation.AlignmentData.KEY_REINCARNATION_OUTCOME));
-        return new FlightProfile(FlightSteering.speedFor(tag.getInt(FLIGHT_SPEED_TIER_TAG), wukong),
+        int tier = tag.getInt(FLIGHT_SPEED_TIER_TAG);
+        if (tier == 0 && fliesInnately(player)) tier = 2; // innate flight is full flight
+        return new FlightProfile(FlightSteering.speedFor(tier, wukong),
                 isGlideOnly(player), boost(player), tag.getBoolean(THRUST_TAG));
     }
 
@@ -134,7 +150,7 @@ public final class JTTWFlight {
         setStoredSwimVector(player, Vec3.ZERO);
 
         boolean transformFlight = (data != null && data.canFly());
-        boolean shouldHaveMayfly = transformFlight || hasUniversalFlight(player);
+        boolean shouldHaveMayfly = transformFlight || canFly(player);
 
         if (player.getAbilities().mayfly != shouldHaveMayfly) {
             player.getAbilities().mayfly = shouldHaveMayfly;

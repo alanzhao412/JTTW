@@ -70,8 +70,6 @@ public final class PengAbilityHandler {
     public static final String KEY_SOARING = "jttw_gp_soaring";
     /** Set while he plays the Peng, so what the Peng changed is undone once, when he stops. */
     private static final String KEY_WAS_PENG = "jttw_gp_was_peng";
-    /** Set while Peng's own innate flight is what lets him fly, so only that is taken back. */
-    private static final String KEY_FLIGHT_GRANTED = "jttw_gp_flight_granted";
     private static final String KEY_LAST_X = "jttw_gp_last_x", KEY_LAST_Y = "jttw_gp_last_y", KEY_LAST_Z = "jttw_gp_last_z";
     /** On a foe: game time Wingstrike last struck it. */
     private static final String KEY_STRUCK_AT = "jttw_gp_struck_at";
@@ -445,19 +443,10 @@ public final class PengAbilityHandler {
                 pd.remove(KEY_SOARING);
                 JTTWFlight.setBoost(p, 1, false);
             }
-            if (pd.getBoolean(KEY_FLIGHT_GRANTED)) {
-                pd.remove(KEY_FLIGHT_GRANTED);
-                JTTWFlight.setUniversalFlight(p, false);
-            }
             return;
         }
         pd.putBoolean(KEY_WAS_PENG, true);
-        // He flies from the start
-        if (!JTTWFlight.hasUniversalFlight(p)) {
-            JTTWFlight.setUniversalFlight(p, true);
-            JTTWFlight.setFlightSpeedTier(p, 2);
-            pd.putBoolean(KEY_FLIGHT_GRANTED, true);
-        }
+        // He flies from the start: JTTWFlight checks it each tick (fliesInnately), nothing to grant
 
         tickSoaring(p);
 

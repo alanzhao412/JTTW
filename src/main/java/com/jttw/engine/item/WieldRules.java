@@ -178,8 +178,11 @@ public final class WieldRules {
         pairSwords(p);
         if (p.tickCount % 20 == 0) drawFormQi(p);
         if (p.tickCount % 4 == 0 && FireTipSpearItem.isAflame(p.getMainHandItem())) {
-            // The lit spear trails flame from the wielder's hand
-            net.minecraft.world.phys.Vec3 tip = p.getEyePosition().add(p.getLookAngle().scale(0.8)).add(0, -0.4, 0);
+            // The lit spear trails flame from the wielder's right hand: beside and below the view,
+            // not in front of the eyes (the play-test saw it cover the middle of the screen)
+            net.minecraft.world.phys.Vec3 look = p.getLookAngle();
+            net.minecraft.world.phys.Vec3 right = new net.minecraft.world.phys.Vec3(-look.z, 0, look.x).normalize();
+            net.minecraft.world.phys.Vec3 tip = p.getEyePosition().add(look.scale(0.5)).add(right.scale(0.55)).add(0, -0.7, 0);
             p.serverLevel().sendParticles(net.minecraft.core.particles.ParticleTypes.FLAME, tip.x, tip.y, tip.z, 3, 0.1, 0.1, 0.1, 0.01);
         }
         boolean nezha = NezhaCharacter.is(p);

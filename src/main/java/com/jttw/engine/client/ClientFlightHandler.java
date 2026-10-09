@@ -24,6 +24,10 @@ public final class ClientFlightHandler {
     private static Vec3 landingMomentum = Vec3.ZERO;
     private static boolean wasFlying = false;
     private static Vec3 swimVector = Vec3.ZERO;
+    /** Where the player was last tick: a jump further than any flight is a teleport. */
+    private static Vec3 lastPos;
+    /** Further than this in a tick, faster than anyone flies, and it was a teleport. */
+    private static final double TELEPORT_JUMP = FlightSteering.TOP_SPEED * 1.5 + 2;
 
     public static void setProfile(FlightProfile newProfile) {
         profile = newProfile;
@@ -36,7 +40,25 @@ public final class ClientFlightHandler {
     public static void tick(Minecraft mc) {
         LocalPlayer p = mc.player;
         if (p == null) return;
-        if (p.isCreative() || p.isSpectator()) return;
+        Vec3 pos = p.position();
+        if (p.isCreative() || p.isSpectator()) {
+            // Vanilla flies these; none of this mod's momentum outlives them
+            flightVector = Vec3.ZERO;
+            landingMomentum = Vec3.ZERO;
+            swimVector = Vec3.ZERO;
+            wasFlying = false;
+            lastPos = pos;
+            return;
+        }
+
+        // A teleport ends all momentum: it is not carried from where you were to where you are
+        if (lastPos != null && pos.distanceTo(lastPos) > TELEPORT_JUMP) {
+            flightVector = Vec3.ZERO;
+            landingMomentum = Vec3.ZERO;
+            swimVector = Vec3.ZERO;
+            wasFlying = false;
+        }
+        lastPos = pos;
 
         // A water creature in water swims the way others fly
         TransformationData data = TransformationManager.getTransformation(p);
@@ -56,7 +78,8 @@ public final class ClientFlightHandler {
                 flightVector = Vec3.ZERO;
                 wasFlying = false;
             }
-            if (landingMomentum.lengthSqr() > FlightSteering.NO_INPUT_CUTOFF_SQR) {
+            // Coast out of flight while airborne; on the ground the coasting is over
+            if (!p.onGround() && landingMomentum.lengthSqr() > FlightSteering.NO_INPUT_CUTOFF_SQR) {
                 p.setDeltaMovement(landingMomentum);
                 landingMomentum = landingMomentum.scale(FlightSteering.LANDING_DECAY);
             } else {

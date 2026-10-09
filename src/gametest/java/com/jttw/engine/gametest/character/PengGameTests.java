@@ -75,13 +75,24 @@ public class PengGameTests {
     public static void theOutcomeIsThePengAndHeFliesFromTheStart(GameTestHelper h) {
         ServerPlayer p = peng(h);
         eq(h, PengCharacter.INSTANCE, Characters.of(p), "character");
-        check(h, !JTTWFlight.hasUniversalFlight(p), "not before his first tick");
-        tick(p, PengAbilityHandler::onPlayerTick, 1);
-        check(h, JTTWFlight.hasUniversalFlight(p), "flies, no item, no node");
+        check(h, JTTWFlight.canFly(p), "flies, no item, no node");
+        check(h, !JTTWFlight.hasUniversalFlight(p), "without touching the flag others grant and revoke");
+        near(h, com.jttw.engine.flight.FlightSteering.CRUISE_SPEED, JTTWFlight.profile(p).speed(), "at full-flight speed");
 
         p.getPersistentData().putString(AlignmentData.KEY_REINCARNATION_OUTCOME, ReincarnationOutcome.CELESTIAL_PRIMATE.id);
-        tick(p, PengAbilityHandler::onPlayerTick, 1);
-        check(h, !JTTWFlight.hasUniversalFlight(p), "the flight he was given goes with the Peng");
+        check(h, !JTTWFlight.canFly(p), "the flight goes with the Peng");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void flightGrantedAfterBeingThePengIsKept(GameTestHelper h) {
+        // Found by the client play-test: leaving the Peng used to revoke the shared flight flag
+        ServerPlayer p = peng(h);
+        tick(p, PengAbilityHandler::onPlayerTick, 2);
+        p.getPersistentData().putString(AlignmentData.KEY_REINCARNATION_OUTCOME, ReincarnationOutcome.CELESTIAL_PRIMATE.id);
+        JTTWFlight.setUniversalFlight(p, true); // Wukong's own flight
+        tick(p, PengAbilityHandler::onPlayerTick, 20);
+        check(h, JTTWFlight.hasUniversalFlight(p), "Wukong's flight survives the Peng's leaving");
         h.succeed();
     }
 

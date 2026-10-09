@@ -55,9 +55,28 @@ public class SomersaultMomentumGameTests {
         for (int i = 0; i < 200; i++) fly(p, 1.0);
         for (int i = 0; i < 20; i++) fly(p, 0.5);
         double slowed = JTTWFlight.profile(p).effectiveSpeed();
-        check(h, slowed < 4.3, "half the momentum gone in a second: " + slowed);
+        check(h, slowed < FlightSteering.TOP_SPEED - 0.8, "a second at half speed costs momentum: " + slowed);
         for (int i = 0; i < 40; i++) fly(p, 0.0);
         near(h, FlightSteering.WUKONG_FAST_SPEED, JTTWFlight.profile(p).effectiveSpeed(), "back to 2.8 when he stops");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void aLateMovementPacketDoesNotCostMomentum(GameTestHelper h) {
+        // Found by the client play-test: one tick of no movement (packets arriving bunched up)
+        // used to read as a stall and undo five ticks of building
+        ServerPlayer p = wukongInFlight(h);
+        for (int i = 0; i < 100; i++) {
+            if (i % 10 == 5) {
+                WukongAbilityHandler.tickMomentum(p); // this tick's movement arrives with the next
+            } else if (i % 10 == 6) {
+                fly(p, 2.0);
+            } else {
+                fly(p, 1.0);
+            }
+        }
+        double v = JTTWFlight.profile(p).effectiveSpeed();
+        check(h, v > 4.0, "still halfway after 5 seconds of jittery flight: " + v);
         h.succeed();
     }
 

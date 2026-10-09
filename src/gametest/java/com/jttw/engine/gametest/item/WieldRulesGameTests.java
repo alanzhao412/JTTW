@@ -275,6 +275,18 @@ public class WieldRulesGameTests {
     }
 
     @GameTest(template = PLATFORM)
+    public static void tooltipsShowTheStrNeededAgainstTheReaders(GameTestHelper h) {
+        ServerPlayer marshal = as(h, ReincarnationOutcome.MARSHAL_HEAVENLY_CANOPY);
+        for (ItemStack s : List.of(new ItemStack(ModItems.RUYI_JINGU_BANG.get()), new ItemStack(ModItems.ERLANG_AXE.get()))) {
+            List<String> lines = s.getTooltipLines(marshal, net.minecraft.world.item.TooltipFlag.NORMAL).stream()
+                    .map(net.minecraft.network.chat.Component::getString).toList();
+            check(h, lines.stream().anyMatch(l -> l.startsWith("Requires") && l.contains("STR (you have")),
+                    s.getHoverName().getString() + " shows the STR it needs: " + lines);
+        }
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
     public static void thePillGivesEveryoneQi(GameTestHelper h) {
         ServerPlayer p = as(h, ReincarnationOutcome.EYE_OF_HEAVEN);
         qi(p, 0f, 10000f);

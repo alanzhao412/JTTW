@@ -298,7 +298,7 @@ public class RuyiJinguBangItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.literal("Requires 30 ATK to wield").withStyle(ChatFormatting.RED));
+        // The STR it needs is shown against the reader's own by WieldRules
 
         if (isQiEmpowered(stack)) {
             tooltip.add(Component.literal("§dQI EMPOWERED §7— 3× ATK"));

@@ -101,6 +101,19 @@ minecraft {
             }
         }
 
+        // An automated play-test in a real client (see ClientPass); named after 'client' to inherit it
+        playtestPass {
+            parent runs.client
+            workingDirectory project.file('run-playtest')
+            property 'jttw.playtest', 'true'
+            mods {
+                jttw_engine {
+                    source sourceSets.main
+                    source sourceSets.gametest
+                }
+            }
+        }
+
         data {
             workingDirectory project.file('run-data')
             args '--mod', 'jttw_engine', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
