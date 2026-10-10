@@ -45,7 +45,7 @@ final class NimbusCloud {
     }
 
     /** A number in [0, 1) that is always the same for the same flier, puff and question. */
-    private static float h(long seed, int a, int b, int c) {
+    static float h(long seed, int a, int b, int c) {
         long x = seed ^ (a * 0x9E3779B97F4A7C15L) ^ (b * 0xC2B2AE3D27D4EB4FL) ^ (c * 0x165667B19E3779F9L);
         x ^= x >>> 33;
         x *= 0xff51afd7ed558ccdL;
@@ -61,7 +61,7 @@ final class NimbusCloud {
         return amp * (Mth.sin(t * f1 + 6.283f * h(seed, i, k, 3)) + 0.5f * Mth.sin(t * f2 + 6.283f * h(seed, i, k, 4)));
     }
 
-    /** x, y, z, radius, spin, alpha and shade of each puff, {@code t} seconds on. */
+    /** x, y, z, radius, spin, alpha, and red, green and blue of each puff, {@code t} seconds on. */
     private static List<float[]> puffs(long seed, float t, float presence) {
         List<float[]> out = new ArrayList<>(CORE + DRIFTERS);
         float spread = 1.4f - 0.4f * presence, grow = 0.55f + 0.45f * presence;
@@ -96,7 +96,7 @@ final class NimbusCloud {
             float spin = 6.283f * h(seed, i, life, 15) + t * (h(seed, i, life, 16) - 0.5f) * 0.5f;
             // the underside a shade greyer, the top bright
             float shade = 0.84f + 0.16f * Mth.clamp((y - bob + 0.38f) / 0.5f, 0, 1);
-            out.add(new float[]{x * spread, y, z * spread, r * grow, spin, 0.9f * presence * there, shade});
+            out.add(new float[]{x * spread, y, z * spread, r * grow, spin, 0.9f * presence * there, shade, shade, Math.min(1, shade + 0.03f)});
         }
         return out;
     }
@@ -104,28 +104,34 @@ final class NimbusCloud {
     /** Draws the cloud about the origin of {@code pose}, under the feet. */
     static void draw(PoseStack pose, MultiBufferSource buffers, Player p, float presence, int light) {
         if (presence <= 0) return;
-        makeTexture();
         long seed = p.getUUID().getLeastSignificantBits() ^ p.getUUID().getMostSignificantBits();
         float t = (p.tickCount + Minecraft.getInstance().getFrameTime()) / 20f;
+        drawPuffs(pose, buffers, puffs(seed, t, presence), Math.max(light, LightTexture.pack(14, 14))); // it glows a little, even at night
+    }
+
+    /**
+     * Draws soft puffs about the origin of {@code pose}, each turned to face the eye: per puff x, y,
+     * z, radius, spin, alpha, red, green, blue.
+     */
+    static void drawPuffs(PoseStack pose, MultiBufferSource buffers, List<float[]> puffs, int light) {
+        makeTexture();
         Matrix4f m = pose.last().pose();
-        // the eye's right and up, in the cloud's own frame: each puff is turned to face it
+        // the eye's right and up, in the puffs' own frame
         Matrix3f toLocal = new Matrix3f(m).invert();
         Vector3f right = toLocal.transform(new Vector3f(1, 0, 0)).normalize();
         Vector3f up = toLocal.transform(new Vector3f(0, 1, 0)).normalize();
-        List<float[]> puffs = puffs(seed, t, presence);
         // far ones first, so the near ones lie over them
         puffs.sort(Comparator.comparingDouble(c -> m.transformPosition(new Vector3f(c[0], c[1], c[2])).z));
         VertexConsumer vc = buffers.getBuffer(TYPE);
-        int lit = Math.max(light, LightTexture.pack(14, 14)); // it glows a little, even at night
+        float[][] corners = {{-1, -1, 0, 1}, {1, -1, 1, 1}, {1, 1, 1, 0}, {-1, 1, 0, 0}};
         for (float[] c : puffs) {
             if (c[5] <= 0.01f) continue;
             float cos = Mth.cos(c[4]) * c[3], sin = Mth.sin(c[4]) * c[3];
             Vector3f a = new Vector3f(right).mul(cos).add(new Vector3f(up).mul(sin));
             Vector3f b = new Vector3f(up).mul(cos).sub(new Vector3f(right).mul(sin));
-            float[][] corners = {{-1, -1, 0, 1}, {1, -1, 1, 1}, {1, 1, 1, 0}, {-1, 1, 0, 0}};
             for (float[] k : corners) {
                 vc.vertex(m, c[0] + a.x * k[0] + b.x * k[1], c[1] + a.y * k[0] + b.y * k[1], c[2] + a.z * k[0] + b.z * k[1])
-                        .color(c[6], c[6], Math.min(1, c[6] + 0.03f), c[5]).uv(k[2], k[3]).uv2(lit).endVertex();
+                        .color(c[6], c[7], c[8], c[5]).uv(k[2], k[3]).uv2(light).endVertex();
             }
         }
     }

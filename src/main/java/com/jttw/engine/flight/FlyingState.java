@@ -24,8 +24,8 @@ public final class FlyingState {
 
     private FlyingState() {}
 
-    /** How someone is flying: not at all, on their own, or riding Wukong's cloud. */
-    public static final int GROUNDED = 0, FLYING = 1, ON_CLOUD = 2;
+    /** How someone is flying: not at all, on their own, riding Wukong's cloud, or as Erlang, through wind and fog. */
+    public static final int GROUNDED = 0, FLYING = 1, ON_CLOUD = 2, IN_SQUALL = 3;
 
     private static final Map<UUID, Integer> LAST = new ConcurrentHashMap<>();
 
@@ -59,8 +59,16 @@ public final class FlyingState {
         return on;
     }
 
+    /** Erlang Shen flies wrapped in a dark squall (Kuangfeng Shenwu), never on a cloud. */
+    public static boolean isErlang(Player p) {
+        return com.jttw.engine.reincarnation.ReincarnationOutcome.EYE_OF_HEAVEN.id.equals(
+                p.getPersistentData().getString(com.jttw.engine.reincarnation.AlignmentData.KEY_REINCARNATION_OUTCOME));
+    }
+
     public static int mode(ServerPlayer p) {
-        return ridesCloud(p) ? ON_CLOUD : flies(p) ? FLYING : GROUNDED;
+        if (ridesCloud(p)) return ON_CLOUD;
+        if (!flies(p)) return GROUNDED;
+        return isErlang(p) ? IN_SQUALL : FLYING;
     }
 
     @SubscribeEvent

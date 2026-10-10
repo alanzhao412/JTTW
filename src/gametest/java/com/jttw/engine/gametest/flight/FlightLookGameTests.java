@@ -18,7 +18,7 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import static com.jttw.engine.gametest.GT.*;
 import static com.jttw.engine.gametest.character.CharTest.as;
 
-/** Who flies on their own and who rides a cloud: Wukong only, at the top speed of his Somersault Cloud. */
+/** Who flies on their own, who rides a cloud (Wukong only, at his top speed) and who flies in a squall (Erlang). */
 @GameTestHolder(JTTWEngine.MOD_ID)
 @PrefixGameTestTemplate(false)
 public class FlightLookGameTests {
@@ -55,6 +55,15 @@ public class FlightLookGameTests {
         momentum(p, 1);
         p.getAbilities().flying = false;
         eq(h, FlyingState.GROUNDED, FlyingState.mode(p), "and none on the ground");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void erlangLeapsThroughWindAndFog(GameTestHelper h) {
+        ServerPlayer erlang = flying(h, ReincarnationOutcome.EYE_OF_HEAVEN, com.jttw.engine.character.erlang.ErlangShenSkillTree.FLIGHT_3);
+        eq(h, FlyingState.IN_SQUALL, FlyingState.mode(erlang), "in his squall, at every tier");
+        erlang.getAbilities().flying = false;
+        eq(h, FlyingState.GROUNDED, FlyingState.mode(erlang), "and none on the ground");
         h.succeed();
     }
 

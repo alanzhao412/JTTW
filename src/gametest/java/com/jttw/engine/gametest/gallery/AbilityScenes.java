@@ -70,11 +70,13 @@ final class AbilityScenes {
                     f.setHatch(true);
                 }, p -> {}, 1, false),
                 // ── Flight: stretched along it (Dragon Block C), or Wukong upright on his cloud ──
-                new Scene("flight_hover", p -> fly(p, false, 0), p -> {}, 1, false, 0f),
-                new Scene("flight_under_way", p -> fly(p, false, 1), p -> {}, 1, false, 0f),
-                new Scene("flight_climbing", p -> fly(p, false, 1), p -> {}, 1, false, -45f),
-                new Scene("flight_cloud_hover", p -> fly(p, true, 0), p -> {}, 1, false, 0f),
-                new Scene("flight_cloud_under_way", p -> fly(p, true, 1), p -> {}, 1, false, 0f),
+                new Scene("flight_hover", p -> fly(p, ReincarnationOutcome.THIRD_LOTUS_PRINCE, 0), p -> {}, 1, false, 0f),
+                new Scene("flight_under_way", p -> fly(p, ReincarnationOutcome.THIRD_LOTUS_PRINCE, 1), p -> {}, 1, false, 0f),
+                new Scene("flight_climbing", p -> fly(p, ReincarnationOutcome.THIRD_LOTUS_PRINCE, 1), p -> {}, 1, false, -45f),
+                new Scene("flight_cloud_hover", p -> fly(p, ReincarnationOutcome.CELESTIAL_PRIMATE, 0), p -> {}, 1, false, 0f),
+                new Scene("flight_cloud_under_way", p -> fly(p, ReincarnationOutcome.CELESTIAL_PRIMATE, 1), p -> {}, 1, false, 0f),
+                new Scene("flight_squall_hover", p -> fly(p, ReincarnationOutcome.EYE_OF_HEAVEN, 0), p -> {}, 1, false, 0f),
+                new Scene("flight_squall_under_way", p -> fly(p, ReincarnationOutcome.EYE_OF_HEAVEN, 1), p -> {}, 1, false, 0f),
                 new Scene("heaven_pavilion", p -> com.jttw.engine.world.heaven.HeavenFeatures.IslandBuilding.pavilion(
                         p.serverLevel(), p.blockPosition().offset(0, 0, 8), p.getRandom()), p -> {}, 1, true, 5f),
                 new Scene("heaven_garden", p -> com.jttw.engine.world.heaven.HeavenFeatures.IslandBuilding.garden(
@@ -357,13 +359,13 @@ final class AbilityScenes {
 
     /** Puts a player back to an ordinary state between scenes. */
     /**
-     * Up in the air, flying (in survival: creative's flying is drawn as vanilla's): as Wukong
-     * at his top speed, on his cloud, or else as Erlang, on his own; drawn hovering
-     * (0) or under way (1).
+     * Up in the air, flying (in survival: creative's flying is drawn as vanilla's) as {@code who}:
+     * Wukong at his top speed, on his cloud; Erlang in his squall; anyone else on their own. Drawn
+     * hovering (0) or under way (1).
      */
-    private static void fly(ServerPlayer p, boolean cloud, float underWay) {
+    private static void fly(ServerPlayer p, ReincarnationOutcome who, float underWay) {
         p.getPersistentData().remove("jttw_skill_nodes"); // an earlier scene's nodes
-        ReincarnationOutcome who = cloud ? ReincarnationOutcome.CELESTIAL_PRIMATE : ReincarnationOutcome.EYE_OF_HEAVEN;
+        boolean cloud = who == ReincarnationOutcome.CELESTIAL_PRIMATE;
         AlignmentData.markReincarnated(p, who);
         LevelManager.initClass(p, who);
         if (cloud) { // at his top speed: his somersault momentum at its height

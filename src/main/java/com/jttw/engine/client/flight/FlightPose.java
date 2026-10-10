@@ -27,7 +27,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * How a flier is drawn. Flying on their own, they stretch out along their flight, head first,
  * as in Dragon Block C, and stand upright when they hover. Wukong at his top speed (the height
  * of his Somersault Cloud's momentum) rides his cloud instead: upright, knees bent, leaning a
- * little into the flight, his arms trailing behind. All of it fades: taking off, the body tips into the flight and the cloud
+ * little into the flight, his arms trailing behind. Erlang Shen flies stretched out like the rest,
+ * but wrapped in a dark squall of wind and fog. All of it fades: taking off, the body tips into the flight and the cloud
  * gathers over half a second; landing, they right themselves and it thins away.
  */
 @Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, value = Dist.CLIENT)
@@ -48,7 +49,7 @@ public final class FlightPose {
     private static final Map<Integer, Integer> MODE = new ConcurrentHashMap<>();
     /**
      * Each flier's state, now and a tick ago, to blend between frames: how far into flight
-     * (0 on foot), how far onto the cloud, how much under way (0 hovering).
+     * (0 on foot), how far onto the cloud, how much under way (0 hovering), how far into a squall.
      */
     private static final Map<Integer, float[]> STATE = new ConcurrentHashMap<>();
     /** The angles put aside while a flier is drawn turned, to put back after. */
@@ -61,6 +62,10 @@ public final class FlightPose {
 
     private static boolean flying(Player p) {
         return p == Minecraft.getInstance().player ? FlyingState.flies(p) : MODE.containsKey(p.getId());
+    }
+
+    private static boolean inSquall(Player p) {
+        return flying(p) && MODE.getOrDefault(p.getId(), FlyingState.GROUNDED) == FlyingState.IN_SQUALL;
     }
 
     private static boolean onCloud(Player p) {
@@ -90,6 +95,11 @@ public final class FlightPose {
      */
     public static volatile float posedUnderWay = -1;
 
+    /** How far wrapped in Erlang's squall, 0 to 1. */
+    public static float squall(Player p, float partialTick) {
+        return get(p, 6, partialTick);
+    }
+
     /** How much under way, 0 (hovering) to 1. */
     public static float underWay(Player p, float partialTick) {
         return posedUnderWay >= 0 ? posedUnderWay : get(p, 4, partialTick);
@@ -106,7 +116,7 @@ public final class FlightPose {
         }
         if (mc.isPaused()) return;
         for (Player p : mc.level.players()) {
-            if (flying(p)) STATE.computeIfAbsent(p.getId(), k -> new float[6]);
+            if (flying(p)) STATE.computeIfAbsent(p.getId(), k -> new float[8]);
         }
         STATE.entrySet().removeIf(e -> {
             Player p = mc.level.getEntity(e.getKey()) instanceof Player pl ? pl : null;
@@ -115,20 +125,24 @@ public final class FlightPose {
             f[1] = f[0];
             f[3] = f[2];
             f[5] = f[4];
+            f[7] = f[6];
             f[0] = Mth.clamp(f[0] + (on ? 1f : -1f) / FADE_TICKS, 0, 1);
             f[2] = Mth.clamp(f[2] + (cloud ? 1f : -1f) / FADE_TICKS, 0, 1);
+            f[6] = Mth.clamp(f[6] + (p != null && inSquall(p) ? 1f : -1f) / FADE_TICKS, 0, 1);
             if (p != null) {
                 double dx = p.getX() - p.xo, dy = p.getY() - p.yo, dz = p.getZ() - p.zo;
                 float speed = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
                 float target = Mth.clamp((speed - 0.08f) / 0.5f, 0, 1);
                 f[4] += (target - f[4]) * 0.2f;
             }
-            return p == null || (f[0] == 0 && f[1] == 0 && !on);
+            return p == null || (f[0] == 0 && f[1] == 0 && f[6] == 0 && f[7] == 0 && !on);
         });
         MODE.keySet().removeIf(id -> !(mc.level.getEntity(id) instanceof Player));
         for (Player p : mc.level.players()) {
             float c = presence(p, 1) * cloud(p, 1);
             if (c > 0) NimbusCloud.wisps(p, c);
+            float sq = squall(p, 1);
+            if (sq > 0) SquallFog.smoke(p, sq);
         }
     }
 
@@ -205,6 +219,10 @@ public final class FlightPose {
         p.yHeadRotO = saved[3];
         p.setXRot(saved[4]);
         p.xRotO = saved[5];
+        // the squall is the weather about him, square to the world, not to his body; drawn with his
+        // own angles back, so with no way to go it trails from where he truly looks
+        SquallFog.draw(pose, event.getMultiBufferSource(), p, squall(p, event.getPartialTick()),
+                underWay(p, event.getPartialTick()), event.getPackedLight());
     }
 
     /** In first person the flier is not drawn, but they see their cloud under them. */

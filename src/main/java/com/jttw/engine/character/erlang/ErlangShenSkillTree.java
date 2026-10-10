@@ -12,7 +12,7 @@ import java.util.List;
  * <pre>
  * Col:    0 (Transforms)  1 (Xiaotian Quan)  2 (Eye of Heaven)  3 (Flight)  4 (Celestial Hunt)  5 (Hound Growth)  6 (Zhàn Shén)
  *
- * Row 0:  Transform I     XTQ I              Eye I              Ascent      Hunt I              Hound Training I  Zhàn Shén I
+ * Row 0:  Transform I     XTQ I              Eye I              Wind & Fog  Hunt I              Hound Training I  Zhàn Shén I
  * Row 1:  Transform II    XTQ II             Eye II             Wind        Hunt II             Hound Training II Zhàn Shén II
  * Row 2:  Transform III   XTQ III            Eye III            Gale                                              Zhàn Shén III
  * </pre>
@@ -128,10 +128,11 @@ public final class ErlangShenSkillTree {
         ));
 
         // ── FLIGHT (col 3, PASSIVE) ──────────────────────────────────
-        // His own names: the clouds (the Nimbus, the Somersault Cloud) are Wukong's alone
+        // His own: the clouds (the Nimbus, the Somersault Cloud) are Wukong's alone. He leaps
+        // through wind and fog (Kuangfeng Shenwu), drawn as a dark squall about him in flight
         TREE.add(new SkillNode(
-                FLIGHT_1, "Heavenly Ascent",
-                new String[]{ "Grants permanent flight.", "Hold Space to ascend.", "" },
+                FLIGHT_1, "Wind and Fog",
+                new String[]{ "Grants permanent flight,", "wrapped in a dark squall.", "Hold Space to ascend." },
                 2, 3, 0, List.of(), AbilityType.PASSIVE, 1, "Flight"
         ));
         TREE.add(new SkillNode(

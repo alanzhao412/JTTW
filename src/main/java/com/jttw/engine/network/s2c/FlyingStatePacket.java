@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 public class FlyingStatePacket {
 
     private final int entityId;
-    /** {@link com.jttw.engine.flight.FlyingState#GROUNDED}, {@code FLYING} or {@code ON_CLOUD}. */
+    /** {@link com.jttw.engine.flight.FlyingState#GROUNDED}, {@code FLYING}, {@code ON_CLOUD} or {@code IN_SQUALL}. */
     private final int mode;
 
     public FlyingStatePacket(int entityId, int mode) {
@@ -29,7 +29,7 @@ public class FlyingStatePacket {
     }
 
     public static FlyingStatePacket decode(FriendlyByteBuf buf) {
-        return new FlyingStatePacket(buf.readVarInt(), Math.max(0, Math.min(2, buf.readByte())));
+        return new FlyingStatePacket(buf.readVarInt(), Math.max(0, Math.min(3, buf.readByte())));
     }
 
     public static void handle(FlyingStatePacket pkt, Supplier<NetworkEvent.Context> ctx) {
