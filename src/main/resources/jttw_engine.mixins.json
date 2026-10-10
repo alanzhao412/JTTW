@@ -23,6 +23,7 @@
   ],
   "client": [
     "AbstractClientPlayerMixin",
+    "EntityTurnMixin",
     "HumanoidModelMixin",
     "ItemRendererMixin",
     "LocalPlayerMixin",

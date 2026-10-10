@@ -61,6 +61,10 @@ final class AbilityScenes {
                     f.ignite(com.jttw.engine.world.furnace.TrigramsFurnaceBlockEntity.SAMADHI_BURN);
                     f.setHatch(true);
                 }, p -> {}, 1, false),
+                // ── Flight: lying along the flight, on a cloud ──
+                new Scene("flight_cruise", AbilityScenes::fly, p -> {}, 1, false, 0f),
+                new Scene("flight_climb", AbilityScenes::fly, p -> {}, 1, false, -70f),
+                new Scene("flight_dive", AbilityScenes::fly, p -> {}, 1, false, 55f),
                 new Scene("heaven_pavilion", p -> com.jttw.engine.world.heaven.HeavenFeatures.IslandBuilding.pavilion(
                         p.serverLevel(), p.blockPosition().offset(0, 0, 8), p.getRandom()), p -> {}, 1, true, 5f),
                 new Scene("heaven_garden", p -> com.jttw.engine.world.heaven.HeavenFeatures.IslandBuilding.garden(
@@ -342,6 +346,16 @@ final class AbilityScenes {
     }
 
     /** Puts a player back to an ordinary state between scenes. */
+    /** Up in the air, flying (in survival: creative's flying is not drawn on a cloud). */
+    private static void fly(ServerPlayer p) {
+        p.setGameMode(GameType.SURVIVAL);
+        com.jttw.engine.flight.JTTWFlight.setUniversalFlight(p, true);
+        p.getAbilities().mayfly = true;
+        p.getAbilities().flying = true;
+        p.onUpdateAbilities();
+        p.teleportTo(p.getX(), p.getY() + 2.5, p.getZ());
+    }
+
     static void reset(ServerPlayer p) {
         keepScreen = false;
         if (NineSpiritsAbilityHandler.inTrueForm(p)) NineSpiritsAbilityHandler.endTrueForm(p);
@@ -350,6 +364,7 @@ final class AbilityScenes {
         p.removeAllEffects();
         p.clearFire();
         p.setGameMode(GameType.CREATIVE);
+        com.jttw.engine.flight.JTTWFlight.setUniversalFlight(p, false);
         NetworkHandler.sendToPlayer(p, new TruffleScentPacket(0, new int[0], new long[0], new int[0]));
     }
 }

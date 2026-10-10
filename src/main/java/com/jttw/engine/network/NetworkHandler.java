@@ -223,6 +223,12 @@ public final class NetworkHandler {
                 .decoder(com.jttw.engine.network.c2s.ArmoryPacket::decode)
                 .consumerMainThread(com.jttw.engine.network.c2s.ArmoryPacket::handle)
                 .add();
+
+        CHANNEL.messageBuilder(com.jttw.engine.network.s2c.FlyingStatePacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.jttw.engine.network.s2c.FlyingStatePacket::encode)
+                .decoder(com.jttw.engine.network.s2c.FlyingStatePacket::decode)
+                .consumerMainThread(com.jttw.engine.network.s2c.FlyingStatePacket::handle)
+                .add();
     }
 
     public static void sendToServer(Object msg) {

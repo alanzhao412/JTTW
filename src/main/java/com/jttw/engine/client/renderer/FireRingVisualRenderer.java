@@ -66,24 +66,26 @@ public final class FireRingVisualRenderer {
     @SubscribeEvent
     public static void onRenderPlayer(RenderPlayerEvent.Post event) {
         Player player = event.getEntity();
-        if (!ClientRingVisuals.isActive(player.getUUID())) return;
+        float presence = ClientRingVisuals.presence(player.getUUID(), event.getPartialTick());
+        if (presence <= 0) return;
 
         PoseStack      pose = event.getPoseStack();
         MultiBufferSource buf = event.getMultiBufferSource();
-        VertexConsumer vc   = buf.getBuffer(RenderType.entityCutoutNoCull(TEX));
+        VertexConsumer vc   = buf.getBuffer(RenderType.entityTranslucent(TEX)); // it fades: drawn through
+        float grow = 0.6f + 0.4f * presence; // and swells into place as it fades in
 
         // Outer rune — rotates forward
         pose.pushPose();
         pose.translate(0.0, GROUND_Y, 0.0);
         pose.mulPose(Axis.YP.rotation(outerAngle));
-        drawQuad(pose, vc, OUTER_RADIUS);
+        drawQuad(pose, vc, OUTER_RADIUS * grow, presence);
         pose.popPose();
 
         // Inner rune — counter-rotates at 75% size
         pose.pushPose();
         pose.translate(0.0, GROUND_Y + 0.01, 0.0); // tiny Z-fight offset
         pose.mulPose(Axis.YP.rotation(innerAngle));
-        drawQuad(pose, vc, INNER_RADIUS);
+        drawQuad(pose, vc, INNER_RADIUS * grow, presence);
         pose.popPose();
     }
 
@@ -92,21 +94,22 @@ public final class FireRingVisualRenderer {
      * Two faces (up + down) so it's visible from both sides.
      * UV is always (0,0)→(1,1) — the full texture sheet.
      */
-    private static void drawQuad(PoseStack pose, VertexConsumer vc, float r) {
+    private static void drawQuad(PoseStack pose, VertexConsumer vc, float r, float presence) {
         var matrix = pose.last().pose();
         var normal = pose.last().normal();
+        float a = 0.9f * presence;
 
         // Face up
-        vc.vertex(matrix, -r, 0f, -r).color(1f,1f,1f,0.9f).uv(0f,0f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULL_BRIGHT).normal(normal, 0f,1f,0f).endVertex();
-        vc.vertex(matrix, -r, 0f,  r).color(1f,1f,1f,0.9f).uv(0f,1f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULL_BRIGHT).normal(normal, 0f,1f,0f).endVertex();
-        vc.vertex(matrix,  r, 0f,  r).color(1f,1f,1f,0.9f).uv(1f,1f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULL_BRIGHT).normal(normal, 0f,1f,0f).endVertex();
-        vc.vertex(matrix,  r, 0f, -r).color(1f,1f,1f,0.9f).uv(1f,0f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULL_BRIGHT).normal(normal, 0f,1f,0f).endVertex();
+        vc.vertex(matrix, -r, 0f, -r).color(1f,1f,1f,a).uv(0f,0f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULL_BRIGHT).normal(normal, 0f,1f,0f).endVertex();
+        vc.vertex(matrix, -r, 0f,  r).color(1f,1f,1f,a).uv(0f,1f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULL_BRIGHT).normal(normal, 0f,1f,0f).endVertex();
+        vc.vertex(matrix,  r, 0f,  r).color(1f,1f,1f,a).uv(1f,1f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULL_BRIGHT).normal(normal, 0f,1f,0f).endVertex();
+        vc.vertex(matrix,  r, 0f, -r).color(1f,1f,1f,a).uv(1f,0f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULL_BRIGHT).normal(normal, 0f,1f,0f).endVertex();
 
         // Face down (reversed winding)
-        vc.vertex(matrix,  r, 0f, -r).color(1f,1f,1f,0.9f).uv(1f,0f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULL_BRIGHT).normal(normal, 0f,-1f,0f).endVertex();
-        vc.vertex(matrix,  r, 0f,  r).color(1f,1f,1f,0.9f).uv(1f,1f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULL_BRIGHT).normal(normal, 0f,-1f,0f).endVertex();
-        vc.vertex(matrix, -r, 0f,  r).color(1f,1f,1f,0.9f).uv(0f,1f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULL_BRIGHT).normal(normal, 0f,-1f,0f).endVertex();
-        vc.vertex(matrix, -r, 0f, -r).color(1f,1f,1f,0.9f).uv(0f,0f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULL_BRIGHT).normal(normal, 0f,-1f,0f).endVertex();
+        vc.vertex(matrix,  r, 0f, -r).color(1f,1f,1f,a).uv(1f,0f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULL_BRIGHT).normal(normal, 0f,-1f,0f).endVertex();
+        vc.vertex(matrix,  r, 0f,  r).color(1f,1f,1f,a).uv(1f,1f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULL_BRIGHT).normal(normal, 0f,-1f,0f).endVertex();
+        vc.vertex(matrix, -r, 0f,  r).color(1f,1f,1f,a).uv(0f,1f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULL_BRIGHT).normal(normal, 0f,-1f,0f).endVertex();
+        vc.vertex(matrix, -r, 0f, -r).color(1f,1f,1f,a).uv(0f,0f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULL_BRIGHT).normal(normal, 0f,-1f,0f).endVertex();
     }
 
     // =========================================================================
@@ -125,16 +128,19 @@ public final class FireRingVisualRenderer {
         innerAngle -= 0.015f;
         phaseOffset += TWO_PI / 600.0;
 
+        ClientRingVisuals.tickFade();
         for (Player player : mc.level.players()) {
-            if (!ClientRingVisuals.isActive(player.getUUID())) continue;
-            spawnRingParticles(mc, player);
+            float presence = ClientRingVisuals.presence(player.getUUID(), 1f);
+            if (presence <= 0) continue;
+            spawnRingParticles(mc, player, presence);
         }
     }
 
-    private static void spawnRingParticles(Minecraft mc, Player player) {
+    private static void spawnRingParticles(Minecraft mc, Player player, float presence) {
         Vec3 origin = player.position();
 
         for (int i = 0; i < PILLARS; i++) {
+            if (RNG.nextFloat() > presence) continue; // its flames thin as it fades
             double angle = phaseOffset + (TWO_PI * i / PILLARS);
             double cos   = Math.cos(angle);
             double sin   = Math.sin(angle);
