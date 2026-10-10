@@ -35,6 +35,7 @@ public final class JTTWDimensions {
         }
 
         BlockPos spawnPos = findSafeSpawn(target);
+        if (dimensionKey.equals(HELL)) com.jttw.engine.world.heaven.HeavenFeatures.hallOfJudgement(target, spawnPos);
         player.teleportTo(target,
                 spawnPos.getX() + 0.5, spawnPos.getY(), spawnPos.getZ() + 0.5,
                 player.getYRot(), player.getXRot());

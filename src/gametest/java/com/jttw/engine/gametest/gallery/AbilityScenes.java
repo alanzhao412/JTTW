@@ -61,6 +61,18 @@ final class AbilityScenes {
                     f.ignite(com.jttw.engine.world.furnace.TrigramsFurnaceBlockEntity.SAMADHI_BURN);
                     f.setHatch(true);
                 }, p -> {}, 1, false),
+                new Scene("heaven_pavilion", p -> com.jttw.engine.world.heaven.HeavenFeatures.IslandBuilding.pavilion(
+                        p.serverLevel(), p.blockPosition().offset(0, 0, 8), p.getRandom()), p -> {}, 1, true, 5f),
+                new Scene("heaven_garden", p -> com.jttw.engine.world.heaven.HeavenFeatures.IslandBuilding.garden(
+                        p.serverLevel(), p.blockPosition().offset(0, 0, 9), p.getRandom()), p -> {}, 1, true, 8f),
+                new Scene("heaven_palace", p -> {
+                    // the earlier scenes' pavilion and garden stand in the way: clear the view first
+                    var level = p.serverLevel();
+                    for (int dx = -12; dx <= 12; dx++) for (int dz = 2; dz <= 14; dz++) for (int dy = 0; dy <= 10; dy++) {
+                        level.setBlockAndUpdate(p.blockPosition().offset(dx, dy, dz), Blocks.AIR.defaultBlockState());
+                    }
+                    com.jttw.engine.world.heaven.HeavenFeatures.JadePalace.build(level, p.blockPosition().offset(0, 0, 24), p.getRandom());
+                }, p -> {}, 1, true, -4f),
                 // ── Screens ──
                 new Scene("ui_furnace", p -> {
                     var level = p.serverLevel();

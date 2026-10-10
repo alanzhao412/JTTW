@@ -64,6 +64,8 @@ public class ModItemsGameTests {
             Map.entry("lady_white_bone_spawn_egg", net.minecraftforge.common.ForgeSpawnEggItem.class),
             Map.entry("eight_trigrams_furnace", com.jttw.engine.world.furnace.TrigramsFurnaceItem.class),
             Map.entry("true_samadhi_fire", Item.class),
+            Map.entry("jade_block", BlockItem.class),
+            Map.entry("heavenly_wine", com.jttw.engine.world.heaven.HeavenlyWineItem.class),
             Map.entry("servant_bone", Item.class),
             Map.entry("wraith_wisp", Item.class),
             Map.entry("captains_sigil", Item.class),

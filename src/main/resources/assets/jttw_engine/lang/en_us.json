@@ -38,5 +38,10 @@
   "item.jttw_engine.true_samadhi_fire": "True Samadhi Fire",
   "block.jttw_engine.eight_trigrams_furnace_part": "Eight Trigrams Furnace",
   "death.attack.jttw_engine.samadhi_fire": "%1$s was refined to ash in the Eight Trigrams Furnace",
-  "death.attack.jttw_engine.samadhi_fire.player": "%1$s was refined to ash in the Eight Trigrams Furnace"
+  "death.attack.jttw_engine.samadhi_fire.player": "%1$s was refined to ash in the Eight Trigrams Furnace",
+  "block.jttw_engine.jade_block": "Jade",
+  "block.jttw_engine.immortal_peach_fruit": "Immortal Peach",
+  "block.jttw_engine.heavenly_wine_jar": "Jar of Heavenly Wine",
+  "block.jttw_engine.book_of_life_and_death": "Book of Life and Death",
+  "item.jttw_engine.heavenly_wine": "Heavenly Wine"
 }

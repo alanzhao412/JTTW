@@ -49,6 +49,23 @@ public record CelestialIslandsDensityFunction() implements DensityFunction.Simpl
         return best;
     }
 
+    /** The island in a cell: its centre, the height of its top, its radius. */
+    public record Island(int x, int z, int y, int radius) {}
+
+    public static final int CELL = CELL_SIZE;
+
+    /** The island in this cell, or null if it has none: the same draw the terrain makes. */
+    @javax.annotation.Nullable
+    public static Island island(int cx, int cz) {
+        Random rand = new Random(cx * 341873128712L + cz * 132897987541L);
+        if (rand.nextDouble() > ISLAND_CHANCE) return null;
+        int centerX = cx * CELL_SIZE + rand.nextInt(CELL_SIZE);
+        int centerZ = cz * CELL_SIZE + rand.nextInt(CELL_SIZE);
+        int radius = MIN_RADIUS + rand.nextInt(MAX_RADIUS - MIN_RADIUS + 1);
+        int islandY = BASE_Y + rand.nextInt(Y_VARIANCE * 2 + 1) - Y_VARIANCE;
+        return new Island(centerX, centerZ, islandY, radius);
+    }
+
     private static double sampleCell(int cx, int cz, int x, int y, int z) {
         long seed = cx * 341873128712L + cz * 132897987541L;
         Random rand = new Random(seed);

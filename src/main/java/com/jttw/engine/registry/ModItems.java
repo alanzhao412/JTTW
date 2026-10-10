@@ -52,6 +52,12 @@ public final class ModItems {
     public static final RegistryObject<Item> HEART_BONE = ITEMS.register("heart_bone",
             () -> new Item(new Item.Properties().rarity(net.minecraft.world.item.Rarity.EPIC).fireResistant()));
 
+    // ── Heaven and Hell ───────────────────────────────────────────
+    public static final RegistryObject<Item> JADE_BLOCK_ITEM =
+            ITEMS.register("jade_block", () -> new BlockItem(ModBlocks.JADE_BLOCK.get(), new Item.Properties()));
+    public static final RegistryObject<Item> HEAVENLY_WINE = ITEMS.register("heavenly_wine",
+            () -> new com.jttw.engine.world.heaven.HeavenlyWineItem(new Item.Properties().stacksTo(16).rarity(net.minecraft.world.item.Rarity.RARE)));
+
     // ── White Bone Ridge spawn eggs ───────────────────────────────
     public static final RegistryObject<Item> BONE_SERVANT_SPAWN_EGG = ITEMS.register("bone_servant_spawn_egg",
             () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.jttw.engine.registry.ModEntities.BONE_SERVANT, 0xE8E4D8, 0x6B6458, new Item.Properties()));

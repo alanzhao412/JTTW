@@ -1,6 +1,8 @@
 {
   "replace": false,
   "values": [
-    "jttw_engine:eight_trigrams_furnace"
+    "jttw_engine:eight_trigrams_furnace",
+    "jttw_engine:eight_trigrams_furnace_part",
+    "jttw_engine:jade_block"
   ]
 }

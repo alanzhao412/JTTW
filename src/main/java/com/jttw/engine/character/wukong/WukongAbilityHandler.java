@@ -188,7 +188,9 @@ public final class WukongAbilityHandler {
             new ResourceKey[]{
                     Level.OVERWORLD,
                     Level.NETHER,
-                    Level.END
+                    Level.END,
+                    com.jttw.engine.dimension.JTTWDimensions.HELL,   // the Book of Life and Death
+                    com.jttw.engine.dimension.JTTWDimensions.HEAVEN  // the peaches, the pills, the wine
             };
 
     public static void cycleDimension(ServerPlayer player) {

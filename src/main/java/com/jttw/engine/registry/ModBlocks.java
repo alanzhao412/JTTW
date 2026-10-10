@@ -50,6 +50,20 @@ public final class ModBlocks {
                             .noLootTable()
                             .lightLevel(s -> s.getValue(com.jttw.engine.world.furnace.FurnacePartBlock.LIT) ? 13 : 0)));
 
+    // ── Heaven and Hell: Sun Wukong's road to immortality ───────────
+    public static final RegistryObject<Block> JADE_BLOCK =
+            BLOCKS.register("jade_block", () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_GREEN).strength(3.0F, 9.0F).requiresCorrectToolForDrops().sound(SoundType.CALCITE)));
+    public static final RegistryObject<Block> PEACH_FRUIT =
+            BLOCKS.register("immortal_peach_fruit", () -> new com.jttw.engine.world.heaven.HeavenBlocks.PeachFruit(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_PINK).strength(0.2F).noCollission().sound(SoundType.CHERRY_LEAVES).lightLevel(s -> 4)));
+    public static final RegistryObject<Block> WINE_JAR =
+            BLOCKS.register("heavenly_wine_jar", () -> new com.jttw.engine.world.heaven.HeavenBlocks.WineJar(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_RED).strength(1.0F).sound(SoundType.DECORATED_POT).noOcclusion()));
+    public static final RegistryObject<Block> BOOK_OF_LIFE_AND_DEATH =
+            BLOCKS.register("book_of_life_and_death", () -> new com.jttw.engine.world.heaven.HeavenBlocks.BookOfLifeAndDeath(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLACK).strength(-1.0F, 3600000.0F).noLootTable().noOcclusion().lightLevel(s -> 6)));
+
     public static void register(IEventBus modEventBus) {
         BLOCKS.register(modEventBus);
     }

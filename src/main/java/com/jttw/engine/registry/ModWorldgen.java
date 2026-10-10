@@ -46,6 +46,13 @@ public final class ModWorldgen {
             FEATURES.register("lady_lair", () -> new com.jttw.engine.world.feature.LairFeature(
                     net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
 
+    public static final RegistryObject<net.minecraft.world.level.levelgen.feature.Feature<?>> HEAVEN_BUILDING =
+            FEATURES.register("heaven_building", () -> new com.jttw.engine.world.heaven.HeavenFeatures.IslandBuilding(
+                    net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+    public static final RegistryObject<net.minecraft.world.level.levelgen.feature.Feature<?>> JADE_PALACE =
+            FEATURES.register("jade_palace", () -> new com.jttw.engine.world.heaven.HeavenFeatures.JadePalace(
+                    net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
     public static void register(IEventBus modEventBus) {
         DENSITY_FUNCTION_TYPES.register(modEventBus);
         FEATURES.register(modEventBus);

@@ -123,7 +123,8 @@ public class CloneAiGameTests {
         for (int i = 0; i < diamonds; i++) c.pack().addItem(new ItemStack(Items.DIAMOND, 64));
     }
 
-    @GameTest(template = PLATFORM, timeoutTicks = 200)
+    // alone: a hostile mob in a neighbouring test would rightly come first, and it would never stash
+    @GameTest(template = PLATFORM, timeoutTicks = 200, batch = "clone_stash")
     public static void aNearlyFullPackGoesIntoTheNearestChest(GameTestHelper h) {
         ServerPlayer p = wukong(h);
         BlockPos chest = new BlockPos(4, 2, 4);

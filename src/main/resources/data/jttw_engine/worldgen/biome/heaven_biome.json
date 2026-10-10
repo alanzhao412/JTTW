@@ -17,5 +17,20 @@
   "spawners": {},
   "spawn_costs": {},
   "carvers": {},
-  "features": [[], [], [], [], [], [], [], [], [], [], []]
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [
+      "jttw_engine:jade_palace",
+      "jttw_engine:heaven_building"
+    ],
+    [],
+    [],
+    [],
+    [],
+    [],
+    []
+  ]
 }
