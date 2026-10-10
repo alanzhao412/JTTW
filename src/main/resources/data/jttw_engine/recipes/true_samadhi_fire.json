@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "jttw_engine:wraith_wisp"
+    },
+    {
+      "item": "jttw_engine:wraith_wisp"
+    },
+    {
+      "item": "jttw_engine:wraith_wisp"
+    },
+    {
+      "item": "jttw_engine:servant_bone"
+    },
+    {
+      "item": "jttw_engine:servant_bone"
+    },
+    {
+      "item": "jttw_engine:captains_sigil"
+    }
+  ],
+  "result": {
+    "item": "jttw_engine:true_samadhi_fire"
+  }
+}

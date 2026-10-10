@@ -43,6 +43,10 @@ public final class SkillPurchase {
         // off the wire, and flight takes the best tier across every tree.
         PlayableCharacter character = Characters.of(player);
         if (character == null || !character.skillTree().owns(nodeId)) return false;
+        if (com.jttw.engine.world.furnace.WukongTrial.lockedUntilFurnace(player, nodeId)) {
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§cThe Yao Wang arts open only to one who survives the Eight Trigrams Furnace."));
+            return false;
+        }
 
         boolean success = SkillTreeData.tryUnlock(player, nodeId);
         if (!success) return false;

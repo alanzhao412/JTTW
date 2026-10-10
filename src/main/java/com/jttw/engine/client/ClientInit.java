@@ -118,6 +118,8 @@ public final class ClientInit {
         event.registerEntityRenderer(ModEntities.HOWL_PROJECTILE.get(),
                 net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         event.registerEntityRenderer(ModEntities.PLACED_STAFF.get(), PlacedStaffRenderer::new);
+        event.registerBlockEntityRenderer(com.jttw.engine.registry.ModBlockEntities.TRIGRAMS_FURNACE.get(),
+                com.jttw.engine.client.renderer.TrigramsFurnaceRenderer::new);
         // White Bone Ridge
         event.registerEntityRenderer(ModEntities.BONE_SERVANT.get(), com.jttw.engine.client.renderer.RidgeRenderers.BoneServantRenderer::new);
         event.registerEntityRenderer(ModEntities.WRAITH.get(), com.jttw.engine.client.renderer.RidgeRenderers.WraithRenderer::new);
@@ -142,6 +144,14 @@ public final class ClientInit {
             // Zhu Bajie's Keen Ears hear what the sound engine plays
             Minecraft.getInstance().getSoundManager().addListener(KeenEarsOverlay.INSTANCE);
         });
+    }
+
+    /** The great furnace's models, which no block state names: its renderer draws them. */
+    @SubscribeEvent
+    public static void registerModels(net.minecraftforge.client.event.ModelEvent.RegisterAdditional event) {
+        event.register(com.jttw.engine.client.renderer.TrigramsFurnaceRenderer.GREAT);
+        event.register(com.jttw.engine.client.renderer.TrigramsFurnaceRenderer.GREAT_LIT);
+        event.register(com.jttw.engine.client.renderer.TrigramsFurnaceRenderer.HATCH);
     }
 
     @SubscribeEvent

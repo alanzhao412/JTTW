@@ -116,7 +116,7 @@ public final class LevelPower {
     public static double of(Player p) {
         ProgressionClass cls = PlayerLevel.getProgressionClass(p);
         int level = PlayerLevel.getLevel(p);
-        return cls == null ? of(level) : of(cls, outcome(p), level);
+        return (cls == null ? of(level) : of(cls, outcome(p), level)) * com.jttw.engine.world.furnace.WukongTrial.boon(p);
     }
 
     /** A number set for level 1, at this player's power: a fixed damage, heal or health bonus. */

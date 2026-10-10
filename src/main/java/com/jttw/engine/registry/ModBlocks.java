@@ -38,6 +38,18 @@ public final class ModBlocks {
                             .noOcclusion() // an eight-sided brazier, not a cube
                             .lightLevel(s -> s.getValue(com.jttw.engine.world.furnace.TrigramsFurnaceBlock.LIT) ? 13 : 0)));
 
+    /** The rest of the great furnace round its core. */
+    public static final RegistryObject<Block> FURNACE_PART =
+            BLOCKS.register("eight_trigrams_furnace_part", () -> new com.jttw.engine.world.furnace.FurnacePartBlock(
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.COLOR_ORANGE)
+                            .strength(5.0F, 1200.0F)
+                            .requiresCorrectToolForDrops()
+                            .sound(SoundType.METAL)
+                            .noOcclusion()
+                            .noLootTable()
+                            .lightLevel(s -> s.getValue(com.jttw.engine.world.furnace.FurnacePartBlock.LIT) ? 13 : 0)));
+
     public static void register(IEventBus modEventBus) {
         BLOCKS.register(modEventBus);
     }

@@ -130,6 +130,7 @@ public final class NezhaAbilityHandler {
         double halfWidth = threeHeads ? 1.5 : 0.5;
         Vec3 eye = player.getEyePosition();
         Vec3 look = player.getLookAngle().normalize();
+        com.jttw.engine.world.furnace.TrigramsFurnaceBlockEntity.igniteAlong(player.level(), eye, look, range, player); // true fire lights the furnace
         ServerLevel level = player.serverLevel();
 
         for (double d = 1.0; d <= range; d += 1.0) {

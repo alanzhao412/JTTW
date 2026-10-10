@@ -84,7 +84,7 @@ public class TrigramsFurnaceMenu extends AbstractContainerMenu {
         int furnaceSlots = TrigramsFurnaceBlockEntity.SLOTS, end = slots.size();
         if (index < furnaceSlots) {
             if (!moveItemStackTo(stack, furnaceSlots, end, true)) return ItemStack.EMPTY;
-        } else if (furnace.canPlaceItem(TrigramsFurnaceBlockEntity.FUEL, stack) && moveItemStackTo(stack, TrigramsFurnaceBlockEntity.FUEL, furnaceSlots, false)) {
+        } else if (furnace.canPlaceItem(TrigramsFurnaceBlockEntity.FUEL, stack) && moveItemStackTo(stack, TrigramsFurnaceBlockEntity.FUEL, TrigramsFurnaceBlockEntity.FUEL + 1, false)) {
             // fuel went in
         } else if (furnace.canPlaceItem(TrigramsFurnaceBlockEntity.CENTRE, stack) && slots.get(TrigramsFurnaceBlockEntity.CENTRE).getItem().isEmpty()) {
             if (!moveItemStackTo(stack, TrigramsFurnaceBlockEntity.CENTRE, TrigramsFurnaceBlockEntity.CENTRE + 1, false)) return ItemStack.EMPTY;

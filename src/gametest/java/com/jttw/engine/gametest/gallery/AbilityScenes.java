@@ -56,11 +56,10 @@ final class AbilityScenes {
         return List.of(
                 // ── Blocks ──
                 new Scene("block_furnace", p -> {
-                    var level = p.serverLevel();
-                    var furnace = com.jttw.engine.registry.ModBlocks.EIGHT_TRIGRAMS_FURNACE.get().defaultBlockState();
-                    level.setBlockAndUpdate(p.blockPosition().offset(3, 0, 5), furnace);
-                    level.setBlockAndUpdate(p.blockPosition().offset(5, 0, 4),
-                            furnace.setValue(com.jttw.engine.world.furnace.TrigramsFurnaceBlock.LIT, true));
+                    // the great furnace, lit, its hatch open
+                    var f = com.jttw.engine.world.furnace.TrigramsFurnaceBlock.build(p.serverLevel(), p.blockPosition().offset(1, 0, 6));
+                    f.ignite(com.jttw.engine.world.furnace.TrigramsFurnaceBlockEntity.SAMADHI_BURN);
+                    f.setHatch(true);
                 }, p -> {}, 1, false),
                 // ── Screens ──
                 new Scene("ui_furnace", p -> {

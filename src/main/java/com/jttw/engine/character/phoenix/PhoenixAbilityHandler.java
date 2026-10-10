@@ -269,6 +269,7 @@ public final class PhoenixAbilityHandler {
         // Beam direction from player eye
         Vec3 eyePos = player.getEyePosition();
         Vec3 lookDir = player.getLookAngle().normalize();
+        com.jttw.engine.world.furnace.TrigramsFurnaceBlockEntity.igniteAlong(player.level(), eyePos, lookDir, range, player); // its flames light the furnace
 
         // Check entities along the beam
         Vec3 beamEnd = eyePos.add(lookDir.scale(range));

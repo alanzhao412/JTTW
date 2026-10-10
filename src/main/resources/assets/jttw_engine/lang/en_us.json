@@ -34,5 +34,9 @@
   "item.jttw_engine.captains_sigil": "Captain's Sigil",
   "item.jttw_engine.heart_bone": "Lady's Heart-Bone",
   "key.jttw_engine.open_armory": "Open Armory",
-  "key.jttw_engine.cycle_armament": "Cycle Armament"
+  "key.jttw_engine.cycle_armament": "Cycle Armament",
+  "item.jttw_engine.true_samadhi_fire": "True Samadhi Fire",
+  "block.jttw_engine.eight_trigrams_furnace_part": "Eight Trigrams Furnace",
+  "death.attack.jttw_engine.samadhi_fire": "%1$s was refined to ash in the Eight Trigrams Furnace",
+  "death.attack.jttw_engine.samadhi_fire.player": "%1$s was refined to ash in the Eight Trigrams Furnace"
 }

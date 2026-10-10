@@ -118,7 +118,7 @@ public record StatBlock(
         if (cls == null) return null;
         var who = com.jttw.engine.reincarnation.ReincarnationOutcome.byId(
                 p.getPersistentData().getString(com.jttw.engine.reincarnation.AlignmentData.KEY_REINCARNATION_OUTCOME));
-        return compute(cls, who, com.jttw.engine.progression.level.PlayerLevel.getLevel(p));
+        return compute(cls, who, com.jttw.engine.progression.level.PlayerLevel.getLevel(p), com.jttw.engine.world.furnace.WukongTrial.boon(p));
     }
 
     /** A class's stats at a level, before any one character's measure. */
@@ -128,6 +128,11 @@ public record StatBlock(
 
     /** A character's stats at a level: its class's shape, at its own power (see {@link LevelPower}). */
     public static StatBlock compute(ProgressionClass cls, @javax.annotation.Nullable com.jttw.engine.reincarnation.ReincarnationOutcome who, int level) {
+        return compute(cls, who, level, 1);
+    }
+
+    /** As above, with a further measure on its power (Wukong's, after the Eight Trigrams Furnace). */
+    public static StatBlock compute(ProgressionClass cls, @javax.annotation.Nullable com.jttw.engine.reincarnation.ReincarnationOutcome who, int level, double boon) {
         int lv = Math.max(1, Math.min(level, LevelConstants.MAX_LEVEL));
         BaseStats base = BaseStats.forClass(cls);
 
@@ -142,7 +147,7 @@ public record StatBlock(
 
         double bonus = computeBonus(cls, lv);
         double resBonus = computeBonus(cls, rl);
-        double power = LevelPower.of(cls, who, lv); // each class's own curve (it carries the class's late growth and leaps)
+        double power = LevelPower.of(cls, who, lv) * boon; // each class's own curve (it carries the class's late growth and leaps)
 
         return new StatBlock(
                 hpShape(base) * HP_NORM * power,                   // class shape x level power

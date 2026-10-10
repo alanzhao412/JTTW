@@ -37,7 +37,10 @@ public final class ModItems {
 
     // ── Forging: the furnace, and the zones' materials ─────────────
     public static final RegistryObject<Item> EIGHT_TRIGRAMS_FURNACE_ITEM =
-            ITEMS.register("eight_trigrams_furnace", () -> new BlockItem(ModBlocks.EIGHT_TRIGRAMS_FURNACE.get(), new Item.Properties()));
+            ITEMS.register("eight_trigrams_furnace", () -> new com.jttw.engine.world.furnace.TrigramsFurnaceItem(ModBlocks.EIGHT_TRIGRAMS_FURNACE.get(), new Item.Properties()));
+    /** The furnace's only fuel: forged from the zones' materials (Nezha and the Phoenix need none: their fire lights it). */
+    public static final RegistryObject<Item> TRUE_SAMADHI_FIRE = ITEMS.register("true_samadhi_fire",
+            () -> new Item(new Item.Properties().rarity(net.minecraft.world.item.Rarity.RARE).fireResistant()));
     /** From Bone Servants. */
     public static final RegistryObject<Item> SERVANT_BONE = ITEMS.register("servant_bone", () -> new Item(new Item.Properties()));
     /** From Wraiths. */
