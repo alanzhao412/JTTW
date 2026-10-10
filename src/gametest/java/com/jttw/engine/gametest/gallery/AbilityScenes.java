@@ -54,6 +54,14 @@ final class AbilityScenes {
 
     static List<Scene> all() {
         return List.of(
+                // ── Blocks ──
+                new Scene("block_furnace", p -> {
+                    var level = p.serverLevel();
+                    var furnace = com.jttw.engine.registry.ModBlocks.EIGHT_TRIGRAMS_FURNACE.get().defaultBlockState();
+                    level.setBlockAndUpdate(p.blockPosition().offset(3, 0, 5), furnace);
+                    level.setBlockAndUpdate(p.blockPosition().offset(5, 0, 4),
+                            furnace.setValue(com.jttw.engine.world.furnace.TrigramsFurnaceBlock.LIT, true));
+                }, p -> {}, 1, false),
                 // ── Screens ──
                 new Scene("ui_furnace", p -> {
                     var level = p.serverLevel();

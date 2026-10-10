@@ -25,7 +25,11 @@ import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 
-/** The Eight Trigrams Furnace, Laozi's: the one place armaments are forged and refined. Glows while it burns. */
+/**
+ * The Eight Trigrams Furnace, Laozi's: the one place armaments are forged and refined. An eight-sided
+ * bronze brazier on short legs, each side bearing one of the eight trigrams (Qian, Kan, Gen, Zhen,
+ * Sun, Li, Kun, Dui); it glows while it burns.
+ */
 public class TrigramsFurnaceBlock extends BaseEntityBlock {
 
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
@@ -38,6 +42,17 @@ public class TrigramsFurnaceBlock extends BaseEntityBlock {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(LIT);
+    }
+
+    /** Its body and rim, as near to its eight sides as boxes come. */
+    private static final net.minecraft.world.phys.shapes.VoxelShape SHAPE = net.minecraft.world.phys.shapes.Shapes.or(
+            Block.box(3, 0, 3, 13, 13, 13), Block.box(1.5, 2, 5.5, 14.5, 12, 10.5), Block.box(5.5, 2, 1.5, 10.5, 12, 14.5));
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public net.minecraft.world.phys.shapes.VoxelShape getShape(BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos,
+                                                               net.minecraft.world.phys.shapes.CollisionContext context) {
+        return SHAPE;
     }
 
     @Override

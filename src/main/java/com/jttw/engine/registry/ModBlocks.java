@@ -35,6 +35,7 @@ public final class ModBlocks {
                             .strength(5.0F, 1200.0F)
                             .requiresCorrectToolForDrops()
                             .sound(SoundType.METAL)
+                            .noOcclusion() // an eight-sided brazier, not a cube
                             .lightLevel(s -> s.getValue(com.jttw.engine.world.furnace.TrigramsFurnaceBlock.LIT) ? 13 : 0)));
 
     public static void register(IEventBus modEventBus) {
