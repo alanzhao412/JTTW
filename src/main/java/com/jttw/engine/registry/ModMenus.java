@@ -19,6 +19,9 @@ public final class ModMenus {
     public static final RegistryObject<MenuType<TrigramsFurnaceMenu>> TRIGRAMS_FURNACE =
             MENUS.register("eight_trigrams_furnace", () -> IForgeMenuType.create(TrigramsFurnaceMenu::new));
 
+    public static final RegistryObject<MenuType<com.jttw.engine.item.ArmoryMenu>> ARMORY =
+            MENUS.register("armory", () -> IForgeMenuType.create(com.jttw.engine.item.ArmoryMenu::new));
+
     public static void register(IEventBus modEventBus) {
         MENUS.register(modEventBus);
     }

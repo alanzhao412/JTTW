@@ -217,6 +217,12 @@ public final class NetworkHandler {
                 .decoder(SyncGoldenEyesPacket::decode)
                 .consumerMainThread(SyncGoldenEyesPacket::handle)
                 .add();
+
+        CHANNEL.messageBuilder(com.jttw.engine.network.c2s.ArmoryPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.jttw.engine.network.c2s.ArmoryPacket::encode)
+                .decoder(com.jttw.engine.network.c2s.ArmoryPacket::decode)
+                .consumerMainThread(com.jttw.engine.network.c2s.ArmoryPacket::handle)
+                .add();
     }
 
     public static void sendToServer(Object msg) {

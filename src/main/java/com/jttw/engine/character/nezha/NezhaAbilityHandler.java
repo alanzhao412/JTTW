@@ -62,50 +62,16 @@ public final class NezhaAbilityHandler {
     private static final UUID THREE_HEADS_ATK_UUID =
             UUID.fromString("f4d5e6a7-b8c9-4d0e-1f2a-3b4c5d6e7f80");
     private static final float THREE_HEADS_QI_DRAIN = 0.15f;
+    /** Armament Mastery I-III: what his armaments in hand add to his attack. */
+    private static final double[] ARM_MASTERY = {0, 0.05, 0.10, 0.25};
 
     // =========================================================================
     // Public API (called from ActivateAbilityPacket)
     // =========================================================================
 
+    /** His weapon cycle: the next weapon from his armory into hand (see {@link com.jttw.engine.item.Armory#cycle}). */
     public static void cycleWeapon(ServerPlayer player) {
-        if (SkillTreeData.getNzArmTier(player) < 1) return;
-
-        int current = player.getPersistentData().getInt("jttw_nz_weapon_slot");
-        int maxSlot = SkillTreeData.getNzArmTier(player) >= 2 ? 2 : 1; // swords require tier 2
-        int next = (current + 1) % (maxSlot + 1);
-
-        // Remove old swappable weapons
-        var inv = player.getInventory();
-        for (int i = 0; i < inv.getContainerSize(); i++) {
-            ItemStack s = inv.getItem(i);
-            if (s.getItem() instanceof FireTipSpearItem
-                    || s.getItem() instanceof QiankunRingItem
-                    || s.getItem() instanceof YinYangSwordItem) {
-                inv.setItem(i, ItemStack.EMPTY);
-            }
-        }
-
-        // Give new weapons
-        switch (next) {
-            case 0 -> {
-                player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,
-                        new ItemStack(ModItems.FIRE_TIP_SPEAR.get()));
-                player.sendSystemMessage(Component.literal("§6[JTTW] §eEquipped: Fire-Tip Spear"));
-            }
-            case 1 -> {
-                player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,
-                        new ItemStack(ModItems.QIANKUN_RING.get()));
-                player.sendSystemMessage(Component.literal("§6[JTTW] §eEquipped: Qiankun Ring"));
-            }
-            case 2 -> {
-                player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,
-                        YinYangSwordItem.createYin());
-                player.setItemInHand(net.minecraft.world.InteractionHand.OFF_HAND,
-                        YinYangSwordItem.createYang());
-                player.sendSystemMessage(Component.literal("§6[JTTW] §eEquipped: Yin-Yang Swords"));
-            }
-        }
-        player.getPersistentData().putInt("jttw_nz_weapon_slot", next);
+        com.jttw.engine.item.Armory.cycle(player);
     }
 
     /** Samadhi Fire, held: a stream of fire from the spear's tip while Nezha has the Qi. */
@@ -314,9 +280,9 @@ public final class NezhaAbilityHandler {
         if (!(event.player instanceof ServerPlayer sp)) return;
         if (!isNezha(sp)) return;
 
-        // Flight: require Wind Fire Wheels + flight tier
-        ItemStack boots = sp.getItemBySlot(EquipmentSlot.FEET);
-        boolean hasWheels = boots.getItem() instanceof WindFireWheelsItem;
+        // Flight: require Wind Fire Wheels (worn, or in his armory) + flight tier
+        ItemStack wheels = com.jttw.engine.item.Armory.find(sp, "wind_fire_wheels");
+        boolean hasWheels = !wheels.isEmpty();
         int flightTier = SkillTreeData.getNzFlightTier(sp);
         if (hasWheels && flightTier >= 1) {
             com.jttw.engine.flight.JTTWFlight.setUniversalFlight(sp, true);
@@ -329,9 +295,13 @@ public final class NezhaAbilityHandler {
         }
 
         tickSamadhiStream(sp);
-        applyWheelsSpeed(sp, hasWheels ? boots : ItemStack.EMPTY);
-        ItemStack chest = sp.getItemBySlot(EquipmentSlot.CHEST);
-        applyClothResistance(sp, chest.getItem() instanceof HuntianClothItem ? chest : ItemStack.EMPTY);
+        applyWheelsSpeed(sp, wheels);
+        applyClothResistance(sp, com.jttw.engine.item.Armory.find(sp, "huntian_cloth"));
+        // Armament Mastery: his armaments strike harder in his hands
+        int arm = SkillTreeData.getNzArmTier(sp);
+        boolean armed = com.jttw.engine.item.Armaments.of(sp.getMainHandItem()) != null;
+        com.jttw.engine.character.PassiveModifiers.set(sp, Attributes.ATTACK_DAMAGE, "nz_arm_mastery",
+                armed ? ARM_MASTERY[Math.min(arm, 3)] : 0, AttributeModifier.Operation.MULTIPLY_TOTAL);
 
         // Three Heads Qi drain
         if (ACTIVE_THREE_HEADS.contains(sp.getUUID())) {
@@ -390,18 +360,8 @@ public final class NezhaAbilityHandler {
         return "third_lotus_prince".equals(outcome);
     }
 
+    /** His armaments about him: in his armory, in hand, or worn. */
     private static int countArmaments(ServerPlayer player) {
-        int count = 0;
-        var inv = player.getInventory();
-        boolean hasSpear = false, hasRing = false, hasSword = false;
-        for (int i = 0; i < inv.getContainerSize(); i++) {
-            ItemStack s = inv.getItem(i);
-            if (!hasSpear && s.getItem() instanceof FireTipSpearItem) { count++; hasSpear = true; }
-            if (!hasRing && s.getItem() instanceof QiankunRingItem) { count++; hasRing = true; }
-            if (!hasSword && s.getItem() instanceof YinYangSwordItem) { count++; hasSword = true; }
-        }
-        if (player.getItemBySlot(EquipmentSlot.FEET).getItem() instanceof WindFireWheelsItem) count++;
-        if (player.getItemBySlot(EquipmentSlot.CHEST).getItem() instanceof HuntianClothItem) count++;
-        return count;
+        return com.jttw.engine.item.Armory.held(player).size();
     }
 }

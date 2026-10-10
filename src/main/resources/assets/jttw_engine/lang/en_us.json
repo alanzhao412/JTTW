@@ -32,5 +32,7 @@
   "item.jttw_engine.servant_bone": "Servant Bone",
   "item.jttw_engine.wraith_wisp": "Wraith Wisp",
   "item.jttw_engine.captains_sigil": "Captain's Sigil",
-  "item.jttw_engine.heart_bone": "Lady's Heart-Bone"
+  "item.jttw_engine.heart_bone": "Lady's Heart-Bone",
+  "key.jttw_engine.open_armory": "Open Armory",
+  "key.jttw_engine.cycle_armament": "Cycle Armament"
 }

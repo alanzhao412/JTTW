@@ -55,13 +55,13 @@ public final class NezhaSkillTree {
     static {
         // ── ARMAMENT MASTERY (col 0) ──────────────────────────────────
         TREE.add(new SkillNode(ARM_1, "Armament Mastery I",
-                new String[]{ "Unlock the Fire-Tip Spear", "and Qiankun Ring.", "Weapon cycle enabled." },
+                new String[]{ "Armaments in hand", "+5% damage.", "" },
                 2, 0, 0, List.of(), AbilityType.TOGGLE, 1, "Armaments"));
         TREE.add(new SkillNode(ARM_2, "Armament Mastery II",
-                new String[]{ "Unlock Yin-Yang Swords.", "+10% damage with all", "armaments." },
+                new String[]{ "Armaments in hand", "+10% damage.", "" },
                 3, 0, 1, List.of(ARM_1), AbilityType.TOGGLE, 2, "Armaments"));
         TREE.add(new SkillNode(ARM_3, "Armament Mastery III",
-                new String[]{ "All armaments +25% damage.", "Qiankun Ring max size 5.", "" },
+                new String[]{ "Armaments in hand", "+25% damage.", "" },
                 4, 0, 2, List.of(ARM_2), AbilityType.TOGGLE, 3, "Armaments"));
 
         // ── TRUE SAMADHI FIRE (col 1) ─────────────────────────────────

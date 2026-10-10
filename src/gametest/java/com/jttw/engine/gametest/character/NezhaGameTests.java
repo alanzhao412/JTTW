@@ -64,42 +64,48 @@ public class NezhaGameTests {
 
     // ── Weapon cycle (slot 0) ───────────────────────────────────────
 
+    /** Puts these armaments in his armory. */
+    private static void armory(ServerPlayer p, ItemStack... armaments) {
+        var armory = com.jttw.engine.item.Armory.of(p);
+        var slots = com.jttw.engine.item.Armory.slots(p);
+        for (ItemStack a : armaments) {
+            for (int i = 0; i < slots.size(); i++) if (slots.get(i).is().test(a)) armory.setItem(i, a);
+        }
+    }
+
     @GameTest(template = PLATFORM, batch = "weaponCycleNeedsArmaments")
     public static void weaponCycleNeedsArmaments(GameTestHelper h) {
         ServerPlayer p = nezha(h);
         character().activate(p, 0, AbilityAction.USE);
-        check(h, p.getMainHandItem().isEmpty(), "nothing equipped");
+        check(h, p.getMainHandItem().isEmpty(), "an empty armory: nothing comes to hand");
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM, batch = "tierOneCyclesBetweenRingAndSpear")
-    public static void tierOneCyclesBetweenRingAndSpear(GameTestHelper h) {
+    @GameTest(template = PLATFORM, batch = "theCycleTakesHisWeaponsFromHisArmory")
+    public static void theCycleTakesHisWeaponsFromHisArmory(GameTestHelper h) {
         ServerPlayer p = nezha(h);
-        grant(p, "nz_arm_1");
+        armory(p, new ItemStack(ModItems.FIRE_TIP_SPEAR.get()), new ItemStack(ModItems.QIANKUN_RING.get()));
         character().activate(p, 0, AbilityAction.USE);
-        check(h, p.getMainHandItem().getItem() instanceof QiankunRingItem, "first press: Qiankun Ring");
+        check(h, p.getMainHandItem().getItem() instanceof FireTipSpearItem, "first press: the spear");
         character().activate(p, 0, AbilityAction.USE);
-        check(h, p.getMainHandItem().getItem() instanceof FireTipSpearItem, "second press: Fire-Tip Spear");
-        eq(h, 0, count(p, QiankunRingItem.class), "the ring was taken back");
+        check(h, p.getMainHandItem().getItem() instanceof QiankunRingItem, "second: the ring");
+        eq(h, 0, count(p, FireTipSpearItem.class), "the spear went back to his armory, not his inventory");
         character().activate(p, 0, AbilityAction.USE);
-        check(h, p.getMainHandItem().getItem() instanceof QiankunRingItem, "third press: back to the ring");
-        eq(h, 0, count(p, FireTipSpearItem.class), "the spear was taken back");
-        eq(h, 0, count(p, YinYangSwordItem.class), "no swords at tier 1");
+        check(h, p.getMainHandItem().isEmpty(), "third: weapons put away");
+        eq(h, 0, count(p, QiankunRingItem.class), "the ring too");
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM, batch = "tierTwoAddsTheYinYangSwordsInBothHands")
-    public static void tierTwoAddsTheYinYangSwordsInBothHands(GameTestHelper h) {
+    @GameTest(template = PLATFORM, batch = "theYinYangSwordsComeToBothHands")
+    public static void theYinYangSwordsComeToBothHands(GameTestHelper h) {
         ServerPlayer p = nezha(h);
-        grant(p, "nz_arm_1", "nz_arm_2");
-        NezhaAbilityHandler.cycleWeapon(p); // ring
-        NezhaAbilityHandler.cycleWeapon(p); // swords
-        check(h, p.getMainHandItem().getItem() instanceof YinYangSwordItem, "Yin in the main hand");
-        check(h, p.getOffhandItem().getItem() instanceof YinYangSwordItem, "Yang in the off hand");
-        eq(h, 0, count(p, QiankunRingItem.class), "ring taken back");
-        NezhaAbilityHandler.cycleWeapon(p); // spear
-        check(h, p.getMainHandItem().getItem() instanceof FireTipSpearItem, "then the spear");
-        eq(h, 0, count(p, YinYangSwordItem.class), "both swords taken back, off hand included");
+        armory(p, YinYangSwordItem.createYin(), YinYangSwordItem.createYang());
+        NezhaAbilityHandler.cycleWeapon(p);
+        check(h, YinYangSwordItem.isYin(p.getMainHandItem()), "Yin in the main hand");
+        check(h, YinYangSwordItem.isYang(p.getOffhandItem()), "Yang in the off hand");
+        NezhaAbilityHandler.cycleWeapon(p);
+        check(h, p.getMainHandItem().isEmpty() && p.getOffhandItem().isEmpty(), "both put away together");
+        eq(h, 0, count(p, YinYangSwordItem.class), "into the armory, not the inventory");
         h.succeed();
     }
 
@@ -315,8 +321,7 @@ public class NezhaGameTests {
     @GameTest(template = PLATFORM, batch = "lotusDetonationScalesWithArmamentsAndThreeHeads")
     public static void lotusDetonationScalesWithArmamentsAndThreeHeads(GameTestHelper h) {
         ServerPlayer p = detonator(h);
-        p.getInventory().add(new ItemStack(ModItems.FIRE_TIP_SPEAR.get()));
-        p.getInventory().add(new ItemStack(ModItems.QIANKUN_RING.get()));
+        armory(p, new ItemStack(ModItems.FIRE_TIP_SPEAR.get()), new ItemStack(ModItems.QIANKUN_RING.get()));
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 0, 0);
         List<Hit> hits = watch(golem);
         NezhaAbilityHandler.startDetonationCharge(p);

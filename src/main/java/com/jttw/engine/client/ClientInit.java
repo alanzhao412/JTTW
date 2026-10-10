@@ -54,6 +54,10 @@ public final class ClientInit {
     public static KeyMapping ABILITY_SLOT_3;
     /** Cycle the skill-bar playlist (Z). */
     public static KeyMapping CYCLE_SKILLS;
+    /** Open the armory (J). */
+    public static KeyMapping OPEN_ARMORY;
+    /** Cycle the next weapon from the armory into hand (R). */
+    public static KeyMapping CYCLE_ARMAMENT;
 
     private ClientInit() {}
 
@@ -92,6 +96,10 @@ public final class ClientInit {
         event.register(ABILITY_SLOT_2);
         event.register(ABILITY_SLOT_3);
         event.register(CYCLE_SKILLS);
+        OPEN_ARMORY = new KeyMapping("key.jttw_engine.open_armory", GLFW.GLFW_KEY_J, "key.categories.jttw_engine");
+        CYCLE_ARMAMENT = new KeyMapping("key.jttw_engine.cycle_armament", GLFW.GLFW_KEY_R, "key.categories.jttw_engine");
+        event.register(OPEN_ARMORY);
+        event.register(CYCLE_ARMAMENT);
     }
 
     // ── Entity model layers (MOD bus) ───────────────────────────────
@@ -129,6 +137,8 @@ public final class ClientInit {
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.CELESTIAL_CLOUD.get(), RenderType.translucent());
             net.minecraft.client.gui.screens.MenuScreens.register(com.jttw.engine.registry.ModMenus.TRIGRAMS_FURNACE.get(),
                                     com.jttw.engine.client.gui.TrigramsFurnaceScreen::new);
+            net.minecraft.client.gui.screens.MenuScreens.register(com.jttw.engine.registry.ModMenus.ARMORY.get(),
+                                    com.jttw.engine.client.gui.ArmoryScreen::new);
             // Zhu Bajie's Keen Ears hear what the sound engine plays
             Minecraft.getInstance().getSoundManager().addListener(KeenEarsOverlay.INSTANCE);
         });
@@ -206,6 +216,14 @@ public final class ClientInit {
             }
             if (CYCLE_SKILLS != null) {
                 while (CYCLE_SKILLS.consumeClick()) ClientAbilityData.cycle();
+            }
+            if (OPEN_ARMORY != null) {
+                while (OPEN_ARMORY.consumeClick()) NetworkHandler.sendToServer(
+                        new com.jttw.engine.network.c2s.ArmoryPacket(com.jttw.engine.network.c2s.ArmoryPacket.Action.OPEN));
+            }
+            if (CYCLE_ARMAMENT != null) {
+                while (CYCLE_ARMAMENT.consumeClick()) NetworkHandler.sendToServer(
+                        new com.jttw.engine.network.c2s.ArmoryPacket(com.jttw.engine.network.c2s.ArmoryPacket.Action.CYCLE));
             }
 
             // ── Ability slot 0 (V) — single-press OR held (if HELD type) ──

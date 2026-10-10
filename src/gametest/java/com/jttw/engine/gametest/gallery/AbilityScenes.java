@@ -78,6 +78,18 @@ final class AbilityScenes {
                     keepScreen = true;
                     net.minecraftforge.network.NetworkHooks.openScreen(p, f, at);
                 }, p -> {}, 1, true),
+                new Scene("ui_armory", p -> {
+                    AlignmentData.markReincarnated(p, ReincarnationOutcome.THIRD_LOTUS_PRINCE);
+                    LevelManager.initClass(p, ReincarnationOutcome.THIRD_LOTUS_PRINCE);
+                    var armory = com.jttw.engine.item.Armory.of(p);
+                    var spear = new net.minecraft.world.item.ItemStack(com.jttw.engine.registry.ModItems.FIRE_TIP_SPEAR.get());
+                    com.jttw.engine.item.Armaments.setRefine(spear, 6);
+                    armory.setItem(0, spear);
+                    armory.setItem(1, new net.minecraft.world.item.ItemStack(com.jttw.engine.registry.ModItems.QIANKUN_RING.get()));
+                    armory.setItem(5, new net.minecraft.world.item.ItemStack(com.jttw.engine.registry.ModItems.HUNTIAN_CLOTH.get()));
+                    keepScreen = true;
+                    com.jttw.engine.network.c2s.ArmoryPacket.open(p);
+                }, p -> {}, 1, true),
                 // ── HUD: the Heavenly's minimap, Zhu Bajie's Keen Ears ──
                 new Scene("hud_minimap", p -> {
                     AlignmentData.markReincarnated(p, ReincarnationOutcome.EYE_OF_HEAVEN);
