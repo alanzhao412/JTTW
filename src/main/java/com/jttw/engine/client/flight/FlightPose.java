@@ -3,13 +3,9 @@ package com.jttw.engine.client.flight;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.flight.FlyingState;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
@@ -20,8 +16,6 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
 import java.util.HashMap;
@@ -44,43 +38,6 @@ public final class FlightPose {
     public static final int FADE_TICKS = 10;
     /** The height about which the body turns: its middle, so it stays where it is. */
     private static final float PIVOT = 0.9f;
-    private static final ResourceLocation CLOUD = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "textures/block/celestial_cloud.png");
-
-    /**
-     * The nimbus, as modelled in Blockbench ({@code nimbus_cloud.geo.json}): each cube's bone
-     * (0 the body, 1 the left puff, 2 the right), then its corner and size in pixels, Bedrock's way
-     * (x mirrored from Java's), the feet at y 0, sunk a little into it.
-     */
-    private static final int[][] NIMBUS = {
-            {0, -12, -5, -14, 24, 9, 24},
-            {1, -2, -2, -2, 18, 6, 20},
-            {1, -22, -4, 1, 20, 3, 20},
-            {1, 4, -2, 3, 18, 3, 17},
-            {1, 7, -2, -5, 18, 5, 9},
-            {2, -20, -2, -16, 18, 5, 17},
-            {2, -23, -2, 0, 12, 5, 7},
-            {2, -2, -2, -20, 22, 3, 20},
-    };
-    /** Its idle drift ({@code animation.nimbus_cloud.idle}): per bone, keyframes of seconds then x, y, z in pixels. */
-    private static final float[][][] DRIFT = {
-            {{0, 0, 0, 0}, {2.9167f, 0, 1.5f, 0}, {4.5f, 0, 0.25f, 0}, {5, 0, 0, 0}},
-            {{0, 1, -1, 0}, {1.5f, -1, 1, 0}, {3, 1, -1, 0}},
-            {{0, 1.4f, -0.4f, -1.4f}, {2, -1.4f, 0.4f, -4}, {5, 1.4f, -0.4f, -1.4f}},
-    };
-
-    /** Where a bone has drifted to, {@code seconds} into its loop. */
-    private static float[] drift(float[][] keys, float seconds) {
-        float t = seconds % keys[keys.length - 1][0];
-        for (int i = 1; i < keys.length; i++) {
-            if (t <= keys[i][0]) {
-                float[] a = keys[i - 1], b = keys[i];
-                float f = (t - a[0]) / (b[0] - a[0]);
-                return new float[]{Mth.lerp(f, a[1], b[1]), Mth.lerp(f, a[2], b[2]), Mth.lerp(f, a[3], b[3])};
-            }
-        }
-        float[] last = keys[keys.length - 1];
-        return new float[]{last[1], last[2], last[3]};
-    }
 
     /** The other fliers this client has been told of (by entity id): vanilla does not share flying. */
     private static final Set<Integer> REMOTE = ConcurrentHashMap.newKeySet();
@@ -129,6 +86,10 @@ public final class FlightPose {
             return p == null || (f[0] == 0 && f[1] == 0 && !on);
         });
         REMOTE.removeIf(id -> !(mc.level.getEntity(id) instanceof Player));
+        for (Player p : mc.level.players()) {
+            float presence = presence(p, 1);
+            if (presence > 0) NimbusCloud.wisps(p, presence);
+        }
     }
 
     /**
@@ -173,7 +134,7 @@ public final class FlightPose {
         PoseStack pose = event.getPoseStack();
         pose.pushPose();
         pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-p.getViewYRot(event.getPartialTick())));
-        drawCloud(pose, event.getMultiBufferSource(), p, presence, event.getPackedLight());
+        NimbusCloud.draw(pose, event.getMultiBufferSource(), p, presence, event.getPackedLight());
         pose.popPose();
         pose.popPose();
         p.yBodyRot = saved[0];
@@ -204,54 +165,8 @@ public final class FlightPose {
         pose.translate(0, -PIVOT, 0);
         pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-yaw));
         MultiBufferSource.BufferSource buffers = mc.renderBuffers().bufferSource();
-        drawCloud(pose, buffers, p, presence, LightTexture.FULL_BRIGHT);
-        buffers.endBatch(RenderType.entityTranslucent(CLOUD));
+        NimbusCloud.draw(pose, buffers, p, presence, LightTexture.FULL_BRIGHT);
+        buffers.endBatch(NimbusCloud.renderType());
         pose.popPose();
-    }
-
-    /** The nimbus under the feet, drifting as it was animated, gathering in as it fades in. */
-    private static void drawCloud(PoseStack pose, MultiBufferSource buffers, Player p, float presence, int light) {
-        if (presence <= 0) return;
-        VertexConsumer vc = buffers.getBuffer(RenderType.entityTranslucent(CLOUD));
-        float seconds = (p.tickCount + Minecraft.getInstance().getFrameTime()) / 20f;
-        float grow = 0.5f + 0.5f * presence, alpha = 0.85f * presence;
-        float[][] at = new float[DRIFT.length][];
-        at[0] = drift(DRIFT[0], seconds);
-        for (int bone = 1; bone < DRIFT.length; bone++) {
-            float[] own = drift(DRIFT[bone], seconds);
-            // the puffs ride on the body
-            at[bone] = new float[]{own[0] + at[0][0], own[1] + at[0][1], own[2] + at[0][2]};
-        }
-        pose.pushPose();
-        pose.scale(grow, grow, grow);
-        int lit = Math.max(light, LightTexture.pack(12, 12));
-        for (int[] c : NIMBUS) {
-            float[] d = at[c[0]];
-            // Bedrock's x runs the other way: mirror the cube (and its drift)
-            float x0 = -(c[1] + c[4]) - d[0], y0 = c[2] + d[1], z0 = c[3] + d[2];
-            box(pose, vc, (x0 + c[4] / 2f) / 16f, (y0 + c[5] / 2f) / 16f, (z0 + c[6] / 2f) / 16f,
-                    c[4] / 32f, c[5] / 32f, c[6] / 32f, alpha, lit);
-        }
-        pose.popPose();
-    }
-
-    private static void box(PoseStack pose, VertexConsumer vc, float x, float y, float z, float hx, float hy, float hz, float a, int light) {
-        Matrix4f m = pose.last().pose();
-        Matrix3f n = pose.last().normal();
-        float x0 = x - hx, x1 = x + hx, y0 = y - hy, y1 = y + hy, z0 = z - hz, z1 = z + hz;
-        quad(vc, m, n, a, light, 0, 1, 0, x0, y1, z0, x0, y1, z1, x1, y1, z1, x1, y1, z0);
-        quad(vc, m, n, a, light, 0, -1, 0, x0, y0, z1, x0, y0, z0, x1, y0, z0, x1, y0, z1);
-        quad(vc, m, n, a, light, 0, 0, -1, x1, y1, z0, x1, y0, z0, x0, y0, z0, x0, y1, z0);
-        quad(vc, m, n, a, light, 0, 0, 1, x0, y1, z1, x0, y0, z1, x1, y0, z1, x1, y1, z1);
-        quad(vc, m, n, a, light, -1, 0, 0, x0, y1, z0, x0, y0, z0, x0, y0, z1, x0, y1, z1);
-        quad(vc, m, n, a, light, 1, 0, 0, x1, y1, z1, x1, y0, z1, x1, y0, z0, x1, y1, z0);
-    }
-
-    private static void quad(VertexConsumer vc, Matrix4f m, Matrix3f n, float a, int light, float nx, float ny, float nz, float... v) {
-        float[][] uv = {{0, 0}, {0, 1}, {1, 1}, {1, 0}};
-        for (int i = 0; i < 4; i++) {
-            vc.vertex(m, v[i * 3], v[i * 3 + 1], v[i * 3 + 2]).color(1f, 1f, 1f, a).uv(uv[i][0], uv[i][1])
-                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(n, nx, ny, nz).endVertex();
-        }
     }
 }
