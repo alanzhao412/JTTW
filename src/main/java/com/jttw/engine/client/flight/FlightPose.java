@@ -24,10 +24,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * How a flier is drawn: lying along their flight, the way they look (straight ahead they stand,
- * looking up they lie back, diving they go head first), on a cloud beneath their feet. Both fade:
- * taking off, the cloud gathers and the body tips over into the flight over half a second; landing,
- * it thins away and they right themselves.
+ * How a flier is drawn. Flying on their own, they stretch out along their flight, head first,
+ * as in Dragon Block C, and stand upright when they hover. Wukong, once he has the Somersault
+ * Cloud, rides his cloud instead: upright, knees bent, leaning a little into the flight, his arms
+ * trailing behind. All of it fades: taking off, the body tips into the flight and the cloud
+ * gathers over half a second; landing, they right themselves and it thins away.
  */
 @Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, value = Dist.CLIENT)
 public final class FlightPose {
@@ -38,30 +39,60 @@ public final class FlightPose {
     public static final int FADE_TICKS = 10;
     /** The height about which the body turns: its middle, so it stays where it is. */
     private static final float PIVOT = 0.9f;
+    /** How far a cloud rider leans into the flight at speed, degrees. */
+    private static final float CLOUD_LEAN = 14f;
+    /** How far a flier stretched out along the flight lifts their head to look ahead, degrees. */
+    private static final float HEAD_UP = 50f;
 
-    /** The other fliers this client has been told of (by entity id): vanilla does not share flying. */
-    private static final Set<Integer> REMOTE = ConcurrentHashMap.newKeySet();
-    /** Each flier's presence, 0 to 1: now and a tick ago, to blend between frames. */
-    private static final Map<Integer, float[]> FADE = new ConcurrentHashMap<>();
+    /** How each player this client knows of flies (by entity id), as the server says. */
+    private static final Map<Integer, Integer> MODE = new ConcurrentHashMap<>();
+    /**
+     * Each flier's state, now and a tick ago, to blend between frames: how far into flight
+     * (0 on foot), how far onto the cloud, how much under way (0 hovering).
+     */
+    private static final Map<Integer, float[]> STATE = new ConcurrentHashMap<>();
     /** The angles put aside while a flier is drawn turned, to put back after. */
     private static final Map<Integer, float[]> SAVED = new HashMap<>();
 
-    public static void setFlying(int entityId, boolean flying) {
-        if (flying) REMOTE.add(entityId);
-        else REMOTE.remove(entityId);
+    public static void setMode(int entityId, int mode) {
+        if (mode == FlyingState.GROUNDED) MODE.remove(entityId);
+        else MODE.put(entityId, mode);
     }
 
     private static boolean flying(Player p) {
-        Minecraft mc = Minecraft.getInstance();
-        return p == mc.player ? FlyingState.flies(p) : REMOTE.contains(p.getId());
+        return p == Minecraft.getInstance().player ? FlyingState.flies(p) : MODE.containsKey(p.getId());
     }
 
-    /** How present this flier's cloud and pose are, 0 (on foot) to 1, between ticks. */
-    public static float presence(Player p, float partialTick) {
-        float[] f = FADE.get(p.getId());
+    private static boolean onCloud(Player p) {
+        return flying(p) && MODE.getOrDefault(p.getId(), FlyingState.GROUNDED) == FlyingState.ON_CLOUD;
+    }
+
+    private static float get(Player p, int i, float partialTick) {
+        float[] f = STATE.get(p.getId());
         if (f == null) return 0;
-        float t = f[1] + (f[0] - f[1]) * partialTick;
+        float t = f[i + 1] + (f[i] - f[i + 1]) * partialTick;
         return t * t * (3 - 2 * t);
+    }
+
+    /** How far into flight this player is drawn, 0 (on foot) to 1, between ticks. */
+    public static float presence(Player p, float partialTick) {
+        return get(p, 0, partialTick);
+    }
+
+    /** How far onto Wukong's cloud, 0 to 1. */
+    public static float cloud(Player p, float partialTick) {
+        return get(p, 2, partialTick);
+    }
+
+    /**
+     * Set (0 to 1) by the screenshot gallery, which holds its players still, to draw them under
+     * way; below 0, how far under way a flier is is measured from how they move.
+     */
+    public static volatile float posedUnderWay = -1;
+
+    /** How much under way, 0 (hovering) to 1. */
+    public static float underWay(Player p, float partialTick) {
+        return posedUnderWay >= 0 ? posedUnderWay : get(p, 4, partialTick);
     }
 
     @SubscribeEvent
@@ -69,39 +100,67 @@ public final class FlightPose {
         if (event.phase != TickEvent.Phase.END) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) {
-            REMOTE.clear();
-            FADE.clear();
+            MODE.clear();
+            STATE.clear();
             return;
         }
         if (mc.isPaused()) return;
         for (Player p : mc.level.players()) {
-            if (flying(p)) FADE.computeIfAbsent(p.getId(), k -> new float[2]);
+            if (flying(p)) STATE.computeIfAbsent(p.getId(), k -> new float[6]);
         }
-        FADE.entrySet().removeIf(e -> {
+        STATE.entrySet().removeIf(e -> {
             Player p = mc.level.getEntity(e.getKey()) instanceof Player pl ? pl : null;
-            boolean on = p != null && flying(p);
+            boolean on = p != null && flying(p), cloud = p != null && onCloud(p);
             float[] f = e.getValue();
             f[1] = f[0];
+            f[3] = f[2];
+            f[5] = f[4];
             f[0] = Mth.clamp(f[0] + (on ? 1f : -1f) / FADE_TICKS, 0, 1);
+            f[2] = Mth.clamp(f[2] + (cloud ? 1f : -1f) / FADE_TICKS, 0, 1);
+            if (p != null) {
+                double dx = p.getX() - p.xo, dy = p.getY() - p.yo, dz = p.getZ() - p.zo;
+                float speed = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+                float target = Mth.clamp((speed - 0.08f) / 0.5f, 0, 1);
+                f[4] += (target - f[4]) * 0.2f;
+            }
             return p == null || (f[0] == 0 && f[1] == 0 && !on);
         });
-        REMOTE.removeIf(id -> !(mc.level.getEntity(id) instanceof Player));
+        MODE.keySet().removeIf(id -> !(mc.level.getEntity(id) instanceof Player));
         for (Player p : mc.level.players()) {
-            float presence = presence(p, 1);
-            if (presence > 0) NimbusCloud.wisps(p, presence);
+            float c = presence(p, 1) * cloud(p, 1);
+            if (c > 0) NimbusCloud.wisps(p, c);
         }
     }
 
     /**
-     * The turn that lies a body, drawn facing {@code yaw}, along the flier's orientation: the
-     * orientation, less the yaw vanilla already turns the body by.
+     * The turn, on top of vanilla's turning the body to face {@code yaw}, that poses a flier: the
+     * blend of hovering upright, stretched along the flight, and riding the cloud.
      */
-    private static Quaternionf lean(Player p, float yaw, float partialTick) {
+    private static Quaternionf pose(Player p, float yaw, float partialTick) {
         Minecraft mc = Minecraft.getInstance();
-        Quaternionf q = p == mc.player && FlightOrientation.active()
+        Quaternionf look = p == mc.player && FlightOrientation.active()
                 ? FlightOrientation.orientation()
                 : FlightOrientation.of(yaw, p.getViewXRot(partialTick));
-        return q.rotateY((float) Math.toRadians(yaw));
+        float move = underWay(p, partialTick);
+        Quaternionf upright = FlightOrientation.of(yaw, 0);
+        // stretched out: the body's head end along the way they look
+        Quaternionf along = look.rotateX((float) Math.toRadians(90));
+        Quaternionf free = upright.slerp(along, move, new Quaternionf());
+        Quaternionf riding = FlightOrientation.of(yaw, CLOUD_LEAN * move);
+        Quaternionf body = free.slerp(riding, cloud(p, partialTick), new Quaternionf());
+        Quaternionf turn = body.rotateY((float) Math.toRadians(yaw));
+        return new Quaternionf().slerp(turn, presence(p, partialTick));
+    }
+
+    /**
+     * How the limbs are posed in flight, for the model: {weight stretched out, weight on the
+     * cloud, how much under way}; null when not flying.
+     */
+    public static float[] limbs(Player p, float partialTick) {
+        float presence = presence(p, partialTick);
+        if (presence <= 0) return null;
+        float c = cloud(p, partialTick), move = underWay(p, partialTick);
+        return new float[]{presence * (1 - c) * move, presence * c, move};
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -110,17 +169,20 @@ public final class FlightPose {
         Player p = event.getEntity();
         float t = event.getPartialTick(), presence = presence(p, t);
         if (presence <= 0) return;
-        float yaw = p.getViewYRot(t);
+        float yaw = p.getViewYRot(t), view = p.getViewXRot(t);
+        float move = underWay(p, t), c = cloud(p, t);
         SAVED.put(p.getId(), new float[]{p.yBodyRot, p.yBodyRotO, p.yHeadRot, p.yHeadRotO, p.getXRot(), p.xRotO});
         // the whole body turns, so the body, head and neck line up along it
         p.yBodyRot = p.yBodyRotO = p.yHeadRot = p.yHeadRotO = yaw;
-        float pitch = p.getViewXRot(t) * (1 - presence);
+        // hovering or on the cloud they look where they look; stretched out, they lift their head to look ahead
+        float free = Mth.lerp(move, view, -HEAD_UP);
+        float pitch = Mth.lerp(presence, view, Mth.lerp(c, free, view));
         p.setXRot(pitch);
         p.xRotO = pitch;
         PoseStack pose = event.getPoseStack();
         pose.pushPose();
         pose.translate(0, PIVOT, 0);
-        pose.mulPose(new Quaternionf().slerp(lean(p, yaw, t), presence));
+        pose.mulPose(pose(p, yaw, t));
         pose.translate(0, -PIVOT, 0);
     }
 
@@ -130,7 +192,7 @@ public final class FlightPose {
         Player p = event.getEntity();
         float[] saved = SAVED.remove(p.getId());
         if (saved == null) return;
-        float presence = presence(p, event.getPartialTick());
+        float presence = presence(p, event.getPartialTick()) * cloud(p, event.getPartialTick());
         PoseStack pose = event.getPoseStack();
         pose.pushPose();
         pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-p.getViewYRot(event.getPartialTick())));
@@ -152,7 +214,7 @@ public final class FlightPose {
         Minecraft mc = Minecraft.getInstance();
         Player p = mc.player;
         if (p == null || !mc.options.getCameraType().isFirstPerson()) return;
-        float t = event.getPartialTick(), presence = presence(p, t);
+        float t = event.getPartialTick(), presence = presence(p, t) * cloud(p, t);
         if (presence <= 0) return;
         Vec3 cam = event.getCamera().getPosition();
         Vec3 at = p.getPosition(t);
@@ -161,7 +223,7 @@ public final class FlightPose {
         pose.translate(at.x - cam.x, at.y - cam.y, at.z - cam.z);
         float yaw = p.getViewYRot(t);
         pose.translate(0, PIVOT, 0);
-        pose.mulPose(new Quaternionf().slerp(lean(p, yaw, t), presence));
+        pose.mulPose(pose(p, yaw, t));
         pose.translate(0, -PIVOT, 0);
         pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-yaw));
         MultiBufferSource.BufferSource buffers = mc.renderBuffers().bufferSource();

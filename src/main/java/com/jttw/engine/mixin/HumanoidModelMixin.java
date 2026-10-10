@@ -27,6 +27,8 @@ public class HumanoidModelMixin<T extends LivingEntity> {
 
     @Shadow public ModelPart rightArm;
     @Shadow public ModelPart leftArm;
+    @Shadow public ModelPart rightLeg;
+    @Shadow public ModelPart leftLeg;
 
     private static boolean jttw$isClone(LivingEntity entity) {
         if (!(entity instanceof Husk)) return false;
@@ -50,6 +52,10 @@ public class HumanoidModelMixin<T extends LivingEntity> {
             float headPitch,
             CallbackInfo ci
     ) {
+        if (entity instanceof net.minecraft.world.entity.player.Player p) {
+            jttw$flightLimbs(p, ageInTicks);
+            return;
+        }
         if (!jttw$isClone(entity)) return;
 
         // Natural player arm swing — arms at sides, swinging with walk cycle
@@ -63,5 +69,35 @@ public class HumanoidModelMixin<T extends LivingEntity> {
         this.rightArm.zRot = 0.0F;
         this.leftArm.yRot  = 0.0F;
         this.leftArm.zRot  = 0.0F;
+    }
+
+    /**
+     * A flier's limbs (see FlightPose). Stretched out along the flight: arms at the sides, legs
+     * together. On Wukong's cloud: knees bent (legs forward, one more than the other, as the
+     * single-piece legs can show it), arms trailing behind, further the faster he goes.
+     */
+    private void jttw$flightLimbs(net.minecraft.world.entity.player.Player p, float ageInTicks) {
+        float[] w = com.jttw.engine.client.flight.FlightPose.limbs(p, ageInTicks - (int) ageInTicks);
+        if (w == null) return;
+        float stretched = w[0], cloud = w[1], move = w[2];
+        if (stretched > 0) {
+            jttw$toward(rightArm, stretched, 0.05f, 0, 0.12f);
+            jttw$toward(leftArm, stretched, 0.05f, 0, -0.12f);
+            jttw$toward(rightLeg, stretched, 0.04f, 0, 0.03f);
+            jttw$toward(leftLeg, stretched, -0.04f, 0, -0.03f);
+        }
+        if (cloud > 0) {
+            float trail = 0.55f + 0.55f * move, flutter = 0.06f * Mth.sin(ageInTicks * 0.35f) * (0.4f + move);
+            jttw$toward(rightArm, cloud, trail + flutter, 0.1f, 0.22f);
+            jttw$toward(leftArm, cloud, trail - flutter, -0.1f, -0.22f);
+            jttw$toward(rightLeg, cloud, -0.42f, 0.06f, 0.07f);
+            jttw$toward(leftLeg, cloud, -0.18f, -0.06f, -0.07f);
+        }
+    }
+
+    private static void jttw$toward(ModelPart part, float weight, float x, float y, float z) {
+        part.xRot = Mth.lerp(weight, part.xRot, x);
+        part.yRot = Mth.lerp(weight, part.yRot, y);
+        part.zRot = Mth.lerp(weight, part.zRot, z);
     }
 }

@@ -61,10 +61,12 @@ final class AbilityScenes {
                     f.ignite(com.jttw.engine.world.furnace.TrigramsFurnaceBlockEntity.SAMADHI_BURN);
                     f.setHatch(true);
                 }, p -> {}, 1, false),
-                // ── Flight: lying along the flight, on a cloud ──
-                new Scene("flight_cruise", AbilityScenes::fly, p -> {}, 1, false, 0f),
-                new Scene("flight_climb", AbilityScenes::fly, p -> {}, 1, false, -70f),
-                new Scene("flight_dive", AbilityScenes::fly, p -> {}, 1, false, 55f),
+                // ── Flight: stretched along it (Dragon Block C), or Wukong upright on his cloud ──
+                new Scene("flight_hover", p -> fly(p, false, 0), p -> {}, 1, false, 0f),
+                new Scene("flight_under_way", p -> fly(p, false, 1), p -> {}, 1, false, 0f),
+                new Scene("flight_climbing", p -> fly(p, false, 1), p -> {}, 1, false, -45f),
+                new Scene("flight_cloud_hover", p -> fly(p, true, 0), p -> {}, 1, false, 0f),
+                new Scene("flight_cloud_under_way", p -> fly(p, true, 1), p -> {}, 1, false, 0f),
                 new Scene("heaven_pavilion", p -> com.jttw.engine.world.heaven.HeavenFeatures.IslandBuilding.pavilion(
                         p.serverLevel(), p.blockPosition().offset(0, 0, 8), p.getRandom()), p -> {}, 1, true, 5f),
                 new Scene("heaven_garden", p -> com.jttw.engine.world.heaven.HeavenFeatures.IslandBuilding.garden(
@@ -346,8 +348,18 @@ final class AbilityScenes {
     }
 
     /** Puts a player back to an ordinary state between scenes. */
-    /** Up in the air, flying (in survival: creative's flying is not drawn on a cloud). */
-    private static void fly(ServerPlayer p) {
+    /**
+     * Up in the air, flying (in survival: creative's flying is drawn as vanilla's): as Wukong
+     * with the Somersault Cloud, on his cloud, or else as Erlang, on his own; drawn hovering
+     * (0) or under way (1).
+     */
+    private static void fly(ServerPlayer p, boolean cloud, float underWay) {
+        p.getPersistentData().remove("jttw_skill_nodes"); // an earlier scene's nodes
+        ReincarnationOutcome who = cloud ? ReincarnationOutcome.CELESTIAL_PRIMATE : ReincarnationOutcome.EYE_OF_HEAVEN;
+        AlignmentData.markReincarnated(p, who);
+        LevelManager.initClass(p, who);
+        if (cloud) SkillTreeData.grantNode(p, com.jttw.engine.character.wukong.WukongSkillTree.FLIGHT_3);
+        com.jttw.engine.client.flight.FlightPose.posedUnderWay = underWay;
         p.setGameMode(GameType.SURVIVAL);
         com.jttw.engine.flight.JTTWFlight.setUniversalFlight(p, true);
         p.getAbilities().mayfly = true;
@@ -365,6 +377,7 @@ final class AbilityScenes {
         p.clearFire();
         p.setGameMode(GameType.CREATIVE);
         com.jttw.engine.flight.JTTWFlight.setUniversalFlight(p, false);
+        com.jttw.engine.client.flight.FlightPose.posedUnderWay = -1;
         NetworkHandler.sendToPlayer(p, new TruffleScentPacket(0, new int[0], new long[0], new int[0]));
     }
 }
