@@ -46,15 +46,41 @@ public final class FlightPose {
     private static final float PIVOT = 0.9f;
     private static final ResourceLocation CLOUD = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "textures/block/celestial_cloud.png");
 
-    /** The puffs of the cloud: x, y, z of each one's middle, and its half width, half height, half depth. */
-    private static final float[][] PUFFS = {
-            {0.0f, -0.20f, 0.0f, 0.70f, 0.20f, 0.60f},
-            {0.45f, -0.15f, 0.25f, 0.40f, 0.22f, 0.40f},
-            {-0.50f, -0.17f, -0.15f, 0.42f, 0.20f, 0.42f},
-            {0.10f, -0.08f, -0.45f, 0.35f, 0.18f, 0.32f},
-            {-0.20f, -0.10f, 0.50f, 0.36f, 0.17f, 0.34f},
-            {0.0f, -0.32f, -0.05f, 0.50f, 0.12f, 0.45f},
+    /**
+     * The nimbus, as modelled in Blockbench ({@code nimbus_cloud.geo.json}): each cube's bone
+     * (0 the body, 1 the left puff, 2 the right), then its corner and size in pixels, Bedrock's way
+     * (x mirrored from Java's), the feet at y 0, sunk a little into it.
+     */
+    private static final int[][] NIMBUS = {
+            {0, -12, -5, -14, 24, 9, 24},
+            {1, -2, -2, -2, 18, 6, 20},
+            {1, -22, -4, 1, 20, 3, 20},
+            {1, 4, -2, 3, 18, 3, 17},
+            {1, 7, -2, -5, 18, 5, 9},
+            {2, -20, -2, -16, 18, 5, 17},
+            {2, -23, -2, 0, 12, 5, 7},
+            {2, -2, -2, -20, 22, 3, 20},
     };
+    /** Its idle drift ({@code animation.nimbus_cloud.idle}): per bone, keyframes of seconds then x, y, z in pixels. */
+    private static final float[][][] DRIFT = {
+            {{0, 0, 0, 0}, {2.9167f, 0, 1.5f, 0}, {4.5f, 0, 0.25f, 0}, {5, 0, 0, 0}},
+            {{0, 1, -1, 0}, {1.5f, -1, 1, 0}, {3, 1, -1, 0}},
+            {{0, 1.4f, -0.4f, -1.4f}, {2, -1.4f, 0.4f, -4}, {5, 1.4f, -0.4f, -1.4f}},
+    };
+
+    /** Where a bone has drifted to, {@code seconds} into its loop. */
+    private static float[] drift(float[][] keys, float seconds) {
+        float t = seconds % keys[keys.length - 1][0];
+        for (int i = 1; i < keys.length; i++) {
+            if (t <= keys[i][0]) {
+                float[] a = keys[i - 1], b = keys[i];
+                float f = (t - a[0]) / (b[0] - a[0]);
+                return new float[]{Mth.lerp(f, a[1], b[1]), Mth.lerp(f, a[2], b[2]), Mth.lerp(f, a[3], b[3])};
+            }
+        }
+        float[] last = keys[keys.length - 1];
+        return new float[]{last[1], last[2], last[3]};
+    }
 
     /** The other fliers this client has been told of (by entity id): vanilla does not share flying. */
     private static final Set<Integer> REMOTE = ConcurrentHashMap.newKeySet();
@@ -183,18 +209,28 @@ public final class FlightPose {
         pose.popPose();
     }
 
-    /** The cloud under the feet: soft white puffs that gather in as it fades in, drifting a little. */
+    /** The nimbus under the feet, drifting as it was animated, gathering in as it fades in. */
     private static void drawCloud(PoseStack pose, MultiBufferSource buffers, Player p, float presence, int light) {
         if (presence <= 0) return;
         VertexConsumer vc = buffers.getBuffer(RenderType.entityTranslucent(CLOUD));
-        float age = p.tickCount + Minecraft.getInstance().getFrameTime();
+        float seconds = (p.tickCount + Minecraft.getInstance().getFrameTime()) / 20f;
         float grow = 0.5f + 0.5f * presence, alpha = 0.85f * presence;
+        float[][] at = new float[DRIFT.length][];
+        at[0] = drift(DRIFT[0], seconds);
+        for (int bone = 1; bone < DRIFT.length; bone++) {
+            float[] own = drift(DRIFT[bone], seconds);
+            // the puffs ride on the body
+            at[bone] = new float[]{own[0] + at[0][0], own[1] + at[0][1], own[2] + at[0][2]};
+        }
         pose.pushPose();
         pose.scale(grow, grow, grow);
-        for (int i = 0; i < PUFFS.length; i++) {
-            float[] b = PUFFS[i];
-            float bob = 0.04f * Mth.sin(age * 0.15f + i * 1.7f);
-            box(pose, vc, b[0], b[1] + bob, b[2], b[3], b[4], b[5], alpha, Math.max(light, LightTexture.pack(12, 12)));
+        int lit = Math.max(light, LightTexture.pack(12, 12));
+        for (int[] c : NIMBUS) {
+            float[] d = at[c[0]];
+            // Bedrock's x runs the other way: mirror the cube (and its drift)
+            float x0 = -(c[1] + c[4]) - d[0], y0 = c[2] + d[1], z0 = c[3] + d[2];
+            box(pose, vc, (x0 + c[4] / 2f) / 16f, (y0 + c[5] / 2f) / 16f, (z0 + c[6] / 2f) / 16f,
+                    c[4] / 32f, c[5] / 32f, c[6] / 32f, alpha, lit);
         }
         pose.popPose();
     }
