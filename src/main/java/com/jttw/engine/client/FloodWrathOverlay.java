@@ -1,55 +1,45 @@
 package com.jttw.engine.client;
 
-import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.registry.ModEffects;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderGuiEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.client.gui.overlay.ForgeGui;
+import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 
 /**
  * While the Saurian Demon King's Flood-Dragon's Wrath is on him, the edges of his sight run with
- * water: a deep blue-green that swells and ebbs, thinning away in its last seconds.
+ * water: a deep blue-green band that swells and ebbs, thinning away in its last two seconds. It
+ * fades toward the centre, so it never covers what he aims at.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, value = Dist.CLIENT)
 public final class FloodWrathOverlay {
 
     private FloodWrathOverlay() {}
 
-    /** How deep into the screen the water reaches, as a share of the shorter side. */
-    private static final float DEPTH = 0.16f;
-    private static final int STRIPS = 12;
-    private static final int COLOR = 0x1E7FA8;
+    private static final int RGB = 0x1E8FC0;
+    private static final int BAND = 48;
+    private static final int MAX_ALPHA = 0xB4;
 
-    @SubscribeEvent
-    public static void onRenderGui(RenderGuiEvent.Post event) {
+    public static final IGuiOverlay OVERLAY = FloodWrathOverlay::render;
+
+    private static void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.options.hideGui) return;
+        if (mc.player == null) return;
         MobEffectInstance wrath = mc.player.getEffect(ModEffects.FLOOD_WRATH.get());
         if (wrath == null) return;
-        float t = mc.player.tickCount + event.getPartialTick();
-        float fade = Math.min(1, wrath.getDuration() / 40f);
-        float ebb = 0.75f + 0.25f * Mth.sin(t * 0.12f);
-        draw(event.getGuiGraphics(), 0.42f * fade * ebb);
-    }
-
-    private static void draw(GuiGraphics g, float strength) {
-        int w = g.guiWidth(), h = g.guiHeight();
-        int depth = (int) (Math.min(w, h) * DEPTH);
-        for (int i = 0; i < STRIPS; i++) {
-            float k = 1 - i / (float) STRIPS;
-            int a = (int) (255 * strength * k * k);
-            if (a <= 0) continue;
-            int c = (a << 24) | COLOR;
-            int in = depth * i / STRIPS, next = depth * (i + 1) / STRIPS;
-            g.fill(in, next, in + (next - in), h - next, c);           // left
-            g.fill(w - next, next, w - in, h - next, c);               // right
-            g.fill(in, in, w - in, next, c);                           // top
-            g.fill(in, h - next, w - in, h - in, c);                   // bottom
+        float t = mc.player.tickCount + partialTick;
+        float strength = Math.min(1, wrath.getDuration() / 40f) * (0.7f + 0.3f * Mth.sin(t * 0.12f));
+        // the band's inner edge ripples, so it reads as water rather than a frame
+        for (int i = 0; i < BAND; i++) {
+            float k = (BAND - i) / (float) BAND;
+            int alpha = (int) (MAX_ALPHA * strength * k * Mth.sqrt(k));
+            if (alpha <= 0) continue;
+            int argb = (alpha << 24) | RGB;
+            g.fill(i, i, width - i, i + 1, argb);                          // top
+            g.fill(i, height - i - 1, width - i, height - i, argb);        // bottom
+            g.fill(i, i + 1, i + 1, height - i - 1, argb);                 // left
+            g.fill(width - i - 1, i + 1, width - i, height - i - 1, argb); // right
         }
     }
 }

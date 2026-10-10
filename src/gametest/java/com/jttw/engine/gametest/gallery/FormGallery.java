@@ -153,6 +153,7 @@ public final class FormGallery {
             mc.options.pauseOnLostFocus = false; // the window may lose focus while it runs
             mc.options.setCameraType(CameraType.FIRST_PERSON);
             mc.options.bobView().set(false);
+            mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE); // its hints would cover the picture
             JTTWEngine.LOGGER.info("FormGallery: {} forms, {} shots", forms.size(), shots.size());
             startShot(mc);
             return;

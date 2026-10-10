@@ -235,6 +235,12 @@ public final class NetworkHandler {
                 .decoder(com.jttw.engine.network.s2c.SyncKarmaPacket::decode)
                 .consumerMainThread(com.jttw.engine.network.s2c.SyncKarmaPacket::handle)
                 .add();
+
+        CHANNEL.messageBuilder(com.jttw.engine.network.s2c.WaterFxPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.jttw.engine.network.s2c.WaterFxPacket::encode)
+                .decoder(com.jttw.engine.network.s2c.WaterFxPacket::decode)
+                .consumerMainThread(com.jttw.engine.network.s2c.WaterFxPacket::handle)
+                .add();
     }
 
     public static void sendToServer(Object msg) {
@@ -243,6 +249,11 @@ public final class NetworkHandler {
 
     public static void sendToPlayer(ServerPlayer player, Object msg) {
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), msg);
+    }
+
+    /** To every player within {@code radius} blocks of {@code at} in that world. */
+    public static void sendToNear(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at, double radius, Object msg) {
+        CHANNEL.send(PacketDistributor.NEAR.with(PacketDistributor.TargetPoint.p(at.x, at.y, at.z, radius, level.dimension())), msg);
     }
 
     public static void sendToTrackingPlayers(ServerPlayer player, Object msg) {

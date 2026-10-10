@@ -302,18 +302,18 @@ public final class SaurianAbilityHandler {
             }
         }
         rope(level, from, to);
+        NetworkHandler.sendToNear(level, to, 96, com.jttw.engine.network.s2c.WaterFxPacket.lash(p.getId(), caught != null ? caught.getId() : -1, to));
         sound(level, p.position(), SoundEvents.FISHING_BOBBER_THROW, 1f, 0.6f);
         sound(level, to, caught != null ? SoundEvents.PLAYER_SPLASH_HIGH_SPEED : SoundEvents.GENERIC_SPLASH, 1f, 1.1f);
         return caught;
     }
 
-    /** The rope of water, from his hand to where it struck. */
+    /** Droplets shaken off the rope of water, from his hand to where it struck (the client draws the rope). */
     private static void rope(ServerLevel level, Vec3 from, Vec3 to) {
         Vec3 d = to.subtract(from);
         int steps = (int) Math.ceil(d.length() / 0.3);
         for (int i = 0; i <= steps; i++) {
             Vec3 at = from.add(d.scale(i / (double) Math.max(1, steps)));
-            level.sendParticles(ParticleTypes.DOLPHIN, at.x, at.y, at.z, 2, 0.03, 0.03, 0.03, 0);
             if (i % 3 == 0) level.sendParticles(ParticleTypes.SPLASH, at.x, at.y, at.z, 1, 0.05, 0.05, 0.05, 0);
         }
     }
@@ -347,6 +347,7 @@ public final class SaurianAbilityHandler {
         Vec3 at = hit.getLocation();
         Whirlpool w = new Whirlpool(level.dimension(), at, p.getUUID(), tier, whirlDamage(atk(p), tier), level.getGameTime() + whirlTicks(tier));
         WHIRLPOOLS.add(w);
+        NetworkHandler.sendToNear(level, at, 96, com.jttw.engine.network.s2c.WaterFxPacket.whirlpool(p.getId(), at, (float) whirlRadius(tier), whirlTicks(tier)));
         sound(level, at, SoundEvents.BUBBLE_COLUMN_WHIRLPOOL_INSIDE, 1.5f, 0.7f);
         return w;
     }
@@ -421,7 +422,11 @@ public final class SaurianAbilityHandler {
         p.addEffect(new MobEffectInstance(ModEffects.FLOOD_WRATH.get(), ticks, tier - 1, false, false, true));
         startCooldown(p, KEY_WRATH_READY, "sdk_wrath", ticks + WRATH_REST);
         sound(p.serverLevel(), p.position(), SoundEvents.CONDUIT_ACTIVATE, 1.5f, 0.8f);
-        p.serverLevel().sendParticles(ParticleTypes.SPLASH, p.getX(), p.getY() + 1, p.getZ(), 60, 1, 1, 1, 0.3);
+        // a ring of water rising round his feet, not in his eyes
+        for (int i = 0; i < 32; i++) {
+            double a = i * Math.PI * 2 / 32;
+            p.serverLevel().sendParticles(ParticleTypes.SPLASH, p.getX() + Math.cos(a) * 1.6, p.getY() + 0.1, p.getZ() + Math.sin(a) * 1.6, 3, 0.05, 0.05, 0.05, 0.15);
+        }
         return true;
     }
 

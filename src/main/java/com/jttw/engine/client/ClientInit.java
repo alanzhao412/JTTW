@@ -161,6 +161,7 @@ public final class ClientInit {
         event.registerAboveAll("jttw_skill_bar", SkillBarRenderer.OVERLAY);
         event.registerAboveAll("jttw_minimap",   MinimapOverlay.OVERLAY);
         event.registerBelowAll("jttw_head_tint", HeadTintOverlay.OVERLAY);
+        event.registerBelowAll("jttw_flood_wrath", FloodWrathOverlay.OVERLAY);
         event.registerAbove(net.minecraftforge.client.gui.overlay.VanillaGuiOverlay.FOOD_LEVEL.id(),
                 "jttw_second_stomach", StomachOverlay.OVERLAY);
     }

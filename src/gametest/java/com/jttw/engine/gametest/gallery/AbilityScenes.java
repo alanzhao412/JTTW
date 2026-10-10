@@ -152,6 +152,27 @@ final class AbilityScenes {
                     level.playSound(null, p.getX() + 1, p.getY(), p.getZ() + 10, net.minecraft.sounds.SoundEvents.CHEST_OPEN, net.minecraft.sounds.SoundSource.BLOCKS, 1f, 1f);
                 }, 6, true),
                 // ── White Bone Ridge's dead ──
+                // ── The Saurian Demon King: seen from his own eyes ──
+                new Scene("saurian_lash", p -> {
+                    saurian(p, com.jttw.engine.character.saurian.SaurianSkillTree.LASH_1);
+                    foe(p, 0, 9);
+                }, p -> com.jttw.engine.character.saurian.SaurianAbilityHandler.lash(p), 2, true),
+                new Scene("saurian_whirlpool", p -> {
+                    saurian(p, com.jttw.engine.character.saurian.SaurianSkillTree.WHIRL_1);
+                    foe(p, -2, 7);
+                    foe(p, 2, 8);
+                }, p -> com.jttw.engine.character.saurian.SaurianAbilityHandler.whirlpool(p), 25, true, 35f),
+                new Scene("saurian_wrath", p -> {
+                    saurian(p, com.jttw.engine.character.saurian.SaurianSkillTree.WRATH_1);
+                    foe(p, 0, 3);
+                    foe(p, 1, 4);
+                }, p -> {
+                    com.jttw.engine.character.saurian.SaurianAbilityHandler.wrath(p);
+                    p.level().getEntitiesOfClass(net.minecraft.world.entity.monster.Zombie.class, p.getBoundingBox().inflate(6))
+                            .stream().min(java.util.Comparator.comparingDouble(m -> m.distanceToSqr(p))).ifPresent(p::attack);
+                }, 3, true),
+                new Scene("saurian_surge", p -> saurian(p, com.jttw.engine.character.saurian.SaurianSkillTree.SURGE_1),
+                        p -> com.jttw.engine.character.saurian.SaurianAbilityHandler.surge(p, 1f), 2, false),
                 new Scene("heaven_host", p -> {
                     soldier(p, -2, 2, false);
                     soldier(p, 1, 4, true);
@@ -350,6 +371,33 @@ final class AbilityScenes {
     }
 
     /** One of the ridge's dead, standing still at (dx, dz) from the player, facing them (a captain if asked). */
+    /** The Saurian Demon King with these nodes and Qi to spare. */
+    private static void saurian(ServerPlayer p, String... nodes) {
+        p.getPersistentData().remove("jttw_skill_nodes");
+        AlignmentData.markReincarnated(p, ReincarnationOutcome.SAURIAN_DEMON_KING);
+        LevelManager.initClass(p, ReincarnationOutcome.SAURIAN_DEMON_KING);
+        for (String n : nodes) SkillTreeData.grantNode(p, n);
+        for (String k : List.of("jttw_sdk_surge_ready", "jttw_sdk_lash_ready", "jttw_sdk_whirl_ready", "jttw_sdk_wrath_ready")) {
+            p.getPersistentData().remove(k);
+        }
+        p.removeEffect(com.jttw.engine.registry.ModEffects.FLOOD_WRATH.get());
+        QiData.setMax(p, 1000f);
+        QiData.setCurrent(p, 1000f);
+    }
+
+    /** A husk standing {@code dz} blocks ahead (south) and {@code dx} across, to be struck. */
+    private static void foe(ServerPlayer p, int dx, int dz) {
+        var z = net.minecraft.world.entity.EntityType.HUSK.create(p.serverLevel()); // a husk: daylight does not burn it
+        if (z == null) return;
+        z.moveTo(p.getX() + dx, p.getY(), p.getZ() + dz, 180f, 0f);
+        z.setYHeadRot(180f);
+        z.setYBodyRot(180f);
+        z.setBaby(false);
+        z.setPersistenceRequired();
+        z.setTarget(null);
+        p.serverLevel().addFreshEntity(z);
+    }
+
     /** A soldier of Heaven's host, still, on its cloud a little above the ground, facing the camera. */
     private static void soldier(ServerPlayer p, int dx, int dz, boolean general) {
         var s = com.jttw.engine.registry.ModEntities.HEAVENLY_SOLDIER.get().create(p.serverLevel());

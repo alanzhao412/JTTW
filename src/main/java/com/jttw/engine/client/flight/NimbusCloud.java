@@ -40,7 +40,7 @@ public final class NimbusCloud {
 
     private static boolean textureMade;
 
-    static RenderType renderType() {
+    public static RenderType renderType() {
         return TYPE;
     }
 
@@ -113,7 +113,7 @@ public final class NimbusCloud {
      * Draws soft puffs about the origin of {@code pose}, each turned to face the eye: per puff x, y,
      * z, radius, spin, alpha, red, green, blue.
      */
-    static void drawPuffs(PoseStack pose, MultiBufferSource buffers, List<float[]> puffs, int light) {
+    public static void drawPuffs(PoseStack pose, MultiBufferSource buffers, List<float[]> puffs, int light) {
         makeTexture();
         Matrix4f m = pose.last().pose();
         // the eye's right and up, in the puffs' own frame
