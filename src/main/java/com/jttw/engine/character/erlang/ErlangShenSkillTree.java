@@ -12,9 +12,9 @@ import java.util.List;
  * <pre>
  * Col:    0 (Transforms)  1 (Xiaotian Quan)  2 (Eye of Heaven)  3 (Flight)  4 (Celestial Hunt)  5 (Hound Growth)  6 (Zhàn Shén)
  *
- * Row 0:  Transform I     XTQ I              Eye I              Cloud Step  Hunt I              Hound Training I  Zhàn Shén I
- * Row 1:  Transform II    XTQ II             Eye II             Nimbus      Hunt II             Hound Training II Zhàn Shén II
- * Row 2:  Transform III   XTQ III            Eye III            Somersault                                        Zhàn Shén III
+ * Row 0:  Transform I     XTQ I              Eye I              Ascent      Hunt I              Hound Training I  Zhàn Shén I
+ * Row 1:  Transform II    XTQ II             Eye II             Wind        Hunt II             Hound Training II Zhàn Shén II
+ * Row 2:  Transform III   XTQ III            Eye III            Gale                                              Zhàn Shén III
  * </pre>
  *
  * <p>Players earn 1 skill point every 5 levels (max 20 at level 100).
@@ -128,21 +128,20 @@ public final class ErlangShenSkillTree {
         ));
 
         // ── FLIGHT (col 3, PASSIVE) ──────────────────────────────────
+        // His own names: the clouds (the Nimbus, the Somersault Cloud) are Wukong's alone
         TREE.add(new SkillNode(
-                FLIGHT_1, "Cloud Step",
+                FLIGHT_1, "Heavenly Ascent",
                 new String[]{ "Grants permanent flight.", "Hold Space to ascend.", "" },
                 2, 3, 0, List.of(), AbilityType.PASSIVE, 1, "Flight"
         ));
         TREE.add(new SkillNode(
-                FLIGHT_2, "Nimbus Cloud",
-                new String[]{ "Flight speed greatly", "increased. Somersault",
-                              "cloud momentum physics." },
+                FLIGHT_2, "Divine Wind",
+                new String[]{ "Flight speed greatly", "increased.", "" },
                 3, 3, 1, List.of(FLIGHT_1), AbilityType.PASSIVE, 2, "Flight"
         ));
         TREE.add(new SkillNode(
-                FLIGHT_3, "Somersault Cloud",
-                new String[]{ "Cycles Overworld/Nether/End", "while airborne.",
-                              "" },
+                FLIGHT_3, "Celestial Gale",
+                new String[]{ "Flight speed increased", "again: your swiftest.", "" },
                 4, 3, 2, List.of(FLIGHT_2), AbilityType.PASSIVE, 3, "Flight"
         ));
 
