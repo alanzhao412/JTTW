@@ -420,13 +420,14 @@ public class WukongGameTests {
     public static void tierOneSummonsOneCloneForTenQi(GameTestHelper h) {
         ServerPlayer p = wukong(h);
         grant(p, "wu_clone_1");
-        PlayerLevel.setLevel(p, 20); // clone health is 20 at level 1, scaled by its owner's power
+        PlayerLevel.setLevel(p, 20); // a clone has its owner's health, whatever his level
+        com.jttw.engine.progression.level.LevelManager.reapplyStats(p);
         summon(p, 1);
         List<WuCloneEntity> one = clones(p);
         eq(h, 1, one.size(), "clones after one press");
         near(h, 90f, QiData.getCurrent(p), "Qi after summoning");
         check(h, WuCloneManager.isActive(p.getUUID()), "manager tracks the clone");
-        near(h, 20.0 * LevelPower.of(p), one.get(0).getMaxHealth(), "clone max health at level 20, by his own power");
+        near(h, p.getMaxHealth(), one.get(0).getMaxHealth(), "clone max health: its owner's");
         summon(p, 1);
         eq(h, 1, clones(p).size(), "tier 1 caps at one clone");
         near(h, 90f, QiData.getCurrent(p), "capped press costs nothing");

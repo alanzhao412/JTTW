@@ -6,19 +6,16 @@ import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
 import com.jttw.engine.progression.stats.ProgressionClass;
-import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.progression.stats.StatBlock;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.entity.WuCloneEntity;
 import com.jttw.engine.progression.stats.ResistanceHandler;
 import com.jttw.engine.registry.ModAttributes;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -27,13 +24,8 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.TargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CropBlock;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
@@ -76,8 +68,11 @@ public final class WuCloneManager {
     private static final int    MAX_CLONES_T3               = 9;
 
     private static final Map<UUID, List<UUID>> OWNER_TO_CLONES = new HashMap<>();
-    /** Items collected by clones, waiting to be delivered to owner. */
-    private static final Map<UUID, List<ItemStack>> CLONE_INVENTORY = new HashMap<>();
+    /**
+     * Each owner with clones out, as summoned: so a clone finds its owner even when he is not in the
+     * server's player list (a test's player), and in any dimension.
+     */
+    private static final Map<UUID, ServerPlayer> OWNERS = new HashMap<>();
 
     // =========================================================================
     // Public API
@@ -109,11 +104,15 @@ public final class WuCloneManager {
         List<UUID> ids = OWNER_TO_CLONES.get(ownerId);
         if (ids != null) {
             ids.remove(cloneId);
-            if (ids.isEmpty()) OWNER_TO_CLONES.remove(ownerId);
+            if (ids.isEmpty()) {
+                OWNER_TO_CLONES.remove(ownerId);
+                OWNERS.remove(ownerId);
+            }
         }
     }
 
     public static void dismissAll(ServerPlayer player) {
+        OWNERS.remove(player.getUUID());
         List<UUID> ids = OWNER_TO_CLONES.remove(player.getUUID());
         if (ids == null) return;
         ServerLevel level = player.serverLevel();
@@ -135,15 +134,16 @@ public final class WuCloneManager {
      * Called from {@link WuCloneEntity#registerGoals()} at construction time.
      */
     public static void registerCloneGoals(PathfinderMob mob) {
-        // Behaviour goals — lower number = higher priority
+        WuCloneEntity clone = (WuCloneEntity) mob;
+        // Behaviour goals — lower number = higher priority: fight, empty a full pack, gather, follow
         mob.goalSelector.addGoal(1, new FloatGoal(mob));
         mob.goalSelector.addGoal(2, new MeleeAttackGoal(mob, 1.2, true));
-        mob.goalSelector.addGoal(3, new CloneHarvestCropGoal(mob, 1.0, 8));
-        mob.goalSelector.addGoal(3, new CloneMineOreGoal(mob, 1.0, 20));
-        mob.goalSelector.addGoal(4, new CloneFollowOwnerGoal(mob, 1.1, 5.0f, 2.5f));
-        mob.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(mob, 0.8));
-        mob.goalSelector.addGoal(6, new LookAtPlayerGoal(mob, Player.class, 8.0F));
-        mob.goalSelector.addGoal(6, new RandomLookAroundGoal(mob));
+        mob.goalSelector.addGoal(3, new CloneWork.StashGoal(clone));
+        mob.goalSelector.addGoal(4, new CloneWork.GatherGoal(clone));
+        mob.goalSelector.addGoal(5, new CloneFollowOwnerGoal(mob, 1.1, 5.0f, 2.5f));
+        mob.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(mob, 0.8));
+        mob.goalSelector.addGoal(7, new LookAtPlayerGoal(mob, Player.class, 8.0F));
+        mob.goalSelector.addGoal(7, new RandomLookAroundGoal(mob));
 
         // Target-selection goals:
         // 1. Whatever the owner just attacked
@@ -204,9 +204,9 @@ public final class WuCloneManager {
                     clone = movedClone;
                 }
 
-                // Sync held item + attack stat periodically
+                // Sync held item (unless it has its own tool in hand) + attack and health periodically
                 if ((server.getTickCount() & 7) == 0) {
-                    syncHeldItem(clone, player);
+                    if (!clone.isGathering()) syncHeldItem(clone, player);
                     syncAttack(clone, player);
                 }
 
@@ -215,10 +215,11 @@ public final class WuCloneManager {
                     clone.setTarget(null);
                 }
 
-                // Deliver collected items when close to owner
                 double dist = clone.position().distanceTo(player.position());
-                if (dist < 3.0) {
-                    deliverItems(level, clone, player);
+                // A working clone stays at its work until it runs out of it
+                if (!followsOwner(clone)) {
+                    idx++;
+                    continue;
                 }
 
                 // Only teleport to owner if the clone is idle (no combat, no task)
@@ -312,18 +313,16 @@ public final class WuCloneManager {
 
         level.addFreshEntity(clone);
         OWNER_TO_CLONES.computeIfAbsent(player.getUUID(), k -> new ArrayList<>()).add(clone.getUUID());
+        OWNERS.put(player.getUUID(), player);
 
         int total = OWNER_TO_CLONES.get(player.getUUID()).size();
         String word = total == 1 ? "clone" : "clones";
         player.sendSystemMessage(Component.literal("§a" + total + " shadow " + word + " active."));
     }
 
-    /** A clone's max health at its owner's level 1; scaled by the owner's power on summon. */
-    static final double CLONE_HEALTH = 20.0;
-
     private static void applyPlayerStats(WuCloneEntity clone, ServerPlayer player) {
-        // A clone's health is 20 at level 1, scaled by its owner's power
-        float cloneHp = LevelPower.scaled(player, CLONE_HEALTH);
+        // A clone has its owner's health
+        float cloneHp = player.getMaxHealth();
         var maxHp = clone.getAttribute(Attributes.MAX_HEALTH);
         if (maxHp != null) maxHp.setBaseValue(cloneHp);
         clone.setHealth(cloneHp);
@@ -360,6 +359,13 @@ public final class WuCloneManager {
         double playerAtk = player.getAttributeValue(Attributes.ATTACK_DAMAGE);
         var atk = clone.getAttribute(Attributes.ATTACK_DAMAGE);
         if (atk != null) atk.setBaseValue(Math.max(1.0, playerAtk));
+        // and its health with his, at the share it has left
+        var maxHp = clone.getAttribute(Attributes.MAX_HEALTH);
+        if (maxHp != null && maxHp.getBaseValue() != player.getMaxHealth()) {
+            float share = clone.getHealth() / clone.getMaxHealth();
+            maxHp.setBaseValue(player.getMaxHealth());
+            clone.setHealth(clone.getMaxHealth() * share);
+        }
     }
 
     // =========================================================================
@@ -383,12 +389,22 @@ public final class WuCloneManager {
                 && pd.getUUID(CLONE_OWNER_TAG).equals(ownerId);
     }
 
-    static ServerPlayer resolveOwner(Mob mob) {
+    /** A clone's owner: online, or as he summoned it; null when he is gone. */
+    @javax.annotation.Nullable
+    public static ServerPlayer resolveOwner(Mob mob) {
         var pd = mob.getPersistentData();
         if (!pd.hasUUID(CLONE_OWNER_TAG)) return null;
         UUID ownerId = pd.getUUID(CLONE_OWNER_TAG);
         if (!(mob.level() instanceof ServerLevel sl)) return null;
-        return sl.getServer().getPlayerList().getPlayer(ownerId);
+        ServerPlayer online = sl.getServer().getPlayerList().getPlayer(ownerId);
+        if (online != null) return online;
+        ServerPlayer summoner = OWNERS.get(ownerId);
+        return summoner != null && !summoner.isRemoved() ? summoner : null;
+    }
+
+    /** Whether a clone should be with its owner now: it follows him, or it has run out of work. */
+    public static boolean followsOwner(WuCloneEntity clone) {
+        return clone.getPriority() == WuCloneEntity.Priority.FOLLOW || clone.idleTicks() > CloneWork.IDLE_BEFORE_FOLLOW;
     }
 
     private static List<Entity> resolveClones(MinecraftServer server, List<UUID> ids) {
@@ -426,7 +442,6 @@ public final class WuCloneManager {
 
         @Override
         public boolean canUse() {
-            if (clone instanceof WuCloneEntity wce && !wce.canFight()) return false;
             if (clone.getTarget() != null && clone.getTarget().isAlive()) return false;
 
             ServerPlayer owner = resolveOwner(clone);
@@ -477,7 +492,6 @@ public final class WuCloneManager {
 
         @Override
         public boolean canUse() {
-            if (clone instanceof WuCloneEntity wce && !wce.canFight()) return false;
             ServerPlayer owner = resolveOwner(clone);
             if (owner == null) return false;
 
@@ -527,6 +541,7 @@ public final class WuCloneManager {
 
         @Override
         public boolean canUse() {
+            if (clone instanceof WuCloneEntity wce && !followsOwner(wce)) return false;
             ServerPlayer player = resolveOwner(clone);
             if (player == null || player.isSpectator()) return false;
             if (clone.distanceToSqr(player) < (double) (startDist * startDist)) return false;
@@ -564,344 +579,13 @@ public final class WuCloneManager {
     }
 
     // =========================================================================
-    // Inner goal: harvest fully-grown crops and replant seeds
+    // Its pack: spilled where it is dismissed
     // =========================================================================
 
-    private static final class CloneHarvestCropGoal extends MoveToBlockGoal {
-
-        private final PathfinderMob clone;
-
-        CloneHarvestCropGoal(PathfinderMob clone, double speed, int searchRange) {
-            super(clone, speed, searchRange, 3);
-            this.clone = clone;
-        }
-
-        @Override
-        protected int nextStartTick(PathfinderMob mob) {
-            return reducedTickDelay(10);
-        }
-
-        @Override
-        public boolean canUse() {
-            if (clone.getTarget() != null && clone.getTarget().isAlive()) return false;
-            if (clone instanceof WuCloneEntity wce && !wce.canHarvest()) return false;
-            return super.canUse();
-        }
-
-        @Override
-        protected boolean isValidTarget(net.minecraft.world.level.LevelReader level, BlockPos pos) {
-            return level.getBlockState(pos).getBlock() instanceof CropBlock crop
-                    && crop.isMaxAge(level.getBlockState(pos));
-        }
-
-        @Override
-        protected BlockPos getMoveToTarget() {
-            return this.blockPos; // crops are at ground level, don't go above
-        }
-
-        @Override
-        public double acceptedDistance() {
-            return 2.0;
-        }
-
-        @Override
-        public void tick() {
-            super.tick();
-            if (!isReachedTarget()) return;
-
-            ServerLevel level = (ServerLevel) clone.level();
-            BlockState state = level.getBlockState(blockPos);
-            if (!(state.getBlock() instanceof CropBlock crop) || !crop.isMaxAge(state)) return;
-
-            // Swing arm for visual feedback
-            clone.swing(clone.getUsedItemHand());
-
-            // Harvest: get drops and break
-            List<ItemStack> drops = Block.getDrops(state, level, blockPos, null);
-            level.destroyBlock(blockPos, false);
-
-            // Replant: find seed from drops
-            BlockState seedState = crop.defaultBlockState();
-            ItemStack seedItem = null;
-            for (ItemStack drop : drops) {
-                if (drop.is(crop.getCloneItemStack(level, blockPos, seedState).getItem())) {
-                    seedItem = drop;
-                    break;
-                }
-            }
-
-            if (seedItem != null && level.getBlockState(blockPos).isAir()
-                    && level.getBlockState(blockPos.below()).is(Blocks.FARMLAND)) {
-                level.setBlock(blockPos, seedState, 3);
-                seedItem.shrink(1);
-            }
-
-            // Store items — clone will deliver when near owner
-            storeItems((WuCloneEntity) clone, drops);
-
-            clone.getNavigation().stop();
-        }
-    }
-
-    // =========================================================================
-    // Inner goal: mine visible ore blocks and drop items to owner
-    // =========================================================================
-
-    private static final class CloneMineOreGoal extends MoveToBlockGoal {
-
-        private final PathfinderMob clone;
-        private int miningTicks;
-        private boolean justCompleted;
-        private static final int MINE_DURATION = 30; // 1.5 seconds
-
-        CloneMineOreGoal(PathfinderMob clone, double speed, int searchRange) {
-            super(clone, speed, searchRange, 1);
-            this.clone = clone;
-        }
-
-        @Override
-        protected int nextStartTick(PathfinderMob mob) {
-            return reducedTickDelay(10);
-        }
-
-        @Override
-        public boolean canUse() {
-            if (clone.getTarget() != null && clone.getTarget().isAlive()) return false;
-            if (clone instanceof WuCloneEntity wce && !wce.canHarvest()) return false;
-            if (justCompleted) {
-                justCompleted = false;
-                this.nextStartTick = 0;
-            }
-            // Skip MoveToBlockGoal's default search — use line-of-sight scan instead
-            if (this.nextStartTick > 0) {
-                --this.nextStartTick;
-                return false;
-            }
-            this.nextStartTick = this.nextStartTick(this.mob);
-            return findVisibleOre();
-        }
-
-        /** Scans all blocks within 20 blocks that the clone can see (raycast). */
-        private boolean findVisibleOre() {
-            net.minecraft.world.phys.Vec3 eyePos = clone.getEyePosition();
-            ServerPlayer owner = resolveOwner(clone);
-            if (owner == null) return false;
-
-            BlockPos center = clone.blockPosition();
-            int range = 20;
-            double bestDistSq = Double.MAX_VALUE;
-            BlockPos bestPos = null;
-
-            for (int dx = -range; dx <= range; dx++) {
-                for (int dy = -range; dy <= range; dy++) {
-                    for (int dz = -range; dz <= range; dz++) {
-                        double distSq = dx * dx + dy * dy + dz * dz;
-                        if (distSq > range * range) continue;
-                        if (distSq >= bestDistSq) continue;
-
-                        BlockPos pos = center.offset(dx, dy, dz);
-                        BlockState state = clone.level().getBlockState(pos);
-                        if (!isMineable(state)) continue;
-                        if (!ownerHasToolFor(owner, state)) continue;
-
-                        // Line-of-sight: raycast from clone eyes to block center
-                        net.minecraft.world.phys.Vec3 blockCenter = net.minecraft.world.phys.Vec3.atCenterOf(pos);
-                        net.minecraft.world.phys.BlockHitResult hit = clone.level().clip(
-                                new net.minecraft.world.level.ClipContext(
-                                        eyePos, blockCenter,
-                                        net.minecraft.world.level.ClipContext.Block.COLLIDER,
-                                        net.minecraft.world.level.ClipContext.Fluid.NONE,
-                                        clone));
-                        // Hit must be the ore block itself (not something in the way)
-                        if (hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK
-                                && hit.getBlockPos().equals(pos)) {
-                            bestDistSq = distSq;
-                            bestPos = pos;
-                        }
-                    }
-                }
-            }
-
-            if (bestPos != null) {
-                this.blockPos = bestPos;
-                return true;
-            }
-            return false;
-        }
-
-        @Override
-        protected boolean isValidTarget(net.minecraft.world.level.LevelReader level, BlockPos pos) {
-            // Used by canContinueToUse — just check it's still ore
-            return isMineable(level.getBlockState(pos));
-        }
-
-        private static boolean isMineable(BlockState state) {
-            // Ores
-            if (state.is(BlockTags.GOLD_ORES) || state.is(BlockTags.IRON_ORES)
-                    || state.is(BlockTags.COPPER_ORES) || state.is(BlockTags.COAL_ORES)
-                    || state.is(BlockTags.LAPIS_ORES) || state.is(BlockTags.REDSTONE_ORES)
-                    || state.is(BlockTags.DIAMOND_ORES) || state.is(BlockTags.EMERALD_ORES)) {
-                return true;
-            }
-            Block b = state.getBlock();
-            if (b == Blocks.NETHER_QUARTZ_ORE || b == Blocks.NETHER_GOLD_ORE
-                    || b == Blocks.ANCIENT_DEBRIS) {
-                return true;
-            }
-            // Logs / wood
-            return state.is(BlockTags.LOGS);
-        }
-
-        /**
-         * Returns the minimum harvest tier required for the given block state.
-         * 0 = wood/gold, 1 = stone, 2 = iron, 3 = diamond, 4 = netherite.
-         */
-        private static int requiredTier(BlockState state) {
-            if (state.is(BlockTags.NEEDS_DIAMOND_TOOL)) return 3;
-            if (state.is(BlockTags.NEEDS_IRON_TOOL))    return 2;
-            if (state.is(BlockTags.NEEDS_STONE_TOOL))   return 1;
-            // Ancient debris needs diamond+ (tagged via forge)
-            if (state.is(Blocks.ANCIENT_DEBRIS))        return 3;
-            return 0;
-        }
-
-        /**
-         * Returns the harvest tier of a pickaxe item.
-         * Checks by material: netherite=4, diamond=3, iron=2, stone=1, wood/gold=0.
-         */
-        private static int pickaxeTier(ItemStack stack) {
-            if (stack.isEmpty()) return -1;
-            if (!(stack.getItem() instanceof net.minecraft.world.item.PickaxeItem pick)) return -1;
-            net.minecraft.world.item.Tier tier = pick.getTier();
-            // Compare by harvest level from tier
-            if (tier == net.minecraft.world.item.Tiers.NETHERITE) return 4;
-            if (tier == net.minecraft.world.item.Tiers.DIAMOND)   return 3;
-            if (tier == net.minecraft.world.item.Tiers.IRON)      return 2;
-            if (tier == net.minecraft.world.item.Tiers.STONE)     return 1;
-            if (tier == net.minecraft.world.item.Tiers.GOLD)      return 0;
-            if (tier == net.minecraft.world.item.Tiers.WOOD)      return 0;
-            // Modded tiers: use the tag-based level
-            return net.minecraftforge.common.TierSortingRegistry.getSortedTiers()
-                    .indexOf(tier);
-        }
-
-        /**
-         * Checks if the player has the right tool in their inventory.
-         * Logs need any axe; ores need a pickaxe of sufficient tier.
-         */
-        private static boolean ownerHasToolFor(ServerPlayer owner, BlockState state) {
-            if (state.is(BlockTags.LOGS)) {
-                // Any axe works for logs
-                for (int i = 0; i < owner.getInventory().getContainerSize(); i++) {
-                    if (owner.getInventory().getItem(i).getItem()
-                            instanceof net.minecraft.world.item.AxeItem) return true;
-                }
-                return false;
-            }
-            // Ores: need pickaxe of correct tier
-            int required = requiredTier(state);
-            for (int i = 0; i < owner.getInventory().getContainerSize(); i++) {
-                int tier = pickaxeTier(owner.getInventory().getItem(i));
-                if (tier >= required) return true;
-            }
-            return false;
-        }
-
-        @Override
-        public void start() {
-            super.start();
-            miningTicks = 0;
-        }
-
-        @Override
-        public void tick() {
-            super.tick();
-            if (!isReachedTarget()) {
-                miningTicks = 0;
-                return;
-            }
-
-            ServerLevel level = (ServerLevel) clone.level();
-            BlockState state = level.getBlockState(blockPos);
-            if (!isMineable(state)) return;
-
-            // Re-check pickaxe requirement each tick
-            ServerPlayer owner = resolveOwner(clone);
-            if (owner == null || !ownerHasToolFor(owner, state)) {
-                miningTicks = 0;
-                return;
-            }
-
-            // Swing arm for visual feedback
-            if (miningTicks % 5 == 0) {
-                clone.swing(clone.getUsedItemHand());
-            }
-
-            // Mining progress particles
-            if (miningTicks % 4 == 0) {
-                level.destroyBlockProgress(clone.getId(), blockPos,
-                        (int) ((float) miningTicks / MINE_DURATION * 9));
-            }
-
-            miningTicks++;
-            if (miningTicks >= MINE_DURATION) {
-                List<ItemStack> drops = Block.getDrops(state, level, blockPos, null);
-                level.destroyBlock(blockPos, false);
-
-                storeItems((WuCloneEntity) clone, drops);
-                miningTicks = 0;
-
-                // Force immediate re-search for next ore
-                justCompleted = true;
-                clone.getNavigation().stop();
-            }
-        }
-
-        @Override
-        public double acceptedDistance() {
-            return 2.0;
-        }
-    }
-
-    // =========================================================================
-    // Item storage: clones hold items until they return to the player
-    // =========================================================================
-
-    /** Store collected items in the clone's inventory for later delivery. */
-    private static void storeItems(WuCloneEntity clone, List<ItemStack> drops) {
-        List<ItemStack> inv = CLONE_INVENTORY.computeIfAbsent(clone.getUUID(), k -> new ArrayList<>());
-        for (ItemStack stack : drops) {
-            if (!stack.isEmpty()) inv.add(stack.copy());
-        }
-    }
-
-    /** Drop all stored items at the player's feet when clone is nearby. */
-    private static void deliverItems(ServerLevel level, WuCloneEntity clone, ServerPlayer owner) {
-        List<ItemStack> inv = CLONE_INVENTORY.remove(clone.getUUID());
-        if (inv == null || inv.isEmpty()) return;
-        for (ItemStack stack : inv) {
-            if (stack.isEmpty()) continue;
-            ItemEntity item = new ItemEntity(level,
-                    owner.getX(), owner.getY() + 0.5, owner.getZ(), stack);
-            item.setDeltaMovement(0, 0.1, 0);
-            item.setPickUpDelay(10);
-            item.setThrower(owner.getUUID());
-            level.addFreshEntity(item);
-        }
-    }
-
-    /** Clean up inventory when a clone is dismissed. */
+    /** A dismissed clone's pack spills where it stood. */
     private static void dropInventoryOnDismiss(ServerLevel level, UUID cloneId) {
-        List<ItemStack> inv = CLONE_INVENTORY.remove(cloneId);
-        if (inv == null || inv.isEmpty()) return;
-        Entity e = level.getEntity(cloneId);
-        if (e == null) return;
-        for (ItemStack stack : inv) {
-            if (stack.isEmpty()) continue;
-            ItemEntity item = new ItemEntity(level,
-                    e.getX(), e.getY() + 0.5, e.getZ(), stack);
-            item.setPickUpDelay(10);
-            level.addFreshEntity(item);
+        if (level.getEntity(cloneId) instanceof WuCloneEntity clone) {
+            net.minecraft.world.Containers.dropContents(level, clone, clone.pack());
         }
     }
 }

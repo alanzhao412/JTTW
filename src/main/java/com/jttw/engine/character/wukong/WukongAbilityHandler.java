@@ -114,7 +114,7 @@ public final class WukongAbilityHandler {
 
             boolean applyThisTick = (tier >= 3) || (player.tickCount % 2 == 0);
             if (applyThisTick) {
-                applyRingEffect(player, tier);
+                ringPulse(player, player, tier);
             }
 
             if (tier >= 2) {
@@ -129,8 +129,12 @@ public final class WukongAbilityHandler {
         ACTIVE_RINGS.removeAll(toRemove);
     }
 
-    private static void applyRingEffect(ServerPlayer player, int tier) {
-        Vec3 center = player.position().add(0, 1.0, 0);
+    /**
+     * One pulse of a Ring of Fire round {@code centre} (Wukong, or one of his clones): what is in it
+     * burns and is thrown out, all but Wukong and his clones. Its burn is by Wukong's power.
+     */
+    public static void ringPulse(LivingEntity centre, ServerPlayer player, int tier) {
+        Vec3 center = centre.position().add(0, 1.0, 0);
         float pushForce = (tier >= 3) ? PUSH_FORCE_T3 : PUSH_FORCE_T1;
         int fireTicks   = (tier >= 3) ? FIRE_TICKS_T3 : FIRE_TICKS_T1;
 
@@ -138,7 +142,8 @@ public final class WukongAbilityHandler {
         List<LivingEntity> nearby = player.level().getEntitiesOfClass(
                 LivingEntity.class,
                 searchBox,
-                e -> e != player && e.distanceTo(player) <= RING_RADIUS
+                e -> e != player && e != centre && e.distanceTo(centre) <= RING_RADIUS
+                        && !WuCloneManager.isAllyClone(e, player.getUUID())
         );
 
         DamageSource fireSrc = player.level().damageSources().magic();
@@ -165,10 +170,10 @@ public final class WukongAbilityHandler {
             entity.hurt(fireSrc, ringDamage);
 
             if (tier >= 3) {
-                double dist = entity.distanceTo(player);
+                double dist = entity.distanceTo(centre);
                 if (dist < RING_RADIUS - 0.5) {
                     Vec3 edge = dir.scale(RING_RADIUS + 0.5);
-                    entity.teleportTo(player.getX() + edge.x, entity.getY(), player.getZ() + edge.z);
+                    entity.teleportTo(centre.getX() + edge.x, entity.getY(), centre.getZ() + edge.z);
                 }
             }
         }
