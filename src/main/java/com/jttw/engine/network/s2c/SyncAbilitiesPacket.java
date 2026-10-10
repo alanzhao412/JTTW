@@ -76,7 +76,7 @@ public class SyncAbilitiesPacket {
         PlayableCharacter character = Characters.of(player);
         List<AbilitySlot> bar = character == null
                 ? PlayableCharacter.emptyBar()
-                : character.skillBar(player);
+                : character.fullBar(player);
         return new SyncAbilitiesPacket(player.getUUID(), bar);
     }
 }

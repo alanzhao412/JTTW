@@ -7,6 +7,7 @@ import com.jttw.engine.character.PlayableCharacter;
 import com.jttw.engine.progression.skilltree.AbilityType;
 import com.jttw.engine.progression.skilltree.SkillTree;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
+import com.jttw.engine.transformation.TransformationSchool;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
@@ -15,7 +16,8 @@ import java.util.Set;
 
 /**
  * The Saurian Demon King, the Flood-Dragon: Riptide Surge on V (hold and let go), Tidal Lash on
- * B, Whirlpool on N, Flood-Dragon's Wrath on M. See {@link SaurianAbilityHandler}.
+ * B, Whirlpool on N, Flood-Dragon's Wrath on M; and, holding Shift, the 18 Transformations on V.
+ * See {@link SaurianAbilityHandler}.
  */
 public final class SaurianCharacter implements PlayableCharacter {
 
@@ -32,7 +34,7 @@ public final class SaurianCharacter implements PlayableCharacter {
     @Override public SkillTree skillTree() { return SaurianSkillTree.TREE; }
     @Override public String treeTitle() { return "SAURIAN DEMON KING"; }
     @Override public List<String> treeColumns() {
-        return List.of("Riptide Surge", "Tidal Lash", "Whirlpool", "Flood-Dragon's Wrath", "Riverborn", "Scaled Hide", "Venom Fangs");
+        return List.of("Riptide Surge", "Tidal Lash", "Whirlpool", "Flood-Dragon's Wrath", "Riverborn", "Scaled Hide", "Venom Fangs", "18 Transformations");
     }
 
     @Override
@@ -43,6 +45,21 @@ public final class SaurianCharacter implements PlayableCharacter {
                 AbilitySlot.fromBranch(tree, unlocked, "sdk_lash", "Tidal Lash", AbilityType.TOGGLE),
                 AbilitySlot.fromBranch(tree, unlocked, "sdk_whirl", "Whirlpool", AbilityType.TOGGLE),
                 AbilitySlot.fromBranch(tree, unlocked, "sdk_wrath", "Flood-Dragon's Wrath", AbilityType.TOGGLE));
+    }
+
+    /** Shift + V: the 18 Transformations (a menu, opened client-side). */
+    @Override
+    public List<AbilitySlot> shiftBar(Set<String> unlocked) {
+        return PlayableCharacter.bar(
+                AbilitySlot.fromBranch(skillTree(), unlocked, "sdk_transform", "18 Transformations", AbilityType.MENU),
+                AbilitySlot.EMPTY, AbilitySlot.EMPTY, AbilitySlot.EMPTY);
+    }
+
+    @Override public TransformationSchool transformationSchool() { return TransformationSchool.EIGHTEEN; }
+
+    @Override
+    public int transformationLevel(Set<String> unlocked) {
+        return skillTree().highestTier(unlocked, "sdk_transform");
     }
 
     @Override

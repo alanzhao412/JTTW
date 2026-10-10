@@ -152,6 +152,14 @@ final class AbilityScenes {
                     level.playSound(null, p.getX() + 1, p.getY(), p.getZ() + 10, net.minecraft.sounds.SoundEvents.CHEST_OPEN, net.minecraft.sounds.SoundSource.BLOCKS, 1f, 1f);
                 }, 6, true),
                 // ── White Bone Ridge's dead ──
+                new Scene("xtq_howl", p -> {}, p -> {
+                    // a howl crossing in front of the camera, from left to right
+                    var howl = new com.jttw.engine.entity.HowlProjectileEntity(com.jttw.engine.registry.ModEntities.HOWL_PROJECTILE.get(), p.level());
+                    howl.setPos(p.getX() - 1, p.getY() + 1.4, p.getZ() + 5);
+                    howl.shoot(0.6, 0, -0.8, 0.25f, 0); // across the camera's view
+                    howl.setNoGravity(true);
+                    p.level().addFreshEntity(howl);
+                }, 6, false),
                 // ── The Saurian Demon King: seen from his own eyes ──
                 new Scene("saurian_lash", p -> {
                     saurian(p, com.jttw.engine.character.saurian.SaurianSkillTree.LASH_1);

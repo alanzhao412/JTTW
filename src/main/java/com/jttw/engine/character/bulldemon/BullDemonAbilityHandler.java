@@ -244,7 +244,7 @@ public final class BullDemonAbilityHandler {
             return;
         }
         p.getPersistentData().putBoolean(KEY_GREAT_BULL, true);
-        TransformationManager.transform(p, EntityType.RAVAGER); // stand-in for the white bull
+        TransformationManager.transform(p, com.jttw.engine.registry.ModEntities.GREAT_WHITE_BULL.get());
         applyGreatBull(p, tier);
         p.heal(LevelPower.scaled(p, greatBullHealth(tier)));
         p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 1.5f, 0.6f);
@@ -266,7 +266,7 @@ public final class BullDemonAbilityHandler {
         PassiveModifiers.set(p, Attributes.ATTACK_DAMAGE, "bdk_bull_attack", 0, AttributeModifier.Operation.MULTIPLY_TOTAL);
         PassiveModifiers.add(p, Attributes.KNOCKBACK_RESISTANCE, "bdk_bull_steady", 0);
         TransformationData data = TransformationManager.getTransformation(p);
-        if (data != null && data.getEntityType() == EntityType.RAVAGER) TransformationManager.demorph(p);
+        if (data != null && data.getEntityType() == com.jttw.engine.registry.ModEntities.GREAT_WHITE_BULL.get()) TransformationManager.demorph(p);
     }
 
     // ── Thick Hide ─────────────────────────────────────────────────
@@ -443,7 +443,7 @@ public final class BullDemonAbilityHandler {
         if (inGreatBull(p)) {
             int tier = bull ? tier(p, "bdk_bull") : 0;
             TransformationData data = TransformationManager.getTransformation(p);
-            boolean stillBull = data != null && data.getEntityType() == EntityType.RAVAGER;
+            boolean stillBull = data != null && data.getEntityType() == com.jttw.engine.registry.ModEntities.GREAT_WHITE_BULL.get();
             if (tier < 1 || !stillBull || !QiData.spend(p, GREAT_BULL_QI_PER_TICK)) {
                 endGreatBull(p);
             } else {

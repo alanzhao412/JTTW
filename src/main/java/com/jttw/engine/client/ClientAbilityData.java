@@ -51,6 +51,16 @@ public final class ClientAbilityData {
         pageOffset = (pageOffset + PAGE_SIZE) % abilities.size();
     }
 
+    /** Shows the second page while {@code shift} is held, if there is one; the first otherwise. */
+    public static void showShiftPage(boolean shift) {
+        pageOffset = shift && abilities.size() > PAGE_SIZE ? PAGE_SIZE : 0;
+    }
+
+    /** The slot index the server knows a slot on this page by: 0-3, or 4-7 on the Shift page. */
+    public static int serverIndex(int slotIndex) {
+        return pageOffset + slotIndex;
+    }
+
     public static int totalCount() { return abilities.size(); }
 
     @Nullable

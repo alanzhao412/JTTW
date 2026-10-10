@@ -60,7 +60,7 @@ import java.util.UUID;
  *       rain: he launches the way he looks, spinning, striking all he passes; the longer held
  *       (up to 1 s), the further.</li>
  *   <li><b>B, Tidal Lash:</b> a rope of water from his hand to the crosshair yanks the first foe
- *       on it to him; sneaking, it pulls him to the block he aims at.</li>
+ *       on it to him; with no foe on it, it pulls him to the block he aims at.</li>
  *   <li><b>N, Whirlpool:</b> opens on the ground he looks at, dragging foes into its heart and
  *       drowning them there.</li>
  *   <li><b>M, Flood-Dragon's Wrath:</b> for a time his blows burst in floodwater round the one
@@ -262,7 +262,7 @@ public final class SaurianAbilityHandler {
 
     // ── B: Tidal Lash ──────────────────────────────────────────────
 
-    /** Lashes at the crosshair. Returns what it caught (a foe, or null for a grapple or a miss). */
+    /** Lashes at the crosshair. Returns the foe it caught, or null if it pulled him to a block, or missed. */
     @Nullable
     public static LivingEntity lash(ServerPlayer p) {
         int tier = SaurianCharacter.is(p) ? tier(p, "sdk_lash") : 0;
@@ -272,8 +272,9 @@ public final class SaurianAbilityHandler {
         Vec3 eye = p.getEyePosition(), look = p.getLookAngle(), end = eye.add(look.scale(reach));
         BlockHitResult block = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, p));
         Vec3 stop = block.getLocation();
-        boolean grapple = p.isShiftKeyDown();
-        if (grapple && block.getType() == HitResult.Type.MISS) {
+        EntityHitResult hit = ProjectileUtil.getEntityHitResult(level, p, eye, stop,
+                p.getBoundingBox().expandTowards(look.scale(reach)).inflate(1), e -> e instanceof LivingEntity l && isFoe(l, p));
+        if (hit == null && block.getType() == HitResult.Type.MISS) {
             p.displayClientMessage(Component.literal("§7Nothing there to catch hold of."), true);
             return null;
         }
@@ -282,24 +283,22 @@ public final class SaurianAbilityHandler {
         Vec3 from = hand(p);
         LivingEntity caught = null;
         Vec3 to = stop;
-        if (grapple) {
+        if (hit != null && hit.getEntity() instanceof LivingEntity e) {
+            // a foe on the line: yanked to him
+            caught = e;
+            to = e.position().add(0, e.getBbHeight() / 2, 0);
+            e.hurt(p.damageSources().playerAttack(p), lashDamage(atk(p), tier));
+            Vec3 pull = p.position().subtract(e.position());
+            e.setDeltaMovement(pull.normalize().scale(Math.min(2.0, 0.5 + pull.length() * 0.1)).add(0, 0.35, 0));
+            e.hurtMarked = true;
+            if (tier >= 3) e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 1));
+            level.sendParticles(ParticleTypes.SPLASH, to.x, to.y, to.z, 25, 0.4, 0.4, 0.4, 0.2);
+        } else {
+            // only a block: it pulls him there
             Vec3 pull = stop.subtract(p.position());
             p.setDeltaMovement(pull.normalize().scale(Math.min(2.4, 0.6 + pull.length() * 0.12)).add(0, 0.3, 0));
             p.hurtMarked = true;
             p.getPersistentData().putLong(KEY_SAFE_FALL_UNTIL, level.getGameTime() + SAFE_FALL);
-        } else {
-            EntityHitResult hit = ProjectileUtil.getEntityHitResult(level, p, eye, stop,
-                    p.getBoundingBox().expandTowards(look.scale(reach)).inflate(1), e -> e instanceof LivingEntity l && isFoe(l, p));
-            if (hit != null && hit.getEntity() instanceof LivingEntity e) {
-                caught = e;
-                to = e.position().add(0, e.getBbHeight() / 2, 0);
-                e.hurt(p.damageSources().playerAttack(p), lashDamage(atk(p), tier));
-                Vec3 pull = p.position().subtract(e.position());
-                e.setDeltaMovement(pull.normalize().scale(Math.min(2.0, 0.5 + pull.length() * 0.1)).add(0, 0.35, 0));
-                e.hurtMarked = true;
-                if (tier >= 3) e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 1));
-                level.sendParticles(ParticleTypes.SPLASH, to.x, to.y, to.z, 25, 0.4, 0.4, 0.4, 0.2);
-            }
         }
         rope(level, from, to);
         NetworkHandler.sendToNear(level, to, 96, com.jttw.engine.network.s2c.WaterFxPacket.lash(p.getId(), caught != null ? caught.getId() : -1, to));

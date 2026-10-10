@@ -35,7 +35,7 @@ public class HowlProjectileEntity extends ThrowableItemProjectile {
 
     @Override
     protected Item getDefaultItem() {
-        return Items.SNOWBALL; // visual placeholder — nearly invisible with flat trajectory
+        return Items.SNOWBALL; // never drawn: HowlRenderer draws it as a cone of sound
     }
 
     @Override

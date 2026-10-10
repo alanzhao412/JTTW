@@ -11,10 +11,10 @@ import java.util.List;
  * of the Monkey King's seven sworn brothers. Water, serpent and venom. Node ids start {@code sdk_}.
  *
  * <pre>
- * Col:   0 (Riptide)  1 (Lash)   2 (Whirlpool)  3 (Wrath)   4 (Riverborn)  5 (Scaled Hide)  6 (Venom)
- * Row 0: Surge I      Lash I     Whirlpool I    Wrath I     Riverborn I    Scaled Hide I    Venom I
- * Row 1: Surge II     Lash II    Whirlpool II   Wrath II    Riverborn II   Scaled Hide II   Venom II
- * Row 2: Surge III    Lash III   Whirlpool III  Wrath III   Riverborn III  Scaled Hide III  Venom III
+ * Col:   0 (Riptide)  1 (Lash)   2 (Whirlpool)  3 (Wrath)   4 (Riverborn)  5 (Scaled Hide)  6 (Venom)  7 (18 Transformations)
+ * Row 0: Surge I      Lash I     Whirlpool I    Wrath I     Riverborn I    Scaled Hide I    Venom I    18 Trans. I
+ * Row 1: Surge II     Lash II    Whirlpool II   Wrath II    Riverborn II   Scaled Hide II   Venom II   18 Trans. II
+ * Row 2: Surge III    Lash III   Whirlpool III  Wrath III   Riverborn III  Scaled Hide III  Venom III  18 Trans. III
  * </pre>
  */
 public final class SaurianSkillTree {
@@ -28,6 +28,7 @@ public final class SaurianSkillTree {
     public static final String RIVER_1 = "sdk_river_1", RIVER_2 = "sdk_river_2", RIVER_3 = "sdk_river_3";
     public static final String HIDE_1 = "sdk_hide_1", HIDE_2 = "sdk_hide_2", HIDE_3 = "sdk_hide_3";
     public static final String VENOM_1 = "sdk_venom_1", VENOM_2 = "sdk_venom_2", VENOM_3 = "sdk_venom_3";
+    public static final String TRANSFORM_1 = "sdk_transform_1", TRANSFORM_2 = "sdk_transform_2", TRANSFORM_3 = "sdk_transform_3";
 
     public static final SkillTree TREE = new SkillTree("sdk_");
 
@@ -46,7 +47,7 @@ public final class SaurianSkillTree {
                         {"Faster, further, harder", "still.", ""}});
         branch(new String[]{LASH_1, LASH_2, LASH_3}, "Tidal Lash", "Tidal Lash", 1, AbilityType.TOGGLE, new int[]{2, 3, 4},
                 new String[][]{
-                        {"B: a rope of water to the", "crosshair yanks a foe to", "you. Sneak: pull yourself."},
+                        {"B: a rope of water to the", "crosshair yanks a foe to you,", "or you to the block."},
                         {"Longer reach, harder lash.", "", ""},
                         {"Longer still; the lashed", "are slowed.", ""}});
         branch(new String[]{WHIRL_1, WHIRL_2, WHIRL_3}, "Whirlpool", "Whirlpool", 2, AbilityType.TOGGLE, new int[]{3, 4, 5},
@@ -74,5 +75,10 @@ public final class SaurianSkillTree {
                         {"Your blows envenom: poison", "that stacks, up to 3.", ""},
                         {"Up to 5 stacks, stronger.", "", ""},
                         {"Up to 7 stacks, stronger", "still.", ""}});
+        branch(new String[]{TRANSFORM_1, TRANSFORM_2, TRANSFORM_3}, "18 Transformations", "18 Transformations", 7, AbilityType.MENU, new int[]{3, 4, 5},
+                new String[][]{
+                        {"Shift + V: the 18", "Transformations. Neutral", "land and water forms."},
+                        {"Adds neutral", "flying forms.", ""},
+                        {"Adds hostile", "forms.", ""}});
     }
 }

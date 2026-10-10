@@ -102,6 +102,16 @@ public final class ModEntities {
                             .updateInterval(5)
                             .build(new ResourceLocation(JTTWEngine.MOD_ID, "bone_shard").toString()));
 
+    // ── Forms ──────────────────────────────────────────────────────
+
+    /** The Bull Demon King's true form, never spawned: only taken. */
+    public static final RegistryObject<EntityType<com.jttw.engine.entity.bull.GreatWhiteBullEntity>> GREAT_WHITE_BULL =
+            ENTITIES.register("great_white_bull", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.bull.GreatWhiteBullEntity>of(com.jttw.engine.entity.bull.GreatWhiteBullEntity::new, MobCategory.MISC)
+                            .sized(2.4F, 3.2F)
+                            .clientTrackingRange(10)
+                            .build(new ResourceLocation(JTTWEngine.MOD_ID, "great_white_bull").toString()));
+
     // ── Heaven's host ─────────────────────────────────────────────
 
     public static final RegistryObject<EntityType<com.jttw.engine.entity.heaven.HeavenlySoldierEntity>> HEAVENLY_SOLDIER =
@@ -134,6 +144,7 @@ public final class ModEntities {
         event.put(XIAOTIAN_QUAN.get(), XiaotianQuanEntity.createAttributes().build());
         event.put(BONE_SERVANT.get(), com.jttw.engine.entity.ridge.BoneServantEntity.createAttributes().build());
         event.put(WRAITH.get(), com.jttw.engine.entity.ridge.WraithEntity.createAttributes().build());
+        event.put(GREAT_WHITE_BULL.get(), com.jttw.engine.entity.bull.GreatWhiteBullEntity.createAttributes().build());
         event.put(HEAVENLY_SOLDIER.get(), com.jttw.engine.entity.heaven.HeavenlySoldierEntity.createAttributes().build());
         event.put(LADY_WHITE_BONE.get(), com.jttw.engine.entity.ridge.LadyWhiteBoneEntity.createAttributes().build());
     }

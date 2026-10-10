@@ -29,8 +29,7 @@ import net.minecraftforge.client.gui.overlay.IGuiOverlay;
  *
  * <ul>
  *   <li>Slots are separated by {@link #SLOT_GAP} pixels so each reads as its own element.</li>
- *   <li>Icon area is a placeholder now.  When icon PNGs are ready, drop them into
- *       {@code assets/jttw_engine/textures/abilities/} and uncomment the blit block.</li>
+ *   <li>Each ability shows its icon, {@code assets/jttw_engine/textures/abilities/<id>.png}.</li>
  *   <li>Cooldown overlay: semi-transparent dark fill + centred second countdown +
  *       a drain bar running across the bottom-inside of the slot.</li>
  *   <li>Key label sits in a small coloured badge at the bottom-centre of the slot.</li>
@@ -131,8 +130,7 @@ public final class SkillBarRenderer {
 
     // -----------------------------------------------------------------------
     // Icon texture path template
-    // Drop PNG files into: assets/jttw_engine/textures/abilities/<abilityId>.png
-    // Uncomment the blit block in drawIconArea() once icons are ready.
+    // Each ability's 16x16 picture: assets/jttw_engine/textures/abilities/<abilityId>.png
     // -----------------------------------------------------------------------
 
     private static ResourceLocation abilityTexture(String abilityId) {
@@ -199,30 +197,29 @@ public final class SkillBarRenderer {
     // Icon area
     // -----------------------------------------------------------------------
 
+    /** Which abilities have an icon, found once each (a missing one falls back to the plain tile). */
+    private static final java.util.Map<String, Boolean> HAS_ICON = new java.util.HashMap<>();
+
+    private static boolean hasIcon(Minecraft mc, String abilityId) {
+        return HAS_ICON.computeIfAbsent(abilityId, id -> mc.getResourceManager().getResource(abilityTexture(id)).isPresent());
+    }
+
     /**
-     * Draws the ability icon inside the slot (above the key badge).
+     * Draws the ability's icon inside the slot, above the key badge: its 16x16 picture, centred
+     * on the dark tile; or the plain tile alone if it has none.
      *
-     * <p><b>Placeholder mode:</b> renders a styled dark rectangle.
-     * When icon PNGs are ready, replace the placeholder block with the blit block.
-     *
-     * <p>Icon area bounds: x, y  →  x + SLOT,  y + (SLOT - BADGE_H)
+     * <p>Icon area bounds: x, y  to  x + SLOT,  y + (SLOT - BADGE_H)
      */
     private static void drawIconArea(GuiGraphics gfx, Minecraft mc,
                                      int x, int y, String abilityId) {
         int iconH = SLOT - BADGE_H;
-
-        // ── PLACEHOLDER ────────────────────────────────────────────────────
-        // Styled dark icon placeholder with an inner highlight border.
-        // Remove this block when real icons are added.
         gfx.fill(x,     y,          x + SLOT,     y + iconH,     0xFF151520);
         gfx.fill(x,     y,          x + SLOT,     y + 1,         0xFF303048); // top highlight
         gfx.fill(x,     y,          x + 1,         y + iconH,    0xFF303048); // left highlight
-        // ── END PLACEHOLDER ────────────────────────────────────────────────
-
-        // ── ICON BLIT (uncomment when textures/abilities/<abilityId>.png exist) ──
-        // RenderSystem.setShaderTexture(0, abilityTexture(abilityId));
-        // gfx.blit(abilityTexture(abilityId), x, y, 0, 0, SLOT, iconH, SLOT, iconH);
-        // ── END ICON BLIT ───────────────────────────────────────────────────
+        if (hasIcon(mc, abilityId)) {
+            int size = Math.min(16, iconH);
+            gfx.blit(abilityTexture(abilityId), x + (SLOT - size) / 2, y + (iconH - size) / 2, 0, 0, size, size, size, size);
+        }
     }
 
     private static void drawEmptyIcon(GuiGraphics gfx, int x, int y) {

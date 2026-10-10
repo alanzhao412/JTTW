@@ -42,6 +42,22 @@ class CharactersTest {
                 Characters.resolve("saurian_demon_king", ProgressionClass.YAOGUAI, null));
     }
 
+    /** Holding Shift shows a second page of four: the Saurian's 18 Transformations; nobody else has one yet. */
+    @Test
+    void theShiftPageHoldsTheSauriansTransformations() {
+        var saurian = com.jttw.engine.character.saurian.SaurianCharacter.INSTANCE;
+        assertTrue(saurian.shiftBar(java.util.Set.of()).stream().allMatch(AbilitySlot::isEmpty), "nothing until learned");
+        var page = saurian.shiftBar(java.util.Set.of("sdk_transform_1", "sdk_transform_2"));
+        assertEquals(PlayableCharacter.SLOT_COUNT, page.size());
+        assertEquals("sdk_transform", page.get(0).id());
+        assertEquals(2, page.get(0).tier());
+        assertEquals(com.jttw.engine.transformation.TransformationSchool.EIGHTEEN, saurian.transformationSchool());
+        for (PlayableCharacter c : Characters.all()) {
+            if (c == saurian) continue;
+            assertTrue(c.shiftBar(new java.util.HashSet<>(c.skillTree().nodes().keySet())).stream().allMatch(AbilitySlot::isEmpty), c.outcomeId());
+        }
+    }
+
     @Test
     void outcomeIdsAndTreePrefixesAreUnique() {
         List<PlayableCharacter> all = Characters.all();

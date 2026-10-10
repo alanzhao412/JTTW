@@ -137,7 +137,7 @@ public class BullDemonGameTests {
         BullDemonCharacter.INSTANCE.activate(p, 3, AbilityAction.USE);
         check(h, BullDemonAbilityHandler.inGreatBull(p), "the bull");
         TransformationData data = TransformationManager.getTransformation(p);
-        check(h, data != null && data.getEntityType() == EntityType.RAVAGER, "giant form");
+        check(h, data != null && data.getEntityType() == com.jttw.engine.registry.ModEntities.GREAT_WHITE_BULL.get(), "the Great White Bull");
         near(h, baseHealth + 30 * LevelPower.of(p), p.getMaxHealth(), "II: +30 health, at his level's power");
         near(h, 0.5, modifier(p, Attributes.ATTACK_DAMAGE, "bdk_bull_attack"), "II: +50% attack");
         near(h, baseAttack * 1.5, p.getAttributeValue(Attributes.ATTACK_DAMAGE), "half again his whole attack");

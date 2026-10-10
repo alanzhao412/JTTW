@@ -107,6 +107,7 @@ public final class ClientInit {
     public static void registerLayers(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(XiaotianQuanModel.LAYER_LOCATION, XiaotianQuanModel::createBodyLayer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.RidgeRenderers.WRAITH_LAYER, com.jttw.engine.client.renderer.RidgeRenderers::wraithLayer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.GreatWhiteBullRenderer.LAYER, com.jttw.engine.client.renderer.GreatWhiteBullRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.RidgeRenderers.VEIL_LAYER, com.jttw.engine.client.renderer.RidgeRenderers::veilLayer);
     }
 
@@ -115,8 +116,7 @@ public final class ClientInit {
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.WU_CLONE.get(), WuCloneRenderer::new);
         event.registerEntityRenderer(ModEntities.XIAOTIAN_QUAN.get(), XiaotianQuanRenderer::new);
-        event.registerEntityRenderer(ModEntities.HOWL_PROJECTILE.get(),
-                net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
+        event.registerEntityRenderer(ModEntities.HOWL_PROJECTILE.get(), com.jttw.engine.client.renderer.HowlRenderer::new);
         event.registerEntityRenderer(ModEntities.PLACED_STAFF.get(), PlacedStaffRenderer::new);
         event.registerBlockEntityRenderer(com.jttw.engine.registry.ModBlockEntities.TRIGRAMS_FURNACE.get(),
                 com.jttw.engine.client.renderer.TrigramsFurnaceRenderer::new);
@@ -124,6 +124,7 @@ public final class ClientInit {
         event.registerEntityRenderer(ModEntities.BONE_SERVANT.get(), com.jttw.engine.client.renderer.RidgeRenderers.BoneServantRenderer::new);
         event.registerEntityRenderer(ModEntities.WRAITH.get(), com.jttw.engine.client.renderer.RidgeRenderers.WraithRenderer::new);
         event.registerEntityRenderer(ModEntities.HEAVENLY_SOLDIER.get(), com.jttw.engine.client.renderer.HeavenRenderers.SoldierRenderer::new);
+        event.registerEntityRenderer(ModEntities.GREAT_WHITE_BULL.get(), com.jttw.engine.client.renderer.GreatWhiteBullRenderer::new);
         event.registerEntityRenderer(ModEntities.LADY_WHITE_BONE.get(), com.jttw.engine.client.renderer.RidgeRenderers.LadyWhiteBoneRenderer::new);
         event.registerEntityRenderer(ModEntities.BONE_SHARD.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         event.registerEntityRenderer(ModEntities.THROWN_SPEAR.get(),
@@ -227,7 +228,7 @@ public final class ClientInit {
                 while (OPEN_SKILL_TREE.consumeClick()) mc.setScreen(new SkillTreeScreen());
             }
             if (CYCLE_SKILLS != null) {
-                while (CYCLE_SKILLS.consumeClick()) ClientAbilityData.cycle();
+                while (CYCLE_SKILLS.consumeClick()) {} // Shift turns the page now
             }
             if (OPEN_ARMORY != null) {
                 while (OPEN_ARMORY.consumeClick()) NetworkHandler.sendToServer(
@@ -236,6 +237,12 @@ public final class ClientInit {
             if (CYCLE_ARMAMENT != null) {
                 while (CYCLE_ARMAMENT.consumeClick()) NetworkHandler.sendToServer(
                         new com.jttw.engine.network.c2s.ArmoryPacket(com.jttw.engine.network.c2s.ArmoryPacket.Action.CYCLE));
+            }
+
+            // ── The page: Shift shows the second four, letting go the first ──
+            // (only between presses: an ability held down keeps its page until it is let go)
+            if (!(wasSlot0Down || wasSlot1Down || wasSlot2Down || wasSlot3Down)) {
+                ClientAbilityData.showShiftPage(mc.options.keyShift.isDown());
             }
 
             // ── Ability slot 0 (V) — single-press OR held (if HELD type) ──
@@ -248,10 +255,10 @@ public final class ClientInit {
                 if (slot0Type == AbilityType.HELD) {
                     if (isDown0 && !wasSlot0Down) {
                         NetworkHandler.sendToServer(
-                                new ActivateAbilityPacket(0, AbilityAction.START));
+                                new ActivateAbilityPacket(heldIndex[0] = ClientAbilityData.serverIndex(0), AbilityAction.START));
                     } else if (!isDown0 && wasSlot0Down) {
                         NetworkHandler.sendToServer(
-                                new ActivateAbilityPacket(0, AbilityAction.STOP));
+                                new ActivateAbilityPacket(heldIndex[0], AbilityAction.STOP));
                     }
                     while (ABILITY_SLOT_0.consumeClick()) {}
                 } else {
@@ -272,10 +279,10 @@ public final class ClientInit {
                 if (slot1Type == AbilityType.HELD) {
                     if (isDown1 && !wasSlot1Down) {
                         NetworkHandler.sendToServer(
-                                new ActivateAbilityPacket(1, AbilityAction.START));
+                                new ActivateAbilityPacket(heldIndex[1] = ClientAbilityData.serverIndex(1), AbilityAction.START));
                     } else if (!isDown1 && wasSlot1Down) {
                         NetworkHandler.sendToServer(
-                                new ActivateAbilityPacket(1, AbilityAction.STOP));
+                                new ActivateAbilityPacket(heldIndex[1], AbilityAction.STOP));
                     }
                     while (ABILITY_SLOT_1.consumeClick()) {}
                 } else {
@@ -296,7 +303,7 @@ public final class ClientInit {
                 if (isDown && !wasSlot2Down) {
                     if (slot2Type == AbilityType.HELD) {
                         NetworkHandler.sendToServer(
-                                new ActivateAbilityPacket(2, AbilityAction.START));
+                                new ActivateAbilityPacket(heldIndex[2] = ClientAbilityData.serverIndex(2), AbilityAction.START));
                     } else if (slot2Type != null) {
                         activateSlot(mc, 2);
                         while (ABILITY_SLOT_2.consumeClick()) {}
@@ -304,7 +311,7 @@ public final class ClientInit {
                 } else if (!isDown && wasSlot2Down) {
                     if (slot2Type == AbilityType.HELD) {
                         NetworkHandler.sendToServer(
-                                new ActivateAbilityPacket(2, AbilityAction.STOP));
+                                new ActivateAbilityPacket(heldIndex[2], AbilityAction.STOP));
                     }
                 }
                 wasSlot2Down = isDown;
@@ -321,7 +328,7 @@ public final class ClientInit {
                 if (isDown3 && !wasSlot3Down) {
                     if (slot3Type == AbilityType.HELD) {
                         NetworkHandler.sendToServer(
-                                new ActivateAbilityPacket(3, AbilityAction.START));
+                                new ActivateAbilityPacket(heldIndex[3] = ClientAbilityData.serverIndex(3), AbilityAction.START));
                     } else if (slot3Type != null) {
                         activateSlot(mc, 3);
                         while (ABILITY_SLOT_3.consumeClick()) {}
@@ -329,7 +336,7 @@ public final class ClientInit {
                 } else if (!isDown3 && wasSlot3Down) {
                     if (slot3Type == AbilityType.HELD) {
                         NetworkHandler.sendToServer(
-                                new ActivateAbilityPacket(3, AbilityAction.STOP));
+                                new ActivateAbilityPacket(heldIndex[3], AbilityAction.STOP));
                     }
                 }
                 wasSlot3Down = isDown3;
@@ -340,6 +347,9 @@ public final class ClientInit {
         // -----------------------------------------------------------------------
         // Slot activation routing
         // -----------------------------------------------------------------------
+
+        /** The server index each key's held ability began on, so its release goes to the same one. */
+        private static final int[] heldIndex = new int[4];
 
         private static void activateSlot(Minecraft mc, int slot) {
             AbilitySlot entry = ClientAbilityData.getSlot(slot);
@@ -352,7 +362,7 @@ public final class ClientInit {
                 }
                 case TOGGLE -> {
                     NetworkHandler.sendToServer(
-                            new ActivateAbilityPacket(slot, AbilityAction.USE));
+                            new ActivateAbilityPacket(ClientAbilityData.serverIndex(slot), AbilityAction.USE));
                 }
                 case HELD -> {} // handled by press/release tracking above
                 case PASSIVE -> {}

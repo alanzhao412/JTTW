@@ -857,8 +857,8 @@ public final class TransformationAbilityHandler {
             return;
         }
 
-        // Ravager: 3x knockback on melee
-        if (morphType == EntityType.RAVAGER) {
+        // Ravager, and the Great White Bull: 3x knockback on melee
+        if (morphType == EntityType.RAVAGER || morphType == com.jttw.engine.registry.ModEntities.GREAT_WHITE_BULL.get()) {
             double dx = target.getX() - attacker.getX();
             double dz = target.getZ() - attacker.getZ();
             double dist = Math.sqrt(dx * dx + dz * dz);

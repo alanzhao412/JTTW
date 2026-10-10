@@ -42,7 +42,9 @@ public class ActivateAbilityPacket {
             ServerPlayer player = ctx.get().getSender();
             if (player == null) return;
             PlayableCharacter character = Characters.of(player);
-            if (character != null) character.activate(player, pkt.slot, pkt.action);
+            if (character != null && pkt.slot >= 0 && pkt.slot < 2 * PlayableCharacter.SLOT_COUNT) {
+                character.activate(player, pkt.slot, pkt.action);
+            }
         });
         ctx.get().setPacketHandled(true);
     }

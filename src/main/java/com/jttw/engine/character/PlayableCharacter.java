@@ -51,6 +51,24 @@ public interface PlayableCharacter {
         return skillBar(SkillTreeData.getUnlockedNodes(player));
     }
 
+    /**
+     * The second page of four, shown while Shift is held, for a character with more than four
+     * abilities; its slots are numbered 4 to 7 in {@link #activate}. Empty for most.
+     */
+    default List<AbilitySlot> shiftBar(Set<String> unlockedNodes) {
+        return emptyBar();
+    }
+
+    /** Everything on this player's bar: the first page, and the Shift page if it holds anything. */
+    default List<AbilitySlot> fullBar(Player player) {
+        Set<String> unlocked = SkillTreeData.getUnlockedNodes(player);
+        List<AbilitySlot> first = skillBar(player), second = shiftBar(unlocked);
+        if (second.stream().allMatch(AbilitySlot::isEmpty)) return first;
+        List<AbilitySlot> all = new java.util.ArrayList<>(first);
+        all.addAll(second);
+        return List.copyOf(all);
+    }
+
     /** The transformation art this character practises, or null if it has none. */
     default TransformationSchool transformationSchool() {
         return null;
