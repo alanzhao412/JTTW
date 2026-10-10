@@ -25,7 +25,8 @@ public final class SkillTrees {
                 TurtleSkillTree.TREE, ByakkoSkillTree.TREE, PhoenixSkillTree.TREE,
                 YuanDiSkillTree.TREE, PengSkillTree.TREE, NezhaSkillTree.TREE, MarshalSkillTree.TREE,
                 com.jttw.engine.character.ninespirits.NineSpiritsSkillTree.TREE,
-                com.jttw.engine.character.bulldemon.BullDemonSkillTree.TREE);
+                com.jttw.engine.character.bulldemon.BullDemonSkillTree.TREE,
+                com.jttw.engine.character.saurian.SaurianSkillTree.TREE);
     }
 
     /** The tree whose prefix names this node, or null if no tree claims it. */

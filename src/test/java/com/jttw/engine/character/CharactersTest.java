@@ -28,21 +28,18 @@ import static org.junit.jupiter.api.Assertions.*;
 class CharactersTest {
 
     @ParameterizedTest
-    @EnumSource(value = ReincarnationOutcome.class,
-            names = {"SAURIAN_DEMON_KING"}, mode = EnumSource.Mode.EXCLUDE)
-    void everyBuiltOutcomeHasItsCharacter(ReincarnationOutcome outcome) {
+    @EnumSource(ReincarnationOutcome.class)
+    void everyOutcomeHasItsCharacter(ReincarnationOutcome outcome) {
         PlayableCharacter c = Characters.byOutcome(outcome.id);
         assertNotNull(c, outcome.id);
         assertEquals(outcome.id, c.outcomeId());
     }
 
-    /** The Saurian Demon King has no character yet; the Yaoguai stand-in plays him. */
-    @ParameterizedTest
-    @EnumSource(value = ReincarnationOutcome.class, names = {"SAURIAN_DEMON_KING"})
-    void unbuiltYaoguaiPlayTheGrandSaintOfNineSpirits(ReincarnationOutcome outcome) {
-        assertNull(Characters.byOutcome(outcome.id));
-        assertSame(com.jttw.engine.character.ninespirits.NineSpiritsCharacter.INSTANCE,
-                Characters.resolve(outcome.id, ProgressionClass.YAOGUAI, null));
+    /** The Saurian Demon King plays himself, the Flood-Dragon, never the Grand Saint of Nine Spirits. */
+    @Test
+    void theSaurianDemonKingPlaysHimself() {
+        assertSame(com.jttw.engine.character.saurian.SaurianCharacter.INSTANCE,
+                Characters.resolve("saurian_demon_king", ProgressionClass.YAOGUAI, null));
     }
 
     @Test
@@ -72,8 +69,6 @@ class CharactersTest {
 
     @Test
     void classStandsInWhenTheOutcomeHasNoCharacter() {
-        assertSame(WukongCharacter.INSTANCE,
-                Characters.resolve("saurian_demon_king", ProgressionClass.PRIMORDIAL, null));
         assertSame(WukongCharacter.INSTANCE,
                 Characters.resolve("not_an_outcome", ProgressionClass.PRIMORDIAL, null));
     }

@@ -53,13 +53,14 @@ class CharacterSkillBarTest {
     /**
      * Kits built after the old builder, which have no legacy bar to match: the Marshal's changed
      * on purpose (36 Transformations became a skill branch, then gained abilities), the Peng's
-     * was empty, and the Grand Saint and the Bull Demon King had no character.
+     * was empty, and the Grand Saint, the Bull Demon King and the Saurian Demon King had no character.
      */
     private static final Set<PlayableCharacter> NEWER_THAN_THE_OLD_BUILDER = Set.of(
             MarshalCharacter.INSTANCE,
             com.jttw.engine.character.ninespirits.NineSpiritsCharacter.INSTANCE,
             com.jttw.engine.character.peng.PengCharacter.INSTANCE,
-            com.jttw.engine.character.bulldemon.BullDemonCharacter.INSTANCE);
+            com.jttw.engine.character.bulldemon.BullDemonCharacter.INSTANCE,
+            com.jttw.engine.character.saurian.SaurianCharacter.INSTANCE);
 
     @TestFactory
     Stream<DynamicTest> barMatchesTheOldBuilder() {

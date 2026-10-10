@@ -46,5 +46,6 @@
   "item.jttw_engine.heavenly_wine": "Heavenly Wine",
   "entity.jttw_engine.heavenly_soldier": "Heavenly Soldier",
   "entity.jttw_engine.heavenly_general": "Heavenly General",
-  "item.jttw_engine.heavenly_halberd": "Heavenly Halberd"
+  "item.jttw_engine.heavenly_halberd": "Heavenly Halberd",
+  "effect.jttw_engine.flood_wrath": "Flood-Dragon's Wrath"
 }

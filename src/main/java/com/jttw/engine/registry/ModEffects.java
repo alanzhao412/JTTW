@@ -21,6 +21,10 @@ public final class ModEffects {
     /** Shows the Curse of the Dead (see {@link com.jttw.engine.world.CurseOfTheDead}); does nothing itself, and no milk cures it. */
     public static final RegistryObject<MobEffect> CURSE_OF_THE_DEAD = EFFECTS.register("curse_of_the_dead", Mark::new);
 
+    /** The Saurian Demon King's Flood-Dragon's Wrath, while it lasts (see SaurianAbilityHandler). */
+    public static final RegistryObject<MobEffect> FLOOD_WRATH = EFFECTS.register("flood_wrath",
+            () -> new MobEffect(MobEffectCategory.BENEFICIAL, 0x2E8BC0) {});
+
     public static void register(IEventBus modEventBus) {
         EFFECTS.register(modEventBus);
     }

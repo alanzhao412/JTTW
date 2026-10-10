@@ -654,7 +654,7 @@ public class CharacterScreen extends Screen {
             case BULL_DEMON_KING ->
                 "Demon patriarch of Iron Fan Mountain. Raw power, volcanic pride, and a network of demonic allegiances across the land.";
             case SAURIAN_DEMON_KING ->
-                "Scaled, patient, calculating. An ancient reptilian demon king who outlasted countless celestial campaigns by enduring.";
+                "The Flood-Dragon Demon King, sworn brother of the Monkey King. Rivers rise at your call, and what your fangs touch, your venom finishes.";
             case GRAND_SAINT_NINE_SPIRITS ->
                 "The nine-headed lion of Bamboo-Knot Mountain, grandsire of the lion demons. Nine mouths seize what nine voices shake, and only the Heavenly Honoured One of the Great Monad has ever ridden you.";
             case GOLD_WINGED_PENG ->

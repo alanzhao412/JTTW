@@ -13,6 +13,7 @@
     "OverworldBiomeBuilderMixin",
     "EntityEyeHeightInvoker",
     "LivingEntityJumpingAccessor",
+    "LivingEntityFlagInvoker",
     "LivingEntityJumpInvoker",
     "PlayerMixin",
     "PlayerRidingMixin",
