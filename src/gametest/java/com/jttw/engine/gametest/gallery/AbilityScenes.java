@@ -49,6 +49,14 @@ final class AbilityScenes {
         }
     }
 
+    /** Set by a scene of Wukong at his top speed: the gallery keeps his momentum at its height. */
+    static volatile boolean topSpeed;
+
+    /** Keeps a top-speed scene's momentum at its height, each tick. */
+    static void holdTopSpeed(ServerPlayer p) {
+        if (topSpeed) com.jttw.engine.flight.JTTWFlight.setBoost(p, com.jttw.engine.character.wukong.WukongAbilityHandler.momentumMax(), false);
+    }
+
     /** Set by a scene that photographs a screen (a furnace's, say), so the gallery leaves it open. */
     static volatile boolean keepScreen;
 
@@ -350,7 +358,7 @@ final class AbilityScenes {
     /** Puts a player back to an ordinary state between scenes. */
     /**
      * Up in the air, flying (in survival: creative's flying is drawn as vanilla's): as Wukong
-     * with the Somersault Cloud, on his cloud, or else as Erlang, on his own; drawn hovering
+     * at his top speed, on his cloud, or else as Erlang, on his own; drawn hovering
      * (0) or under way (1).
      */
     private static void fly(ServerPlayer p, boolean cloud, float underWay) {
@@ -358,7 +366,11 @@ final class AbilityScenes {
         ReincarnationOutcome who = cloud ? ReincarnationOutcome.CELESTIAL_PRIMATE : ReincarnationOutcome.EYE_OF_HEAVEN;
         AlignmentData.markReincarnated(p, who);
         LevelManager.initClass(p, who);
-        if (cloud) SkillTreeData.grantNode(p, com.jttw.engine.character.wukong.WukongSkillTree.FLIGHT_3);
+        if (cloud) { // at his top speed: his somersault momentum at its height
+            SkillTreeData.grantNode(p, com.jttw.engine.character.wukong.WukongSkillTree.FLIGHT_3);
+            com.jttw.engine.flight.JTTWFlight.setFlightSpeedTier(p, 3); // as buying it sets
+            topSpeed = true; // held there: standing still for the picture would lose it
+        }
         com.jttw.engine.client.flight.FlightPose.posedUnderWay = underWay;
         p.setGameMode(GameType.SURVIVAL);
         com.jttw.engine.flight.JTTWFlight.setUniversalFlight(p, true);
@@ -370,6 +382,7 @@ final class AbilityScenes {
 
     static void reset(ServerPlayer p) {
         keepScreen = false;
+        topSpeed = false;
         if (NineSpiritsAbilityHandler.inTrueForm(p)) NineSpiritsAbilityHandler.endTrueForm(p);
         if (BullDemonAbilityHandler.inGreatBull(p)) BullDemonAbilityHandler.endGreatBull(p);
         p.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);

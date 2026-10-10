@@ -164,6 +164,13 @@ public final class FormGallery {
         Shot shot = shots.get(next);
         holdPose(mc.player, shot.kind() == Kind.SCENE ? scene(shot).pitch() : shot.view() == View.UP ? UP_PITCH : 0f,
                 shot.kind() != Kind.BOAT_ON_WATER);
+        if (AbilityScenes.topSpeed) {
+            UUID held = mc.player.getUUID();
+            mc.getSingleplayerServer().execute(() -> {
+                ServerPlayer sp = mc.getSingleplayerServer().getPlayerList().getPlayer(held);
+                if (sp != null) AbilityScenes.holdTopSpeed(sp);
+            });
+        }
         if (cameraId != null && mc.getCameraEntity() == mc.player) {
             for (Entity e : mc.level.entitiesForRendering()) {
                 if (e.getUUID().equals(cameraId)) mc.setCameraEntity(e);

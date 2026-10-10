@@ -25,9 +25,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * How a flier is drawn. Flying on their own, they stretch out along their flight, head first,
- * as in Dragon Block C, and stand upright when they hover. Wukong, once he has the Somersault
- * Cloud, rides his cloud instead: upright, knees bent, leaning a little into the flight, his arms
- * trailing behind. All of it fades: taking off, the body tips into the flight and the cloud
+ * as in Dragon Block C, and stand upright when they hover. Wukong at his top speed (the height
+ * of his Somersault Cloud's momentum) rides his cloud instead: upright, knees bent, leaning a
+ * little into the flight, his arms trailing behind. All of it fades: taking off, the body tips into the flight and the cloud
  * gathers over half a second; landing, they right themselves and it thins away.
  */
 @Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, value = Dist.CLIENT)
