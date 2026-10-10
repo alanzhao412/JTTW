@@ -72,6 +72,9 @@ public final class HeavenBlocks {
                 return InteractionResult.CONSUME;
             }
             level.setBlock(pos, state.setValue(CUPS, cups - 1), Block.UPDATE_ALL);
+            if (player instanceof net.minecraft.server.level.ServerPlayer sp && !sp.isCreative()) {
+                com.jttw.engine.world.morality.Morality.deed(sp, com.jttw.engine.world.morality.Morality.STEAL_WINE, "you stole the Jade Emperor's wine");
+            }
             ItemStack wine = new ItemStack(ModItems.HEAVENLY_WINE.get());
             if (!player.getInventory().add(wine)) player.drop(wine, false);
             level.playSound(null, pos, SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1f, 0.8f);
@@ -109,6 +112,9 @@ public final class HeavenBlocks {
                 return InteractionResult.CONSUME;
             }
             WukongCheckpoints.complete(player, WukongCheckpoints.Checkpoint.HELLS_BOOK);
+            if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
+                com.jttw.engine.world.morality.Morality.deed(sp, com.jttw.engine.world.morality.Morality.STRIKE_THE_BOOK, "you defied the judges of the dead");
+            }
             player.sendSystemMessage(Component.literal("§6You strike your name from the Book of Life and Death, and the names of all your monkeys. Death has no more claim on you."));
             level.playSound(null, pos, SoundEvents.BOOK_PAGE_TURN, SoundSource.BLOCKS, 1.5f, 0.6f);
             return InteractionResult.CONSUME;

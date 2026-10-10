@@ -27,7 +27,7 @@ import java.util.List;
  * their own way, each puff drifts and breathes on rhythms of its own that never fall back into
  * step, and the puffs round the edge slowly melt away and gather again somewhere else.
  */
-final class NimbusCloud {
+public final class NimbusCloud {
 
     private NimbusCloud() {}
 
@@ -102,7 +102,7 @@ final class NimbusCloud {
     }
 
     /** Draws the cloud about the origin of {@code pose}, under the feet. */
-    static void draw(PoseStack pose, MultiBufferSource buffers, Player p, float presence, int light) {
+    public static void draw(PoseStack pose, MultiBufferSource buffers, net.minecraft.world.entity.Entity p, float presence, int light) {
         if (presence <= 0) return;
         long seed = p.getUUID().getLeastSignificantBits() ^ p.getUUID().getMostSignificantBits();
         float t = (p.tickCount + Minecraft.getInstance().getFrameTime()) / 20f;

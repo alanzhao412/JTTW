@@ -1,0 +1,6 @@
+{
+  "parent": "item/handheld",
+  "textures": {
+    "layer0": "jttw_engine:item/heavenly_halberd"
+  }
+}

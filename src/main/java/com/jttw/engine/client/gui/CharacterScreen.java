@@ -254,6 +254,10 @@ public class CharacterScreen extends Screen {
 
         // Level
         g.drawString(mc.font, "Level  §a" + level, rx, ry, C_LABEL, false);
+        ry += 12;
+        int karma = com.jttw.engine.world.morality.Morality.karma(player);
+        String tone = com.jttw.engine.world.morality.Morality.wanted(karma) > 0 ? "§c" : karma >= 100 ? "§a" : "§7";
+        g.drawString(mc.font, "Karma  " + tone + karma + " §8(" + tone + com.jttw.engine.world.morality.Morality.standing(karma) + "§8)", rx, ry, C_LABEL, false);
         ry += 14;
 
         // Class

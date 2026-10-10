@@ -17,6 +17,7 @@
     "PlayerMixin",
     "PlayerRidingMixin",
     "RabbitJumpAccessor",
+    "RandomizableContainerMixin",
     "RangedAttributeAccessor",
     "ServerGamePacketListenerMixin",
     "WalkAnimationStateAccessor"

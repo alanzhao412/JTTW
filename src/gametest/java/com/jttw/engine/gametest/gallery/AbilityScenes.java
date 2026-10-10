@@ -152,6 +152,11 @@ final class AbilityScenes {
                     level.playSound(null, p.getX() + 1, p.getY(), p.getZ() + 10, net.minecraft.sounds.SoundEvents.CHEST_OPEN, net.minecraft.sounds.SoundSource.BLOCKS, 1f, 1f);
                 }, 6, true),
                 // ── White Bone Ridge's dead ──
+                new Scene("heaven_host", p -> {
+                    soldier(p, -2, 2, false);
+                    soldier(p, 1, 4, true);
+                    soldier(p, -4, 6, false);
+                }, p -> {}, 1, false),
                 new Scene("ridge_servants", p -> {
                     ridge(p, com.jttw.engine.registry.ModEntities.BONE_SERVANT.get(), -3, 1, false);
                     ridge(p, com.jttw.engine.registry.ModEntities.BONE_SERVANT.get(), -6, 5, true);
@@ -345,6 +350,19 @@ final class AbilityScenes {
     }
 
     /** One of the ridge's dead, standing still at (dx, dz) from the player, facing them (a captain if asked). */
+    /** A soldier of Heaven's host, still, on its cloud a little above the ground, facing the camera. */
+    private static void soldier(ServerPlayer p, int dx, int dz, boolean general) {
+        var s = com.jttw.engine.registry.ModEntities.HEAVENLY_SOLDIER.get().create(p.serverLevel());
+        if (s == null) return;
+        s.moveTo(p.getX() + dx, p.getY() + 0.6, p.getZ() + dz, -40f, 0f);
+        s.become(30, general, null);
+        s.setNoAi(true);
+        s.setYHeadRot(-40f);
+        s.setYBodyRot(-40f);
+        s.setPersistenceRequired();
+        p.serverLevel().addFreshEntity(s);
+    }
+
     private static void ridge(ServerPlayer p, net.minecraft.world.entity.EntityType<? extends com.jttw.engine.entity.ridge.RidgeMonster> type,
                               int dx, int dz, boolean captain) {
         var m = com.jttw.engine.entity.ridge.RidgeMonster.summon(p.serverLevel(), type,

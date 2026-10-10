@@ -102,6 +102,15 @@ public final class ModEntities {
                             .updateInterval(5)
                             .build(new ResourceLocation(JTTWEngine.MOD_ID, "bone_shard").toString()));
 
+    // ── Heaven's host ─────────────────────────────────────────────
+
+    public static final RegistryObject<EntityType<com.jttw.engine.entity.heaven.HeavenlySoldierEntity>> HEAVENLY_SOLDIER =
+            ENTITIES.register("heavenly_soldier", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.heaven.HeavenlySoldierEntity>of(com.jttw.engine.entity.heaven.HeavenlySoldierEntity::new, MobCategory.MONSTER)
+                            .sized(0.6F, 1.95F)
+                            .clientTrackingRange(10)
+                            .build(new ResourceLocation(JTTWEngine.MOD_ID, "heavenly_soldier").toString()));
+
     public static void register(IEventBus modEventBus) {
         ENTITIES.register(modEventBus);
         modEventBus.addListener(ModEntities::onAttributeCreate);
@@ -125,6 +134,7 @@ public final class ModEntities {
         event.put(XIAOTIAN_QUAN.get(), XiaotianQuanEntity.createAttributes().build());
         event.put(BONE_SERVANT.get(), com.jttw.engine.entity.ridge.BoneServantEntity.createAttributes().build());
         event.put(WRAITH.get(), com.jttw.engine.entity.ridge.WraithEntity.createAttributes().build());
+        event.put(HEAVENLY_SOLDIER.get(), com.jttw.engine.entity.heaven.HeavenlySoldierEntity.createAttributes().build());
         event.put(LADY_WHITE_BONE.get(), com.jttw.engine.entity.ridge.LadyWhiteBoneEntity.createAttributes().build());
     }
 }

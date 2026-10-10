@@ -43,5 +43,8 @@
   "block.jttw_engine.immortal_peach_fruit": "Immortal Peach",
   "block.jttw_engine.heavenly_wine_jar": "Jar of Heavenly Wine",
   "block.jttw_engine.book_of_life_and_death": "Book of Life and Death",
-  "item.jttw_engine.heavenly_wine": "Heavenly Wine"
+  "item.jttw_engine.heavenly_wine": "Heavenly Wine",
+  "entity.jttw_engine.heavenly_soldier": "Heavenly Soldier",
+  "entity.jttw_engine.heavenly_general": "Heavenly General",
+  "item.jttw_engine.heavenly_halberd": "Heavenly Halberd"
 }

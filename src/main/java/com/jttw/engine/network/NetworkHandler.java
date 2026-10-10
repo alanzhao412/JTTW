@@ -229,6 +229,12 @@ public final class NetworkHandler {
                 .decoder(com.jttw.engine.network.s2c.FlyingStatePacket::decode)
                 .consumerMainThread(com.jttw.engine.network.s2c.FlyingStatePacket::handle)
                 .add();
+
+        CHANNEL.messageBuilder(com.jttw.engine.network.s2c.SyncKarmaPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.jttw.engine.network.s2c.SyncKarmaPacket::encode)
+                .decoder(com.jttw.engine.network.s2c.SyncKarmaPacket::decode)
+                .consumerMainThread(com.jttw.engine.network.s2c.SyncKarmaPacket::handle)
+                .add();
     }
 
     public static void sendToServer(Object msg) {
