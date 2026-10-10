@@ -136,7 +136,6 @@ public final class ClientInit {
     public static void registerOverlays(RegisterGuiOverlaysEvent event) {
         event.registerAboveAll("jttw_hud",       JTTWHudRenderer.OVERLAY);
         event.registerAboveAll("jttw_skill_bar", SkillBarRenderer.OVERLAY);
-        event.registerAboveAll("jttw_keen_ears", KeenEarsOverlay.OVERLAY);
         event.registerAboveAll("jttw_minimap",   MinimapOverlay.OVERLAY);
         event.registerBelowAll("jttw_head_tint", HeadTintOverlay.OVERLAY);
         event.registerAbove(net.minecraftforge.client.gui.overlay.VanillaGuiOverlay.FOOD_LEVEL.id(),

@@ -78,10 +78,10 @@ final class AbilityScenes {
                     AlignmentData.markReincarnated(p, ReincarnationOutcome.MARSHAL_HEAVENLY_CANOPY);
                     LevelManager.initClass(p, ReincarnationOutcome.MARSHAL_HEAVENLY_CANOPY);
                 }, p -> {
-                    // sounds round him, out of sight: a zombie to his left, a creeper to his right, steps behind
+                    // sounds round him, near and far: a zombie close on his left, a creeper far off on his right, steps behind
                     var level = p.serverLevel();
-                    level.playSound(null, p.getX() + 8, p.getY(), p.getZ() + 3, net.minecraft.sounds.SoundEvents.ZOMBIE_AMBIENT, net.minecraft.sounds.SoundSource.HOSTILE, 1f, 1f);
-                    level.playSound(null, p.getX() - 6, p.getY(), p.getZ() + 4, net.minecraft.sounds.SoundEvents.CREEPER_PRIMED, net.minecraft.sounds.SoundSource.HOSTILE, 1f, 1f);
+                    level.playSound(null, p.getX() + 3, p.getY(), p.getZ() + 4, net.minecraft.sounds.SoundEvents.ZOMBIE_AMBIENT, net.minecraft.sounds.SoundSource.HOSTILE, 1f, 1f);
+                    level.playSound(null, p.getX() - 9, p.getY(), p.getZ() + 18, net.minecraft.sounds.SoundEvents.CREEPER_PRIMED, net.minecraft.sounds.SoundSource.HOSTILE, 1f, 1f);
                     level.playSound(null, p.getX(), p.getY(), p.getZ() - 5, net.minecraft.sounds.SoundEvents.IRON_GOLEM_STEP, net.minecraft.sounds.SoundSource.NEUTRAL, 1f, 1f);
                     level.playSound(null, p.getX() + 1, p.getY(), p.getZ() + 10, net.minecraft.sounds.SoundEvents.CHEST_OPEN, net.minecraft.sounds.SoundSource.BLOCKS, 1f, 1f);
                 }, 6, true),

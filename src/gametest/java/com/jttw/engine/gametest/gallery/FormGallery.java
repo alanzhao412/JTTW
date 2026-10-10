@@ -115,10 +115,17 @@ public final class FormGallery {
         Minecraft mc = Minecraft.getInstance();
         if (!worldRequested) {
             // at a menu, with loading finished
-            if (mc.level == null && mc.screen != null && mc.getOverlay() == null) createWorld(mc);
+            if (mc.level == null && mc.screen != null && mc.getOverlay() == null) {
+                mc.options.pauseOnLostFocus = false; // the window may lose focus while it runs
+                createWorld(mc);
+            }
             return;
         }
         if (mc.player == null || mc.level == null || mc.getSingleplayerServer() == null) return;
+        // A paused game never settles (the player does not tick): if the window lost focus as the
+        // world opened, before the option below was set, close the pause menu it brought up
+        mc.options.pauseOnLostFocus = false;
+        if (mc.isPaused() && mc.screen != null) mc.setScreen(null);
         if (mc.player.tickCount < 40) return; // let the world settle
 
         if (shots == null) {
