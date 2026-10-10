@@ -1,6 +1,6 @@
 {
-  "parent": "minecraft:item/handheld",
+  "parent": "item/handheld",
   "textures": {
-    "layer0": "minecraft:item/netherite_hoe"
+    "layer0": "jttw_engine:item/nine_tooth_rake"
   }
 }

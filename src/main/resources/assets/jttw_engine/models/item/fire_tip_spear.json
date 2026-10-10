@@ -1,7 +1,6 @@
 {
-  "_comment": "Temporary stand-in using a vanilla texture until this item has its own art.",
   "parent": "item/handheld",
   "textures": {
-    "layer0": "minecraft:item/trident"
+    "layer0": "jttw_engine:item/fire_tip_spear"
   }
 }

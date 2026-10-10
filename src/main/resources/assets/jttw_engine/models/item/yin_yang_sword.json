@@ -1,7 +1,6 @@
 {
-  "_comment": "Temporary stand-in using a vanilla texture until this item has its own art.",
   "parent": "item/handheld",
   "textures": {
-    "layer0": "minecraft:item/netherite_sword"
+    "layer0": "jttw_engine:item/yin_yang_sword"
   }
 }

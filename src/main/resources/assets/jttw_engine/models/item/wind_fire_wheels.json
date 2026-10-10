@@ -1,7 +1,6 @@
 {
-  "_comment": "Temporary stand-in using a vanilla texture until this item has its own art.",
   "parent": "item/generated",
   "textures": {
-    "layer0": "minecraft:item/blaze_powder"
+    "layer0": "jttw_engine:item/wind_fire_wheels"
   }
 }

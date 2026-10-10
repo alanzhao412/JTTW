@@ -1,7 +1,6 @@
 {
-  "_comment": "Temporary stand-in using a vanilla texture until this item has its own art.",
   "parent": "item/generated",
   "textures": {
-    "layer0": "minecraft:item/nether_wart"
+    "layer0": "jttw_engine:item/jttw_immortal_pill"
   }
 }

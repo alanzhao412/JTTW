@@ -1,6 +1,6 @@
 {
-  "parent": "minecraft:item/generated",
+  "parent": "item/generated",
   "textures": {
-    "layer0": "minecraft:item/flower_pot"
+    "layer0": "jttw_engine:item/yin_yang_vase"
   }
 }
