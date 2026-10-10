@@ -27,6 +27,16 @@ public final class ModBlocks {
                             .noOcclusion()
                             .isViewBlocking((s, g, p) -> false)));
 
+    /** Laozi's Eight Trigrams Furnace: where armaments are forged and refined. */
+    public static final RegistryObject<Block> EIGHT_TRIGRAMS_FURNACE =
+            BLOCKS.register("eight_trigrams_furnace", () -> new com.jttw.engine.world.furnace.TrigramsFurnaceBlock(
+                    BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.COLOR_ORANGE)
+                            .strength(5.0F, 1200.0F)
+                            .requiresCorrectToolForDrops()
+                            .sound(SoundType.METAL)
+                            .lightLevel(s -> s.getValue(com.jttw.engine.world.furnace.TrigramsFurnaceBlock.LIT) ? 13 : 0)));
+
     public static void register(IEventBus modEventBus) {
         BLOCKS.register(modEventBus);
     }

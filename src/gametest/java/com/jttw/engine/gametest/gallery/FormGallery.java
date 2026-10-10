@@ -159,7 +159,8 @@ public final class FormGallery {
         }
 
         if (next >= shots.size()) return;
-        if (mc.screen != null) mc.setScreen(null); // a pause menu or chat would cover the picture
+        // a pause menu or chat would cover the picture; a scene of a screen keeps its own
+        if (mc.screen != null && !AbilityScenes.keepScreen) mc.setScreen(null);
         Shot shot = shots.get(next);
         holdPose(mc.player, shot.kind() == Kind.SCENE ? scene(shot).pitch() : shot.view() == View.UP ? UP_PITCH : 0f,
                 shot.kind() != Kind.BOAT_ON_WATER);

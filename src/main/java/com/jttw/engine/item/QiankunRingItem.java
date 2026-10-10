@@ -57,7 +57,7 @@ public class QiankunRingItem extends Item {
         if (slot != EquipmentSlot.MAINHAND) return ImmutableMultimap.of();
         ImmutableMultimap.Builder<Attribute, AttributeModifier> b = ImmutableMultimap.builder();
         b.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK, "jttw:ring_atk",
-                0.25, AttributeModifier.Operation.MULTIPLY_TOTAL));
+                0.25 * Armaments.refineMultiplier(stack), AttributeModifier.Operation.MULTIPLY_TOTAL));
         return b.build();
     }
 

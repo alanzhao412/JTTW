@@ -27,5 +27,10 @@
   "item.jttw_engine.bone_servant_spawn_egg": "Bone Servant Spawn Egg",
   "item.jttw_engine.wraith_spawn_egg": "Wraith Spawn Egg",
   "item.jttw_engine.lady_white_bone_spawn_egg": "Lady White Bone Spawn Egg",
-  "biome.jttw_engine.white_bone_ridge": "White Bone Ridge"
+  "biome.jttw_engine.white_bone_ridge": "White Bone Ridge",
+  "block.jttw_engine.eight_trigrams_furnace": "Eight Trigrams Furnace",
+  "item.jttw_engine.servant_bone": "Servant Bone",
+  "item.jttw_engine.wraith_wisp": "Wraith Wisp",
+  "item.jttw_engine.captains_sigil": "Captain's Sigil",
+  "item.jttw_engine.heart_bone": "Lady's Heart-Bone"
 }

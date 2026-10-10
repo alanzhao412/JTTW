@@ -67,7 +67,7 @@ public class FireTipSpearItem extends Item {
         double mult = isAflame(stack) ? 1.25 : 0.75; // +75% for everyone holding it, +125% lit; Nezha gets extra from handler
         ImmutableMultimap.Builder<Attribute, AttributeModifier> b = ImmutableMultimap.builder();
         b.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK, "jttw:spear_atk",
-                mult, AttributeModifier.Operation.MULTIPLY_TOTAL));
+                mult * Armaments.refineMultiplier(stack), AttributeModifier.Operation.MULTIPLY_TOTAL));
         return b.build();
     }
 

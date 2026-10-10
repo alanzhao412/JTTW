@@ -35,6 +35,20 @@ public final class ModItems {
             ITEMS.register("celestial_cloud", () -> new BlockItem(
                     ModBlocks.CELESTIAL_CLOUD.get(), new Item.Properties()));
 
+    // ── Forging: the furnace, and the zones' materials ─────────────
+    public static final RegistryObject<Item> EIGHT_TRIGRAMS_FURNACE_ITEM =
+            ITEMS.register("eight_trigrams_furnace", () -> new BlockItem(ModBlocks.EIGHT_TRIGRAMS_FURNACE.get(), new Item.Properties()));
+    /** From Bone Servants. */
+    public static final RegistryObject<Item> SERVANT_BONE = ITEMS.register("servant_bone", () -> new Item(new Item.Properties()));
+    /** From Wraiths. */
+    public static final RegistryObject<Item> WRAITH_WISP = ITEMS.register("wraith_wisp", () -> new Item(new Item.Properties()));
+    /** From any captain. */
+    public static final RegistryObject<Item> CAPTAINS_SIGIL = ITEMS.register("captains_sigil",
+            () -> new Item(new Item.Properties().rarity(net.minecraft.world.item.Rarity.UNCOMMON)));
+    /** From Lady White Bone. */
+    public static final RegistryObject<Item> HEART_BONE = ITEMS.register("heart_bone",
+            () -> new Item(new Item.Properties().rarity(net.minecraft.world.item.Rarity.EPIC).fireResistant()));
+
     // ── White Bone Ridge spawn eggs ───────────────────────────────
     public static final RegistryObject<Item> BONE_SERVANT_SPAWN_EGG = ITEMS.register("bone_servant_spawn_egg",
             () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.jttw.engine.registry.ModEntities.BONE_SERVANT, 0xE8E4D8, 0x6B6458, new Item.Properties()));

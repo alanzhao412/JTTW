@@ -49,8 +49,27 @@ final class AbilityScenes {
         }
     }
 
+    /** Set by a scene that photographs a screen (a furnace's, say), so the gallery leaves it open. */
+    static volatile boolean keepScreen;
+
     static List<Scene> all() {
         return List.of(
+                // ── Screens ──
+                new Scene("ui_furnace", p -> {
+                    var level = p.serverLevel();
+                    BlockPos at = p.blockPosition().offset(0, 0, 2);
+                    level.setBlockAndUpdate(at, com.jttw.engine.registry.ModBlocks.EIGHT_TRIGRAMS_FURNACE.get().defaultBlockState());
+                    var f = (com.jttw.engine.world.furnace.TrigramsFurnaceBlockEntity) level.getBlockEntity(at);
+                    var spear = new net.minecraft.world.item.ItemStack(com.jttw.engine.registry.ModItems.FIRE_TIP_SPEAR.get());
+                    com.jttw.engine.item.Armaments.setRefine(spear, 4);
+                    f.setItem(com.jttw.engine.world.furnace.TrigramsFurnaceBlockEntity.CENTRE, spear);
+                    f.setItem(0, new net.minecraft.world.item.ItemStack(com.jttw.engine.registry.ModItems.SERVANT_BONE.get(), 12));
+                    f.setItem(1, new net.minecraft.world.item.ItemStack(com.jttw.engine.registry.ModItems.WRAITH_WISP.get(), 5));
+                    f.setItem(2, new net.minecraft.world.item.ItemStack(com.jttw.engine.registry.ModItems.CAPTAINS_SIGIL.get(), 2));
+                    f.setItem(com.jttw.engine.world.furnace.TrigramsFurnaceBlockEntity.FUEL, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.COAL, 9));
+                    keepScreen = true;
+                    net.minecraftforge.network.NetworkHooks.openScreen(p, f, at);
+                }, p -> {}, 1, true),
                 // ── HUD: the Heavenly's minimap, Zhu Bajie's Keen Ears ──
                 new Scene("hud_minimap", p -> {
                     AlignmentData.markReincarnated(p, ReincarnationOutcome.EYE_OF_HEAVEN);
@@ -293,6 +312,7 @@ final class AbilityScenes {
 
     /** Puts a player back to an ordinary state between scenes. */
     static void reset(ServerPlayer p) {
+        keepScreen = false;
         if (NineSpiritsAbilityHandler.inTrueForm(p)) NineSpiritsAbilityHandler.endTrueForm(p);
         if (BullDemonAbilityHandler.inGreatBull(p)) BullDemonAbilityHandler.endGreatBull(p);
         p.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);

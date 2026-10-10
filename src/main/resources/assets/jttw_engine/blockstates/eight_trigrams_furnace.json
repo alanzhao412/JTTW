@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "jttw_engine:block/eight_trigrams_furnace"
+    },
+    "lit=true": {
+      "model": "jttw_engine:block/eight_trigrams_furnace_lit"
+    }
+  }
+}

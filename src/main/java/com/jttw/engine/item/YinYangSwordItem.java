@@ -66,7 +66,7 @@ public class YinYangSwordItem extends Item {
         ImmutableMultimap.Builder<Attribute, AttributeModifier> b = ImmutableMultimap.builder();
         UUID id = slot == EquipmentSlot.MAINHAND ? UUID_ATK : UUID_ATK_OFFHAND;
         b.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(id, "jttw:yy_atk",
-                0.5, AttributeModifier.Operation.MULTIPLY_TOTAL));
+                0.5 * Armaments.refineMultiplier(stack), AttributeModifier.Operation.MULTIPLY_TOTAL));
         return b.build();
     }
 

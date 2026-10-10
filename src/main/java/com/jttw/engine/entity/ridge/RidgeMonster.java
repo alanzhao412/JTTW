@@ -196,6 +196,13 @@ public abstract class RidgeMonster extends Monster {
         if (CAPTAIN.equals(key)) refreshDimensions();
     }
 
+    /** A captain leaves its sigil, for forging. */
+    @Override
+    protected void dropCustomDeathLoot(net.minecraft.world.damagesource.DamageSource source, int looting, boolean hitByPlayer) {
+        super.dropCustomDeathLoot(source, looting, hitByPlayer);
+        if (isCaptain()) spawnAtLocation(new net.minecraft.world.item.ItemStack(com.jttw.engine.registry.ModItems.CAPTAINS_SIGIL.get(), 1 + random.nextInt(1 + looting)));
+    }
+
     @Override
     public MobType getMobType() {
         return MobType.UNDEAD;

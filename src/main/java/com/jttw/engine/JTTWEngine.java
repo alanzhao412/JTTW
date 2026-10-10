@@ -50,6 +50,8 @@ public class JTTWEngine {
 
         ModWorldgen.register(modEventBus);
         ModBlocks.register(modEventBus);
+        com.jttw.engine.registry.ModBlockEntities.register(modEventBus);
+        com.jttw.engine.registry.ModMenus.register(modEventBus);
         ModItems.register(modEventBus);
         ModEntities.register(modEventBus);
         ModAttributes.register(modEventBus);

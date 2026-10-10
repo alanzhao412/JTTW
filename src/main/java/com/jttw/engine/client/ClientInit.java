@@ -127,6 +127,8 @@ public final class ClientInit {
     public static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.CELESTIAL_CLOUD.get(), RenderType.translucent());
+            net.minecraft.client.gui.screens.MenuScreens.register(com.jttw.engine.registry.ModMenus.TRIGRAMS_FURNACE.get(),
+                                    com.jttw.engine.client.gui.TrigramsFurnaceScreen::new);
             // Zhu Bajie's Keen Ears hear what the sound engine plays
             Minecraft.getInstance().getSoundManager().addListener(KeenEarsOverlay.INSTANCE);
         });

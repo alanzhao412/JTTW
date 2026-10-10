@@ -57,7 +57,7 @@ public class ErlangAxeItem extends Item {
         // Base +50% for everyone (large: twice that, x3); Erlang Shen bonus applied via handler event.
         boolean large = isLarge(stack);
         b.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK, "jttw:axe_atk",
-                large ? 2.0 : 0.50, AttributeModifier.Operation.MULTIPLY_TOTAL));
+                (large ? 2.0 : 0.50) * Armaments.refineMultiplier(stack), AttributeModifier.Operation.MULTIPLY_TOTAL));
         // Slower attack speed (-20%; large: half speed)
         b.put(Attributes.ATTACK_SPEED, new AttributeModifier(UUID_SPEED, "jttw:axe_speed",
                 large ? -0.5 : -0.2, AttributeModifier.Operation.MULTIPLY_TOTAL));

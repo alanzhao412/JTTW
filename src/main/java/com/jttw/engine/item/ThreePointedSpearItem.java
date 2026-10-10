@@ -61,7 +61,7 @@ public class ThreePointedSpearItem extends Item {
         // For attribute display, show the base (lower) value.
         // The Erlang Shen bonus is applied via ErlangShenAbilityHandler event.
         b.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK_OTHER, "jttw:spear_atk",
-                0.20, AttributeModifier.Operation.MULTIPLY_TOTAL));
+                0.20 * Armaments.refineMultiplier(stack), AttributeModifier.Operation.MULTIPLY_TOTAL));
 
         return b.build();
     }

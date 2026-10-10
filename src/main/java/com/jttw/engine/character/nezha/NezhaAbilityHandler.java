@@ -284,29 +284,28 @@ public final class NezhaAbilityHandler {
     // Events
     // =========================================================================
 
-    private static void applyWheelsSpeed(ServerPlayer sp, boolean wearingWheels) {
-        var speed = sp.getAttribute(Attributes.MOVEMENT_SPEED);
-        if (speed == null) return;
-        boolean has = speed.getModifier(WHEELS_SPEED_ID) != null;
-        if (wearingWheels && !has) {
-            speed.addTransientModifier(new AttributeModifier(WHEELS_SPEED_ID, "jttw:wind_fire_wheels",
-                    WHEELS_SPEED_BONUS, AttributeModifier.Operation.MULTIPLY_BASE));
-        } else if (!wearingWheels && has) {
-            speed.removeModifier(WHEELS_SPEED_ID);
-        }
+    /** Sets (or clears, with no amount) a transient modifier, replacing it when its amount changes. */
+    private static void setTransient(net.minecraft.world.entity.ai.attributes.AttributeInstance attr, UUID id, String name,
+                                     double amount, AttributeModifier.Operation op) {
+        if (attr == null) return;
+        AttributeModifier now = attr.getModifier(id);
+        if (now != null && now.getAmount() == amount) return;
+        if (now != null) attr.removeModifier(id);
+        if (amount != 0) attr.addTransientModifier(new AttributeModifier(id, name, amount, op));
     }
 
-    /** Huntian Cloth: magic resistance while Nezha wears it. */
-    private static void applyClothResistance(ServerPlayer sp, boolean wearingCloth) {
-        var mres = sp.getAttribute(com.jttw.engine.registry.ModAttributes.MAGIC_RESISTANCE.get());
-        if (mres == null) return;
-        boolean has = mres.getModifier(CLOTH_MRES_ID) != null;
-        if (wearingCloth && !has) {
-            mres.addTransientModifier(new AttributeModifier(CLOTH_MRES_ID, "jttw:huntian_cloth",
-                    HuntianClothItem.MAGIC_RESISTANCE, AttributeModifier.Operation.ADDITION));
-        } else if (!wearingCloth && has) {
-            mres.removeModifier(CLOTH_MRES_ID);
-        }
+    /** Wind Fire Wheels: speed while Nezha has them, the more the better refined. */
+    private static void applyWheelsSpeed(ServerPlayer sp, ItemStack wheels) {
+        setTransient(sp.getAttribute(Attributes.MOVEMENT_SPEED), WHEELS_SPEED_ID, "jttw:wind_fire_wheels",
+                wheels.isEmpty() ? 0 : WHEELS_SPEED_BONUS * com.jttw.engine.item.Armaments.refineMultiplier(wheels),
+                AttributeModifier.Operation.MULTIPLY_BASE);
+    }
+
+    /** Huntian Cloth: magic resistance while Nezha has it, the more the better refined. */
+    private static void applyClothResistance(ServerPlayer sp, ItemStack cloth) {
+        setTransient(sp.getAttribute(com.jttw.engine.registry.ModAttributes.MAGIC_RESISTANCE.get()), CLOTH_MRES_ID, "jttw:huntian_cloth",
+                cloth.isEmpty() ? 0 : HuntianClothItem.MAGIC_RESISTANCE * com.jttw.engine.item.Armaments.refineMultiplier(cloth),
+                AttributeModifier.Operation.ADDITION);
     }
 
     @SubscribeEvent
@@ -330,8 +329,9 @@ public final class NezhaAbilityHandler {
         }
 
         tickSamadhiStream(sp);
-        applyWheelsSpeed(sp, hasWheels);
-        applyClothResistance(sp, sp.getItemBySlot(EquipmentSlot.CHEST).getItem() instanceof HuntianClothItem);
+        applyWheelsSpeed(sp, hasWheels ? boots : ItemStack.EMPTY);
+        ItemStack chest = sp.getItemBySlot(EquipmentSlot.CHEST);
+        applyClothResistance(sp, chest.getItem() instanceof HuntianClothItem ? chest : ItemStack.EMPTY);
 
         // Three Heads Qi drain
         if (ACTIVE_THREE_HEADS.contains(sp.getUUID())) {

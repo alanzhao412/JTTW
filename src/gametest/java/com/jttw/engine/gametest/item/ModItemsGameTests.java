@@ -61,7 +61,12 @@ public class ModItemsGameTests {
             Map.entry("banana_leaf_fan", com.jttw.engine.item.BananaLeafFanItem.class),
             Map.entry("bone_servant_spawn_egg", net.minecraftforge.common.ForgeSpawnEggItem.class),
             Map.entry("wraith_spawn_egg", net.minecraftforge.common.ForgeSpawnEggItem.class),
-            Map.entry("lady_white_bone_spawn_egg", net.minecraftforge.common.ForgeSpawnEggItem.class));
+            Map.entry("lady_white_bone_spawn_egg", net.minecraftforge.common.ForgeSpawnEggItem.class),
+            Map.entry("eight_trigrams_furnace", BlockItem.class),
+            Map.entry("servant_bone", Item.class),
+            Map.entry("wraith_wisp", Item.class),
+            Map.entry("captains_sigil", Item.class),
+            Map.entry("heart_bone", Item.class));
 
     @GameTest(template = PLATFORM)
     public static void everyModItemIsRegisteredUnderItsIdAsTheRightClass(GameTestHelper h) {
