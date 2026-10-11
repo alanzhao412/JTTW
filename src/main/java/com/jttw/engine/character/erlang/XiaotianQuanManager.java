@@ -97,6 +97,13 @@ public final class XiaotianQuanManager {
         player.sendSystemMessage(Component.literal("§6Xiaotian Quan dismissed."));
     }
 
+    /** This player's Xiaotian Quan, if out and in their world; else null. */
+    @javax.annotation.Nullable
+    public static XiaotianQuanEntity houndOf(ServerPlayer player) {
+        UUID id = OWNER_TO_XTQ.get(player.getUUID());
+        return id != null && player.serverLevel().getEntity(id) instanceof XiaotianQuanEntity hound ? hound : null;
+    }
+
     public static boolean isActive(UUID ownerId) {
         return OWNER_TO_XTQ.containsKey(ownerId);
     }

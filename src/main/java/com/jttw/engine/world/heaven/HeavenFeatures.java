@@ -94,7 +94,8 @@ public final class HeavenFeatures {
         public static void build(WorldGenLevel level, BlockPos at, RandomSource r) {
             BlockState jade = ModBlocks.JADE_BLOCK.get().defaultBlockState(), quartz = Blocks.SMOOTH_QUARTZ.defaultBlockState(),
                     pillar = Blocks.QUARTZ_PILLAR.defaultBlockState(), gold = Blocks.GOLD_BLOCK.defaultBlockState(),
-                    cloud = ModBlocks.CELESTIAL_CLOUD.get().defaultBlockState(), air = Blocks.AIR.defaultBlockState();
+                    cloud = ModBlocks.CELESTIAL_CLOUD.get().defaultBlockState(), air = Blocks.AIR.defaultBlockState(),
+                    red = Blocks.RED_CONCRETE.defaultBlockState();
             int x = at.getX(), y = at.getY(), z = at.getZ();
             BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
             // its foundation: a round terrace of jade on a bank of cloud
@@ -114,7 +115,8 @@ public final class HeavenFeatures {
                 for (int up = 0; up < 6; up++) {
                     boolean gate = dz == 7 && Math.abs(dx) <= 1 && up < 4;
                     boolean window = !post && up >= 2 && up <= 3 && !gate;
-                    set(level, p.set(x + dx, y + up, z + dz), gate ? air : post ? pillar : window ? Blocks.LIME_STAINED_GLASS_PANE.defaultBlockState() : jade);
+                    Direction out = Math.abs(dz) == 7 ? (dz > 0 ? Direction.SOUTH : Direction.NORTH) : (dx > 0 ? Direction.EAST : Direction.WEST);
+                    set(level, p.set(x + dx, y + up, z + dz), gate ? air : post ? (up == 5 ? gold : red) : window ? lattice(out) : jade);
                 }
             }
             // three tiers of golden roof
@@ -122,25 +124,80 @@ public final class HeavenFeatures {
             for (int[] t : tiers) for (int dx = -t[0]; dx <= t[0]; dx++) for (int dz = -t[0]; dz <= t[0]; dz++) {
                 set(level, p.set(x + dx, y + t[1], z + dz), Math.abs(dx) == t[0] || Math.abs(dz) == t[0] ? gold : jade);
             }
-            // the throne, at the north
-            set(level, p.set(x, y, z - 6), gold);
-            set(level, p.set(x, y + 1, z - 6), gold);
-            set(level, p.set(x, y, z - 5), Blocks.GOLD_BLOCK.defaultBlockState());
-            set(level, p.set(x - 1, y, z - 5), Blocks.QUARTZ_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.EAST));
-            set(level, p.set(x + 1, y, z - 5), Blocks.QUARTZ_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.WEST));
-            // the banquet: two long tables, jars of Heavenly Wine on them
-            for (int side : new int[]{-3, 3}) for (int dz = -2; dz <= 3; dz++) {
-                set(level, p.set(x + side, y, z + dz), Blocks.DARK_OAK_SLAB.defaultBlockState()
+            hall(level, x, y, z, r);
+        }
+
+        /** A red lattice window, a mangrove trapdoor standing open in the wall. */
+        private static BlockState lattice(Direction out) {
+            return Blocks.MANGROVE_TRAPDOOR.defaultBlockState()
+                    .setValue(net.minecraft.world.level.block.TrapDoorBlock.OPEN, true)
+                    .setValue(net.minecraft.world.level.block.TrapDoorBlock.FACING, out.getOpposite());
+        }
+
+        /**
+         * The hall within, in the manner of the palaces below Heaven, but in jade and red: a red
+         * carpet from the gate to the throne between two rows of red-lacquered columns, red beams
+         * across a jade ceiling, the throne on a jade dais before a gold screen hung with red
+         * banners, red lanterns, the banquet laid on red-lacquered tables, the treasury beside the
+         * throne.
+         */
+        private static void hall(WorldGenLevel level, int x, int y, int z, RandomSource r) {
+            BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+            BlockState jade = ModBlocks.JADE_BLOCK.get().defaultBlockState(), gold = Blocks.GOLD_BLOCK.defaultBlockState(),
+                    red = Blocks.RED_CONCRETE.defaultBlockState(), carpet = Blocks.RED_CARPET.defaultBlockState(),
+                    air = Blocks.AIR.defaultBlockState();
+            // the floor: jade, a gold-edged red aisle from the gate to the dais
+            for (int dx = -6; dx <= 6; dx++) for (int dz = -6; dz <= 6; dz++) {
+                set(level, p.set(x + dx, y - 1, z + dz), Math.abs(dx) == 2 ? gold : jade);
+                for (int up = 0; up < 6; up++) set(level, p.set(x + dx, y + up, z + dz), air);
+                if (Math.abs(dx) <= 1 && dz >= -3) set(level, p.set(x + dx, y, z + dz), carpet);
+            }
+            // two rows of red-lacquered columns, gold at foot and head
+            for (int side : new int[]{-4, 4}) for (int dz : new int[]{-3, 0, 3, 6}) {
+                if (dz == 6) continue;
+                for (int up = 0; up < 6; up++) set(level, p.set(x + side, y + up, z + dz), up == 0 || up == 5 ? gold : red);
+            }
+            // red beams across a jade ceiling
+            for (int dz = -6; dz <= 6; dz += 3) for (int dx = -6; dx <= 6; dx++) set(level, p.set(x + dx, y + 5, z + dz), red);
+            // the throne: a two-step jade dais, gold-edged, the throne gold with a jade back
+            for (int dx = -3; dx <= 3; dx++) for (int dz = -6; dz <= -4; dz++) {
+                set(level, p.set(x + dx, y, z + dz), Math.abs(dx) == 3 || dz == -4 ? gold : jade);
+            }
+            for (int dx = -2; dx <= 2; dx++) for (int dz = -6; dz <= -5; dz++) set(level, p.set(x + dx, y + 1, z + dz), jade);
+            set(level, p.set(x, y + 2, z - 5), Blocks.QUARTZ_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.NORTH));
+            set(level, p.set(x, y + 2, z - 6), jade);
+            set(level, p.set(x, y + 3, z - 6), gold);
+            for (int dx : new int[]{-1, 1}) {
+                set(level, p.set(x + dx, y + 2, z - 6), gold);
+                set(level, p.set(x + dx, y + 2, z - 5), Blocks.GOLD_BLOCK.defaultBlockState());
+            }
+            // a gold screen behind it, hung with red banners
+            for (int dx = -3; dx <= 3; dx++) for (int up = 1; up < 5; up++) set(level, p.set(x + dx, y + up, z - 7), gold);
+            for (int dx : new int[]{-3, -2, 2, 3}) {
+                set(level, p.set(x + dx, y + 3, z - 6), Blocks.RED_WALL_BANNER.defaultBlockState()
+                        .setValue(net.minecraft.world.level.block.WallBannerBlock.FACING, Direction.SOUTH));
+            }
+            // the banquet, on red-lacquered tables, cushions either side; wine jars and candles on them
+            for (int side : new int[]{-6, 6}) for (int dz = -2; dz <= 4; dz++) {
+                set(level, p.set(x + side, y, z + dz), Blocks.MANGROVE_SLAB.defaultBlockState()
                         .setValue(net.minecraft.world.level.block.SlabBlock.TYPE, net.minecraft.world.level.block.state.properties.SlabType.TOP));
-                if (dz % 2 == 0) set(level, p.set(x + side, y + 1, z + dz), ModBlocks.WINE_JAR.get().defaultBlockState());
+                set(level, p.set(x + side + (side < 0 ? 1 : -1), y, z + dz), dz % 2 == 0 ? Blocks.RED_CARPET.defaultBlockState() : air);
+                if (dz % 3 == 0) set(level, p.set(x + side, y + 1, z + dz), ModBlocks.WINE_JAR.get().defaultBlockState());
+                else if (dz % 3 == 1) set(level, p.set(x + side, y + 1, z + dz), Blocks.YELLOW_CANDLE.defaultBlockState()
+                        .setValue(net.minecraft.world.level.block.CandleBlock.CANDLES, 3).setValue(net.minecraft.world.level.block.CandleBlock.LIT, true));
             }
             // the treasury, either side of the throne
-            chest(level, p.set(x - 3, y, z - 6).immutable(), Direction.SOUTH, PALACE_CHEST, r);
-            chest(level, p.set(x + 3, y, z - 6).immutable(), Direction.SOUTH, PALACE_CHEST, r);
-            // lanterns at the gate and in the hall
+            chest(level, p.set(x - 5, y, z - 6).immutable(), Direction.SOUTH, PALACE_CHEST, r);
+            chest(level, p.set(x + 5, y, z - 6).immutable(), Direction.SOUTH, PALACE_CHEST, r);
+            // red lanterns hung on chains, down the hall and at the gate
+            for (int[] l : new int[][]{{-2, -2}, {2, -2}, {-2, 2}, {2, 2}, {-2, 5}, {2, 5}}) {
+                set(level, p.set(x + l[0], y + 4, z + l[1]), Blocks.CHAIN.defaultBlockState());
+                set(level, p.set(x + l[0], y + 3, z + l[1]), Blocks.SHROOMLIGHT.defaultBlockState());
+            }
             for (int dx : new int[]{-2, 2}) set(level, p.set(x + dx, y, z + 8), Blocks.LANTERN.defaultBlockState());
-            for (int[] l : new int[][]{{-4, -4}, {4, -4}, {-4, 4}, {4, 4}}) {
-                set(level, p.set(x + l[0], y + 5, z + l[1]), Blocks.LANTERN.defaultBlockState().setValue(LanternBlock.HANGING, true));
+            // bamboo in the corners
+            for (int[] c : new int[][]{{-6, 6}, {6, 6}, {-6, -6}, {6, -6}}) {
+                set(level, p.set(x + c[0], y, z + c[1]), Blocks.POTTED_BAMBOO.defaultBlockState());
             }
         }
     }

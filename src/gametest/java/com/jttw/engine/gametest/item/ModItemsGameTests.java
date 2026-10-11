@@ -70,7 +70,8 @@ public class ModItemsGameTests {
             Map.entry("wraith_wisp", Item.class),
             Map.entry("captains_sigil", Item.class),
             Map.entry("heart_bone", Item.class),
-            Map.entry("heavenly_halberd", net.minecraft.world.item.SwordItem.class));
+            Map.entry("heavenly_halberd", net.minecraft.world.item.SwordItem.class),
+            Map.entry("golden_bow", com.jttw.engine.item.GoldenBowItem.class));
 
     @GameTest(template = PLATFORM)
     public static void everyModItemIsRegisteredUnderItsIdAsTheRightClass(GameTestHelper h) {

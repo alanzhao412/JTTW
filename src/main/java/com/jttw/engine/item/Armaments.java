@@ -86,7 +86,9 @@ public final class Armaments {
             new Armament("three_pointed_spear", ERLANG, () -> new ItemStack(ModItems.THREE_POINTED_SPEAR.get()), of(ModItems.THREE_POINTED_SPEAR::get),
                     cost(BONE, 6, SIGIL, 2)),
             new Armament("erlang_axe", ERLANG, () -> new ItemStack(ModItems.ERLANG_AXE.get()), of(ModItems.ERLANG_AXE::get),
-                    cost(BONE, 7, SIGIL, 1)));
+                    cost(BONE, 7, SIGIL, 1)),
+            new Armament("golden_bow", ERLANG, () -> new ItemStack(ModItems.GOLDEN_BOW.get()), of(ModItems.GOLDEN_BOW::get),
+                    cost(WISP, 5, BONE, 2, SIGIL, 2)));
 
     /** The armament this stack is, or null. */
     @Nullable

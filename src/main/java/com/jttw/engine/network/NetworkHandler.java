@@ -236,6 +236,18 @@ public final class NetworkHandler {
                 .consumerMainThread(com.jttw.engine.network.s2c.SyncKarmaPacket::handle)
                 .add();
 
+        CHANNEL.messageBuilder(com.jttw.engine.network.s2c.ArmamentsShownPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.jttw.engine.network.s2c.ArmamentsShownPacket::encode)
+                .decoder(com.jttw.engine.network.s2c.ArmamentsShownPacket::decode)
+                .consumerMainThread(com.jttw.engine.network.s2c.ArmamentsShownPacket::handle)
+                .add();
+
+        CHANNEL.messageBuilder(com.jttw.engine.network.s2c.BeastFormPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.jttw.engine.network.s2c.BeastFormPacket::encode)
+                .decoder(com.jttw.engine.network.s2c.BeastFormPacket::decode)
+                .consumerMainThread(com.jttw.engine.network.s2c.BeastFormPacket::handle)
+                .add();
+
         CHANNEL.messageBuilder(com.jttw.engine.network.s2c.WaterFxPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.jttw.engine.network.s2c.WaterFxPacket::encode)
                 .decoder(com.jttw.engine.network.s2c.WaterFxPacket::decode)

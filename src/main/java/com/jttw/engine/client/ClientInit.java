@@ -112,6 +112,18 @@ public final class ClientInit {
     }
 
     // ── Entity renderers (MOD bus) ─────────────────────────────────
+    /** Armaments drawn on the body, on both player builds. */
+    @SubscribeEvent
+    @SuppressWarnings("unchecked")
+    public static void addLayers(EntityRenderersEvent.AddLayers event) {
+        for (String skin : event.getSkins()) {
+            if (event.getSkin(skin) instanceof net.minecraft.client.renderer.entity.player.PlayerRenderer renderer) {
+                renderer.addLayer(new com.jttw.engine.client.renderer.ArmamentLayer(renderer));
+                renderer.addLayer(new com.jttw.engine.client.renderer.BeastFormLayer(renderer));
+            }
+        }
+    }
+
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.WU_CLONE.get(), WuCloneRenderer::new);
@@ -138,6 +150,13 @@ public final class ClientInit {
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
+            // the Golden Bow draws as a bow does
+            net.minecraft.client.renderer.item.ItemProperties.register(com.jttw.engine.registry.ModItems.GOLDEN_BOW.get(),
+                    new net.minecraft.resources.ResourceLocation("pull"), (stack, level, e, seed) ->
+                            e == null || e.getUseItem() != stack ? 0f : (stack.getUseDuration() - e.getUseItemRemainingTicks()) / 20f);
+            net.minecraft.client.renderer.item.ItemProperties.register(com.jttw.engine.registry.ModItems.GOLDEN_BOW.get(),
+                    new net.minecraft.resources.ResourceLocation("pulling"), (stack, level, e, seed) ->
+                            e != null && e.isUsingItem() && e.getUseItem() == stack ? 1f : 0f);
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.CELESTIAL_CLOUD.get(), RenderType.translucent());
             net.minecraft.client.gui.screens.MenuScreens.register(com.jttw.engine.registry.ModMenus.TRIGRAMS_FURNACE.get(),
                                     com.jttw.engine.client.gui.TrigramsFurnaceScreen::new);

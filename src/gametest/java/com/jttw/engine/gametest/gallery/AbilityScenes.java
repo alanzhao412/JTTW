@@ -49,6 +49,11 @@ final class AbilityScenes {
         }
     }
 
+    /** The way the player faces in the scene being shot (0 south, toward the camera's side; 180 away). */
+    static volatile float facing;
+    /** Set by a scene that wants the camera close on the player rather than on the ground ahead. */
+    static volatile boolean closeUp;
+
     /** Set by a scene of Wukong at his top speed: the gallery keeps his momentum at its height. */
     static volatile boolean topSpeed;
 
@@ -89,6 +94,11 @@ final class AbilityScenes {
                     }
                     com.jttw.engine.world.heaven.HeavenFeatures.JadePalace.build(level, p.blockPosition().offset(0, 0, 24), p.getRandom());
                 }, p -> {}, 1, true, -4f),
+                new Scene("heaven_palace_hall", p -> {
+                    // inside, at the gate, looking up the hall to the throne
+                    com.jttw.engine.world.heaven.HeavenFeatures.JadePalace.build(p.serverLevel(), p.blockPosition().offset(0, 0, -6), p.getRandom());
+                    facing = 180f;
+                }, p -> {}, 1, true, 8f),
                 // ── Screens ──
                 new Scene("ui_furnace", p -> {
                     var level = p.serverLevel();
@@ -152,6 +162,28 @@ final class AbilityScenes {
                     level.playSound(null, p.getX() + 1, p.getY(), p.getZ() + 10, net.minecraft.sounds.SoundEvents.CHEST_OPEN, net.minecraft.sounds.SoundSource.BLOCKS, 1f, 1f);
                 }, 6, true),
                 // ── White Bone Ridge's dead ──
+                // ── Divine Beasts growing into their beasts ──
+                new Scene("beast_dragon_20", p -> beast(p, ReincarnationOutcome.DRAGON, 20, -25f), p -> {}, 1, false),
+                new Scene("beast_dragon_60", p -> beast(p, ReincarnationOutcome.DRAGON, 60, -25f), p -> {}, 1, false),
+                new Scene("beast_dragon_80", p -> beast(p, ReincarnationOutcome.DRAGON, 80, 200f), p -> {}, 1, false),
+                new Scene("beast_dragon_100", p -> beast(p, ReincarnationOutcome.DRAGON, 100, -35f), p -> {}, 1, false),
+                new Scene("beast_turtle_20", p -> beast(p, ReincarnationOutcome.TURTLE, 20, -25f), p -> {}, 1, false),
+                new Scene("beast_turtle_60", p -> beast(p, ReincarnationOutcome.TURTLE, 60, -25f), p -> {}, 1, false),
+                new Scene("beast_turtle_80", p -> beast(p, ReincarnationOutcome.TURTLE, 80, 200f), p -> {}, 1, false),
+                new Scene("beast_turtle_100", p -> beast(p, ReincarnationOutcome.TURTLE, 100, -35f), p -> {}, 1, false),
+                new Scene("beast_tiger_20", p -> beast(p, ReincarnationOutcome.WHITE_TIGER, 20, -25f), p -> {}, 1, false),
+                new Scene("beast_tiger_60", p -> beast(p, ReincarnationOutcome.WHITE_TIGER, 60, -25f), p -> {}, 1, false),
+                new Scene("beast_tiger_80", p -> beast(p, ReincarnationOutcome.WHITE_TIGER, 80, 200f), p -> {}, 1, false),
+                new Scene("beast_tiger_100", p -> beast(p, ReincarnationOutcome.WHITE_TIGER, 100, -35f), p -> {}, 1, false),
+                new Scene("beast_phoenix_20", p -> beast(p, ReincarnationOutcome.PHOENIX, 20, -25f), p -> {}, 1, false),
+                new Scene("beast_phoenix_60", p -> beast(p, ReincarnationOutcome.PHOENIX, 60, -25f), p -> {}, 1, false),
+                new Scene("beast_phoenix_80", p -> beast(p, ReincarnationOutcome.PHOENIX, 80, 200f), p -> {}, 1, false),
+                new Scene("beast_phoenix_100", p -> beast(p, ReincarnationOutcome.PHOENIX, 100, -35f), p -> {}, 1, false),
+                // ── Armaments on the body ──
+                new Scene("armaments_nezha_back", p -> armed(p, ReincarnationOutcome.THIRD_LOTUS_PRINCE, 200f), p -> {}, 1, false),
+                new Scene("armaments_nezha_front", p -> armed(p, ReincarnationOutcome.THIRD_LOTUS_PRINCE, -20f), p -> {}, 1, false),
+                new Scene("armaments_erlang_back", p -> armed(p, ReincarnationOutcome.EYE_OF_HEAVEN, 200f), p -> {}, 1, false),
+                new Scene("armaments_erlang_front", p -> armed(p, ReincarnationOutcome.EYE_OF_HEAVEN, -20f), p -> {}, 1, false),
                 new Scene("xtq_howl", p -> {}, p -> {
                     // a howl crossing in front of the camera, from left to right
                     var howl = new com.jttw.engine.entity.HowlProjectileEntity(com.jttw.engine.registry.ModEntities.HOWL_PROJECTILE.get(), p.level());
@@ -379,6 +411,26 @@ final class AbilityScenes {
     }
 
     /** One of the ridge's dead, standing still at (dx, dz) from the player, facing them (a captain if asked). */
+    /** A Divine Beast of {@code who}'s line at {@code level}, seen close, facing {@code yaw}. */
+    private static void beast(ServerPlayer p, ReincarnationOutcome who, int level, float yaw) {
+        AlignmentData.markReincarnated(p, who);
+        LevelManager.initClass(p, who);
+        com.jttw.engine.progression.level.PlayerLevel.setLevel(p, level);
+        facing = yaw;
+        closeUp = true;
+    }
+
+    /** {@code who} with every one of their armaments in their armory, none in hand, facing {@code yaw}. */
+    private static void armed(ServerPlayer p, ReincarnationOutcome who, float yaw) {
+        AlignmentData.markReincarnated(p, who);
+        LevelManager.initClass(p, who);
+        var armory = com.jttw.engine.item.Armory.of(p);
+        var slots = com.jttw.engine.item.Armory.slots(p);
+        for (int i = 0; i < slots.size(); i++) armory.setItem(i, slots.get(i).forged().get());
+        facing = yaw;
+        closeUp = true;
+    }
+
     /** The Saurian Demon King with these nodes and Qi to spare. */
     private static void saurian(ServerPlayer p, String... nodes) {
         p.getPersistentData().remove("jttw_skill_nodes");
@@ -459,6 +511,8 @@ final class AbilityScenes {
     static void reset(ServerPlayer p) {
         keepScreen = false;
         topSpeed = false;
+        facing = 0;
+        closeUp = false;
         if (NineSpiritsAbilityHandler.inTrueForm(p)) NineSpiritsAbilityHandler.endTrueForm(p);
         if (BullDemonAbilityHandler.inGreatBull(p)) BullDemonAbilityHandler.endGreatBull(p);
         p.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);

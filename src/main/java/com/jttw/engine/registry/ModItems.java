@@ -41,6 +41,8 @@ public final class ModItems {
     /** The furnace's only fuel: forged from the zones' materials (Nezha and the Phoenix need none: their fire lights it). */
     public static final RegistryObject<Item> TRUE_SAMADHI_FIRE = ITEMS.register("true_samadhi_fire",
             () -> new Item(new Item.Properties().rarity(net.minecraft.world.item.Rarity.RARE).fireResistant()));
+    /** Erlang Shen's Golden Bow (see GoldenBowItem). */
+    public static final RegistryObject<Item> GOLDEN_BOW = ITEMS.register("golden_bow", com.jttw.engine.item.GoldenBowItem::new);
     /** The ji of Heaven's soldiers; now and then one falls from a soldier struck down. */
     public static final RegistryObject<Item> HEAVENLY_HALBERD = ITEMS.register("heavenly_halberd",
             () -> new net.minecraft.world.item.SwordItem(net.minecraft.world.item.Tiers.GOLD, 4, -2.8f,

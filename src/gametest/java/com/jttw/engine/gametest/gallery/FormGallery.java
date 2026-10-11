@@ -207,10 +207,11 @@ public final class FormGallery {
 
     /** The player faces south at this pitch (looking up for the UP view, as a scene asks). Body and head follow. */
     private static void holdPose(Player p, float pitch, boolean still) {
-        p.setYRot(0f); p.yRotO = 0f;
+        float yaw = AbilityScenes.facing;
+        p.setYRot(yaw); p.yRotO = yaw;
         p.setXRot(pitch); p.xRotO = pitch;
-        p.yBodyRot = 0f; p.yBodyRotO = 0f;
-        p.yHeadRot = 0f; p.yHeadRotO = 0f;
+        p.yBodyRot = yaw; p.yBodyRotO = yaw;
+        p.yHeadRot = yaw; p.yHeadRotO = yaw;
         if (still) p.setDeltaMovement(0, 0, 0); // a boat on water is left to float
     }
 
@@ -276,8 +277,10 @@ public final class FormGallery {
             if (shot.kind() == Kind.SCENE) {
                 if (!scene(shot).firstPerson()) {
                     // Three-quarter view: from the south-east, onto the player and the ground in front
-                    double tx = 0.5, ty = ground + 1.0, tz = 3.0;
-                    double cx = 7.0, cy = ground + 3.5, cz = 8.0;
+                    // (or, close up, onto the player alone)
+                    boolean close = AbilityScenes.closeUp;
+                    double tx = 0.5, ty = ground + (close ? 1.0 : 1.0), tz = close ? 0.5 : 3.0;
+                    double cx = close ? 2.6 : 7.0, cy = ground + (close ? 1.9 : 3.5), cz = close ? 3.4 : 8.0;
                     double dx = tx - cx, dy = ty - cy, dz = tz - cz;
                     float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
                     float pitch = (float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)));

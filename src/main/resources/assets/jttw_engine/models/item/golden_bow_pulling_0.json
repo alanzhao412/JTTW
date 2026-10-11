@@ -1,0 +1,6 @@
+{
+  "parent": "jttw_engine:item/golden_bow",
+  "textures": {
+    "layer0": "jttw_engine:item/golden_bow_pulling_0"
+  }
+}
