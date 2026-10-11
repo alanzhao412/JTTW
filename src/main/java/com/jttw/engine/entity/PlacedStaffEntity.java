@@ -344,7 +344,8 @@ public class PlacedStaffEntity extends Entity {
             }
         }
         if (!column.isEmpty() && level() instanceof ServerLevel sl) {
-            com.jttw.engine.world.TerrainBreaker.breakBlocks(sl, column); // no drops, spread over ticks
+            com.jttw.engine.world.TerrainBreaker.breakBlocks(sl, column, // no drops, spread over ticks
+                    getOwnerUUID() == null ? null : sl.getPlayerByUUID(getOwnerUUID()));
             sl.sendParticles(ParticleTypes.CLOUD,
                     getX(), getY() + staffHeight, getZ(),
                     (int)(scale * 0.5f + 2), 0.4, 0.4, 0.4, 0.02);
@@ -440,7 +441,7 @@ public class PlacedStaffEntity extends Entity {
             }
         }
 
-        com.jttw.engine.world.TerrainBreaker.breakBlocks(serverLevel, arc);
+        com.jttw.engine.world.TerrainBreaker.breakBlocks(serverLevel, arc, owner);
 
         startFall(yaw);
     }

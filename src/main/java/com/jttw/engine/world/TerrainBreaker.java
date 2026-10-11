@@ -75,6 +75,8 @@ public final class TerrainBreaker {
         @Nullable final Explosion explosion;
         @Nullable final Runnable then;
         final boolean effects;
+        /** How strong its breaker is, against the mod's hardened ground (see HardenedGround). */
+        double strength = 1;
         int cursor;
 
         Job(List<BlockPos> positions, @Nullable Explosion explosion, boolean effects, @Nullable Runnable then) {
@@ -98,8 +100,18 @@ public final class TerrainBreaker {
 
     /** Breaks these blocks, no drops, over as many ticks as it takes. Air and unbreakable blocks are left. */
     public static void breakBlocks(ServerLevel level, Collection<BlockPos> positions) {
+        breakBlocks(level, positions, null);
+    }
+
+    /**
+     * Breaks these blocks for {@code by}, whose strength is weighed against the mod's hardened
+     * ground (see HardenedGround): there, only the very strong carve ordinary ground.
+     */
+    public static void breakBlocks(ServerLevel level, Collection<BlockPos> positions, @Nullable Entity by) {
         if (positions.isEmpty()) return;
-        enqueue(level, new Job(dedupe(positions), null, true, null));
+        Job job = new Job(dedupe(positions), null, true, null);
+        job.strength = HardenedGround.strength(by);
+        enqueue(level, job);
     }
 
     /** Runs {@code action} once all the breaking asked for in this world so far is done. */
@@ -167,6 +179,9 @@ public final class TerrainBreaker {
                 if (!level.isLoaded(pos)) continue; // never load a chunk to break it
                 BlockState state = level.getBlockState(pos);
                 if (state.isAir() || state.getDestroySpeed(level, pos) < 0) continue;
+                // in the mod's own places, ordinary ground stands up to the carving powers (a blast's
+                // blocks were already weighed against it, as it detonated)
+                if (job.explosion == null && !HardenedGround.carvable(level, pos, state, job.strength)) continue;
                 boolean interior = true;
                 for (Direction d : Direction.values()) {
                     if (!job.members.contains(pos.relative(d).asLong())) { interior = false; break; }

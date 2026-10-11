@@ -265,7 +265,7 @@ public class ErlangAxeItem extends Item {
         }
 
         // The cut, spread over the next ticks rather than all in this one
-        com.jttw.engine.world.TerrainBreaker.breakBlocks(serverLevel, cleaved);
+        com.jttw.engine.world.TerrainBreaker.breakBlocks(serverLevel, cleaved, sp);
 
         // Explosion at end point
         net.minecraft.world.phys.Vec3 endPos = eyeStart.add(look.scale(cleaveRange));

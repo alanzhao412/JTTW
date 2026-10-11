@@ -139,7 +139,7 @@ public class QiWaveEntity extends Entity {
             if (distanceTraveled >= maxDistance) {
                 // Final explosion at termination point
                 Vec3 pos = position();
-                com.jttw.engine.world.TerrainBreaker.breakBlocks(serverLevel, carved);
+                com.jttw.engine.world.TerrainBreaker.breakBlocks(serverLevel, carved, owner);
                 com.jttw.engine.world.TerrainBreaker.explode(serverLevel, owner, pos.x, pos.y, pos.z, 3.0f);
                 discard();
                 return;
@@ -214,7 +214,7 @@ public class QiWaveEntity extends Entity {
                     effectiveRadius * 0.3, effectiveRadius * 0.3, effectiveRadius * 0.3, 0.01);
         }
 
-        com.jttw.engine.world.TerrainBreaker.breakBlocks(serverLevel, carved);
+        com.jttw.engine.world.TerrainBreaker.breakBlocks(serverLevel, carved, owner);
 
         // Sound every few ticks
         if (tickCount % 3 == 0) {
