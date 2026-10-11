@@ -29,7 +29,8 @@
     "HumanoidModelMixin",
     "ItemRendererMixin",
     "LocalPlayerMixin",
-    "PlayerRendererMixin"
+    "PlayerRendererMixin",
+    "RenderBuffersMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -23,6 +23,8 @@ public class ItemRendererMixin {
     private void jttw_onRenderHead(ItemStack stack, ItemDisplayContext displayContext, boolean leftHand,
                                     PoseStack poseStack, MultiBufferSource buffer, int combinedLight,
                                     int combinedOverlay, BakedModel model, CallbackInfo ci) {
+        // a Qi-empowered staff's glint is gold, not the enchantment's purple
+        com.jttw.engine.client.renderer.GoldGlint.ACTIVE.set(stack.getItem() instanceof RuyiJinguBangItem && RuyiJinguBangItem.isQiEmpowered(stack));
         boolean largeAxe = stack.getItem() instanceof com.jttw.engine.item.ErlangAxeItem
                 && com.jttw.engine.item.ErlangAxeItem.isLarge(stack);
         if (!(stack.getItem() instanceof RuyiJinguBangItem) && !largeAxe) return;
@@ -38,6 +40,31 @@ public class ItemRendererMixin {
             poseStack.scale(2.0f, 2.0f, 2.0f); // Erlang's axe, enlarged: twice its size
         } else if (RuyiJinguBangItem.isLargeMode(stack)) {
             poseStack.scale(3.0f, 3.0f, 3.0f);
+        }
+    }
+
+    @Inject(method = "render", at = @At("RETURN"))
+    private void jttw_onRenderReturn(ItemStack stack, ItemDisplayContext displayContext, boolean leftHand,
+                                      PoseStack poseStack, MultiBufferSource buffer, int combinedLight,
+                                      int combinedOverlay, BakedModel model, CallbackInfo ci) {
+        com.jttw.engine.client.renderer.GoldGlint.ACTIVE.set(false);
+    }
+
+    @Inject(method = "getFoilBuffer", at = @At("HEAD"), cancellable = true)
+    private static void jttw_goldFoil(MultiBufferSource buffer, net.minecraft.client.renderer.RenderType type, boolean isItem, boolean glint,
+                                      org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable<com.mojang.blaze3d.vertex.VertexConsumer> cir) {
+        if (glint && com.jttw.engine.client.renderer.GoldGlint.ACTIVE.get()) {
+            cir.setReturnValue(com.mojang.blaze3d.vertex.VertexMultiConsumer.create(
+                    buffer.getBuffer(com.jttw.engine.client.renderer.GoldGlint.ITEM), buffer.getBuffer(type)));
+        }
+    }
+
+    @Inject(method = "getFoilBufferDirect", at = @At("HEAD"), cancellable = true)
+    private static void jttw_goldFoilDirect(MultiBufferSource buffer, net.minecraft.client.renderer.RenderType type, boolean noEntity, boolean glint,
+                                            org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable<com.mojang.blaze3d.vertex.VertexConsumer> cir) {
+        if (glint && com.jttw.engine.client.renderer.GoldGlint.ACTIVE.get()) {
+            cir.setReturnValue(com.mojang.blaze3d.vertex.VertexMultiConsumer.create(
+                    buffer.getBuffer(com.jttw.engine.client.renderer.GoldGlint.DIRECT), buffer.getBuffer(type)));
         }
     }
 }

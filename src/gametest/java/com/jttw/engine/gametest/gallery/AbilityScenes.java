@@ -203,6 +203,15 @@ final class AbilityScenes {
                 new Scene("staff_crossed", p -> { plantAt(p, -4, 7, 5f); plantAt(p, 0, 2, 5f); }, p -> fellEach(p, -90f, 0f), 195, false),
                 new Scene("staff_tall_below", p -> plantAt(p, 0, 2, 30f), p -> {}, 1, true, -70f),
                 new Scene("staff_tall_far", p -> plantAt(p, 0, 2, 30f), p -> {}, 1, false),
+                // the Ruyi Jingu Bang in hand, Qi-empowered: a gold glint, not the enchantment's purple
+                new Scene("staff_empowered", p -> {
+                    empoweredStaff(p);
+                }, p -> {}, 1, true, 20f),
+                new Scene("staff_empowered_side", p -> {
+                    empoweredStaff(p);
+                    closeUp = true;
+                    facing = -40f;
+                }, p -> {}, 1, false),
                 // ── The Saurian Demon King: seen from his own eyes ──
                 new Scene("saurian_lash", p -> {
                     saurian(p, com.jttw.engine.character.saurian.SaurianSkillTree.LASH_1);
@@ -464,6 +473,17 @@ final class AbilityScenes {
         for (int i = 0; i < slots.size(); i++) armory.setItem(i, slots.get(i).forged().get());
         facing = yaw;
         closeUp = true;
+    }
+
+    /** Wukong, strong enough to hold it, with the Ruyi Jingu Bang Qi-empowered in hand. */
+    private static void empoweredStaff(ServerPlayer p) {
+        AlignmentData.markReincarnated(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
+        LevelManager.initClass(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
+        com.jttw.engine.progression.level.PlayerLevel.setLevel(p, 60);
+        LevelManager.reapplyStats(p);
+        var stack = new ItemStack(com.jttw.engine.registry.ModItems.RUYI_JINGU_BANG.get());
+        stack.getOrCreateTag().putBoolean(com.jttw.engine.item.RuyiJinguBangItem.TAG_QI_EMPOWERED, true);
+        p.setItemInHand(InteractionHand.MAIN_HAND, stack);
     }
 
     /** A Ruyi Jingu Bang of the player's planted {@code dx}, {@code dz} from them, at {@code scale}. */
