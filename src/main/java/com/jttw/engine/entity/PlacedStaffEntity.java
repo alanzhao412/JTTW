@@ -199,6 +199,34 @@ public class PlacedStaffEntity extends Entity {
         return owner != null && owner.equals(player.getUUID());
     }
 
+    // ── How large it is drawn (client) ───────────────────────────────
+
+    /**
+     * Each tick the drawn size closes this share of the way to its true size, so a change in size
+     * is seen to grow (or shrink) over a few ticks rather than jump: a few ticks for a notch of the
+     * wheel, a little longer for many notches at once.
+     */
+    public static final float GROWTH_EASE = 0.3f;
+
+    private float shownScale = -1, shownScaleO = -1;
+
+    private void easeShownScale() {
+        float target = getStaffScale();
+        if (shownScale < 0) { // first seen: as it is, not grown from nothing
+            shownScale = shownScaleO = target;
+            return;
+        }
+        shownScaleO = shownScale;
+        float gap = target - shownScale;
+        shownScale = Math.abs(gap) < 0.01f ? target : shownScale + gap * GROWTH_EASE;
+    }
+
+    /** The size it is drawn at, between ticks: easing toward {@link #getStaffScale()}. */
+    public float shownScale(float partialTick) {
+        if (shownScale < 0) return getStaffScale();
+        return shownScaleO + (shownScale - shownScaleO) * partialTick;
+    }
+
     // ── Scroll to scale ──────────────────────────────────────────────
 
     public void adjustScale(float delta) {
@@ -425,6 +453,7 @@ public class PlacedStaffEntity extends Entity {
 
         // Client-side: count animation ticks while falling
         if (level().isClientSide()) {
+            easeShownScale();
             if (isFalling()) {
                 fallAnimTicks++;
             }

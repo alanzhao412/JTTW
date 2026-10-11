@@ -192,6 +192,9 @@ final class AbilityScenes {
                     howl.setNoGravity(true);
                     p.level().addFreshEntity(howl);
                 }, 6, false),
+                // the Ruyi Jingu Bang grows smoothly: caught three ticks into growing from 1 to 6, and once grown
+                new Scene("staff_growing", AbilityScenes::staff, p -> grow(p), 3, false),
+                new Scene("staff_grown", AbilityScenes::staff, p -> grow(p), 40, false),
                 // ── The Saurian Demon King: seen from his own eyes ──
                 new Scene("saurian_lash", p -> {
                     saurian(p, com.jttw.engine.character.saurian.SaurianSkillTree.LASH_1);
@@ -453,6 +456,19 @@ final class AbilityScenes {
         for (int i = 0; i < slots.size(); i++) armory.setItem(i, slots.get(i).forged().get());
         facing = yaw;
         closeUp = true;
+    }
+
+    /** A Ruyi Jingu Bang standing on the ground before the camera, at its smallest. */
+    private static void staff(ServerPlayer p) {
+        var staff = new com.jttw.engine.entity.PlacedStaffEntity(p.level(), p.getX() + 1, p.getY(), p.getZ() + 3, p.getUUID());
+        staff.setStaffScale(1f);
+        p.level().addFreshEntity(staff);
+    }
+
+    /** Grows the staff by the camera to six times its size at once. */
+    private static void grow(ServerPlayer p) {
+        p.serverLevel().getEntitiesOfClass(com.jttw.engine.entity.PlacedStaffEntity.class, p.getBoundingBox().inflate(8))
+                .forEach(s -> s.setStaffScale(6f));
     }
 
     /** The Saurian Demon King with these nodes and Qi to spare. */

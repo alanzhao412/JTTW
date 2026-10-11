@@ -31,7 +31,8 @@ public class PlacedStaffRenderer extends EntityRenderer<PlacedStaffEntity> {
                        PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
         poseStack.pushPose();
 
-        float scale = entity.getStaffScale();
+        // drawn at its eased size, so it grows smoothly from one size to the next
+        float scale = entity.shownScale(partialTick);
 
         // The staff model extends from Y=-15.8 to Y=31.2 in model space.
         // After FIXED display normalization (÷16, -0.5), the bottom is at ~-1.49.
