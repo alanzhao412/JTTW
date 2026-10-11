@@ -3,7 +3,6 @@ package com.jttw.engine.gametest.flight;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.character.peng.PengSkillTree;
 import com.jttw.engine.character.wukong.WukongSkillTree;
-import com.jttw.engine.character.wukong.WukongAbilityHandler;
 import com.jttw.engine.flight.FlyingState;
 import com.jttw.engine.flight.JTTWFlight;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
@@ -31,28 +30,32 @@ public class FlightLookGameTests {
         return p;
     }
 
-    /** Sets how far his somersault momentum has built, 0 to 1. */
-    private static void momentum(ServerPlayer p, double built) {
-        JTTWFlight.setBoost(p, 1 + built * (WukongAbilityHandler.momentumMax() - 1), false);
+    /** Moves him {@code perTick} blocks along x for {@code ticks} ticks, as flying does, his state ticking. */
+    private static void fly(ServerPlayer p, double perTick, int ticks) {
+        for (int i = 0; i < ticks; i++) {
+            p.setPos(p.getX() + perTick, p.getY(), p.getZ());
+            FlyingState.onPlayerTick(new net.minecraftforge.event.TickEvent.PlayerTickEvent(
+                    net.minecraftforge.event.TickEvent.Phase.END, p));
+        }
     }
 
     @GameTest(template = PLATFORM)
     public static void wukongsCloudMarksHisTopSpeed(GameTestHelper h) {
         ServerPlayer p = flying(h, ReincarnationOutcome.CELESTIAL_PRIMATE, WukongSkillTree.FLIGHT_1, WukongSkillTree.FLIGHT_2);
-        momentum(p, 1);
+        JTTWFlight.setFlightSpeedTier(p, 2);
+        fly(p, 2.8, 10);
         eq(h, FlyingState.FLYING, FlyingState.mode(p), "before Flight III, no cloud even at his fastest");
         SkillTreeData.grantNode(p, WukongSkillTree.FLIGHT_3);
-        momentum(p, 0);
+        JTTWFlight.setFlightSpeedTier(p, 3);
+        fly(p, 0.5, 10);
         eq(h, FlyingState.FLYING, FlyingState.mode(p), "Flight III, flying slowly: no cloud");
-        momentum(p, 0.9);
-        eq(h, FlyingState.FLYING, FlyingState.mode(p), "still building: no cloud yet");
-        momentum(p, 1);
-        eq(h, FlyingState.ON_CLOUD, FlyingState.mode(p), "at the height of his momentum, on his cloud");
-        momentum(p, 0.9);
+        fly(p, 2.8, 4);
+        eq(h, FlyingState.ON_CLOUD, FlyingState.mode(p), "at his full speed, at once (within a few ticks), on his cloud");
+        fly(p, 1.8, 2);
         eq(h, FlyingState.ON_CLOUD, FlyingState.mode(p), "easing off a moment, he keeps it");
-        momentum(p, 0.5);
+        fly(p, 0.3, 10);
         eq(h, FlyingState.FLYING, FlyingState.mode(p), "slowed, it is gone");
-        momentum(p, 1);
+        fly(p, 2.8, 6);
         p.getAbilities().flying = false;
         eq(h, FlyingState.GROUNDED, FlyingState.mode(p), "and none on the ground");
         h.succeed();
@@ -82,11 +85,12 @@ public class FlightLookGameTests {
     public static void inCreativeACharactersOwnFlightIsStillTheirs(GameTestHelper h) {
         ServerPlayer wukong = flying(h, ReincarnationOutcome.CELESTIAL_PRIMATE, WukongSkillTree.FLIGHT_1, WukongSkillTree.FLIGHT_2, WukongSkillTree.FLIGHT_3);
         JTTWFlight.setUniversalFlight(wukong, true);
+        JTTWFlight.setFlightSpeedTier(wukong, 3);
         wukong.setGameMode(GameType.CREATIVE);
         wukong.getAbilities().flying = true;
         eq(h, FlyingState.FLYING, FlyingState.mode(wukong), "his own flight, in creative: stretched out along it");
-        momentum(wukong, 1);
-        eq(h, FlyingState.ON_CLOUD, FlyingState.mode(wukong), "and at his top speed, on his cloud");
+        fly(wukong, 2.8, 4);
+        eq(h, FlyingState.ON_CLOUD, FlyingState.mode(wukong), "and at his full speed, on his cloud");
         ServerPlayer plain = as(h, ReincarnationOutcome.BULL_DEMON_KING); // no flight of his own
         plain.setGameMode(GameType.CREATIVE);
         plain.getAbilities().flying = true;

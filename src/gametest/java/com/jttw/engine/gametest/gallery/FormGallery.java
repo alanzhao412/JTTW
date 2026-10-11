@@ -163,7 +163,7 @@ public final class FormGallery {
         if (mc.screen != null && !AbilityScenes.keepScreen) mc.setScreen(null);
         Shot shot = shots.get(next);
         holdPose(mc.player, shot.kind() == Kind.SCENE ? scene(shot).pitch() : shot.view() == View.UP ? UP_PITCH : 0f,
-                shot.kind() != Kind.BOAT_ON_WATER);
+                shot.kind() != Kind.BOAT_ON_WATER && !AbilityScenes.live);
         if (AbilityScenes.topSpeed) {
             UUID held = mc.player.getUUID();
             mc.getSingleplayerServer().execute(() -> {
@@ -180,6 +180,10 @@ public final class FormGallery {
             mc.gui.getChat().clearMessages(false); // setup chatter would cover a first-person HUD
             if (AbilityScenes.holdUse) mc.options.keyUse.setDown(true);
             if (AbilityScenes.openSkillTree) mc.setScreen(new com.jttw.engine.client.gui.SkillTreeScreen());
+            if (AbilityScenes.live) { // played as a player plays: forward and sprint held, nothing posed
+                mc.options.keyUp.setDown(true);
+                mc.options.keySprint.setDown(true);
+            }
             UUID id = mc.player.getUUID();
             AbilityScenes.Scene sc = scene(shot);
             mc.getSingleplayerServer().execute(() -> {
@@ -195,11 +199,20 @@ public final class FormGallery {
         boolean onCamera = mc.getCameraEntity() != mc.player;
         Screenshot.grab(mc.gameDirectory, RUN_DIR + "/" + file, mc.getMainRenderTarget(), msg -> {});
         mc.options.keyUse.setDown(false);
+        mc.options.keyUp.setDown(false);
+        mc.options.keySprint.setDown(false);
+        if (AbilityScenes.live) mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON);
         if (mc.screen instanceof com.jttw.engine.client.gui.SkillTreeScreen) mc.setScreen(null);
         TransformationData data = TransformationManager.getTransformation(mc.player);
         index.add(file + "\t" + shot.form() + "\t" + shot.view()
                 + "\tclientForm=" + (data == null ? "none" : data.getFormId())
-                + "\tcamera=" + onCamera);
+                + "\tcamera=" + onCamera
+                + "\tflying=" + mc.player.getAbilities().flying + " creative=" + mc.player.isCreative()
+                + String.format(" speed=%.3f presence=%.2f underWay=%.2f cloud=%.2f",
+                        mc.player.position().subtract(mc.player.xo, mc.player.yo, mc.player.zo).length(),
+                        com.jttw.engine.client.flight.FlightPose.presence(mc.player, 1),
+                        com.jttw.engine.client.flight.FlightPose.underWay(mc.player, 1),
+                        com.jttw.engine.client.flight.FlightPose.cloud(mc.player, 1)));
         next++;
         if (next < shots.size()) {
             startShot(mc);
@@ -209,6 +222,32 @@ public final class FormGallery {
     }
 
     /** The player faces south at this pitch (looking up for the UP view, as a scene asks). Body and head follow. */
+    /**
+     * A live scene's camera: the player's own third-person camera (so his keys still steer him and
+     * his movement still reaches the server), moved once the game has set it up to six blocks off
+     * his right side, level with him, looking at him, as he goes.
+     */
+    @SubscribeEvent
+    public static void onCameraAngles(net.minecraftforge.client.event.ViewportEvent.ComputeCameraAngles event) {
+        if (!AbilityScenes.live) return;
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return;
+        net.minecraft.world.phys.Vec3 at = mc.player.getPosition((float) event.getPartialTick()).add(0, 0.9, 0);
+        double rad = Math.toRadians(AbilityScenes.facing);
+        double rx = -Math.cos(rad), rz = -Math.sin(rad); // his right
+        net.minecraft.world.phys.Vec3 cam = at.add(rx * 3.5, 0.3, rz * 3.5);
+        try {
+            java.lang.reflect.Method setPosition = net.minecraftforge.fml.util.ObfuscationReflectionHelper.findMethod(
+                    net.minecraft.client.Camera.class, "m_90584_", net.minecraft.world.phys.Vec3.class);
+            setPosition.invoke(event.getCamera(), cam);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
+        event.setYaw((float) Math.toDegrees(Math.atan2(rx, -rz)));
+        event.setPitch(0);
+        event.setRoll(0);
+    }
+
     private static void holdPose(Player p, float pitch, boolean still) {
         float yaw = AbilityScenes.facing;
         p.setYRot(yaw); p.yRotO = yaw;
@@ -280,6 +319,10 @@ public final class FormGallery {
                 }
             }
             if (shot.kind() == Kind.SCENE) {
+                if (AbilityScenes.live) { // his own camera, from outside him, moved alongside (onCameraAngles)
+                    mc.execute(() -> mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK));
+                    return;
+                }
                 if (!scene(shot).firstPerson()) {
                     // Three-quarter view: from the south-east, onto the player and the ground in front
                     // (or, close up, onto the player alone)

@@ -57,6 +57,8 @@ final class AbilityScenes {
     static volatile boolean holdUse;
     /** The scene opens the skill tree at its trigger, to be shot. */
     static volatile boolean openSkillTree;
+    /** Played, not posed: forward and sprint held from the trigger, the player moving freely, seen from behind. */
+    static volatile boolean live;
 
     /** Set by a scene of Wukong at his top speed: the gallery keeps his momentum at its height. */
     static volatile boolean topSpeed;
@@ -89,6 +91,11 @@ final class AbilityScenes {
                 // in creative too: Wukong at Flight I stretched out along his flight, and at Flight III on his cloud
                 new Scene("flight_creative_wukong", p -> fly(p, ReincarnationOutcome.CELESTIAL_PRIMATE, 1, false, true), p -> {}, 1, false, 0f),
                 new Scene("flight_creative_cloud", p -> fly(p, ReincarnationOutcome.CELESTIAL_PRIMATE, 1, true, true), p -> {}, 1, false, 0f),
+                // flown as a player flies, in creative: the flight nodes bought as from the tree, forward
+                // held for two seconds, nothing posed (Flight I glides; II flies; III his fastest)
+                new Scene("flight_live_1", p -> liveWukong(p, 1), p -> {}, 40, false, 0f),
+                new Scene("flight_live_2", p -> liveWukong(p, 2), p -> {}, 40, false, 0f),
+                new Scene("flight_live_3", p -> liveWukong(p, 3), p -> {}, 40, false, 0f),
                 new Scene("flight_cloud_hover", p -> fly(p, ReincarnationOutcome.CELESTIAL_PRIMATE, 0), p -> {}, 1, false, 0f),
                 new Scene("flight_cloud_under_way", p -> fly(p, ReincarnationOutcome.CELESTIAL_PRIMATE, 1), p -> {}, 1, false, 0f),
                 new Scene("flight_squall_hover", p -> fly(p, ReincarnationOutcome.EYE_OF_HEAVEN, 0), p -> {}, 1, false, 0f),
@@ -555,6 +562,24 @@ final class AbilityScenes {
     }
 
     /** Wukong, strong enough to hold it, with the Ruyi Jingu Bang Qi-empowered in hand. */
+    /** Wukong in creative, his flight bought to {@code tier} through the skill tree as a player buys it, flying, to be flown live. */
+    private static void liveWukong(ServerPlayer p, int tier) {
+        p.getPersistentData().remove("jttw_skill_nodes");
+        com.jttw.engine.flight.JTTWFlight.setUniversalFlight(p, false);
+        com.jttw.engine.flight.JTTWFlight.setBoost(p, 1, false);
+        AlignmentData.markReincarnated(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
+        LevelManager.initClass(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
+        SkillTreeData.addPoints(p, 50);
+        String[] flight = {com.jttw.engine.character.wukong.WukongSkillTree.FLIGHT_1,
+                com.jttw.engine.character.wukong.WukongSkillTree.FLIGHT_2, com.jttw.engine.character.wukong.WukongSkillTree.FLIGHT_3};
+        for (int i = 0; i < tier; i++) com.jttw.engine.progression.skilltree.SkillPurchase.purchase(p, flight[i]);
+        p.setGameMode(GameType.CREATIVE);
+        p.getAbilities().flying = true;
+        p.onUpdateAbilities();
+        p.teleportTo(p.getX(), p.getY() + 6, p.getZ());
+        live = true;
+    }
+
     private static void plainStaff(ServerPlayer p) {
         AlignmentData.markReincarnated(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
         LevelManager.initClass(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
@@ -736,6 +761,8 @@ final class AbilityScenes {
         closeUp = false;
         holdUse = false;
         openSkillTree = false;
+        live = false;
+        com.jttw.engine.client.flight.FlightPose.posedUnderWay = -1;
         if (NineSpiritsAbilityHandler.inTrueForm(p)) NineSpiritsAbilityHandler.endTrueForm(p);
         if (BullDemonAbilityHandler.inGreatBull(p)) BullDemonAbilityHandler.endGreatBull(p);
         p.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
