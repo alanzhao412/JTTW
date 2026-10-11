@@ -220,7 +220,7 @@ public class PengGameTests {
         for (Zombie z : List.of(front, behind)) {
             eq(h, 1, amp(z, MobEffects.WEAKNESS), "weakened");
             eq(h, 1, amp(z, MobEffects.MOVEMENT_SLOWDOWN), "slowed");
-            check(h, z.hasEffect(MobEffects.GLOWING), "II: glows for him");
+            check(h, com.jttw.engine.world.PrivateGlow.glowsFor(p, z) && !z.hasEffect(MobEffects.GLOWING), "II: glows for him alone");
         }
         check(h, front.getTarget() == null, "II: loses its prey");
         near(h, 10.0, PengAbilityHandler.eclipseRadius(1), "I reach");

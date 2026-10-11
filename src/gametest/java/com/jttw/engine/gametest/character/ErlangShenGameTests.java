@@ -248,7 +248,7 @@ public class ErlangShenGameTests {
         Husk husk = mob(h, EntityType.HUSK, 0, 0);
         XiaotianQuanManager.toggle(p);
         h.succeedWhen(() -> {
-            check(h, husk.hasEffect(MobEffects.GLOWING), "husk tracked");
+            check(h, com.jttw.engine.world.PrivateGlow.glowsFor(p, husk), "husk tracked, for him");
             XiaotianQuanManager.dismiss(p);
         });
     }
@@ -261,7 +261,7 @@ public class ErlangShenGameTests {
         Husk husk = mob(h, EntityType.HUSK, 0, 0);
         XiaotianQuanManager.toggle(p);
         h.runAfterDelay(25, () -> {
-            check(h, !husk.hasEffect(MobEffects.GLOWING), "no tracking below Hound Training II");
+            check(h, !com.jttw.engine.world.PrivateGlow.glowsFor(p, husk), "no tracking below Hound Training II");
             XiaotianQuanManager.dismiss(p);
             h.succeed();
         });

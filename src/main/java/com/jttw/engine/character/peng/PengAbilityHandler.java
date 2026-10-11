@@ -311,7 +311,7 @@ public final class PengAbilityHandler {
             e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, ticks, 1));
             if (e instanceof Player) e.addEffect(new MobEffectInstance(MobEffects.DARKNESS, ticks, 0));
             if (tier >= 2) {
-                e.addEffect(new MobEffectInstance(MobEffects.GLOWING, ticks, 0));
+                com.jttw.engine.world.PrivateGlow.show(p, e, ticks); // they glow for the Peng alone
                 if (e instanceof Mob m) m.setTarget(null);
             }
             count++;

@@ -264,10 +264,11 @@ public class PassiveSkillsGameTests {
         near(h, 10.0, hurt(ErlangShenPassives::onHurt, pig, src, 10f), "first hit only marks");
         check(h, ErlangShenPassives.isMarkedBy(pig, p), "marked");
         near(h, 11.5, hurt(ErlangShenPassives::onHurt, pig, src, 10f), "I: +15% on the marked");
-        check(h, !pig.hasEffect(MobEffects.GLOWING), "no glow at tier 1");
+        check(h, !com.jttw.engine.world.PrivateGlow.glowsFor(p, pig), "no glow at tier 1");
         grant(p, "es_hunt_2");
         near(h, 12.5, hurt(ErlangShenPassives::onHurt, pig, src, 10f), "II: +25%");
-        check(h, pig.hasEffect(MobEffects.GLOWING), "marked targets glow at tier 2");
+        check(h, com.jttw.engine.world.PrivateGlow.glowsFor(p, pig), "marked targets glow at tier 2, for him");
+        check(h, !pig.hasEffect(MobEffects.GLOWING), "for him alone");
         pig.getPersistentData().putLong(ErlangShenPassives.KEY_MARKED_UNTIL, h.getLevel().getGameTime());
         check(h, !ErlangShenPassives.isMarkedBy(pig, p), "the mark wears off");
         h.succeed();

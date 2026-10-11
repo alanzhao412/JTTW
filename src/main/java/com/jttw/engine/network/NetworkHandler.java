@@ -206,6 +206,11 @@ public final class NetworkHandler {
                 .consumerMainThread(com.jttw.engine.network.s2c.SyncFlightPacket::handle)
                 .add();
 
+        CHANNEL.messageBuilder(com.jttw.engine.network.s2c.PrivateGlowPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.jttw.engine.network.s2c.PrivateGlowPacket::encode)
+                .decoder(com.jttw.engine.network.s2c.PrivateGlowPacket::decode)
+                .consumerMainThread(com.jttw.engine.network.s2c.PrivateGlowPacket::handle)
+                .add();
         CHANNEL.messageBuilder(com.jttw.engine.network.s2c.TruffleScentPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.jttw.engine.network.s2c.TruffleScentPacket::encode)
                 .decoder(com.jttw.engine.network.s2c.TruffleScentPacket::decode)

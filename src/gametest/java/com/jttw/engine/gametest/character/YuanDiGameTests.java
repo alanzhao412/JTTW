@@ -197,7 +197,7 @@ public class YuanDiGameTests {
         eq(h, 1, amp(husk, MobEffects.WEAKNESS), "Weakness II");
         eq(h, 200, duration(husk, MobEffects.WEAKNESS), "for 10 s");
         eq(h, p.getStringUUID(), husk.getPersistentData().getString(DOMINATED_BY), "husk dominated");
-        check(h, husk.hasEffect(MobEffects.GLOWING), "dominated mobs glow");
+        check(h, com.jttw.engine.world.PrivateGlow.glowsFor(p, husk), "dominated mobs glow, for him");
         eq(h, "", pig.getPersistentData().getString(DOMINATED_BY), "a pig is not a monster");
         endIfTransformed(p);
         h.succeed();

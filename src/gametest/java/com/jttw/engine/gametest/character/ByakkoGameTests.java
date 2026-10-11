@@ -18,6 +18,7 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.animal.Pig;
@@ -140,6 +141,32 @@ public class ByakkoGameTests {
         near(h, 16.0 * (5.0 / 7.0), of(hits, DamageTypes.PLAYER_ATTACK).get(0).amount(), "impact damage");
         eq(h, 3, amp(golem, MobEffects.MOVEMENT_SLOWDOWN), "stun: Slowness IV");
         check(h, golem.hasEffect(MobEffects.BLINDNESS), "stun: blind");
+        h.succeed();
+    }
+
+    /** The pounce strikes what it passes through, each once, before the landing's blast. */
+    @GameTest(template = PLATFORM, batch = "leapStrikesAlongTheWay")
+    public static void leapStrikesAlongTheWay(GameTestHelper h) {
+        ServerPlayer p = byakko(h);
+        grant(p, "bk_leap_1");
+        attackFour(p);
+        Vec3 start = h.absoluteVec(new Vec3(0.5, 2, 0.5));
+        p.moveTo(start.x, start.y, start.z, 0f, 0f); // facing +z, along the platform
+        p.setOnGround(true);
+        Zombie inTheWay = mob(h, EntityType.ZOMBIE, 0, 3);
+        Zombie offTheLine = mob(h, EntityType.ZOMBIE, 4, 3);
+        List<Hit> hit = watch(inTheWay), missed = watch(offTheLine);
+        ByakkoAbilityHandler.castLeap(p);
+        check(h, p.getDeltaMovement().y > 0.4, "springs up off the ground: " + p.getDeltaMovement());
+        p.setOnGround(false);
+        for (int i = 1; i <= 5; i++) { // carried a block a tick through the zombie
+            p.setPos(start.x, start.y + 0.5, start.z + i);
+            ticks(p, 1);
+        }
+        List<Hit> blows = of(hit, DamageTypes.PLAYER_ATTACK);
+        eq(h, 1, blows.size(), "struck once on the way through, not each tick it overlapped");
+        near(h, (5.0 * LevelPower.of(p) + 2.0) * 0.5, blows.get(0).amount(), "half the landing's damage");
+        eq(h, 0, of(missed, DamageTypes.PLAYER_ATTACK).size(), "what it does not pass through is not struck");
         h.succeed();
     }
 
@@ -328,8 +355,9 @@ public class ByakkoGameTests {
         IronGolem healthy = mob(h, EntityType.IRON_GOLEM, 0, 0);
         wounded.setHealth(wounded.getMaxHealth() * 0.4f);
         ticks(p, 20);
-        check(h, wounded.hasEffect(MobEffects.GLOWING), "below half health: glowing");
-        check(h, !healthy.hasEffect(MobEffects.GLOWING), "healthy prey is not marked");
+        check(h, com.jttw.engine.world.PrivateGlow.glowsFor(p, wounded), "below half health: glowing for him");
+        check(h, !wounded.hasEffect(MobEffects.GLOWING), "for him alone: no glow the world sees");
+        check(h, !com.jttw.engine.world.PrivateGlow.glowsFor(p, healthy), "healthy prey is not marked");
 
         LivingHurtEvent t1 = new LivingHurtEvent(wounded, h.getLevel().damageSources().playerAttack(p), 10f);
         ByakkoAbilityHandler.onLivingHurt(t1);
@@ -339,9 +367,9 @@ public class ByakkoGameTests {
         LivingHurtEvent first = new LivingHurtEvent(wounded, h.getLevel().damageSources().playerAttack(p), 10f);
         ByakkoAbilityHandler.onLivingHurt(first);
         near(h, 20f, first.getAmount(), "tier 2: first hit doubled");
-        check(h, !wounded.hasEffect(MobEffects.GLOWING), "mark consumed");
+        check(h, !com.jttw.engine.world.PrivateGlow.glowsFor(p, wounded), "mark consumed");
         ticks(p, 20);
-        check(h, !wounded.hasEffect(MobEffects.GLOWING), "not re-marked during the 5 s cooldown");
+        check(h, !com.jttw.engine.world.PrivateGlow.glowsFor(p, wounded), "not re-marked during the 5 s cooldown");
         h.succeed();
     }
 

@@ -66,6 +66,6 @@ public final class ErlangShenPassives {
         CompoundTag pd = target.getPersistentData();
         pd.putUUID(KEY_MARKED_BY, hunter.getUUID());
         pd.putLong(KEY_MARKED_UNTIL, target.level().getGameTime() + MARK_TICKS);
-        if (tier >= 2) target.addEffect(new MobEffectInstance(MobEffects.GLOWING, MARK_TICKS, 0, false, false), hunter);
+        if (tier >= 2) com.jttw.engine.world.PrivateGlow.show(hunter, target, MARK_TICKS); // marked for him alone
     }
 }

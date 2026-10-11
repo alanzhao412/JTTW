@@ -82,6 +82,11 @@ public final class ByakkoAbilityHandler {
     private static final Map<UUID, Integer> LEAP_TIER = new HashMap<>();
 
     private static final float LEAP_QI_COST = 10.0f;
+    /** The pounce: its speed along the look, and the spring off the ground (a jump's). */
+    public static final double LEAP_SPEED = 2.0, LEAP_SPRING = 0.42;
+    /** Where each pouncer was last tick, and whom this pounce has struck already. */
+    private static final Map<UUID, Vec3> LEAP_FROM = new HashMap<>();
+    private static final Map<UUID, Set<Integer>> LEAP_STRUCK = new HashMap<>();
     private static final int LEAP_COOLDOWN_TICKS = 60; // 3 seconds
     private static final Map<UUID, Long> LEAP_COOLDOWNS = new HashMap<>();
 
@@ -185,10 +190,14 @@ public final class ByakkoAbilityHandler {
         }
         NetworkHandler.sendToPlayer(player, new SyncQiPacket(QiData.getCurrent(player), QiData.getMax(player)));
 
-        // Launch: toward where the player is looking
+        // Launch: toward where the player is looking, springing off the ground as a jump does, so
+        // a level pounce arcs too (about 14 blocks looking ahead, up to about 19 looking a little up)
         Vec3 look = player.getLookAngle();
-        Vec3 launch = look.normalize().scale(2.0);
+        Vec3 launch = look.normalize().scale(LEAP_SPEED);
+        if (player.onGround()) launch = launch.add(0, LEAP_SPRING, 0);
         player.setDeltaMovement(launch);
+        LEAP_FROM.put(player.getUUID(), player.position());
+        LEAP_STRUCK.put(player.getUUID(), new HashSet<>());
         player.hurtMarked = true; // force velocity sync to client
 
         LEAPING.add(player.getUUID());
@@ -202,28 +211,55 @@ public final class ByakkoAbilityHandler {
     }
 
     // -----------------------------------------------------------------------
+    // Leap: all it passes through
+    // -----------------------------------------------------------------------
+
+    /**
+     * Each tick of the pounce, everything his body sweeps through since the last (his box, from
+     * where he was to where he is, a little wider) is struck once: raked aside, at half the
+     * landing's damage, bleeding if his claws bleed.
+     */
+    private static void strikeAlongTheWay(ServerPlayer player, int tier) {
+        UUID id = player.getUUID();
+        Vec3 from = LEAP_FROM.getOrDefault(id, player.position()), to = player.position();
+        LEAP_FROM.put(id, to);
+        if (to.distanceToSqr(from) < 0.0025) return; // not under way yet: no path to strike along
+        Set<Integer> struck = LEAP_STRUCK.computeIfAbsent(id, k -> new HashSet<>());
+        AABB body = player.getBoundingBox().inflate(0.4);
+        AABB swept = body.move(from.subtract(to)).minmax(body);
+        Vec3 path = to.subtract(from);
+        for (LivingEntity e : player.level().getEntitiesOfClass(LivingEntity.class, swept,
+                e -> e.isAlive() && e != player && !struck.contains(e.getId()))) {
+            // the swept box is wide on a diagonal: only those near the line he travelled
+            if (e.getBoundingBox().inflate(0.7).clip(from.add(0, 0.9, 0), to.add(0, 0.9, 0)).isEmpty()
+                    && !e.getBoundingBox().intersects(body)) continue;
+            struck.add(e.getId());
+            e.hurt(player.damageSources().playerAttack(player), leapDamage(player, tier) * 0.5f);
+            // raked aside, off his line
+            Vec3 aside = path.lengthSqr() > 1e-6 ? new Vec3(-path.z, 0, path.x).normalize() : Vec3.ZERO;
+            if (aside.dot(e.position().subtract(to)) < 0) aside = aside.scale(-1);
+            e.setDeltaMovement(e.getDeltaMovement().add(aside.x * 0.6, 0.25, aside.z * 0.6));
+            e.hurtMarked = true;
+            int bleed = ByakkoSkillTree.TREE.highestTier(SkillTreeData.getUnlockedNodes(player), "bk_bleed");
+            if (bleed >= 1) applyBleed(player, e, bleed);
+        }
+    }
+
+    /** The landing's full damage, at the heart of it. */
+    private static float leapDamage(ServerPlayer player, int tier) {
+        float baseDmg = switch (tier) { case 2 -> 8.0f; case 3 -> 12.0f; default -> 5.0f; };
+        float strScale = switch (tier) { case 2 -> 0.75f; case 3 -> 1.0f; default -> 0.5f; };
+        // The fixed base is a level-1 number and grows with level power; the STR share already does
+        return (float) (LevelPower.scaled(player, baseDmg) + player.getAttributeValue(Attributes.ATTACK_DAMAGE) * strScale);
+    }
+
+    // -----------------------------------------------------------------------
     // Leap landing explosion
     // -----------------------------------------------------------------------
 
     private static void doLeapExplosion(ServerPlayer player, int tier) {
-        double attackDamage = player.getAttributeValue(Attributes.ATTACK_DAMAGE);
-
-        float baseDmg;
-        double radius;
-        switch (tier) {
-            case 2 -> { baseDmg = 8.0f; radius = 5.0; }
-            case 3 -> { baseDmg = 12.0f; radius = 7.0; }
-            default -> { baseDmg = 5.0f; radius = 3.0; }
-        }
-
-        float strScale = switch (tier) {
-            case 2 -> 0.75f;
-            case 3 -> 1.0f;
-            default -> 0.5f;
-        };
-
-        // The fixed base is a level-1 number and grows with level power; the STR share already does
-        float totalDamage = (float) (LevelPower.scaled(player, baseDmg) + attackDamage * strScale);
+        double radius = switch (tier) { case 2 -> 5.0; case 3 -> 7.0; default -> 3.0; };
+        float totalDamage = leapDamage(player, tier);
 
         // Damage entities in radius (no terrain destruction)
         AABB box = new AABB(player.position(), player.position()).inflate(radius);
@@ -309,6 +345,7 @@ public final class ByakkoAbilityHandler {
 
         // --- Leap landing detection ---
         if (LEAPING.contains(uuid)) {
+            strikeAlongTheWay(sp, LEAP_TIER.getOrDefault(uuid, 1));
             if (!sp.onGround()) {
                 AIRBORNE.add(uuid);
             } else if (AIRBORNE.contains(uuid)) {
@@ -318,6 +355,8 @@ public final class ByakkoAbilityHandler {
                 LEAPING.remove(uuid);
                 AIRBORNE.remove(uuid);
                 LEAP_TIER.remove(uuid);
+                LEAP_FROM.remove(uuid);
+                LEAP_STRUCK.remove(uuid);
             }
         }
 
@@ -465,21 +504,23 @@ public final class ByakkoAbilityHandler {
                 LivingEntity.class, scanBox,
                 e -> e.isAlive() && e != player && !(e instanceof ServerPlayer));
 
+        // The wounded (under half their health, whoever or whatever wounded them) glow for him
+        // alone, 1.5 s, renewed each second while they stay wounded and near
+        List<LivingEntity> wounded = new ArrayList<>();
         for (LivingEntity mob : nearby) {
-            // Skip entities on T2 hit cooldown
-            if (cooldownMap.containsKey(mob.getId())) continue;
-
-            float healthPct = mob.getHealth() / mob.getMaxHealth();
-            if (healthPct < 0.5f) {
-                // Apply Glowing for 30 ticks (1.5s) — refreshed every 20 ticks
-                mob.addEffect(new MobEffectInstance(MobEffects.GLOWING, 30, 0, false, false));
-            }
+            if (!cooldownMap.containsKey(mob.getId()) && wounded(mob)) wounded.add(mob);
         }
+        com.jttw.engine.world.PrivateGlow.show(player, wounded, 30);
     }
 
     // -----------------------------------------------------------------------
     // Predator's Instinct — T2 bonus damage on glowing targets
     // -----------------------------------------------------------------------
+
+    /** Wounded, to his nose: under half its health. */
+    public static boolean wounded(LivingEntity e) {
+        return e.getHealth() < e.getMaxHealth() * 0.5f;
+    }
 
     private static void handleInstinctBonusDamage(ServerPlayer attacker, LivingEntity target,
                                                    LivingHurtEvent event) {
@@ -487,8 +528,8 @@ public final class ByakkoAbilityHandler {
         int instinctTier = ByakkoSkillTree.TREE.highestTier(nodes, "bk_instinct");
         if (instinctTier < 2) return;
 
-        // Only proc if target currently has Glowing effect
-        if (!target.hasEffect(MobEffects.GLOWING)) return;
+        // Only on the wounded he can smell (within 20 blocks)
+        if (!wounded(target) || target.distanceTo(attacker) > 20) return;
 
         // Check per-target cooldown (prevents repeated 2x hits)
         Map<Integer, Long> cooldownMap = INSTINCT_COOLDOWNS.get(attacker.getUUID());
@@ -497,8 +538,8 @@ public final class ByakkoAbilityHandler {
         // Apply 2x damage
         event.setAmount(event.getAmount() * 2.0f);
 
-        // Remove Glowing and put this entity on 5-second cooldown
-        target.removeEffect(MobEffects.GLOWING);
+        // This one is on a 5-second cooldown, and stops glowing for him meanwhile
+        com.jttw.engine.world.PrivateGlow.hide(attacker, target);
         long now = attacker.level().getGameTime();
         INSTINCT_COOLDOWNS.computeIfAbsent(attacker.getUUID(), k -> new HashMap<>())
                 .put(target.getId(), now + 100L); // 5 seconds = 100 ticks

@@ -217,6 +217,20 @@ final class AbilityScenes {
                     plantAt(p, 0, 2, 4f);
                     facing = -14f; // onto it: it stands half a block east of straight ahead
                 }, p -> {}, 1, true, -25f),
+                // Byakko smells the wounded: the husk on the left at half health glows (for him alone)
+                // through the wall; the healthy one on the right does not
+                new Scene("byakko_instinct", p -> {
+                    p.getPersistentData().remove("jttw_skill_nodes");
+                    AlignmentData.markReincarnated(p, ReincarnationOutcome.WHITE_TIGER);
+                    LevelManager.initClass(p, ReincarnationOutcome.WHITE_TIGER);
+                    SkillTreeData.grantNode(p, "bk_instinct_1");
+                    foe(p, 2, 7);
+                    foe(p, -2, 7);
+                    p.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.monster.Husk.class, p.getBoundingBox().inflate(12))
+                            .stream().filter(z -> z.getX() > p.getX()).forEach(z -> z.setHealth(z.getMaxHealth() * 0.4f));
+                    for (int dx = -4; dx <= 4; dx++) for (int dy = 0; dy < 4; dy++)
+                        p.level().setBlockAndUpdate(p.blockPosition().offset(dx, dy, 5), Blocks.STONE.defaultBlockState());
+                }, p -> {}, 1, true),
                 // a Qi Wave half charged: the meter above the crosshair
                 new Scene("charge_meter", p -> {
                     empoweredStaff(p);

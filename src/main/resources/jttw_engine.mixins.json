@@ -29,6 +29,7 @@
     "HumanoidModelMixin",
     "ItemRendererMixin",
     "LocalPlayerMixin",
+    "MinecraftMixin",
     "PlayerRendererMixin",
     "RenderBuffersMixin"
   ],

@@ -186,7 +186,7 @@ public final class XiaotianQuanManager {
             // Tracking: Tier 2+ applies Glowing to nearest hostile every 20 ticks
             int growthTier = SkillTreeData.getXtqGrowthTier(player);
             if (growthTier >= 2 && server.getTickCount() % 20 == 0) {
-                applyTracking(xtq);
+                applyTracking(xtq, player);
             }
 
             // Its health and attack keep pace with its owner's level
@@ -309,8 +309,8 @@ public final class XiaotianQuanManager {
         if (armor != null) armor.setBaseValue(stats[3]);
     }
 
-    /** Apply Glowing to the nearest hostile mob within tracking range. */
-    private static void applyTracking(XiaotianQuanEntity xtq) {
+    /** The nearest hostile mob within tracking range glows, for its owner alone. */
+    private static void applyTracking(XiaotianQuanEntity xtq, ServerPlayer owner) {
         AABB box = xtq.getBoundingBox().inflate(TRACKING_RANGE);
         List<LivingEntity> nearby = xtq.level().getEntitiesOfClass(LivingEntity.class, box,
                 e -> e instanceof Enemy && e.isAlive() && e != xtq);
@@ -326,7 +326,7 @@ public final class XiaotianQuanManager {
         }
 
         if (closest != null) {
-            closest.addEffect(new MobEffectInstance(MobEffects.GLOWING, 40, 0, false, false));
+            com.jttw.engine.world.PrivateGlow.show(owner, closest, 40);
         }
     }
 

@@ -387,9 +387,8 @@ public final class YuanDiAbilityHandler {
                     data.putString(TAG_DOMINATED_BY, player.getStringUUID());
                     data.putInt(TAG_DOMINATE_TICKS, dominateTicks);
                     mob.setTarget(null);
-                    // Glowing so player can track dominated mobs
-                    target.addEffect(new MobEffectInstance(MobEffects.GLOWING,
-                            effectDuration, 0, false, false));
+                    // they glow for him alone, so he can track those he dominates
+                    com.jttw.engine.world.PrivateGlow.show(player, target, effectDuration);
                 }
             }
 
