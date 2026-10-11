@@ -42,20 +42,40 @@ class CharactersTest {
                 Characters.resolve("saurian_demon_king", ProgressionClass.YAOGUAI, null));
     }
 
-    /** Holding Shift shows a second page of four: the Saurian's 18 Transformations; nobody else has one yet. */
+    /**
+     * Holding Shift shows a second page of four: the 18 Transformations, for those whose first four
+     * keys are full (the Saurian, the World Turtle); nobody else has one.
+     */
     @Test
-    void theShiftPageHoldsTheSauriansTransformations() {
+    void theShiftPageHoldsTheEighteenTransformations() {
         var saurian = com.jttw.engine.character.saurian.SaurianCharacter.INSTANCE;
         assertTrue(saurian.shiftBar(java.util.Set.of()).stream().allMatch(AbilitySlot::isEmpty), "nothing until learned");
         var page = saurian.shiftBar(java.util.Set.of("sdk_transform_1", "sdk_transform_2"));
         assertEquals(PlayableCharacter.SLOT_COUNT, page.size());
         assertEquals("sdk_transform", page.get(0).id());
         assertEquals(2, page.get(0).tier());
-        assertEquals(com.jttw.engine.transformation.TransformationSchool.EIGHTEEN, saurian.transformationSchool());
+        assertEquals("tu_transform", TurtleCharacter.INSTANCE.shiftBar(java.util.Set.of("tu_transform_1")).get(0).id());
         for (PlayableCharacter c : Characters.all()) {
-            if (c == saurian) continue;
+            if (c == saurian || c == TurtleCharacter.INSTANCE) continue;
             assertTrue(c.shiftBar(new java.util.HashSet<>(c.skillTree().nodes().keySet())).stream().allMatch(AbilitySlot::isEmpty), c.outcomeId());
         }
+    }
+
+    /** Every divine beast practises the 18 Transformations: its level by its tier, its menu on a key. */
+    @TestFactory
+    Stream<DynamicTest> everyDivineBeastHasTheEighteen() {
+        return Stream.of(ByakkoCharacter.INSTANCE, PhoenixCharacter.INSTANCE, DragonCharacter.INSTANCE, TurtleCharacter.INSTANCE)
+                .map(c -> DynamicTest.dynamicTest(c.outcomeId(), () -> {
+                    String p = c.skillTree().idPrefix() + "transform";
+                    assertEquals(com.jttw.engine.transformation.TransformationSchool.EIGHTEEN, c.transformationSchool());
+                    assertEquals(0, c.transformationLevel(Set.of()));
+                    Set<String> all = Set.of(p + "_1", p + "_2", p + "_3");
+                    assertEquals(3, c.transformationLevel(all));
+                    var keys = Stream.concat(c.skillBar(all).stream(), c.shiftBar(all).stream()).toList();
+                    assertTrue(keys.stream().anyMatch(s -> s.id().equals(p)), "its menu is on a key");
+                    assertTrue(Stream.concat(c.skillBar(Set.of()).stream(), c.shiftBar(Set.of()).stream())
+                            .noneMatch(s -> s.id().equals(p)), "not before it is learned");
+                }));
     }
 
     @Test

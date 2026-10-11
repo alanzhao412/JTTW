@@ -25,7 +25,7 @@ public final class DragonCharacter implements PlayableCharacter {
 
     @Override
     public List<String> treeColumns() {
-        return List.of("Lightning", "Weather", "Flight", "Pressure", "Regen", "Wave", "Scales", "Force");
+        return List.of("Lightning", "Weather", "Flight", "Pressure", "Regen", "Wave", "Scales", "Force", "Transform");
     }
 
     @Override
@@ -42,7 +42,8 @@ public final class DragonCharacter implements PlayableCharacter {
         return PlayableCharacter.bar(
                 AbilitySlot.fromBranch(tree, unlocked, "dr_lightning", "Lightning Strike", AbilityType.TOGGLE),
                 AbilitySlot.fromBranch(tree, unlocked, "dr_weather", "Weather Control", AbilityType.TOGGLE),
-                slot2);
+                slot2,
+                AbilitySlot.fromBranch(tree, unlocked, "dr_transform", "18 Transformations", AbilityType.MENU));
     }
 
     @Override
@@ -57,5 +58,14 @@ public final class DragonCharacter implements PlayableCharacter {
             }
             default -> {}
         }
+    }
+
+    @Override public com.jttw.engine.transformation.TransformationSchool transformationSchool() {
+        return com.jttw.engine.transformation.TransformationSchool.EIGHTEEN;
+    }
+
+    @Override
+    public int transformationLevel(Set<String> unlocked) {
+        return skillTree().highestTier(unlocked, "dr_transform");
     }
 }

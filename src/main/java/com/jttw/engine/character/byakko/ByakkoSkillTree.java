@@ -56,6 +56,8 @@ public final class ByakkoSkillTree {
     // Registry
     // -----------------------------------------------------------------------
 
+    public static final String TRANSFORM_1 = "bk_transform_1", TRANSFORM_2 = "bk_transform_2", TRANSFORM_3 = "bk_transform_3";
+
     public static final SkillTree TREE = new SkillTree("bk_");
 
     static {
@@ -139,6 +141,23 @@ public final class ByakkoSkillTree {
                 ROAR_2, "Territorial Roar II",
                 new String[]{ "Roar strips buffs from", "enemies. Grants +20%", "speed for 5 seconds." },
                 3, 5, 1, List.of(ROAR_1), AbilityType.TOGGLE, 2, "Territorial Roar"
+        ));
+
+        // ── 18 TRANSFORMATIONS (col 6, MENU) ───────────────────────
+        TREE.add(new SkillNode(
+                TRANSFORM_1, "18 Transformations I",
+                new String[]{ "Press N: the 18", "Transformations. Neutral", "land forms." },
+                3, 6, 0, List.of(), AbilityType.MENU, 1, "18 Transformations"
+        ));
+        TREE.add(new SkillNode(
+                TRANSFORM_2, "18 Transformations II",
+                new String[]{ "Adds neutral", "water forms.", "" },
+                4, 6, 1, List.of(TRANSFORM_1), AbilityType.MENU, 2, "18 Transformations"
+        ));
+        TREE.add(new SkillNode(
+                TRANSFORM_3, "18 Transformations III",
+                new String[]{ "Adds neutral", "flying forms.", "" },
+                5, 6, 2, List.of(TRANSFORM_2), AbilityType.MENU, 3, "18 Transformations"
         ));
     }
 }

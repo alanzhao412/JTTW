@@ -57,6 +57,8 @@ public final class PhoenixSkillTree {
     // Registry
     // -----------------------------------------------------------------------
 
+    public static final String TRANSFORM_1 = "ph_transform_1", TRANSFORM_2 = "ph_transform_2", TRANSFORM_3 = "ph_transform_3";
+
     public static final SkillTree TREE = new SkillTree("ph_");
 
     static {
@@ -145,6 +147,23 @@ public final class PhoenixSkillTree {
                 TALONS_3, "Molten Talons III",
                 new String[]{ "Killing a burning enemy", "causes them to explode,", "spreading fire to nearby." },
                 4, 5, 2, List.of(TALONS_2), AbilityType.PASSIVE, 3, "Molten Talons"
+        ));
+
+        // ── 18 TRANSFORMATIONS (col 6, MENU) ───────────────────────
+        TREE.add(new SkillNode(
+                TRANSFORM_1, "18 Transformations I",
+                new String[]{ "Press N: the 18", "Transformations. Neutral", "land forms." },
+                3, 6, 0, List.of(), AbilityType.MENU, 1, "18 Transformations"
+        ));
+        TREE.add(new SkillNode(
+                TRANSFORM_2, "18 Transformations II",
+                new String[]{ "Adds neutral", "water forms.", "" },
+                4, 6, 1, List.of(TRANSFORM_1), AbilityType.MENU, 2, "18 Transformations"
+        ));
+        TREE.add(new SkillNode(
+                TRANSFORM_3, "18 Transformations III",
+                new String[]{ "Adds neutral", "flying forms.", "" },
+                5, 6, 2, List.of(TRANSFORM_2), AbilityType.MENU, 3, "18 Transformations"
         ));
     }
 }

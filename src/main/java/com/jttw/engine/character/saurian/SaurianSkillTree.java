@@ -77,8 +77,8 @@ public final class SaurianSkillTree {
                         {"Up to 7 stacks, stronger", "still.", ""}});
         branch(new String[]{TRANSFORM_1, TRANSFORM_2, TRANSFORM_3}, "18 Transformations", "18 Transformations", 7, AbilityType.MENU, new int[]{3, 4, 5},
                 new String[][]{
-                        {"Shift + V: the 18", "Transformations. Neutral", "land and water forms."},
-                        {"Adds neutral", "flying forms.", ""},
-                        {"Adds hostile", "forms.", ""}});
+                        {"Shift + V: the 18", "Transformations. Neutral", "land forms."},
+                        {"Adds neutral", "water forms.", ""},
+                        {"Adds neutral", "flying forms.", ""}});
     }
 }

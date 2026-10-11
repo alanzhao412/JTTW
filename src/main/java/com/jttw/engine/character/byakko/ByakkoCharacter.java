@@ -21,14 +21,15 @@ public final class ByakkoCharacter implements PlayableCharacter {
     @Override public String outcomeId() { return ReincarnationOutcome.WHITE_TIGER.id; }
     @Override public SkillTree skillTree() { return ByakkoSkillTree.TREE; }
     @Override public String treeTitle() { return "BYAKKO"; }
-    @Override public List<String> treeColumns() { return List.of("Leap", "Scent", "Bleed", "Velocity", "Instinct", "Roar"); }
+    @Override public List<String> treeColumns() { return List.of("Leap", "Scent", "Bleed", "Velocity", "Instinct", "Roar", "Transform"); }
 
     @Override
     public List<AbilitySlot> skillBar(Set<String> unlocked) {
         SkillTree tree = skillTree();
         return PlayableCharacter.bar(
                 AbilitySlot.fromBranch(tree, unlocked, "bk_leap", "Predator's Leap", AbilityType.TOGGLE),
-                AbilitySlot.fromBranch(tree, unlocked, "bk_roar", "Territorial Roar", AbilityType.TOGGLE));
+                AbilitySlot.fromBranch(tree, unlocked, "bk_roar", "Territorial Roar", AbilityType.TOGGLE),
+                AbilitySlot.fromBranch(tree, unlocked, "bk_transform", "18 Transformations", AbilityType.MENU));
     }
 
     @Override
@@ -39,5 +40,14 @@ public final class ByakkoCharacter implements PlayableCharacter {
             case 1 -> ByakkoAbilityHandler.castRoar(player);
             default -> {}
         }
+    }
+
+    @Override public com.jttw.engine.transformation.TransformationSchool transformationSchool() {
+        return com.jttw.engine.transformation.TransformationSchool.EIGHTEEN;
+    }
+
+    @Override
+    public int transformationLevel(Set<String> unlocked) {
+        return skillTree().highestTier(unlocked, "bk_transform");
     }
 }

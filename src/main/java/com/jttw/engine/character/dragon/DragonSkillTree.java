@@ -60,6 +60,8 @@ public final class DragonSkillTree {
     // Registry
     // -----------------------------------------------------------------------
 
+    public static final String TRANSFORM_1 = "dr_transform_1", TRANSFORM_2 = "dr_transform_2", TRANSFORM_3 = "dr_transform_3";
+
     public static final SkillTree TREE = new SkillTree("dr_");
 
     static {
@@ -177,6 +179,23 @@ public final class DragonSkillTree {
                 FORCE_2, "Tidal Force II",
                 new String[]{ "5x knockback. Mobs that", "hit a wall take bonus", "impact damage." },
                 3, 7, 1, List.of(FORCE_1), AbilityType.PASSIVE, 2, "Tidal Force"
+        ));
+
+        // ── 18 TRANSFORMATIONS (col 8, MENU) ───────────────────────
+        TREE.add(new SkillNode(
+                TRANSFORM_1, "18 Transformations I",
+                new String[]{ "Press M: the 18", "Transformations. Neutral", "land forms." },
+                3, 8, 0, List.of(), AbilityType.MENU, 1, "18 Transformations"
+        ));
+        TREE.add(new SkillNode(
+                TRANSFORM_2, "18 Transformations II",
+                new String[]{ "Adds neutral", "water forms.", "" },
+                4, 8, 1, List.of(TRANSFORM_1), AbilityType.MENU, 2, "18 Transformations"
+        ));
+        TREE.add(new SkillNode(
+                TRANSFORM_3, "18 Transformations III",
+                new String[]{ "Adds neutral", "flying forms.", "" },
+                5, 8, 2, List.of(TRANSFORM_2), AbilityType.MENU, 3, "18 Transformations"
         ));
     }
 }

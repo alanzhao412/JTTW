@@ -53,14 +53,19 @@ class CharacterSkillBarTest {
     /**
      * Kits built after the old builder, which have no legacy bar to match: the Marshal's changed
      * on purpose (36 Transformations became a skill branch, then gained abilities), the Peng's
-     * was empty, and the Grand Saint, the Bull Demon King and the Saurian Demon King had no character.
+     * was empty, the Grand Saint, the Bull Demon King and the Saurian Demon King had no character, and
+     * the divine beasts took up the 18 Transformations (Byakko, the Phoenix and the Dragon on a key
+     * of their bar; the Turtle on its Shift page, its bar unchanged).
      */
     private static final Set<PlayableCharacter> NEWER_THAN_THE_OLD_BUILDER = Set.of(
             MarshalCharacter.INSTANCE,
             com.jttw.engine.character.ninespirits.NineSpiritsCharacter.INSTANCE,
             com.jttw.engine.character.peng.PengCharacter.INSTANCE,
             com.jttw.engine.character.bulldemon.BullDemonCharacter.INSTANCE,
-            com.jttw.engine.character.saurian.SaurianCharacter.INSTANCE);
+            com.jttw.engine.character.saurian.SaurianCharacter.INSTANCE,
+            com.jttw.engine.character.byakko.ByakkoCharacter.INSTANCE,
+            com.jttw.engine.character.phoenix.PhoenixCharacter.INSTANCE,
+            com.jttw.engine.character.dragon.DragonCharacter.INSTANCE);
 
     @TestFactory
     Stream<DynamicTest> barMatchesTheOldBuilder() {
@@ -129,7 +134,10 @@ class CharacterSkillBarTest {
         assertEquals(TransformationSchool.THIRTY_SIX, Characters.byOutcome("marshal_of_the_heavenly_canopy").transformationSchool());
         assertEquals(TransformationSchool.SEVENTY_TWO, Characters.byOutcome("bull_demon_king").transformationSchool());
         assertEquals(2, Characters.byOutcome("bull_demon_king").transformationLevel(Set.of("bdk_transform_1", "bdk_transform_2")));
-        for (String other : List.of("yuan_di", "gold_winged_peng", "third_lotus_prince", "dragon", "phoenix", "white_tiger", "turtle")) {
+        for (String beast : List.of("dragon", "phoenix", "white_tiger", "turtle")) {
+            assertEquals(TransformationSchool.EIGHTEEN, Characters.byOutcome(beast).transformationSchool(), beast);
+        }
+        for (String other : List.of("yuan_di", "gold_winged_peng", "third_lotus_prince")) {
             assertNull(Characters.byOutcome(other).transformationSchool(), other);
         }
         assertEquals(3, Characters.byOutcome("celestial_primate").transformationLevel(Set.of("wu_transform_1", "wu_transform_2", "wu_transform_3")));

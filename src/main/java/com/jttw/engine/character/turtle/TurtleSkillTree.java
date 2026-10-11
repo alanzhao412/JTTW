@@ -56,6 +56,8 @@ public final class TurtleSkillTree {
     // Registry
     // -----------------------------------------------------------------------
 
+    public static final String TRANSFORM_1 = "tu_transform_1", TRANSFORM_2 = "tu_transform_2", TRANSFORM_3 = "tu_transform_3";
+
     public static final SkillTree TREE = new SkillTree("tu_");
 
     static {
@@ -156,6 +158,23 @@ public final class TurtleSkillTree {
                 PATIENCE_2, "Mountain's Patience II",
                 new String[]{ "At max stacks, next hit is", "a guaranteed crit and", "stuns for 2 seconds." },
                 3, 6, 1, List.of(PATIENCE_1), AbilityType.PASSIVE, 2, "Mountain's Patience"
+        ));
+
+        // ── 18 TRANSFORMATIONS (col 7, MENU) ───────────────────────
+        TREE.add(new SkillNode(
+                TRANSFORM_1, "18 Transformations I",
+                new String[]{ "Shift + V: the 18", "Transformations. Neutral", "land forms." },
+                3, 7, 0, List.of(), AbilityType.MENU, 1, "18 Transformations"
+        ));
+        TREE.add(new SkillNode(
+                TRANSFORM_2, "18 Transformations II",
+                new String[]{ "Adds neutral", "water forms.", "" },
+                4, 7, 1, List.of(TRANSFORM_1), AbilityType.MENU, 2, "18 Transformations"
+        ));
+        TREE.add(new SkillNode(
+                TRANSFORM_3, "18 Transformations III",
+                new String[]{ "Adds neutral", "flying forms.", "" },
+                5, 7, 2, List.of(TRANSFORM_2), AbilityType.MENU, 3, "18 Transformations"
         ));
     }
 }

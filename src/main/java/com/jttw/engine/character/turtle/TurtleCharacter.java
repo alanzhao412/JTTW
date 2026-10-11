@@ -24,7 +24,7 @@ public final class TurtleCharacter implements PlayableCharacter {
 
     @Override
     public List<String> treeColumns() {
-        return List.of("Shell Guard", "Roots", "Bedrock", "Force", "Tectonic", "Gravity", "Patience");
+        return List.of("Shell Guard", "Roots", "Bedrock", "Force", "Tectonic", "Gravity", "Patience", "Transform");
     }
 
     @Override
@@ -55,5 +55,22 @@ public final class TurtleCharacter implements PlayableCharacter {
             }
             default -> {}
         }
+    }
+
+    @Override public com.jttw.engine.transformation.TransformationSchool transformationSchool() {
+        return com.jttw.engine.transformation.TransformationSchool.EIGHTEEN;
+    }
+
+    @Override
+    public int transformationLevel(Set<String> unlocked) {
+        return skillTree().highestTier(unlocked, "tu_transform");
+    }
+
+    /** Shift + V: the 18 Transformations (a menu, opened client-side). */
+    @Override
+    public List<AbilitySlot> shiftBar(Set<String> unlocked) {
+        return PlayableCharacter.bar(
+                AbilitySlot.fromBranch(skillTree(), unlocked, "tu_transform", "18 Transformations", AbilityType.MENU),
+                AbilitySlot.EMPTY, AbilitySlot.EMPTY, AbilitySlot.EMPTY);
     }
 }
