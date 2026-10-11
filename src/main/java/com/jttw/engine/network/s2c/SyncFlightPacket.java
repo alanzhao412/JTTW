@@ -25,6 +25,7 @@ public class SyncFlightPacket {
         buf.writeBoolean(pkt.profile.glide());
         buf.writeFloat((float) pkt.profile.boost());
         buf.writeBoolean(pkt.profile.thrust());
+        buf.writeBoolean(pkt.profile.own());
     }
 
     public static SyncFlightPacket decode(FriendlyByteBuf buf) {
@@ -32,11 +33,12 @@ public class SyncFlightPacket {
         boolean glide = buf.readBoolean();
         float boost = buf.readFloat();
         boolean thrust = buf.readBoolean();
+        boolean own = buf.readBoolean();
         return new SyncFlightPacket(new FlightProfile(
                 Float.isFinite(speed) ? Math.max(0.1, Math.min(5.0, speed)) : FlightProfile.DEFAULT.speed(),
                 glide,
                 Float.isFinite(boost) ? Math.min(5.0, boost) : 1.0,
-                thrust));
+                thrust, own));
     }
 
     public static void handle(SyncFlightPacket pkt, Supplier<NetworkEvent.Context> ctx) {
@@ -47,5 +49,6 @@ public class SyncFlightPacket {
     @OnlyIn(Dist.CLIENT)
     private static void handleClient(SyncFlightPacket pkt) {
         com.jttw.engine.client.ClientFlightHandler.setProfile(pkt.profile);
+        com.jttw.engine.flight.FlyingState.localOwnFlight = pkt.profile.own();
     }
 }

@@ -71,11 +71,26 @@ public class FlightLookGameTests {
     public static void nobodyElseRidesACloud(GameTestHelper h) {
         ServerPlayer peng = flying(h, ReincarnationOutcome.GOLD_WINGED_PENG, PengSkillTree.SOAR_1);
         eq(h, FlyingState.FLYING, FlyingState.mode(peng), "the Peng, at his fastest, on his own wings");
-        ServerPlayer creative = flying(h, ReincarnationOutcome.CELESTIAL_PRIMATE, WukongSkillTree.FLIGHT_3);
-        momentum(creative, 1);
-        creative.setGameMode(GameType.CREATIVE);
-        creative.getAbilities().flying = true;
-        eq(h, FlyingState.GROUNDED, FlyingState.mode(creative), "creative flight is vanilla's");
+        h.succeed();
+    }
+
+    /**
+     * In creative, one who flies by their own power flies (and is drawn) their own way: Wukong
+     * stretched out, and on his cloud at his top speed. Creative's flight alone is vanilla's.
+     */
+    @GameTest(template = PLATFORM)
+    public static void inCreativeACharactersOwnFlightIsStillTheirs(GameTestHelper h) {
+        ServerPlayer wukong = flying(h, ReincarnationOutcome.CELESTIAL_PRIMATE, WukongSkillTree.FLIGHT_1, WukongSkillTree.FLIGHT_2, WukongSkillTree.FLIGHT_3);
+        JTTWFlight.setUniversalFlight(wukong, true);
+        wukong.setGameMode(GameType.CREATIVE);
+        wukong.getAbilities().flying = true;
+        eq(h, FlyingState.FLYING, FlyingState.mode(wukong), "his own flight, in creative: stretched out along it");
+        momentum(wukong, 1);
+        eq(h, FlyingState.ON_CLOUD, FlyingState.mode(wukong), "and at his top speed, on his cloud");
+        ServerPlayer plain = as(h, ReincarnationOutcome.BULL_DEMON_KING); // no flight of his own
+        plain.setGameMode(GameType.CREATIVE);
+        plain.getAbilities().flying = true;
+        eq(h, FlyingState.GROUNDED, FlyingState.mode(plain), "creative's flight alone is vanilla's");
         h.succeed();
     }
 }

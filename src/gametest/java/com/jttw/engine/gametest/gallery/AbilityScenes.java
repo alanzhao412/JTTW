@@ -86,6 +86,9 @@ final class AbilityScenes {
                 new Scene("flight_hover", p -> fly(p, ReincarnationOutcome.THIRD_LOTUS_PRINCE, 0), p -> {}, 1, false, 0f),
                 new Scene("flight_under_way", p -> fly(p, ReincarnationOutcome.THIRD_LOTUS_PRINCE, 1), p -> {}, 1, false, 0f),
                 new Scene("flight_climbing", p -> fly(p, ReincarnationOutcome.THIRD_LOTUS_PRINCE, 1), p -> {}, 1, false, -45f),
+                // in creative too: Wukong at Flight I stretched out along his flight, and at Flight III on his cloud
+                new Scene("flight_creative_wukong", p -> fly(p, ReincarnationOutcome.CELESTIAL_PRIMATE, 1, false, true), p -> {}, 1, false, 0f),
+                new Scene("flight_creative_cloud", p -> fly(p, ReincarnationOutcome.CELESTIAL_PRIMATE, 1, true, true), p -> {}, 1, false, 0f),
                 new Scene("flight_cloud_hover", p -> fly(p, ReincarnationOutcome.CELESTIAL_PRIMATE, 0), p -> {}, 1, false, 0f),
                 new Scene("flight_cloud_under_way", p -> fly(p, ReincarnationOutcome.CELESTIAL_PRIMATE, 1), p -> {}, 1, false, 0f),
                 new Scene("flight_squall_hover", p -> fly(p, ReincarnationOutcome.EYE_OF_HEAVEN, 0), p -> {}, 1, false, 0f),
@@ -702,8 +705,12 @@ final class AbilityScenes {
      * hovering (0) or under way (1).
      */
     private static void fly(ServerPlayer p, ReincarnationOutcome who, float underWay) {
+        fly(p, who, underWay, who == ReincarnationOutcome.CELESTIAL_PRIMATE, false);
+    }
+
+    /** As {@link #fly(ServerPlayer, ReincarnationOutcome, float)}, with or without his cloud, in creative or survival. */
+    private static void fly(ServerPlayer p, ReincarnationOutcome who, float underWay, boolean cloud, boolean creative) {
         p.getPersistentData().remove("jttw_skill_nodes"); // an earlier scene's nodes
-        boolean cloud = who == ReincarnationOutcome.CELESTIAL_PRIMATE;
         AlignmentData.markReincarnated(p, who);
         LevelManager.initClass(p, who);
         if (cloud) { // at his top speed: his somersault momentum at its height
@@ -712,7 +719,8 @@ final class AbilityScenes {
             topSpeed = true; // held there: standing still for the picture would lose it
         }
         com.jttw.engine.client.flight.FlightPose.posedUnderWay = underWay;
-        p.setGameMode(GameType.SURVIVAL);
+        if (!cloud) com.jttw.engine.flight.JTTWFlight.setFlightSpeedTier(p, 1);
+        p.setGameMode(creative ? GameType.CREATIVE : GameType.SURVIVAL);
         com.jttw.engine.flight.JTTWFlight.setUniversalFlight(p, true);
         p.getAbilities().mayfly = true;
         p.getAbilities().flying = true;

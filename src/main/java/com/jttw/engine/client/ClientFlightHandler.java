@@ -41,8 +41,9 @@ public final class ClientFlightHandler {
         LocalPlayer p = mc.player;
         if (p == null) return;
         Vec3 pos = p.position();
-        if (p.isCreative() || p.isSpectator()) {
-            // Vanilla flies these; none of this mod's momentum outlives them
+        if (p.isSpectator() || (p.isCreative() && !profile.own())) {
+            // Vanilla flies these (creative, unless they fly by their own power too); none of this
+            // mod's momentum outlives them
             flightVector = Vec3.ZERO;
             landingMomentum = Vec3.ZERO;
             swimVector = Vec3.ZERO;

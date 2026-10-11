@@ -29,9 +29,17 @@ public final class FlyingState {
 
     private static final Map<UUID, Integer> LAST = new ConcurrentHashMap<>();
 
-    /** Whether a player is flying in a way drawn as flight: not creative's or a spectator's. */
+    /** On the client: whether its own player flies by their own power (from their flight profile). */
+    public static volatile boolean localOwnFlight;
+
+    /**
+     * Whether a player is flying in a way drawn as flight: by their own power (a character's
+     * flight, a form's wings), in survival or creative; not a spectator's, nor creative's alone.
+     */
     public static boolean flies(Player p) {
-        return p.getAbilities().flying && !p.isCreative() && !p.isSpectator() && !p.isPassenger() && !p.isFallFlying();
+        if (!p.getAbilities().flying || p.isSpectator() || p.isPassenger() || p.isFallFlying()) return false;
+        if (!p.isCreative()) return true;
+        return p instanceof ServerPlayer sp ? JTTWFlight.profile(sp).own() : localOwnFlight;
     }
 
     /** How far his somersault momentum must build for the cloud to gather under him: all but its last half second. */

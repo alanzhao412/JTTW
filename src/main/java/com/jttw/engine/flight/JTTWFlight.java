@@ -106,8 +106,11 @@ public final class JTTWFlight {
                 tag.getString(com.jttw.engine.reincarnation.AlignmentData.KEY_REINCARNATION_OUTCOME));
         int tier = tag.getInt(FLIGHT_SPEED_TIER_TAG);
         if (tier == 0 && fliesInnately(player)) tier = 2; // innate flight is full flight
+        TransformationData form = com.jttw.engine.transformation.TransformationManager.getTransformation(player);
+        // by their own power: a character's flight, or a form's wings (not merely creative's)
+        boolean own = canFly(player) || (form != null && form.canFly());
         return new FlightProfile(FlightSteering.speedFor(tier, wukong),
-                isGlideOnly(player), boost(player), tag.getBoolean(THRUST_TAG));
+                isGlideOnly(player), boost(player), tag.getBoolean(THRUST_TAG), own);
     }
 
     /** Sends the client its flight profile if it has changed since it last got one. */
@@ -122,7 +125,19 @@ public final class JTTWFlight {
 
     public static void onServerPlayerTick(ServerPlayer player, @Nullable TransformationData data) {
         syncProfile(player);
-        if (player.isCreative() || player.isSpectator()) return;
+        if (player.isSpectator()) return;
+        if (player.isCreative()) {
+            // Creative can always fly; one who also flies by their own power flies their own way
+            // (its speed, its momentum), and is drawn so (FlyingState)
+            if (player.getAbilities().flying && profile(player).own()) {
+                player.getPersistentData().putBoolean(WAS_FLYING_TAG, true);
+                applyFlight(player);
+            } else {
+                setStoredFlightVector(player, Vec3.ZERO);
+                player.getPersistentData().putBoolean(WAS_FLYING_TAG, false);
+            }
+            return;
+        }
 
         boolean aquatic = (data != null && isAquatic(data));
         boolean inWater = isInWaterOrBubbleColumn(player);
