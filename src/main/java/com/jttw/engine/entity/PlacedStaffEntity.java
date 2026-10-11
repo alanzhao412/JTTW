@@ -81,6 +81,28 @@ public class PlacedStaffEntity extends Entity {
         this.entityData.set(OWNER_UUID, Optional.of(owner));
     }
 
+    /**
+     * A clone's staff: an echo of Wukong's, planted where the clone stands as he plants his. It
+     * grows as his grows and topples as his topples, the same way, striking by his power (the clones
+     * are his hairs); it heeds no wheel or blow of its own, and when his returns to his hand, it is
+     * gone. Null for his own staff.
+     */
+    @Nullable private UUID master;
+    /** Who struck this staff down, for its echoes to fall by. */
+    @Nullable private ServerPlayer toppledBy;
+
+    /** Plants a clone's echo of {@code master} (Wukong's own staff) at {@code x, y, z}. */
+    public static PlacedStaffEntity echoOf(PlacedStaffEntity master, double x, double y, double z) {
+        PlacedStaffEntity echo = new PlacedStaffEntity(master.level(), x, y, z, master.getOwnerUUID());
+        echo.master = master.getUUID();
+        echo.setStaffScale(master.getStaffScale());
+        return echo;
+    }
+
+    public boolean isEcho() {
+        return master != null;
+    }
+
     @Override
     protected void defineSynchedData() {
         this.entityData.define(STAFF_SCALE, 1.0f);
@@ -174,10 +196,11 @@ public class PlacedStaffEntity extends Entity {
 
     /** The owner strikes it: it topples the way they face. Returns false if it could not. */
     public boolean toppleBy(ServerPlayer player) {
-        if (!isOwner(player) || !isStanding()) return false;
+        if (!isOwner(player) || !isStanding() || isEcho()) return false;
         this.entityData.set(FALLING, true);
         this.entityData.set(TOPPLE_YAW, player.getYRot());
-        topple(player);
+        toppledBy = player;
+        topple(player, player.getYRot());
         return true;
     }
 
@@ -230,7 +253,7 @@ public class PlacedStaffEntity extends Entity {
     // ── Scroll to scale ──────────────────────────────────────────────
 
     public void adjustScale(float delta) {
-        if (isFalling() || returnTimer >= 0) return;
+        if (isFalling() || returnTimer >= 0 || isEcho()) return;
         float oldScale = getStaffScale();
         float newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, oldScale + delta * SCROLL_STEP));
         if (newScale == oldScale) return;
@@ -298,15 +321,15 @@ public class PlacedStaffEntity extends Entity {
     /** Number of angle steps for the arc sweep (vertical → horizontal). */
     private static final int ARC_STEPS = 12;
 
-    private void topple(ServerPlayer owner) {
+    private void topple(ServerPlayer owner, float yaw) {
         float scale = getStaffScale();
         ServerLevel serverLevel = (ServerLevel) level();
 
         // Total explosion power scales with size — no cap, the staff is a divine weapon
         float totalPower = BASE_EXPLOSION_POWER + scale * EXPLOSION_SCALE_FACTOR;
 
-        // Fall direction from owner's yaw
-        float yawRad = (float) Math.toRadians(owner.getYRot());
+        // Fall direction: the way the owner faced as they struck (an echo: as its master fell)
+        float yawRad = (float) Math.toRadians(yaw);
         float dirX = -net.minecraft.util.Mth.sin(yawRad);
         float dirZ = net.minecraft.util.Mth.cos(yawRad);
 
@@ -460,6 +483,11 @@ public class PlacedStaffEntity extends Entity {
             return;
         }
 
+        if (isEcho()) {
+            followMaster();
+            return;
+        }
+
         // Return countdown
         if (returnTimer > 0) {
             returnTimer--;
@@ -474,6 +502,30 @@ public class PlacedStaffEntity extends Entity {
             if (owner == null) {
                 discard();
             }
+        }
+    }
+
+    /** An echo's tick: its master's size (drilling as it grows), its master's fall; gone with its master. */
+    private void followMaster() {
+        if (!(level() instanceof ServerLevel server)) return;
+        Entity found = server.getEntity(master);
+        if (!(found instanceof PlacedStaffEntity m) || !m.isAlive() || m.returnTimer == 0) {
+            server.sendParticles(ParticleTypes.CLOUD, getX(), getY() + 0.5, getZ(), 10, 0.3, 0.3, 0.3, 0.05);
+            discard(); // a hair's staff, back to a hair
+            return;
+        }
+        if (isFalling()) return;
+        float mine = getStaffScale(), theirs = m.getStaffScale();
+        if (theirs != mine) {
+            setStaffScale(theirs);
+            if (theirs > mine) drillBlocks(theirs);
+        }
+        if (m.isFalling()) {
+            ServerPlayer owner = m.toppledBy;
+            if (owner == null) return;
+            this.entityData.set(FALLING, true);
+            this.entityData.set(TOPPLE_YAW, m.getToppleYaw());
+            topple(owner, m.getToppleYaw());
         }
     }
 
@@ -535,6 +587,7 @@ public class PlacedStaffEntity extends Entity {
     @Override
     protected void readAdditionalSaveData(CompoundTag tag) {
         setStaffScale(tag.getFloat("StaffScale"));
+        master = tag.hasUUID("Master") ? tag.getUUID("Master") : null;
         if (tag.hasUUID("Owner")) {
             this.entityData.set(OWNER_UUID, Optional.of(tag.getUUID("Owner")));
         }
@@ -543,6 +596,7 @@ public class PlacedStaffEntity extends Entity {
     @Override
     protected void addAdditionalSaveData(CompoundTag tag) {
         tag.putFloat("StaffScale", getStaffScale());
+        if (master != null) tag.putUUID("Master", master);
         UUID owner = getOwnerUUID();
         if (owner != null) {
             tag.putUUID("Owner", owner);

@@ -57,6 +57,44 @@ public class CloneAiGameTests {
     }
 
     @GameTest(template = PLATFORM)
+    public static void hisClonesAreFoundToCopyHim(GameTestHelper h) {
+        ServerPlayer p = wukong(h);
+        WuCloneEntity c = clone(h, p);
+        check(h, WuCloneManager.clonesOf(p).contains(c), "his clone, found");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM, batch = "clone_staff", timeoutTicks = 120)
+    public static void aClonesStaffGrowsAndFallsAsHisDoes(GameTestHelper h) {
+        ServerPlayer p = wukong(h);
+        var at = h.absolutePos(new BlockPos(1, 2, 1));
+        var his = new com.jttw.engine.entity.PlacedStaffEntity(h.getLevel(), at.getX() + 0.5, at.getY(), at.getZ() + 0.5, p.getUUID());
+        h.getLevel().addFreshEntity(his);
+        var echo = com.jttw.engine.entity.PlacedStaffEntity.echoOf(his, at.getX() + 3.5, at.getY(), at.getZ() + 3.5);
+        h.getLevel().addFreshEntity(echo);
+        com.jttw.engine.gametest.GT.onEnd(h, () -> { his.discard(); echo.discard(); });
+        check(h, echo.isEcho() && !his.isEcho(), "his, and its echo");
+        echo.adjustScale(5);
+        eq(h, 1f, echo.getStaffScale(), "the echo heeds no wheel of its own");
+        his.adjustScale(3);
+        float grown = his.getStaffScale();
+        p.setYRot(90f);
+        h.runAfterDelay(2, () -> {
+            eq(h, grown, echo.getStaffScale(), "it grew as his grew");
+            check(h, his.toppleBy(p), "he strikes his down");
+        });
+        h.runAfterDelay(4, () -> {
+            check(h, echo.isFalling(), "the echo falls too");
+            eq(h, 90f, echo.getToppleYaw(), "the same way");
+            his.discard(); // back to his hand
+        });
+        h.runAfterDelay(6, () -> {
+            check(h, !echo.isAlive(), "and the echo is gone with it");
+            h.succeed();
+        });
+    }
+
+    @GameTest(template = PLATFORM)
     public static void aCloneHasItsOwnersHealth(GameTestHelper h) {
         ServerPlayer p = wukong(h);
         com.jttw.engine.progression.level.PlayerLevel.setLevel(p, 30);

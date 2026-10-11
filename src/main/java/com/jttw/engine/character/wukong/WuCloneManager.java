@@ -120,6 +120,17 @@ public final class WuCloneManager {
         removeCloneEntities(level, ids);
     }
 
+    /** This player's clones that are out, in their world. */
+    public static List<WuCloneEntity> clonesOf(ServerPlayer player) {
+        List<UUID> ids = OWNER_TO_CLONES.get(player.getUUID());
+        List<WuCloneEntity> out = new java.util.ArrayList<>();
+        if (ids == null) return out;
+        for (UUID id : ids) {
+            if (player.serverLevel().getEntity(id) instanceof WuCloneEntity clone && clone.isAlive()) out.add(clone);
+        }
+        return out;
+    }
+
     public static boolean isActive(UUID ownerId) {
         List<UUID> c = OWNER_TO_CLONES.get(ownerId);
         return c != null && !c.isEmpty();

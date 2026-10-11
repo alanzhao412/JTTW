@@ -174,6 +174,12 @@ public class RuyiJinguBangItem extends Item {
                             level, placeX, placeY, placeZ, sp.getUUID());
                     level.addFreshEntity(placed);
                     sp.setItemInHand(hand, ItemStack.EMPTY);
+                    // his clones copy him: each plants its own where it stands
+                    for (var clone : com.jttw.engine.character.wukong.WuCloneManager.clonesOf(sp)) {
+                        var echo = PlacedStaffEntity.echoOf(placed, clone.getX(), Math.floor(clone.getY()), clone.getZ());
+                        level.addFreshEntity(echo);
+                        clone.swing(InteractionHand.MAIN_HAND);
+                    }
                     sp.sendSystemMessage(Component.literal(
                             "§6[JTTW] §eYou plant the Ruyi Jingu Bang into the ground. Scroll to resize, punch to topple!"));
                 }
