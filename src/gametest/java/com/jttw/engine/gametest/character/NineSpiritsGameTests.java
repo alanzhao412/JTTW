@@ -147,7 +147,9 @@ public class NineSpiritsGameTests {
         eq(h, first, struck.isEmpty() ? null : struck.get(0), "the bolt strikes what is under the crosshair first");
         eq(h, 3, struck.size(), "then jumps twice");
         check(h, first.getHealth() < second.getHealth() || struck.indexOf(second) > 0, "weaker with each jump");
-        eq(h, 4, NineSpiritsAbilityHandler.thunderBolt(p, 10f, 4).size(), "four jumps reach all four (there are only four)");
+        // four jumps reach all four (a neighbouring test's creature in reach may be struck too)
+        List<LivingEntity> far = NineSpiritsAbilityHandler.thunderBolt(p, 10f, 4);
+        check(h, far.containsAll(List.of(first, second, third, fourth)), "four jumps reach all four: " + far.size() + " struck");
         h.succeed();
     }
 

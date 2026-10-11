@@ -30,7 +30,7 @@ import java.util.UUID;
  * speed and hits twice as hard, and only large does it charge the ground cleave (hold
  * right-click). It draws {@value #LARGE_QI_PER_SECOND} Qi a second while held so.
  */
-public class ErlangAxeItem extends Item {
+public class ErlangAxeItem extends Item implements Charged {
 
     private static final UUID UUID_ATK = UUID.fromString("b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6f");
     private static final UUID UUID_SPEED = UUID.fromString("b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d70");
@@ -114,6 +114,16 @@ public class ErlangAxeItem extends Item {
         return 72000; // hold indefinitely like a bow
     }
 
+    /** The cleave: from half a second held, full at two. */
+    public static final int CLEAVE_MIN = 10, CLEAVE_FULL = 40;
+
+    @Override
+    @Nullable
+    public Charge charge(ItemStack stack, Player user, int ticks, java.util.Set<String> nodes) {
+        return isLarge(stack) ? Charge.between(ticks, CLEAVE_MIN, CLEAVE_FULL) : null;
+    }
+
+
     @Override
     public net.minecraft.world.item.UseAnim getUseAnimation(ItemStack stack) {
         return net.minecraft.world.item.UseAnim.BOW;
@@ -123,7 +133,11 @@ public class ErlangAxeItem extends Item {
     public net.minecraft.world.InteractionResultHolder<ItemStack> use(
             Level level, Player player, net.minecraft.world.InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (level.isClientSide()) return net.minecraft.world.InteractionResultHolder.consume(stack);
+        if (level.isClientSide()) {
+            // held on this side too, as the server will (enlarged, not sneaking), so its charge can be shown
+            if (isLarge(stack) && !player.isShiftKeyDown()) player.startUsingItem(hand);
+            return net.minecraft.world.InteractionResultHolder.consume(stack);
+        }
         if (!(player instanceof net.minecraft.server.level.ServerPlayer sp))
             return net.minecraft.world.InteractionResultHolder.pass(stack);
 
@@ -163,12 +177,12 @@ public class ErlangAxeItem extends Item {
         if (!WieldRules.canCleave(sp) || !isLarge(stack)) return;
 
         int chargeTime = getUseDuration(stack) - timeLeft;
-        if (chargeTime < 10) return;
+        if (chargeTime < CLEAVE_MIN) return;
 
         sp.getPersistentData().putLong(KEY_CLEAVE_READY_AT, level.getGameTime() + CLEAVE_COOLDOWN_TICKS);
 
         float atk = (float) sp.getAttributeValue(Attributes.ATTACK_DAMAGE);
-        float chargePower = Math.min(1.0f, (float) (chargeTime - 10) / 30f);
+        float chargePower = Charge.between(chargeTime, CLEAVE_MIN, CLEAVE_FULL).fraction();
         float cleaveDamage = atk * (1.0f + chargePower * 1.5f);
 
         int playerLevel = com.jttw.engine.progression.level.PlayerLevel.getLevel(sp);

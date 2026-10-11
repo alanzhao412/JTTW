@@ -20,7 +20,6 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraftforge.api.distmarker.Dist;
@@ -179,6 +178,7 @@ public final class FormGallery {
         }
         if (shot.kind() == Kind.SCENE && wait == scene(shot).triggerBefore()) {
             mc.gui.getChat().clearMessages(false); // setup chatter would cover a first-person HUD
+            if (AbilityScenes.holdUse) mc.options.keyUse.setDown(true);
             UUID id = mc.player.getUUID();
             AbilityScenes.Scene sc = scene(shot);
             mc.getSingleplayerServer().execute(() -> {
@@ -193,6 +193,7 @@ public final class FormGallery {
         String file = shot.key() + "__" + shot.view().name().toLowerCase() + ".png";
         boolean onCamera = mc.getCameraEntity() != mc.player;
         Screenshot.grab(mc.gameDirectory, RUN_DIR + "/" + file, mc.getMainRenderTarget(), msg -> {});
+        mc.options.keyUse.setDown(false);
         TransformationData data = TransformationManager.getTransformation(mc.player);
         index.add(file + "\t" + shot.form() + "\t" + shot.view()
                 + "\tclientForm=" + (data == null ? "none" : data.getFormId())
@@ -235,19 +236,21 @@ public final class FormGallery {
             ServerLevel level = sp.serverLevel();
             level.setDayTime(6000);
             level.setWeatherParameters(6000, 0, false, false);
-            int ground = level.getHeight(Heightmap.Types.MOTION_BLOCKING, 0, 0);
-            // reset the stage: forms leave things behind (the snow golem's snow)
+            // the flat world: bedrock, two of dirt, grass; its top, whatever earlier shots blasted out of it
+            int ground = level.getMinBuildHeight() + 4;
+            // reset the stage: forms leave things behind (the snow golem's snow), scenes their craters
             for (int x = -4; x <= 4; x++) for (int z = -4; z <= 4; z++) for (int y = 0; y < 4; y++) {
                 var pos = new net.minecraft.core.BlockPos(x, ground + y, z);
                 if (!level.getBlockState(pos).isAir()) level.setBlock(pos, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
             }
-            // a pool for the boat, grass again for everything else
-            for (int x = -3; x <= 3; x++) for (int z = -3; z <= 3; z++) {
-                var below = new net.minecraft.core.BlockPos(x, ground - 1, z);
-                boolean pool = shot.kind() == Kind.BOAT_ON_WATER;
-                level.setBlock(below, (pool ? net.minecraft.world.level.block.Blocks.WATER
-                        : net.minecraft.world.level.block.Blocks.GRASS_BLOCK).defaultBlockState(), 3);
+            for (int x = -12; x <= 12; x++) for (int z = -12; z <= 12; z++) {
+                level.setBlock(new net.minecraft.core.BlockPos(x, ground - 3, z), net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState(), 3);
+                level.setBlock(new net.minecraft.core.BlockPos(x, ground - 2, z), net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState(), 3);
+                level.setBlock(new net.minecraft.core.BlockPos(x, ground - 1, z), net.minecraft.world.level.block.Blocks.GRASS_BLOCK.defaultBlockState(), 3);
             }
+            // a pool for the boat
+            if (shot.kind() == Kind.BOAT_ON_WATER) for (int x = -3; x <= 3; x++) for (int z = -3; z <= 3; z++)
+                level.setBlock(new net.minecraft.core.BlockPos(x, ground - 1, z), net.minecraft.world.level.block.Blocks.WATER.defaultBlockState(), 3);
             sp.getAbilities().flying = false;
             sp.teleportTo(level, 0.5, ground, 0.5, 0f, shot.view() == View.UP ? UP_PITCH : 0f);
             // clear anything else from the stage (flat worlds spawn animals at generation)

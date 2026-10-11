@@ -35,7 +35,7 @@ import java.util.UUID;
  *   <li>Wrath synergy: faster attacks, 360° slash — TODO</li>
  * </ul>
  */
-public class ThreePointedSpearItem extends Item {
+public class ThreePointedSpearItem extends Item implements Charged {
 
     private static final UUID UUID_ATK_ES = UUID.fromString("a1b2c3d4-e5f6-4789-abcd-ef0123456789");
     private static final UUID UUID_ATK_OTHER = UUID.fromString("a1b2c3d4-e5f6-4789-abcd-ef012345678a");
@@ -110,6 +110,17 @@ public class ThreePointedSpearItem extends Item {
     private static final int MIN_CHARGE_TICKS = 5;   // 0.25s minimum
     private static final int MAX_CHARGE_TICKS = 40;  // 2s for full power
     private static final double LUNGE_BASE = 8.0;
+
+    @Override
+    @Nullable
+    public Charge charge(ItemStack stack, Player user, int ticks, java.util.Set<String> nodes) {
+        boolean throwing = user.isShiftKeyDown()
+                && com.jttw.engine.character.erlang.ErlangShenSkillTree.TREE.highestTier(nodes, "es_spear") >= 1;
+        // the throw is ready or not; the thrust grows from its least to its greatest
+        return throwing ? new Charge(Math.min(1f, ticks / (float) THROW_MIN_CHARGE_TICKS), ticks >= THROW_MIN_CHARGE_TICKS)
+                : Charge.between(ticks, MIN_CHARGE_TICKS, MAX_CHARGE_TICKS);
+    }
+
     private static final double LUNGE_MAX = 20.0;
     private static final double WRATH_LUNGE_BONUS = 1.5;
 
@@ -153,7 +164,7 @@ public class ThreePointedSpearItem extends Item {
                 && com.jttw.engine.progression.skilltree.SkillTreeData.getEsWrathTier(sp) >= 1;
 
         // Charge power: 0.0 → 1.0
-        float chargePower = Math.min(1.0f, (float)(chargeTime - MIN_CHARGE_TICKS) / (MAX_CHARGE_TICKS - MIN_CHARGE_TICKS));
+        float chargePower = Charge.between(chargeTime, MIN_CHARGE_TICKS, MAX_CHARGE_TICKS).fraction();
 
         // Lunge distance scales with charge
         double lungeBase = LUNGE_BASE + (LUNGE_MAX - LUNGE_BASE) * chargePower;

@@ -30,7 +30,7 @@ import java.util.List;
  *       nothing.</li>
  * </ul>
  */
-public class MixedIronCudgelItem extends SwordItem {
+public class MixedIronCudgelItem extends SwordItem implements Charged {
 
     public static final int TICKS_PER_CHARGE = 20;
     public static final int COOLDOWN = 40;
@@ -42,6 +42,13 @@ public class MixedIronCudgelItem extends SwordItem {
     /** Charge from ticks held: 0 (too short) to 3. */
     public static int charge(int heldTicks) {
         return Math.min(3, heldTicks / TICKS_PER_CHARGE);
+    }
+
+    @Override
+    @Nullable
+    public Charge charge(ItemStack stack, Player user, int ticks, java.util.Set<String> nodes) {
+        // shown smoothly; it strikes at the whole steps it has reached (6 / 9 / 12 blocks)
+        return new Charge(Math.min(1f, ticks / (3f * TICKS_PER_CHARGE)), charge(ticks) >= 1);
     }
 
     @Override

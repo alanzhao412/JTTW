@@ -276,9 +276,11 @@ public final class ClientInit {
                     if (isDown0 && !wasSlot0Down) {
                         NetworkHandler.sendToServer(
                                 new ActivateAbilityPacket(heldIndex[0] = ClientAbilityData.serverIndex(0), AbilityAction.START));
+                        ChargeMeter.pressed(slot0.id());
                     } else if (!isDown0 && wasSlot0Down) {
                         NetworkHandler.sendToServer(
                                 new ActivateAbilityPacket(heldIndex[0], AbilityAction.STOP));
+                        ChargeMeter.released();
                     }
                     while (ABILITY_SLOT_0.consumeClick()) {}
                 } else {
@@ -300,9 +302,11 @@ public final class ClientInit {
                     if (isDown1 && !wasSlot1Down) {
                         NetworkHandler.sendToServer(
                                 new ActivateAbilityPacket(heldIndex[1] = ClientAbilityData.serverIndex(1), AbilityAction.START));
+                        ChargeMeter.pressed(slot1.id());
                     } else if (!isDown1 && wasSlot1Down) {
                         NetworkHandler.sendToServer(
                                 new ActivateAbilityPacket(heldIndex[1], AbilityAction.STOP));
+                        ChargeMeter.released();
                     }
                     while (ABILITY_SLOT_1.consumeClick()) {}
                 } else {
@@ -324,6 +328,7 @@ public final class ClientInit {
                     if (slot2Type == AbilityType.HELD) {
                         NetworkHandler.sendToServer(
                                 new ActivateAbilityPacket(heldIndex[2] = ClientAbilityData.serverIndex(2), AbilityAction.START));
+                        ChargeMeter.pressed(slot2.id());
                     } else if (slot2Type != null) {
                         activateSlot(mc, 2);
                         while (ABILITY_SLOT_2.consumeClick()) {}
@@ -332,6 +337,7 @@ public final class ClientInit {
                     if (slot2Type == AbilityType.HELD) {
                         NetworkHandler.sendToServer(
                                 new ActivateAbilityPacket(heldIndex[2], AbilityAction.STOP));
+                        ChargeMeter.released();
                     }
                 }
                 wasSlot2Down = isDown;
@@ -349,6 +355,7 @@ public final class ClientInit {
                     if (slot3Type == AbilityType.HELD) {
                         NetworkHandler.sendToServer(
                                 new ActivateAbilityPacket(heldIndex[3] = ClientAbilityData.serverIndex(3), AbilityAction.START));
+                        ChargeMeter.pressed(slot3.id());
                     } else if (slot3Type != null) {
                         activateSlot(mc, 3);
                         while (ABILITY_SLOT_3.consumeClick()) {}
@@ -357,6 +364,7 @@ public final class ClientInit {
                     if (slot3Type == AbilityType.HELD) {
                         NetworkHandler.sendToServer(
                                 new ActivateAbilityPacket(heldIndex[3], AbilityAction.STOP));
+                        ChargeMeter.released();
                     }
                 }
                 wasSlot3Down = isDown3;

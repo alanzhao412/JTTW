@@ -46,7 +46,7 @@ import java.util.UUID;
  *       attacks bypass armor (magic damage).</li>
  * </ul>
  */
-public class RuyiJinguBangItem extends Item {
+public class RuyiJinguBangItem extends Item implements Charged {
 
     private static final double WUKONG_REACH_BONUS = 5.0; // 3 base + 5 = 8
     private static final float EXPLOSION_POWER = 2.0f;
@@ -198,6 +198,12 @@ public class RuyiJinguBangItem extends Item {
     // ── Bow-style charge mechanics ───────────────────────────────────
 
     @Override
+    @Nullable
+    public Charge charge(ItemStack stack, Player user, int ticks, java.util.Set<String> nodes) {
+        return isQiEmpowered(stack) ? Charge.between(ticks, MIN_CHARGE_TICKS, MAX_CHARGE_TICKS) : null;
+    }
+
+    @Override
     public int getUseDuration(ItemStack stack) {
         // Max time you can hold it — 72000 is vanilla bow standard
         return 72000;
@@ -224,8 +230,7 @@ public class RuyiJinguBangItem extends Item {
         }
 
         // Charge power: 0.0 at MIN_CHARGE → 1.0 at MAX_CHARGE
-        float chargePower = Math.min(1.0f,
-                (float)(chargeTime - MIN_CHARGE_TICKS) / (MAX_CHARGE_TICKS - MIN_CHARGE_TICKS));
+        float chargePower = Charge.between(chargeTime, MIN_CHARGE_TICKS, MAX_CHARGE_TICKS).fraction();
 
         // Qi cost scales with charge
         float qiCost = QI_WAVE_COST * (0.5f + chargePower * 0.5f);

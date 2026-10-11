@@ -53,6 +53,8 @@ final class AbilityScenes {
     static volatile float facing;
     /** Set by a scene that wants the camera close on the player rather than on the ground ahead. */
     static volatile boolean closeUp;
+    /** The scene holds the use key down from its trigger until it is shot (charging, as a player would). */
+    static volatile boolean holdUse;
 
     /** Set by a scene of Wukong at his top speed: the gallery keeps his momentum at its height. */
     static volatile boolean topSpeed;
@@ -63,7 +65,8 @@ final class AbilityScenes {
     }
 
     /** Scenes that take longer to come right than the rest, and by how many more ticks: a fall, and its smoke clearing. */
-    static final java.util.Map<String, Integer> LONG = java.util.Map.of("staff_fallen", 150, "staff_crossed", 150);
+    static final java.util.Map<String, Integer> LONG = java.util.Map.of("staff_fallen", 150, "staff_crossed", 150,
+            "staff_obsidian", 150, "staff_obsidian_mighty", 150);
 
         /** Set by a scene that photographs a screen (a furnace's, say), so the gallery leaves it open. */
     static volatile boolean keepScreen;
@@ -203,6 +206,24 @@ final class AbilityScenes {
                 new Scene("staff_crossed", p -> { plantAt(p, -4, 7, 5f); plantAt(p, 0, 2, 5f); }, p -> fellEach(p, -90f, 0f), 195, false),
                 new Scene("staff_tall_below", p -> plantAt(p, 0, 2, 30f), p -> {}, 1, true, -70f),
                 new Scene("staff_tall_far", p -> plantAt(p, 0, 2, 30f), p -> {}, 1, false),
+                // toppled into an obsidian wall: the weak cannot pay to break it and it rests leaning on it;
+                // the mighty go through
+                new Scene("staff_obsidian", p -> obsidianWall(p, 1), p -> fell(p, 90f), 195, false),
+                new Scene("staff_obsidian_mighty", p -> obsidianWall(p, 100), p -> fell(p, 90f), 195, false),
+                // a Qi Wave half charged: the meter above the crosshair
+                new Scene("charge_meter", p -> {
+                    empoweredStaff(p);
+                    holdUse = true;
+                }, p -> {}, 35, true),
+                // the mod's tough stone, column by column
+                new Scene("tough_blocks", p -> {
+                    var blocks = java.util.List.of(com.jttw.engine.registry.ModBlocks.BLEACHED_STONE, com.jttw.engine.registry.ModBlocks.GRAVE_TUFF,
+                            com.jttw.engine.registry.ModBlocks.BONE_ANDESITE, com.jttw.engine.registry.ModBlocks.OSSIFIED_BONE,
+                            com.jttw.engine.registry.ModBlocks.BONE_GRAVEL, com.jttw.engine.registry.ModBlocks.CELESTIAL_MARBLE,
+                            com.jttw.engine.registry.ModBlocks.UNDERWORLD_STONE, com.jttw.engine.registry.ModBlocks.SOUL_ASH);
+                    for (int i = 0; i < blocks.size(); i++) for (int dy = 0; dy < 2; dy++)
+                        p.level().setBlockAndUpdate(p.blockPosition().offset(i - 4, dy, 3), blocks.get(i).get().defaultBlockState());
+                }, p -> {}, 1, false),
                 // the Ruyi Jingu Bang in hand, Qi-empowered: a gold glint, not the enchantment's purple
                 new Scene("staff_empowered", p -> {
                     empoweredStaff(p);
@@ -486,6 +507,17 @@ final class AbilityScenes {
         p.setItemInHand(InteractionHand.MAIN_HAND, stack);
     }
 
+    /** An obsidian wall two blocks west, and a staff planted two blocks east to fall into it, felled by a Wukong of this level. */
+    private static void obsidianWall(ServerPlayer p, int level) {
+        AlignmentData.markReincarnated(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
+        LevelManager.initClass(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
+        com.jttw.engine.progression.level.PlayerLevel.setLevel(p, level);
+        var l = p.serverLevel();
+        for (int dz = 0; dz <= 8; dz++) for (int dy = 0; dy < 8; dy++)
+            l.setBlockAndUpdate(p.blockPosition().offset(-2, dy, dz), Blocks.OBSIDIAN.defaultBlockState());
+        plantAt(p, 2, 4, 6f);
+    }
+
     /** A Ruyi Jingu Bang of the player's planted {@code dx}, {@code dz} from them, at {@code scale}. */
     private static void plantAt(ServerPlayer p, int dx, int dz, float scale) {
         var staff = new com.jttw.engine.entity.PlacedStaffEntity(p.level(), p.getX() + dx + 0.5, p.getY(), p.getZ() + dz + 0.5, p.getUUID());
@@ -623,6 +655,7 @@ final class AbilityScenes {
         com.jttw.engine.client.renderer.GoldenEyesRenderer.setMode(p.getUUID(), 0);
         facing = 0;
         closeUp = false;
+        holdUse = false;
         if (NineSpiritsAbilityHandler.inTrueForm(p)) NineSpiritsAbilityHandler.endTrueForm(p);
         if (BullDemonAbilityHandler.inGreatBull(p)) BullDemonAbilityHandler.endGreatBull(p);
         p.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);

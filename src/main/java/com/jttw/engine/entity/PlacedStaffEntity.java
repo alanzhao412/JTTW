@@ -466,8 +466,12 @@ public class PlacedStaffEntity extends Entity {
 
     /** Gravity, blocks per tick per tick: as anything falls. */
     private static final double GRAVITY = 0.08;
-    /** How much of its sliding speed a touching end keeps each tick. */
-    private static final double GRIP = 0.5;
+    /**
+     * Friction where it touches, as between iron and stone: a contact holds outright unless what
+     * drives it along the surface is more than this share of what presses it in (so a staff leant
+     * steeply on a wall stays leant), and slides held back by that much if it is.
+     */
+    private static final double FRICTION = 0.6;
     /** Passes over its constraints each step: more is stiffer and steadier. */
     private static final int PASSES = 3;
     /** Ticks it must lie still before it rests (and stops being simulated until disturbed). */
@@ -483,6 +487,8 @@ public class PlacedStaffEntity extends Entity {
     private int stillTicks;
     private float spin;
     private UUID landingOwner;
+    /** Where its ends were as this step began: how far a touching point has slid along what it touches. */
+    private net.minecraft.world.phys.Vec3 stepA = net.minecraft.world.phys.Vec3.ZERO, stepB = net.minecraft.world.phys.Vec3.ZERO;
     /** Who last grew it (an echo: who grew its master), whose strength its drilling is paid by. */
     @Nullable private Player grower;
     /** What it can still pay to carve, falling (see Carving). */
@@ -563,6 +569,8 @@ public class PlacedStaffEntity extends Entity {
         touchA = touchB = false;
         for (int step = 0; step < steps; step++) {
             net.minecraft.world.phys.Vec3 a0 = rodA, b0 = rodB;
+            stepA = a0;
+            stepB = b0;
             velA = velA.add(0, -GRAVITY * h, 0);
             velB = velB.add(0, -GRAVITY * h, 0);
             rodA = rodA.add(velA.scale(h));
@@ -575,10 +583,6 @@ public class PlacedStaffEntity extends Entity {
             // what moved is what it now moves at
             velA = rodA.subtract(a0).scale(1 / h).scale(0.998);
             velB = rodB.subtract(b0).scale(1 / h).scale(0.998);
-            // friction where it touches: a touching end keeps only some of its sliding
-            double keep = Math.pow(GRIP, h);
-            if (touchA) velA = new net.minecraft.world.phys.Vec3(velA.x * keep, velA.y, velA.z * keep);
-            if (touchB) velB = new net.minecraft.world.phys.Vec3(velB.x * keep, velB.y, velB.z * keep);
         }
         if (!toBreak.isEmpty()) {
             com.jttw.engine.world.TerrainBreaker.breakBlocks(level, new java.util.ArrayList<>(toBreak));
@@ -591,15 +595,18 @@ public class PlacedStaffEntity extends Entity {
             net.minecraft.world.phys.Vec3 moved = rodA.add(rodB).scale(0.5).subtract(before);
             spin += (float) (moved.dot(across.normalize()) / radius());
         }
-        if (!landed && (touchA || touchB) && angleFromUp() > 30) {
+        double motion = Math.max(velA.lengthSqr(), velB.lengthSqr());
+        stillTicks = motion < 0.004 * 0.004 ? stillTicks + 1 : 0;
+        // it strikes where its upper half first meets something (ground, wall, another staff), or,
+        // held up before that, where it comes to a stop
+        if (!landed && (touchB || stillTicks > 5)) {
             landed = true;
+            stillTicks = 0;
             ServerPlayer owner = landingOwner == null ? null : level.getServer().getPlayerList().getPlayer(landingOwner);
             if (owner == null && toppledBy != null) owner = toppledBy;
             if (owner != null) land(owner);
         }
-        double motion = Math.max(velA.lengthSqr(), velB.lengthSqr());
-        stillTicks = motion < 0.004 * 0.004 && landed ? stillTicks + 1 : 0;
-        if (stillTicks > SETTLE) {
+        if (landed && stillTicks > SETTLE) {
             resting = true;
             velA = velB = net.minecraft.world.phys.Vec3.ZERO;
         }
@@ -611,14 +618,23 @@ public class PlacedStaffEntity extends Entity {
         syncRod();
     }
 
-    private double angleFromUp() {
-        net.minecraft.world.phys.Vec3 axis = rodB.subtract(rodA);
-        return Math.toDegrees(Math.acos(Math.max(-1, Math.min(1, axis.y / Math.max(1e-6, axis.length())))));
-    }
-
     private void wake() {
         resting = false;
         stillTicks = 0;
+    }
+
+    /**
+     * The point a share {@code t} along it is pushed out of what it touches, along {@code n}, by
+     * {@code depth}; and friction holds back its sliding along the surface this step: all of it if
+     * it slid less than {@link #FRICTION} times the depth (it sticks), else that much of it.
+     */
+    private void contact(double t, net.minecraft.world.phys.Vec3 n, double depth) {
+        moveAt(t, n.scale(depth));
+        net.minecraft.world.phys.Vec3 slid = rodA.lerp(rodB, t).subtract(stepA.lerp(stepB, t));
+        net.minecraft.world.phys.Vec3 along = slid.subtract(n.scale(slid.dot(n)));
+        double far = along.length(), hold = FRICTION * depth;
+        if (far < 1e-9) return;
+        moveAt(t, along.scale(-(far <= hold ? 1 : hold / far)));
     }
 
     /** Moves the rod so the point a share {@code t} of the way from foot to tip moves by {@code by}. */
@@ -709,7 +725,7 @@ public class PlacedStaffEntity extends Entity {
                     };
                     pen = faces[best] + r;
                 }
-                moveAt(t, out.scale(Math.min(pen, 1.0)));
+                contact(t, out, Math.min(pen, 1.0));
                 p = rodA.lerp(rodB, t);
                 if (t < 0.5) touchA = true;
                 else touchB = true;
@@ -751,7 +767,7 @@ public class PlacedStaffEntity extends Entity {
             if (dist >= reach) continue;
             net.minecraft.world.phys.Vec3 n = dist > 1e-5 ? d.scale(1 / dist) : new net.minecraft.world.phys.Vec3(0, 1, 0);
             double pen = Math.min(1.0, reach - dist), share = moves ? 0.5 : 1.0;
-            moveAt(st[0], n.scale(pen * share));
+            contact(st[0], n, pen * share);
             if (moves) {
                 other.moveAt(st[1], n.scale(-pen * share));
                 other.wake();
