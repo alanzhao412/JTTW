@@ -25,6 +25,10 @@ public final class ModEffects {
     public static final RegistryObject<MobEffect> FLOOD_WRATH = EFFECTS.register("flood_wrath",
             () -> new MobEffect(MobEffectCategory.BENEFICIAL, 0x2E8BC0) {});
 
+    /** The Phoenix's Solar Flare, while it burns (see SolarFlare). */
+    public static final RegistryObject<MobEffect> SOLAR_FLARE = EFFECTS.register("solar_flare",
+            () -> new MobEffect(MobEffectCategory.BENEFICIAL, 0xFFC83C) {});
+
     public static void register(IEventBus modEventBus) {
         EFFECTS.register(modEventBus);
     }

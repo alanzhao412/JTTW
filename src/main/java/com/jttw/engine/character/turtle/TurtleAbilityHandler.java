@@ -53,7 +53,7 @@ import java.util.UUID;
  *       T2: lingering damage zone. T3: launch mobs upward.</li>
  *   <li><b>Gravity Well (TOGGLE):</b> pull mobs toward player each tick.
  *       T2: pulled mobs take 15% more damage.</li>
- *   <li><b>Mountain's Patience (PASSIVE):</b> standing still builds damage bonus.
+ *   <li><b>Stored Tremor (PASSIVE):</b> see {@link StoredTremor}.
  *       T2: max stacks = guaranteed crit + stun.</li>
  * </ul>
  */
@@ -138,28 +138,6 @@ public final class TurtleAbilityHandler {
 
     /** Damage multiplier for mobs affected by Gravity Well T2 vulnerability. */
     private static final float GRAVITY_VULN_MULT = 1.15f;
-
-    // -----------------------------------------------------------------------
-    // Mountain's Patience state
-    // -----------------------------------------------------------------------
-
-    /** Tracks how many ticks each player has been standing still. */
-    private static final Map<UUID, Integer> PATIENCE_STILL_TICKS = new HashMap<>();
-
-    /** Tracks the last block position for each player (to detect movement). */
-    private static final Map<UUID, BlockPos> PATIENCE_LAST_POS = new HashMap<>();
-
-    /** Tracks the accumulated damage bonus (0.0 to 0.25). */
-    private static final Map<UUID, Float> PATIENCE_BONUS = new HashMap<>();
-
-    /** Whether the player has reached max stacks (for T2 crit). */
-    private static final Set<UUID> PATIENCE_MAX_STACKS = new HashSet<>();
-
-    /** Max bonus per second of stillness. */
-    private static final float PATIENCE_BONUS_PER_SEC = 0.05f;
-
-    /** Max total bonus at 5 seconds. */
-    private static final float PATIENCE_MAX_BONUS = 0.25f;
 
     // -----------------------------------------------------------------------
     // Shell Guard activation
@@ -411,6 +389,8 @@ public final class TurtleAbilityHandler {
         // Calculate damage: (4.0 + 4% of physical resistance) × level power
         float damage = LevelPower.scaled(player,
                 4.0 + com.jttw.engine.progression.stats.ResistanceHandler.physicalResistance(player) * 0.04);
+        // and what it has stored of the blows it took (Stored Tremor), let go on each it strikes
+        damage += StoredTremor.release(player);
 
         // Hit all entities in AoE
         AABB box = new AABB(player.position(), player.position()).inflate(radius);
@@ -583,8 +563,6 @@ public final class TurtleAbilityHandler {
         // Alternative simpler approach: process all zones here but track last-processed tick.
         tickLingeringZones(sp);
 
-        // --- Mountain's Patience: track stillness ---
-        tickMountainsPatience(sp);
     }
 
     // -----------------------------------------------------------------------
@@ -642,74 +620,7 @@ public final class TurtleAbilityHandler {
     }
 
     // -----------------------------------------------------------------------
-    // Mountain's Patience — stillness tracking
-    // -----------------------------------------------------------------------
-
-    private static void tickMountainsPatience(ServerPlayer sp) {
-        UUID uuid = sp.getUUID();
-
-        // Only track for EARTH turtle players who have the patience node
-        Set<String> nodes = SkillTreeData.getUnlockedNodes(sp);
-        int tier = TurtleSkillTree.TREE.highestTier(nodes, "tu_patience");
-        if (tier < 1) {
-            // Clean up if they don't have the skill
-            PATIENCE_STILL_TICKS.remove(uuid);
-            PATIENCE_LAST_POS.remove(uuid);
-            PATIENCE_BONUS.remove(uuid);
-            PATIENCE_MAX_STACKS.remove(uuid);
-            return;
-        }
-
-        BlockPos currentBlockPos = sp.blockPosition();
-        BlockPos lastPos = PATIENCE_LAST_POS.get(uuid);
-
-        if (lastPos != null && lastPos.equals(currentBlockPos)) {
-            // Still standing on the same block — increment stillness
-            int stillTicks = PATIENCE_STILL_TICKS.getOrDefault(uuid, 0) + 1;
-            PATIENCE_STILL_TICKS.put(uuid, stillTicks);
-
-            // Every 20 ticks (1 second), add +5% bonus (max 25%)
-            if (stillTicks % 20 == 0) {
-                float bonus = PATIENCE_BONUS.getOrDefault(uuid, 0.0f);
-                if (bonus < PATIENCE_MAX_BONUS) {
-                    bonus = Math.min(PATIENCE_MAX_BONUS, bonus + PATIENCE_BONUS_PER_SEC);
-                    PATIENCE_BONUS.put(uuid, bonus);
-
-                    // Check if at max stacks
-                    if (bonus >= PATIENCE_MAX_BONUS) {
-                        PATIENCE_MAX_STACKS.add(uuid);
-                    }
-                }
-            }
-        } else {
-            // Player moved — reset stillness and bonus
-            PATIENCE_STILL_TICKS.put(uuid, 0);
-            PATIENCE_BONUS.put(uuid, 0.0f);
-            PATIENCE_MAX_STACKS.remove(uuid);
-        }
-
-        PATIENCE_LAST_POS.put(uuid, currentBlockPos);
-    }
-
-    /** Get the current Mountain's Patience damage bonus for a player. */
-    public static float getPatienceBonus(UUID playerId) {
-        return PATIENCE_BONUS.getOrDefault(playerId, 0.0f);
-    }
-
-    /** Check if the player has max patience stacks (for T2 crit). */
-    public static boolean hasMaxPatienceStacks(UUID playerId) {
-        return PATIENCE_MAX_STACKS.contains(playerId);
-    }
-
-    /** Reset patience stacks after an empowered hit (T2). */
-    private static void resetPatienceStacks(UUID playerId) {
-        PATIENCE_STILL_TICKS.put(playerId, 0);
-        PATIENCE_BONUS.put(playerId, 0.0f);
-        PATIENCE_MAX_STACKS.remove(playerId);
-    }
-
-    // -----------------------------------------------------------------------
-    // Damage events — Shell Guard + Gravity Well vulnerability + Mountain's Patience
+    // Damage events — Shell Guard + Gravity Well vulnerability
     // -----------------------------------------------------------------------
 
     @SubscribeEvent(priority = EventPriority.HIGH)
@@ -739,44 +650,6 @@ public final class TurtleAbilityHandler {
             // Base: reduce all remaining damage to 25%
             event.setAmount(event.getAmount() * SHELL_DAMAGE_MULT);
             return;
-        }
-
-        // --- Mountain's Patience damage bonus (attacker is a Turtle with stacks) ---
-        Entity attacker = event.getSource().getEntity();
-        if (attacker instanceof ServerPlayer attackerSp) {
-            UUID attackerUuid = attackerSp.getUUID();
-            float bonus = PATIENCE_BONUS.getOrDefault(attackerUuid, 0.0f);
-
-            if (bonus > 0.0f) {
-                Set<String> attackerNodes = SkillTreeData.getUnlockedNodes(attackerSp);
-                int patienceTier = TurtleSkillTree.TREE.highestTier(attackerNodes, "tu_patience");
-
-                if (patienceTier >= 1) {
-                    float multiplier = 1.0f + bonus;
-
-                    // T2: at max stacks, guaranteed crit (1.5x on top of bonus) + stun
-                    if (patienceTier >= 2 && PATIENCE_MAX_STACKS.contains(attackerUuid)) {
-                        multiplier *= 1.5f;
-
-                        // Stun the target for 2 seconds (40 ticks)
-                        LivingEntity stunTarget = event.getEntity();
-                        stunTarget.addEffect(new MobEffectInstance(
-                                MobEffects.MOVEMENT_SLOWDOWN, 40, 4)); // Slowness V
-                        stunTarget.addEffect(new MobEffectInstance(
-                                MobEffects.BLINDNESS, 40, 0));
-
-                        // Reset stacks after empowered hit
-                        resetPatienceStacks(attackerUuid);
-                        attackerSp.sendSystemMessage(Component.literal(
-                                "\u00a77[World Turtle] \u00a7eMountain's Patience \u2014 empowered strike!"));
-                    } else {
-                        // T1: just consume the bonus after any hit
-                        resetPatienceStacks(attackerUuid);
-                    }
-
-                    event.setAmount(event.getAmount() * multiplier);
-                }
-            }
         }
 
         // --- Gravity Well T2 vulnerability (target is near a Turtle with active well) ---
@@ -843,9 +716,5 @@ public final class TurtleAbilityHandler {
         CHARGE_START_POS.remove(uuid);
         TECTONIC_COOLDOWNS.remove(uuid);
         ACTIVE_WELLS.remove(uuid);
-        PATIENCE_STILL_TICKS.remove(uuid);
-        PATIENCE_LAST_POS.remove(uuid);
-        PATIENCE_BONUS.remove(uuid);
-        PATIENCE_MAX_STACKS.remove(uuid);
     }
 }

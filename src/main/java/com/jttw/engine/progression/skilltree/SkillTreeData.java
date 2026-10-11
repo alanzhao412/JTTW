@@ -337,9 +337,9 @@ public final class SkillTreeData {
         return TurtleSkillTree.TREE.highestTier(getUnlockedNodes(p), "tu_gravity");
     }
 
-    /** Highest unlocked Mountain's Patience tier (0 = not unlocked). */
-    public static int getTuPatienceTier(Player p) {
-        return TurtleSkillTree.TREE.highestTier(getUnlockedNodes(p), "tu_patience");
+    /** Highest unlocked Stored Tremor tier (0 = not unlocked). */
+    public static int getTuTremorTier(Player p) {
+        return TurtleSkillTree.TREE.highestTier(getUnlockedNodes(p), "tu_tremor");
     }
 
     // -----------------------------------------------------------------------

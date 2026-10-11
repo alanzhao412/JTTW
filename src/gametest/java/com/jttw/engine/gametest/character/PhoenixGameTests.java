@@ -33,7 +33,7 @@ import java.util.List;
 import static com.jttw.engine.gametest.GT.*;
 import static com.jttw.engine.gametest.character.CharTest.*;
 
-/** The Phoenix (Solar Sovereign): Flamethrower, Solar Radiance, Rebirth and the fire passives. */
+/** The Phoenix (Solar Sovereign): Flamethrower, Solar Flare, Rebirth and the fire passives. */
 @GameTestHolder(JTTWEngine.MOD_ID)
 @PrefixGameTestTemplate(false)
 public class PhoenixGameTests {
@@ -131,61 +131,114 @@ public class PhoenixGameTests {
         h.succeed();
     }
 
-    // ── Solar Radiance (slot 1, toggle) ─────────────────────────────
+    // ── Burning Plumage (passive) ───────────────────────────────────
 
     private static void hitBy(GameTestHelper h, ServerPlayer p, net.minecraft.world.damagesource.DamageSource src) {
         PhoenixAbilityHandler.onTakeDamageRadiance(new LivingHurtEvent(p, src, 4f));
     }
 
-    @GameTest(template = PLATFORM, batch = "solarRadianceTogglesWithTheNode")
-    public static void solarRadianceTogglesWithTheNode(GameTestHelper h) {
+    @GameTest(template = PLATFORM, batch = "burningPlumageSetsMeleeAttackersAlight")
+    public static void burningPlumageSetsMeleeAttackersAlight(GameTestHelper h) {
         ServerPlayer p = phoenix(h);
-        character().activate(p, 1, AbilityAction.USE);
-        check(h, !PhoenixAbilityHandler.isRadianceActive(p), "needs ph_radiance");
-        grant(p, "ph_radiance_1");
-        character().activate(p, 1, AbilityAction.USE);
-        check(h, PhoenixAbilityHandler.isRadianceActive(p), "on");
-        near(h, 100f, QiData.getCurrent(p), "the aura costs no Qi to raise");
-        character().activate(p, 1, AbilityAction.USE);
-        check(h, !PhoenixAbilityHandler.isRadianceActive(p), "off");
-        h.succeed();
-    }
-
-    @GameTest(template = PLATFORM, batch = "solarRadianceSetsMeleeAttackersAlight")
-    public static void solarRadianceSetsMeleeAttackersAlight(GameTestHelper h) {
-        ServerPlayer p = phoenix(h);
-        grant(p, "ph_radiance_1");
         Husk husk = mob(h, EntityType.HUSK, 0, 0);
         var ds = h.getLevel().damageSources();
         hitBy(h, p, ds.mobAttack(husk));
-        check(h, husk.getRemainingFireTicks() <= 0, "aura off: no thorns");
-        PhoenixAbilityHandler.toggleRadiance(p);
+        check(h, husk.getRemainingFireTicks() <= 0, "not learned: no fire");
+        grant(p, "ph_plumage_1");
         hitBy(h, p, ds.mobAttack(husk));
-        eq(h, 60, husk.getRemainingFireTicks(), "tier 1: 3 s of fire");
+        eq(h, 60, husk.getRemainingFireTicks(), "tier 1: 3 s of fire, always, nothing to switch on");
         Husk archer = mob(h, EntityType.HUSK, 4, 0);
         Arrow arrow = EntityType.ARROW.create(h.getLevel());
         hitBy(h, p, ds.arrow(arrow, archer));
-        check(h, archer.getRemainingFireTicks() <= 0, "projectiles do not trigger thorns");
-        PhoenixAbilityHandler.toggleRadiance(p);
+        check(h, archer.getRemainingFireTicks() <= 0, "a blow from afar does not catch");
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM, batch = "solarRadianceTierThreeBurnsLongerHitsBackAndWeakens")
-    public static void solarRadianceTierThreeBurnsLongerHitsBackAndWeakens(GameTestHelper h) {
+    @GameTest(template = PLATFORM, batch = "burningPlumageTierThreeBurnsLongerHitsBackAndWeakens")
+    public static void burningPlumageTierThreeBurnsLongerHitsBackAndWeakens(GameTestHelper h) {
         ServerPlayer p = phoenix(h);
-        grant(p, "ph_radiance_1", "ph_radiance_2", "ph_radiance_3");
+        grant(p, "ph_plumage_1", "ph_plumage_2", "ph_plumage_3");
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 0, 0);
         List<Hit> hits = watch(golem);
-        PhoenixAbilityHandler.toggleRadiance(p);
         hitBy(h, p, h.getLevel().damageSources().mobAttack(golem));
         eq(h, 100, golem.getRemainingFireTicks(), "5 s of fire from tier 2");
         List<Hit> thorns = of(hits, DamageTypes.ON_FIRE);
-        eq(h, 1, thorns.size(), "thorns damage");
+        eq(h, 1, thorns.size(), "it takes the blow back");
         near(h, 8.0, thorns.get(0).amount(), "twice the 4 damage taken");
         eq(h, 0, amp(golem, MobEffects.WEAKNESS), "Weakness I");
         eq(h, 200, duration(golem, MobEffects.WEAKNESS), "for 10 s");
-        PhoenixAbilityHandler.toggleRadiance(p);
         h.succeed();
+    }
+
+    // ── Solar Flare (B) ─────────────────────────────────────────────
+
+    /** The Phoenix at the platform's middle, its flare ticking with the world. */
+    private static ServerPlayer sun(GameTestHelper h, String... nodes) {
+        ServerPlayer p = phoenix(h);
+        grant(p, nodes);
+        var at = h.absoluteVec(new net.minecraft.world.phys.Vec3(2.5, 2, 2.5));
+        p.moveTo(at.x, at.y, at.z);
+        h.onEachTick(() -> tick(p, com.jttw.engine.character.phoenix.SolarFlare::onPlayerTick, 1));
+        return p;
+    }
+
+    @GameTest(template = PLATFORM, batch = "solarFlareBurnsAllWithinItsReach", timeoutTicks = 100)
+    public static void solarFlareBurnsAllWithinItsReach(GameTestHelper h) {
+        ServerPlayer p = sun(h, "ph_radiance_1");
+        Husk undead = mob(h, EntityType.HUSK, 0, 2);
+        Pig pig = mob(h, EntityType.PIG, 4, 2);
+        Pig far = mob(h, EntityType.PIG, 2, 2);
+        far.moveTo(p.getX() + 9, p.getY(), p.getZ()); // beyond its 6 blocks
+        List<Hit> undeadHits = watch(undead), pigHits = watch(pig), farHits = watch(far);
+        character().activate(p, 1, AbilityAction.USE);
+        near(h, 80f, QiData.getCurrent(p), "20 Qi");
+        check(h, p.hasEffect(com.jttw.engine.registry.ModEffects.SOLAR_FLARE.get()), "it is a sun");
+        h.runAfterDelay(25, () -> {
+            float burn = com.jttw.engine.progression.stats.LevelPower.scaled(p, com.jttw.engine.character.phoenix.SolarFlare.burnPerSecond(1));
+            Hit pigBurn = firstHit(h, pigHits, DamageTypes.PLAYER_ATTACK, pig);
+            near(h, burn, pigBurn.amount(), "a second's burn");
+            near(h, burn * 2, firstHit(h, undeadHits, DamageTypes.PLAYER_ATTACK, undead).amount(), "the undead twice");
+            check(h, pig.isOnFire(), "set alight");
+            eq(h, 0, of(farHits, DamageTypes.PLAYER_ATTACK).size(), "beyond its reach, untouched");
+            h.succeed();
+        });
+    }
+
+    @GameTest(template = PLATFORM, batch = "solarFlareBurnsUpWhatIsShotIntoIt")
+    public static void solarFlareBurnsUpWhatIsShotIntoIt(GameTestHelper h) {
+        ServerPlayer p = sun(h, "ph_radiance_1");
+        Husk archer = mob(h, EntityType.HUSK, 0, 0);
+        Arrow theirs = EntityType.ARROW.create(h.getLevel()), mine = EntityType.ARROW.create(h.getLevel());
+        theirs.setOwner(archer);
+        mine.setOwner(p);
+        theirs.moveTo(p.getX() + 2, p.getY() + 1, p.getZ());
+        mine.moveTo(p.getX() - 2, p.getY() + 1, p.getZ());
+        theirs.setNoGravity(true);
+        mine.setNoGravity(true);
+        h.getLevel().addFreshEntity(theirs);
+        h.getLevel().addFreshEntity(mine);
+        com.jttw.engine.character.phoenix.SolarFlare.cast(p);
+        h.runAfterDelay(2, () -> {
+            check(h, !theirs.isAlive(), "an arrow shot into it burns up");
+            check(h, mine.isAlive(), "its own does not");
+            mine.discard();
+            h.succeed();
+        });
+    }
+
+    @GameTest(template = PLATFORM, batch = "solarFlareEndsInABlindingBurstThenRests", timeoutTicks = 260)
+    public static void solarFlareEndsInABlindingBurstThenRests(GameTestHelper h) {
+        ServerPlayer p = sun(h, "ph_radiance_1");
+        IronGolem golem = mob(h, EntityType.IRON_GOLEM, 0, 2);
+        check(h, com.jttw.engine.character.phoenix.SolarFlare.cast(p), "cast");
+        check(h, !com.jttw.engine.character.phoenix.SolarFlare.cast(p), "not twice at once");
+        h.runAfterDelay(com.jttw.engine.character.phoenix.SolarFlare.TICKS + 3, () -> {
+            check(h, !com.jttw.engine.character.phoenix.SolarFlare.active(p), "8 s, then it ends");
+            check(h, !p.hasEffect(com.jttw.engine.registry.ModEffects.SOLAR_FLARE.get()), "the sun gone");
+            check(h, golem.hasEffect(MobEffects.BLINDNESS), "the burst blinds");
+            check(h, !com.jttw.engine.character.phoenix.SolarFlare.cast(p), "it rests 30 s before the next");
+            h.succeed();
+        });
     }
 
     // ── Rebirth (innate) ────────────────────────────────────────────
@@ -382,7 +435,7 @@ public class PhoenixGameTests {
         c.activate(p, 0, AbilityAction.USE);
         eq(h, null, modifier(p, Attributes.MOVEMENT_SPEED, "jttw:flamethrower_slow"), "flame ignores USE");
         c.activate(p, 1, AbilityAction.START);
-        check(h, !PhoenixAbilityHandler.isRadianceActive(p), "radiance ignores START");
+        check(h, !com.jttw.engine.character.phoenix.SolarFlare.active(p), "the flare ignores START");
         c.activate(p, 0, AbilityAction.START);
         eq(h, -1.0, modifier(p, Attributes.MOVEMENT_SPEED, "jttw:flamethrower_slow"), "flame starts on START");
         c.activate(p, 0, AbilityAction.STOP);

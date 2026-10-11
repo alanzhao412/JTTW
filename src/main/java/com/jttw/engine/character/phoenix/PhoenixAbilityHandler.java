@@ -54,8 +54,9 @@ import java.util.UUID;
  *   <li><b>Life Drain (PASSIVE):</b> T1: heal 0.5 hearts per damaging attack.
  *       T2: heal 1 heart per attack. (At level 1; scaled by the player's power.)</li>
  *   <li><b>Rebirth Mastery (PASSIVE):</b> T1: 8 block explosion. T2: 12 blocks + 2 revives/week.</li>
- *   <li><b>Solar Radiance (TOGGLE aura):</b> T1: emit light, fire thorns 3s.
- *       T2: doubled light radius, fire thorns 5s. T3: 2x fire thorns damage + Weakness I.</li>
+ *   <li><b>Solar Flare (B):</b> see {@link SolarFlare}.</li>
+ *   <li><b>Burning Plumage (passive):</b> whatever strikes it in melee catches fire: 3 s, then
+ *       5 s; at III it takes back twice the blow as fire and is weakened.</li>
  *   <li><b>Rising Ember (PASSIVE flight):</b> T1: grant flight. T2: increased speed + fire/lava immunity.</li>
  *   <li><b>Molten Talons (PASSIVE combat):</b> T1: melee sets targets on fire 3s.
  *       T2: fire damage heals 25%. T3: killing burning enemy causes explosion.</li>
@@ -89,12 +90,6 @@ public final class PhoenixAbilityHandler {
             UUID.fromString("e4f5a6b7-c8d9-0123-ef01-456789012300");
 
     // -----------------------------------------------------------------------
-    // Solar Radiance state
-    // -----------------------------------------------------------------------
-
-    private static final Set<UUID> ACTIVE_RADIANCE = new HashSet<>();
-
-    // -----------------------------------------------------------------------
     // Revive — explosion base radius
     // -----------------------------------------------------------------------
 
@@ -126,33 +121,6 @@ public final class PhoenixAbilityHandler {
         // Remove movement freeze
         AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
         if (speed != null) speed.removeModifier(UUID_FLAME_SLOW);
-    }
-
-    // -----------------------------------------------------------------------
-    // Solar Radiance toggle
-    // -----------------------------------------------------------------------
-
-    /**
-     * Toggles Solar Radiance aura on/off. Called from ActivateAbilityPacket slot 1.
-     */
-    public static void toggleRadiance(ServerPlayer player) {
-        Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int tier = PhoenixSkillTree.TREE.highestTier(nodes, "ph_radiance");
-        if (tier < 1) return;
-
-        UUID uuid = player.getUUID();
-        if (ACTIVE_RADIANCE.contains(uuid)) {
-            ACTIVE_RADIANCE.remove(uuid);
-            player.sendSystemMessage(Component.literal("§6[Solar Sovereign] §rSolar Radiance §cdeactivated§r."));
-        } else {
-            ACTIVE_RADIANCE.add(uuid);
-            player.sendSystemMessage(Component.literal("§6[Solar Sovereign] §rSolar Radiance §aactivated§r."));
-        }
-    }
-
-    /** Returns true if the given player currently has Solar Radiance active. */
-    public static boolean isRadianceActive(ServerPlayer player) {
-        return ACTIVE_RADIANCE.contains(player.getUUID());
     }
 
     // -----------------------------------------------------------------------
@@ -397,8 +365,7 @@ public final class PhoenixAbilityHandler {
     }
 
     /**
-     * Solar Radiance: fire thorns — when a Phoenix player with radiance active
-     * takes melee damage, set the attacker on fire.
+     * Burning Plumage: whatever strikes the Phoenix in melee catches fire.
      *
      * Rising Ember T2: cancel fire and lava damage entirely.
      */
@@ -417,12 +384,10 @@ public final class PhoenixAbilityHandler {
             }
         }
 
-        // --- Solar Radiance: fire thorns ---
-        if (!ACTIVE_RADIANCE.contains(player.getUUID())) return;
-
+        // --- Burning Plumage ---
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
-        int radianceTier = PhoenixSkillTree.TREE.highestTier(nodes, "ph_radiance");
-        if (radianceTier < 1) return;
+        int plumageTier = PhoenixSkillTree.TREE.highestTier(nodes, "ph_plumage");
+        if (plumageTier < 1) return;
 
         // Only trigger on melee (direct entity = attacker, not projectile)
         Entity directAttacker = event.getSource().getDirectEntity();
@@ -430,9 +395,9 @@ public final class PhoenixAbilityHandler {
         if (directAttacker != event.getSource().getEntity()) return; // projectile — skip
         if (!(directAttacker instanceof LivingEntity livingAttacker)) return;
 
-        // Fire thorns duration based on tier
+        // How long it burns, by tier
         int fireSeconds;
-        if (radianceTier >= 2) {
+        if (plumageTier >= 2) {
             fireSeconds = 5;
         } else {
             fireSeconds = 3;
@@ -440,13 +405,13 @@ public final class PhoenixAbilityHandler {
         livingAttacker.setSecondsOnFire(fireSeconds);
 
         // T3: fire thorns deal 2x damage (applied as direct fire damage)
-        if (radianceTier >= 3) {
+        if (plumageTier >= 3) {
             float thornsDamage = event.getAmount() * 2.0f;
             livingAttacker.hurt(player.damageSources().onFire(), thornsDamage);
         }
 
         // T3: burning attackers get Weakness I (10 seconds = 200 ticks)
-        if (radianceTier >= 3) {
+        if (plumageTier >= 3) {
             livingAttacker.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 200, 0));
         }
 
@@ -630,7 +595,6 @@ public final class PhoenixAbilityHandler {
     public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayer sp) {
             ACTIVE_FLAMES.remove(sp.getUUID());
-            ACTIVE_RADIANCE.remove(sp.getUUID());
             // Remove speed modifier if still applied
             AttributeInstance speed = sp.getAttribute(Attributes.MOVEMENT_SPEED);
             if (speed != null) speed.removeModifier(UUID_FLAME_SLOW);

@@ -362,50 +362,35 @@ public class TurtleGameTests {
         h.succeed();
     }
 
-    // ── Mountain's Patience (passive) ───────────────────────────────
+    // ── Stored Tremor (passive) ─────────────────────────────────────
 
-    @GameTest(template = PLATFORM, batch = "standingStillBuildsUpToTwentyFivePercentForTheNextHit")
-    public static void standingStillBuildsUpToTwentyFivePercentForTheNextHit(GameTestHelper h) {
-        ServerPlayer p = turtle(h);
-        grant(p, "tu_patience_1");
-        IronGolem golem = mob(h, EntityType.IRON_GOLEM, 0, 0);
-        ticks(p, 21);
-        near(h, 0.05f, TurtleAbilityHandler.getPatienceBonus(p.getUUID()), "+5% after a second");
-        ticks(p, 200);
-        near(h, 0.25f, TurtleAbilityHandler.getPatienceBonus(p.getUUID()), "capped at +25%");
-        LivingHurtEvent strike = new LivingHurtEvent(golem, h.getLevel().damageSources().playerAttack(p), 10f);
-        TurtleAbilityHandler.onLivingHurt(strike);
-        near(h, 12.5f, strike.getAmount(), "+25% on the next hit");
-        near(h, 0f, TurtleAbilityHandler.getPatienceBonus(p.getUUID()), "spent");
+    @GameTest(template = PLATFORM, batch = "storedTremorAddsTheBlowsTakenToTheNextSlam")
+    public static void storedTremorAddsTheBlowsTakenToTheNextSlam(GameTestHelper h) {
+        ServerPlayer p = as(h, ReincarnationOutcome.TURTLE);
+        qi(p, 100f, 100f);
+        grant(p, "tu_tectonic_1", "tu_tremor_1");
+        var ds = h.getLevel().damageSources();
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.living.LivingDamageEvent(p, ds.generic(), 6f));
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.living.LivingDamageEvent(p, ds.generic(), 4f));
+        near(h, 10f, com.jttw.engine.character.turtle.StoredTremor.stored(p), "both blows stored");
+        IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 3);
+        List<Hit> hits = watch(golem);
+        float plain = LevelPower.scaled(p, 4.0 + com.jttw.engine.progression.stats.ResistanceHandler.physicalResistance(p) * 0.04);
+        TurtleAbilityHandler.castTectonicSlam(p);
+        near(h, plain + 5f, firstHit(h, hits, DamageTypes.PLAYER_ATTACK, golem).amount(), "tier 1: half of the 10 stored, added");
+        near(h, 0f, com.jttw.engine.character.turtle.StoredTremor.stored(p), "let go: the store is empty");
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM, batch = "movingResetsPatience")
-    public static void movingResetsPatience(GameTestHelper h) {
-        ServerPlayer p = turtle(h);
-        grant(p, "tu_patience_1");
-        ticks(p, 61);
-        near(h, 0.15f, TurtleAbilityHandler.getPatienceBonus(p.getUUID()), "+15% after 3 s");
-        p.setPos(p.getX() + 2, p.getY(), p.getZ());
-        ticks(p, 1);
-        near(h, 0f, TurtleAbilityHandler.getPatienceBonus(p.getUUID()), "reset by moving");
-        h.succeed();
-    }
-
-    @GameTest(template = PLATFORM, batch = "patienceTierTwoFullStacksCritAndStun")
-    public static void patienceTierTwoFullStacksCritAndStun(GameTestHelper h) {
-        ServerPlayer p = turtle(h);
-        grant(p, "tu_patience_1", "tu_patience_2");
-        IronGolem golem = mob(h, EntityType.IRON_GOLEM, 0, 0);
-        ticks(p, 101);
-        check(h, TurtleAbilityHandler.hasMaxPatienceStacks(p.getUUID()), "full stacks after 5 s");
-        LivingHurtEvent strike = new LivingHurtEvent(golem, h.getLevel().damageSources().playerAttack(p), 10f);
-        TurtleAbilityHandler.onLivingHurt(strike);
-        near(h, 18.75f, strike.getAmount(), "x1.25 x1.5");
-        eq(h, 4, amp(golem, MobEffects.MOVEMENT_SLOWDOWN), "stunned: Slowness V");
-        eq(h, 40, duration(golem, MobEffects.MOVEMENT_SLOWDOWN), "for 2 s");
-        check(h, !TurtleAbilityHandler.hasMaxPatienceStacks(p.getUUID()), "stacks spent");
-        h.succeed();
+    @GameTest(template = PLATFORM, batch = "storedTremorForgetsBlowsAfterTenSeconds", timeoutTicks = 260)
+    public static void storedTremorForgetsBlowsAfterTenSeconds(GameTestHelper h) {
+        ServerPlayer p = as(h, ReincarnationOutcome.TURTLE);
+        grant(p, "tu_tremor_1");
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.living.LivingDamageEvent(p, h.getLevel().damageSources().generic(), 6f));
+        h.runAfterDelay(com.jttw.engine.character.turtle.StoredTremor.WINDOW + 5, () -> {
+            near(h, 0f, com.jttw.engine.character.turtle.StoredTremor.stored(p), "gone after 10 s");
+            h.succeed();
+        });
     }
 
     // ── Key routing ─────────────────────────────────────────────────

@@ -24,7 +24,7 @@ public final class TurtleCharacter implements PlayableCharacter {
 
     @Override
     public List<String> treeColumns() {
-        return List.of("Shell Guard", "Roots", "Bedrock", "Force", "Tectonic", "Gravity", "Patience", "Transform");
+        return List.of("Shell Guard", "Roots", "Bedrock", "Force", "Tectonic", "Gravity", "Tremor", "Transform");
     }
 
     @Override

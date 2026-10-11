@@ -95,6 +95,17 @@ public final class ClientAbilityData {
     // -----------------------------------------------------------------------
 
     private static final Map<String, int[]> cooldowns = new HashMap<>();
+    /** A short note on an ability's key (what it holds), by ability id. */
+    private static final Map<String, String> notes = new HashMap<>();
+
+    public static void setNote(String abilityId, String note) {
+        if (note == null || note.isEmpty()) notes.remove(abilityId);
+        else notes.put(abilityId, note);
+    }
+
+    public static String getNote(String abilityId) {
+        return notes.getOrDefault(abilityId, "");
+    }
 
     public static void setCooldown(String abilityId, int remaining, int max) {
         cooldowns.put(abilityId, new int[]{ Math.max(0, remaining), Math.max(1, max) });

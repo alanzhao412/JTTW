@@ -13,10 +13,10 @@ import java.util.List;
  *
  * <p><b>Tree layout — 4 columns, 3 rows max:</b>
  * <pre>
- * Col:  0 (Shell)    1 (Roots)    2 (Bedrock)    3 (Force)    4 (Tectonic)    5 (Gravity)    6 (Patience)
+ * Col:  0 (Shell)    1 (Roots)    2 (Bedrock)    3 (Force)    4 (Tectonic)    5 (Gravity)    6 (Tremor)
  *
- * Row 0: Shell I     Roots I      Bedrock I      Force I      Tectonic I     Gravity I      Patience I
- * Row 1: Shell II    Roots II     Bedrock II     Force II     Tectonic II    Gravity II     Patience II
+ * Row 0: Shell I     Roots I      Bedrock I      Force I      Tectonic I     Gravity I      Tremor I
+ * Row 1: Shell II    Roots II     Bedrock II     Force II     Tectonic II    Gravity II     Tremor II
  * Row 2: Shell III                               Force III    Tectonic III
  * </pre>
  */
@@ -49,8 +49,8 @@ public final class TurtleSkillTree {
     public static final String GRAVITY_1 = "tu_gravity_1";
     public static final String GRAVITY_2 = "tu_gravity_2";
 
-    public static final String PATIENCE_1 = "tu_patience_1";
-    public static final String PATIENCE_2 = "tu_patience_2";
+    public static final String TREMOR_1 = "tu_tremor_1";
+    public static final String TREMOR_2 = "tu_tremor_2";
 
     // -----------------------------------------------------------------------
     // Registry
@@ -148,16 +148,16 @@ public final class TurtleSkillTree {
                 3, 5, 1, List.of(GRAVITY_1), AbilityType.TOGGLE, 2, "Gravity Well"
         ));
 
-        // ── MOUNTAIN'S PATIENCE (col 6, PASSIVE) ────────────────────────
+        // ── STORED TREMOR (col 6, PASSIVE) ─────────────────────────────
         TREE.add(new SkillNode(
-                PATIENCE_1, "Mountain's Patience I",
-                new String[]{ "Standing still: +5% damage", "per second (max 25%).", "Resets on movement." },
-                2, 6, 0, List.of(), AbilityType.PASSIVE, 1, "Mountain's Patience"
+                TREMOR_1, "Stored Tremor I",
+                new String[]{ "Blows you take are stored", "10 s; Tectonic Slam adds", "half of them to its blow." },
+                2, 6, 0, List.of(), AbilityType.PASSIVE, 1, "Stored Tremor"
         ));
         TREE.add(new SkillNode(
-                PATIENCE_2, "Mountain's Patience II",
-                new String[]{ "At max stacks, next hit is", "a guaranteed crit and", "stuns for 2 seconds." },
-                3, 6, 1, List.of(PATIENCE_1), AbilityType.PASSIVE, 2, "Mountain's Patience"
+                TREMOR_2, "Stored Tremor II",
+                new String[]{ "The slam adds all of", "what you have stored.", "" },
+                3, 6, 1, List.of(TREMOR_1), AbilityType.PASSIVE, 2, "Stored Tremor"
         ));
 
         // ── 18 TRANSFORMATIONS (col 7, MENU) ───────────────────────

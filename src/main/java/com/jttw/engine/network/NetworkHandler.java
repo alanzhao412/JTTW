@@ -206,6 +206,11 @@ public final class NetworkHandler {
                 .consumerMainThread(com.jttw.engine.network.s2c.SyncFlightPacket::handle)
                 .add();
 
+        CHANNEL.messageBuilder(com.jttw.engine.network.s2c.AbilityNotePacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.jttw.engine.network.s2c.AbilityNotePacket::encode)
+                .decoder(com.jttw.engine.network.s2c.AbilityNotePacket::decode)
+                .consumerMainThread(com.jttw.engine.network.s2c.AbilityNotePacket::handle)
+                .add();
         CHANNEL.messageBuilder(com.jttw.engine.network.s2c.PrivateGlowPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.jttw.engine.network.s2c.PrivateGlowPacket::encode)
                 .decoder(com.jttw.engine.network.s2c.PrivateGlowPacket::decode)

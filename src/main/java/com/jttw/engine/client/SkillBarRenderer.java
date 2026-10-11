@@ -185,6 +185,17 @@ public final class SkillBarRenderer {
         if (occupied) {
             drawIconArea(gfx, mc, x, y, entry.id());
             drawCooldownOverlay(gfx, mc, x, y, entry.id());
+            // its note (what it holds), small, in the top-right corner
+            String note = ClientAbilityData.getNote(entry.id());
+            if (!note.isEmpty()) {
+                int nw = Math.round(mc.font.width(note) * 0.6f);
+                gfx.fill(x + SLOT - nw - 2, y, x + SLOT, y + 7, 0xCC000000); // a dark backing, to read over the icon
+                gfx.pose().pushPose();
+                gfx.pose().translate(x + SLOT - 1 - mc.font.width(note) * 0.6f, y + 1, 0);
+                gfx.pose().scale(0.6f, 0.6f, 1f);
+                gfx.drawString(mc.font, note, 0, 0, 0xFFFFC040, true);
+                gfx.pose().popPose();
+            }
         } else {
             drawEmptyIcon(gfx, x, y);
         }

@@ -21,14 +21,14 @@ public final class PhoenixCharacter implements PlayableCharacter {
     @Override public String outcomeId() { return ReincarnationOutcome.PHOENIX.id; }
     @Override public SkillTree skillTree() { return PhoenixSkillTree.TREE; }
     @Override public String treeTitle() { return "SOLAR SOVEREIGN"; }
-    @Override public List<String> treeColumns() { return List.of("Flamethrower", "Life Drain", "Rebirth", "Radiance", "Ember", "Talons", "Transform"); }
+    @Override public List<String> treeColumns() { return List.of("Flamethrower", "Life Drain", "Rebirth", "Radiance", "Ember", "Talons", "Transform", "Plumage"); }
 
     @Override
     public List<AbilitySlot> skillBar(Set<String> unlocked) {
         SkillTree tree = skillTree();
         return PlayableCharacter.bar(
                 AbilitySlot.fromBranch(tree, unlocked, "ph_flame", "Flamethrower", AbilityType.HELD),
-                AbilitySlot.fromBranch(tree, unlocked, "ph_radiance", "Solar Radiance", AbilityType.TOGGLE),
+                AbilitySlot.fromBranch(tree, unlocked, "ph_radiance", "Solar Flare", AbilityType.TOGGLE),
                 AbilitySlot.fromBranch(tree, unlocked, "ph_transform", "18 Transformations", AbilityType.MENU));
     }
 
@@ -40,7 +40,7 @@ public final class PhoenixCharacter implements PlayableCharacter {
                 else if (action == AbilityAction.STOP) PhoenixAbilityHandler.stopFlame(player);
             }
             case 1 -> {
-                if (action == AbilityAction.USE) PhoenixAbilityHandler.toggleRadiance(player);
+                if (action == AbilityAction.USE) SolarFlare.cast(player);
             }
             default -> {}
         }

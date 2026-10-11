@@ -231,6 +231,22 @@ final class AbilityScenes {
                     for (int dx = -4; dx <= 4; dx++) for (int dy = 0; dy < 4; dy++)
                         p.level().setBlockAndUpdate(p.blockPosition().offset(dx, dy, 5), Blocks.STONE.defaultBlockState());
                 }, p -> {}, 1, true),
+                // the Phoenix a sun: from its own eyes (the white-gold rim), and from outside (its ring of reach)
+                new Scene("solar_flare", p -> { phoenix(p, "ph_radiance_1", "ph_radiance_2", "ph_radiance_3"); foe(p, -3, 6); foe(p, 3, 7); },
+                        p -> com.jttw.engine.character.phoenix.SolarFlare.cast(p), 30, true),
+                new Scene("solar_flare_outside", p -> { phoenix(p, "ph_radiance_1", "ph_radiance_2", "ph_radiance_3"); foe(p, -3, 6); foe(p, 3, 7); },
+                        p -> com.jttw.engine.character.phoenix.SolarFlare.cast(p), 30, false),
+                // the Turtle has taken 24 in blows: its Tectonic Slam key shows the +12 it would add
+                new Scene("stored_tremor", p -> {
+                    p.getPersistentData().remove("jttw_skill_nodes");
+                    AlignmentData.markReincarnated(p, ReincarnationOutcome.TURTLE);
+                    LevelManager.initClass(p, ReincarnationOutcome.TURTLE);
+                    for (String n : List.of("tu_shell_1", "tu_force_1", "tu_tectonic_1", "tu_gravity_1", "tu_tremor_1")) SkillTreeData.grantNode(p, n);
+                    LevelManager.reapplyStats(p);
+                    p.setGameMode(GameType.SURVIVAL); // the skill bar shows outside creative
+                    LevelManager.syncToClient(p); // the skill bar, as a player's would show it
+                }, p -> net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(
+                        new net.minecraftforge.event.entity.living.LivingDamageEvent(p, p.damageSources().generic(), 24f)), 10, true),
                 // a Qi Wave half charged: the meter above the crosshair
                 new Scene("charge_meter", p -> {
                     empoweredStaff(p);
@@ -577,6 +593,16 @@ final class AbilityScenes {
     }
 
     /** The Saurian Demon King with these nodes and Qi to spare. */
+    private static void phoenix(ServerPlayer p, String... nodes) {
+        p.getPersistentData().remove("jttw_skill_nodes");
+        p.getPersistentData().remove("jttw_ph_flare_ready");
+        AlignmentData.markReincarnated(p, ReincarnationOutcome.PHOENIX);
+        LevelManager.initClass(p, ReincarnationOutcome.PHOENIX);
+        for (String n : nodes) SkillTreeData.grantNode(p, n);
+        QiData.setMax(p, 1000f);
+        QiData.setCurrent(p, 1000f);
+    }
+
     private static void saurian(ServerPlayer p, String... nodes) {
         p.getPersistentData().remove("jttw_skill_nodes");
         AlignmentData.markReincarnated(p, ReincarnationOutcome.SAURIAN_DEMON_KING);
