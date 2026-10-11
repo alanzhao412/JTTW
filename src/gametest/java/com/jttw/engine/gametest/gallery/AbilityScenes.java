@@ -62,7 +62,10 @@ final class AbilityScenes {
         if (topSpeed) com.jttw.engine.flight.JTTWFlight.setBoost(p, com.jttw.engine.character.wukong.WukongAbilityHandler.momentumMax(), false);
     }
 
-    /** Set by a scene that photographs a screen (a furnace's, say), so the gallery leaves it open. */
+    /** Scenes that take longer to come right than the rest, and by how many more ticks: a fall, and its smoke clearing. */
+    static final java.util.Map<String, Integer> LONG = java.util.Map.of("staff_fallen", 150, "staff_crossed", 150);
+
+        /** Set by a scene that photographs a screen (a furnace's, say), so the gallery leaves it open. */
     static volatile boolean keepScreen;
 
     static List<Scene> all() {
@@ -195,6 +198,11 @@ final class AbilityScenes {
                 // the Ruyi Jingu Bang grows smoothly: caught three ticks into growing from 1 to 6, and once grown
                 new Scene("staff_growing", AbilityScenes::staff, p -> grow(p), 3, false),
                 new Scene("staff_grown", AbilityScenes::staff, p -> grow(p), 40, false),
+                // the staff fallen: lying in its crater; two crossing, one on the other; a tall one from below
+                new Scene("staff_fallen", p -> plantAt(p, -3, 4, 6f), p -> fell(p, -90f), 195, false),
+                new Scene("staff_crossed", p -> { plantAt(p, -4, 7, 5f); plantAt(p, 0, 2, 5f); }, p -> fellEach(p, -90f, 0f), 195, false),
+                new Scene("staff_tall_below", p -> plantAt(p, 0, 2, 30f), p -> {}, 1, true, -70f),
+                new Scene("staff_tall_far", p -> plantAt(p, 0, 2, 30f), p -> {}, 1, false),
                 // ── The Saurian Demon King: seen from his own eyes ──
                 new Scene("saurian_lash", p -> {
                     saurian(p, com.jttw.engine.character.saurian.SaurianSkillTree.LASH_1);
@@ -456,6 +464,30 @@ final class AbilityScenes {
         for (int i = 0; i < slots.size(); i++) armory.setItem(i, slots.get(i).forged().get());
         facing = yaw;
         closeUp = true;
+    }
+
+    /** A Ruyi Jingu Bang of the player's planted {@code dx}, {@code dz} from them, at {@code scale}. */
+    private static void plantAt(ServerPlayer p, int dx, int dz, float scale) {
+        var staff = new com.jttw.engine.entity.PlacedStaffEntity(p.level(), p.getX() + dx + 0.5, p.getY(), p.getZ() + dz + 0.5, p.getUUID());
+        staff.setStaffScale(scale);
+        p.level().addFreshEntity(staff);
+    }
+
+    /** Topples the staffs by the camera, facing {@code yaw}. */
+    private static void fell(ServerPlayer p, float yaw) {
+        p.setYRot(yaw);
+        p.serverLevel().getEntitiesOfClass(com.jttw.engine.entity.PlacedStaffEntity.class, p.getBoundingBox().inflate(12))
+                .forEach(s -> s.toppleBy(p));
+    }
+
+    /** Topples the staffs by the camera in turn, the first facing the first yaw, the next the next. */
+    private static void fellEach(ServerPlayer p, float... yaws) {
+        var staffs = p.serverLevel().getEntitiesOfClass(com.jttw.engine.entity.PlacedStaffEntity.class, p.getBoundingBox().inflate(12));
+        staffs.sort(java.util.Comparator.comparingDouble(s -> s.getZ()));
+        for (int i = 0; i < staffs.size() && i < yaws.length; i++) {
+            p.setYRot(yaws[yaws.length - 1 - i]);
+            staffs.get(i).toppleBy(p);
+        }
     }
 
     /** A Ruyi Jingu Bang standing on the ground before the camera, at its smallest. */

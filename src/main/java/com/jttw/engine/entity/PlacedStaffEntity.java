@@ -34,9 +34,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * The Ruyi Jingu Bang placed in the world as a scalable pillar.
- * Wukong can scroll to resize (1–100×), then punch it to topple it,
- * causing a scaled explosion. Returns to inventory after 2 seconds.
+ * The Ruyi Jingu Bang placed in the world as a scalable pillar. Wukong can scroll to resize it
+ * (1–100×), then punch it to topple it. It falls as a heavy rod truly falls, pivoting on its foot
+ * under gravity, and where it lands the ground is blasted; it comes to rest down in the crater it
+ * made, rolls off whatever (or whichever other staff) it lands across, and stays where it lies
+ * until he punches it again, which calls it back to his hand.
  */
 public class PlacedStaffEntity extends Entity {
 
@@ -47,6 +49,13 @@ public class PlacedStaffEntity extends Entity {
     private static final EntityDataAccessor<Optional<UUID>> OWNER_UUID =
             SynchedEntityData.defineId(PlacedStaffEntity.class, EntityDataSerializers.OPTIONAL_UUID);
     private static final EntityDataAccessor<Float> TOPPLE_YAW =
+            SynchedEntityData.defineId(PlacedStaffEntity.class, EntityDataSerializers.FLOAT);
+    /** Fallen: its two ends (base, tip) and how far it has rolled about its length, for drawing. */
+    private static final EntityDataAccessor<org.joml.Vector3f> ROD_BASE =
+            SynchedEntityData.defineId(PlacedStaffEntity.class, EntityDataSerializers.VECTOR3);
+    private static final EntityDataAccessor<org.joml.Vector3f> ROD_TIP =
+            SynchedEntityData.defineId(PlacedStaffEntity.class, EntityDataSerializers.VECTOR3);
+    private static final EntityDataAccessor<Float> ROD_SPIN =
             SynchedEntityData.defineId(PlacedStaffEntity.class, EntityDataSerializers.FLOAT);
 
     private int returnTimer = -1; // ticks until return, -1 = not returning
@@ -109,6 +118,9 @@ public class PlacedStaffEntity extends Entity {
         this.entityData.define(FALLING, false);
         this.entityData.define(OWNER_UUID, Optional.empty());
         this.entityData.define(TOPPLE_YAW, 0.0f);
+        this.entityData.define(ROD_BASE, new org.joml.Vector3f());
+        this.entityData.define(ROD_TIP, new org.joml.Vector3f());
+        this.entityData.define(ROD_SPIN, 0f);
     }
 
     // ── Getters / Setters ────────────────────────────────────────────
@@ -129,6 +141,7 @@ public class PlacedStaffEntity extends Entity {
         if (STAFF_SCALE.equals(key)) {
             refreshDimensions();
         }
+        if (ROD_BASE.equals(key) || ROD_TIP.equals(key) || FALLING.equals(key)) setBoundingBox(makeBoundingBox());
     }
 
     @Override
@@ -183,15 +196,39 @@ public class PlacedStaffEntity extends Entity {
 
     /** Distance along the look to where it is hit, or -1 if the look misses it within reach. */
     public double aimDistance(net.minecraft.world.phys.Vec3 eye, net.minecraft.world.phys.Vec3 look) {
-        if (!isStanding()) return -1;
         net.minecraft.world.phys.Vec3 end = eye.add(look.normalize().scale(REACH));
+        if (isRod()) {
+            // fallen: where the look passes within its thickness of the rod
+            double[] st = closest(eye, end, rodBase(), rodTip());
+            net.minecraft.world.phys.Vec3 p = eye.lerp(end, st[0]), q = rodBase().lerp(rodTip(), st[1]);
+            return p.distanceTo(q) <= radius() + 0.3 ? eye.distanceTo(p) : -1;
+        }
+        if (!isStanding()) return -1;
         return standingBox().clip(eye, end).map(eye::distanceTo).orElse(-1.0);
     }
 
     /** Server-side check that a player is close enough to have reached it. */
     public boolean withinReachOf(Player player) {
         double r = REACH + REACH_SLACK;
+        if (isRod()) {
+            net.minecraft.world.phys.Vec3 eye = player.getEyePosition();
+            double[] st = closest(eye, eye, rodBase(), rodTip());
+            return eye.distanceTo(rodBase().lerp(rodTip(), st[1])) <= r + radius();
+        }
         return standingBox().distanceToSqr(player.getEyePosition()) <= r * r;
+    }
+
+    /**
+     * The owner strikes it: standing, it topples the way they face; fallen, it comes back to their
+     * hand (and its echoes are gone with it). Returns whether anything happened.
+     */
+    public boolean strikeBy(ServerPlayer player) {
+        if (isRod()) {
+            if (!isOwner(player) || isEcho()) return false;
+            returnTo(player);
+            return true;
+        }
+        return toppleBy(player);
     }
 
     /** The owner strikes it: it topples the way they face. Returns false if it could not. */
@@ -242,6 +279,22 @@ public class PlacedStaffEntity extends Entity {
         shownScaleO = shownScale;
         float gap = target - shownScale;
         shownScale = Math.abs(gap) < 0.01f ? target : shownScale + gap * GROWTH_EASE;
+    }
+
+    /** A fallen staff's ends as drawn: now and a tick ago, to blend between. */
+    private net.minecraft.world.phys.Vec3[] shownRod, shownRodO;
+
+    /** A fallen staff's foot, or (with {@code end} 1) tip, as drawn between ticks. */
+    public net.minecraft.world.phys.Vec3 shownRodEnd(int end, float partialTick) {
+        if (shownRod == null || shownRodO == null) return end == 0 ? rodBase() : rodTip();
+        return shownRodO[end].lerp(shownRod[end], partialTick);
+    }
+
+    /** Seen from as far as its size warrants: a hundredfold staff is a landmark. */
+    @Override
+    public boolean shouldRenderAtSqrDistance(double distanceSqr) {
+        double far = 128 + length() * 4;
+        return distanceSqr < far * far;
     }
 
     /** The size it is drawn at, between ticks: easing toward {@link #getStaffScale()}. */
@@ -306,10 +359,17 @@ public class PlacedStaffEntity extends Entity {
     @Override
     public boolean hurt(DamageSource source, float amount) {
         if (level().isClientSide()) return false;
-        if (isFalling() || returnTimer >= 0) return false;
+        if (returnTimer >= 0) return false;
 
-        Entity attacker = source.getEntity();
-        return attacker instanceof ServerPlayer player && toppleBy(player);
+        // only its owner's own hand: not a blast (its own landing's, which is his), not an arrow
+        return source.is(net.minecraft.world.damagesource.DamageTypes.PLAYER_ATTACK)
+                && source.getDirectEntity() instanceof ServerPlayer player && strikeBy(player);
+    }
+
+    /** Blasts (its own landing's among them) do not move or harm it: only he does. */
+    @Override
+    public boolean ignoreExplosion() {
+        return true;
     }
 
     // Staff length in blocks at scale 1 (model is 47 units / 16 ≈ 2.9375 blocks).
@@ -321,12 +381,13 @@ public class PlacedStaffEntity extends Entity {
     /** Number of angle steps for the arc sweep (vertical → horizontal). */
     private static final int ARC_STEPS = 12;
 
+    /**
+     * Struck down: its path is cleared (what it sweeps through as it falls is broken, as before),
+     * and it begins to fall. The blast comes where and when it lands ({@link #land}).
+     */
     private void topple(ServerPlayer owner, float yaw) {
         float scale = getStaffScale();
         ServerLevel serverLevel = (ServerLevel) level();
-
-        // Total explosion power scales with size — no cap, the staff is a divine weapon
-        float totalPower = BASE_EXPLOSION_POWER + scale * EXPLOSION_SCALE_FACTOR;
 
         // Fall direction: the way the owner faced as they struck (an echo: as its master fell)
         float yawRad = (float) Math.toRadians(yaw);
@@ -381,59 +442,50 @@ public class PlacedStaffEntity extends Entity {
 
         com.jttw.engine.world.TerrainBreaker.breakBlocks(serverLevel, arc);
 
-        // ── Phase 2: Final impact explosions along the horizontal line ──
-        // Start explosions 3 blocks out from the base
+        startFall(yaw);
+    }
+
+    /**
+     * It lands: blasts along where it lies, from a few blocks out from its foot to its tip, harder
+     * toward the tip; strikes everything along it, by its owner's power; sets the ground alight.
+     */
+    private void land(ServerPlayer owner) {
+        float scale = getStaffScale();
+        ServerLevel serverLevel = (ServerLevel) level();
+        // Total explosion power scales with size — no cap, the staff is a divine weapon
+        float totalPower = BASE_EXPLOSION_POWER + scale * EXPLOSION_SCALE_FACTOR;
+        net.minecraft.world.phys.Vec3 foot = rodA, tip = rodB;
+        float length = (float) foot.distanceTo(tip);
+        float skipDist = 3.0f;
+
         int explosionCount = Math.max(1, (int)(length / 3.0f));
         for (int i = 0; i <= explosionCount; i++) {
             float t = (float) i / explosionCount; // 0 = base, 1 = tip
             if (length * t < skipDist) continue;
-            double ex = getX() + dirX * length * t;
-            double ez = getZ() + dirZ * length * t;
+            net.minecraft.world.phys.Vec3 at = foot.lerp(tip, t);
             // Power ramps up toward the tip: base gets 30%, tip gets full
-            float ramp = 0.3f + t * 0.7f;
-            float pointPower = totalPower * ramp;
-            com.jttw.engine.world.TerrainBreaker.explode(serverLevel, owner, ex, getY(), ez, pointPower);
+            float pointPower = totalPower * (0.3f + t * 0.7f);
+            com.jttw.engine.world.TerrainBreaker.explode(serverLevel, owner, at.x, at.y, at.z, pointPower);
         }
 
-        // ── Phase 3: Entity damage in the full swept area ──
         float damageRadius = 2.0f + scale * 0.3f;
         float damage = LevelPower.scaled(owner, BASE_DAMAGE + scale * DAMAGE_SCALE_FACTOR);
-
-        double tipX = getX() + dirX * length;
-        double tipZ = getZ() + dirZ * length;
-
-        // AABB covering the arc zone (base to tip + height + radius)
-        double minX = Math.min(getX(), tipX) - damageRadius;
-        double maxX = Math.max(getX(), tipX) + damageRadius;
-        double minZ = Math.min(getZ(), tipZ) - damageRadius;
-        double maxZ = Math.max(getZ(), tipZ) + damageRadius;
-        AABB damageBox = new AABB(minX, getY() - 1, minZ,
-                                  maxX, getY() + length + 1, maxZ);
-
-        List<LivingEntity> targets = level().getEntitiesOfClass(LivingEntity.class, damageBox,
-                e -> e != owner && e.isAlive());
-
-        for (LivingEntity target : targets) {
-            double tx = target.getX();
-            double tz = target.getZ();
-            float distToLine = distanceToSegment(tx, tz, getX(), getZ(), tipX, tipZ);
+        AABB damageBox = new AABB(foot, tip).inflate(damageRadius, damageRadius, damageRadius);
+        for (LivingEntity target : level().getEntitiesOfClass(LivingEntity.class, damageBox, e -> e != owner && e.isAlive())) {
+            float distToLine = distanceToSegment(target.getX(), target.getZ(), foot.x, foot.z, tip.x, tip.z);
             float falloff = Math.max(0.2f, 1.0f - (distToLine / damageRadius));
             target.hurt(level().damageSources().playerAttack(owner), damage * falloff);
             target.setSecondsOnFire((int)(2 + scale * 0.1f));
         }
 
-        // ── Phase 4: Fire and particles along impact line ──
         java.util.List<BlockPos> firePoints = new java.util.ArrayList<>();
         for (int i = 0; i <= explosionCount; i++) {
             float t = (float) i / explosionCount;
             if (length * t < skipDist) continue;
-            double px = getX() + dirX * length * t;
-            double pz = getZ() + dirZ * length * t;
-            serverLevel.sendParticles(ParticleTypes.EXPLOSION_EMITTER,
-                    px, getY(), pz, 1, 0.5, 0.3, 0.5, 0.0);
-            firePoints.add(BlockPos.containing(px, getY(), pz));
+            net.minecraft.world.phys.Vec3 at = foot.lerp(tip, t);
+            serverLevel.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y, at.z, 1, 0.5, 0.3, 0.5, 0.0);
+            firePoints.add(BlockPos.containing(at));
         }
-        // Fire takes once the craters are carved, as it did when they were carved at once
         com.jttw.engine.world.TerrainBreaker.afterQueued(serverLevel, () -> {
             for (BlockPos firePos : firePoints) {
                 for (int dy = -1; dy <= 1; dy++) {
@@ -445,16 +497,265 @@ public class PlacedStaffEntity extends Entity {
                 }
             }
         });
-        serverLevel.sendParticles(ParticleTypes.FLAME,
-                getX() + dirX * length * 0.5, getY() + 1, getZ() + dirZ * length * 0.5,
-                (int)(scale * 2), length * 0.4, 1.0, length * 0.4, 0.02);
-
-        level().playSound(null, getX(), getY(), getZ(),
-                SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS,
+        level().playSound(null, tip.x, tip.y, tip.z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS,
                 Math.min(4.0f, 1.0f + scale * 0.05f), 0.8f);
+    }
 
-        // Start 2-second return timer
-        returnTimer = 40;
+    // ── Fallen: a heavy rod, its two ends held its length apart ──────
+
+    /** Gravity, blocks per tick per tick: as anything falls. */
+    private static final double GRAVITY = 0.08;
+    /** How much of its sideways motion a resting end keeps each tick, touching ground. */
+    private static final double GROUND_GRIP = 0.55;
+    /** Passes over the rod's constraints each tick: more is stiffer and steadier. */
+    private static final int PASSES = 4;
+    /** Ticks it must lie still before it rests (and stops being simulated until disturbed). */
+    private static final int SETTLE = 30;
+
+    private net.minecraft.world.phys.Vec3 rodA = net.minecraft.world.phys.Vec3.ZERO, rodB = net.minecraft.world.phys.Vec3.ZERO,
+            rodAPrev = net.minecraft.world.phys.Vec3.ZERO, rodBPrev = net.minecraft.world.phys.Vec3.ZERO;
+    private boolean landed, resting, touchA, touchB;
+    private int stillTicks;
+    private float spin;
+    private UUID landingOwner;
+
+    /** How thick it is: half the drawn width. */
+    public float radius() {
+        return Math.max(0.06f, 0.055f * getStaffScale());
+    }
+
+    /** How long it is, foot to tip. */
+    public float length() {
+        return VISUAL_HEIGHT * getStaffScale();
+    }
+
+    /** Whether it lies (or falls) as a rod in the world, rather than standing. */
+    public boolean isRod() {
+        return isFalling();
+    }
+
+    /** Its foot and tip as last known (on the client: as last told), for drawing and aiming. */
+    public net.minecraft.world.phys.Vec3 rodBase() {
+        return level().isClientSide ? new net.minecraft.world.phys.Vec3(entityData.get(ROD_BASE)) : rodA;
+    }
+
+    public net.minecraft.world.phys.Vec3 rodTip() {
+        return level().isClientSide ? new net.minecraft.world.phys.Vec3(entityData.get(ROD_TIP)) : rodB;
+    }
+
+    public float rodSpin() {
+        return entityData.get(ROD_SPIN);
+    }
+
+    /** Upright on its foot, tipped a few degrees the way it is to fall, with a nudge that way. */
+    private void startFall(float yaw) {
+        float yawRad = (float) Math.toRadians(yaw);
+        net.minecraft.world.phys.Vec3 dir = new net.minecraft.world.phys.Vec3(-net.minecraft.util.Mth.sin(yawRad), 0, net.minecraft.util.Mth.cos(yawRad));
+        double L = length(), tilt = Math.toRadians(4);
+        rodA = position();
+        rodB = rodA.add(dir.scale(Math.sin(tilt) * L)).add(0, Math.cos(tilt) * L, 0);
+        rodAPrev = rodA;
+        rodBPrev = rodB.subtract(dir.scale(0.02 * Math.max(1, L / 10)));
+        landed = false;
+        resting = false;
+        stillTicks = 0;
+        landingOwner = getOwnerUUID();
+        syncRod();
+    }
+
+    /** One tick of the fallen rod. */
+    private void rodTick(ServerLevel level) {
+        if (resting) {
+            // at rest it is still watched: if what bears it is blasted away, or another staff lands on it, it moves again
+            if (tickCount % 10 == 0 && !supported(level)) wake();
+            if (resting) return;
+        }
+        net.minecraft.world.phys.Vec3 g = new net.minecraft.world.phys.Vec3(0, -GRAVITY, 0);
+        net.minecraft.world.phys.Vec3 va = rodA.subtract(rodAPrev).scale(0.995), vb = rodB.subtract(rodBPrev).scale(0.995);
+        rodAPrev = rodA;
+        rodBPrev = rodB;
+        rodA = rodA.add(va).add(g);
+        rodB = rodB.add(vb).add(g);
+        touchA = touchB = false;
+        double L = length();
+        for (int pass = 0; pass < PASSES; pass++) {
+            keepLength(L);
+            restOnGround(level);
+            pushOffOtherStaffs(level);
+        }
+        // friction where it touches: a resting end keeps little of its sideways slide
+        if (touchA) rodAPrev = gripped(rodA, rodAPrev);
+        if (touchB) rodBPrev = gripped(rodB, rodBPrev);
+        // rolling: sideways travel of its middle, across its length, turns it about its length
+        net.minecraft.world.phys.Vec3 axis = rodB.subtract(rodA);
+        net.minecraft.world.phys.Vec3 across = new net.minecraft.world.phys.Vec3(-axis.z, 0, axis.x);
+        if (across.lengthSqr() > 1e-6) {
+            net.minecraft.world.phys.Vec3 moved = rodA.add(rodB).scale(0.5).subtract(rodAPrev.add(rodBPrev).scale(0.5));
+            spin += (float) (moved.dot(across.normalize()) / radius());
+        }
+        if (!landed && (touchB || angleFromUp() > 75) && rodB.y - rodBPrev.y > -0.2 && angleFromUp() > 40) {
+            landed = true;
+            ServerPlayer owner = landingOwner == null ? null : level.getServer().getPlayerList().getPlayer(landingOwner);
+            if (owner == null && toppledBy != null) owner = toppledBy;
+            if (owner != null) land(owner);
+        }
+        double motion = Math.max(rodA.distanceToSqr(rodAPrev), rodB.distanceToSqr(rodBPrev));
+        stillTicks = motion < 0.003 * 0.003 && landed ? stillTicks + 1 : 0;
+        if (stillTicks > SETTLE) {
+            resting = true;
+            rodAPrev = rodA;
+            rodBPrev = rodB;
+        }
+        if (rodA.y < level.getMinBuildHeight() - 64) { // fell out of the world
+            discard();
+            return;
+        }
+        setPos(rodA.x, rodA.y, rodA.z);
+        syncRod();
+    }
+
+    private double angleFromUp() {
+        net.minecraft.world.phys.Vec3 axis = rodB.subtract(rodA);
+        return Math.toDegrees(Math.acos(Math.max(-1, Math.min(1, axis.y / Math.max(1e-6, axis.length())))));
+    }
+
+    private static net.minecraft.world.phys.Vec3 gripped(net.minecraft.world.phys.Vec3 now, net.minecraft.world.phys.Vec3 prev) {
+        // keep GROUND_GRIP of the sideways velocity: move prev toward now
+        net.minecraft.world.phys.Vec3 v = now.subtract(prev);
+        return now.subtract(new net.minecraft.world.phys.Vec3(v.x * GROUND_GRIP, v.y, v.z * GROUND_GRIP));
+    }
+
+    private void wake() {
+        resting = false;
+        stillTicks = 0;
+    }
+
+    /** Moves the rod so the point a share {@code t} of the way from foot to tip moves by {@code by}. */
+    private void moveAt(double t, net.minecraft.world.phys.Vec3 by) {
+        double wa = 1 - t, wb = t, k = 1 / (wa * wa + wb * wb);
+        rodA = rodA.add(by.scale(wa * k));
+        rodB = rodB.add(by.scale(wb * k));
+    }
+
+    private void keepLength(double L) {
+        net.minecraft.world.phys.Vec3 d = rodB.subtract(rodA);
+        double len = d.length();
+        if (len < 1e-6) return;
+        net.minecraft.world.phys.Vec3 fix = d.scale((len - L) / len * 0.5);
+        rodA = rodA.add(fix);
+        rodB = rodB.subtract(fix);
+    }
+
+    /** How many points along it are tested against the ground: about one per half block, up to 64. */
+    private int samples() {
+        return Math.max(4, Math.min(64, (int) Math.ceil(length() / 0.5)));
+    }
+
+    /**
+     * Each point along it rests on the highest solid surface beneath it: so in a crater it settles
+     * down onto the crater's floor, tilting with it, and lies on a ridge if it lands across one.
+     */
+    private void restOnGround(ServerLevel level) {
+        float r = radius();
+        int n = samples();
+        for (int i = 0; i <= n; i++) {
+            double t = (double) i / n;
+            net.minecraft.world.phys.Vec3 p = rodA.lerp(rodB, t);
+            double top = surfaceBelow(level, p, r);
+            double bottom = p.y - r;
+            if (top <= bottom) continue;
+            double push = Math.min(1.0, top - bottom); // a little at a time: no leaping out of the ground
+            moveAt(t, new net.minecraft.world.phys.Vec3(0, push, 0));
+            if (t < 0.5) touchA = true;
+            else touchB = true;
+        }
+    }
+
+    /** The top of the highest solid block under {@code p} reaching above its lowest point, or -inf. */
+    private static double surfaceBelow(ServerLevel level, net.minecraft.world.phys.Vec3 p, double r) {
+        BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
+        int x = net.minecraft.util.Mth.floor(p.x), z = net.minecraft.util.Mth.floor(p.z);
+        int from = net.minecraft.util.Mth.floor(p.y + r), to = net.minecraft.util.Mth.floor(p.y - r) - 1;
+        for (int y = from; y >= to; y--) {
+            at.set(x, y, z);
+            if (!level.isLoaded(at)) return Double.NEGATIVE_INFINITY;
+            var shape = level.getBlockState(at).getCollisionShape(level, at);
+            if (!shape.isEmpty()) return y + shape.max(net.minecraft.core.Direction.Axis.Y);
+        }
+        return Double.NEGATIVE_INFINITY;
+    }
+
+    /** Whether, lying at rest, it is still borne up: every few points still find ground under them. */
+    private boolean supported(ServerLevel level) {
+        float r = radius();
+        int n = samples(), bearing = 0;
+        for (int i = 0; i <= n; i++) {
+            net.minecraft.world.phys.Vec3 p = rodA.lerp(rodB, (double) i / n);
+            if (surfaceBelow(level, p.add(0, -0.3, 0), r) > Double.NEGATIVE_INFINITY) bearing++;
+        }
+        return bearing >= 2;
+    }
+
+    /**
+     * Staffs do not pass through each other. Where this one overlaps another, both are pushed apart
+     * at the points that touch, along the line between them: a staff landing across another slides
+     * and rolls off its round side. A standing staff does not give way.
+     */
+    private void pushOffOtherStaffs(ServerLevel level) {
+        float r = radius();
+        AABB near = new AABB(rodA, rodB).inflate(r + 6);
+        for (PlacedStaffEntity other : level.getEntitiesOfClass(PlacedStaffEntity.class, near, o -> o != this && o.isAlive())) {
+            boolean moves = other.isRod();
+            net.minecraft.world.phys.Vec3 oa = moves ? other.rodA : other.position();
+            net.minecraft.world.phys.Vec3 ob = moves ? other.rodB : other.position().add(0, other.length(), 0);
+            double[] st = closest(rodA, rodB, oa, ob);
+            net.minecraft.world.phys.Vec3 p = rodA.lerp(rodB, st[0]), q = oa.lerp(ob, st[1]);
+            net.minecraft.world.phys.Vec3 d = p.subtract(q);
+            double dist = d.length(), reach = r + other.radius();
+            if (dist >= reach) continue;
+            net.minecraft.world.phys.Vec3 n = dist > 1e-5 ? d.scale(1 / dist) : new net.minecraft.world.phys.Vec3(0, 1, 0);
+            double pen = Math.min(1.0, reach - dist), share = moves ? 0.5 : 1.0;
+            moveAt(st[0], n.scale(pen * share));
+            if (moves) {
+                other.moveAt(st[1], n.scale(-pen * share));
+                other.wake();
+            }
+            if (st[0] < 0.5) touchA = true;
+            else touchB = true;
+        }
+    }
+
+    /** The shares {s, t} along segments a0-a1 and b0-b1 of their two closest points. */
+    public static double[] closest(net.minecraft.world.phys.Vec3 a0, net.minecraft.world.phys.Vec3 a1,
+                                    net.minecraft.world.phys.Vec3 b0, net.minecraft.world.phys.Vec3 b1) {
+        net.minecraft.world.phys.Vec3 d1 = a1.subtract(a0), d2 = b1.subtract(b0), r = a0.subtract(b0);
+        double a = d1.dot(d1), e = d2.dot(d2), f = d2.dot(r), s, t;
+        if (a < 1e-9 && e < 1e-9) return new double[]{0, 0};
+        if (a < 1e-9) return new double[]{0, Math.max(0, Math.min(1, f / e))};
+        double c = d1.dot(r);
+        if (e < 1e-9) return new double[]{Math.max(0, Math.min(1, -c / a)), 0};
+        double b = d1.dot(d2), denom = a * e - b * b;
+        s = denom > 1e-9 ? Math.max(0, Math.min(1, (b * f - c * e) / denom)) : 0;
+        t = (b * s + f) / e;
+        if (t < 0) { t = 0; s = Math.max(0, Math.min(1, -c / a)); }
+        else if (t > 1) { t = 1; s = Math.max(0, Math.min(1, (b - c) / a)); }
+        return new double[]{s, t};
+    }
+
+    private void syncRod() {
+        entityData.set(ROD_BASE, rodA.toVector3f());
+        entityData.set(ROD_TIP, rodB.toVector3f());
+        entityData.set(ROD_SPIN, spin);
+    }
+
+    /** Lying fallen, it covers the ground from foot to tip. */
+    @Override
+    protected AABB makeBoundingBox() {
+        if (!isRod()) return super.makeBoundingBox();
+        net.minecraft.world.phys.Vec3 a = rodBase(), b = rodTip();
+        if (a.equals(b)) return super.makeBoundingBox();
+        float r = radius();
+        return new AABB(a, b).inflate(r, r, r);
     }
 
     /** Distance from point (px,pz) to the line segment (ax,az)-(bx,bz). */
@@ -477,6 +778,9 @@ public class PlacedStaffEntity extends Entity {
         // Client-side: count animation ticks while falling
         if (level().isClientSide()) {
             easeShownScale();
+            shownRodO = shownRod;
+            shownRod = new net.minecraft.world.phys.Vec3[]{rodBase(), rodTip()};
+            if (shownRodO == null) shownRodO = shownRod;
             if (isFalling()) {
                 fallAnimTicks++;
             }
@@ -486,6 +790,11 @@ public class PlacedStaffEntity extends Entity {
         if (isEcho()) {
             followMaster();
             return;
+        }
+
+        if (isRod() && level() instanceof ServerLevel server) {
+            rodTick(server);
+            if (!isAlive()) return;
         }
 
         // Return countdown
@@ -514,7 +823,10 @@ public class PlacedStaffEntity extends Entity {
             discard(); // a hair's staff, back to a hair
             return;
         }
-        if (isFalling()) return;
+        if (isFalling()) {
+            rodTick(server); // fallen, it lies by its own weight
+            return;
+        }
         float mine = getStaffScale(), theirs = m.getStaffScale();
         if (theirs != mine) {
             setStaffScale(theirs);
@@ -525,14 +837,19 @@ public class PlacedStaffEntity extends Entity {
             if (owner == null) return;
             this.entityData.set(FALLING, true);
             this.entityData.set(TOPPLE_YAW, m.getToppleYaw());
+            toppledBy = owner;
             topple(owner, m.getToppleYaw());
         }
     }
 
     private void returnToOwner() {
         UUID ownerUUID = getOwnerUUID();
-        if (ownerUUID != null) {
-            Player owner = level().getPlayerByUUID(ownerUUID);
+        returnTo(ownerUUID == null ? null : level().getPlayerByUUID(ownerUUID));
+    }
+
+    /** Back into {@code owner}'s hand (or at their feet, if their hands are full); gone from the ground. */
+    private void returnTo(@Nullable Player owner) {
+        {
             if (owner != null) {
                 // Give staff back
                 ItemStack staff = new ItemStack(ModItems.RUYI_JINGU_BANG.get());
@@ -578,7 +895,7 @@ public class PlacedStaffEntity extends Entity {
     public boolean skipAttackInteraction(Entity attacker) {
         // Handle the topple directly here — for non-LivingEntity,
         // this is the only reliable attack entry point
-        if (attacker instanceof ServerPlayer player) toppleBy(player);
+        if (attacker instanceof ServerPlayer player) strikeBy(player);
         return true; // handled here, or a non-owner's swing that does nothing
     }
 
@@ -588,6 +905,14 @@ public class PlacedStaffEntity extends Entity {
     protected void readAdditionalSaveData(CompoundTag tag) {
         setStaffScale(tag.getFloat("StaffScale"));
         master = tag.hasUUID("Master") ? tag.getUUID("Master") : null;
+        if (tag.getBoolean("Fallen")) {
+            entityData.set(FALLING, true);
+            rodA = rodAPrev = new net.minecraft.world.phys.Vec3(tag.getDouble("FootX"), tag.getDouble("FootY"), tag.getDouble("FootZ"));
+            rodB = rodBPrev = new net.minecraft.world.phys.Vec3(tag.getDouble("TipX"), tag.getDouble("TipY"), tag.getDouble("TipZ"));
+            spin = tag.getFloat("Spin");
+            landed = true; // a staff saved fallen has landed; its blast is long done
+            syncRod();
+        }
         if (tag.hasUUID("Owner")) {
             this.entityData.set(OWNER_UUID, Optional.of(tag.getUUID("Owner")));
         }
@@ -597,6 +922,12 @@ public class PlacedStaffEntity extends Entity {
     protected void addAdditionalSaveData(CompoundTag tag) {
         tag.putFloat("StaffScale", getStaffScale());
         if (master != null) tag.putUUID("Master", master);
+        if (isRod()) {
+            tag.putBoolean("Fallen", true);
+            tag.putDouble("FootX", rodA.x); tag.putDouble("FootY", rodA.y); tag.putDouble("FootZ", rodA.z);
+            tag.putDouble("TipX", rodB.x); tag.putDouble("TipY", rodB.y); tag.putDouble("TipZ", rodB.z);
+            tag.putFloat("Spin", spin);
+        }
         UUID owner = getOwnerUUID();
         if (owner != null) {
             tag.putUUID("Owner", owner);

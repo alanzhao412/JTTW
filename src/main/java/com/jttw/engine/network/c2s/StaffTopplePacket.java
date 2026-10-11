@@ -34,7 +34,7 @@ public class StaffTopplePacket {
             ServerPlayer player = ctx.getSender();
             if (player == null) return;
             Entity entity = player.serverLevel().getEntity(pkt.entityId);
-            if (entity instanceof PlacedStaffEntity staff && staff.withinReachOf(player)) staff.toppleBy(player);
+            if (entity instanceof PlacedStaffEntity staff && staff.withinReachOf(player)) staff.strikeBy(player);
         });
         ctx.setPacketHandled(true);
     }

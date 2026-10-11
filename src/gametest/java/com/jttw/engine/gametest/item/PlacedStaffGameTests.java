@@ -73,8 +73,92 @@ public class PlacedStaffGameTests {
         owner.moveTo(base.x + 2, base.y, base.z);
         check(h, staff.toppleBy(owner), "its owner does");
         check(h, staff.isFalling() && !staff.isStanding(), "falling");
-        check(h, staff.aimDistance(owner.getEyePosition(), new Vec3(-1, 0, 0)) < 0, "a falling staff is not aimed at");
+        check(h, staff.aimDistance(owner.getEyePosition(), new Vec3(-1, 0, 0)) >= 0, "a fallen staff is aimed at, to call it back");
         staff.discard();
         h.succeed();
+    }
+
+    // ── Fallen: a rod that lies where it falls ──────────────────────────
+
+    /** The staff, planted at {@code rel} on the platform, toppled by its owner facing +z (south). */
+    private static PlacedStaffEntity felled(GameTestHelper h, ServerPlayer owner, net.minecraft.core.BlockPos rel, float scale) {
+        var at = h.absolutePos(rel);
+        PlacedStaffEntity staff = new PlacedStaffEntity(h.getLevel(), at.getX() + 0.5, at.getY(), at.getZ() + 0.5, owner.getUUID());
+        staff.setStaffScale(scale);
+        h.getLevel().addFreshEntity(staff);
+        com.jttw.engine.gametest.GT.onEnd(h, staff::discard);
+        owner.moveTo(at.getX() + 0.5, at.getY(), at.getZ() - 1.5, 0f, 0f);
+        check(h, staff.toppleBy(owner), "toppled");
+        return staff;
+    }
+
+    @GameTest(template = PLATFORM, batch = "staff_physics", timeoutTicks = 200)
+    public static void itFallsAndLiesInTheHollowItLandsIn(GameTestHelper h) {
+        ServerPlayer owner = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
+        // a hollow in the floor where its far end will come down
+        h.setBlock(new net.minecraft.core.BlockPos(2, 1, 4), net.minecraft.world.level.block.Blocks.AIR);
+        h.setBlock(new net.minecraft.core.BlockPos(2, 1, 3), net.minecraft.world.level.block.Blocks.AIR);
+        PlacedStaffEntity staff = felled(h, owner, new net.minecraft.core.BlockPos(2, 2, 1), 2f);
+        double floor = h.absolutePos(new net.minecraft.core.BlockPos(2, 2, 2)).getY();
+        h.succeedWhen(() -> {
+            Vec3 tip = staff.rodTip(), foot = staff.rodBase();
+            check(h, foot.distanceTo(tip) > staff.length() * 0.98 && foot.distanceTo(tip) < staff.length() * 1.02, "still its own length");
+            check(h, tip.y < floor - 0.3, "its tip down in the hollow, below the floor: " + tip.y + " vs " + floor);
+            check(h, staff.isAlive() && staff.isRod(), "lying where it fell");
+        });
+    }
+
+    @GameTest(template = PLATFORM, batch = "staff_physics", timeoutTicks = 200)
+    public static void aStaffFallingOnAnotherDoesNotPassThroughIt(GameTestHelper h) {
+        ServerPlayer owner = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
+        // a staff standing in the way, and one toppled toward it
+        var at = h.absolutePos(new net.minecraft.core.BlockPos(2, 2, 3));
+        PlacedStaffEntity post = new PlacedStaffEntity(h.getLevel(), at.getX() + 0.5, at.getY(), at.getZ() + 0.5, owner.getUUID());
+        post.setStaffScale(3f);
+        h.getLevel().addFreshEntity(post);
+        com.jttw.engine.gametest.GT.onEnd(h, post::discard);
+        PlacedStaffEntity falling = felled(h, owner, new net.minecraft.core.BlockPos(2, 2, 0), 3f);
+        Vec3 postFoot = post.position(), postTop = postFoot.add(0, post.length(), 0);
+        h.succeedWhen(() -> {
+            Vec3 a = falling.rodBase(), b = falling.rodTip();
+            double[] st = PlacedStaffEntity.closest(a, b, postFoot, postTop);
+            double gap = a.lerp(b, st[0]).distanceTo(postFoot.lerp(postTop, st[1]));
+            check(h, gap >= falling.radius() + post.radius() - 0.06, "never through the other: gap " + gap);
+            check(h, b.y > postFoot.y + 0.8, "it rests leaning on the other, not on the floor beyond it: tip at " + (b.y - postFoot.y));
+            check(h, a.distanceTo(b) > falling.length() * 0.97, "keeping its length");
+        });
+    }
+
+    @GameTest(template = PLATFORM, batch = "staff_physics", timeoutTicks = 200)
+    public static void itStaysWhereItLiesUntilStruckThenComesBack(GameTestHelper h) {
+        ServerPlayer owner = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
+        PlacedStaffEntity staff = felled(h, owner, new net.minecraft.core.BlockPos(2, 2, 1), 1.5f);
+        h.runAfterDelay(120, () -> {
+            check(h, staff.isAlive() && staff.isRod(), "still lying there after six seconds: no return by itself");
+            owner.moveTo(staff.rodBase().x, staff.rodBase().y, staff.rodBase().z - 1);
+            check(h, staff.strikeBy(owner), "struck again");
+            check(h, !staff.isAlive(), "it is gone from the ground");
+            check(h, owner.getInventory().countItem(com.jttw.engine.registry.ModItems.RUYI_JINGU_BANG.get()) == 1, "back in his hand");
+            h.succeed();
+        });
+    }
+
+    /** Its own landing blast (and anything else but its owner's hand) does not call it back. */
+    @GameTest(template = PLATFORM, batch = "staff_probe", timeoutTicks = 200)
+    public static void aBigStaffSurvivesItsOwnBlast(GameTestHelper h) {
+        ServerPlayer owner = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
+        PlacedStaffEntity staff = felled(h, owner, new net.minecraft.core.BlockPos(2, 2, 1), 6f);
+        ServerPlayer thief = player(h);
+        h.runAfterDelay(120, () -> {
+            check(h, staff.isAlive() && staff.isRod(), "still lying where it fell, after its blast");
+            // only he takes it back: another's blow does nothing to it
+            thief.moveTo(staff.rodBase().x, staff.rodBase().y, staff.rodBase().z - 1);
+            check(h, !staff.strikeBy(thief), "another cannot call it back");
+            staff.hurt(h.getLevel().damageSources().playerAttack(thief), 100);
+            check(h, staff.isAlive() && staff.isRod(), "nor knock it away");
+            check(h, thief.getInventory().countItem(com.jttw.engine.registry.ModItems.RUYI_JINGU_BANG.get()) == 0, "nor take it");
+            check(h, owner.getInventory().countItem(com.jttw.engine.registry.ModItems.RUYI_JINGU_BANG.get()) == 0, "and not back in his hand");
+            h.succeed();
+        });
     }
 }

@@ -223,7 +223,7 @@ public final class FormGallery {
     private static void startShot(Minecraft mc) {
         Shot shot = shots.get(next);
         // scenes wait longer, so one ability's particles are gone before the next picture
-        wait = shot.kind() == Kind.SCENE ? SCENE_SETTLE_TICKS : SETTLE_TICKS;
+        wait = shot.kind() == Kind.SCENE ? SCENE_SETTLE_TICKS + AbilityScenes.LONG.getOrDefault(shot.form().getPath(), 0) : SETTLE_TICKS;
         mc.setCameraEntity(mc.player);
         boolean firstPerson = shot.kind() == Kind.SCENE && scene(shot).firstPerson();
         mc.options.hideGui = !firstPerson; // first-person scenes show the HUD
