@@ -12,8 +12,8 @@ import java.util.List;
  * <pre>
  * Col:  0 (Lightning)  1 (Weather)  2 (Flight)      3 (Pressure)  4 (Recovery)  5 (Tidal Wave)  6 (Scales)  7 (Tidal Force)
  *
- * Row 0: Thunder Claw  Rain Call    Elytra Glide    Pressure I    Recovery I    Tidal Wave I    Scales I    Tidal Force I
- * Row 1: Storm Fang    Tempest      Dragon Flight   Pressure II   Recovery II   Tidal Wave II   Scales II   Tidal Force II
+ * Row 0: Call Thunder  Rain Call    Elytra Glide    Pressure I    Recovery I    Tidal Wave I    Scales I    Tidal Force I
+ * Row 1: Call Thunder  Tempest      Dragon Flight   Pressure II   Recovery II   Tidal Wave II   Scales II   Tidal Force II
  * Row 2: Wrath         —            Dim Travel      —             —             Tidal Wave III  Scales III
  * </pre>
  *
@@ -67,17 +67,17 @@ public final class DragonSkillTree {
     static {
         // ── LIGHTNING STRIKE (col 0, USE type) ──────────────────────────
         TREE.add(new SkillNode(
-                LIGHTNING_1, "Thunder Claw",
+                LIGHTNING_1, "Call Thunder I",
                 new String[]{ "Press V: summon lightning", "where you look (5 block range).", "Damage scales with STR." },
                 2, 0, 0, List.of(), AbilityType.TOGGLE, 1, "Lightning"
         ));
         TREE.add(new SkillNode(
-                LIGHTNING_2, "Storm Fang",
+                LIGHTNING_2, "Call Thunder II",
                 new String[]{ "Lightning damage increased.", "Applies Slowness to targets.", "" },
                 3, 0, 1, List.of(LIGHTNING_1), AbilityType.TOGGLE, 2, "Lightning"
         ));
         TREE.add(new SkillNode(
-                LIGHTNING_3, "Wrath of Heaven",
+                LIGHTNING_3, "Call Thunder III",
                 new String[]{ "Summons 3 bolts in a cone.", "Massive STR scaling.", "Sets targets on fire." },
                 4, 0, 2, List.of(LIGHTNING_2), AbilityType.TOGGLE, 3, "Lightning"
         ));

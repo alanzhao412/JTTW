@@ -81,19 +81,16 @@ public class PassiveSkillsGameTests {
     }
 
     @GameTest(template = PLATFORM)
-    public static void earthenRootsProtectsAfterStandingStillForASecond(GameTestHelper h) {
+    public static void earthenRootsSlowHimForGoodAndCutAndReturnEveryHit(GameTestHelper h) {
         ServerPlayer p = as(h, ReincarnationOutcome.TURTLE);
+        double speed = p.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
         grant(p, "tu_roots_1");
-        var cactus = p.damageSources().cactus();
-        tick(p, TurtlePassives::onPlayerTick, 1); // first tick records where he stands
-        tick(p, TurtlePassives::onPlayerTick, 19);
-        near(h, 10.0, hurt(TurtlePassives::onHurt, p, cactus, 10f), "not rooted before 1 s");
-        tick(p, TurtlePassives::onPlayerTick, 1);
-        check(h, TurtlePassives.isRooted(p), "rooted after 20 still ticks");
-        near(h, 8.5, hurt(TurtlePassives::onHurt, p, cactus, 10f), "-15%");
-        p.setPos(p.getX() + 1, p.getY(), p.getZ());
-        tick(p, TurtlePassives::onPlayerTick, 1);
-        near(h, 10.0, hurt(TurtlePassives::onHurt, p, cactus, 10f), "moving breaks the roots");
+        tick(p, TurtlePassives::onPlayerTick, 20);
+        near(h, speed * 0.9, p.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED), "10% slower, standing or not");
+        Zombie zombie = mob(h, EntityType.ZOMBIE, 0, 0);
+        List<Hit> hits = watch(zombie);
+        near(h, 8.5, hurt(TurtlePassives::onHurt, p, p.damageSources().mobAttack(zombie), 10f), "-15%, moving or not");
+        near(h, 1.5, firstHit(h, hits, DamageTypes.THORNS, zombie).amount(), "15% of 10 back");
         h.succeed();
     }
 
@@ -101,7 +98,6 @@ public class PassiveSkillsGameTests {
     public static void earthenRootsTwoReturnsAQuarterOfTheHit(GameTestHelper h) {
         ServerPlayer p = as(h, ReincarnationOutcome.TURTLE);
         grant(p, "tu_roots_1", "tu_roots_2");
-        tick(p, TurtlePassives::onPlayerTick, 21);
         Zombie zombie = mob(h, EntityType.ZOMBIE, 0, 0);
         List<Hit> hits = watch(zombie);
         near(h, 7.0, hurt(TurtlePassives::onHurt, p, p.damageSources().mobAttack(zombie), 10f), "-30%");

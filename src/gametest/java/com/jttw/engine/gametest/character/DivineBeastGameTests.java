@@ -96,10 +96,11 @@ public class DivineBeastGameTests {
         tick(p, DivineBeastHandler::onPlayerTick, 1);
     }
 
-    @GameTest(template = PLATFORM, batch = "earthLineIsEmpoweredBelowYZero")
-    public static void earthLineIsEmpoweredBelowYZero(GameTestHelper h) {
+    @GameTest(template = PLATFORM, batch = "earthLineIsEmpoweredBelowSeaLevel")
+    public static void earthLineIsEmpoweredBelowSeaLevel(GameTestHelper h) {
         ServerPlayer p = as(h, ReincarnationOutcome.TURTLE);
-        p.setPos(p.getX(), -10, p.getZ());
+        int sea = h.getLevel().getSeaLevel();
+        p.setPos(p.getX(), sea - 1, p.getZ());
         domainTick(p);
         eq(h, 0.20, modifier(p, Attributes.MAX_HEALTH, "jttw:domain_hp"), "+20% health");
         eq(h, 0.20, modifier(p, Attributes.ATTACK_DAMAGE, "jttw:domain_str"), "+20% attack");
@@ -107,9 +108,9 @@ public class DivineBeastGameTests {
         eq(h, 0.20, modifier(p, MAGIC_RESISTANCE(), "jttw:domain_mres"), "+20% magic resistance");
         eq(h, null, modifier(p, Attributes.ARMOR, "jttw:domain_def"), "no vanilla armor");
         p.setHealth(p.getMaxHealth());
-        p.setPos(p.getX(), 10, p.getZ());
+        p.setPos(p.getX(), sea + 1, p.getZ());
         domainTick(p);
-        eq(h, null, modifier(p, Attributes.MAX_HEALTH, "jttw:domain_hp"), "removed above ground");
+        eq(h, null, modifier(p, Attributes.MAX_HEALTH, "jttw:domain_hp"), "removed above sea level");
         near(h, p.getMaxHealth(), p.getHealth(), "health clamped to the lower maximum");
         h.succeed();
     }

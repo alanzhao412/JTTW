@@ -81,12 +81,12 @@ public final class TurtleSkillTree {
         // ── EARTHEN ROOTS (col 1, PASSIVE) ─────────────────────────────
         TREE.add(new SkillNode(
                 ROOTS_1, "Earthen Roots I",
-                new String[]{ "Standing still: -15%", "damage taken after 1s.", "" },
+                new String[]{ "Rooted: -10% speed, for good.", "-15% damage taken; 15% of", "each hit back to its striker." },
                 2, 1, 0, List.of(), AbilityType.PASSIVE, 1, "Earthen Roots"
         ));
         TREE.add(new SkillNode(
                 ROOTS_2, "Earthen Roots II",
-                new String[]{ "-30% damage while still.", "Attackers take 25% of", "the hit back." },
+                new String[]{ "-15% speed. -30% damage", "taken; a quarter of each", "hit back to its striker." },
                 3, 1, 1, List.of(ROOTS_1), AbilityType.PASSIVE, 2, "Earthen Roots"
         ));
 

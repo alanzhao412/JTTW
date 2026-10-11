@@ -18,9 +18,9 @@ import javax.annotation.Nullable;
  *
  * <ul>
  *   <li>WATER (Dragon line): oceans, rivers, and during rain</li>
- *   <li>EARTH (World Turtle line): below Y=0 (underground/deep)</li>
- *   <li>BEAST (Byakko line): forests, jungles, plains</li>
- *   <li>FIRE (Solar Sovereign line): deserts, taigas, savannahs</li>
+ *   <li>EARTH (World Turtle line): below sea level</li>
+ *   <li>BEAST (Byakko line): forests, jungles, plains, savannahs</li>
+ *   <li>FIRE (Solar Sovereign line): deserts (badlands among them) and mountains</li>
  * </ul>
  */
 public enum DivineBeastLine {
@@ -29,9 +29,6 @@ public enum DivineBeastLine {
     EARTH("World Turtle"),
     BEAST("Byakko"),
     FIRE("Solar Sovereign");
-
-    /** Y-level threshold for Earth domain. */
-    private static final int EARTH_DOMAIN_Y = 0;
 
     public final String apexName;
 
@@ -45,7 +42,7 @@ public enum DivineBeastLine {
     public boolean isInDomain(ServerPlayer player) {
         return switch (this) {
             case WATER -> isWaterDomain(player);
-            case EARTH -> player.getY() < EARTH_DOMAIN_Y;
+            case EARTH -> player.getY() < player.level().getSeaLevel();
             case BEAST -> isVerdantDomain(player);
             case FIRE -> isAridDomain(player);
         };
@@ -63,23 +60,21 @@ public enum DivineBeastLine {
 
     private static boolean isAridDomain(ServerPlayer player) {
         Holder<Biome> biome = player.level().getBiome(player.blockPosition());
-        // Deserts, taigas, savannahs and subtypes
-        return biome.is(BiomeTags.IS_TAIGA)
-                || biome.is(Biomes.DESERT)
-                || biome.is(Biomes.SAVANNA)
-                || biome.is(Biomes.SAVANNA_PLATEAU)
-                || biome.is(Biomes.WINDSWEPT_SAVANNA);
+        // Deserts (the badlands with them) and mountains
+        return biome.is(Biomes.DESERT)
+                || biome.is(BiomeTags.IS_BADLANDS)
+                || biome.is(BiomeTags.IS_MOUNTAIN);
     }
 
     private static boolean isVerdantDomain(ServerPlayer player) {
         Holder<Biome> biome = player.level().getBiome(player.blockPosition());
-        // Forests, jungles, plains and subtypes
+        // Forests, jungles, plains and savannahs, and their kinds
         return biome.is(BiomeTags.IS_FOREST)
                 || biome.is(BiomeTags.IS_JUNGLE)
+                || biome.is(BiomeTags.IS_SAVANNA)
                 || biome.is(Biomes.PLAINS)
                 || biome.is(Biomes.SUNFLOWER_PLAINS)
-                || biome.is(Biomes.SNOWY_PLAINS)
-                || biome.is(Biomes.MEADOW);
+                || biome.is(Biomes.SNOWY_PLAINS);
     }
 
     /**
