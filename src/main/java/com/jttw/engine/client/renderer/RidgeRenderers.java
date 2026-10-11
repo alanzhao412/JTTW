@@ -167,10 +167,23 @@ public final class RidgeRenderers {
 
     // ── Lady White Bone ─────────────────────────────────────────────────
 
+    /**
+     * How solid she is drawn: 1, or less for the mirage of her true form that the Fiery Golden
+     * Eyes and the Eye of Heaven see over her disguise.
+     */
+    static float mirage = 1f;
+
     /** A skeleton, tall and thin, arm raised to throw when she fights. */
     public static final class LadyModel extends HumanoidModel<LadyWhiteBoneEntity> {
         public LadyModel(ModelPart root) {
             super(root);
+        }
+
+        @Override
+        public void renderToBuffer(PoseStack pose, VertexConsumer vc, int light, int overlay, float r, float g, float b, float a) {
+            // the mirage: pale, cold, and thin as breath
+            if (mirage < 1f) super.renderToBuffer(pose, vc, light, overlay, r * 0.8f, g * 0.9f, b, a * mirage);
+            else super.renderToBuffer(pose, vc, light, overlay, r, g, b, a);
         }
 
         @Override
@@ -201,6 +214,127 @@ public final class RidgeRenderers {
         public ResourceLocation getTextureLocation(LadyWhiteBoneEntity e) {
             return SKELETON;
         }
+
+        /** The stand-ins her disguises are drawn with, one per her and disguise. */
+        private final java.util.Map<Integer, com.jttw.engine.entity.ridge.RidgeMonster> standIns = new java.util.HashMap<>();
+
+        /** Whether the one looking sees what she truly is: the Fiery Golden Eyes or the Eye of Heaven open. */
+        private static boolean seesTruth() {
+            return GoldenEyesRenderer.isActive() || EyeOfHeavenRenderer.isActive();
+        }
+
+        /**
+         * Disguised, she is drawn as the very thing she passes for: one of her dead, drawn by its
+         * own renderer, posed as she is. Whoever has truth-seeing eyes open sees, over it, a
+         * wavering mirage of her true form.
+         */
+        @Override
+        public void render(LadyWhiteBoneEntity e, float yaw, float partial, PoseStack pose, MultiBufferSource buffers, int light) {
+            int d = e.disguise();
+            if (d == LadyWhiteBoneEntity.HERSELF) {
+                shadowRadius = 0.6f;
+                super.render(e, yaw, partial, pose, buffers, light);
+                return;
+            }
+            com.jttw.engine.entity.ridge.RidgeMonster standIn = standIn(e, d);
+            if (standIn != null) {
+                pose(standIn, e);
+                entityRenderDispatcher.getRenderer(standIn).render(standIn, yaw, partial, pose, buffers, light);
+            }
+            shadowRadius = LadyWhiteBoneEntity.wraith(d) ? 0.2f : 0.5f * BoneServantRenderer.SIZE;
+            if (seesTruth()) {
+                mirage = 0.55f + 0.12f * Mth.sin((e.tickCount + partial) * 0.3f);
+                // as tall as the shape she wears, so it is plainly that shape's wearer
+                float fill = e.getBbHeight() / com.jttw.engine.registry.ModEntities.LADY_WHITE_BONE.get().getDimensions().height;
+                pose.pushPose();
+                pose.scale(fill, fill, fill);
+                try {
+                    // lit from within, so it shows the same by day or night
+                    super.render(e, yaw, partial, pose, buffers, net.minecraft.client.renderer.LightTexture.FULL_BRIGHT);
+                } finally {
+                    mirage = 1f;
+                    pose.popPose();
+                }
+            }
+        }
+
+        private com.jttw.engine.entity.ridge.RidgeMonster standIn(LadyWhiteBoneEntity e, int d) {
+            int key = e.getId() * 8 + d;
+            com.jttw.engine.entity.ridge.RidgeMonster m = standIns.get(key);
+            if (m == null || m.level() != e.level()) {
+                m = (LadyWhiteBoneEntity.wraith(d) ? com.jttw.engine.registry.ModEntities.WRAITH : com.jttw.engine.registry.ModEntities.BONE_SERVANT).get().create(e.level());
+                if (m == null) return null;
+                boolean captain = LadyWhiteBoneEntity.captain(d);
+                m.become(captain ? com.jttw.engine.entity.ridge.RidgeMonster.CAPTAIN_LEVEL : com.jttw.engine.entity.ridge.RidgeMonster.LEVEL, captain);
+                m.setSilent(true);
+                if (standIns.size() > 32) standIns.clear();
+                standIns.put(key, m);
+            }
+            return m;
+        }
+
+        /** The stand-in where she is, turned and moving as she is. */
+        private static void pose(net.minecraft.world.entity.LivingEntity m, LadyWhiteBoneEntity e) {
+            m.setPos(e.getX(), e.getY(), e.getZ());
+            m.xo = e.xo; m.yo = e.yo; m.zo = e.zo;
+            m.setYRot(e.getYRot()); m.yRotO = e.yRotO;
+            m.setXRot(e.getXRot()); m.xRotO = e.xRotO;
+            m.yBodyRot = e.yBodyRot; m.yBodyRotO = e.yBodyRotO;
+            m.yHeadRot = e.yHeadRot; m.yHeadRotO = e.yHeadRotO;
+            m.tickCount = e.tickCount;
+            m.hurtTime = e.hurtTime;
+            m.attackAnim = e.attackAnim; m.oAttackAnim = e.oAttackAnim;
+            m.swinging = e.swinging;
+            m.setOnGround(e.onGround());
+            if (m instanceof net.minecraft.world.entity.Mob mob) mob.setAggressive(e.isAggressive());
+            com.jttw.engine.transformation.MorphPose.copyWalkAnim(e.walkAnimation, m.walkAnimation);
+        }
+
+        @Override
+        protected RenderType getRenderType(LadyWhiteBoneEntity e, boolean visible, boolean translucent, boolean glowing) {
+            return mirage < 1f ? RenderType.entityTranslucent(SKELETON) : super.getRenderType(e, visible, translucent, glowing);
+        }
+
+        @Override
+        protected boolean shouldShowName(LadyWhiteBoneEntity e) {
+            return mirage >= 1f && !e.disguised() && super.shouldShowName(e);
+        }
+    }
+
+    // ── The bodies she leaves ───────────────────────────────────────────
+
+    public static final ResourceLocation[] HUSKS = {
+            new ResourceLocation(JTTWEngine.MOD_ID, "textures/entity/lady_husk_girl.png"),
+            new ResourceLocation(JTTWEngine.MOD_ID, "textures/entity/lady_husk_old_woman.png"),
+            new ResourceLocation(JTTWEngine.MOD_ID, "textures/entity/lady_husk_old_man.png")};
+
+    /** A mortal's body, lying on its back where she fell. */
+    public static final class HuskRenderer extends HumanoidMobRenderer<com.jttw.engine.entity.ridge.LadyHuskEntity,
+            HumanoidModel<com.jttw.engine.entity.ridge.LadyHuskEntity>> {
+        public HuskRenderer(EntityRendererProvider.Context ctx) {
+            super(ctx, new HumanoidModel<>(ctx.bakeLayer(ModelLayers.ZOMBIE)) {
+                @Override
+                public void setupAnim(com.jttw.engine.entity.ridge.LadyHuskEntity e, float swing, float swingAmount, float age, float yaw, float pitch) {
+                    super.setupAnim(e, 0, 0, 0, 0, 0); // still
+                    rightArm.zRot = 0.15f;
+                    leftArm.zRot = -0.15f;
+                }
+            }, 0.3f);
+        }
+
+        @Override
+        protected void setupRotations(com.jttw.engine.entity.ridge.LadyHuskEntity e, PoseStack pose, float age, float yaw, float partial) {
+            pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180f - yaw));
+            // laid out on its back, its feet where it stood
+            pose.translate(0, 0.25f, 0);
+            pose.mulPose(com.mojang.math.Axis.XP.rotationDegrees(-90));
+            pose.translate(0, -0.9f, 0);
+        }
+
+        @Override
+        public ResourceLocation getTextureLocation(com.jttw.engine.entity.ridge.LadyHuskEntity e) {
+            return HUSKS[Math.max(0, Math.min(HUSKS.length - 1, e.mortal()))];
+        }
     }
 
     /** Her veil: a ghost's shape about her bones, half seen. */
@@ -223,7 +357,7 @@ public final class RidgeRenderers {
             veil.leftLeg.visible = false;
             veil.rightLeg.visible = false;
             VertexConsumer v = buffers.getBuffer(RenderType.entityTranslucent(LADY_VEIL));
-            veil.renderToBuffer(pose, v, light, LivingEntityRenderer.getOverlayCoords(e, 0f), 1f, 1f, 1f, 0.85f);
+            veil.renderToBuffer(pose, v, light, LivingEntityRenderer.getOverlayCoords(e, 0f), 1f, 1f, 1f, 0.85f * mirage);
         }
     }
 }

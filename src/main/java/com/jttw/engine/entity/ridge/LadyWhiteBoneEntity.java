@@ -64,7 +64,12 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
 
     public static final int LEVEL = 33;
     /** Sixty of a level-33 character's ordinary hits to kill; each shard a sixth of their health, before resistance. */
-    public static final double HITS = 60, SHARD = 1.0 / 6, CLAW = 0.25;
+    /** Ordinary hits to bring down each of her four lives (her three disguises' deaths, then hers). */
+    public static final double HITS = 25, SHARD = 1.0 / 6, CLAW = 0.25;
+    /** How many times she rises again before she dies for good: the girl, the old woman, the old man. */
+    public static final int FALSE_DEATHS = 3;
+    /** How far she wanders from her lair while she passes for one of her dead. */
+    public static final int HIDING_GROUND = 40;
     public static final double HEALTH = HITS * MobScaling.typicalHit(LEVEL), SHARD_DAMAGE = SHARD * MobScaling.typicalHealth(LEVEL);
     /** How often the veil falls, and how long it blinds, in ticks. */
     public static final int VEIL_EVERY = 280, VEIL_BLINDS = 100;
@@ -78,6 +83,13 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
     public static final String KEY_HER_DEAD = "jttw_lady_summoned";
     /** How far from her lair she keeps when no one is fighting her. */
     public static final int LAIR = 12;
+
+    /** What she passes for: nothing (herself), or one of her dead. */
+    public static final int HERSELF = 0, SERVANT = 1, WRAITH = 2, SERVANT_CAPTAIN = 3, WRAITH_CAPTAIN = 4;
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> DISGUISE =
+            net.minecraft.network.syncher.SynchedEntityData.defineId(LadyWhiteBoneEntity.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> DEATHS =
+            net.minecraft.network.syncher.SynchedEntityData.defineId(LadyWhiteBoneEntity.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
 
     private final ServerBossEvent bossBar = new ServerBossEvent(Component.empty(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.NOTCHED_10);
     private final Set<UUID> slayers = new HashSet<>();
@@ -94,11 +106,82 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
         getPersistentData().putString(RidgeMonster.KEY_ZONE, Zones.WHITE_BONE_RIDGE.location().toString());
     }
 
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        entityData.define(DISGUISE, HERSELF);
+        entityData.define(DEATHS, 0);
+    }
+
+    /**
+     * What she is passing for: {@link #HERSELF}, or one of her own dead, a Bone Servant or a Wraith,
+     * maybe a captain: its shape, its size, its name, its way of moving. The first blow a player
+     * lands on her ends it.
+     */
+    public int disguise() {
+        return entityData.get(DISGUISE);
+    }
+
+    public boolean disguised() {
+        return disguise() != HERSELF;
+    }
+
+    public static boolean wraith(int disguise) {
+        return disguise == WRAITH || disguise == WRAITH_CAPTAIN;
+    }
+
+    public static boolean captain(int disguise) {
+        return disguise == SERVANT_CAPTAIN || disguise == WRAITH_CAPTAIN;
+    }
+
+    public void setDisguise(int disguise) {
+        entityData.set(DISGUISE, Math.max(HERSELF, Math.min(WRAITH_CAPTAIN, disguise)));
+        bossBar.setVisible(!disguised());
+        moveAs(disguise);
+        refreshDimensions();
+    }
+
+    /** One of her dead, at random, as the world sends them: mostly the common sort, now and then a captain. */
+    public static int randomDisguise(net.minecraft.util.RandomSource r) {
+        boolean captain = r.nextFloat() < 0.25f;
+        return r.nextBoolean() ? (captain ? SERVANT_CAPTAIN : SERVANT) : (captain ? WRAITH_CAPTAIN : WRAITH);
+    }
+
+    /** As a Wraith she drifts in the air, never touching the ground; else she walks. */
+    private void moveAs(int disguise) {
+        boolean flies = wraith(disguise);
+        if (flies == isNoGravity() && (flies == (navigation instanceof net.minecraft.world.entity.ai.navigation.FlyingPathNavigation))) return;
+        setNoGravity(flies);
+        moveControl = flies ? new net.minecraft.world.entity.ai.control.FlyingMoveControl(this, 20, true) : new net.minecraft.world.entity.ai.control.MoveControl(this);
+        navigation = flies ? new net.minecraft.world.entity.ai.navigation.FlyingPathNavigation(this, level()) : createNavigation(level());
+    }
+
+    /** How many times she has fallen and risen again (0 to 3). */
+    public int falseDeaths() {
+        return entityData.get(DEATHS);
+    }
+
+    @Override
+    public net.minecraft.world.entity.EntityDimensions getDimensions(net.minecraft.world.entity.Pose pose) {
+        // the frame of what she wears
+        int d = disguise();
+        if (d == HERSELF) return super.getDimensions(pose);
+        var frame = (wraith(d) ? ModEntities.WRAITH : ModEntities.BONE_SERVANT).get().getDimensions();
+        return captain(d) ? frame.scale(RidgeMonster.CAPTAIN_SCALE) : frame;
+    }
+
+    @Override
+    public void onSyncedDataUpdated(net.minecraft.network.syncher.EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+        if (DISGUISE.equals(key)) refreshDimensions();
+    }
+
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, HEALTH)
                 .add(Attributes.ATTACK_DAMAGE, CLAW * MobScaling.typicalHealth(LEVEL))
                 .add(Attributes.MOVEMENT_SPEED, 0.26)
+                .add(Attributes.FLYING_SPEED, 0.5) // drifting, while she passes for a Wraith
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.8)
                 .add(Attributes.ARMOR, 8)
                 .add(Attributes.FOLLOW_RANGE, 48);
@@ -107,7 +190,18 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
     @Override
     protected void registerGoals() {
         goalSelector.addGoal(0, new FloatGoal(this));
-        goalSelector.addGoal(2, new RangedAttackGoal(this, 1.0, 40, 60, 24f));
+        // disguised, she fights as a servant does: up close
+        goalSelector.addGoal(2, new net.minecraft.world.entity.ai.goal.MeleeAttackGoal(this, 0.9, true) {
+            @Override public boolean canUse() { return disguised() && super.canUse(); }
+            @Override public boolean canContinueToUse() { return disguised() && super.canContinueToUse(); }
+        });
+        goalSelector.addGoal(3, new RangedAttackGoal(this, 1.0, 40, 60, 24f) {
+            @Override public boolean canUse() { return !disguised() && super.canUse(); }
+            @Override public boolean canContinueToUse() { return !disguised() && super.canContinueToUse(); }
+        });
+        goalSelector.addGoal(5, new net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal(this, 0.8) {
+            @Override public boolean canUse() { return disguised() && super.canUse(); }
+        });
         goalSelector.addGoal(5, new net.minecraft.world.entity.ai.goal.MoveTowardsRestrictionGoal(this, 1.0));
         goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 24f));
         goalSelector.addGoal(7, new RandomLookAroundGoal(this));
@@ -117,7 +211,21 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
 
     @Override
     protected Component getTypeName() {
-        return Component.empty().append(super.getTypeName()).append(" · Lv " + LEVEL);
+        if (disguised()) {
+            int d = disguise();
+            Component kind = Component.translatable(wraith(d) ? "entity.jttw_engine.wraith" : "entity.jttw_engine.bone_servant");
+            Component name = captain(d) ? Component.translatable("entity.jttw_engine.captain", kind) : kind;
+            int level = captain(d) ? RidgeMonster.CAPTAIN_LEVEL : RidgeMonster.LEVEL;
+            return Component.empty().append(name).append(" · Lv " + level)
+                    .withStyle(s -> s.withColor(net.minecraft.network.chat.TextColor.fromRgb(captain(d) ? RidgeMonster.PURPLE : RidgeMonster.WHITE)));
+        }
+        String lives = falseDeaths() == 0 ? "" : " " + "I".repeat(falseDeaths() + 1).replace("IIII", "IV");
+        return Component.empty().append(super.getTypeName()).append(lives + " · Lv " + LEVEL);
+    }
+
+    @Override
+    public boolean shouldShowName() {
+        return disguised() || super.shouldShowName(); // the dead's names show, as theirs do
     }
 
     // ── Her tricks ──────────────────────────────────────────────────────
@@ -208,7 +316,7 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
         bossBar.setProgress(getHealth() / getMaxHealth());
         LivingEntity target = getTarget();
         if (blink > 0) blink--;
-        if (target == null || !target.isAlive()) return;
+        if (disguised() || target == null || !target.isAlive()) return;
 
         if (--veil <= 0) {
             dropVeil();
@@ -232,7 +340,9 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
 
     @Override
     public boolean hurt(DamageSource source, float amount) {
+        boolean found = disguised() && !level().isClientSide && source.getEntity() instanceof Player;
         boolean hurt = super.hurt(source, amount);
+        if (found && isAlive()) reveal(source.getEntity() instanceof LivingEntity by ? by : null);
         if (hurt && !level().isClientSide) {
             if (source.getEntity() instanceof ServerPlayer p) slayers.add(p.getUUID());
             if (blink == 0 && source.getEntity() instanceof LivingEntity by && random.nextFloat() < 0.25f) vanish(by);
@@ -240,8 +350,29 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
         return hurt;
     }
 
+    /** Found out: the borrowed shape falls away from her with a shriek, and the veil drops. */
+    public void reveal(@javax.annotation.Nullable LivingEntity by) {
+        setDisguise(HERSELF);
+        playSound(SoundEvents.GHAST_SCREAM, 2f, 1.4f);
+        if (level() instanceof ServerLevel server) {
+            server.sendParticles(ParticleTypes.WHITE_ASH, getX(), getY(1), getZ(), 300, 1.5, 2, 1.5, 0.05);
+        }
+        dropVeil();
+        veil = VEIL_EVERY;
+        if (by != null) setTarget(by);
+    }
+
+    /**
+     * She does not die the first three times. She falls, leaves a mortal's body where she fell (the
+     * girl, then the old woman, then the old man, as she left them for Sun Wukong), and rises again
+     * a little way off, whole. The fourth time, she is gone.
+     */
     @Override
     public void die(DamageSource source) {
+        if (falseDeaths() < FALSE_DEATHS && !level().isClientSide) {
+            riseAgain(source);
+            return;
+        }
         super.die(source);
         if (!(level() instanceof ServerLevel server)) return;
         ServerPlayer killer = source.getEntity() instanceof ServerPlayer k ? k : null;
@@ -251,6 +382,26 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
             ServerPlayer p = server.getServer().getPlayerList().getPlayer(id);
             if (p != null) CurseOfTheDead.lay(p);
         }
+    }
+
+    private void riseAgain(DamageSource source) {
+        int deaths = falseDeaths();
+        if (level() instanceof ServerLevel server) {
+            LadyHuskEntity body = ModEntities.LADY_HUSK.get().create(server);
+            if (body != null) {
+                body.moveTo(getX(), getY(), getZ(), getYRot(), 0);
+                body.setMortal(deaths);
+                server.addFreshEntity(body);
+            }
+            server.sendParticles(ParticleTypes.WHITE_ASH, getX(), getY(1), getZ(), 150, 1, 1.5, 1, 0.03);
+        }
+        entityData.set(DEATHS, deaths + 1);
+        setHealth(getMaxHealth());
+        marks = 0;
+        playSound(SoundEvents.WITHER_SKELETON_DEATH, 1.5f, 1.3f);
+        LivingEntity by = source.getEntity() instanceof LivingEntity l ? l : getTarget();
+        if (by != null) vanish(by);
+        bossBar.setName(getDisplayName());
     }
 
     // ── A boss ──────────────────────────────────────────────────────────
@@ -293,8 +444,12 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
     public net.minecraft.world.entity.SpawnGroupData finalizeSpawn(net.minecraft.world.level.ServerLevelAccessor level,
             net.minecraft.world.DifficultyInstance difficulty, net.minecraft.world.entity.MobSpawnType reason,
             @javax.annotation.Nullable net.minecraft.world.entity.SpawnGroupData data, @javax.annotation.Nullable CompoundTag tag) {
-        restrictTo(blockPosition(), LAIR);
-        return super.finalizeSpawn(level, difficulty, reason, data, tag);
+        restrictTo(blockPosition(), HIDING_GROUND);
+        net.minecraft.world.entity.SpawnGroupData result = super.finalizeSpawn(level, difficulty, reason, data, tag);
+        // wherever the world puts her, she is one of her dead until someone finds her out
+        if (reason == net.minecraft.world.entity.MobSpawnType.STRUCTURE || reason == net.minecraft.world.entity.MobSpawnType.NATURAL
+                || reason == net.minecraft.world.entity.MobSpawnType.CHUNK_GENERATION) setDisguise(randomDisguise(random));
+        return result;
     }
 
     @Override
@@ -331,6 +486,8 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putInt("Marks", marks);
+        tag.putInt("Disguise", disguise());
+        tag.putInt("FalseDeaths", falseDeaths());
         if (hasRestriction()) tag.put("Lair", NbtUtils.writeBlockPos(getRestrictCenter()));
         ListTag ids = new ListTag();
         for (UUID id : slayers) ids.add(NbtUtils.createUUID(id));
@@ -341,7 +498,9 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         marks = tag.getInt("Marks");
-        if (tag.contains("Lair")) restrictTo(NbtUtils.readBlockPos(tag.getCompound("Lair")), LAIR);
+        entityData.set(DEATHS, tag.getInt("FalseDeaths"));
+        setDisguise(tag.getInt("Disguise"));
+        if (tag.contains("Lair")) restrictTo(NbtUtils.readBlockPos(tag.getCompound("Lair")), HIDING_GROUND);
         for (Tag id : tag.getList("Slayers", Tag.TAG_INT_ARRAY)) slayers.add(NbtUtils.loadUUID(id));
         bossBar.setName(getDisplayName());
     }

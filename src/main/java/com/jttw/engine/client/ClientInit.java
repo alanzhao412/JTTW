@@ -138,6 +138,7 @@ public final class ClientInit {
         event.registerEntityRenderer(ModEntities.HEAVENLY_SOLDIER.get(), com.jttw.engine.client.renderer.HeavenRenderers.SoldierRenderer::new);
         event.registerEntityRenderer(ModEntities.GREAT_WHITE_BULL.get(), com.jttw.engine.client.renderer.GreatWhiteBullRenderer::new);
         event.registerEntityRenderer(ModEntities.LADY_WHITE_BONE.get(), com.jttw.engine.client.renderer.RidgeRenderers.LadyWhiteBoneRenderer::new);
+        event.registerEntityRenderer(ModEntities.LADY_HUSK.get(), com.jttw.engine.client.renderer.RidgeRenderers.HuskRenderer::new);
         event.registerEntityRenderer(ModEntities.BONE_SHARD.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         event.registerEntityRenderer(ModEntities.THROWN_SPEAR.get(),
                 com.jttw.engine.client.renderer.ThrownSpearRenderer::new);

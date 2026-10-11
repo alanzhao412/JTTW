@@ -218,6 +218,18 @@ final class AbilityScenes {
                     soldier(p, 1, 4, true);
                     soldier(p, -4, 6, false);
                 }, p -> {}, 1, false),
+                // Lady White Bone hiding among her dead: as seen, and as truth-seeing eyes see her
+                new Scene("lady_disguised", p -> disguisedLady(p, false), p -> {}, 1, false),
+                new Scene("lady_mirage", p -> disguisedLady(p, true), p -> {}, 1, false),
+                new Scene("lady_husks", p -> {
+                    for (int i = 0; i < 3; i++) {
+                        var body = com.jttw.engine.registry.ModEntities.LADY_HUSK.get().create(p.serverLevel());
+                        if (body == null) continue;
+                        body.moveTo(p.getX() - 2 + i * 2, p.getY(), p.getZ() + 3, 150f + i * 20f, 0f);
+                        body.setMortal(i);
+                        p.serverLevel().addFreshEntity(body);
+                    }
+                }, p -> {}, 1, false),
                 new Scene("ridge_servants", p -> {
                     ridge(p, com.jttw.engine.registry.ModEntities.BONE_SERVANT.get(), -3, 1, false);
                     ridge(p, com.jttw.engine.registry.ModEntities.BONE_SERVANT.get(), -6, 5, true);
@@ -458,6 +470,23 @@ final class AbilityScenes {
         p.serverLevel().addFreshEntity(z);
     }
 
+    /**
+     * A Bone Servant Captain on the left, and on the right Lady White Bone passing for one; with
+     * {@code eyes}, the Fiery Golden Eyes are open, and her true form shows over her disguise.
+     */
+    private static void disguisedLady(ServerPlayer p, boolean eyes) {
+        ridge(p, com.jttw.engine.registry.ModEntities.BONE_SERVANT.get(), -4, 4, true);
+        var lady = com.jttw.engine.registry.ModEntities.LADY_WHITE_BONE.get().create(p.serverLevel());
+        if (lady == null) return;
+        lady.moveTo(p.getX() + 1, p.getY(), p.getZ() + 4, 180f, 0f);
+        lady.setDisguise(com.jttw.engine.entity.ridge.LadyWhiteBoneEntity.SERVANT_CAPTAIN);
+        lady.setNoAi(true);
+        lady.setYHeadRot(180f);
+        lady.setYBodyRot(180f);
+        p.serverLevel().addFreshEntity(lady);
+        com.jttw.engine.client.renderer.GoldenEyesRenderer.setMode(p.getUUID(), eyes ? 1 : 0);
+    }
+
     /** A soldier of Heaven's host, still, on its cloud a little above the ground, facing the camera. */
     private static void soldier(ServerPlayer p, int dx, int dz, boolean general) {
         var s = com.jttw.engine.registry.ModEntities.HEAVENLY_SOLDIER.get().create(p.serverLevel());
@@ -511,6 +540,7 @@ final class AbilityScenes {
     static void reset(ServerPlayer p) {
         keepScreen = false;
         topSpeed = false;
+        com.jttw.engine.client.renderer.GoldenEyesRenderer.setMode(p.getUUID(), 0);
         facing = 0;
         closeUp = false;
         if (NineSpiritsAbilityHandler.inTrueForm(p)) NineSpiritsAbilityHandler.endTrueForm(p);

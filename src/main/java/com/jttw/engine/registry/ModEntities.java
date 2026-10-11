@@ -94,6 +94,13 @@ public final class ModEntities {
                             .fireImmune()
                             .build(new ResourceLocation(JTTWEngine.MOD_ID, "lady_white_bone").toString()));
 
+    public static final RegistryObject<EntityType<com.jttw.engine.entity.ridge.LadyHuskEntity>> LADY_HUSK =
+            ENTITIES.register("lady_husk", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.ridge.LadyHuskEntity>of(com.jttw.engine.entity.ridge.LadyHuskEntity::new, MobCategory.MISC)
+                            .sized(1.8F, 0.4F)
+                            .clientTrackingRange(8)
+                            .build(new ResourceLocation(JTTWEngine.MOD_ID, "lady_husk").toString()));
+
     public static final RegistryObject<EntityType<com.jttw.engine.entity.ridge.BoneShardEntity>> BONE_SHARD =
             ENTITIES.register("bone_shard", () ->
                     EntityType.Builder.<com.jttw.engine.entity.ridge.BoneShardEntity>of(com.jttw.engine.entity.ridge.BoneShardEntity::new, MobCategory.MISC)
@@ -146,6 +153,7 @@ public final class ModEntities {
         event.put(WRAITH.get(), com.jttw.engine.entity.ridge.WraithEntity.createAttributes().build());
         event.put(GREAT_WHITE_BULL.get(), com.jttw.engine.entity.bull.GreatWhiteBullEntity.createAttributes().build());
         event.put(HEAVENLY_SOLDIER.get(), com.jttw.engine.entity.heaven.HeavenlySoldierEntity.createAttributes().build());
+        event.put(LADY_HUSK.get(), com.jttw.engine.entity.ridge.LadyHuskEntity.createAttributes().build());
         event.put(LADY_WHITE_BONE.get(), com.jttw.engine.entity.ridge.LadyWhiteBoneEntity.createAttributes().build());
     }
 }

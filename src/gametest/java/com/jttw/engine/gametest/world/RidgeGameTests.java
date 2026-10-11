@@ -59,7 +59,8 @@ public class RidgeGameTests {
         onEnd(h, () -> {
             for (Entity e : held) {
                 h.getLevel().getEntities((Entity) null, e.getBoundingBox().inflate(6),
-                        x -> x instanceof RidgeMonster || x instanceof LadyWhiteBoneEntity || x instanceof BoneShardEntity).forEach(Entity::discard);
+                        x -> x instanceof RidgeMonster || x instanceof LadyWhiteBoneEntity || x instanceof BoneShardEntity
+                                || x instanceof com.jttw.engine.entity.ridge.LadyHuskEntity).forEach(Entity::discard);
                 e.discard();
             }
         });
@@ -294,10 +295,56 @@ public class RidgeGameTests {
         ServerPlayer p = player(h);
         LadyWhiteBoneEntity lady = lady(h, new BlockPos(4, 2, 4));
         lady.setNoAi(true);
-        lady.die(h.getLevel().damageSources().playerAttack(p));
+        // she falls three times and rises; the fourth is her death
+        for (int i = 0; i <= LadyWhiteBoneEntity.FALSE_DEATHS; i++) lady.die(h.getLevel().damageSources().playerAttack(p));
+        h.getLevel().getEntitiesOfClass(com.jttw.engine.entity.ridge.LadyHuskEntity.class, lady.getBoundingBox().inflate(40)).forEach(Entity::discard);
         check(h, CurseOfTheDead.isCursed(p), "cursed");
         near(h, CurseOfTheDead.LASTS, CurseOfTheDead.remaining(p), "for ten days");
         check(h, p.hasEffect(ModEffects.CURSE_OF_THE_DEAD.get()), "and it shows");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void disguisedSheIsOneOfHerDeadUntilAPlayerStrikesHer(GameTestHelper h) {
+        ServerPlayer p = player(h);
+        LadyWhiteBoneEntity lady = lady(h, new BlockPos(4, 2, 4));
+        lady.setNoAi(true);
+        lady.setDisguise(LadyWhiteBoneEntity.SERVANT_CAPTAIN);
+        check(h, lady.getDisplayName().getString().startsWith("Bone Servant Captain · Lv " + RidgeMonster.CAPTAIN_LEVEL), "named as a servant captain: " + lady.getDisplayName().getString());
+        close(h, ModEntities.BONE_SERVANT.get().getDimensions().height * RidgeMonster.CAPTAIN_SCALE, lady.getBbHeight(), "a captain's height");
+        lady.setDisguise(LadyWhiteBoneEntity.WRAITH);
+        check(h, lady.isNoGravity() && lady.getNavigation() instanceof net.minecraft.world.entity.ai.navigation.FlyingPathNavigation, "as a Wraith she drifts");
+        check(h, lady.getDisplayName().getString().startsWith("Wraith · Lv " + RidgeMonster.LEVEL), "and is named one");
+        var golem = h.spawn(EntityType.IRON_GOLEM, new BlockPos(1, 2, 1));
+        golem.setNoAi(true);
+        lady.hurt(h.getLevel().damageSources().mobAttack(golem), 1);
+        check(h, lady.disguised(), "a beast's blow does not find her out");
+        lady.hurt(h.getLevel().damageSources().playerAttack(p), 1);
+        check(h, !lady.disguised(), "a player's does");
+        check(h, !lady.isNoGravity(), "and she stands on the ground as herself");
+        check(h, lady.getDisplayName().getString().startsWith("Lady White Bone"), "named as herself");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void sheFallsThriceLeavingMortalsBodiesThenDies(GameTestHelper h) {
+        ServerPlayer p = player(h);
+        LadyWhiteBoneEntity lady = lady(h, new BlockPos(4, 2, 4));
+        lady.setNoAi(true);
+        var husks = new java.util.ArrayList<com.jttw.engine.entity.ridge.LadyHuskEntity>();
+        onEnd(h, () -> h.getLevel().getEntitiesOfClass(com.jttw.engine.entity.ridge.LadyHuskEntity.class, new AABB(h.absolutePos(BlockPos.ZERO)).inflate(60)).forEach(Entity::discard));
+        for (int i = 0; i < LadyWhiteBoneEntity.FALSE_DEATHS; i++) {
+            lady.setHealth(1);
+            lady.die(h.getLevel().damageSources().playerAttack(p));
+            check(h, lady.isAlive() && lady.getHealth() == lady.getMaxHealth(), "she rises again, whole (" + (i + 1) + ")");
+        }
+        husks.addAll(h.getLevel().getEntitiesOfClass(com.jttw.engine.entity.ridge.LadyHuskEntity.class, new AABB(h.absolutePos(BlockPos.ZERO)).inflate(60)));
+        eq(h, LadyWhiteBoneEntity.FALSE_DEATHS, husks.size(), "a body left each time");
+        check(h, husks.stream().map(com.jttw.engine.entity.ridge.LadyHuskEntity::mortal).collect(java.util.stream.Collectors.toSet())
+                .equals(java.util.Set.of(0, 1, 2)), "the girl, the old woman, the old man");
+        check(h, !CurseOfTheDead.isCursed(p), "no curse yet");
+        lady.die(h.getLevel().damageSources().playerAttack(p));
+        check(h, CurseOfTheDead.isCursed(p), "the fourth time she is gone, and the curse falls");
         h.succeed();
     }
 
