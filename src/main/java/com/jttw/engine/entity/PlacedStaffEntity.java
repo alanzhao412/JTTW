@@ -57,6 +57,9 @@ public class PlacedStaffEntity extends Entity {
             SynchedEntityData.defineId(PlacedStaffEntity.class, EntityDataSerializers.VECTOR3);
     private static final EntityDataAccessor<Float> ROD_SPIN =
             SynchedEntityData.defineId(PlacedStaffEntity.class, EntityDataSerializers.FLOAT);
+    /** Standing: the largest size it can grow to now, through what stands above it (see {@link #reachable}). */
+    private static final EntityDataAccessor<Float> GROW_REACH =
+            SynchedEntityData.defineId(PlacedStaffEntity.class, EntityDataSerializers.FLOAT);
 
     private int returnTimer = -1; // ticks until return, -1 = not returning
     private int fallAnimTicks = 0; // client-side animation counter
@@ -121,6 +124,7 @@ public class PlacedStaffEntity extends Entity {
         this.entityData.define(ROD_BASE, new org.joml.Vector3f());
         this.entityData.define(ROD_TIP, new org.joml.Vector3f());
         this.entityData.define(ROD_SPIN, 0f);
+        this.entityData.define(GROW_REACH, MAX_SCALE);
     }
 
     // ── Getters / Setters ────────────────────────────────────────────
@@ -319,39 +323,80 @@ public class PlacedStaffEntity extends Entity {
         // Growing, it drills up through what it can pay for; it stops beneath what it cannot
         if (!level().isClientSide() && newScale > oldScale) newScale = drillTo(oldScale, newScale);
         if (newScale > oldScale || newScale < oldScale) setStaffScale(newScale);
+        if (!level().isClientSide()) updateReach();
+    }
+
+    /** What its growing has paid so far (see Carving): its budget at any size is spent across all its growing. */
+    private double drillPaid;
+    /** Blocks its growing has paid for, gone to it though the breaker takes them over the next ticks. */
+    private final java.util.Set<Long> drilled = new java.util.HashSet<>();
+
+    /** The largest size it can grow to now (synced; on the server, as last worked out). */
+    public float reachScale() {
+        return entityData.get(GROW_REACH);
+    }
+
+    /** How tall it can grow now, in blocks. */
+    public float reachHeight() {
+        return VISUAL_HEIGHT * reachScale();
+    }
+
+    /** Whose strength pays for its growing: who last grew it, else its owner if online. */
+    @Nullable
+    private Player payer() {
+        if (grower != null || getOwnerUUID() == null || level().getServer() == null) return grower;
+        return level().getServer().getPlayerList().getPlayer(getOwnerUUID());
+    }
+
+    /**
+     * The largest size, up to {@code upTo}, it can grow to from where it stands: layer by layer up
+     * its column, each paid for (on top of what its growing has already paid) from its budget at
+     * the size that passes through that layer. It stops beneath the first layer it cannot pay for:
+     * an obsidian ceiling for the weak, bedrock for all. What it would break goes into
+     * {@code breaks}, and what that would cost into {@code cost[0]}, when given.
+     */
+    private float reachable(float upTo, @Nullable Player payer, @Nullable java.util.List<BlockPos> breaks, @Nullable double[] cost) {
+        Level lv = level();
+        double strength = com.jttw.engine.world.tough.Tough.strength(payer), paid = drillPaid;
+        int baseY = net.minecraft.util.Mth.floor(getY()), topY = net.minecraft.util.Mth.floor(getY() + VISUAL_HEIGHT * upTo);
+        BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
+        for (int by = baseY; by <= topY; by++) {
+            // each layer is priced the one way, however it is grown into: at the size whose tip
+            // passes through it, with that size's width (a little wider than drawn) and budget
+            float size = Math.max(MIN_SCALE, (float) ((by + 1 - getY()) / VISUAL_HEIGHT));
+            float radius = 0.25f + size * 0.05f;
+            int x0 = net.minecraft.util.Mth.floor(getX() - radius), x1 = net.minecraft.util.Mth.floor(getX() + radius);
+            int z0 = net.minecraft.util.Mth.floor(getZ() - radius), z1 = net.minecraft.util.Mth.floor(getZ() + radius);
+            double layer = 0;
+            int marked = breaks == null ? 0 : breaks.size();
+            for (int bx = x0; bx <= x1; bx++) for (int bz = z0; bz <= z1; bz++) {
+                at.set(bx, by, bz);
+                BlockState state = lv.getBlockState(at);
+                if (state.isAir() || drilled.contains(at.asLong())) continue;
+                layer += com.jttw.engine.world.tough.Carving.cost(lv, at, state, strength);
+                if (breaks != null) breaks.add(at.immutable());
+            }
+            // a layer already paid for (or empty) costs nothing; a new one must fit, with all paid
+            // below it, in the budget of the size that passes through it
+            if (layer > 0 && paid + layer > carveBudget(size, payer)) {
+                if (breaks != null) breaks.subList(marked, breaks.size()).clear();
+                upTo = Math.max(MIN_SCALE, (float) ((by - getY()) / VISUAL_HEIGHT) - 0.01f);
+                break;
+            }
+            paid += layer;
+        }
+        if (cost != null) cost[0] = paid - drillPaid;
+        return upTo;
     }
 
     /** As tall as it can grow from {@code from} toward {@code to}, drilling what it can pay for on the way. */
     private float drillTo(float from, float to) {
         ServerLevel sl = (ServerLevel) level();
-        Player owner = grower;
-        if (owner == null && getOwnerUUID() != null) owner = sl.getServer().getPlayerList().getPlayer(getOwnerUUID());
-        double allowance = carveBudget(to, owner), strength = com.jttw.engine.world.tough.Tough.strength(owner);
-        float radius = 0.25f + to * 0.05f; // a little wider than drawn
-        int minBX = net.minecraft.util.Mth.floor(getX() - radius), maxBX = net.minecraft.util.Mth.floor(getX() + radius);
-        int minBZ = net.minecraft.util.Mth.floor(getZ() - radius), maxBZ = net.minecraft.util.Mth.floor(getZ() + radius);
-        int fromY = net.minecraft.util.Mth.floor(getY() + VISUAL_HEIGHT * from), toY = net.minecraft.util.Mth.floor(getY() + VISUAL_HEIGHT * to);
         java.util.List<BlockPos> column = new java.util.ArrayList<>();
-        float reached = to;
-        // layer by layer upward: a layer it cannot pay for in full stops it beneath that layer
-        outer:
-        for (int by = Math.max(fromY, net.minecraft.util.Mth.floor(getY())); by <= toY; by++) {
-            java.util.List<BlockPos> layer = new java.util.ArrayList<>();
-            double layerCost = 0;
-            for (int bx = minBX; bx <= maxBX; bx++) for (int bz = minBZ; bz <= maxBZ; bz++) {
-                BlockPos pos = new BlockPos(bx, by, bz);
-                BlockState state = sl.getBlockState(pos);
-                if (state.isAir()) continue;
-                layerCost += com.jttw.engine.world.tough.Carving.cost(sl, pos, state, strength);
-                layer.add(pos);
-            }
-            if (layerCost > allowance) {
-                reached = Math.max(from, (float) ((by - getY()) / VISUAL_HEIGHT) - 0.01f);
-                break outer;
-            }
-            allowance -= layerCost;
-            column.addAll(layer);
-        }
+        double[] cost = new double[1];
+        float reached = Math.max(from, reachable(to, payer(), column, cost));
+        drillPaid += cost[0];
+        for (BlockPos pos : column) drilled.add(pos.asLong());
         if (!column.isEmpty()) {
             com.jttw.engine.world.TerrainBreaker.breakBlocks(sl, column); // no drops, spread over ticks
             sl.sendParticles(ParticleTypes.CLOUD, getX(), getY() + VISUAL_HEIGHT * reached, getZ(),
@@ -363,6 +408,11 @@ public class PlacedStaffEntity extends Entity {
             level().playSound(null, getX(), getY() + VISUAL_HEIGHT * reached, getZ(), SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 0.8f, 0.6f);
         }
         return reached;
+    }
+
+    /** Works out again how tall it can grow now, for its owner's meter. */
+    private void updateReach() {
+        entityData.set(GROW_REACH, Math.max(getStaffScale(), reachable(MAX_SCALE, payer(), null, null)));
     }
 
     // ── Hit to topple ────────────────────────────────────────────────
@@ -637,11 +687,22 @@ public class PlacedStaffEntity extends Entity {
         moveAt(t, along.scale(-(far <= hold ? 1 : hold / far)));
     }
 
+    /**
+     * Where its two weights sit, as shares of its length from each end: half its mass at each, at
+     * 1/2 - 1/(2 sqrt 3) (about 0.211) in from either end, is a solid rod of even weight in how it
+     * turns as well as how it falls (the same moment about its middle, mL^2/12). Its ends follow
+     * them, as all of it does: a rigid line through the two.
+     */
+    private static final double WEIGHT_AT = 0.5 - 0.5 / Math.sqrt(3), BEYOND = WEIGHT_AT / (1 - 2 * WEIGHT_AT);
+
     /** Moves the rod so the point a share {@code t} of the way from foot to tip moves by {@code by}. */
     private void moveAt(double t, net.minecraft.world.phys.Vec3 by) {
-        double wa = 1 - t, wb = t, k = 1 / (wa * wa + wb * wb);
-        rodA = rodA.add(by.scale(wa * k));
-        rodB = rodB.add(by.scale(wb * k));
+        // the point's place between the two weights (below 0 or past 1 out toward the ends)
+        double u = (t - WEIGHT_AT) / (1 - 2 * WEIGHT_AT), wa = 1 - u, wb = u, k = 1 / (wa * wa + wb * wb);
+        net.minecraft.world.phys.Vec3 pa = by.scale(wa * k), pb = by.scale(wb * k);
+        // and the ends, which lie on the line through the weights, beyond them
+        rodA = rodA.add(pa.scale(1 + BEYOND)).subtract(pb.scale(BEYOND));
+        rodB = rodB.add(pb.scale(1 + BEYOND)).subtract(pa.scale(BEYOND));
     }
 
     private void keepLength(double L) {
@@ -847,6 +908,8 @@ public class PlacedStaffEntity extends Entity {
         if (isRod() && level() instanceof ServerLevel server) {
             rodTick(server);
             if (!isAlive()) return;
+        } else if (isStanding() && tickCount % 10 == 0) {
+            updateReach(); // what stands above it may have changed
         }
 
         // Return countdown
@@ -959,6 +1022,7 @@ public class PlacedStaffEntity extends Entity {
     @Override
     protected void readAdditionalSaveData(CompoundTag tag) {
         setStaffScale(tag.getFloat("StaffScale"));
+        drillPaid = tag.getDouble("DrillPaid");
         master = tag.hasUUID("Master") ? tag.getUUID("Master") : null;
         if (tag.getBoolean("Fallen")) {
             entityData.set(FALLING, true);
@@ -977,6 +1041,7 @@ public class PlacedStaffEntity extends Entity {
     @Override
     protected void addAdditionalSaveData(CompoundTag tag) {
         tag.putFloat("StaffScale", getStaffScale());
+        tag.putDouble("DrillPaid", drillPaid);
         if (master != null) tag.putUUID("Master", master);
         if (isRod()) {
             tag.putBoolean("Fallen", true);

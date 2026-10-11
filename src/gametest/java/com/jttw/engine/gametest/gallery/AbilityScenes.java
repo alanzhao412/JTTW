@@ -210,6 +210,13 @@ final class AbilityScenes {
                 // the mighty go through
                 new Scene("staff_obsidian", p -> obsidianWall(p, 1), p -> fell(p, 90f), 195, false),
                 new Scene("staff_obsidian_mighty", p -> obsidianWall(p, 100), p -> fell(p, 90f), 195, false),
+                // looking at his own standing staff beneath an obsidian ceiling: how tall it is, how tall it can grow
+                new Scene("staff_growth_meter", p -> {
+                    for (int dx = -3; dx <= 3; dx++) for (int dz = -1; dz <= 5; dz++)
+                        p.level().setBlockAndUpdate(p.blockPosition().offset(dx, 14, dz), Blocks.OBSIDIAN.defaultBlockState());
+                    plantAt(p, 0, 2, 4f);
+                    facing = -14f; // onto it: it stands half a block east of straight ahead
+                }, p -> {}, 1, true, -25f),
                 // a Qi Wave half charged: the meter above the crosshair
                 new Scene("charge_meter", p -> {
                     empoweredStaff(p);

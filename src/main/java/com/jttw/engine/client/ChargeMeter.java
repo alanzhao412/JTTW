@@ -2,6 +2,7 @@ package com.jttw.engine.client;
 
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.character.saurian.SaurianAbilityHandler;
+import com.jttw.engine.entity.PlacedStaffEntity;
 import com.jttw.engine.item.Charged;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -19,7 +20,8 @@ import javax.annotation.Nullable;
  * Above the crosshair, while something is being charged: how far, as a percentage and a bar. Grey
  * until letting go would strike at all; gold when full. Items say how charged they are (Charged);
  * an ability charged by holding its key (the Saurian's Riptide Surge) is timed here, from the
- * moment its key went down.
+ * moment its key went down. Aimed at one's own standing Ruyi Jingu Bang: how tall it is against
+ * the tallest it can grow now (through what stands above it, by its budget), in blocks.
  */
 @Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, value = Dist.CLIENT)
 public final class ChargeMeter {
@@ -49,20 +51,33 @@ public final class ChargeMeter {
         return "sdk_surge".equals(abilityId) ? SaurianAbilityHandler.FULL_CHARGE : 0;
     }
 
+    /** What the meter shows: how far toward full, whether it would strike now, and a line beneath. */
+    record Reading(float fraction, boolean ready, @Nullable String note) {
+        Reading(Charged.Charge c) {
+            this(c.fraction(), c.ready(), null);
+        }
+    }
+
     @Nullable
-    static Charged.Charge reading(Minecraft mc) {
+    static Reading reading(Minecraft mc) {
         var p = mc.player;
         if (p == null || mc.level == null) return null;
         if (p.isUsingItem()) {
             ItemStack stack = p.getUseItem();
-            if (stack.getItem() instanceof Charged c)
-                return c.charge(stack, p, p.getTicksUsingItem(), ClientAbilityData.getUnlockedNodes());
-            return null;
+            Charged.Charge c = stack.getItem() instanceof Charged ch
+                    ? ch.charge(stack, p, p.getTicksUsingItem(), ClientAbilityData.getUnlockedNodes()) : null;
+            return c == null ? null : new Reading(c);
         }
         if (heldAbility != null) {
             long held = mc.level.getGameTime() - heldSince;
             // the surge: a quarter at once, full after a second
-            return new Charged.Charge(Math.max(0.25f, Math.min(1f, held / (float) fullCharge(heldAbility))), true);
+            return new Reading(Math.max(0.25f, Math.min(1f, held / (float) fullCharge(heldAbility))), true, null);
+        }
+        PlacedStaffEntity staff = StaffScrollHandler.aimedStaff(mc);
+        if (staff != null && staff.isStanding() && !staff.isEcho()) {
+            float most = Math.max(staff.getStaffScale(), staff.reachScale());
+            return new Reading(staff.getStaffScale() / most, true,
+                    Math.round(staff.length()) + " / " + Math.round(staff.reachHeight()) + " blocks");
         }
         return null;
     }
@@ -71,7 +86,7 @@ public final class ChargeMeter {
     public static void onRenderGuiOverlay(RenderGuiOverlayEvent.Post event) {
         if (event.getOverlay() != VanillaGuiOverlay.CROSSHAIR.type()) return;
         Minecraft mc = Minecraft.getInstance();
-        Charged.Charge c = reading(mc);
+        Reading c = reading(mc);
         if (c == null) return;
         GuiGraphics g = event.getGuiGraphics();
         Font font = mc.font;
@@ -83,5 +98,6 @@ public final class ChargeMeter {
         g.drawString(font, text, (w - font.width(text)) / 2, y - 10, colour, true);
         g.fill(x0 - 1, y - 1, x0 + barW + 1, y + 3, 0xAA000000);
         g.fill(x0, y, x0 + Math.round(barW * c.fraction()), y + 2, colour);
+        if (c.note() != null) g.drawString(font, c.note(), (w - font.width(c.note())) / 2, y + 5, 0xFFDDDDDD, true);
     }
 }

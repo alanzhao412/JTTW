@@ -171,4 +171,46 @@ public class ToughGameTests {
         near(h, 21, staff.getStaffScale(), "grown all the way");
         h.succeedWhen(() -> check(h, h.getBlockState(new BlockPos(2, 8, 2)).isAir(), "through the ceiling"));
     }
+
+    /** Its reach, shown on the meter, is how tall growing would really take it. */
+    @GameTest(template = PLATFORM)
+    public static void itsReachIsWhereGrowingStops(GameTestHelper h) {
+        ServerPlayer owner = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
+        for (int x = 0; x < 5; x++) for (int z = 0; z < 5; z++) h.setBlock(new BlockPos(x, 8, z), Blocks.OBSIDIAN);
+        PlacedStaffEntity staff = planted(h, owner);
+        h.runAfterDelay(12, () -> { // it works its reach out as it stands
+            float reach = staff.reachScale();
+            double ceiling = h.absolutePos(new BlockPos(2, 8, 2)).getY();
+            check(h, reach < PlacedStaffEntity.MAX_SCALE, "the ceiling holds it short: " + reach);
+            check(h, staff.getY() + staff.reachHeight() <= ceiling, "its reach in blocks ends beneath the ceiling");
+            for (int i = 0; i < 20; i++) staff.adjustScale(1, owner);
+            near(h, reach, staff.getStaffScale(), "it grows exactly as far as its reach said");
+            h.succeed();
+        });
+    }
+
+    /**
+     * Growing a notch at a time spends one budget: it ends exactly where growing all at once does,
+     * in dirt it cannot pay to drill all of (a fresh budget each notch would have taken it further).
+     */
+    @GameTest(template = PLATFORM, timeoutTicks = 200)
+    public static void growingSpendsOneBudget(GameTestHelper h) {
+        ServerPlayer owner = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
+        Runnable fill = () -> {
+            for (int y = 3; y < 30; y++) for (int x = 0; x < 5; x++) for (int z = 0; z < 5; z++) h.setBlock(new BlockPos(x, y, z), Blocks.DIRT);
+        };
+        fill.run();
+        PlacedStaffEntity stepwise = planted(h, owner);
+        for (int i = 0; i < 15; i++) stepwise.adjustScale(1, owner);
+        float stepped = stepwise.getStaffScale();
+        check(h, stepped < 16, "its budget ran out in the dirt: " + stepped);
+        stepwise.discard();
+        h.runAfterDelay(60, () -> { // the first's drilling done, the dirt put back
+            fill.run();
+            PlacedStaffEntity atOnce = planted(h, owner);
+            atOnce.adjustScale(15, owner);
+            near(h, stepped, atOnce.getStaffScale(), "a notch at a time ends where all at once does");
+            h.succeed();
+        });
+    }
 }
