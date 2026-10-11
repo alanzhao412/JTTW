@@ -77,6 +77,7 @@ public class TransformationManager {
     }
 
     private static void become(Player player, TransformationData data) {
+        float wasW = player.getBbWidth(), wasH = player.getBbHeight();
         TRANSFORMATIONS.put(player.getUUID(), data);
         applyTransformation(player, data);
         saveToPlayer(player, data);
@@ -87,11 +88,31 @@ public class TransformationManager {
             NetworkHandler.sendToTrackingPlayers(sp, new SyncTransformationPacket(player.getUUID(), data));
         }
         BlockForms.onFormChanged(player);
+        puff(player, wasW, wasH);
+    }
+
+    /**
+     * A puff of cloud as the shape changes: a burst of white about it, as big as the larger of
+     * the shape it leaves and the one it takes, and the whoosh of it.
+     */
+    private static void puff(Player player, float wasW, float wasH) {
+        if (!(player.level() instanceof net.minecraft.server.level.ServerLevel level)) return;
+        float w = Math.max(wasW, player.getBbWidth()), h = Math.max(wasH, player.getBbHeight());
+        int count = Math.min(320, 60 + (int) (w * w * h * 24));
+        double cx = player.getX(), cy = player.getY() + h * 0.5, cz = player.getZ();
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD, cx, cy, cz, count,
+                w * 0.45 + 0.2, h * 0.4 + 0.1, w * 0.45 + 0.2, 0.03);
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.POOF, cx, cy, cz, count / 3,
+                w * 0.3, h * 0.3, w * 0.3, 0.05);
+        level.playSound(null, cx, cy, cz, net.minecraft.sounds.SoundEvents.ILLUSIONER_MIRROR_MOVE,
+                net.minecraft.sounds.SoundSource.PLAYERS, 1.0f, 1.0f);
     }
 
     public static void demorph(Player player) {
         if (player.level().isClientSide) return;
 
+        boolean wasTransformed = TRANSFORMATIONS.containsKey(player.getUUID());
+        float wasW = player.getBbWidth(), wasH = player.getBbHeight();
         TRANSFORMATIONS.remove(player.getUUID());
         resetTransformation(player);
         clearFromPlayer(player);
@@ -102,6 +123,7 @@ public class TransformationManager {
             NetworkHandler.sendToTrackingPlayers(sp, new SyncTransformationPacket(player.getUUID(), null));
         }
         BlockForms.onFormChanged(player);
+        if (wasTransformed && player.isAlive()) puff(player, wasW, wasH);
     }
 
     /** Apply all trait side-effects when a player gains a transformation. */

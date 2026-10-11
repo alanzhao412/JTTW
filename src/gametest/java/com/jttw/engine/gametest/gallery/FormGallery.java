@@ -179,6 +179,7 @@ public final class FormGallery {
         if (shot.kind() == Kind.SCENE && wait == scene(shot).triggerBefore()) {
             mc.gui.getChat().clearMessages(false); // setup chatter would cover a first-person HUD
             if (AbilityScenes.holdUse) mc.options.keyUse.setDown(true);
+            if (AbilityScenes.openSkillTree) mc.setScreen(new com.jttw.engine.client.gui.SkillTreeScreen());
             UUID id = mc.player.getUUID();
             AbilityScenes.Scene sc = scene(shot);
             mc.getSingleplayerServer().execute(() -> {
@@ -194,6 +195,7 @@ public final class FormGallery {
         boolean onCamera = mc.getCameraEntity() != mc.player;
         Screenshot.grab(mc.gameDirectory, RUN_DIR + "/" + file, mc.getMainRenderTarget(), msg -> {});
         mc.options.keyUse.setDown(false);
+        if (mc.screen instanceof com.jttw.engine.client.gui.SkillTreeScreen) mc.setScreen(null);
         TransformationData data = TransformationManager.getTransformation(mc.player);
         index.add(file + "\t" + shot.form() + "\t" + shot.view()
                 + "\tclientForm=" + (data == null ? "none" : data.getFormId())

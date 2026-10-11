@@ -526,6 +526,13 @@ public class PlacedStaffEntity extends Entity {
     private static final int PASSES = 3;
     /** Ticks it must lie still before it rests (and stops being simulated until disturbed). */
     private static final int SETTLE = 30;
+    /**
+     * How fast (blocks a tick) a point of it must be driving into a block to break it: a staff
+     * crashing down smashes what it strikes; one standing or lying on the ground does not dig in.
+     */
+    public static final double BREAK_SPEED = 0.3;
+    /** The length of the step being taken, as a share of a tick. */
+    private double stepH = 1;
     /** The most steps a tick is cut into, so a fast end never skips through a block. */
     private static final int MAX_STEPS = 12;
     /** Its budget for carving (see Carving), per unit of size and per unit of its owner's level power. */
@@ -615,6 +622,7 @@ public class PlacedStaffEntity extends Entity {
         double fastest = Math.max(velA.length(), velB.length());
         int steps = Math.max(1, Math.min(MAX_STEPS, (int) Math.ceil(fastest / (Math.max(0.25, radius()) * 0.8))));
         double h = 1.0 / steps;
+        stepH = h;
         net.minecraft.world.phys.Vec3 before = rodA.add(rodB).scale(0.5);
         touchA = touchB = false;
         for (int step = 0; step < steps; step++) {
@@ -766,7 +774,6 @@ public class PlacedStaffEntity extends Entity {
                 net.minecraft.world.phys.Vec3 d = p.subtract(cx, cy, cz);
                 double dist = d.length();
                 if (dist >= r && !(dist == 0)) continue; // not touching
-                if (breakInto(level, at)) continue;
                 net.minecraft.world.phys.Vec3 out;
                 double pen;
                 if (dist > 1e-6) {
@@ -786,6 +793,10 @@ public class PlacedStaffEntity extends Entity {
                     };
                     pen = faces[best] + r;
                 }
+                // it breaks the block only if it strikes it hard enough: how fast this point is
+                // driving into it; resting on it, its weight alone breaks nothing
+                double into = -p.subtract(stepA.lerp(stepB, t)).dot(out) / stepH;
+                if (into >= BREAK_SPEED && breakInto(level, at)) continue;
                 contact(t, out, Math.min(pen, 1.0));
                 p = rodA.lerp(rodB, t);
                 if (t < 0.5) touchA = true;

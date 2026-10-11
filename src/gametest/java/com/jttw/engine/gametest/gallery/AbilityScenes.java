@@ -55,6 +55,8 @@ final class AbilityScenes {
     static volatile boolean closeUp;
     /** The scene holds the use key down from its trigger until it is shot (charging, as a player would). */
     static volatile boolean holdUse;
+    /** The scene opens the skill tree at its trigger, to be shot. */
+    static volatile boolean openSkillTree;
 
     /** Set by a scene of Wukong at his top speed: the gallery keeps his momentum at its height. */
     static volatile boolean topSpeed;
@@ -247,6 +249,22 @@ final class AbilityScenes {
                     LevelManager.syncToClient(p); // the skill bar, as a player's would show it
                 }, p -> net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(
                         new net.minecraftforge.event.entity.living.LivingDamageEvent(p, p.damageSources().generic(), 24f)), 10, true),
+                // the Ruyi Jingu Bang, plain, in hand: as he sees it, and as others do
+                new Scene("staff_base_hand", p -> plainStaff(p), p -> {}, 1, true, 10f),
+                new Scene("staff_base_held", p -> { plainStaff(p); closeUp = true; facing = -40f; }, p -> {}, 1, false),
+                // the Dragon's skill tree, nine columns: the window keeps its size and the tree scrolls
+                new Scene("skill_tree_dragon", p -> {
+                    p.getPersistentData().remove("jttw_skill_nodes");
+                    AlignmentData.markReincarnated(p, ReincarnationOutcome.DRAGON);
+                    LevelManager.initClass(p, ReincarnationOutcome.DRAGON);
+                    p.setGameMode(GameType.SURVIVAL);
+                    LevelManager.syncToClient(p);
+                    openSkillTree = true;
+                    keepScreen = true;
+                }, p -> {}, 10, true),
+                // a transformation: the puff of cloud as he becomes a horse, seen from outside
+                new Scene("transform_puff", p -> {},
+                        p -> com.jttw.engine.transformation.TransformationManager.transform(p, net.minecraft.world.entity.EntityType.HORSE), 3, false),
                 // a Qi Wave half charged: the meter above the crosshair
                 new Scene("charge_meter", p -> {
                     empoweredStaff(p);
@@ -534,6 +552,12 @@ final class AbilityScenes {
     }
 
     /** Wukong, strong enough to hold it, with the Ruyi Jingu Bang Qi-empowered in hand. */
+    private static void plainStaff(ServerPlayer p) {
+        AlignmentData.markReincarnated(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
+        LevelManager.initClass(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
+        p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(com.jttw.engine.registry.ModItems.RUYI_JINGU_BANG.get()));
+    }
+
     private static void empoweredStaff(ServerPlayer p) {
         AlignmentData.markReincarnated(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
         LevelManager.initClass(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
@@ -703,6 +727,7 @@ final class AbilityScenes {
         facing = 0;
         closeUp = false;
         holdUse = false;
+        openSkillTree = false;
         if (NineSpiritsAbilityHandler.inTrueForm(p)) NineSpiritsAbilityHandler.endTrueForm(p);
         if (BullDemonAbilityHandler.inGreatBull(p)) BullDemonAbilityHandler.endGreatBull(p);
         p.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);

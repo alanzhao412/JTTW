@@ -77,7 +77,12 @@ public class ToughGameTests {
 
     /** A wall of {@code block}, 5 wide and 8 high, at relative z = 3 across the platform. */
     private static void wall(GameTestHelper h, Block block) {
-        for (int x = 0; x < 5; x++) for (int y = 2; y < 10; y++) h.setBlock(new BlockPos(x, y, 3), block);
+        wall(h, block, 3);
+    }
+
+    /** A wall of {@code block}, 5 wide and 8 high, at relative z = {@code z}. */
+    private static void wall(GameTestHelper h, Block block, int z) {
+        for (int x = 0; x < 5; x++) for (int y = 2; y < 10; y++) h.setBlock(new BlockPos(x, y, z), block);
     }
 
     private static PlacedStaffEntity felled(GameTestHelper h, ServerPlayer owner, float scale) {
@@ -114,13 +119,40 @@ public class ToughGameTests {
     public static void aMightyStaffFallsThroughObsidian(GameTestHelper h) {
         ServerPlayer owner = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
         PlayerLevel.setLevel(owner, 100);
-        wall(h, Blocks.OBSIDIAN);
+        // far enough that it is falling fast when it strikes (one it leans on as it tips, it only touches)
+        wall(h, Blocks.OBSIDIAN, 5);
         PlacedStaffEntity staff = felled(h, owner, 4f);
         h.runAfterDelay(140, () -> {
             check(h, elevation(staff) < 20, "down through it: " + elevation(staff));
             int gone = 0;
-            for (int y = 2; y < 10; y++) if (h.getBlockState(new BlockPos(2, y, 3)).isAir()) gone++;
+            for (int y = 2; y < 10; y++) if (h.getBlockState(new BlockPos(2, y, 5)).isAir()) gone++;
             check(h, gone >= 3, "it broke its way: " + gone + " blocks of the wall gone");
+            h.succeed();
+        });
+    }
+
+    /**
+     * Toppled on stone by the mightiest, who can pay for any of it: while it still stands its foot
+     * stays on the floor (its weight alone breaks nothing) and it tips over; only its crash smashes.
+     */
+    @GameTest(template = PLATFORM, batch = "staff_physics", timeoutTicks = 200)
+    public static void aToppledStaffTipsOverRatherThanDiggingIn(GameTestHelper h) {
+        ServerPlayer owner = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
+        PlayerLevel.setLevel(owner, 100);
+        for (int x = 0; x < 5; x++) for (int z = 0; z < 5; z++) h.setBlock(new BlockPos(x, 1, z), Blocks.STONE);
+        PlacedStaffEntity staff = felled(h, owner, 2f);
+        double floor = h.absolutePos(new BlockPos(2, 2, 1)).getY();
+        // from the push until it first leans past 45 degrees: while it still stands
+        double[] lowestUpright = {Double.MAX_VALUE};
+        boolean[] fallen = {false};
+        h.onEachTick(() -> {
+            if (fallen[0] || elevation(staff) <= 45) fallen[0] = true;
+            else lowestUpright[0] = Math.min(lowestUpright[0], staff.rodBase().y);
+        });
+        h.runAfterDelay(60, () -> {
+            check(h, lowestUpright[0] > floor - 0.3, "standing, its foot never sank: " + (lowestUpright[0] - floor));
+            h.assertBlockPresent(Blocks.STONE, new BlockPos(2, 1, 1));
+            check(h, fallen[0], "it has tipped over (and, so mighty, smashed in where it struck)");
             h.succeed();
         });
     }

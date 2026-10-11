@@ -59,10 +59,11 @@ public class SkillTreeScreen extends Screen {
     // Layout constants
     // -----------------------------------------------------------------------
 
-    // Panel dimensions — width is computed dynamically in init() based on tree column count
-    private static final int PANEL_MIN_W = 452;
+    // The window is a fixed size (never more than the screen holds); a tree larger than it scrolls
+    private static final int PANEL_W = 452;
     private static final int PANEL_H = 194;
-    private int panelW = PANEL_MIN_W;
+    private static final int SCREEN_MARGIN = 8;
+    private int panelW = PANEL_W, panelH = PANEL_H;
 
     // Active ability nodes (cols 0-2)
     private static final int ACTIVE_NODE_W = 62;
@@ -182,11 +183,11 @@ public class SkillTreeScreen extends Screen {
         contentW = (maxCol < COL_X.length ? COL_X[maxCol] : maxCol * 58) + PASS_NODE_W + 12;
         contentH = ROW_Y[Math.min(maxRow, ROW_Y.length - 1)] + ACTIVE_NODE_H + 16;
 
-        // Panel fits on screen — cap to 90% of screen width
-        panelW = Math.min(contentW, (int)(width * 0.9));
-        panelW = Math.max(PANEL_MIN_W, panelW);
+        // A fixed window, shrunk only to fit the screen; whatever of the tree it cannot show scrolls
+        panelW = Math.min(PANEL_W, width - 2 * SCREEN_MARGIN);
+        panelH = Math.min(PANEL_H, height - 2 * SCREEN_MARGIN);
         panelX = (width  - panelW) / 2;
-        panelY = (height - PANEL_H) / 2;
+        panelY = (height - panelH) / 2;
 
         // Reset scroll, clamp
         scrollX = 0;
@@ -196,7 +197,7 @@ public class SkillTreeScreen extends Screen {
 
     private void clampScroll() {
         double maxScrollX = Math.max(0, contentW - panelW);
-        double maxScrollY = Math.max(0, contentH - PANEL_H);
+        double maxScrollY = Math.max(0, contentH - panelH);
         scrollX = Math.max(0, Math.min(scrollX, maxScrollX));
         scrollY = Math.max(0, Math.min(scrollY, maxScrollY));
     }
@@ -233,7 +234,7 @@ public class SkillTreeScreen extends Screen {
         drawPanel(gfx, points);
 
         // Enable scissor so nodes/connectors don't draw outside panel
-        gfx.enableScissor(panelX, panelY, panelX + panelW, panelY + PANEL_H);
+        gfx.enableScissor(panelX, panelY, panelX + panelW, panelY + panelH);
 
         // Apply scroll offset via pose translation
         gfx.pose().pushPose();
@@ -245,6 +246,7 @@ public class SkillTreeScreen extends Screen {
 
         gfx.pose().popPose();
         gfx.disableScissor();
+        drawScrollBars(gfx);
 
         // Tooltip last (on top, not clipped)
         if (hoveredNodeId != null) {
@@ -252,6 +254,24 @@ public class SkillTreeScreen extends Screen {
         }
 
         hoveredNodeId = null;
+    }
+
+    /** Where the window shows only part of the tree: a thin bar on the bottom (and right) edge, its thumb where the view is. */
+    private void drawScrollBars(GuiGraphics gfx) {
+        if (contentW > panelW) {
+            int track = panelW - 4, thumb = Math.max(12, track * panelW / contentW);
+            int at = (int) ((track - thumb) * (scrollX / (contentW - panelW)));
+            int y = panelY + panelH - 3;
+            gfx.fill(panelX + 2, y, panelX + 2 + track, y + 2, 0x60FFFFFF);
+            gfx.fill(panelX + 2 + at, y, panelX + 2 + at + thumb, y + 2, 0xFFE0B040);
+        }
+        if (contentH > panelH) {
+            int track = panelH - 4, thumb = Math.max(12, track * panelH / contentH);
+            int at = (int) ((track - thumb) * (scrollY / (contentH - panelH)));
+            int x = panelX + panelW - 3;
+            gfx.fill(x, panelY + 2, x + 2, panelY + 2 + track, 0x60FFFFFF);
+            gfx.fill(x, panelY + 2 + at, x + 2, panelY + 2 + at + thumb, 0xFFE0B040);
+        }
     }
 
     // -----------------------------------------------------------------------
@@ -262,9 +282,9 @@ public class SkillTreeScreen extends Screen {
         int px = panelX, py = panelY;
 
         // Border
-        gfx.fill(px - 1, py - 1, px + panelW + 1, py + PANEL_H + 1, C_PANEL_BORDER);
+        gfx.fill(px - 1, py - 1, px + panelW + 1, py + panelH + 1, C_PANEL_BORDER);
         // Background
-        gfx.fill(px, py, px + panelW, py + PANEL_H, C_PANEL_BG);
+        gfx.fill(px, py, px + panelW, py + panelH, C_PANEL_BG);
 
         // Title
         gfx.drawString(font, "§6" + treeTitle + " §r— Skill Tree", px + 8, py + 8, C_TITLE, false);
@@ -289,7 +309,7 @@ public class SkillTreeScreen extends Screen {
         gfx.drawString(font, "\u00a77\u2014 PASSIVES \u2014", px + DIVIDER_X_PANEL + 4, py + 20, C_SECTION_HDR, false);
 
         // Vertical divider
-        gfx.fill(px + DIVIDER_X_PANEL, py + 18, px + DIVIDER_X_PANEL + 1, py + PANEL_H - 8, C_DIVIDER);
+        gfx.fill(px + DIVIDER_X_PANEL, py + 18, px + DIVIDER_X_PANEL + 1, py + panelH - 8, C_DIVIDER);
 
         // Column headers
         int numCols = Math.min(columnHeaders.length, COL_X.length);
@@ -494,7 +514,7 @@ public class SkillTreeScreen extends Screen {
 
         // Start drag if inside panel but not on a node
         if (mouseX >= panelX && mouseX <= panelX + panelW
-                && mouseY >= panelY && mouseY <= panelY + PANEL_H) {
+                && mouseY >= panelY && mouseY <= panelY + panelH) {
             isDragging = true;
             lastDragX = mouseX;
             lastDragY = mouseY;
@@ -527,7 +547,10 @@ public class SkillTreeScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        scrollX -= delta * 30;
+        // the wheel scrolls across; held Shift (or a tree only too tall), up and down
+        boolean down = hasShiftDown() || contentW <= panelW;
+        if (down) scrollY -= delta * 30;
+        else scrollX -= delta * 30;
         clampScroll();
         return true;
     }
