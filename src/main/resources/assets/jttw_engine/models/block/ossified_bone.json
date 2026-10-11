@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "jttw_engine:block/ossified_bone_top",
+    "side": "jttw_engine:block/ossified_bone_side"
+  }
+}

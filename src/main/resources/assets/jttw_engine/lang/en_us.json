@@ -48,5 +48,13 @@
   "entity.jttw_engine.heavenly_general": "Heavenly General",
   "item.jttw_engine.heavenly_halberd": "Heavenly Halberd",
   "effect.jttw_engine.flood_wrath": "Flood-Dragon's Wrath",
-  "item.jttw_engine.golden_bow": "Golden Bow"
+  "item.jttw_engine.golden_bow": "Golden Bow",
+  "block.jttw_engine.bleached_stone": "Bleached Stone",
+  "block.jttw_engine.grave_tuff": "Grave Tuff",
+  "block.jttw_engine.bone_andesite": "Bone Andesite",
+  "block.jttw_engine.ossified_bone": "Ossified Bone",
+  "block.jttw_engine.bone_gravel": "Bone Gravel",
+  "block.jttw_engine.celestial_marble": "Celestial Marble",
+  "block.jttw_engine.underworld_stone": "Underworld Stone",
+  "block.jttw_engine.soul_ash": "Soul Ash"
 }

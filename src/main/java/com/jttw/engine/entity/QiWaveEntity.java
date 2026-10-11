@@ -52,6 +52,14 @@ public class QiWaveEntity extends Entity {
      * and max values, so the wave's size follows the build, not the level.
      */
     private float strFactor = 0.0f;
+    /** What its carving can still pay for durable blocks (see Carving): {@value #BUDGET_PER_ATK} per point of its wielder's attack. */
+    private double budget;
+    /** Its wielder's strength against the mod's tough stone. */
+    private double strength = 1;
+    /** Its budget, per point of attack: so great that only the most durable blocks ever slow it. */
+    public static final double BUDGET_PER_ATK = 100;
+    /** What it carves for nothing: anything that costs up to this (earth, stone, ores, deepslate). */
+    public static final double FREE_COST = 2;
     /** When each creature was last struck, so it is struck once per damage window, not every step. */
     private final java.util.Map<Integer, Long> struckAt = new java.util.HashMap<>();
     /** The last step's sphere: the next step only needs what lies outside it. */
@@ -83,6 +91,8 @@ public class QiWaveEntity extends Entity {
         // STR factor: 0.0 at 1 ATK → 1.0 at 80 ATK, by attack without level power (damage keeps it)
         float sizeAtk = (float) (attackDamage / LevelPower.of(owner));
         this.strFactor = Math.min(1.0f, Math.max(0.0f, (sizeAtk - ATK_MIN) / (ATK_MAX - ATK_MIN)));
+        this.budget = attackDamage * BUDGET_PER_ATK;
+        this.strength = com.jttw.engine.world.tough.Tough.strength(owner);
         // Offset spawn point forward so the wave doesn't destroy where the player stands
         double startRadius = MIN_CONE_START + (MAX_CONE_START - MIN_CONE_START) * strFactor;
         double offset = startRadius + 2.0;
@@ -139,7 +149,7 @@ public class QiWaveEntity extends Entity {
             if (distanceTraveled >= maxDistance) {
                 // Final explosion at termination point
                 Vec3 pos = position();
-                com.jttw.engine.world.TerrainBreaker.breakBlocks(serverLevel, carved, owner);
+                com.jttw.engine.world.TerrainBreaker.breakBlocks(serverLevel, carved);
                 com.jttw.engine.world.TerrainBreaker.explode(serverLevel, owner, pos.x, pos.y, pos.z, 3.0f);
                 discard();
                 return;
@@ -166,7 +176,13 @@ public class QiWaveEntity extends Entity {
                         BlockPos bp = center.offset(dx, dy, dz);
                         // Inside the last step's sphere: already carved
                         if (lastCenter != null && bp.distSqr(lastCenter) <= lastRadius * lastRadius) continue;
-                        // Fluids and blocks alike; the breaker leaves air and bedrock
+                        // Fluids and blocks alike; the breaker leaves air and bedrock. Ordinary ground
+                        // is nothing to it; only what is truly durable (obsidian, the mod's tough
+                        // stone) draws on its budget, and what it cannot pay for stands
+                        BlockState state = serverLevel.getBlockState(bp);
+                        double cost = Math.max(0, com.jttw.engine.world.tough.Carving.cost(serverLevel, bp, state, strength) - FREE_COST);
+                        if (cost > budget) continue;
+                        budget -= cost;
                         carved.add(bp);
                     }
                 }
@@ -214,7 +230,7 @@ public class QiWaveEntity extends Entity {
                     effectiveRadius * 0.3, effectiveRadius * 0.3, effectiveRadius * 0.3, 0.01);
         }
 
-        com.jttw.engine.world.TerrainBreaker.breakBlocks(serverLevel, carved, owner);
+        com.jttw.engine.world.TerrainBreaker.breakBlocks(serverLevel, carved);
 
         // Sound every few ticks
         if (tickCount % 3 == 0) {

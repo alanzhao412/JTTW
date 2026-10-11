@@ -9,8 +9,8 @@
       "structure_overrides": [],
       "layers": [
         { "block": "minecraft:bedrock", "height": 1 },
-        { "block": "minecraft:blackstone", "height": 20 },
-        { "block": "minecraft:soul_sand", "height": 3 }
+        { "block": "jttw_engine:underworld_stone", "height": 20 },
+        { "block": "jttw_engine:soul_ash", "height": 3 }
       ]
     }
   }

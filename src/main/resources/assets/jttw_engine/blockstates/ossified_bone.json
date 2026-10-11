@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "jttw_engine:block/ossified_bone"
+    },
+    "axis=z": {
+      "model": "jttw_engine:block/ossified_bone",
+      "x": 90
+    },
+    "axis=x": {
+      "model": "jttw_engine:block/ossified_bone",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

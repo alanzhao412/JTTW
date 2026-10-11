@@ -45,8 +45,8 @@ public class RibcageFeature extends Feature<NoneFeatureConfiguration> {
             if (Math.abs(ground[i] - origin.getY()) > UNEVEN) return false;
         }
         int sunk = r.nextInt(5) < 2 ? 1 : 0;
-        BlockState spine = Blocks.BONE_BLOCK.defaultBlockState().setValue(RotatedPillarBlock.AXIS, along.getAxis());
-        BlockState rib = Blocks.BONE_BLOCK.defaultBlockState();
+        BlockState spine = com.jttw.engine.registry.ModBlocks.OSSIFIED_BONE.get().defaultBlockState().setValue(RotatedPillarBlock.AXIS, along.getAxis());
+        BlockState rib = com.jttw.engine.registry.ModBlocks.OSSIFIED_BONE.get().defaultBlockState();
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
         for (int i = 0; i < length; i++) {
             BlockPos bone = origin.relative(along, i - half).atY(ground[i] - sunk);

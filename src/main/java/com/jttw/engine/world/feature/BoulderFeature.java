@@ -21,7 +21,7 @@ public class BoulderFeature extends Feature<NoneFeatureConfiguration> {
 
     private static BlockState stone(RandomSource r) {
         int roll = r.nextInt(10);
-        return roll < 5 ? Blocks.TUFF.defaultBlockState() : roll < 8 ? Blocks.ANDESITE.defaultBlockState() : Blocks.CALCITE.defaultBlockState();
+        return roll < 5 ? com.jttw.engine.registry.ModBlocks.GRAVE_TUFF.get().defaultBlockState() : roll < 8 ? com.jttw.engine.registry.ModBlocks.BONE_ANDESITE.get().defaultBlockState() : com.jttw.engine.registry.ModBlocks.BLEACHED_STONE.get().defaultBlockState();
     }
 
     @Override

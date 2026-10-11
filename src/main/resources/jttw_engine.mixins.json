@@ -7,7 +7,6 @@
   "mixins": [
     "BlockStateBaseMixin",
     "EntityPhaseMixin",
-    "ExplosionAccessor",
     "FoodDataMixin",
     "LivingEntityMixin",
     "MultiNoiseBiomeSourceMixin",

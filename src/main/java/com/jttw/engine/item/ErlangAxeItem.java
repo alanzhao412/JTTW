@@ -245,8 +245,8 @@ public class ErlangAxeItem extends Item {
                     float hardness = state.getDestroySpeed(level, bp);
                     if (hardness < 0) continue;
 
-                    // Budget cost: harder blocks cost more
-                    double cost = 1.0 + hardness * 0.5;
+                    // Budget cost: harder blocks cost more (obsidian dearly; the mod's tough stone by his strength)
+                    double cost = 1.0 + com.jttw.engine.world.tough.Carving.cost(level, bp, state, com.jttw.engine.world.tough.Tough.strength(sp)) * 0.5;
                     if (cost > budgetRemaining) {
                         budgetRemaining = 0;
                         break;
@@ -265,7 +265,7 @@ public class ErlangAxeItem extends Item {
         }
 
         // The cut, spread over the next ticks rather than all in this one
-        com.jttw.engine.world.TerrainBreaker.breakBlocks(serverLevel, cleaved, sp);
+        com.jttw.engine.world.TerrainBreaker.breakBlocks(serverLevel, cleaved);
 
         // Explosion at end point
         net.minecraft.world.phys.Vec3 endPos = eyeStart.add(look.scale(cleaveRange));

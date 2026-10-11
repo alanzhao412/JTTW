@@ -306,53 +306,63 @@ public class PlacedStaffEntity extends Entity {
     // ── Scroll to scale ──────────────────────────────────────────────
 
     public void adjustScale(float delta) {
+        adjustScale(delta, null);
+    }
+
+    /** As {@link #adjustScale(float)}, grown by {@code by}: whose strength pays for what it drills through. */
+    public void adjustScale(float delta, @Nullable Player by) {
+        if (by != null) grower = by;
         if (isFalling() || returnTimer >= 0 || isEcho()) return;
         float oldScale = getStaffScale();
         float newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, oldScale + delta * SCROLL_STEP));
         if (newScale == oldScale) return;
-        setStaffScale(newScale);
-
-        // Destroy blocks the staff now occupies as it grows upward
-        if (!level().isClientSide() && newScale > oldScale) {
-            drillBlocks(newScale);
-        }
+        // Growing, it drills up through what it can pay for; it stops beneath what it cannot
+        if (!level().isClientSide() && newScale > oldScale) newScale = drillTo(oldScale, newScale);
+        if (newScale > oldScale || newScale < oldScale) setStaffScale(newScale);
     }
 
-    /**
-     * Destroy all non-bedrock blocks inside the staff's vertical column
-     * at the current scale. Simulates the staff drilling through terrain.
-     */
-    private void drillBlocks(float scale) {
-        float staffHeight = VISUAL_HEIGHT * scale;
-        float staffRadius = 0.25f + scale * 0.05f; // slightly larger than visual
-
-        int minBX = net.minecraft.util.Mth.floor(getX() - staffRadius);
-        int maxBX = net.minecraft.util.Mth.ceil(getX() + staffRadius);
-        int minBZ = net.minecraft.util.Mth.floor(getZ() - staffRadius);
-        int maxBZ = net.minecraft.util.Mth.ceil(getZ() + staffRadius);
-        int minBY = net.minecraft.util.Mth.floor(getY());
-        int maxBY = net.minecraft.util.Mth.ceil(getY() + staffHeight);
-
+    /** As tall as it can grow from {@code from} toward {@code to}, drilling what it can pay for on the way. */
+    private float drillTo(float from, float to) {
+        ServerLevel sl = (ServerLevel) level();
+        Player owner = grower;
+        if (owner == null && getOwnerUUID() != null) owner = sl.getServer().getPlayerList().getPlayer(getOwnerUUID());
+        double allowance = carveBudget(to, owner), strength = com.jttw.engine.world.tough.Tough.strength(owner);
+        float radius = 0.25f + to * 0.05f; // a little wider than drawn
+        int minBX = net.minecraft.util.Mth.floor(getX() - radius), maxBX = net.minecraft.util.Mth.floor(getX() + radius);
+        int minBZ = net.minecraft.util.Mth.floor(getZ() - radius), maxBZ = net.minecraft.util.Mth.floor(getZ() + radius);
+        int fromY = net.minecraft.util.Mth.floor(getY() + VISUAL_HEIGHT * from), toY = net.minecraft.util.Mth.floor(getY() + VISUAL_HEIGHT * to);
         java.util.List<BlockPos> column = new java.util.ArrayList<>();
-        for (int bx = minBX; bx <= maxBX; bx++) {
-            for (int bz = minBZ; bz <= maxBZ; bz++) {
-                for (int by = minBY; by <= maxBY; by++) {
-                    BlockPos pos = new BlockPos(bx, by, bz);
-                    BlockState state = level().getBlockState(pos);
-                    if (!state.isAir() && state.getDestroySpeed(level(), pos) >= 0) column.add(pos);
-                }
+        float reached = to;
+        // layer by layer upward: a layer it cannot pay for in full stops it beneath that layer
+        outer:
+        for (int by = Math.max(fromY, net.minecraft.util.Mth.floor(getY())); by <= toY; by++) {
+            java.util.List<BlockPos> layer = new java.util.ArrayList<>();
+            double layerCost = 0;
+            for (int bx = minBX; bx <= maxBX; bx++) for (int bz = minBZ; bz <= maxBZ; bz++) {
+                BlockPos pos = new BlockPos(bx, by, bz);
+                BlockState state = sl.getBlockState(pos);
+                if (state.isAir()) continue;
+                layerCost += com.jttw.engine.world.tough.Carving.cost(sl, pos, state, strength);
+                layer.add(pos);
             }
+            if (layerCost > allowance) {
+                reached = Math.max(from, (float) ((by - getY()) / VISUAL_HEIGHT) - 0.01f);
+                break outer;
+            }
+            allowance -= layerCost;
+            column.addAll(layer);
         }
-        if (!column.isEmpty() && level() instanceof ServerLevel sl) {
-            com.jttw.engine.world.TerrainBreaker.breakBlocks(sl, column, // no drops, spread over ticks
-                    getOwnerUUID() == null ? null : sl.getPlayerByUUID(getOwnerUUID()));
-            sl.sendParticles(ParticleTypes.CLOUD,
-                    getX(), getY() + staffHeight, getZ(),
-                    (int)(scale * 0.5f + 2), 0.4, 0.4, 0.4, 0.02);
-            level().playSound(null, getX(), getY(), getZ(),
-                    SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS,
-                    Math.min(2.0f, 0.5f + scale * 0.02f), 1.2f);
+        if (!column.isEmpty()) {
+            com.jttw.engine.world.TerrainBreaker.breakBlocks(sl, column); // no drops, spread over ticks
+            sl.sendParticles(ParticleTypes.CLOUD, getX(), getY() + VISUAL_HEIGHT * reached, getZ(),
+                    (int) (reached * 0.5f + 2), 0.4, 0.4, 0.4, 0.02);
+            level().playSound(null, getX(), getY(), getZ(), SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS,
+                    Math.min(2.0f, 0.5f + reached * 0.02f), 1.2f);
         }
+        if (reached < to) {
+            level().playSound(null, getX(), getY() + VISUAL_HEIGHT * reached, getZ(), SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 0.8f, 0.6f);
+        }
+        return reached;
     }
 
     // ── Hit to topple ────────────────────────────────────────────────
@@ -379,70 +389,13 @@ public class PlacedStaffEntity extends Entity {
     private static final float STAFF_LENGTH = 2.9375f;
     private static final float VISUAL_HEIGHT = STAFF_LENGTH * 0.5f; // ≈ 1.47 blocks at scale 1
 
-    /** Number of angle steps for the arc sweep (vertical → horizontal). */
-    private static final int ARC_STEPS = 12;
-
     /**
-     * Struck down: its path is cleared (what it sweeps through as it falls is broken, as before),
-     * and it begins to fall. The blast comes where and when it lands ({@link #land}).
+     * Struck down: it begins to fall. It carves its own way as it goes, through whatever it can pay
+     * for from its budget ({@link #carveBudget}); what it cannot holds it up. The blast comes where
+     * and when it lands ({@link #land}).
      */
     private void topple(ServerPlayer owner, float yaw) {
-        float scale = getStaffScale();
-        ServerLevel serverLevel = (ServerLevel) level();
-
-        // Fall direction: the way the owner faced as they struck (an echo: as its master fell)
-        float yawRad = (float) Math.toRadians(yaw);
-        float dirX = -net.minecraft.util.Mth.sin(yawRad);
-        float dirZ = net.minecraft.util.Mth.cos(yawRad);
-
-        // Staff length at current scale (visual, accounting for FIXED 0.5×)
-        float length = VISUAL_HEIGHT * scale;
-
-        // ── Phase 1: Arc sweep — destroy blocks along the falling arc ──
-        // The staff pivots at the base from vertical (0°) to horizontal (90°).
-        // At angle θ from vertical, a point at distance d from the base is at:
-        //   y = d × cos(θ),  horizontal = d × sin(θ)
-        // Skip the first 3 blocks near the base so we don't destroy where
-        // the pole is standing.
-        float staffRadius = 0.25f + scale * 0.05f;
-        int staffSegments = Math.max(2, (int)(length / 2.0f)); // sample points along staff
-        float skipDist = 3.0f; // don't destroy blocks within 3 blocks of the base
-        java.util.List<BlockPos> arc = new java.util.ArrayList<>();
-
-        for (int step = 0; step <= ARC_STEPS; step++) {
-            float theta = (float)(Math.PI / 2.0 * step / ARC_STEPS); // 0 → π/2
-            float cosT = (float) Math.cos(theta);
-            float sinT = (float) Math.sin(theta);
-
-            // Trace along the staff at this angle
-            for (int seg = 1; seg <= staffSegments; seg++) {
-                float d = length * seg / staffSegments;
-                // Skip points close to the base
-                if (d < skipDist) continue;
-                double bx = getX() + dirX * d * sinT;
-                double bz = getZ() + dirZ * d * sinT;
-                double by = getY() + d * cosT;
-
-                // Destroy blocks in a small radius around this point
-                int minBX = net.minecraft.util.Mth.floor(bx - staffRadius);
-                int maxBX = net.minecraft.util.Mth.ceil(bx + staffRadius);
-                int minBZ = net.minecraft.util.Mth.floor(bz - staffRadius);
-                int maxBZ = net.minecraft.util.Mth.ceil(bz + staffRadius);
-                int minBY = net.minecraft.util.Mth.floor(by - staffRadius);
-                int maxBY = net.minecraft.util.Mth.ceil(by + staffRadius);
-
-                for (int ix = minBX; ix <= maxBX; ix++) {
-                    for (int iz = minBZ; iz <= maxBZ; iz++) {
-                        for (int iy = minBY; iy <= maxBY; iy++) {
-                            arc.add(new BlockPos(ix, iy, iz)); // the breaker skips air and the unbreakable
-                        }
-                    }
-                }
-            }
-        }
-
-        com.jttw.engine.world.TerrainBreaker.breakBlocks(serverLevel, arc, owner);
-
+        budget = carveBudget(getStaffScale(), owner);
         startFall(yaw);
     }
 
@@ -503,22 +456,48 @@ public class PlacedStaffEntity extends Entity {
     }
 
     // ── Fallen: a heavy rod, its two ends held its length apart ──────
+    //
+    // Two weighted ends, a constraint holding them its length apart, gravity, and contact: every
+    // point along it is a ball of its thickness that may not sit inside a solid block or another
+    // staff. That is all; resting on the ground, in a crater, against a wall, across another
+    // staff, at whatever angle it comes to, all follow from it. Where it presses into a block it
+    // can pay for (see Carving), the block breaks and it goes on, a little slowed; what it cannot
+    // pay for holds it.
 
     /** Gravity, blocks per tick per tick: as anything falls. */
     private static final double GRAVITY = 0.08;
-    /** How much of its sideways motion a resting end keeps each tick, touching ground. */
-    private static final double GROUND_GRIP = 0.55;
-    /** Passes over the rod's constraints each tick: more is stiffer and steadier. */
-    private static final int PASSES = 4;
+    /** How much of its sliding speed a touching end keeps each tick. */
+    private static final double GRIP = 0.5;
+    /** Passes over its constraints each step: more is stiffer and steadier. */
+    private static final int PASSES = 3;
     /** Ticks it must lie still before it rests (and stops being simulated until disturbed). */
     private static final int SETTLE = 30;
+    /** The most steps a tick is cut into, so a fast end never skips through a block. */
+    private static final int MAX_STEPS = 12;
+    /** Its budget for carving (see Carving), per unit of size and per unit of its owner's level power. */
+    public static final double BUDGET_BASE = 10, BUDGET_PER_SIZE = 2;
 
     private net.minecraft.world.phys.Vec3 rodA = net.minecraft.world.phys.Vec3.ZERO, rodB = net.minecraft.world.phys.Vec3.ZERO,
-            rodAPrev = net.minecraft.world.phys.Vec3.ZERO, rodBPrev = net.minecraft.world.phys.Vec3.ZERO;
+            velA = net.minecraft.world.phys.Vec3.ZERO, velB = net.minecraft.world.phys.Vec3.ZERO;
     private boolean landed, resting, touchA, touchB;
     private int stillTicks;
     private float spin;
     private UUID landingOwner;
+    /** Who last grew it (an echo: who grew its master), whose strength its drilling is paid by. */
+    @Nullable private Player grower;
+    /** What it can still pay to carve, falling (see Carving). */
+    private double budget;
+    /** Its owner's strength against the mod's tough stone, as it was struck. */
+    private double strength = 1;
+    /** Blocks it has paid to break, gone to it at once though the breaker takes them over the next ticks. */
+    private final java.util.Set<Long> broken = new java.util.HashSet<>();
+    private final java.util.List<BlockPos> toBreak = new java.util.ArrayList<>();
+
+    /** How much a staff of this size, in this owner's hands, can carve: (10 + 2 x size) x their level power. */
+    public static double carveBudget(float scale, @Nullable Player owner) {
+        double power = owner == null ? 1 : LevelPower.of(owner);
+        return (BUDGET_BASE + BUDGET_PER_SIZE * scale) * power;
+    }
 
     /** How thick it is: half the drawn width. */
     public float radius() {
@@ -548,6 +527,11 @@ public class PlacedStaffEntity extends Entity {
         return entityData.get(ROD_SPIN);
     }
 
+    /** What it has left to carve with. */
+    public double budgetLeft() {
+        return budget;
+    }
+
     /** Upright on its foot, tipped a few degrees the way it is to fall, with a nudge that way. */
     private void startFall(float yaw) {
         float yawRad = (float) Math.toRadians(yaw);
@@ -555,57 +539,69 @@ public class PlacedStaffEntity extends Entity {
         double L = length(), tilt = Math.toRadians(4);
         rodA = position();
         rodB = rodA.add(dir.scale(Math.sin(tilt) * L)).add(0, Math.cos(tilt) * L, 0);
-        rodAPrev = rodA;
-        rodBPrev = rodB.subtract(dir.scale(0.02 * Math.max(1, L / 10)));
+        velA = net.minecraft.world.phys.Vec3.ZERO;
+        velB = dir.scale(0.02 * Math.max(1, L / 10));
         landed = false;
         resting = false;
         stillTicks = 0;
         landingOwner = getOwnerUUID();
+        strength = com.jttw.engine.world.tough.Tough.strength(toppledBy);
         syncRod();
     }
 
-    /** One tick of the fallen rod. */
+    /** One tick of the fallen rod: as many small steps as its speed needs. */
     private void rodTick(ServerLevel level) {
         if (resting) {
             // at rest it is still watched: if what bears it is blasted away, or another staff lands on it, it moves again
             if (tickCount % 10 == 0 && !supported(level)) wake();
             if (resting) return;
         }
-        net.minecraft.world.phys.Vec3 g = new net.minecraft.world.phys.Vec3(0, -GRAVITY, 0);
-        net.minecraft.world.phys.Vec3 va = rodA.subtract(rodAPrev).scale(0.995), vb = rodB.subtract(rodBPrev).scale(0.995);
-        rodAPrev = rodA;
-        rodBPrev = rodB;
-        rodA = rodA.add(va).add(g);
-        rodB = rodB.add(vb).add(g);
+        double fastest = Math.max(velA.length(), velB.length());
+        int steps = Math.max(1, Math.min(MAX_STEPS, (int) Math.ceil(fastest / (Math.max(0.25, radius()) * 0.8))));
+        double h = 1.0 / steps;
+        net.minecraft.world.phys.Vec3 before = rodA.add(rodB).scale(0.5);
         touchA = touchB = false;
-        double L = length();
-        for (int pass = 0; pass < PASSES; pass++) {
-            keepLength(L);
-            restOnGround(level);
-            pushOffOtherStaffs(level);
+        for (int step = 0; step < steps; step++) {
+            net.minecraft.world.phys.Vec3 a0 = rodA, b0 = rodB;
+            velA = velA.add(0, -GRAVITY * h, 0);
+            velB = velB.add(0, -GRAVITY * h, 0);
+            rodA = rodA.add(velA.scale(h));
+            rodB = rodB.add(velB.scale(h));
+            for (int pass = 0; pass < PASSES; pass++) {
+                keepLength(length());
+                collideWithBlocks(level);
+                pushOffOtherStaffs(level);
+            }
+            // what moved is what it now moves at
+            velA = rodA.subtract(a0).scale(1 / h).scale(0.998);
+            velB = rodB.subtract(b0).scale(1 / h).scale(0.998);
+            // friction where it touches: a touching end keeps only some of its sliding
+            double keep = Math.pow(GRIP, h);
+            if (touchA) velA = new net.minecraft.world.phys.Vec3(velA.x * keep, velA.y, velA.z * keep);
+            if (touchB) velB = new net.minecraft.world.phys.Vec3(velB.x * keep, velB.y, velB.z * keep);
         }
-        // friction where it touches: a resting end keeps little of its sideways slide
-        if (touchA) rodAPrev = gripped(rodA, rodAPrev);
-        if (touchB) rodBPrev = gripped(rodB, rodBPrev);
+        if (!toBreak.isEmpty()) {
+            com.jttw.engine.world.TerrainBreaker.breakBlocks(level, new java.util.ArrayList<>(toBreak));
+            toBreak.clear();
+        }
         // rolling: sideways travel of its middle, across its length, turns it about its length
         net.minecraft.world.phys.Vec3 axis = rodB.subtract(rodA);
         net.minecraft.world.phys.Vec3 across = new net.minecraft.world.phys.Vec3(-axis.z, 0, axis.x);
         if (across.lengthSqr() > 1e-6) {
-            net.minecraft.world.phys.Vec3 moved = rodA.add(rodB).scale(0.5).subtract(rodAPrev.add(rodBPrev).scale(0.5));
+            net.minecraft.world.phys.Vec3 moved = rodA.add(rodB).scale(0.5).subtract(before);
             spin += (float) (moved.dot(across.normalize()) / radius());
         }
-        if (!landed && (touchB || angleFromUp() > 75) && rodB.y - rodBPrev.y > -0.2 && angleFromUp() > 40) {
+        if (!landed && (touchA || touchB) && angleFromUp() > 30) {
             landed = true;
             ServerPlayer owner = landingOwner == null ? null : level.getServer().getPlayerList().getPlayer(landingOwner);
             if (owner == null && toppledBy != null) owner = toppledBy;
             if (owner != null) land(owner);
         }
-        double motion = Math.max(rodA.distanceToSqr(rodAPrev), rodB.distanceToSqr(rodBPrev));
-        stillTicks = motion < 0.003 * 0.003 && landed ? stillTicks + 1 : 0;
+        double motion = Math.max(velA.lengthSqr(), velB.lengthSqr());
+        stillTicks = motion < 0.004 * 0.004 && landed ? stillTicks + 1 : 0;
         if (stillTicks > SETTLE) {
             resting = true;
-            rodAPrev = rodA;
-            rodBPrev = rodB;
+            velA = velB = net.minecraft.world.phys.Vec3.ZERO;
         }
         if (rodA.y < level.getMinBuildHeight() - 64) { // fell out of the world
             discard();
@@ -618,12 +614,6 @@ public class PlacedStaffEntity extends Entity {
     private double angleFromUp() {
         net.minecraft.world.phys.Vec3 axis = rodB.subtract(rodA);
         return Math.toDegrees(Math.acos(Math.max(-1, Math.min(1, axis.y / Math.max(1e-6, axis.length())))));
-    }
-
-    private static net.minecraft.world.phys.Vec3 gripped(net.minecraft.world.phys.Vec3 now, net.minecraft.world.phys.Vec3 prev) {
-        // keep GROUND_GRIP of the sideways velocity: move prev toward now
-        net.minecraft.world.phys.Vec3 v = now.subtract(prev);
-        return now.subtract(new net.minecraft.world.phys.Vec3(v.x * GROUND_GRIP, v.y, v.z * GROUND_GRIP));
     }
 
     private void wake() {
@@ -647,52 +637,97 @@ public class PlacedStaffEntity extends Entity {
         rodB = rodB.subtract(fix);
     }
 
-    /** How many points along it are tested against the ground: about one per half block, up to 64. */
+    /** Points along it, each a ball of its thickness: spaced about its thickness apart, 4 to 64. */
     private int samples() {
-        return Math.max(4, Math.min(64, (int) Math.ceil(length() / 0.5)));
+        return Math.max(4, Math.min(64, (int) Math.ceil(length() / Math.max(0.3, radius()))));
+    }
+
+    /** Whether the block here stands in its way: solid, and not already broken by it. */
+    private boolean solid(ServerLevel level, BlockPos pos) {
+        if (broken.contains(pos.asLong()) || !level.isLoaded(pos)) return false;
+        return !level.getBlockState(pos).getCollisionShape(level, pos).isEmpty();
     }
 
     /**
-     * Each point along it rests on the highest solid surface beneath it: so in a crater it settles
-     * down onto the crater's floor, tilting with it, and lies on a ridge if it lands across one.
+     * It meets a block: if it can pay to break it, it does (and loses a little of its speed doing
+     * so); if not, the block holds. Returns whether it broke.
      */
-    private void restOnGround(ServerLevel level) {
-        float r = radius();
+    private boolean breakInto(ServerLevel level, BlockPos pos) {
+        BlockState state = level.getBlockState(pos);
+        double cost = com.jttw.engine.world.tough.Carving.cost(level, pos, state, strength);
+        if (cost > budget) return false;
+        budget -= cost;
+        broken.add(pos.asLong());
+        toBreak.add(pos.immutable());
+        double slow = 1 / (1 + 0.02 * cost);
+        velA = velA.scale(slow);
+        velB = velB.scale(slow);
+        return true;
+    }
+
+    /**
+     * Each point along it is a ball of its thickness: where one sits in a solid block it either
+     * breaks through (if it can pay for the block) or is pushed out of it, by the shortest way.
+     * Floors, walls, ceilings and craters are all only blocks.
+     */
+    private void collideWithBlocks(ServerLevel level) {
+        double r = radius();
         int n = samples();
+        BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
         for (int i = 0; i <= n; i++) {
             double t = (double) i / n;
             net.minecraft.world.phys.Vec3 p = rodA.lerp(rodB, t);
-            double top = surfaceBelow(level, p, r);
-            double bottom = p.y - r;
-            if (top <= bottom) continue;
-            double push = Math.min(1.0, top - bottom); // a little at a time: no leaping out of the ground
-            moveAt(t, new net.minecraft.world.phys.Vec3(0, push, 0));
-            if (t < 0.5) touchA = true;
-            else touchB = true;
+            int x0 = net.minecraft.util.Mth.floor(p.x - r), x1 = net.minecraft.util.Mth.floor(p.x + r);
+            int y0 = net.minecraft.util.Mth.floor(p.y - r), y1 = net.minecraft.util.Mth.floor(p.y + r);
+            int z0 = net.minecraft.util.Mth.floor(p.z - r), z1 = net.minecraft.util.Mth.floor(p.z + r);
+            // the deepest overlap with a block that will not give: pushed out of that one first
+            for (int bx = x0; bx <= x1; bx++) for (int by = y0; by <= y1; by++) for (int bz = z0; bz <= z1; bz++) {
+                at.set(bx, by, bz);
+                if (!solid(level, at)) continue;
+                // nearest point of the block to the ball's centre
+                double cx = Math.max(bx, Math.min(bx + 1, p.x)), cy = Math.max(by, Math.min(by + 1, p.y)), cz = Math.max(bz, Math.min(bz + 1, p.z));
+                net.minecraft.world.phys.Vec3 d = p.subtract(cx, cy, cz);
+                double dist = d.length();
+                if (dist >= r && !(dist == 0)) continue; // not touching
+                if (breakInto(level, at)) continue;
+                net.minecraft.world.phys.Vec3 out;
+                double pen;
+                if (dist > 1e-6) {
+                    out = d.scale(1 / dist);
+                    pen = r - dist;
+                } else { // its centre inside the block: out by the nearest face
+                    double[] faces = {p.x - bx, bx + 1 - p.x, p.y - by, by + 1 - p.y, p.z - bz, bz + 1 - p.z};
+                    int best = 0;
+                    for (int f = 1; f < 6; f++) if (faces[f] < faces[best]) best = f;
+                    out = switch (best) {
+                        case 0 -> new net.minecraft.world.phys.Vec3(-1, 0, 0);
+                        case 1 -> new net.minecraft.world.phys.Vec3(1, 0, 0);
+                        case 2 -> new net.minecraft.world.phys.Vec3(0, -1, 0);
+                        case 3 -> new net.minecraft.world.phys.Vec3(0, 1, 0);
+                        case 4 -> new net.minecraft.world.phys.Vec3(0, 0, -1);
+                        default -> new net.minecraft.world.phys.Vec3(0, 0, 1);
+                    };
+                    pen = faces[best] + r;
+                }
+                moveAt(t, out.scale(Math.min(pen, 1.0)));
+                p = rodA.lerp(rodB, t);
+                if (t < 0.5) touchA = true;
+                else touchB = true;
+            }
         }
     }
 
-    /** The top of the highest solid block under {@code p} reaching above its lowest point, or -inf. */
-    private static double surfaceBelow(ServerLevel level, net.minecraft.world.phys.Vec3 p, double r) {
-        BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
-        int x = net.minecraft.util.Mth.floor(p.x), z = net.minecraft.util.Mth.floor(p.z);
-        int from = net.minecraft.util.Mth.floor(p.y + r), to = net.minecraft.util.Mth.floor(p.y - r) - 1;
-        for (int y = from; y >= to; y--) {
-            at.set(x, y, z);
-            if (!level.isLoaded(at)) return Double.NEGATIVE_INFINITY;
-            var shape = level.getBlockState(at).getCollisionShape(level, at);
-            if (!shape.isEmpty()) return y + shape.max(net.minecraft.core.Direction.Axis.Y);
-        }
-        return Double.NEGATIVE_INFINITY;
-    }
-
-    /** Whether, lying at rest, it is still borne up: every few points still find ground under them. */
+    /** Whether, lying at rest, it is still borne up: something solid just beneath it at two points or more. */
     private boolean supported(ServerLevel level) {
-        float r = radius();
+        double r = radius();
         int n = samples(), bearing = 0;
         for (int i = 0; i <= n; i++) {
             net.minecraft.world.phys.Vec3 p = rodA.lerp(rodB, (double) i / n);
-            if (surfaceBelow(level, p.add(0, -0.3, 0), r) > Double.NEGATIVE_INFINITY) bearing++;
+            if (solid(level, BlockPos.containing(p.x, p.y - r - 0.15, p.z))) bearing++;
+            else for (PlacedStaffEntity o : level.getEntitiesOfClass(PlacedStaffEntity.class, new AABB(p, p).inflate(r + 0.5), x -> x != this)) {
+                bearing++;
+                break;
+            }
         }
         return bearing >= 2;
     }
@@ -829,9 +864,12 @@ public class PlacedStaffEntity extends Entity {
             return;
         }
         float mine = getStaffScale(), theirs = m.getStaffScale();
-        if (theirs != mine) {
+        if (theirs > mine) {
+            grower = m.grower;
+            float reached = drillTo(mine, theirs);
+            if (reached > mine) setStaffScale(reached);
+        } else if (theirs < mine) {
             setStaffScale(theirs);
-            if (theirs > mine) drillBlocks(theirs);
         }
         if (m.isFalling()) {
             ServerPlayer owner = m.toppledBy;
@@ -908,8 +946,9 @@ public class PlacedStaffEntity extends Entity {
         master = tag.hasUUID("Master") ? tag.getUUID("Master") : null;
         if (tag.getBoolean("Fallen")) {
             entityData.set(FALLING, true);
-            rodA = rodAPrev = new net.minecraft.world.phys.Vec3(tag.getDouble("FootX"), tag.getDouble("FootY"), tag.getDouble("FootZ"));
-            rodB = rodBPrev = new net.minecraft.world.phys.Vec3(tag.getDouble("TipX"), tag.getDouble("TipY"), tag.getDouble("TipZ"));
+            rodA = new net.minecraft.world.phys.Vec3(tag.getDouble("FootX"), tag.getDouble("FootY"), tag.getDouble("FootZ"));
+            rodB = new net.minecraft.world.phys.Vec3(tag.getDouble("TipX"), tag.getDouble("TipY"), tag.getDouble("TipZ"));
+            velA = velB = net.minecraft.world.phys.Vec3.ZERO;
             spin = tag.getFloat("Spin");
             landed = true; // a staff saved fallen has landed; its blast is long done
             syncRod();

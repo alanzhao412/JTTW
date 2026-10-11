@@ -3,6 +3,12 @@
   "values": [
     "jttw_engine:eight_trigrams_furnace",
     "jttw_engine:eight_trigrams_furnace_part",
-    "jttw_engine:jade_block"
+    "jttw_engine:jade_block",
+    "jttw_engine:bleached_stone",
+    "jttw_engine:grave_tuff",
+    "jttw_engine:bone_andesite",
+    "jttw_engine:ossified_bone",
+    "jttw_engine:celestial_marble",
+    "jttw_engine:underworld_stone"
   ]
 }

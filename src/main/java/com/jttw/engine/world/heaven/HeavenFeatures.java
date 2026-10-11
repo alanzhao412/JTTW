@@ -92,8 +92,8 @@ public final class HeavenFeatures {
 
         /** The palace, its floor at {@code at}'s height, facing south. */
         public static void build(WorldGenLevel level, BlockPos at, RandomSource r) {
-            BlockState jade = ModBlocks.JADE_BLOCK.get().defaultBlockState(), quartz = Blocks.SMOOTH_QUARTZ.defaultBlockState(),
-                    pillar = Blocks.QUARTZ_PILLAR.defaultBlockState(), gold = Blocks.GOLD_BLOCK.defaultBlockState(),
+            BlockState jade = ModBlocks.JADE_BLOCK.get().defaultBlockState(), quartz = ModBlocks.CELESTIAL_MARBLE.get().defaultBlockState(),
+                    pillar = ModBlocks.CELESTIAL_MARBLE.get().defaultBlockState(), gold = Blocks.GOLD_BLOCK.defaultBlockState(),
                     cloud = ModBlocks.CELESTIAL_CLOUD.get().defaultBlockState(), air = Blocks.AIR.defaultBlockState(),
                     red = Blocks.RED_CONCRETE.defaultBlockState();
             int x = at.getX(), y = at.getY(), z = at.getZ();
@@ -250,11 +250,11 @@ public final class HeavenFeatures {
             BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
             int x = at.getX(), y = at.getY(), z = at.getZ();
             for (int dx = -3; dx <= 3; dx++) for (int dz = -3; dz <= 3; dz++) {
-                set(level, p.set(x + dx, y - 1, z + dz), Math.abs(dx) == 3 || Math.abs(dz) == 3 ? Blocks.GOLD_BLOCK.defaultBlockState() : Blocks.SMOOTH_QUARTZ.defaultBlockState());
+                set(level, p.set(x + dx, y - 1, z + dz), Math.abs(dx) == 3 || Math.abs(dz) == 3 ? Blocks.GOLD_BLOCK.defaultBlockState() : ModBlocks.CELESTIAL_MARBLE.get().defaultBlockState());
                 for (int up = 0; up < 6; up++) set(level, p.set(x + dx, y + up, z + dz), Blocks.AIR.defaultBlockState());
             }
             for (int[] c : new int[][]{{-3, -3}, {3, -3}, {-3, 3}, {3, 3}}) {
-                for (int up = 0; up < 4; up++) set(level, p.set(x + c[0], y + up, z + c[1]), Blocks.QUARTZ_PILLAR.defaultBlockState());
+                for (int up = 0; up < 4; up++) set(level, p.set(x + c[0], y + up, z + c[1]), ModBlocks.CELESTIAL_MARBLE.get().defaultBlockState());
             }
             for (int dx = -4; dx <= 4; dx++) for (int dz = -4; dz <= 4; dz++) {
                 boolean rim = Math.abs(dx) == 4 || Math.abs(dz) == 4;

@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "jttw_engine:block/celestial_marble"
+    },
+    "axis=z": {
+      "model": "jttw_engine:block/celestial_marble",
+      "x": 90
+    },
+    "axis=x": {
+      "model": "jttw_engine:block/celestial_marble",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

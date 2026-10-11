@@ -71,7 +71,15 @@ public class ModItemsGameTests {
             Map.entry("captains_sigil", Item.class),
             Map.entry("heart_bone", Item.class),
             Map.entry("heavenly_halberd", net.minecraft.world.item.SwordItem.class),
-            Map.entry("golden_bow", com.jttw.engine.item.GoldenBowItem.class));
+            Map.entry("golden_bow", com.jttw.engine.item.GoldenBowItem.class),
+            Map.entry("bleached_stone", BlockItem.class),
+            Map.entry("grave_tuff", BlockItem.class),
+            Map.entry("bone_andesite", BlockItem.class),
+            Map.entry("ossified_bone", BlockItem.class),
+            Map.entry("bone_gravel", BlockItem.class),
+            Map.entry("celestial_marble", BlockItem.class),
+            Map.entry("underworld_stone", BlockItem.class),
+            Map.entry("soul_ash", BlockItem.class));
 
     @GameTest(template = PLATFORM)
     public static void everyModItemIsRegisteredUnderItsIdAsTheRightClass(GameTestHelper h) {

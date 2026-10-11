@@ -42,7 +42,7 @@ public class StaffScalePacket {
             // Only the owner, within reach of it
             if (!staff.isOwner(player) || !staff.withinReachOf(player)) return;
 
-            staff.adjustScale(pkt.delta);
+            staff.adjustScale(pkt.delta, player);
         });
         ctx.setPacketHandled(true);
     }

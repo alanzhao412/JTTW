@@ -152,7 +152,7 @@ public class BoneMassifFeature extends Feature<NoneFeatureConfiguration> {
     /** The stone inside, in uneven bands of tuff and andesite. */
     private static BlockState inner(int y, int x, int z) {
         int band = Math.floorMod(y + ((x * 31 + z * 17) >> 5), 9);
-        return band == 0 ? Blocks.TUFF.defaultBlockState() : band == 5 ? Blocks.ANDESITE.defaultBlockState() : Blocks.STONE.defaultBlockState();
+        return band == 0 ? com.jttw.engine.registry.ModBlocks.GRAVE_TUFF.get().defaultBlockState() : band == 5 ? com.jttw.engine.registry.ModBlocks.BONE_ANDESITE.get().defaultBlockState() : Blocks.STONE.defaultBlockState();
     }
 
     private static int patch(int x, int z, int size, int salt) {
@@ -165,21 +165,21 @@ public class BoneMassifFeature extends Feature<NoneFeatureConfiguration> {
         switch (kind) {
             case CRAG -> {
                 roll = patch(x, z, 4, 1);
-                if (roll < 12) return Blocks.BONE_BLOCK.defaultBlockState();
-                if (roll < 25) return Blocks.TUFF.defaultBlockState();
+                if (roll < 12) return com.jttw.engine.registry.ModBlocks.OSSIFIED_BONE.get().defaultBlockState();
+                if (roll < 25) return com.jttw.engine.registry.ModBlocks.GRAVE_TUFF.get().defaultBlockState();
             }
             case BASIN -> {
                 roll = patch(x, z, 3, 2);
-                if (roll < 55) return Blocks.GRAVEL.defaultBlockState();
-                if (roll < 75) return Blocks.TUFF.defaultBlockState();
-                if (roll < 85) return Blocks.BONE_BLOCK.defaultBlockState();
+                if (roll < 55) return com.jttw.engine.registry.ModBlocks.BONE_GRAVEL.get().defaultBlockState();
+                if (roll < 75) return com.jttw.engine.registry.ModBlocks.GRAVE_TUFF.get().defaultBlockState();
+                if (roll < 85) return com.jttw.engine.registry.ModBlocks.OSSIFIED_BONE.get().defaultBlockState();
             }
             default -> {
                 roll = patch(x, z, 6, 3);
-                if (roll < 8) return Blocks.BONE_BLOCK.defaultBlockState();
+                if (roll < 8) return com.jttw.engine.registry.ModBlocks.OSSIFIED_BONE.get().defaultBlockState();
             }
         }
-        return Blocks.CALCITE.defaultBlockState();
+        return com.jttw.engine.registry.ModBlocks.BLEACHED_STONE.get().defaultBlockState();
     }
 
     @Override
@@ -231,16 +231,16 @@ public class BoneMassifFeature extends Feature<NoneFeatureConfiguration> {
                     face = false;
                     for (int y = top + 1; y <= Math.max(surface, top + HEADROOM); y++) {
                         BlockState s = level.getBlockState(p.set(x, y, z));
-                        if (!s.isAir() && !s.is(Blocks.BONE_BLOCK) && !s.is(Blocks.SKELETON_SKULL)) level.setBlock(p, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+                        if (!s.isAir() && !s.is(com.jttw.engine.registry.ModBlocks.OSSIFIED_BONE.get()) && !s.is(Blocks.SKELETON_SKULL)) level.setBlock(p, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
                     }
                 }
                 for (int y = Math.min(ground, top); y <= top; y++) {
                     p.set(x, y, z);
                     BlockState s;
-                    if (lair && y == top) s = ((int) fromLair) % 3 == 0 ? Blocks.BONE_BLOCK.defaultBlockState() : Blocks.CALCITE.defaultBlockState();
+                    if (lair && y == top) s = ((int) fromLair) % 3 == 0 ? com.jttw.engine.registry.ModBlocks.OSSIFIED_BONE.get().defaultBlockState() : com.jttw.engine.registry.ModBlocks.BLEACHED_STONE.get().defaultBlockState();
                     else if (face || y < top - 3) s = inner(y, x, z);
                     else if (y == top) s = topOf(kind, x, z);
-                    else s = kind == BASIN && y == top - 1 ? Blocks.GRAVEL.defaultBlockState() : Blocks.CALCITE.defaultBlockState();
+                    else s = kind == BASIN && y == top - 1 ? com.jttw.engine.registry.ModBlocks.BONE_GRAVEL.get().defaultBlockState() : com.jttw.engine.registry.ModBlocks.BLEACHED_STONE.get().defaultBlockState();
                     level.setBlock(p, s, Block.UPDATE_CLIENTS);
                 }
                 any = true;

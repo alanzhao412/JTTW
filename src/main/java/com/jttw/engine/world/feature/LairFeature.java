@@ -51,13 +51,13 @@ public class LairFeature extends Feature<NoneFeatureConfiguration> {
         for (int i = 0; i < 6; i++) {
             double a = i * Math.PI / 3;
             int x = c[0] + (int) Math.round(Math.cos(a) * (RADIUS - 1)), z = c[1] + (int) Math.round(Math.sin(a) * (RADIUS - 1));
-            for (int up = 0; up < 4; up++) level.setBlock(p.set(x, y + up, z), Blocks.BONE_BLOCK.defaultBlockState(), Block.UPDATE_CLIENTS);
+            for (int up = 0; up < 4; up++) level.setBlock(p.set(x, y + up, z), com.jttw.engine.registry.ModBlocks.OSSIFIED_BONE.get().defaultBlockState(), Block.UPDATE_CLIENTS);
             int facing = Math.floorMod(Math.round((float) Math.toDegrees(Math.atan2(c[0] - x, z - c[1])) / 22.5f), 16);
             level.setBlock(p.set(x, y + 4, z), Blocks.SKELETON_SKULL.defaultBlockState().setValue(SkullBlock.ROTATION, facing), Block.UPDATE_CLIENTS);
         }
         // a dais of bone laid crosswise, and she stands on it
         for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
-            level.setBlock(p.set(c[0] + dx, y, c[1] + dz), Blocks.BONE_BLOCK.defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.X), Block.UPDATE_CLIENTS);
+            level.setBlock(p.set(c[0] + dx, y, c[1] + dz), com.jttw.engine.registry.ModBlocks.OSSIFIED_BONE.get().defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.X), Block.UPDATE_CLIENTS);
         }
         LadyWhiteBoneEntity lady = ModEntities.LADY_WHITE_BONE.get().create(level.getLevel());
         if (lady != null) {

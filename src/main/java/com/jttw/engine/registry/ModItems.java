@@ -117,6 +117,25 @@ public final class ModItems {
     public static final RegistryObject<Item> BANANA_LEAF_FAN =
             ITEMS.register("banana_leaf_fan", com.jttw.engine.item.BananaLeafFanItem::new);
 
+
+    // ── Tough stone ──
+    public static final RegistryObject<Item> BLEACHED_STONE_ITEM =
+            ITEMS.register("bleached_stone", () -> new BlockItem(ModBlocks.BLEACHED_STONE.get(), new Item.Properties()));
+    public static final RegistryObject<Item> GRAVE_TUFF_ITEM =
+            ITEMS.register("grave_tuff", () -> new BlockItem(ModBlocks.GRAVE_TUFF.get(), new Item.Properties()));
+    public static final RegistryObject<Item> BONE_ANDESITE_ITEM =
+            ITEMS.register("bone_andesite", () -> new BlockItem(ModBlocks.BONE_ANDESITE.get(), new Item.Properties()));
+    public static final RegistryObject<Item> OSSIFIED_BONE_ITEM =
+            ITEMS.register("ossified_bone", () -> new BlockItem(ModBlocks.OSSIFIED_BONE.get(), new Item.Properties()));
+    public static final RegistryObject<Item> BONE_GRAVEL_ITEM =
+            ITEMS.register("bone_gravel", () -> new BlockItem(ModBlocks.BONE_GRAVEL.get(), new Item.Properties()));
+    public static final RegistryObject<Item> CELESTIAL_MARBLE_ITEM =
+            ITEMS.register("celestial_marble", () -> new BlockItem(ModBlocks.CELESTIAL_MARBLE.get(), new Item.Properties()));
+    public static final RegistryObject<Item> UNDERWORLD_STONE_ITEM =
+            ITEMS.register("underworld_stone", () -> new BlockItem(ModBlocks.UNDERWORLD_STONE.get(), new Item.Properties()));
+    public static final RegistryObject<Item> SOUL_ASH_ITEM =
+            ITEMS.register("soul_ash", () -> new BlockItem(ModBlocks.SOUL_ASH.get(), new Item.Properties()));
+
     public static void register(IEventBus modEventBus) {
         ITEMS.register(modEventBus);
     }

@@ -122,10 +122,8 @@ public class ThrownSpearEntity extends Projectile implements ItemSupplier {
         if (state.isAir() || state.getCollisionShape(level(), pos).isEmpty()) return true;
         float hardness = state.getDestroySpeed(level(), pos);
         if (hardness < 0) return false; // bedrock, barriers, end portal frames
-        // the mod's own places stand up to it, unless its thrower is very strong (see HardenedGround)
-        if (!com.jttw.engine.world.HardenedGround.carvable(level(), pos, state,
-                com.jttw.engine.world.HardenedGround.strength(getOwner()))) return false;
-        double cost = Math.max(MIN_BLOCK_COST, hardness);
+        double cost = Math.max(MIN_BLOCK_COST, com.jttw.engine.world.tough.Carving.cost(level(), pos, state,
+                com.jttw.engine.world.tough.Tough.strength(getOwner())));
         if (cost > budget) return false;
         if (getOwner() instanceof ServerPlayer owner
                 && MinecraftForge.EVENT_BUS.post(new BlockEvent.BreakEvent(level(), pos, state, owner))) {

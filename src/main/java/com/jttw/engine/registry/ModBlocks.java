@@ -19,10 +19,10 @@ public final class ModBlocks {
             DeferredRegister.create(ForgeRegistries.BLOCKS, JTTWEngine.MOD_ID);
 
     public static final RegistryObject<Block> CELESTIAL_CLOUD =
-            BLOCKS.register("celestial_cloud", () -> new Block(
+            BLOCKS.register("celestial_cloud", () -> new com.jttw.engine.world.tough.Tough.Stone(
                     BlockBehaviour.Properties.of()
                             .mapColor(MapColor.SNOW)
-                            .strength(0.5F)
+                            .strength(0.5F, com.jttw.engine.world.tough.Tough.RESISTANCE)
                             .sound(SoundType.WOOL)
                             .noOcclusion()
                             .isViewBlocking((s, g, p) -> false)));
@@ -52,8 +52,8 @@ public final class ModBlocks {
 
     // ── Heaven and Hell: Sun Wukong's road to immortality ───────────
     public static final RegistryObject<Block> JADE_BLOCK =
-            BLOCKS.register("jade_block", () -> new Block(BlockBehaviour.Properties.of()
-                    .mapColor(MapColor.COLOR_LIGHT_GREEN).strength(3.0F, 9.0F).requiresCorrectToolForDrops().sound(SoundType.CALCITE)));
+            BLOCKS.register("jade_block", () -> new com.jttw.engine.world.tough.Tough.Stone(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_GREEN).strength(3.0F, com.jttw.engine.world.tough.Tough.RESISTANCE).requiresCorrectToolForDrops().sound(SoundType.CALCITE)));
     public static final RegistryObject<Block> PEACH_FRUIT =
             BLOCKS.register("immortal_peach_fruit", () -> new com.jttw.engine.world.heaven.HeavenBlocks.PeachFruit(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.COLOR_PINK).strength(0.2F).noCollission().sound(SoundType.CHERRY_LEAVES).lightLevel(s -> 4)));
@@ -63,6 +63,33 @@ public final class ModBlocks {
     public static final RegistryObject<Block> BOOK_OF_LIFE_AND_DEATH =
             BLOCKS.register("book_of_life_and_death", () -> new com.jttw.engine.world.heaven.HeavenBlocks.BookOfLifeAndDeath(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.COLOR_BLACK).strength(-1.0F, 3600000.0F).noLootTable().noOcclusion().lightLevel(s -> 6)));
+
+
+    // ── Tough stone: the ground of White Bone Ridge, Heaven and Hell (see world.tough.Tough) ──
+    public static final RegistryObject<Block> BLEACHED_STONE =
+            BLOCKS.register("bleached_stone", () -> new com.jttw.engine.world.tough.Tough.Stone(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_WHITE).strength(0.75F, com.jttw.engine.world.tough.Tough.RESISTANCE).requiresCorrectToolForDrops().sound(SoundType.CALCITE)));
+    public static final RegistryObject<Block> GRAVE_TUFF =
+            BLOCKS.register("grave_tuff", () -> new com.jttw.engine.world.tough.Tough.Stone(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_GRAY).strength(1.5F, com.jttw.engine.world.tough.Tough.RESISTANCE).requiresCorrectToolForDrops().sound(SoundType.TUFF)));
+    public static final RegistryObject<Block> BONE_ANDESITE =
+            BLOCKS.register("bone_andesite", () -> new com.jttw.engine.world.tough.Tough.Stone(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.STONE).strength(1.5F, com.jttw.engine.world.tough.Tough.RESISTANCE).requiresCorrectToolForDrops().sound(SoundType.STONE)));
+    public static final RegistryObject<Block> OSSIFIED_BONE =
+            BLOCKS.register("ossified_bone", () -> new com.jttw.engine.world.tough.Tough.Pillar(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.SAND).strength(2.0F, com.jttw.engine.world.tough.Tough.RESISTANCE).requiresCorrectToolForDrops().sound(SoundType.BONE_BLOCK)));
+    public static final RegistryObject<Block> BONE_GRAVEL =
+            BLOCKS.register("bone_gravel", () -> new com.jttw.engine.world.tough.Tough.Loose(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_LIGHT_GRAY).strength(0.6F, com.jttw.engine.world.tough.Tough.RESISTANCE).sound(SoundType.GRAVEL)));
+    public static final RegistryObject<Block> CELESTIAL_MARBLE =
+            BLOCKS.register("celestial_marble", () -> new com.jttw.engine.world.tough.Tough.Pillar(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.QUARTZ).strength(0.8F, com.jttw.engine.world.tough.Tough.RESISTANCE).requiresCorrectToolForDrops().sound(SoundType.STONE)));
+    public static final RegistryObject<Block> UNDERWORLD_STONE =
+            BLOCKS.register("underworld_stone", () -> new com.jttw.engine.world.tough.Tough.Stone(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLACK).strength(1.5F, com.jttw.engine.world.tough.Tough.RESISTANCE).requiresCorrectToolForDrops().sound(SoundType.STONE)));
+    public static final RegistryObject<Block> SOUL_ASH =
+            BLOCKS.register("soul_ash", () -> new com.jttw.engine.world.tough.Tough.Stone(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BROWN).strength(0.5F, com.jttw.engine.world.tough.Tough.RESISTANCE).sound(SoundType.SOUL_SAND)));
 
     public static void register(IEventBus modEventBus) {
         BLOCKS.register(modEventBus);

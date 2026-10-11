@@ -25,7 +25,7 @@ public class BoneSpireFeature extends Feature<NoneFeatureConfiguration> {
     }
 
     private static boolean ground(BlockState s) {
-        return s.is(Blocks.CALCITE) || s.is(Blocks.BONE_BLOCK) || s.is(Blocks.TUFF) || s.is(Blocks.GRAVEL)
+        return s.is(com.jttw.engine.registry.ModBlocks.BLEACHED_STONE.get()) || s.is(com.jttw.engine.registry.ModBlocks.OSSIFIED_BONE.get()) || s.is(com.jttw.engine.registry.ModBlocks.GRAVE_TUFF.get()) || s.is(com.jttw.engine.registry.ModBlocks.BONE_GRAVEL.get())
                 || s.is(net.minecraft.tags.BlockTags.DIRT) || s.is(net.minecraft.tags.BlockTags.SAND)
                 || s.is(net.minecraft.tags.BlockTags.TERRACOTTA);
     }
@@ -40,7 +40,7 @@ public class BoneSpireFeature extends Feature<NoneFeatureConfiguration> {
 
         int height = 2 + r.nextInt(5);
         Direction lean = r.nextInt(3) == 0 ? Direction.Plane.HORIZONTAL.getRandomDirection(r) : null;
-        BlockState bone = Blocks.BONE_BLOCK.defaultBlockState();
+        BlockState bone = com.jttw.engine.registry.ModBlocks.OSSIFIED_BONE.get().defaultBlockState();
         BlockPos.MutableBlockPos p = base.mutable();
         for (int i = 0; i < height; i++) {
             if (!level.isEmptyBlock(p)) break;
