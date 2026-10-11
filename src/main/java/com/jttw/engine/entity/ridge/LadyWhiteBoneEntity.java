@@ -12,12 +12,10 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -91,7 +89,6 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
     private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> DEATHS =
             net.minecraft.network.syncher.SynchedEntityData.defineId(LadyWhiteBoneEntity.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
 
-    private final ServerBossEvent bossBar = new ServerBossEvent(Component.empty(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.NOTCHED_10);
     private final Set<UUID> slayers = new HashSet<>();
     private int veil = VEIL_EVERY / 2, blink, call = CALL_EVERY, nextWander = 200;
     /** How many of the three health marks (3/4, 1/2, 1/4) have called her servants. */
@@ -101,7 +98,6 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
         super(type, level);
         xpReward = 200;
         setPersistenceRequired();
-        bossBar.setName(getDisplayName());
         getPersistentData().putString(RidgeMonster.KEY_TIER, EnemyTier.BOSS.name());
         getPersistentData().putString(RidgeMonster.KEY_ZONE, Zones.WHITE_BONE_RIDGE.location().toString());
     }
@@ -136,7 +132,6 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
 
     public void setDisguise(int disguise) {
         entityData.set(DISGUISE, Math.max(HERSELF, Math.min(WRAITH_CAPTAIN, disguise)));
-        bossBar.setVisible(!disguised());
         moveAs(disguise);
         refreshDimensions();
     }
@@ -313,7 +308,6 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
     @Override
     protected void customServerAiStep() {
         super.customServerAiStep();
-        bossBar.setProgress(getHealth() / getMaxHealth());
         LivingEntity target = getTarget();
         if (blink > 0) blink--;
         if (disguised() || target == null || !target.isAlive()) return;
@@ -401,7 +395,6 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
         playSound(SoundEvents.WITHER_SKELETON_DEATH, 1.5f, 1.3f);
         LivingEntity by = source.getEntity() instanceof LivingEntity l ? l : getTarget();
         if (by != null) vanish(by);
-        bossBar.setName(getDisplayName());
     }
 
     // ── A boss ──────────────────────────────────────────────────────────
@@ -411,23 +404,8 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
         return slayers;
     }
 
-    @Override
-    public void startSeenByPlayer(ServerPlayer player) {
-        super.startSeenByPlayer(player);
-        bossBar.addPlayer(player);
-    }
 
-    @Override
-    public void stopSeenByPlayer(ServerPlayer player) {
-        super.stopSeenByPlayer(player);
-        bossBar.removePlayer(player);
-    }
 
-    @Override
-    public void setCustomName(Component name) {
-        super.setCustomName(name);
-        bossBar.setName(getDisplayName());
-    }
 
     @Override
     public boolean removeWhenFarAway(double distance) {
@@ -502,6 +480,5 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
         setDisguise(tag.getInt("Disguise"));
         if (tag.contains("Lair")) restrictTo(NbtUtils.readBlockPos(tag.getCompound("Lair")), HIDING_GROUND);
         for (Tag id : tag.getList("Slayers", Tag.TAG_INT_ARRAY)) slayers.add(NbtUtils.loadUUID(id));
-        bossBar.setName(getDisplayName());
     }
 }

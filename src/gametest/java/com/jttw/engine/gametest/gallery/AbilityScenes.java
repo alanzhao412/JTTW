@@ -221,6 +221,18 @@ final class AbilityScenes {
                 // Lady White Bone hiding among her dead: as seen, and as truth-seeing eyes see her
                 new Scene("lady_disguised", p -> disguisedLady(p, false), p -> {}, 1, false),
                 new Scene("lady_mirage", p -> disguisedLady(p, true), p -> {}, 1, false),
+                new Scene("lady_truth_sight", p -> {
+                    // through the Fiery Golden Eyes: her true name and health, though she wears a servant's shape
+                    var lady = com.jttw.engine.registry.ModEntities.LADY_WHITE_BONE.get().create(p.serverLevel());
+                    if (lady == null) return;
+                    lady.moveTo(p.getX(), p.getY(), p.getZ() + 5, 180f, 0f);
+                    lady.setDisguise(com.jttw.engine.entity.ridge.LadyWhiteBoneEntity.SERVANT);
+                    lady.setNoAi(true);
+                    lady.setYHeadRot(180f);
+                    lady.setYBodyRot(180f);
+                    p.serverLevel().addFreshEntity(lady);
+                    com.jttw.engine.client.renderer.GoldenEyesRenderer.setMode(p.getUUID(), 1);
+                }, p -> {}, 1, true),
                 new Scene("lady_husks", p -> {
                     for (int i = 0; i < 3; i++) {
                         var body = com.jttw.engine.registry.ModEntities.LADY_HUSK.get().create(p.serverLevel());

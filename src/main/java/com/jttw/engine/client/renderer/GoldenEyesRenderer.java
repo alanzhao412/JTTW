@@ -227,59 +227,8 @@ public final class GoldenEyesRenderer {
         poseStack.popPose();
     }
 
-    // =========================================================================
-    // HUD overlay — crosshair target entity info
-    // =========================================================================
-
-    @SubscribeEvent
-    public static void onRenderGuiOverlay(RenderGuiOverlayEvent.Post event) {
-        if (mode < 1) return;
-        if (event.getOverlay() != VanillaGuiOverlay.CROSSHAIR.type()) return;
-
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null) return;
-
-        // Raycast from player eye to find looked-at entity
-        Entity target = getTargetEntity(mc, 20.0);
-        if (target == null || !(target instanceof LivingEntity living)) return;
-
-        GuiGraphics gfx = event.getGuiGraphics();
-        Font font = mc.font;
-        int screenW = mc.getWindow().getGuiScaledWidth();
-        int screenH = mc.getWindow().getGuiScaledHeight();
-
-        // Build info text
-        String name = living.getName().getString();
-        float hp = living.getHealth();
-        float maxHp = living.getMaxHealth();
-        int hpInt = Math.round(hp);
-        int maxHpInt = Math.round(maxHp);
-
-        String infoLine = "\u00a7c\u2665 " + hpInt + "/" + maxHpInt + " \u00a7r" + name;
-
-        // Render below crosshair
-        int textW = font.width(infoLine);
-        int x = (screenW - textW) / 2;
-        int y = screenH / 2 + 12;
-
-        // Background
-        gfx.fill(x - 2, y - 1, x + textW + 2, y + 10, 0xAA000000);
-        gfx.drawString(font, infoLine, x, y, 0xFFFFFFFF, true);
-
-        // Health bar
-        int barW = 60;
-        int barX = (screenW - barW) / 2;
-        int barY = y + 12;
-        float ratio = Math.min(1f, hp / Math.max(1f, maxHp));
-        int fillW = (int)(barW * ratio);
-
-        gfx.fill(barX - 1, barY - 1, barX + barW + 1, barY + 4, 0xFF000000);
-        gfx.fill(barX, barY, barX + barW, barY + 3, 0xFF3A0000);
-        gfx.fill(barX, barY, barX + fillW, barY + 3, 0xFFBB1111);
-        if (fillW > 0) {
-            gfx.fill(barX, barY, barX + fillW, barY + 1, 0xFFEE3333);
-        }
-    }
+    // (What the eyes read in what they look upon, its true name, health and Qi, is TruthSightHud's,
+    // shared with the Eye of Heaven.)
 
     // =========================================================================
     // Helpers

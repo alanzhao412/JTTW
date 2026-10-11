@@ -248,6 +248,12 @@ public final class NetworkHandler {
                 .consumerMainThread(com.jttw.engine.network.s2c.BeastFormPacket::handle)
                 .add();
 
+        CHANNEL.messageBuilder(com.jttw.engine.network.s2c.QiSeenPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.jttw.engine.network.s2c.QiSeenPacket::encode)
+                .decoder(com.jttw.engine.network.s2c.QiSeenPacket::decode)
+                .consumerMainThread(com.jttw.engine.network.s2c.QiSeenPacket::handle)
+                .add();
+
         CHANNEL.messageBuilder(com.jttw.engine.network.s2c.WaterFxPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.jttw.engine.network.s2c.WaterFxPacket::encode)
                 .decoder(com.jttw.engine.network.s2c.WaterFxPacket::decode)
