@@ -18,10 +18,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 /**
- * The White Tiger, Byakko's true form: a great white tiger, black-striped, built as a predator is:
- * massive raised shoulders, the back falling away to lean haunches, the head carried low under a
- * heavy brow, cheek ruffs flaring, the jaw a little open on its fangs, ears laid back; forelegs
- * thicker than the hind, on broad clawed paws. Its model and skin come from one list of parts
+ * The White Tiger, Byakko's true form: a great white tiger, black-striped, long and low, its back
+ * near level, the head broad and flat-faced at shoulder height, cheek ruffs flaring, the jaw a little
+ * open on its fangs, curved claws out over its forepaws, a long tail carried low. Its model and skin come from one list of parts
  * ({@code assets_source/white_tiger.py}). About five and a half blocks from nose to rump.
  */
 public final class WhiteTigerRenderer extends MobRenderer<WhiteTigerEntity, WhiteTigerRenderer.Model> {
@@ -54,58 +53,77 @@ public final class WhiteTigerRenderer extends MobRenderer<WhiteTigerEntity, Whit
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
         PartDefinition body = root.addOrReplaceChild("body", CubeListBuilder.create()
-                .texOffs(0, 0).mirror(false).addBox(-7.5f, -2, -19, 15, 13, 13)
-                .texOffs(98, 27).mirror(false).addBox(-7, -5, -17, 5, 3, 8)
-                .texOffs(98, 27).mirror(false).addBox(2, -5, -17, 5, 3, 8)
-                .texOffs(106, 0).mirror(false).addBox(-5.5f, 0, -6, 11, 10, 11)
-                .texOffs(57, 0).mirror(false).addBox(-6.5f, -1, 5, 13, 11, 11), PartPose.offsetAndRotation(0, 0, 0, 0, 0, 0));
+                .texOffs(0, 0).mirror(false).addBox(-6.5f, 2, -18, 13, 11, 12)
+                .texOffs(94, 24).mirror(false).addBox(-5.5f, 1.2f, -16, 11, 1, 8)
+                .texOffs(100, 0).mirror(false).addBox(-5.5f, 3, -6, 11, 9, 12)
+                .texOffs(51, 0).mirror(false).addBox(-6, 2.5f, 6, 12, 9.5f, 12), PartPose.offsetAndRotation(0, 0, 0, 0, 0, 0));
         PartDefinition neck = root.addOrReplaceChild("neck", CubeListBuilder.create()
-                .texOffs(151, 0).mirror(false).addBox(-5, -1, -7, 10, 10, 8), PartPose.offsetAndRotation(0, 2, -18, 0.45f, 0, 0));
+                .texOffs(0, 24).mirror(false).addBox(-4.5f, -3.5f, -5, 9, 8, 6), PartPose.offsetAndRotation(0, 5, -17, 0.15f, 0, 0));
         PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create()
-                .texOffs(188, 0).mirror(false).addBox(-5.5f, -3, -8, 11, 8, 8)
-                .texOffs(29, 27).mirror(false).addBox(-8, -1, -6, 2.5f, 7, 6)
-                .texOffs(29, 27).mirror(false).addBox(5.5f, -1, -6, 2.5f, 7, 6)
-                .texOffs(192, 27).mirror(false).addBox(-2.5f, 1.5f, -11.5f, 5, 3.5f, 3.5f)
-                .texOffs(0, 42).mirror(false).addBox(-2.2f, 5, -11.2f, 1, 2.5f, 1)
-                .texOffs(0, 42).mirror(false).addBox(1.2f, 5, -11.2f, 1, 2.5f, 1)
-                .texOffs(5, 42).mirror(false).addBox(-5, -5, -3, 2.5f, 2.5f, 1)
-                .texOffs(5, 42).mirror(false).addBox(2.5f, -5, -3, 2.5f, 2.5f, 1), PartPose.offsetAndRotation(0, 7, -24, 0.08f, 0, 0));
-        PartDefinition rightBrow = head.addOrReplaceChild("right_brow", CubeListBuilder.create()
-                .texOffs(14, 42).mirror(false).addBox(-2.4f, -0.7f, -0.7f, 4.8f, 1.4f, 1.2f), PartPose.offsetAndRotation(-2.5f, -1.6f, -8.3f, 0, 0, 0.42f));
-        PartDefinition leftBrow = head.addOrReplaceChild("left_brow", CubeListBuilder.create()
-                .texOffs(14, 42).mirror(true).addBox(-2.4f, -0.7f, -0.7f, 4.8f, 1.4f, 1.2f), PartPose.offsetAndRotation(2.5f, -1.6f, -8.3f, 0, 0, -0.42f));
+                .texOffs(147, 0).mirror(false).addBox(-5.5f, -4.5f, -8, 11, 9, 8)
+                .texOffs(79, 24).mirror(false).addBox(-7.2f, -1.5f, -6.5f, 2, 6, 5)
+                .texOffs(79, 24).mirror(false).addBox(5.2f, -1.5f, -6.5f, 2, 6, 5)
+                .texOffs(192, 24).mirror(false).addBox(-3.5f, 1.5f, -10.5f, 7, 3, 2.5f)
+                .texOffs(241, 24).mirror(false).addBox(-2.7f, 4.5f, -10.3f, 0.8f, 2.2f, 0.8f)
+                .texOffs(241, 24).mirror(false).addBox(1.9f, 4.5f, -10.3f, 0.8f, 2.2f, 0.8f)
+                .texOffs(213, 24).mirror(false).addBox(-5, -6.5f, -3, 3, 2.5f, 1.5f)
+                .texOffs(213, 24).mirror(false).addBox(2, -6.5f, -3, 3, 2.5f, 1.5f), PartPose.offsetAndRotation(0, 4.5f, -21, 0, 0, 0));
         PartDefinition jaw = head.addOrReplaceChild("jaw", CubeListBuilder.create()
-                .texOffs(236, 27).mirror(false).addBox(-2.5f, 0, -3.5f, 5, 1.5f, 4)
-                .texOffs(29, 42).mirror(false).addBox(-2, -1.4f, -3.3f, 1, 1.4f, 1)
-                .texOffs(29, 42).mirror(false).addBox(1, -1.4f, -3.3f, 1, 1.4f, 1), PartPose.offsetAndRotation(0, 5, -8, 0.32f, 0, 0));
+                .texOffs(224, 24).mirror(false).addBox(-2.5f, 0, -2.5f, 5, 1.5f, 3)
+                .texOffs(246, 24).mirror(false).addBox(-2, -1.2f, -2.3f, 0.7f, 1.2f, 0.7f)
+                .texOffs(246, 24).mirror(false).addBox(1.3f, -1.2f, -2.3f, 0.7f, 1.2f, 0.7f), PartPose.offsetAndRotation(0, 4, -8, 0.3f, 0, 0));
         PartDefinition rightFrontLeg = root.addOrReplaceChild("right_front_leg", CubeListBuilder.create()
-                .texOffs(48, 27).mirror(false).addBox(-3, 0, -3, 6, 7, 6)
-                .texOffs(125, 27).mirror(false).addBox(-2.5f, 7, -2.5f, 5, 5, 5)
-                .texOffs(163, 27).mirror(false).addBox(-3.5f, 11, -4.5f, 7, 2, 7)
-                .texOffs(34, 42).mirror(false).addBox(-3, 12, -5.5f, 1, 1, 1)
-                .texOffs(34, 42).mirror(false).addBox(-1, 12, -5.5f, 1, 1, 1)
-                .texOffs(34, 42).mirror(false).addBox(1, 12, -5.5f, 1, 1, 1)
-                .texOffs(34, 42).mirror(false).addBox(2.5f, 12, -5.5f, 1, 1, 1), PartPose.offsetAndRotation(-4.5f, 11, -13, 0, 0, 0));
+                .texOffs(58, 24).mirror(false).addBox(-2.5f, 0, -2.5f, 5, 7, 5)
+                .texOffs(150, 24).mirror(false).addBox(-2, 7, -2, 4, 4, 4)
+                .texOffs(167, 24).mirror(false).addBox(-3, 10.5f, -4, 6, 1.5f, 6), PartPose.offsetAndRotation(-4.2f, 12, -12, 0, 0, 0));
         PartDefinition leftFrontLeg = root.addOrReplaceChild("left_front_leg", CubeListBuilder.create()
-                .texOffs(48, 27).mirror(true).addBox(-3, 0, -3, 6, 7, 6)
-                .texOffs(125, 27).mirror(true).addBox(-2.5f, 7, -2.5f, 5, 5, 5)
-                .texOffs(163, 27).mirror(true).addBox(-3.5f, 11, -4.5f, 7, 2, 7)
-                .texOffs(34, 42).mirror(true).addBox(-3, 12, -5.5f, 1, 1, 1)
-                .texOffs(34, 42).mirror(true).addBox(-1, 12, -5.5f, 1, 1, 1)
-                .texOffs(34, 42).mirror(true).addBox(1, 12, -5.5f, 1, 1, 1)
-                .texOffs(34, 42).mirror(true).addBox(2.5f, 12, -5.5f, 1, 1, 1), PartPose.offsetAndRotation(4.5f, 11, -13, 0, 0, 0));
+                .texOffs(58, 24).mirror(true).addBox(-2.5f, 0, -2.5f, 5, 7, 5)
+                .texOffs(150, 24).mirror(true).addBox(-2, 7, -2, 4, 4, 4)
+                .texOffs(167, 24).mirror(true).addBox(-3, 10.5f, -4, 6, 1.5f, 6), PartPose.offsetAndRotation(4.2f, 12, -12, 0, 0, 0));
         PartDefinition rightHindLeg = root.addOrReplaceChild("right_hind_leg", CubeListBuilder.create()
-                .texOffs(227, 0).mirror(false).addBox(-3, -2, -3.5f, 6, 8, 7)
-                .texOffs(146, 27).mirror(false).addBox(-2, 6, -1, 4, 6, 4)
-                .texOffs(211, 27).mirror(false).addBox(-3, 11, -3.5f, 6, 2, 6), PartPose.offsetAndRotation(-4, 11, 11, 0, 0, 0));
+                .texOffs(186, 0).mirror(false).addBox(-3, -3, -3, 6, 9, 6)
+                .texOffs(133, 24).mirror(false).addBox(-2, 6, -1.5f, 4, 5, 4)
+                .texOffs(167, 24).mirror(false).addBox(-2.75f, 10.5f, -3.5f, 5.5f, 1.5f, 5.5f), PartPose.offsetAndRotation(-4, 12, 12, 0, 0, 0));
         PartDefinition leftHindLeg = root.addOrReplaceChild("left_hind_leg", CubeListBuilder.create()
-                .texOffs(227, 0).mirror(true).addBox(-3, -2, -3.5f, 6, 8, 7)
-                .texOffs(146, 27).mirror(true).addBox(-2, 6, -1, 4, 6, 4)
-                .texOffs(211, 27).mirror(true).addBox(-3, 11, -3.5f, 6, 2, 6), PartPose.offsetAndRotation(4, 11, 11, 0, 0, 0));
+                .texOffs(186, 0).mirror(true).addBox(-3, -3, -3, 6, 9, 6)
+                .texOffs(133, 24).mirror(true).addBox(-2, 6, -1.5f, 4, 5, 4)
+                .texOffs(167, 24).mirror(true).addBox(-2.75f, 10.5f, -3.5f, 5.5f, 1.5f, 5.5f), PartPose.offsetAndRotation(4, 12, 12, 0, 0, 0));
         PartDefinition tail = root.addOrReplaceChild("tail", CubeListBuilder.create()
-                .texOffs(0, 27).mirror(false).addBox(-1.25f, -1.25f, 0, 2.5f, 2.5f, 11), PartPose.offsetAndRotation(0, 2, 16, 0.55f, 0, 0));
+                .texOffs(211, 0).mirror(false).addBox(-1.25f, -1.25f, 0, 2.5f, 2.5f, 12), PartPose.offsetAndRotation(0, 3.5f, 17.5f, -0.55f, 0, 0));
         PartDefinition tailEnd = tail.addOrReplaceChild("tail_end", CubeListBuilder.create()
-                .texOffs(73, 27).mirror(false).addBox(-1, -1, 0, 2, 2, 10), PartPose.offsetAndRotation(0, 0, 11, -0.5f, 0, 0));
+                .texOffs(31, 24).mirror(false).addBox(-1, -1, 0, 2, 2, 11), PartPose.offsetAndRotation(0, 0, 12, 0.5f, 0, 0));
+        PartDefinition rightClaw0 = rightFrontLeg.addOrReplaceChild("right_claw0", CubeListBuilder.create()
+                .texOffs(0, 39).mirror(false).addBox(-0.3f, -0.3f, -1.6f, 0.6f, 0.6f, 1.6f), PartPose.offsetAndRotation(-2.1f, 11, -3.6f, 0.55f, 0, 0));
+        PartDefinition rightClaw0Tip = rightClaw0.addOrReplaceChild("right_claw0_tip", CubeListBuilder.create()
+                .texOffs(7, 39).mirror(false).addBox(-0.22f, -0.22f, -1.1f, 0.44f, 0.44f, 1.1f), PartPose.offsetAndRotation(0, 0, -1.6f, 0.9f, 0, 0));
+        PartDefinition rightClaw1 = rightFrontLeg.addOrReplaceChild("right_claw1", CubeListBuilder.create()
+                .texOffs(0, 39).mirror(false).addBox(-0.3f, -0.3f, -1.6f, 0.6f, 0.6f, 1.6f), PartPose.offsetAndRotation(-0.7f, 11, -3.6f, 0.55f, 0, 0));
+        PartDefinition rightClaw1Tip = rightClaw1.addOrReplaceChild("right_claw1_tip", CubeListBuilder.create()
+                .texOffs(7, 39).mirror(false).addBox(-0.22f, -0.22f, -1.1f, 0.44f, 0.44f, 1.1f), PartPose.offsetAndRotation(0, 0, -1.6f, 0.9f, 0, 0));
+        PartDefinition rightClaw2 = rightFrontLeg.addOrReplaceChild("right_claw2", CubeListBuilder.create()
+                .texOffs(0, 39).mirror(false).addBox(-0.3f, -0.3f, -1.6f, 0.6f, 0.6f, 1.6f), PartPose.offsetAndRotation(0.7f, 11, -3.6f, 0.55f, 0, 0));
+        PartDefinition rightClaw2Tip = rightClaw2.addOrReplaceChild("right_claw2_tip", CubeListBuilder.create()
+                .texOffs(7, 39).mirror(false).addBox(-0.22f, -0.22f, -1.1f, 0.44f, 0.44f, 1.1f), PartPose.offsetAndRotation(0, 0, -1.6f, 0.9f, 0, 0));
+        PartDefinition rightClaw3 = rightFrontLeg.addOrReplaceChild("right_claw3", CubeListBuilder.create()
+                .texOffs(0, 39).mirror(false).addBox(-0.3f, -0.3f, -1.6f, 0.6f, 0.6f, 1.6f), PartPose.offsetAndRotation(2.1f, 11, -3.6f, 0.55f, 0, 0));
+        PartDefinition rightClaw3Tip = rightClaw3.addOrReplaceChild("right_claw3_tip", CubeListBuilder.create()
+                .texOffs(7, 39).mirror(false).addBox(-0.22f, -0.22f, -1.1f, 0.44f, 0.44f, 1.1f), PartPose.offsetAndRotation(0, 0, -1.6f, 0.9f, 0, 0));
+        PartDefinition leftClaw0 = leftFrontLeg.addOrReplaceChild("left_claw0", CubeListBuilder.create()
+                .texOffs(0, 39).mirror(false).addBox(-0.3f, -0.3f, -1.6f, 0.6f, 0.6f, 1.6f), PartPose.offsetAndRotation(-2.1f, 11, -3.6f, 0.55f, 0, 0));
+        PartDefinition leftClaw0Tip = leftClaw0.addOrReplaceChild("left_claw0_tip", CubeListBuilder.create()
+                .texOffs(7, 39).mirror(false).addBox(-0.22f, -0.22f, -1.1f, 0.44f, 0.44f, 1.1f), PartPose.offsetAndRotation(0, 0, -1.6f, 0.9f, 0, 0));
+        PartDefinition leftClaw1 = leftFrontLeg.addOrReplaceChild("left_claw1", CubeListBuilder.create()
+                .texOffs(0, 39).mirror(false).addBox(-0.3f, -0.3f, -1.6f, 0.6f, 0.6f, 1.6f), PartPose.offsetAndRotation(-0.7f, 11, -3.6f, 0.55f, 0, 0));
+        PartDefinition leftClaw1Tip = leftClaw1.addOrReplaceChild("left_claw1_tip", CubeListBuilder.create()
+                .texOffs(7, 39).mirror(false).addBox(-0.22f, -0.22f, -1.1f, 0.44f, 0.44f, 1.1f), PartPose.offsetAndRotation(0, 0, -1.6f, 0.9f, 0, 0));
+        PartDefinition leftClaw2 = leftFrontLeg.addOrReplaceChild("left_claw2", CubeListBuilder.create()
+                .texOffs(0, 39).mirror(false).addBox(-0.3f, -0.3f, -1.6f, 0.6f, 0.6f, 1.6f), PartPose.offsetAndRotation(0.7f, 11, -3.6f, 0.55f, 0, 0));
+        PartDefinition leftClaw2Tip = leftClaw2.addOrReplaceChild("left_claw2_tip", CubeListBuilder.create()
+                .texOffs(7, 39).mirror(false).addBox(-0.22f, -0.22f, -1.1f, 0.44f, 0.44f, 1.1f), PartPose.offsetAndRotation(0, 0, -1.6f, 0.9f, 0, 0));
+        PartDefinition leftClaw3 = leftFrontLeg.addOrReplaceChild("left_claw3", CubeListBuilder.create()
+                .texOffs(0, 39).mirror(false).addBox(-0.3f, -0.3f, -1.6f, 0.6f, 0.6f, 1.6f), PartPose.offsetAndRotation(2.1f, 11, -3.6f, 0.55f, 0, 0));
+        PartDefinition leftClaw3Tip = leftClaw3.addOrReplaceChild("left_claw3_tip", CubeListBuilder.create()
+                .texOffs(7, 39).mirror(false).addBox(-0.22f, -0.22f, -1.1f, 0.44f, 0.44f, 1.1f), PartPose.offsetAndRotation(0, 0, -1.6f, 0.9f, 0, 0));
         return LayerDefinition.create(mesh, 256, 256);
         // GENERATED: end
     }
@@ -137,8 +155,8 @@ public final class WhiteTigerRenderer extends MobRenderer<WhiteTigerEntity, Whit
         public void setupAnim(WhiteTigerEntity e, float swing, float amount, float age, float yaw, float pitch) {
             // the head low and level, turning where it looks; the jaw working a little, as it breathes
             head.yRot = yaw * Mth.DEG_TO_RAD * 0.6f;
-            head.xRot = 0.08f + pitch * Mth.DEG_TO_RAD * 0.5f;
-            jaw.xRot = 0.32f + Mth.sin(age * 0.09f) * 0.05f;
+            head.xRot = pitch * Mth.DEG_TO_RAD * 0.5f;
+            jaw.xRot = 0.3f + Mth.sin(age * 0.09f) * 0.05f;
             // a stalking gait: the legs of a side together, the forequarters rolling
             for (int i = 0; i < 4; i++) {
                 boolean right = i % 2 == 0, front = i < 2;
@@ -146,8 +164,8 @@ public final class WhiteTigerRenderer extends MobRenderer<WhiteTigerEntity, Whit
             }
             // the tail low and long, its end flicking
             tail.yRot = Mth.sin(age * 0.07f) * 0.2f * (1 - amount * 0.6f);
-            tail.xRot = 0.55f - amount * 0.2f;
-            tailEnd.xRot = -0.5f + Mth.sin(age * 0.13f) * 0.15f;
+            tail.xRot = -0.55f + amount * 0.25f;
+            tailEnd.xRot = 0.5f + Mth.sin(age * 0.13f) * 0.15f;
         }
 
         @Override

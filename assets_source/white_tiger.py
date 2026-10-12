@@ -1,103 +1,106 @@
 """The White Tiger, Byakko's true form: its model and its skin from one list of parts.
 
 Writes the body of WhiteTigerRenderer.layer() (between its GENERATED markers) and paints
-textures/entity/white_tiger.png to the same box-UV layout, so the two never drift apart.
+textures/entity/white_tiger.png to the same box-UV layout, so the two never drift apart. The skin
+is painted at twice the model's resolution (each model pixel is 2x2 texture pixels), so the face
+can carry real eyes.
 
-The shape is a predator's: massive raised shoulders and forequarters, the back falling away to
-lean haunches; the head carried low and thrust forward on a thick neck, under a heavy brow, cheek
-ruffs flaring; the jaw a little open on its fangs; ears laid back; forelegs thicker than the hind,
-on broad clawed paws; a long, low tail. Every box is shaded for its form: lit above, darker down
-its sides, darkest beneath.
+A tiger's build: long and low, the back near level from shoulder to hip, the chest deep; the head
+broad and round at shoulder height on a short neck, its face flat with a short muzzle and cheek
+ruffs; legs strong and not long, the forelegs heavier; curved claws out over the forepaws; a long
+tail carried low. Every box is shaded for its form: lit above, darker down its sides, darkest beneath.
 """
+import math
 import random
 import re
 from PIL import Image
 
-rnd = random.Random(19)
-TEX = 256
+rnd = random.Random(23)
+UNITS = 256          # the model's texture size, in model pixels
+S = 2                # texture pixels per model pixel
+TEX = UNITS * S
 
 # ── the parts ────────────────────────────────────────────────────────────────
 # (name, parent, pivot (x, y, z), rotation (x, y, z) radians, boxes, mirror)
-# each box: (x, y, z, w, h, d, style); pixels, ground at y 24, the head toward -z
-FORE = [(-3, 0, -3, 6, 7, 6, 'fur'), (-2.5, 7, -2.5, 5, 5, 5, 'fur'), (-3.5, 11, -4.5, 7, 2, 7, 'paw'),
-        (-3, 12, -5.5, 1, 1, 1, 'claw'), (-1, 12, -5.5, 1, 1, 1, 'claw'), (1, 12, -5.5, 1, 1, 1, 'claw'), (2.5, 12, -5.5, 1, 1, 1, 'claw')]
-HIND = [(-3, -2, -3.5, 6, 8, 7, 'fur'), (-2, 6, -1, 4, 6, 4, 'fur'), (-3, 11, -3.5, 6, 2, 6, 'paw')]
+# each box: (x, y, z, w, h, d, style); model pixels, ground at y 24, the head toward -z
+FORE = [(-2.5, 0, -2.5, 5, 7, 5, 'fur'), (-2, 7, -2, 4, 4, 4, 'fur'), (-3, 10.5, -4, 6, 1.5, 6, 'paw')]
+HIND = [(-3, -3, -3, 6, 9, 6, 'fur'), (-2, 6, -1.5, 4, 5, 4, 'fur'), (-2.75, 10.5, -3.5, 5.5, 1.5, 5.5, 'paw')]
 PARTS = [
     ('body', 'root', (0, 0, 0), (0, 0, 0), [
-        (-7.5, -2, -19, 15, 13, 13, 'fur'),       # the forequarters: deep chest, broad shoulders
-        (-7, -5, -17, 5, 3, 8, 'fur'),            # the shoulder blades, standing up as it prowls
-        (2, -5, -17, 5, 3, 8, 'fur'),
-        (-5.5, 0, -6, 11, 10, 11, 'fur'),         # the waist, drawn in
-        (-6.5, -1, 5, 13, 11, 11, 'fur'),         # the haunches
+        (-6.5, 2, -18, 13, 11, 12, 'fur'),        # the chest and shoulders, deep
+        (-5.5, 1.2, -16, 11, 1, 8, 'fur'),        # the shoulders' rise, slight
+        (-5.5, 3, -6, 11, 9, 12, 'fur'),          # the waist, drawn in
+        (-6, 2.5, 6, 12, 9.5, 12, 'fur'),         # the haunches
     ], False),
-    ('neck', 'root', (0, 2, -18), (0.45, 0, 0), [(-5, -1, -7, 10, 10, 8, 'fur')], False),
-    ('head', 'root', (0, 7, -24), (0.08, 0, 0), [
-        (-5.5, -3, -8, 11, 8, 8, 'skull'),        # the skull, broad
-        (-8, -1, -6, 2.5, 7, 6, 'ruff'),          # the cheek ruffs, flaring
-        (5.5, -1, -6, 2.5, 7, 6, 'ruff'),
-        (-2.5, 1.5, -11.5, 5, 3.5, 3.5, 'muzzle'),  # the muzzle, below the eyes
-        (-2.2, 5, -11.2, 1, 2.5, 1, 'fang'),      # the upper fangs, bared
-        (1.2, 5, -11.2, 1, 2.5, 1, 'fang'),
-        (-5, -5, -3, 2.5, 2.5, 1, 'ear'),         # the ears, laid back
-        (2.5, -5, -3, 2.5, 2.5, 1, 'ear'),
+    ('neck', 'root', (0, 5, -17), (0.15, 0, 0), [(-4.5, -3.5, -5, 9, 8, 6, 'fur')], False),
+    ('head', 'root', (0, 4.5, -21), (0, 0, 0), [
+        (-5.5, -4.5, -8, 11, 9, 8, 'skull'),      # the head: broad, its face flat
+        (-7.2, -1.5, -6.5, 2, 6, 5, 'ruff'),      # the cheek ruffs, flaring
+        (5.2, -1.5, -6.5, 2, 6, 5, 'ruff'),
+        (-3.5, 1.5, -10.5, 7, 3, 2.5, 'muzzle'),  # the muzzle, short and broad, below the eyes
+        (-2.7, 4.5, -10.3, 0.8, 2.2, 0.8, 'fang'),  # the upper fangs
+        (1.9, 4.5, -10.3, 0.8, 2.2, 0.8, 'fang'),
+        (-5, -6.5, -3, 3, 2.5, 1.5, 'ear'),       # the ears, round, a little back
+        (2, -6.5, -3, 3, 2.5, 1.5, 'ear'),
     ], False),
-    ('right_brow', 'head', (-2.5, -1.6, -8.3), (0, 0, 0.42), [(-2.4, -0.7, -0.7, 4.8, 1.4, 1.2, 'brow')], False),
-    ('left_brow', 'head', (2.5, -1.6, -8.3), (0, 0, -0.42), [(-2.4, -0.7, -0.7, 4.8, 1.4, 1.2, 'brow')], True),
-    ('jaw', 'head', (0, 5, -8), (0.32, 0, 0), [
-        (-2.5, 0, -3.5, 5, 1.5, 4, 'jaw'),
-        (-2, -1.4, -3.3, 1, 1.4, 1, 'fang'),      # the lower fangs
-        (1, -1.4, -3.3, 1, 1.4, 1, 'fang'),
+    ('jaw', 'head', (0, 4, -8), (0.3, 0, 0), [
+        (-2.5, 0, -2.5, 5, 1.5, 3, 'jaw'),
+        (-2, -1.2, -2.3, 0.7, 1.2, 0.7, 'fang'),  # the lower fangs
+        (1.3, -1.2, -2.3, 0.7, 1.2, 0.7, 'fang'),
     ], False),
-    ('right_front_leg', 'root', (-4.5, 11, -13), (0, 0, 0), FORE, False),
-    ('left_front_leg', 'root', (4.5, 11, -13), (0, 0, 0), FORE, True),
-    ('right_hind_leg', 'root', (-4, 11, 11), (0, 0, 0), HIND, False),
-    ('left_hind_leg', 'root', (4, 11, 11), (0, 0, 0), HIND, True),
-    ('tail', 'root', (0, 2, 16), (0.55, 0, 0), [(-1.25, -1.25, 0, 2.5, 2.5, 11, 'tail')], False),
-    ('tail_end', 'tail', (0, 0, 11), (-0.5, 0, 0), [(-1, -1, 0, 2, 2, 10, 'tailtip')], False),
+    ('right_front_leg', 'root', (-4.2, 12, -12), (0, 0, 0), FORE, False),
+    ('left_front_leg', 'root', (4.2, 12, -12), (0, 0, 0), FORE, True),
+    ('right_hind_leg', 'root', (-4, 12, 12), (0, 0, 0), HIND, False),
+    ('left_hind_leg', 'root', (4, 12, 12), (0, 0, 0), HIND, True),
+    ('tail', 'root', (0, 3.5, 17.5), (-0.55, 0, 0), [(-1.25, -1.25, 0, 2.5, 2.5, 12, 'tail')], False),
+    ('tail_end', 'tail', (0, 0, 12), (0.5, 0, 0), [(-1, -1, 0, 2, 2, 11, 'tailtip')], False),
 ]
+# curved claws over each forepaw: a base hooked down from the paw's front, its point curling under
+for leg in ('right_front_leg', 'left_front_leg'):
+    for k, cx in enumerate((-2.1, -0.7, 0.7, 2.1)):
+        base = '%s_claw%d' % (leg.split('_')[0], k)
+        PARTS.append((base, leg, (cx, 11.0, -3.6), (0.55, 0, 0), [(-0.3, -0.3, -1.6, 0.6, 0.6, 1.6, 'claw')], False))
+        PARTS.append((base + '_tip', base, (0, 0, -1.6), (0.9, 0, 0), [(-0.22, -0.22, -1.1, 0.44, 0.44, 1.1, 'clawtip')], False))
 
-# ── pack each distinct box's six faces into the texture ─────────────────────
+# ── pack each distinct box's six faces into the texture (model pixels) ──────
 def size(b):
-    import math
-    w, h, d = (max(1, math.ceil(v)) for v in b[3:6])
-    return w, h, d
+    return tuple(max(1, math.ceil(v)) for v in b[3:6])
 
 
-slots = {}  # (w, h, d, style) -> (u, v)
-shapes = []
+slots = {}
 for _, _, _, _, boxes, _ in PARTS:
     for b in boxes:
-        w, h, d = size(b)
-        key = (w, h, d, b[6])
-        if key not in slots:
-            slots[key] = None
-            shapes.append(key)
-shapes.sort(key=lambda k: -(k[2] + k[1]))
+        slots.setdefault(size(b) + (b[6],), None)
 x = y = row = 0
-for key in shapes:
+for key in sorted(slots, key=lambda k: -(k[2] + k[1])):
     w, h, d, _ = key
     rw, rh = 2 * d + 2 * w, d + h
-    if x + rw > TEX:
+    if x + rw > UNITS:
         x, y, row = 0, y + row + 1, 0
     slots[key] = (x, y)
     x += rw + 1
     row = max(row, rh)
-assert y + row <= TEX, 'texture too small'
+assert y + row <= UNITS, 'texture too small'
 
-# ── paint ───────────────────────────────────────────────────────────────────
+# ── paint, at S texture pixels per model pixel ──────────────────────────────
 img = Image.new('RGBA', (TEX, TEX), (0, 0, 0, 0))
-WHITE, BELLY, STRIPE = (238, 236, 230), (214, 208, 196), (30, 28, 34)
-EYE, NOSE, MOUTH = (132, 214, 250), (176, 112, 116), (110, 34, 40)
-IVORY, CLAW, PAD = (236, 228, 204), (52, 50, 56), (64, 56, 60)
+WHITE, BELLY, STRIPE = (238, 236, 230), (214, 208, 196), (28, 26, 32)
+EYE, NOSE, MOUTH = (110, 196, 245), (176, 106, 112), (104, 30, 38)
+IVORY, PAD = (236, 228, 204), (60, 52, 56)
 
 
 def px(p, c):
     if 0 <= p[0] < TEX and 0 <= p[1] < TEX:
-        img.putpixel(p, tuple(max(0, min(255, int(v))) for v in c[:3]) + (255,))
+        img.putpixel((int(p[0]), int(p[1])), tuple(max(0, min(255, int(v))) for v in c[:3]) + (255,))
+
+
+def faces(u, v, w, h, d):
+    f = {'top': (u + d, v, w, d), 'bottom': (u + d + w, v, w, d), 'right': (u, v + d, d, h),
+         'front': (u + d, v + d, w, h), 'left': (u + d + w, v + d, d, h), 'back': (u + 2 * d + w, v + d, w, h)}
+    return {k: tuple(c * S for c in r) for k, r in f.items()}
 
 
 def face(rect, base, light, noise=5, fall=0.0):
-    """A face in one tone, lit `light`, falling off `fall` toward its bottom (its form's shadow)."""
     fx, fy, fw, fh = rect
     for j in range(fh):
         for i in range(fw):
@@ -107,116 +110,140 @@ def face(rect, base, light, noise=5, fall=0.0):
 
 
 def stripes(rect, spacing, vertical=True, reach=0.7):
-    """Dark stripes: tapering, a little wavy, spaced along the face."""
+    """Dark stripes, tapering to points and a little wavy, spaced along the face (texture pixels)."""
     fx, fy, fw, fh = rect
     length, across = (fw, fh) if vertical else (fh, fw)
     pos = rnd.randint(1, max(1, spacing))
-    while pos < length - 1:
-        r = max(1, int(across * (reach + rnd.uniform(-0.15, 0.15))))
+    while pos < length - 2:
+        r = max(2, int(across * (reach + rnd.uniform(-0.15, 0.12))))
         from_top = rnd.random() < 0.7
         for t in range(r):
-            thick = 2 if t < r * 0.45 else 1
-            wob = round(0.8 * __import__('math').sin(t * 0.9 + pos))
+            thick = 3 if t < r * 0.35 else 2 if t < r * 0.7 else 1
+            wob = round(1.2 * math.sin(t * 0.45 + pos))
             for k in range(thick):
                 a, b2 = pos + k + wob, (t if from_top else across - 1 - t)
                 p = (fx + a, fy + b2) if vertical else (fx + b2, fy + a)
                 if fx <= p[0] < fx + fw and fy <= p[1] < fy + fh:
                     px(p, [c * rnd.uniform(0.9, 1.1) for c in STRIPE])
-        pos += spacing + rnd.randint(-1, 1)
+        pos += spacing + rnd.randint(-2, 2)
 
 
-def faces(u, v, w, h, d):
-    return {'top': (u + d, v, w, d), 'bottom': (u + d + w, v, w, d), 'right': (u, v + d, d, h),
-            'front': (u + d, v + d, w, h), 'left': (u + d + w, v + d, d, h), 'back': (u + 2 * d + w, v + d, w, h)}
+def shaded(f, base=WHITE):
+    face(f['top'], base, 1.06)
+    face(f['bottom'], BELLY, 0.72)
+    for s in ('right', 'left'):
+        face(f[s], base, 0.94, fall=0.32)
+    face(f['front'], base, 1.0, fall=0.22)
+    face(f['back'], base, 0.9, fall=0.3)
+
+
+def eye(fx, fy, inward):
+    """A tiger's eye, from its outer corner (fx, fy), opening toward `inward`: deep-set and hooded,
+    narrow, the heavy upper lid falling toward the inner corner and on into a tear line; a small
+    iris, shadowed under the lid, about a slit pupil; no glint. Lighter fur above, under a dark brow
+    stripe slanting down toward the nose."""
+    X = lambda i: fx + i * inward
+    top = [1, 1, 1, 1, 2, 2, 2]              # the open eye: two rows at most, narrowing inward
+    bottom = [2, 2, 3, 3, 3, 3, 3]
+    for i in range(7):                       # paler fur above the eye, softly
+        px((X(i), fy + top[i] - 3), (246, 244, 238))
+    for i in range(9):                       # the brow stripe, heavy, slanting down inward
+        for j in (-6, -5):
+            px((X(i), fy + j + i // 2), STRIPE)
+    for i in range(7):
+        for j in range(top[i], bottom[i] + 1):
+            shadow = 0.55 if j == top[i] else 0.85   # the lid's shadow on the iris
+            px((X(i), fy + j), [c * shadow for c in EYE])
+        for j in (top[i] - 1, top[i] - 2):            # the heavy upper lid
+            px((X(i), fy + j), STRIPE)
+        px((X(i), fy + bottom[i] + 1), STRIPE)        # the lower lid
+    for j in (top[3], top[3] + 1, top[3] + 2):        # the pupil: a narrow upright slit
+        px((X(3), fy + j), (12, 12, 16))
+    px((X(-1), fy + 1), STRIPE)                       # the corners, drawn out sharp
+    px((X(-1), fy + 0), STRIPE)
+    for i in (7, 8):
+        px((X(i), fy + 3), STRIPE)
+        px((X(i), fy + 4), STRIPE)
+    for j in range(5, 10):                            # the tear line, down from the inner corner
+        px((X(8) + (j - 5) // 3 * inward, fy + j), STRIPE)
 
 
 for (w, h, d, style), (u, v) in slots.items():
     f = faces(u, v, w, h, d)
-    if style in ('fur', 'skull', 'brow', 'ruff', 'tail', 'tailtip', 'muzzle', 'jaw'):
-        face(f['top'], WHITE, 1.06)
-        face(f['bottom'], BELLY, 0.72)
+    if style in ('fur', 'skull', 'ruff', 'tail', 'tailtip', 'muzzle', 'jaw'):
+        shaded(f)
+    if style in ('fur', 'ruff', 'tail'):
         for s in ('right', 'left'):
-            face(f[s], WHITE, 0.94, fall=0.32)
-        face(f['front'], WHITE, 1.0, fall=0.22)
-        face(f['back'], WHITE, 0.9, fall=0.3)
-        if style in ('fur', 'ruff', 'tail'):
-            for s in ('right', 'left'):
-                stripes(f[s], 3 if style != 'ruff' else 2, vertical=True, reach=0.75)
-            stripes(f['top'], 3, vertical=False, reach=0.85)
-            if style == 'fur':
-                stripes(f['front'], 4, vertical=True, reach=0.5)
-                stripes(f['back'], 4, vertical=True, reach=0.5)
-        if style == 'tailtip':
-            for s in ('right', 'left', 'top', 'bottom'):
-                stripes(f[s], 3, vertical=s in ('top', 'bottom'), reach=1.0)
-            face(f['back'], STRIPE, 1.0, noise=3)
-        if style == 'skull':
-            tx, ty, tw, th = f['top']
-            for i in range(tw // 2 - 3, tw // 2 + 3):         # the mark of a king (王) on its forehead
-                for j in (th - 1, th - 3, th - 5):
-                    px((tx + i, ty + j), STRIPE)
-            for j in range(th - 5, th):
-                px((tx + tw // 2, ty + j), STRIPE)
-            for j in range(0, th - 6, 2):
-                px((tx + 1, ty + j), STRIPE)
-                px((tx + tw - 2, ty + j), STRIPE)
-            for s in ('right', 'left'):
-                stripes(f[s], 3, vertical=True, reach=0.5)
-            fx, fy, fw, fh = f['front']
-
-            # deep-set ice-blue eyes, dark-rimmed, slanted
-            # thin slits, outer corner high, inner corner low toward the nose: a glare; a dark
-            # lid line pressed along their top, a dark point at the inner corner
-            for outer, inward in ((fx + 1, 1), (fx + fw - 2, -1)):
-                for i in range(4):
-                    x_ = outer + i * inward
-                    row = fy + 2 + (1 if i >= 2 else 0)
-                    px((x_, row - 1), STRIPE)
-                    if i < 3:
-                        px((x_, row), EYE if i else [c * 0.75 for c in EYE])
-                px((outer + 3 * inward, fy + 3), STRIPE)
-                px((outer + 3 * inward, fy + 4), STRIPE)
-            for j in range(5, fh):            # tear lines down past the muzzle
-                if j % 2 == 1:
-                    px((fx + 1, fy + j), STRIPE)
-                    px((fx + fw - 2, fy + j), STRIPE)
-        if style == 'brow':
-            face(f['bottom'], STRIPE, 1.3, noise=4)   # the shadow it casts on the eyes
-        if style == 'muzzle':
-            fx, fy, fw, fh = f['front']
-            for i in range(fw // 2 - 1, fw // 2 + 2):         # a dark, broad nose
-                px((fx + i, fy), [c * 0.6 for c in NOSE])
-            px((fx + fw // 2, fy + 1), [c * 0.5 for c in NOSE])
-            face(f['top'], WHITE, 1.0, noise=4)
-            for i in range(fw):
-                px((fx + i, fy + fh - 1), MOUTH)
-            face(f['bottom'], MOUTH, 0.8, noise=4)      # the roof of the open mouth
-            for s in ('right', 'left'):                  # whisker spots
-                rx, ry, rw, rh = f[s]
-                for k in range(3):
-                    px((rx + 1 + k, ry + 1 + (k % 2)), STRIPE)
-        if style == 'jaw':
-            face(f['top'], MOUTH, 0.9, noise=4)         # its tongue and the floor of the mouth
-        if style == 'ruff':
-            face(f['front'], WHITE, 1.05, fall=0.1)
-    elif style == 'fang':
-        for name, r in f.items():
-            face(r, IVORY, 1.0 if name != 'bottom' else 0.9, noise=3)
-    elif style == 'claw':
-        for name, r in f.items():
-            face(r, CLAW, 1.0, noise=3)
-    elif style == 'paw':
+            stripes(f[s], 6 if style != 'ruff' else 4, vertical=True, reach=0.75)
+        stripes(f['top'], 6, vertical=False, reach=0.85)
+        if style == 'fur':
+            stripes(f['front'], 8, vertical=True, reach=0.45)
+            stripes(f['back'], 8, vertical=True, reach=0.45)
+    if style == 'tailtip':
+        for s in ('right', 'left', 'top', 'bottom'):
+            stripes(f[s], 6, vertical=s in ('top', 'bottom'), reach=1.0)
+        face(f['back'], STRIPE, 1.0, noise=3)
+    if style == 'skull':
+        # the mark of a king (王) on the forehead, on top of the head toward its front
+        tx, ty, tw, th = f['top']
+        cx = tx + tw // 2
+        for i in range(-5, 5):
+            for j in (th - 2, th - 6, th - 10):
+                px((cx + i, ty + j), STRIPE)
+                px((cx + i, ty + j - 1), STRIPE)
+        for j in range(th - 11, th - 1):
+            px((cx - 1, ty + j), STRIPE)
+            px((cx, ty + j), STRIPE)
+        for s in ('right', 'left'):
+            stripes(f[s], 5, vertical=True, reach=0.5)
+        fx, fy, fw, fh = f['front']               # 22 x 18: the face
+        eye(fx + 1, fy + 7, 1)
+        eye(fx + fw - 2, fy + 7, -1)
+        for i in range(fw // 2 - 3, fw // 2 + 3):  # the forehead's short stripes between the eyes
+            if i % 2 == 0:
+                for j in range(1, 5):
+                    px((fx + i, fy + j), STRIPE)
+    if style == 'ruff':
+        face(f['front'], WHITE, 1.05, fall=0.1)
+    if style == 'muzzle':
+        fx, fy, fw, fh = f['front']               # 12 x 7
+        for j in range(3):                        # the nose: a broad dark triangle
+            for i in range(fw // 2 - 3 + j, fw // 2 + 3 - j):
+                px((fx + i, fy + j), [c * 0.55 for c in NOSE])
+        for j in range(3, fh - 1):                # the line from nose to lip
+            px((fx + fw // 2 - 1, fy + j), STRIPE)
+        for i in range(fw):                       # the lip
+            px((fx + i, fy + fh - 1), MOUTH if 1 < i < fw - 2 else STRIPE)
+        for s in ('right', 'left'):               # whisker spots
+            rx, ry, rw, rh = f[s]
+            for k in range(4):
+                px((rx + 1 + k, ry + 2 + (k % 2) * 2), STRIPE)
+        face(f['bottom'], MOUTH, 0.8, noise=4)    # the roof of the open mouth
+    if style == 'jaw':
+        face(f['top'], MOUTH, 0.9, noise=4)
+    if style == 'fang':
+        for r in f.values():
+            face(r, IVORY, 1.0, noise=3)
+    if style == 'claw':
+        for r in f.values():
+            face(r, IVORY, 0.95, noise=3, fall=0.2)
+    if style == 'clawtip':
+        for r in f.values():
+            face(r, (60, 56, 52), 1.0, noise=3)
+    if style == 'paw':
         face(f['top'], WHITE, 1.0)
         for s in ('right', 'left', 'front', 'back'):
             face(f[s], WHITE, 0.88, fall=0.35)
         face(f['bottom'], PAD, 1.0, noise=4)
-        stripes(f['top'], 3, vertical=False, reach=0.6)
-    elif style == 'ear':
-        face(f['front'], WHITE, 0.95)
+        stripes(f['top'], 5, vertical=False, reach=0.6)
+    if style == 'ear':
+        face(f['front'], (226, 214, 214), 0.95)
         for s in ('back', 'top', 'right', 'left', 'bottom'):
             face(f[s], STRIPE, 1.2, noise=4)
-        fx, fy, fw, fh = f['back']
-        px((fx + fw // 2, fy + fh // 2), WHITE)     # the white spot on a tiger's ear
+        bx, by, bw, bh = f['back']
+        for i in range(bw // 2 - 1, bw // 2 + 1):  # the white spot on a tiger's ear
+            for j in range(bh // 2 - 1, bh // 2 + 1):
+                px((bx + i, by + j), (250, 250, 248))
 
 img.save('src/main/resources/assets/jttw_engine/textures/entity/white_tiger.png')
 
@@ -226,29 +253,28 @@ def num(v):
     return s + ('f' if ('.' in s or 'e' in s) else '')
 
 
+def camel(n):
+    return re.sub(r'_(\w)', lambda m: m.group(1).upper(), n)
+
+
 lines = ['        MeshDefinition mesh = new MeshDefinition();', '        PartDefinition root = mesh.getRoot();']
 for name, parent, (px_, py_, pz_), (rx, ry, rz), boxes, mirror in PARTS:
-    var = re.sub(r'_(\w)', lambda m: m.group(1).upper(), name)
     cubes = 'CubeListBuilder.create()'
     for b in boxes:
-        w, h, d = size(b)
-        u, v = slots[(w, h, d, b[6])]
+        u, v = slots[size(b) + (b[6],)]
         cubes += '\n                .texOffs(%d, %d).mirror(%s).addBox(%s, %s, %s, %s, %s, %s)' % (
             u, v, 'true' if mirror else 'false', num(b[0]), num(b[1]), num(b[2]), num(b[3]), num(b[4]), num(b[5]))
     pose = 'PartPose.offsetAndRotation(%s, %s, %s, %s, %s, %s)' % tuple(num(c) for c in (px_, py_, pz_, rx, ry, rz))
-    lines.append('        PartDefinition %s = %s.addOrReplaceChild("%s", %s, %s);' % (var, parent, name, cubes, pose))
-lines.append('        return LayerDefinition.create(mesh, %d, %d);' % (TEX, TEX))
+    lines.append('        PartDefinition %s = %s.addOrReplaceChild("%s", %s, %s);' % (
+        camel(name), 'root' if parent == 'root' else camel(parent), name, cubes, pose))
+lines.append('        return LayerDefinition.create(mesh, %d, %d);' % (UNITS, UNITS))
 code = '\n'.join(lines)
 
 java = 'src/main/java/com/jttw/engine/client/renderer/WhiteTigerRenderer.java'
 s = open(java, encoding='utf-8').read()
 start, end = '        // GENERATED by assets_source/white_tiger.py: begin', '        // GENERATED: end'
-if start not in s:
-    a = s.index('    public static LayerDefinition layer() {')
-    b = s.index('    private static String legName(int i) {')
-    s = s[:a] + '    public static LayerDefinition layer() {\n' + start + '\n' + end + '\n    }\n\n' + s[b:]
 a = s.index(start) + len(start)
 b = s.index(end)
 s = s[:a] + '\n' + code + '\n' + s[b:]
 open(java, 'w', encoding='utf-8').write(s)
-print('model and skin written;', len(slots), 'distinct boxes')
+print('model and skin written;', len(slots), 'distinct boxes;', TEX, 'px texture')
