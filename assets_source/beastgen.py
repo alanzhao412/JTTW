@@ -144,8 +144,11 @@ class Painter:
                 self.px((X(i), fy + j), c, glow=True)
         if slit:
             m = w // 2 if pupil_at is None else pupil_at   # where the pupil sits: forward, it looks ahead
-            self.px((X(m), fy + top[m] + 1), (8, 8, 12))
-            self.glow.putpixel((int(X(m)), int(fy + top[m] + 1)), (0, 0, 0, 0))
+            for i in (m, m + 1):                              # two wide, the full height of the eye there
+                for j in range(min(top[m], top[m + 1]), max(bottom[m], bottom[m + 1]) + 1):
+                    if top[i] <= j <= bottom[i]:
+                        self.px((X(i), fy + j), (8, 8, 12))
+                        self.glow.putpixel((int(X(i)), int(fy + j)), (0, 0, 0, 0))
 
     def save(self, name):
         self.img.save('src/main/resources/assets/jttw_engine/textures/entity/%s.png' % name)
