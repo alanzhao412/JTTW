@@ -115,7 +115,7 @@ public final class ModEntities {
     public static final RegistryObject<EntityType<com.jttw.engine.entity.beast.WhiteTigerEntity>> WHITE_TIGER =
             ENTITIES.register("white_tiger", () ->
                     EntityType.Builder.<com.jttw.engine.entity.beast.WhiteTigerEntity>of(com.jttw.engine.entity.beast.WhiteTigerEntity::new, MobCategory.MISC)
-                            .sized(2.0F, 2.4F)
+                            .sized(2.4F, 3.0F)
                             .clientTrackingRange(10)
                             .build(new ResourceLocation(JTTWEngine.MOD_ID, "white_tiger").toString()));
 

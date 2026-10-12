@@ -62,6 +62,31 @@ for leg in ('right_front_leg', 'left_front_leg'):
         PARTS.append((base, leg, (cx, 11.0, -3.6), (0.55, 0, 0), [(-0.3, -0.3, -1.6, 0.6, 0.6, 1.6, 'claw')], False))
         PARTS.append((base + '_tip', base, (0, 0, -1.6), (0.9, 0, 0), [(-0.22, -0.22, -1.1, 0.44, 0.44, 1.1, 'clawtip')], False))
 
+# ── the body larger about the head: every part but the head (and its jaw) scaled by BODY,
+# from the ground up, so the feet stay on it; the head keeps its size, set on the larger neck ──
+BODY = 1.35
+HEADS = ('head', 'jaw')
+
+
+def grow(parts):
+    out = []
+    for name, parent, (px_, py_, pz_), rot, boxes, mirror in parts:
+        if name in HEADS:
+            if parent == 'root':
+                px_, py_, pz_ = px_ * BODY, 24 - (24 - py_) * BODY, pz_ * BODY
+            out.append((name, parent, (px_, py_, pz_), rot, boxes, mirror))
+            continue
+        if parent == 'root':
+            pivot = (px_ * BODY, 24 - (24 - py_) * BODY, pz_ * BODY)
+        else:
+            pivot = (px_ * BODY, py_ * BODY, pz_ * BODY)
+        boxes = [tuple(v * BODY for v in b[:6]) + (b[6],) for b in boxes]
+        out.append((name, parent, pivot, rot, boxes, mirror))
+    return out
+
+
+PARTS = grow(PARTS)
+
 # ── pack each distinct box's six faces into the texture (model pixels) ──────
 def size(b):
     return tuple(max(1, math.ceil(v)) for v in b[3:6])
