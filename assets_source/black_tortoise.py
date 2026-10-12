@@ -116,7 +116,7 @@ def paint_box(p, style, f, dims):
     if style == 'thead':
         for k, inward in (('right', -1), ('left', 1)):          # small, hard eyes, glowing amber
             fx, fy, fw, fh = f[k]
-            p.eye(fx + (fw - 3 if inward < 0 else 2), fy + 3, inward, AMBER, w=5)
+            p.eye(fx + (fw - 3 if inward < 0 else 2), fy + 3, inward, AMBER, w=5, pupil_at=1)
     if style == 'foot':
         p.shaded(f, SKIN)
         p.face(f['bottom'], DARK, 1.0)
@@ -140,7 +140,7 @@ def paint_box(p, style, f, dims):
         for k, inward in (('right', -1), ('left', 1)):
             fx, fy, fw, fh = f[k]
             if fw >= 8:
-                p.eye(fx + (fw - 3 if inward < 0 else 2), fy + 1, inward, RED, w=4)
+                p.eye(fx + (fw - 3 if inward < 0 else 2), fy + 1, inward, RED, w=4, pupil_at=1)
     if style == 'sjaw':
         p.face(f['top'], MOUTH, 0.8, noise=4)
     if style == 'hood':

@@ -122,9 +122,9 @@ def dragon_eye(p, fx, fy, away):
         for j in range(h + 1):
             p.px((X(i), top + j), EYE if j else [v * 0.7 for v in EYE], glow=True)
         p.px((X(i), top + h + 1), DARK)
-    for j in range(2):                         # the pupil: a thin slit, short
-        y = base - 1 + j
-        p.px((X(4), y), (110, 60, 10), glow=True)
+    for j in range(2):                         # the pupil: a thin slit, short, forward in the eye
+        y = base + 1 + j
+        p.px((X(2), y), (110, 60, 10), glow=True)
     for i in range(L, L + 3):                  # its outer corner drawn out sharp, up and back
         p.px((X(i), base - i // 3 + 1), DARK)
     for i in (-1, -2):                         # and the inner corner, a hard notch toward the snout

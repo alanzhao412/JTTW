@@ -173,7 +173,7 @@ def paint_box(p, style, f, dims):
     if style == 'phead':
         for k, inward in (('right', -1), ('left', 1)):
             fx, fy, fw, fh = f[k]
-            p.eye(fx + (fw - 2 if inward < 0 else 1), fy + 2, inward, EYE, w=7, rise=True)
+            p.eye(fx + (fw - 2 if inward < 0 else 1), fy + 2, inward, EYE, w=7, rise=True, pupil_at=1)
             for i in range(fw):                       # a dark streak back from the eye, a raptor's mask
                 p.px((fx + i, fy + 7 + (i % 3 == 0)), DARK)
     if style == 'cheek':

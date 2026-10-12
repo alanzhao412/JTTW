@@ -123,7 +123,7 @@ class Painter:
                         self.px(p, colour)
             pos += spacing + self.rnd.randint(-2, 2)
 
-    def eye(self, fx, fy, inward, iris, w=5, slit=True, rise=False):
+    def eye(self, fx, fy, inward, iris, w=5, slit=True, rise=False, pupil_at=None):
         """A narrow, glaring eye `w` wide from its outer corner, opening toward `inward`: the lid falling
         toward the inner corner, a thin dark rim, the iris glowing about a dark slit. With `rise`, it
         slopes the other way along `inward` (for a face whose texture runs the other way about)."""
@@ -143,7 +143,7 @@ class Painter:
                 c = iris if j > top[i] else [v * 0.72 for v in iris]
                 self.px((X(i), fy + j), c, glow=True)
         if slit:
-            m = w // 2
+            m = w // 2 if pupil_at is None else pupil_at   # where the pupil sits: forward, it looks ahead
             self.px((X(m), fy + top[m] + 1), (8, 8, 12))
             self.glow.putpixel((int(X(m)), int(fy + top[m] + 1)), (0, 0, 0, 0))
 
