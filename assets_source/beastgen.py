@@ -123,12 +123,15 @@ class Painter:
                         self.px(p, colour)
             pos += spacing + self.rnd.randint(-2, 2)
 
-    def eye(self, fx, fy, inward, iris, w=5, slit=True):
+    def eye(self, fx, fy, inward, iris, w=5, slit=True, rise=False):
         """A narrow, glaring eye `w` wide from its outer corner, opening toward `inward`: the lid falling
-        toward the inner corner, a thin dark rim, the iris glowing about a dark slit."""
+        toward the inner corner, a thin dark rim, the iris glowing about a dark slit. With `rise`, it
+        slopes the other way along `inward` (for a face whose texture runs the other way about)."""
         X = lambda i: fx + i * inward
         top = [1] * (w // 2 + 1) + [2] * (w - w // 2 - 1)
         bottom = [2] * (w // 2) + [3] * (w - w // 2)
+        if rise:
+            top, bottom = top[::-1], bottom[::-1]
         dark = (14, 12, 16)
         for i in range(-1, w + 1):
             t_ = top[min(max(i, 0), w - 1)]
@@ -141,9 +144,8 @@ class Painter:
                 self.px((X(i), fy + j), c, glow=True)
         if slit:
             m = w // 2
-            for j in (top[m], top[m] + 1):
-                self.px((X(m), fy + j), (8, 8, 12))
-                self.glow.putpixel((int(X(m)), int(fy + j)), (0, 0, 0, 0))
+            self.px((X(m), fy + top[m] + 1), (8, 8, 12))
+            self.glow.putpixel((int(X(m)), int(fy + top[m] + 1)), (0, 0, 0, 0))
 
     def save(self, name):
         self.img.save('src/main/resources/assets/jttw_engine/textures/entity/%s.png' % name)

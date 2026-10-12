@@ -26,8 +26,8 @@ PARTS = [
     ('neck', 'body', (0, -3, -7), (-0.55, 0, 0), [(-3, -3, -6, 6, 6, 7, 'plumage')], False),
     ('head', 'neck', (0, -1, -5.5), (0.75, 0, 0), [
         (-3.2, -3.2, -6, 6.4, 6, 6.5, 'phead'),
-        (-3.6, -1, -4, 1, 3.5, 4, 'cheek'),          # cheek feathers, swept back
-        (2.6, -1, -4, 1, 3.5, 4, 'cheek'),
+        (-3.7, 0.5, -1.5, 1, 3, 4, 'cheek'),         # cheek feathers, swept back behind the eye
+        (2.7, 0.5, -1.5, 1, 3, 4, 'cheek'),
         (-1.4, -1, -10.5, 2.8, 2.6, 5, 'beak'),
         (-1, 1, -11.5, 2, 1.6, 1.6, 'beak'),        # its hook
     ], False),
@@ -173,7 +173,7 @@ def paint_box(p, style, f, dims):
     if style == 'phead':
         for k, inward in (('right', -1), ('left', 1)):
             fx, fy, fw, fh = f[k]
-            p.eye(fx + (fw - 3 if inward < 0 else 2), fy + 3, inward, EYE, w=5)
+            p.eye(fx + (fw - 2 if inward < 0 else 1), fy + 2, inward, EYE, w=7, rise=True)
             for i in range(fw):                       # a dark streak back from the eye, a raptor's mask
                 p.px((fx + i, fy + 7 + (i % 3 == 0)), DARK)
     if style == 'cheek':
