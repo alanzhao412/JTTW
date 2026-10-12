@@ -302,6 +302,13 @@ final class AbilityScenes {
                         p -> com.jttw.engine.transformation.TransformationManager.transform(p, net.minecraft.world.entity.EntityType.HORSE), 3, false),
                 // Byakko's true form, the White Tiger: from the side, from in front, through its own eyes,
                 // and the moment of its taking
+                // the Azure Dragon, the Dragon's true form: from the side, from in front, its head
+                new Scene("dragon_side", p -> { beast(p, ReincarnationOutcome.DRAGON, "dr_true"); facing = -90f; sceneCam = new double[]{-3.5, 3.5, 14.0, -3.5, 3.0, 0.5}; },
+                        p -> trueForm(p, com.jttw.engine.registry.ModEntities.AZURE_DRAGON.get(), "dr_true"), 45, false),
+                new Scene("dragon_front", p -> { beast(p, ReincarnationOutcome.DRAGON, "dr_true"); facing = -60f; sceneCam = new double[]{11.0, 4.0, 9.0, -1.5, 2.4, 0.5}; },
+                        p -> trueForm(p, com.jttw.engine.registry.ModEntities.AZURE_DRAGON.get(), "dr_true"), 45, false),
+                new Scene("dragon_face", p -> { beast(p, ReincarnationOutcome.DRAGON, "dr_true"); facing = -90f; sceneCam = new double[]{7.5, 4.0, 4.0, 2.0, 3.3, 0.5}; },
+                        p -> trueForm(p, com.jttw.engine.registry.ModEntities.AZURE_DRAGON.get(), "dr_true"), 45, false),
                 new Scene("tiger_side", p -> { byakko(p); facing = -90f; sceneCam = new double[]{0.5, 2.0, 11.0, 0.5, 1.6, 0.5}; }, p -> tiger(p), 45, false),
                 new Scene("tiger_front", p -> { byakko(p); facing = -50f; sceneCam = new double[]{7.5, 2.0, 8.0, 0.5, 1.6, 0.5}; }, p -> tiger(p), 45, false),
                 new Scene("tiger_paws", p -> { byakko(p); facing = -90f; sceneCam = new double[]{6.5, 1.2, 3.5, 2.8, 0.3, 0.5}; }, p -> tiger(p), 45, false),
@@ -616,6 +623,22 @@ final class AbilityScenes {
 
     private static void staffInHand(ServerPlayer p) {
         p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(com.jttw.engine.registry.ModItems.RUYI_JINGU_BANG.get()));
+    }
+
+    /** A divine beast, its true form ({@code prefix}_true) learned to its height, rested and with Qi to spare. */
+    private static void beast(ServerPlayer p, ReincarnationOutcome who, String prefix) {
+        p.getPersistentData().remove("jttw_skill_nodes");
+        p.getPersistentData().remove(com.jttw.engine.character.divinebeast.TrueForm.KEY_READY);
+        p.removeEffect(com.jttw.engine.registry.ModEffects.EXHAUSTED.get());
+        AlignmentData.markReincarnated(p, who);
+        LevelManager.initClass(p, who);
+        for (int t = 1; t <= 3; t++) SkillTreeData.grantNode(p, prefix + "_" + t);
+        QiData.setMax(p, 1000f);
+        QiData.setCurrent(p, 1000f);
+    }
+
+    private static void trueForm(ServerPlayer p, net.minecraft.world.entity.EntityType<?> form, String id) {
+        com.jttw.engine.character.divinebeast.TrueForm.toggle(p, form, 3, id);
     }
 
     /** Byakko, his White Tiger learned to its height, rested and with Qi to spare. */

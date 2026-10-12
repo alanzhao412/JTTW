@@ -62,6 +62,8 @@ public final class DragonSkillTree {
 
     public static final String TRANSFORM_1 = "dr_transform_1", TRANSFORM_2 = "dr_transform_2", TRANSFORM_3 = "dr_transform_3";
 
+    public static final String TRUE_1 = "dr_true_1", TRUE_2 = "dr_true_2", TRUE_3 = "dr_true_3";
+
     public static final SkillTree TREE = new SkillTree("dr_");
 
     static {
@@ -196,6 +198,23 @@ public final class DragonSkillTree {
                 TRANSFORM_3, "18 Transformations III",
                 new String[]{ "Adds neutral", "flying forms.", "" },
                 5, 8, 2, List.of(TRANSFORM_2), AbilityType.MENU, 3, "18 Transformations"
+        ));
+
+        // ── TRUE FORM (col 9, TOGGLE) ──────────────────────────────────
+        TREE.add(new SkillNode(
+                TRUE_1, "Azure Dragon I",
+                new String[]{ "Shift + B: become the Azure Dragon,", "20 s. x3 health, x2.5", "attack. Then exhausted 1 min." },
+                4, 9, 0, List.of(), AbilityType.TOGGLE, 1, "Azure Dragon"
+        ));
+        TREE.add(new SkillNode(
+                TRUE_2, "Azure Dragon II",
+                new String[]{ "30 s as the Azure Dragon.", "It swims the air; its", "thunder needs no rest." },
+                5, 9, 1, List.of(TRUE_1), AbilityType.TOGGLE, 2, "Azure Dragon"
+        ));
+        TREE.add(new SkillNode(
+                TRUE_3, "Azure Dragon III",
+                new String[]{ "45 s as the Azure Dragon.", "10 min rest.", "" },
+                6, 9, 2, List.of(TRUE_2), AbilityType.TOGGLE, 3, "Azure Dragon"
         ));
     }
 }

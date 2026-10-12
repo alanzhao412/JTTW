@@ -77,7 +77,10 @@ public final class DragonAbilityHandler {
 
         // Cooldown: the game time it is ready again (absent = ready)
         long now = player.level().getGameTime();
-        if (now < player.getPersistentData().getLong(KEY_LIGHTNING_READY_AT)) return;
+        // as the Azure Dragon (II and above), its thunder needs no rest
+        boolean storm = com.jttw.engine.character.divinebeast.TrueForm.active(player)
+                && DragonSkillTree.TREE.highestTier(SkillTreeData.getUnlockedNodes(player), "dr_true") >= 2;
+        if (!storm && now < player.getPersistentData().getLong(KEY_LIGHTNING_READY_AT)) return;
 
         if (!QiData.spend(player, QI_COST_LIGHTNING)) {
             player.sendSystemMessage(Component.literal("§cNot enough Qi."));

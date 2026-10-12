@@ -59,5 +59,8 @@
   "block.jttw_engine.soul_ash": "Soul Ash",
   "effect.jttw_engine.solar_flare": "Solar Flare",
   "entity.jttw_engine.white_tiger": "White Tiger",
-  "effect.jttw_engine.exhausted": "Exhausted"
+  "effect.jttw_engine.exhausted": "Exhausted",
+  "entity.jttw_engine.azure_dragon": "Azure Dragon",
+  "entity.jttw_engine.black_tortoise": "Black Tortoise",
+  "entity.jttw_engine.vermilion_bird": "Vermilion Bird"
 }

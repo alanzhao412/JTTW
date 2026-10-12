@@ -62,7 +62,10 @@ public final class FormCatalog {
      */
     public static final Set<ResourceLocation> ABILITY_FORMS = Set.of(
             new ResourceLocation(com.jttw.engine.JTTWEngine.MOD_ID, "great_white_bull"),
-            new ResourceLocation(com.jttw.engine.JTTWEngine.MOD_ID, "white_tiger"));
+            new ResourceLocation(com.jttw.engine.JTTWEngine.MOD_ID, "white_tiger"),
+            new ResourceLocation(com.jttw.engine.JTTWEngine.MOD_ID, "azure_dragon"),
+            new ResourceLocation(com.jttw.engine.JTTWEngine.MOD_ID, "black_tortoise"),
+            new ResourceLocation(com.jttw.engine.JTTWEngine.MOD_ID, "vermilion_bird"));
 
     /** The blocks a player can become, each with its own behaviour. */
     public static final List<Block> BLOCK_FORMS = List.of(Blocks.CHEST, Blocks.OAK_SIGN, Blocks.TNT);

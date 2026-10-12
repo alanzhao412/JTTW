@@ -111,6 +111,28 @@ public final class ModEntities {
 
     // ── Forms ──────────────────────────────────────────────────────
 
+    /** The other divine beasts' true forms, never spawned: only taken (see TrueForm). */
+    public static final RegistryObject<EntityType<com.jttw.engine.entity.beast.TrueFormEntity.Flying>> AZURE_DRAGON =
+            ENTITIES.register("azure_dragon", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.beast.TrueFormEntity.Flying>of(com.jttw.engine.entity.beast.TrueFormEntity.Flying::new, MobCategory.MISC)
+                            .sized(2.4F, 2.4F)
+                            .clientTrackingRange(10)
+                            .build(new ResourceLocation(JTTWEngine.MOD_ID, "azure_dragon").toString()));
+
+    public static final RegistryObject<EntityType<com.jttw.engine.entity.beast.TrueFormEntity>> BLACK_TORTOISE =
+            ENTITIES.register("black_tortoise", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.beast.TrueFormEntity>of(com.jttw.engine.entity.beast.TrueFormEntity::new, MobCategory.MISC)
+                            .sized(3.6F, 3.2F)
+                            .clientTrackingRange(10)
+                            .build(new ResourceLocation(JTTWEngine.MOD_ID, "black_tortoise").toString()));
+
+    public static final RegistryObject<EntityType<com.jttw.engine.entity.beast.TrueFormEntity.Flying>> VERMILION_BIRD =
+            ENTITIES.register("vermilion_bird", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.beast.TrueFormEntity.Flying>of(com.jttw.engine.entity.beast.TrueFormEntity.Flying::new, MobCategory.MISC)
+                            .sized(2.4F, 3.0F)
+                            .clientTrackingRange(10)
+                            .build(new ResourceLocation(JTTWEngine.MOD_ID, "vermilion_bird").toString()));
+
     /** Byakko's true form, never spawned: only taken (see TrueForm). */
     public static final RegistryObject<EntityType<com.jttw.engine.entity.beast.WhiteTigerEntity>> WHITE_TIGER =
             ENTITIES.register("white_tiger", () ->
@@ -161,6 +183,9 @@ public final class ModEntities {
         event.put(WRAITH.get(), com.jttw.engine.entity.ridge.WraithEntity.createAttributes().build());
         event.put(GREAT_WHITE_BULL.get(), com.jttw.engine.entity.bull.GreatWhiteBullEntity.createAttributes().build());
         event.put(WHITE_TIGER.get(), com.jttw.engine.entity.beast.WhiteTigerEntity.createAttributes().build());
+        event.put(AZURE_DRAGON.get(), com.jttw.engine.entity.beast.TrueFormEntity.createAttributes().build());
+        event.put(BLACK_TORTOISE.get(), com.jttw.engine.entity.beast.TrueFormEntity.createAttributes().build());
+        event.put(VERMILION_BIRD.get(), com.jttw.engine.entity.beast.TrueFormEntity.createAttributes().build());
         event.put(HEAVENLY_SOLDIER.get(), com.jttw.engine.entity.heaven.HeavenlySoldierEntity.createAttributes().build());
         event.put(LADY_HUSK.get(), com.jttw.engine.entity.ridge.LadyHuskEntity.createAttributes().build());
         event.put(LADY_WHITE_BONE.get(), com.jttw.engine.entity.ridge.LadyWhiteBoneEntity.createAttributes().build());

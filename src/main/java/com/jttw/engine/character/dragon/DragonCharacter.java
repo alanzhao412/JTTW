@@ -25,7 +25,7 @@ public final class DragonCharacter implements PlayableCharacter {
 
     @Override
     public List<String> treeColumns() {
-        return List.of("Lightning", "Weather", "Flight", "Pressure", "Regen", "Wave", "Scales", "Force", "Transform");
+        return List.of("Lightning", "Weather", "Flight", "Pressure", "Regen", "Wave", "Scales", "Force", "Transform", "True Form");
     }
 
     @Override
@@ -47,7 +47,8 @@ public final class DragonCharacter implements PlayableCharacter {
         int flightTier = skillTree().highestTier(unlocked, "dr_flight");
         return PlayableCharacter.bar(
                 flightTier >= 3 ? new AbilitySlot("dr_dimension", "Dimension Travel", AbilityType.TOGGLE, flightTier) : AbilitySlot.EMPTY,
-                AbilitySlot.EMPTY, AbilitySlot.EMPTY, AbilitySlot.EMPTY);
+                AbilitySlot.fromBranch(skillTree(), unlocked, "dr_true", "Azure Dragon", AbilityType.TOGGLE),
+                AbilitySlot.EMPTY, AbilitySlot.EMPTY);
     }
 
     @Override
@@ -60,6 +61,9 @@ public final class DragonCharacter implements PlayableCharacter {
             case 4 -> {
                 if (SkillTreeData.getDrFlightTier(player) >= 3) DragonAbilityHandler.travelDimension(player);
             }
+            case 5 -> com.jttw.engine.character.divinebeast.TrueForm.toggle(player,
+                    com.jttw.engine.registry.ModEntities.AZURE_DRAGON.get(),
+                    skillTree().highestTier(SkillTreeData.getUnlockedNodes(player), "dr_true"), "dr_true");
             default -> {}
         }
     }
