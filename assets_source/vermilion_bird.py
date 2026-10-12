@@ -47,6 +47,28 @@ for row, (z, w) in enumerate(((-6, 10), (-3, 11), (0, 10.5), (3, 9.5), (6, 8))):
             PARTS.append(('flank%d_%s%d' % (row, side, lvl), 'body', (sgn * (w / 2 + 0.1), y, z),
                           (-0.15, sgn * 0.22, sgn * (0.25 + lvl * 0.15)),
                           [(-0.35 if sgn < 0 else -0.35, -1.6, 0, 0.7, 3.4, 4.4, 'contour')], False))
+# the breast: scalloped rows of feathers down its front, each overlapping the one below
+for row, (y, w) in enumerate(((-2.5, 7), (0, 8), (2.5, 7.5), (5, 6))):
+    for k in range(3):
+        x = (k - 1) * w / 3.1
+        PARTS.append(('breastrow%d_%d' % (row, k), 'body', (x, y, -10.3 + abs(row - 1.5) * 0.5),
+                      (0.55, (k - 1) * 0.25, 0), [(-w / 6 - 0.2, -0.3, -3.2, w / 3 + 0.4, 0.6, 3.4, 'scallop')], False))
+# at each wing's root, a tuft of feathers over the shoulder
+for side, sgn in (('r', -1), ('l', 1)):
+    for k in range(3):
+        PARTS.append(('shoulder_%s%d' % (side, k), 'body', (sgn * (4.5 + k * 0.6), -4.8 + k * 0.6, -4 + k * 2),
+                      (-0.35, sgn * 0.5, sgn * 0.7), [(-1.2, -0.3, 0, 2.4, 0.6, 5 + k, 'contour')], False))
+# flame plumes rising off its back, curling back
+for k, (z, h) in enumerate(((-4, 7), (0, 9), (4, 7), (7, 5))):
+    PARTS += [
+        ('backflame%d' % k, 'body', (0, -6, z), (-1.15, 0, 0), [(-0.7, -0.4, 0, 1.4, 0.8, h, 'flame')], False),
+        ('backflame%d_end' % k, 'backflame%d' % k, (0, 0, h), (0.9, 0, 0), [(-0.5, -0.35, 0, 1, 0.7, h * 0.6, 'flametip')], False),
+    ]
+# long feathers hanging from its flanks and belly, drawn back
+for side, sgn in (('r', -1), ('l', 1)):
+    for k in range(4):
+        PARTS.append(('hang_%s%d' % (side, k), 'body', (sgn * (3.2 - k * 0.3), 5, -3 + k * 3),
+                      (0.55 + k * 0.05, 0, sgn * 0.12), [(-1.1, -0.3, 0, 2.2, 0.6, 6 + k, 'contour')], False))
 # the ruff: feathers flaring out and back all round the base of the neck
 for k in range(10):
     a = 2 * math.pi * k / 10
@@ -136,6 +158,12 @@ def paint_box(p, style, f, dims):
         for k in ('top', 'right', 'left', 'front', 'back'):
             p.scales(f[k], RED, cell=4, edge=0.8, light=1.15 if k == 'top' else 1.05)
         p.face(f['bottom'], ORANGE, 1.0, noise=5)
+    if style == 'scallop':
+        for k, r in f.items():
+            feathers(p, r, GOLD, ORANGE, vertical=k in ('top', 'bottom'))
+            fx, fy, fw, fh = r
+            for i in range(fw):                       # the scallop's rim, dark
+                p.px((fx + i, fy + fh - 1), DARK)
     if style == 'contour':
         for k, r in f.items():
             feathers(p, r, RED if k in ('top', 'right', 'left') else ORANGE, GOLD, vertical=k in ('top', 'bottom'))

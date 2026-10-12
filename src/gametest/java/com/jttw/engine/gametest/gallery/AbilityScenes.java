@@ -319,6 +319,8 @@ final class AbilityScenes {
                         p -> trueForm(p, com.jttw.engine.registry.ModEntities.VERMILION_BIRD.get(), "ph_true"), 45, false),
                 new Scene("bird_close", p -> { beast(p, ReincarnationOutcome.PHOENIX, "ph_true"); facing = -90f; sceneCam = new double[]{10.0, 8.0, 12.0, 0.5, 7.0, 0.5}; },
                         p -> trueForm(p, com.jttw.engine.registry.ModEntities.VERMILION_BIRD.get(), "ph_true"), 45, false),
+                new Scene("dragon_eye", p -> { beast(p, ReincarnationOutcome.DRAGON, "dr_true"); facing = -90f; sceneCam = new double[]{1.5, 6.5, 9.0, 1.5, 6.0, -10.0}; },
+                        p -> trueForm(p, com.jttw.engine.registry.ModEntities.AZURE_DRAGON.get(), "dr_true"), 45, false),
                 new Scene("bird_side", p -> { beast(p, ReincarnationOutcome.PHOENIX, "ph_true"); facing = -90f; sceneCam = new double[]{0.5, 10.0, 33.5, 0.5, 8.0, 0.5}; },
                         p -> trueForm(p, com.jttw.engine.registry.ModEntities.VERMILION_BIRD.get(), "ph_true"), 45, false),
                 new Scene("tiger_side", p -> { byakko(p); facing = -90f; sceneCam = new double[]{0.5, 2.0, 11.0, 0.5, 1.6, 0.5}; }, p -> tiger(p), 45, false),

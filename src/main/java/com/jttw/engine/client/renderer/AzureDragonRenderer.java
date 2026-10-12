@@ -86,11 +86,11 @@ public final class AzureDragonRenderer extends MobRenderer<TrueFormEntity, Azure
         PartDefinition leftHornBranch = leftHorn.addOrReplaceChild("left_horn_branch", CubeListBuilder.create()
                 .texOffs(26, 62).mirror(true).addBox(-0.5f, -0.5f, 0, 1, 1, 3.5f), PartPose.offsetAndRotation(0, 0, 3.5f, 0.9f, 0.4f, 0));
         PartDefinition rightBarbel = head.addOrReplaceChild("right_barbel", CubeListBuilder.create()
-                .texOffs(81, 50).mirror(false).addBox(-0.3f, -0.3f, 0, 0.6f, 0.6f, 9), PartPose.offsetAndRotation(-3.4f, 0.5f, -13.5f, -0.1f, -0.75f, 0));
+                .texOffs(81, 50).mirror(false).addBox(-0.3f, -0.3f, 0, 0.6f, 0.6f, 9), PartPose.offsetAndRotation(-3.2f, 2.4f, -13.5f, -0.1f, -0.75f, 0));
         PartDefinition rightBarbelEnd = rightBarbel.addOrReplaceChild("right_barbel_end", CubeListBuilder.create()
                 .texOffs(81, 50).mirror(false).addBox(-0.25f, -0.25f, 0, 0.5f, 0.5f, 9), PartPose.offsetAndRotation(0, 0, 9, 0.35f, 0.3f, 0));
         PartDefinition leftBarbel = head.addOrReplaceChild("left_barbel", CubeListBuilder.create()
-                .texOffs(81, 50).mirror(true).addBox(-0.3f, -0.3f, 0, 0.6f, 0.6f, 9), PartPose.offsetAndRotation(3.4f, 0.5f, -13.5f, -0.1f, 0.75f, 0));
+                .texOffs(81, 50).mirror(true).addBox(-0.3f, -0.3f, 0, 0.6f, 0.6f, 9), PartPose.offsetAndRotation(3.2f, 2.4f, -13.5f, -0.1f, 0.75f, 0));
         PartDefinition leftBarbelEnd = leftBarbel.addOrReplaceChild("left_barbel_end", CubeListBuilder.create()
                 .texOffs(81, 50).mirror(true).addBox(-0.25f, -0.25f, 0, 0.5f, 0.5f, 9), PartPose.offsetAndRotation(0, 0, 9, 0.35f, -0.3f, 0));
         PartDefinition seg0 = root.addOrReplaceChild("seg0", CubeListBuilder.create()

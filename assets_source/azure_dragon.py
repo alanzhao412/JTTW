@@ -46,7 +46,7 @@ for side, s in (('right', -1), ('left', 1)):
 # the barbels, long, from beside the nose, trailing back in two lengths
 for side, s in (('right', -1), ('left', 1)):
     PARTS += [
-        (side + '_barbel', 'head', (s * 3.4, 0.5, -13.5), (-0.1, s * 0.75, 0), [(-0.3, -0.3, 0, 0.6, 0.6, 9, 'barbel')], s > 0),
+        (side + '_barbel', 'head', (s * 3.2, 2.4, -13.5), (-0.1, s * 0.75, 0), [(-0.3, -0.3, 0, 0.6, 0.6, 9, 'barbel')], s > 0),
         (side + '_barbel_end', side + '_barbel', (0, 0, 9), (0.35, -s * 0.3, 0), [(-0.25, -0.25, 0, 0.5, 0.5, 9, 'barbel')], s > 0),
     ]
 # the body: a chain of segments back from the neck, each a child of the last
@@ -105,26 +105,31 @@ MOUTH = (110, 30, 38)
 IVORY = (238, 230, 206)
 
 
-def dragon_eye(p, fx, fy, toward):
-    """A dragon's eye from its back corner (fx, fy) toward the snout (`toward`): long and narrow,
-    high at the back and dropping toward the snout, under a heavy brow line on the same hard angle;
-    the iris burning gold about a dark slit (it glows)."""
-    X = lambda i: fx + i * toward
+def dragon_eye(p, fx, fy, away):
+    """A dragon's eye with a positive canthal tilt, from its inner corner at the snout end (fx, fy),
+    running `away` toward the back of the head: long and narrow, low at the snout and rising to its
+    outer corner, under a heavy brow brought down hard over the inner corner on the same angle; the
+    iris burning gold about a dark slit (it glows)."""
+    X = lambda i: fx + i * away
     L = 9
-    for i in range(-1, L + 2):                 # the brow, dark, angled down to the snout and past the eye
+    base = fy + 5
+    for i in range(-2, L + 2):                 # the brow, dark and heavy, low over the inner corner
         for k in (0, 1):
-            p.px((X(i), fy - 2 + k + i // 3), DARK)
+            p.px((X(i), base - 3 + k - i // 3), DARK)
     for i in range(L):
-        top = i // 3 + (1 if i in (0, 1) else 0)          # the lid falling toward the snout
-        bottom = top + (1 if i < 2 or i > L - 3 else 2)   # narrowest at its corners
-        for j in range(top, bottom + 1):
-            p.px((X(i), fy + 1 + j), EYE if j > top else [v * 0.7 for v in EYE], glow=True)
-        p.px((X(i), fy + 2 + bottom), DARK)
-    for j in range(1, 4):                      # the pupil: a narrow slit
-        p.px((X(4), fy + 1 + 1 + j - 1), (8, 6, 4))
-        p.glow.putpixel((int(X(4)), int(fy + 1 + 1 + j - 1)), (0, 0, 0, 0))
-    for i in range(L, L + 3):                  # its corner drawn out sharp toward the snout
-        p.px((X(i), fy + 2 + i // 3), DARK)
+        top = base - i // 3                    # rising toward the outer corner
+        h = 1 if i < 2 or i > L - 3 else 2     # narrowest at its corners
+        for j in range(h + 1):
+            p.px((X(i), top + j), EYE if j else [v * 0.7 for v in EYE], glow=True)
+        p.px((X(i), top + h + 1), DARK)
+    for j in range(3):                         # the pupil: a narrow slit
+        y = base - 4 // 3 + j
+        p.px((X(4), y), (8, 6, 4))
+        p.glow.putpixel((int(X(4)), int(y)), (0, 0, 0, 0))
+    for i in range(L, L + 3):                  # its outer corner drawn out sharp, up and back
+        p.px((X(i), base - i // 3 + 1), DARK)
+    for i in (-1, -2):                         # and the inner corner, a hard notch toward the snout
+        p.px((X(i), base + 1), DARK)
 
 
 def paint_box(p, style, f, dims):
@@ -150,9 +155,9 @@ def paint_box(p, style, f, dims):
                     p.px((fx + i, fy + j), [v * 0.7 for v in GOLD])
     if style == 'skull':
         fx, fy, fw, fh = f['right']                 # its eyes on the sides of its head, burning gold
-        dragon_eye(p, fx + fw - 2, fy + 3, -1)
+        dragon_eye(p, fx + fw - 3, fy - 1, -1)
         fx, fy, fw, fh = f['left']
-        dragon_eye(p, fx + 1, fy + 3, 1)
+        dragon_eye(p, fx + 2, fy - 1, 1)
     if style == 'nose':
         p.shaded(f, AZURE)
         fx, fy, fw, fh = f['front']                 # flared nostrils
