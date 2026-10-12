@@ -33,7 +33,6 @@ PARTS = [
     ('neck', 'root', (0, 2, -18), (0.45, 0, 0), [(-5, -1, -7, 10, 10, 8, 'fur')], False),
     ('head', 'root', (0, 7, -24), (0.08, 0, 0), [
         (-5.5, -3, -8, 11, 8, 8, 'skull'),        # the skull, broad
-        (-5, -3.5, -8.8, 10, 1.5, 1.5, 'brow'),   # the brow ridge, a lip of bone over the eyes
         (-8, -1, -6, 2.5, 7, 6, 'ruff'),          # the cheek ruffs, flaring
         (5.5, -1, -6, 2.5, 7, 6, 'ruff'),
         (-2.5, 1.5, -11.5, 5, 3.5, 3.5, 'muzzle'),  # the muzzle, below the eyes
@@ -42,6 +41,8 @@ PARTS = [
         (-5, -5, -3, 2.5, 2.5, 1, 'ear'),         # the ears, laid back
         (2.5, -5, -3, 2.5, 2.5, 1, 'ear'),
     ], False),
+    ('right_brow', 'head', (-2.5, -1.6, -8.3), (0, 0, 0.42), [(-2.4, -0.7, -0.7, 4.8, 1.4, 1.2, 'brow')], False),
+    ('left_brow', 'head', (2.5, -1.6, -8.3), (0, 0, -0.42), [(-2.4, -0.7, -0.7, 4.8, 1.4, 1.2, 'brow')], True),
     ('jaw', 'head', (0, 5, -8), (0.32, 0, 0), [
         (-2.5, 0, -3.5, 5, 1.5, 4, 'jaw'),
         (-2, -1.4, -3.3, 1, 1.4, 1, 'fang'),      # the lower fangs
@@ -164,15 +165,19 @@ for (w, h, d, style), (u, v) in slots.items():
             fx, fy, fw, fh = f['front']
 
             # deep-set ice-blue eyes, dark-rimmed, slanted
-            for ex, slant in ((fx + 1, 1), (fx + fw - 4, -1)):
-                # slanted, dark-rimmed, ice-blue, under the ridge: a hard stare
-                for i in range(3):
-                    px((ex + i, fy + 1 + (1 if (i * slant > 0 or (slant < 0 and i == 0)) else 0)), STRIPE)
-                    px((ex + i, fy + 3), STRIPE)
-                px((ex + 1, fy + 2), EYE)
-                px((ex + (2 if slant > 0 else 0), fy + 2), [c * 0.7 for c in EYE])
-            for j in range(4, fh):            # tear lines down past the muzzle
-                if j % 2 == 0:
+            # thin slits, outer corner high, inner corner low toward the nose: a glare; a dark
+            # lid line pressed along their top, a dark point at the inner corner
+            for outer, inward in ((fx + 1, 1), (fx + fw - 2, -1)):
+                for i in range(4):
+                    x_ = outer + i * inward
+                    row = fy + 2 + (1 if i >= 2 else 0)
+                    px((x_, row - 1), STRIPE)
+                    if i < 3:
+                        px((x_, row), EYE if i else [c * 0.75 for c in EYE])
+                px((outer + 3 * inward, fy + 3), STRIPE)
+                px((outer + 3 * inward, fy + 4), STRIPE)
+            for j in range(5, fh):            # tear lines down past the muzzle
+                if j % 2 == 1:
                     px((fx + 1, fy + j), STRIPE)
                     px((fx + fw - 2, fy + j), STRIPE)
         if style == 'brow':

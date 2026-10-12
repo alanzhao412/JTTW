@@ -297,6 +297,7 @@ final class AbilityScenes {
                 // and the moment of its taking
                 new Scene("tiger_side", p -> { byakko(p); facing = -90f; sceneCam = new double[]{0.5, 1.7, 8.5, 0.5, 1.3, 0.5}; }, p -> tiger(p), 45, false),
                 new Scene("tiger_front", p -> { byakko(p); facing = -50f; sceneCam = new double[]{5.5, 1.6, 6.5, 0.5, 1.3, 0.5}; }, p -> tiger(p), 45, false),
+                new Scene("tiger_stare", p -> { byakko(p); facing = -90f; sceneCam = new double[]{8.5, 1.5, 0.5, 0.5, 1.5, 0.5}; }, p -> tiger(p), 45, false),
                 new Scene("tiger_face", p -> { byakko(p); facing = -90f; sceneCam = new double[]{5.5, 1.5, 1.5, 0.5, 1.4, 0.5}; }, p -> tiger(p), 45, false),
                 new Scene("tiger_first", p -> byakko(p), p -> tiger(p), 20, true),
                 new Scene("tiger_taking", p -> { byakko(p); facing = -60f; }, p -> tiger(p), 2, false),
