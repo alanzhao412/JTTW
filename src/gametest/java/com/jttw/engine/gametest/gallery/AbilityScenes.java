@@ -309,6 +309,16 @@ final class AbilityScenes {
                         p -> trueForm(p, com.jttw.engine.registry.ModEntities.AZURE_DRAGON.get(), "dr_true"), 45, false),
                 new Scene("dragon_face", p -> { beast(p, ReincarnationOutcome.DRAGON, "dr_true"); facing = -90f; sceneCam = new double[]{7.5, 4.0, 4.0, 2.0, 3.3, 0.5}; },
                         p -> trueForm(p, com.jttw.engine.registry.ModEntities.AZURE_DRAGON.get(), "dr_true"), 45, false),
+                // the Black Tortoise, the World Turtle's true form
+                new Scene("tortoise_side", p -> { beast(p, ReincarnationOutcome.TURTLE, "tu_true"); facing = -90f; sceneCam = new double[]{0.5, 4.5, 15.0, 0.5, 2.2, 0.5}; },
+                        p -> trueForm(p, com.jttw.engine.registry.ModEntities.BLACK_TORTOISE.get(), "tu_true"), 45, false),
+                new Scene("tortoise_front", p -> { beast(p, ReincarnationOutcome.TURTLE, "tu_true"); facing = -60f; sceneCam = new double[]{11.0, 5.0, 9.0, 0.5, 2.4, 0.5}; },
+                        p -> trueForm(p, com.jttw.engine.registry.ModEntities.BLACK_TORTOISE.get(), "tu_true"), 45, false),
+                // the Vermilion Bird, the Phoenix's true form
+                new Scene("bird_front", p -> { beast(p, ReincarnationOutcome.PHOENIX, "ph_true"); facing = -60f; sceneCam = new double[]{13.0, 5.0, 11.0, 0.5, 4.0, 0.5}; },
+                        p -> trueForm(p, com.jttw.engine.registry.ModEntities.VERMILION_BIRD.get(), "ph_true"), 45, false),
+                new Scene("bird_side", p -> { beast(p, ReincarnationOutcome.PHOENIX, "ph_true"); facing = -90f; sceneCam = new double[]{0.5, 5.0, 17.0, 0.5, 4.0, 0.5}; },
+                        p -> trueForm(p, com.jttw.engine.registry.ModEntities.VERMILION_BIRD.get(), "ph_true"), 45, false),
                 new Scene("tiger_side", p -> { byakko(p); facing = -90f; sceneCam = new double[]{0.5, 2.0, 11.0, 0.5, 1.6, 0.5}; }, p -> tiger(p), 45, false),
                 new Scene("tiger_front", p -> { byakko(p); facing = -50f; sceneCam = new double[]{7.5, 2.0, 8.0, 0.5, 1.6, 0.5}; }, p -> tiger(p), 45, false),
                 new Scene("tiger_paws", p -> { byakko(p); facing = -90f; sceneCam = new double[]{6.5, 1.2, 3.5, 2.8, 0.3, 0.5}; }, p -> tiger(p), 45, false),

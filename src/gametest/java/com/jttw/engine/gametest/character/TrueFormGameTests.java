@@ -71,4 +71,23 @@ public class TrueFormGameTests {
             h.succeed();
         });
     }
+
+    /** Each divine beast's key takes its own true form: the Dragon (Shift+B), Turtle (Shift+B), Phoenix (M). */
+    @GameTest(template = PLATFORM, batch = "trueFormsOfEach")
+    public static void eachBeastTakesItsOwnTrueForm(GameTestHelper h) {
+        Object[][] cases = {
+                {ReincarnationOutcome.DRAGON, "dr_true_1", 5, ModEntities.AZURE_DRAGON.get()},
+                {ReincarnationOutcome.TURTLE, "tu_true_1", 5, ModEntities.BLACK_TORTOISE.get()},
+                {ReincarnationOutcome.PHOENIX, "ph_true_1", 3, ModEntities.VERMILION_BIRD.get()}};
+        for (Object[] c : cases) {
+            ServerPlayer p = as(h, (ReincarnationOutcome) c[0]);
+            qi(p, 100f, 100f);
+            grant(p, (String) c[1]);
+            Characters.of(p).activate(p, (Integer) c[2], AbilityAction.USE);
+            check(h, TrueForm.active(p), c[0] + ": its key takes the true form");
+            eq(h, c[3], TransformationManager.getTransformation(p).getEntityType(), c[0] + ": in its own shape");
+            TrueForm.end(p);
+        }
+        h.succeed();
+    }
 }

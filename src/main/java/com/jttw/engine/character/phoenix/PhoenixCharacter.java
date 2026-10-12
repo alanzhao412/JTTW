@@ -21,7 +21,7 @@ public final class PhoenixCharacter implements PlayableCharacter {
     @Override public String outcomeId() { return ReincarnationOutcome.PHOENIX.id; }
     @Override public SkillTree skillTree() { return PhoenixSkillTree.TREE; }
     @Override public String treeTitle() { return "SOLAR SOVEREIGN"; }
-    @Override public List<String> treeColumns() { return List.of("Flamethrower", "Life Drain", "Rebirth", "Radiance", "Ember", "Talons", "Transform", "Plumage"); }
+    @Override public List<String> treeColumns() { return List.of("Flamethrower", "Life Drain", "Rebirth", "Radiance", "Ember", "Talons", "Transform", "Plumage", "True Form"); }
 
     @Override
     public List<AbilitySlot> skillBar(Set<String> unlocked) {
@@ -29,7 +29,8 @@ public final class PhoenixCharacter implements PlayableCharacter {
         return PlayableCharacter.bar(
                 AbilitySlot.fromBranch(tree, unlocked, "ph_flame", "Flamethrower", AbilityType.HELD),
                 AbilitySlot.fromBranch(tree, unlocked, "ph_radiance", "Solar Flare", AbilityType.TOGGLE),
-                AbilitySlot.fromBranch(tree, unlocked, "ph_transform", "18 Transformations", AbilityType.MENU));
+                AbilitySlot.fromBranch(tree, unlocked, "ph_transform", "18 Transformations", AbilityType.MENU),
+                AbilitySlot.fromBranch(tree, unlocked, "ph_true", "Vermilion Bird", AbilityType.TOGGLE));
     }
 
     @Override
@@ -41,6 +42,11 @@ public final class PhoenixCharacter implements PlayableCharacter {
             }
             case 1 -> {
                 if (action == AbilityAction.USE) SolarFlare.cast(player);
+            }
+            case 3 -> {
+                if (action == AbilityAction.USE) com.jttw.engine.character.divinebeast.TrueForm.toggle(player,
+                        com.jttw.engine.registry.ModEntities.VERMILION_BIRD.get(), skillTree().highestTier(
+                                com.jttw.engine.progression.skilltree.SkillTreeData.getUnlockedNodes(player), "ph_true"), "ph_true");
             }
             default -> {}
         }

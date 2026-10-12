@@ -110,6 +110,8 @@ public final class ClientInit {
         event.registerLayerDefinition(com.jttw.engine.client.renderer.GreatWhiteBullRenderer.LAYER, com.jttw.engine.client.renderer.GreatWhiteBullRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.WhiteTigerRenderer.LAYER, com.jttw.engine.client.renderer.WhiteTigerRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.AzureDragonRenderer.LAYER, com.jttw.engine.client.renderer.AzureDragonRenderer::layer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.BlackTortoiseRenderer.LAYER, com.jttw.engine.client.renderer.BlackTortoiseRenderer::layer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.VermilionBirdRenderer.LAYER, com.jttw.engine.client.renderer.VermilionBirdRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.RidgeRenderers.VEIL_LAYER, com.jttw.engine.client.renderer.RidgeRenderers::veilLayer);
     }
 
@@ -142,6 +144,8 @@ public final class ClientInit {
         event.registerEntityRenderer(ModEntities.GREAT_WHITE_BULL.get(), com.jttw.engine.client.renderer.GreatWhiteBullRenderer::new);
         event.registerEntityRenderer(ModEntities.WHITE_TIGER.get(), com.jttw.engine.client.renderer.WhiteTigerRenderer::new);
         event.registerEntityRenderer(ModEntities.AZURE_DRAGON.get(), com.jttw.engine.client.renderer.AzureDragonRenderer::new);
+        event.registerEntityRenderer(ModEntities.BLACK_TORTOISE.get(), com.jttw.engine.client.renderer.BlackTortoiseRenderer::new);
+        event.registerEntityRenderer(ModEntities.VERMILION_BIRD.get(), com.jttw.engine.client.renderer.VermilionBirdRenderer::new);
         event.registerEntityRenderer(ModEntities.LADY_WHITE_BONE.get(), com.jttw.engine.client.renderer.RidgeRenderers.LadyWhiteBoneRenderer::new);
         event.registerEntityRenderer(ModEntities.LADY_HUSK.get(), com.jttw.engine.client.renderer.RidgeRenderers.HuskRenderer::new);
         event.registerEntityRenderer(ModEntities.BONE_SHARD.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);

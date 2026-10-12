@@ -122,7 +122,7 @@ public final class ModEntities {
     public static final RegistryObject<EntityType<com.jttw.engine.entity.beast.TrueFormEntity>> BLACK_TORTOISE =
             ENTITIES.register("black_tortoise", () ->
                     EntityType.Builder.<com.jttw.engine.entity.beast.TrueFormEntity>of(com.jttw.engine.entity.beast.TrueFormEntity::new, MobCategory.MISC)
-                            .sized(3.6F, 3.2F)
+                            .sized(4.4F, 3.4F)
                             .clientTrackingRange(10)
                             .build(new ResourceLocation(JTTWEngine.MOD_ID, "black_tortoise").toString()));
 

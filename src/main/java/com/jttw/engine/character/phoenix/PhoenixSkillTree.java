@@ -61,6 +61,8 @@ public final class PhoenixSkillTree {
 
     public static final String TRANSFORM_1 = "ph_transform_1", TRANSFORM_2 = "ph_transform_2", TRANSFORM_3 = "ph_transform_3";
 
+    public static final String TRUE_1 = "ph_true_1", TRUE_2 = "ph_true_2", TRUE_3 = "ph_true_3";
+
     public static final SkillTree TREE = new SkillTree("ph_");
 
     static {
@@ -183,6 +185,23 @@ public final class PhoenixSkillTree {
                 PLUMAGE_3, "Burning Plumage III",
                 new String[]{ "It takes back twice the", "blow as fire, and is", "weakened for 10 s." },
                 4, 7, 2, List.of(PLUMAGE_2), AbilityType.PASSIVE, 3, "Burning Plumage"
+        ));
+
+        // ── TRUE FORM (col 8, TOGGLE) ──────────────────────────────────
+        TREE.add(new SkillNode(
+                TRUE_1, "Vermilion Bird I",
+                new String[]{ "Press M: become the Vermilion Bird,", "20 s. x3 health, x2.5", "attack. Then exhausted 1 min." },
+                4, 8, 0, List.of(), AbilityType.TOGGLE, 1, "Vermilion Bird"
+        ));
+        TREE.add(new SkillNode(
+                TRUE_2, "Vermilion Bird II",
+                new String[]{ "30 s. It flies; fire trails", "where it passes, and its", "wingbeats burn all near." },
+                5, 8, 1, List.of(TRUE_1), AbilityType.TOGGLE, 2, "Vermilion Bird"
+        ));
+        TREE.add(new SkillNode(
+                TRUE_3, "Vermilion Bird III",
+                new String[]{ "45 s as the Vermilion", "Bird. 10 min rest.", "" },
+                6, 8, 2, List.of(TRUE_2), AbilityType.TOGGLE, 3, "Vermilion Bird"
         ));
     }
 }

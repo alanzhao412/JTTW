@@ -58,6 +58,8 @@ public final class TurtleSkillTree {
 
     public static final String TRANSFORM_1 = "tu_transform_1", TRANSFORM_2 = "tu_transform_2", TRANSFORM_3 = "tu_transform_3";
 
+    public static final String TRUE_1 = "tu_true_1", TRUE_2 = "tu_true_2", TRUE_3 = "tu_true_3";
+
     public static final SkillTree TREE = new SkillTree("tu_");
 
     static {
@@ -175,6 +177,23 @@ public final class TurtleSkillTree {
                 TRANSFORM_3, "18 Transformations III",
                 new String[]{ "Adds neutral", "flying forms.", "" },
                 5, 7, 2, List.of(TRANSFORM_2), AbilityType.MENU, 3, "18 Transformations"
+        ));
+
+        // ── TRUE FORM (col 8, TOGGLE) ──────────────────────────────────
+        TREE.add(new SkillNode(
+                TRUE_1, "Black Tortoise I",
+                new String[]{ "Shift + B: become the Black Tortoise,", "20 s. x3 health, x2.5", "attack. Then exhausted 1 min." },
+                4, 8, 0, List.of(), AbilityType.TOGGLE, 1, "Black Tortoise"
+        ));
+        TREE.add(new SkillNode(
+                TRUE_2, "Black Tortoise II",
+                new String[]{ "30 s. Its serpent strikes", "what comes near, once a", "second. Blows to it halved." },
+                5, 8, 1, List.of(TRUE_1), AbilityType.TOGGLE, 2, "Black Tortoise"
+        ));
+        TREE.add(new SkillNode(
+                TRUE_3, "Black Tortoise III",
+                new String[]{ "45 s as the Black", "Tortoise. 10 min rest.", "" },
+                6, 8, 2, List.of(TRUE_2), AbilityType.TOGGLE, 3, "Black Tortoise"
         ));
     }
 }

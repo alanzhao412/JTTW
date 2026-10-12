@@ -24,7 +24,7 @@ public final class TurtleCharacter implements PlayableCharacter {
 
     @Override
     public List<String> treeColumns() {
-        return List.of("Shell Guard", "Roots", "Bedrock", "Force", "Tectonic", "Gravity", "Tremor", "Transform");
+        return List.of("Shell Guard", "Roots", "Bedrock", "Force", "Tectonic", "Gravity", "Tremor", "Transform", "True Form");
     }
 
     @Override
@@ -53,6 +53,11 @@ public final class TurtleCharacter implements PlayableCharacter {
             case 3 -> {
                 if (action == AbilityAction.USE) TurtleAbilityHandler.toggleGravityWell(player);
             }
+            case 5 -> {
+                if (action == AbilityAction.USE) com.jttw.engine.character.divinebeast.TrueForm.toggle(player,
+                        com.jttw.engine.registry.ModEntities.BLACK_TORTOISE.get(), skillTree().highestTier(
+                                com.jttw.engine.progression.skilltree.SkillTreeData.getUnlockedNodes(player), "tu_true"), "tu_true");
+            }
             default -> {}
         }
     }
@@ -71,6 +76,7 @@ public final class TurtleCharacter implements PlayableCharacter {
     public List<AbilitySlot> shiftBar(Set<String> unlocked) {
         return PlayableCharacter.bar(
                 AbilitySlot.fromBranch(skillTree(), unlocked, "tu_transform", "18 Transformations", AbilityType.MENU),
-                AbilitySlot.EMPTY, AbilitySlot.EMPTY, AbilitySlot.EMPTY);
+                AbilitySlot.fromBranch(skillTree(), unlocked, "tu_true", "Black Tortoise", AbilityType.TOGGLE),
+                AbilitySlot.EMPTY, AbilitySlot.EMPTY);
     }
 }
