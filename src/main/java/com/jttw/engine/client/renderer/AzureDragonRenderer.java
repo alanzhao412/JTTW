@@ -30,11 +30,11 @@ public final class AzureDragonRenderer extends MobRenderer<TrueFormEntity, Azure
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(new ResourceLocation(JTTWEngine.MOD_ID, "azure_dragon"), "main");
     public static final ResourceLocation TEXTURE = new ResourceLocation(JTTWEngine.MOD_ID, "textures/entity/azure_dragon.png");
     private static final RenderType GLOW = RenderType.eyes(new ResourceLocation(JTTWEngine.MOD_ID, "textures/entity/azure_dragon_glow.png"));
-    public static final float SCALE = 1.6f;
+    public static final float SCALE = 3.2f;
     public static final int SEGMENTS = 11;
 
     public AzureDragonRenderer(EntityRendererProvider.Context ctx) {
-        super(ctx, new Model(ctx.bakeLayer(LAYER)), 1.2f);
+        super(ctx, new Model(ctx.bakeLayer(LAYER)), 2.4f);
         addLayer(new EyesLayer<>(this) {
             @Override
             public RenderType renderType() {

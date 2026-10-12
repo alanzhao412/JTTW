@@ -115,21 +115,21 @@ public final class ModEntities {
     public static final RegistryObject<EntityType<com.jttw.engine.entity.beast.TrueFormEntity.Flying>> AZURE_DRAGON =
             ENTITIES.register("azure_dragon", () ->
                     EntityType.Builder.<com.jttw.engine.entity.beast.TrueFormEntity.Flying>of(com.jttw.engine.entity.beast.TrueFormEntity.Flying::new, MobCategory.MISC)
-                            .sized(2.4F, 2.4F)
+                            .sized(3.6F, 3.6F)
                             .clientTrackingRange(10)
                             .build(new ResourceLocation(JTTWEngine.MOD_ID, "azure_dragon").toString()));
 
     public static final RegistryObject<EntityType<com.jttw.engine.entity.beast.TrueFormEntity>> BLACK_TORTOISE =
             ENTITIES.register("black_tortoise", () ->
                     EntityType.Builder.<com.jttw.engine.entity.beast.TrueFormEntity>of(com.jttw.engine.entity.beast.TrueFormEntity::new, MobCategory.MISC)
-                            .sized(4.4F, 3.4F)
+                            .sized(6.0F, 4.8F)
                             .clientTrackingRange(10)
                             .build(new ResourceLocation(JTTWEngine.MOD_ID, "black_tortoise").toString()));
 
     public static final RegistryObject<EntityType<com.jttw.engine.entity.beast.TrueFormEntity.Flying>> VERMILION_BIRD =
             ENTITIES.register("vermilion_bird", () ->
                     EntityType.Builder.<com.jttw.engine.entity.beast.TrueFormEntity.Flying>of(com.jttw.engine.entity.beast.TrueFormEntity.Flying::new, MobCategory.MISC)
-                            .sized(2.4F, 3.0F)
+                            .sized(3.6F, 4.4F)
                             .clientTrackingRange(10)
                             .build(new ResourceLocation(JTTWEngine.MOD_ID, "vermilion_bird").toString()));
 

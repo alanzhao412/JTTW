@@ -28,7 +28,7 @@ public class TrueFormEntity extends PathfinderMob {
 
     @Override
     public AABB getBoundingBoxForCulling() {
-        return getBoundingBox().inflate(8);
+        return getBoundingBox().inflate(20);
     }
 
     /** A true form that flies (the Azure Dragon, the Vermilion Bird): its taker flies in it. */

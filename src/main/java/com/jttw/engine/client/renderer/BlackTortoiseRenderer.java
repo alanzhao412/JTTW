@@ -30,10 +30,10 @@ public final class BlackTortoiseRenderer extends MobRenderer<TrueFormEntity, Bla
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(new ResourceLocation(JTTWEngine.MOD_ID, "black_tortoise"), "main");
     public static final ResourceLocation TEXTURE = new ResourceLocation(JTTWEngine.MOD_ID, "textures/entity/black_tortoise.png");
     private static final RenderType GLOW = RenderType.eyes(new ResourceLocation(JTTWEngine.MOD_ID, "textures/entity/black_tortoise_glow.png"));
-    public static final float SCALE = 2.1f;
+    public static final float SCALE = 4.2f;
 
     public BlackTortoiseRenderer(EntityRendererProvider.Context ctx) {
-        super(ctx, new Model(ctx.bakeLayer(LAYER)), 2.2f);
+        super(ctx, new Model(ctx.bakeLayer(LAYER)), 4.4f);
         addLayer(new EyesLayer<>(this) {
             @Override
             public RenderType renderType() {

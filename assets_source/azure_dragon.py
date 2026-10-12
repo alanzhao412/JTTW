@@ -105,6 +105,28 @@ MOUTH = (110, 30, 38)
 IVORY = (238, 230, 206)
 
 
+def dragon_eye(p, fx, fy, toward):
+    """A dragon's eye from its back corner (fx, fy) toward the snout (`toward`): long and narrow,
+    high at the back and dropping toward the snout, under a heavy brow line on the same hard angle;
+    the iris burning gold about a dark slit (it glows)."""
+    X = lambda i: fx + i * toward
+    L = 9
+    for i in range(-1, L + 2):                 # the brow, dark, angled down to the snout and past the eye
+        for k in (0, 1):
+            p.px((X(i), fy - 2 + k + i // 3), DARK)
+    for i in range(L):
+        top = i // 3 + (1 if i in (0, 1) else 0)          # the lid falling toward the snout
+        bottom = top + (1 if i < 2 or i > L - 3 else 2)   # narrowest at its corners
+        for j in range(top, bottom + 1):
+            p.px((X(i), fy + 1 + j), EYE if j > top else [v * 0.7 for v in EYE], glow=True)
+        p.px((X(i), fy + 2 + bottom), DARK)
+    for j in range(1, 4):                      # the pupil: a narrow slit
+        p.px((X(4), fy + 1 + 1 + j - 1), (8, 6, 4))
+        p.glow.putpixel((int(X(4)), int(fy + 1 + 1 + j - 1)), (0, 0, 0, 0))
+    for i in range(L, L + 3):                  # its corner drawn out sharp toward the snout
+        p.px((X(i), fy + 2 + i // 3), DARK)
+
+
 def paint_box(p, style, f, dims):
     if style in ('body', 'skull', 'snout', 'brow'):
         for k in ('top', 'right', 'left', 'front', 'back'):
@@ -128,9 +150,9 @@ def paint_box(p, style, f, dims):
                     p.px((fx + i, fy + j), [v * 0.7 for v in GOLD])
     if style == 'skull':
         fx, fy, fw, fh = f['right']                 # its eyes on the sides of its head, burning gold
-        p.eye(fx + fw - 3, fy + 4, -1, EYE, w=6)
+        dragon_eye(p, fx + fw - 2, fy + 3, -1)
         fx, fy, fw, fh = f['left']
-        p.eye(fx + 2, fy + 4, 1, EYE, w=6)
+        dragon_eye(p, fx + 1, fy + 3, 1)
     if style == 'nose':
         p.shaded(f, AZURE)
         fx, fy, fw, fh = f['front']                 # flared nostrils
