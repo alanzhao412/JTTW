@@ -23,8 +23,19 @@ TEX = UNITS * S
 # ── the parts ────────────────────────────────────────────────────────────────
 # (name, parent, pivot (x, y, z), rotation (x, y, z) radians, boxes, mirror)
 # each box: (x, y, z, w, h, d, style); model pixels, ground at y 24, the head toward -z
-FORE = [(-2.5, 0, -2.5, 5, 7, 5, 'fur'), (-2, 7, -2, 4, 4, 4, 'fur'), (-3, 10.5, -4, 6, 1.5, 6, 'paw')]
-HIND = [(-3, -3, -3, 6, 9, 6, 'fur'), (-2, 6, -1.5, 4, 5, 4, 'fur'), (-2.75, 10.5, -3.5, 5.5, 1.5, 5.5, 'paw')]
+def paw(front):
+    """A paw: a pad hardly wider than the leg above it, its back rising to the leg, and four toes
+    rounding its front (the forepaw's broader, set further forward)."""
+    z0, d = (-3.0, 4.6) if front else (-2.6, 4.2)
+    boxes = [(-2.2, 10.2, z0, 4.4, 1.8, d, 'paw'),
+             (-1.8, 9.2, z0 + d - 2.4, 3.6, 1.2, 2.4, 'paw')]      # the heel, rising to the leg
+    for x in (-2.0, -0.95, 0.05, 1.1):
+        boxes.append((x, 10.6, z0 - 0.9, 0.9, 1.4, 1.2, 'toe'))
+    return boxes
+
+
+FORE = [(-2.5, 0, -2.5, 5, 7, 5, 'fur'), (-2, 7, -2, 4, 4, 4, 'fur')] + paw(True)
+HIND = [(-3, -3, -3, 6, 9, 6, 'fur'), (-2, 6, -1.5, 4, 5, 4, 'fur')] + paw(False)
 PARTS = [
     ('body', 'root', (0, 0, 0), (0, 0, 0), [
         (-6.5, 2, -18, 13, 11, 12, 'fur'),        # the chest and shoulders, deep
@@ -65,10 +76,10 @@ PARTS = [
 ]
 # curved claws over each forepaw: a base hooked down from the paw's front, its point curling under
 for leg in ('right_front_leg', 'left_front_leg'):
-    for k, cx in enumerate((-2.1, -0.7, 0.7, 2.1)):
+    for k, cx in enumerate((-1.55, -0.5, 0.5, 1.55)):
         base = '%s_claw%d' % (leg.split('_')[0], k)
-        PARTS.append((base, leg, (cx, 11.0, -3.6), (0.55, 0, 0), [(-0.3, -0.3, -1.6, 0.6, 0.6, 1.6, 'claw')], False))
-        PARTS.append((base + '_tip', base, (0, 0, -1.6), (0.9, 0, 0), [(-0.22, -0.22, -1.1, 0.44, 0.44, 1.1, 'clawtip')], False))
+        PARTS.append((base, leg, (cx, 11.4, -3.8), (0.45, 0, 0), [(-0.22, -0.22, -1.1, 0.44, 0.44, 1.1, 'claw')], False))
+        PARTS.append((base + '_tip', base, (0, 0, -1.1), (1.0, 0, 0), [(-0.16, -0.16, -0.8, 0.32, 0.32, 0.8, 'clawtip')], False))
 
 # ── the body larger about the head: every part but the head (and its jaw) scaled by BODY,
 # from the ground up, so the feet stay on it; the head keeps its size, set on the larger neck ──
@@ -292,11 +303,14 @@ for (w, h, d, style), (u, v) in slots.items():
         for r in f.values():
             face(r, (60, 56, 52), 1.0, noise=3)
     if style == 'paw':
-        face(f['top'], WHITE, 1.0)
-        for s in ('right', 'left', 'front', 'back'):
-            face(f[s], WHITE, 0.88, fall=0.35)
+        shaded(f)
         face(f['bottom'], PAD, 1.0, noise=4)
-        stripes(f['top'], 5, vertical=False, reach=0.6)
+        stripes(f['top'], 5, vertical=False, reach=0.5)
+    if style == 'toe':
+        shaded(f)
+        face(f['bottom'], PAD, 1.0, noise=4)
+        for k in ('right', 'left'):              # the parting between toes, in shadow
+            face(f[k], WHITE, 0.62, fall=0.3)
     if style == 'ear':
         face(f['front'], (226, 214, 214), 0.95)
         for s in ('back', 'top', 'right', 'left', 'bottom'):
