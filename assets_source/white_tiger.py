@@ -35,7 +35,6 @@ PARTS = [
     ('neck', 'root', (0, 5, -17), (0.15, 0, 0), [(-4.5, -3.5, -5, 9, 8, 6, 'fur')], False),
     ('head', 'root', (0, 4.5, -21), (0, 0, 0), [
         (-5.5, -4.5, -8, 11, 8, 8, 'skull'),       # the head: broad, its face flat
-        (-5.8, -5.2, -8.6, 11.6, 1.8, 1.6, 'brow'),  # the brow, heavy, over the eyes
         (-3.5, 0, -11, 7, 3.5, 3, 'muzzle'),       # the upper muzzle, its lip drawn back
         (-3.2, 2.5, -7.8, 6.4, 5.5, 0.6, 'throat'),  # the throat, dark, at the back of the mouth
         (-2.9, 3.5, -10.8, 1, 3.2, 1, 'fang'),     # the upper fangs, long
