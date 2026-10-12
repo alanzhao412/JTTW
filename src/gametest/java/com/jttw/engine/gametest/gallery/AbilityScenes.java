@@ -57,8 +57,8 @@ final class AbilityScenes {
     static volatile boolean holdUse;
     /** The scene opens the skill tree at its trigger, to be shot. */
     static volatile boolean openSkillTree;
-    /** Played, not posed: forward and sprint held from the trigger, the player moving freely, seen from behind. */
-    static volatile boolean live;
+    /** Played, not posed: forward (and sprint, unless {@code liveCruise}) held from the trigger, the player moving freely. */
+    static volatile boolean live, liveCruise;
     /** In a live scene, the player's own F5 camera as it is (behind, or {@code liveFront} in front), not moved alongside. */
     static volatile boolean liveF5, liveFront;
 
@@ -99,6 +99,7 @@ final class AbilityScenes {
                 new Scene("flight_live_2", p -> liveWukong(p, 2), p -> {}, 40, false, 0f),
                 new Scene("flight_live_3", p -> liveWukong(p, 3), p -> {}, 40, false, 0f),
                 // as F5 shows it, unmoved: from behind and in front, the staff in hand
+                new Scene("flight_live_cruise_3", p -> { liveWukong(p, 3); liveCruise = true; }, p -> {}, 40, false, 0f),
                 new Scene("flight_f5_back_2", p -> { liveWukong(p, 2); liveF5 = true; staffInHand(p); }, p -> {}, 40, false, 0f),
                 new Scene("flight_f5_back_3", p -> { liveWukong(p, 3); liveF5 = true; staffInHand(p); }, p -> {}, 40, false, 0f),
                 new Scene("flight_f5_front_2", p -> { liveWukong(p, 2); liveF5 = true; liveFront = true; staffInHand(p); }, p -> {}, 40, false, 0f),
@@ -271,6 +272,12 @@ final class AbilityScenes {
                 // the Ruyi Jingu Bang, plain, in hand: as he sees it, and as others do
                 new Scene("staff_base_hand", p -> plainStaff(p), p -> {}, 1, true, 10f),
                 new Scene("staff_base_held", p -> { plainStaff(p); closeUp = true; facing = -40f; }, p -> {}, 1, false),
+                // at ease, the staff across his shoulders (from the side and from behind); and mid-blow, in hand
+                new Scene("staff_rest_side", p -> { plainStaff(p); closeUp = true; facing = -70f; }, p -> {}, 1, false),
+                new Scene("staff_rest_back", p -> { plainStaff(p); closeUp = true; facing = 150f; }, p -> {}, 1, false),
+                new Scene("staff_rest_front", p -> { plainStaff(p); closeUp = true; facing = -20f; }, p -> {}, 1, false),
+                new Scene("staff_swing", p -> { plainStaff(p); closeUp = true; facing = -70f; },
+                        p -> p.swing(InteractionHand.MAIN_HAND, true), 3, false),
                 // the Dragon's skill tree, nine columns: the window keeps its size and the tree scrolls
                 new Scene("skill_tree_dragon", p -> {
                     p.getPersistentData().remove("jttw_skill_nodes");
@@ -776,6 +783,7 @@ final class AbilityScenes {
         openSkillTree = false;
         live = false;
         liveF5 = false;
+        liveCruise = false;
         liveFront = false;
         com.jttw.engine.client.flight.FlightPose.posedUnderWay = -1;
         if (NineSpiritsAbilityHandler.inTrueForm(p)) NineSpiritsAbilityHandler.endTrueForm(p);

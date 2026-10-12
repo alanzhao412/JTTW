@@ -631,6 +631,7 @@ public class PlacedStaffEntity extends Entity {
             stepB = b0;
             velA = velA.add(0, -GRAVITY * h, 0);
             velB = velB.add(0, -GRAVITY * h, 0);
+            net.minecraft.world.phys.Vec3 freeA = velA, freeB = velB;
             rodA = rodA.add(velA.scale(h));
             rodB = rodB.add(velB.scale(h));
             for (int pass = 0; pass < PASSES; pass++) {
@@ -638,9 +639,11 @@ public class PlacedStaffEntity extends Entity {
                 collideWithBlocks(level);
                 pushOffOtherStaffs(level);
             }
-            // what moved is what it now moves at
-            velA = rodA.subtract(a0).scale(1 / h).scale(0.998);
-            velB = rodB.subtract(b0).scale(1 / h).scale(0.998);
+            // what moved is what it now moves at; but what holds it (the ground, a wall, another
+            // staff, its own length) can only turn or stop its motion, never quicken it: being
+            // pushed out of what it touches does not fling it off
+            velA = noFaster(rodA.subtract(a0).scale(1 / h).scale(0.998), freeA);
+            velB = noFaster(rodB.subtract(b0).scale(1 / h).scale(0.998), freeB);
         }
         if (!toBreak.isEmpty()) {
             com.jttw.engine.world.TerrainBreaker.breakBlocks(level, new java.util.ArrayList<>(toBreak));
@@ -703,6 +706,12 @@ public class PlacedStaffEntity extends Entity {
      */
     private static final double WEIGHT_AT = 0.5 - 0.5 / Math.sqrt(3), BEYOND = WEIGHT_AT / (1 - 2 * WEIGHT_AT);
 
+    /** {@code v}, no faster than {@code free} (what gravity and its own momentum alone would have it moving at). */
+    private static net.minecraft.world.phys.Vec3 noFaster(net.minecraft.world.phys.Vec3 v, net.minecraft.world.phys.Vec3 free) {
+        double most = free.length(), now = v.length();
+        return now > most && now > 1e-9 ? v.scale(most / now) : v;
+    }
+
     /** Moves the rod so the point a share {@code t} of the way from foot to tip moves by {@code by}. */
     private void moveAt(double t, net.minecraft.world.phys.Vec3 by) {
         // the point's place between the two weights (below 0 or past 1 out toward the ends)
@@ -759,8 +768,11 @@ public class PlacedStaffEntity extends Entity {
         double r = radius();
         int n = samples();
         BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
+        // the balls are kept inside the drawn cylinder: the end ones a radius in from its flat ends,
+        // so stood on its foot it meets the ground there, not half sunk in it
+        double inset = Math.min(r, length() / 2) / length();
         for (int i = 0; i <= n; i++) {
-            double t = (double) i / n;
+            double t = inset + (1 - 2 * inset) * i / n;
             net.minecraft.world.phys.Vec3 p = rodA.lerp(rodB, t);
             int x0 = net.minecraft.util.Mth.floor(p.x - r), x1 = net.minecraft.util.Mth.floor(p.x + r);
             int y0 = net.minecraft.util.Mth.floor(p.y - r), y1 = net.minecraft.util.Mth.floor(p.y + r);

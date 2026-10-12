@@ -54,6 +54,7 @@ public class HumanoidModelMixin<T extends LivingEntity> {
     ) {
         if (entity instanceof net.minecraft.world.entity.player.Player p) {
             jttw$flightLimbs(p, ageInTicks);
+            jttw$staffAtEase(p);
             return;
         }
         if (!jttw$isClone(entity)) return;
@@ -94,6 +95,20 @@ public class HumanoidModelMixin<T extends LivingEntity> {
             jttw$toward(leftLeg, cloud, -0.18f, -0.06f, -0.07f);
         }
     }
+
+    /** The staff across the shoulders (StaffStance): the arms out along it, draped over it. */
+    private void jttw$staffAtEase(net.minecraft.world.entity.player.Player p) {
+        if (!com.jttw.engine.client.StaffStance.resting(p)) return;
+        rightArm.xRot = ARM_BACK;
+        rightArm.yRot = 0;
+        rightArm.zRot = ARM_OUT;
+        leftArm.xRot = ARM_BACK;
+        leftArm.yRot = 0;
+        leftArm.zRot = -ARM_OUT;
+    }
+
+    /** At ease with the staff: how far back, and out (radians), the arms lie along it. */
+    private static final float ARM_BACK = -0.3f, ARM_OUT = 2.0f;
 
     private static void jttw$toward(ModelPart part, float weight, float x, float y, float z) {
         part.xRot = Mth.lerp(weight, part.xRot, x);

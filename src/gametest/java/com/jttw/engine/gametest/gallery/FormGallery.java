@@ -187,7 +187,7 @@ public final class FormGallery {
             if (AbilityScenes.openSkillTree) mc.setScreen(new com.jttw.engine.client.gui.SkillTreeScreen());
             if (AbilityScenes.live) { // played as a player plays: forward and sprint held, nothing posed
                 mc.options.keyUp.setDown(true);
-                mc.options.keySprint.setDown(true);
+                if (!AbilityScenes.liveCruise) mc.options.keySprint.setDown(true);
             }
             UUID id = mc.player.getUUID();
             AbilityScenes.Scene sc = scene(shot);

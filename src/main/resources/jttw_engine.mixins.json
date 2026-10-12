@@ -28,6 +28,7 @@
     "EntityTurnMixin",
     "HumanoidModelMixin",
     "ItemRendererMixin",
+    "ItemInHandLayerMixin",
     "LocalPlayerMixin",
     "MinecraftMixin",
     "PlayerRendererMixin",

@@ -30,34 +30,18 @@ public class FlightLookGameTests {
         return p;
     }
 
-    /** Moves him {@code perTick} blocks along x for {@code ticks} ticks, as flying does, his state ticking. */
-    private static void fly(ServerPlayer p, double perTick, int ticks) {
-        for (int i = 0; i < ticks; i++) {
-            p.setPos(p.getX() + perTick, p.getY(), p.getZ());
-            FlyingState.onPlayerTick(new net.minecraftforge.event.TickEvent.PlayerTickEvent(
-                    net.minecraftforge.event.TickEvent.Phase.END, p));
-        }
-    }
-
     @GameTest(template = PLATFORM)
-    public static void wukongsCloudMarksHisTopSpeed(GameTestHelper h) {
+    public static void wukongsCloudIsHisSprint(GameTestHelper h) {
         ServerPlayer p = flying(h, ReincarnationOutcome.CELESTIAL_PRIMATE, WukongSkillTree.FLIGHT_1, WukongSkillTree.FLIGHT_2);
-        JTTWFlight.setFlightSpeedTier(p, 2);
-        fly(p, 2.8, 10);
-        eq(h, FlyingState.FLYING, FlyingState.mode(p), "before Flight III, no cloud even at his fastest");
+        p.setSprinting(true);
+        eq(h, FlyingState.FLYING, FlyingState.mode(p), "before Flight III, no cloud even sprinting");
         SkillTreeData.grantNode(p, WukongSkillTree.FLIGHT_3);
-        JTTWFlight.setFlightSpeedTier(p, 3);
-        fly(p, 0.5, 10);
-        eq(h, FlyingState.FLYING, FlyingState.mode(p), "Flight III, flying slowly: no cloud");
-        fly(p, 2.8, 4);
-        eq(h, FlyingState.ON_CLOUD, FlyingState.mode(p), "at his full speed, at once (within a few ticks), on his cloud");
-        fly(p, 1.8, 2);
-        eq(h, FlyingState.ON_CLOUD, FlyingState.mode(p), "easing off a moment, he keeps it");
-        fly(p, 0.3, 10);
-        eq(h, FlyingState.FLYING, FlyingState.mode(p), "slowed, it is gone");
-        fly(p, 2.8, 6);
+        eq(h, FlyingState.ON_CLOUD, FlyingState.mode(p), "Flight III, sprinting through the air: on his cloud");
+        p.setSprinting(false);
+        eq(h, FlyingState.FLYING, FlyingState.mode(p), "cruising: stretched out along his flight");
+        p.setSprinting(true);
         p.getAbilities().flying = false;
-        eq(h, FlyingState.GROUNDED, FlyingState.mode(p), "and none on the ground");
+        eq(h, FlyingState.GROUNDED, FlyingState.mode(p), "and none sprinting on the ground");
         h.succeed();
     }
 
@@ -89,8 +73,8 @@ public class FlightLookGameTests {
         wukong.setGameMode(GameType.CREATIVE);
         wukong.getAbilities().flying = true;
         eq(h, FlyingState.FLYING, FlyingState.mode(wukong), "his own flight, in creative: stretched out along it");
-        fly(wukong, 2.8, 4);
-        eq(h, FlyingState.ON_CLOUD, FlyingState.mode(wukong), "and at his full speed, on his cloud");
+        wukong.setSprinting(true);
+        eq(h, FlyingState.ON_CLOUD, FlyingState.mode(wukong), "and sprinting, on his cloud");
         ServerPlayer plain = as(h, ReincarnationOutcome.BULL_DEMON_KING); // no flight of his own
         plain.setGameMode(GameType.CREATIVE);
         plain.getAbilities().flying = true;

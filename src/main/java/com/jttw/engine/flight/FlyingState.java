@@ -42,45 +42,15 @@ public final class FlyingState {
         return p instanceof ServerPlayer sp ? JTTWFlight.profile(sp).own() : localOwnFlight;
     }
 
-    /** How near his full Flight III speed his pace must come for the cloud to gather under him. */
-    public static final double CLOUD_GATHERS = 0.75;
-    /** How far below it his pace may fall before the cloud thins away. */
-    public static final double CLOUD_THINS = 0.5;
-    /** How much each tick's movement moves his pace: the last few ticks count, so it answers at once. */
-    private static final double PACE_WEIGHT = 0.5;
-    /** Each flier's last position and pace (blocks a tick), as the server sees them move. */
-    private static final Map<UUID, double[]> PACE = new ConcurrentHashMap<>();
-
-    /** Notes how far a player moved this tick into their pace. */
-    private static void notePace(ServerPlayer p) {
-        double[] was = PACE.get(p.getUUID());
-        double moved = was == null ? 0 : p.position().distanceTo(new net.minecraft.world.phys.Vec3(was[0], was[1], was[2]));
-        if (moved > FlightSteering.TOP_SPEED * 1.5 + 2) moved = 0; // further than anyone flies in a tick: a teleport
-        double pace = was == null ? 0 : was[3] * (1 - PACE_WEIGHT) + moved * PACE_WEIGHT;
-        PACE.put(p.getUUID(), new double[]{p.getX(), p.getY(), p.getZ(), pace});
-    }
-
-    /** How fast a player has been moving, blocks a tick, over the last few ticks. */
-    public static double pace(ServerPlayer p) {
-        double[] was = PACE.get(p.getUUID());
-        return was == null ? 0 : was[3];
-    }
-
     private static final Set<UUID> ON_CLOUD_NOW = ConcurrentHashMap.newKeySet();
 
     /**
-     * Wukong's cloud marks his top speed: with the Somersault Cloud (Flight III), the moment he
-     * flies at his full speed it gathers under him; slowing, it thins away. Flying slower, and
-     * before Flight III, he flies on his own as everyone else does.
+     * Wukong's cloud is his sprint: with the Somersault Cloud (Flight III), sprinting through the
+     * air he rides it, upright; cruising, he flies stretched out along his flight. Before Flight
+     * III he flies on his own as everyone else does.
      */
     public static boolean ridesCloud(ServerPlayer p) {
-        if (!flies(p) || com.jttw.engine.progression.skilltree.SkillTreeData.getFlightTier(p) < 3) {
-            ON_CLOUD_NOW.remove(p.getUUID());
-            return false;
-        }
-        double full = JTTWFlight.profile(p).speed();
-        double share = pace(p) / full;
-        boolean on = share >= (ON_CLOUD_NOW.contains(p.getUUID()) ? CLOUD_THINS : CLOUD_GATHERS);
+        boolean on = flies(p) && com.jttw.engine.progression.skilltree.SkillTreeData.getFlightTier(p) >= 3 && p.isSprinting();
         if (on) ON_CLOUD_NOW.add(p.getUUID());
         else ON_CLOUD_NOW.remove(p.getUUID());
         return on;
@@ -101,7 +71,6 @@ public final class FlyingState {
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p)) return;
-        notePace(p);
         int now = mode(p);
         Integer was = LAST.put(p.getUUID(), now);
         if (was == null ? now != GROUNDED : was != now) {
@@ -122,7 +91,6 @@ public final class FlyingState {
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         LAST.remove(event.getEntity().getUUID());
         ON_CLOUD_NOW.remove(event.getEntity().getUUID());
-        PACE.remove(event.getEntity().getUUID());
     }
 
     /** A new world or a new life is a new entity to the client: tell it afresh. */

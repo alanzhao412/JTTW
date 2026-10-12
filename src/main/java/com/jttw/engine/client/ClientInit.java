@@ -120,6 +120,7 @@ public final class ClientInit {
             if (event.getSkin(skin) instanceof net.minecraft.client.renderer.entity.player.PlayerRenderer renderer) {
                 renderer.addLayer(new com.jttw.engine.client.renderer.ArmamentLayer(renderer));
                 renderer.addLayer(new com.jttw.engine.client.renderer.BeastFormLayer(renderer));
+                renderer.addLayer(new com.jttw.engine.client.renderer.StaffRestLayer(renderer));
             }
         }
     }
