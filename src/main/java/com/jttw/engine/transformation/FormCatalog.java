@@ -57,10 +57,12 @@ public final class FormCatalog {
 
     /**
      * Forms only a character's own ability takes, never offered in a menu: the Great White Bull
-     * is the Bull Demon King's true form, with its own cost and strength (BullDemonAbilityHandler).
+     * is the Bull Demon King's true form, with its own cost and strength (BullDemonAbilityHandler);
+     * the White Tiger, Byakko's (TrueForm).
      */
     public static final Set<ResourceLocation> ABILITY_FORMS = Set.of(
-            new ResourceLocation(com.jttw.engine.JTTWEngine.MOD_ID, "great_white_bull"));
+            new ResourceLocation(com.jttw.engine.JTTWEngine.MOD_ID, "great_white_bull"),
+            new ResourceLocation(com.jttw.engine.JTTWEngine.MOD_ID, "white_tiger"));
 
     /** The blocks a player can become, each with its own behaviour. */
     public static final List<Block> BLOCK_FORMS = List.of(Blocks.CHEST, Blocks.OAK_SIGN, Blocks.TNT);

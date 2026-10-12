@@ -111,6 +111,14 @@ public final class ModEntities {
 
     // ── Forms ──────────────────────────────────────────────────────
 
+    /** Byakko's true form, never spawned: only taken (see TrueForm). */
+    public static final RegistryObject<EntityType<com.jttw.engine.entity.beast.WhiteTigerEntity>> WHITE_TIGER =
+            ENTITIES.register("white_tiger", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.beast.WhiteTigerEntity>of(com.jttw.engine.entity.beast.WhiteTigerEntity::new, MobCategory.MISC)
+                            .sized(2.0F, 2.4F)
+                            .clientTrackingRange(10)
+                            .build(new ResourceLocation(JTTWEngine.MOD_ID, "white_tiger").toString()));
+
     /** The Bull Demon King's true form, never spawned: only taken. */
     public static final RegistryObject<EntityType<com.jttw.engine.entity.bull.GreatWhiteBullEntity>> GREAT_WHITE_BULL =
             ENTITIES.register("great_white_bull", () ->
@@ -152,6 +160,7 @@ public final class ModEntities {
         event.put(BONE_SERVANT.get(), com.jttw.engine.entity.ridge.BoneServantEntity.createAttributes().build());
         event.put(WRAITH.get(), com.jttw.engine.entity.ridge.WraithEntity.createAttributes().build());
         event.put(GREAT_WHITE_BULL.get(), com.jttw.engine.entity.bull.GreatWhiteBullEntity.createAttributes().build());
+        event.put(WHITE_TIGER.get(), com.jttw.engine.entity.beast.WhiteTigerEntity.createAttributes().build());
         event.put(HEAVENLY_SOLDIER.get(), com.jttw.engine.entity.heaven.HeavenlySoldierEntity.createAttributes().build());
         event.put(LADY_HUSK.get(), com.jttw.engine.entity.ridge.LadyHuskEntity.createAttributes().build());
         event.put(LADY_WHITE_BONE.get(), com.jttw.engine.entity.ridge.LadyWhiteBoneEntity.createAttributes().build());

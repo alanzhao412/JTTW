@@ -21,7 +21,7 @@ public final class ByakkoCharacter implements PlayableCharacter {
     @Override public String outcomeId() { return ReincarnationOutcome.WHITE_TIGER.id; }
     @Override public SkillTree skillTree() { return ByakkoSkillTree.TREE; }
     @Override public String treeTitle() { return "BYAKKO"; }
-    @Override public List<String> treeColumns() { return List.of("Leap", "Scent", "Bleed", "Velocity", "Instinct", "Roar", "Transform"); }
+    @Override public List<String> treeColumns() { return List.of("Leap", "Scent", "Bleed", "Velocity", "Instinct", "Roar", "Transform", "True Form"); }
 
     @Override
     public List<AbilitySlot> skillBar(Set<String> unlocked) {
@@ -29,7 +29,8 @@ public final class ByakkoCharacter implements PlayableCharacter {
         return PlayableCharacter.bar(
                 AbilitySlot.fromBranch(tree, unlocked, "bk_leap", "Predator's Leap", AbilityType.TOGGLE),
                 AbilitySlot.fromBranch(tree, unlocked, "bk_roar", "Territorial Roar", AbilityType.TOGGLE),
-                AbilitySlot.fromBranch(tree, unlocked, "bk_transform", "18 Transformations", AbilityType.MENU));
+                AbilitySlot.fromBranch(tree, unlocked, "bk_transform", "18 Transformations", AbilityType.MENU),
+                AbilitySlot.fromBranch(tree, unlocked, "bk_true", "White Tiger", AbilityType.TOGGLE));
     }
 
     @Override
@@ -38,6 +39,9 @@ public final class ByakkoCharacter implements PlayableCharacter {
         switch (slot) {
             case 0 -> ByakkoAbilityHandler.castLeap(player);
             case 1 -> ByakkoAbilityHandler.castRoar(player);
+            case 3 -> com.jttw.engine.character.divinebeast.TrueForm.toggle(player,
+                    com.jttw.engine.registry.ModEntities.WHITE_TIGER.get(), skillTree().highestTier(
+                            com.jttw.engine.progression.skilltree.SkillTreeData.getUnlockedNodes(player), "bk_true"), "bk_true");
             default -> {}
         }
     }

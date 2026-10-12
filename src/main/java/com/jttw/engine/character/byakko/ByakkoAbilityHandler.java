@@ -193,7 +193,9 @@ public final class ByakkoAbilityHandler {
         // Launch: toward where the player is looking, springing off the ground as a jump does, so
         // a level pounce arcs too (about 14 blocks looking ahead, up to about 19 looking a little up)
         Vec3 look = player.getLookAngle();
-        Vec3 launch = look.normalize().scale(LEAP_SPEED);
+        // as the White Tiger, the pounce carries half again as far
+        boolean tiger = com.jttw.engine.character.divinebeast.TrueForm.active(player);
+        Vec3 launch = look.normalize().scale(tiger ? LEAP_SPEED * 1.5 : LEAP_SPEED);
         if (player.onGround()) launch = launch.add(0, LEAP_SPRING, 0);
         player.setDeltaMovement(launch);
         LEAP_FROM.put(player.getUUID(), player.position());
@@ -250,7 +252,11 @@ public final class ByakkoAbilityHandler {
         float baseDmg = switch (tier) { case 2 -> 8.0f; case 3 -> 12.0f; default -> 5.0f; };
         float strScale = switch (tier) { case 2 -> 0.75f; case 3 -> 1.0f; default -> 0.5f; };
         // The fixed base is a level-1 number and grows with level power; the STR share already does
-        return (float) (LevelPower.scaled(player, baseDmg) + player.getAttributeValue(Attributes.ATTACK_DAMAGE) * strScale);
+        float dmg = (float) (LevelPower.scaled(player, baseDmg) + player.getAttributeValue(Attributes.ATTACK_DAMAGE) * strScale);
+        // as the White Tiger (II and above), twice as hard
+        boolean tiger = com.jttw.engine.character.divinebeast.TrueForm.active(player)
+                && ByakkoSkillTree.TREE.highestTier(SkillTreeData.getUnlockedNodes(player), "bk_true") >= 2;
+        return tiger ? dmg * 2 : dmg;
     }
 
     // -----------------------------------------------------------------------
@@ -574,7 +580,10 @@ public final class ByakkoAbilityHandler {
         NetworkHandler.sendToPlayer(player, new SyncQiPacket(QiData.getCurrent(player), QiData.getMax(player)));
 
         // Get all living entities within 8 blocks (not players, not Byakko's own mobs)
-        AABB roarBox = player.getBoundingBox().inflate(8.0);
+        // as the White Tiger (III), the roar carries twice as far
+        double roarReach = com.jttw.engine.character.divinebeast.TrueForm.active(player)
+                && ByakkoSkillTree.TREE.highestTier(nodes, "bk_true") >= 3 ? 16.0 : 8.0;
+        AABB roarBox = player.getBoundingBox().inflate(roarReach);
         List<LivingEntity> affected = player.level().getEntitiesOfClass(
                 LivingEntity.class, roarBox,
                 e -> e.isAlive() && e != player && !(e instanceof ServerPlayer));

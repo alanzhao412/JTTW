@@ -107,7 +107,7 @@ public final class QiManager {
 
         // Regen
         float current = QiData.getCurrent(sp);
-        if (current < maxQi) {
+        if (current < maxQi && !com.jttw.engine.character.divinebeast.TrueForm.exhausted(sp)) {
             float regenRate = REGEN_BASE + (float) (stats.will() * REGEN_WILL_FACTOR);
 
             regenRate *= regenMultiplier(sp);

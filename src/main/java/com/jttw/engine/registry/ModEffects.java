@@ -29,6 +29,10 @@ public final class ModEffects {
     public static final RegistryObject<MobEffect> SOLAR_FLARE = EFFECTS.register("solar_flare",
             () -> new MobEffect(MobEffectCategory.BENEFICIAL, 0xFFC83C) {});
 
+    /** After a divine beast's true form: no ability answers and Qi does not come back (see TrueForm). */
+    public static final RegistryObject<MobEffect> EXHAUSTED = EFFECTS.register("exhausted",
+            () -> new MobEffect(MobEffectCategory.HARMFUL, 0x6B6B78) {});
+
     public static void register(IEventBus modEventBus) {
         EFFECTS.register(modEventBus);
     }

@@ -57,6 +57,8 @@ final class AbilityScenes {
     static volatile boolean holdUse;
     /** The scene opens the skill tree at its trigger, to be shot. */
     static volatile boolean openSkillTree;
+    /** A scene's own camera: where it stands and what it looks at, from the stage's origin at ground level; null for the usual. */
+    static volatile double[] sceneCam;
     /** Played, not posed: forward (and sprint, unless {@code liveCruise}) held from the trigger, the player moving freely. */
     static volatile boolean live, liveCruise;
     /** In a live scene, the player's own F5 camera as it is (behind, or {@code liveFront} in front), not moved alongside. */
@@ -291,6 +293,13 @@ final class AbilityScenes {
                 // a transformation: the puff of cloud as he becomes a horse, seen from outside
                 new Scene("transform_puff", p -> {},
                         p -> com.jttw.engine.transformation.TransformationManager.transform(p, net.minecraft.world.entity.EntityType.HORSE), 3, false),
+                // Byakko's true form, the White Tiger: from the side, from in front, through its own eyes,
+                // and the moment of its taking
+                new Scene("tiger_side", p -> { byakko(p); facing = -90f; sceneCam = new double[]{0.5, 1.7, 8.5, 0.5, 1.3, 0.5}; }, p -> tiger(p), 45, false),
+                new Scene("tiger_front", p -> { byakko(p); facing = -50f; sceneCam = new double[]{5.5, 1.6, 6.5, 0.5, 1.3, 0.5}; }, p -> tiger(p), 45, false),
+                new Scene("tiger_face", p -> { byakko(p); facing = -90f; sceneCam = new double[]{5.5, 1.5, 1.5, 0.5, 1.4, 0.5}; }, p -> tiger(p), 45, false),
+                new Scene("tiger_first", p -> byakko(p), p -> tiger(p), 20, true),
+                new Scene("tiger_taking", p -> { byakko(p); facing = -60f; }, p -> tiger(p), 2, false),
                 // a Qi Wave half charged: the meter above the crosshair
                 new Scene("charge_meter", p -> {
                     empoweredStaff(p);
@@ -600,6 +609,22 @@ final class AbilityScenes {
         p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(com.jttw.engine.registry.ModItems.RUYI_JINGU_BANG.get()));
     }
 
+    /** Byakko, his White Tiger learned to its height, rested and with Qi to spare. */
+    private static void byakko(ServerPlayer p) {
+        p.getPersistentData().remove("jttw_skill_nodes");
+        p.getPersistentData().remove(com.jttw.engine.character.divinebeast.TrueForm.KEY_READY);
+        p.removeEffect(com.jttw.engine.registry.ModEffects.EXHAUSTED.get());
+        AlignmentData.markReincarnated(p, ReincarnationOutcome.WHITE_TIGER);
+        LevelManager.initClass(p, ReincarnationOutcome.WHITE_TIGER);
+        for (String n : List.of("bk_true_1", "bk_true_2", "bk_true_3")) SkillTreeData.grantNode(p, n);
+        QiData.setMax(p, 1000f);
+        QiData.setCurrent(p, 1000f);
+    }
+
+    private static void tiger(ServerPlayer p) {
+        com.jttw.engine.character.divinebeast.TrueForm.toggle(p, com.jttw.engine.registry.ModEntities.WHITE_TIGER.get(), 3, "bk_true");
+    }
+
     private static void plainStaff(ServerPlayer p) {
         AlignmentData.markReincarnated(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
         LevelManager.initClass(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
@@ -781,6 +806,12 @@ final class AbilityScenes {
         closeUp = false;
         holdUse = false;
         openSkillTree = false;
+        sceneCam = null;
+        if (p.getPersistentData().contains(com.jttw.engine.character.divinebeast.TrueForm.KEY_UNTIL)) {
+            com.jttw.engine.character.divinebeast.TrueForm.end(p);
+            p.removeEffect(com.jttw.engine.registry.ModEffects.EXHAUSTED.get());
+            p.removeAllEffects();
+        }
         live = false;
         liveF5 = false;
         liveCruise = false;

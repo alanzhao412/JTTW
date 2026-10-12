@@ -57,5 +57,7 @@
   "block.jttw_engine.celestial_marble": "Celestial Marble",
   "block.jttw_engine.underworld_stone": "Underworld Stone",
   "block.jttw_engine.soul_ash": "Soul Ash",
-  "effect.jttw_engine.solar_flare": "Solar Flare"
+  "effect.jttw_engine.solar_flare": "Solar Flare",
+  "entity.jttw_engine.white_tiger": "White Tiger",
+  "effect.jttw_engine.exhausted": "Exhausted"
 }

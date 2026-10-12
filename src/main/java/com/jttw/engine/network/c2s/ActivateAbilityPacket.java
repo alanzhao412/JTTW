@@ -42,6 +42,8 @@ public class ActivateAbilityPacket {
             ServerPlayer player = ctx.get().getSender();
             if (player == null) return;
             PlayableCharacter character = Characters.of(player);
+            // exhausted after a true form, no ability answers (but the form's own key may end it)
+            if (com.jttw.engine.character.divinebeast.TrueForm.exhausted(player)) return;
             if (character != null && pkt.slot >= 0 && pkt.slot < 2 * PlayableCharacter.SLOT_COUNT) {
                 character.activate(player, pkt.slot, pkt.action);
             }

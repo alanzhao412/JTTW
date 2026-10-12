@@ -329,6 +329,13 @@ public final class FormGallery {
                             ? net.minecraft.client.CameraType.THIRD_PERSON_FRONT : net.minecraft.client.CameraType.THIRD_PERSON_BACK));
                     return;
                 }
+                if (!scene(shot).firstPerson() && AbilityScenes.sceneCam != null) {
+                    double[] c = AbilityScenes.sceneCam;
+                    double dx = c[3] - c[0], dy = c[4] - c[1], dz = c[5] - c[2];
+                    placeCamera(level, c[0], ground + c[1], c[2], (float) Math.toDegrees(Math.atan2(-dx, dz)),
+                            (float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz))));
+                    return;
+                }
                 if (!scene(shot).firstPerson()) {
                     // Three-quarter view: from the south-east, onto the player and the ground in front
                     // (or, close up, onto the player alone)

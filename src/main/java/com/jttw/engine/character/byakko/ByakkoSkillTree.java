@@ -58,6 +58,8 @@ public final class ByakkoSkillTree {
 
     public static final String TRANSFORM_1 = "bk_transform_1", TRANSFORM_2 = "bk_transform_2", TRANSFORM_3 = "bk_transform_3";
 
+    public static final String TRUE_1 = "bk_true_1", TRUE_2 = "bk_true_2", TRUE_3 = "bk_true_3";
+
     public static final SkillTree TREE = new SkillTree("bk_");
 
     static {
@@ -158,6 +160,23 @@ public final class ByakkoSkillTree {
                 TRANSFORM_3, "18 Transformations III",
                 new String[]{ "Adds neutral", "flying forms.", "" },
                 5, 6, 2, List.of(TRANSFORM_2), AbilityType.MENU, 3, "18 Transformations"
+        ));
+
+        // ── TRUE FORM (col 7, TOGGLE) ──────────────────────────────────
+        TREE.add(new SkillNode(
+                TRUE_1, "White Tiger I",
+                new String[]{ "Press M: become the White", "Tiger, 20 s. x3 health, x2.5", "attack. Then exhausted 1 min." },
+                4, 7, 0, List.of(), AbilityType.TOGGLE, 1, "White Tiger"
+        ));
+        TREE.add(new SkillNode(
+                TRUE_2, "White Tiger II",
+                new String[]{ "30 s as the White Tiger.", "Its pounce goes further", "and strikes twice as hard." },
+                5, 7, 1, List.of(TRUE_1), AbilityType.TOGGLE, 2, "White Tiger"
+        ));
+        TREE.add(new SkillNode(
+                TRUE_3, "White Tiger III",
+                new String[]{ "45 s as the White Tiger.", "Its roar carries twice", "as far. 10 min rest." },
+                6, 7, 2, List.of(TRUE_2), AbilityType.TOGGLE, 3, "White Tiger"
         ));
     }
 }
