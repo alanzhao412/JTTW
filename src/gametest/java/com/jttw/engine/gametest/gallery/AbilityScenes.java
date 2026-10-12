@@ -61,6 +61,8 @@ final class AbilityScenes {
     static volatile double[] sceneCam;
     /** Played, not posed: forward (and sprint, unless {@code liveCruise}) held from the trigger, the player moving freely. */
     static volatile boolean live, liveCruise;
+    /** In a live cruising scene, sprint pressed this many ticks before the picture (0: never). */
+    static volatile int liveSprintAt;
     /** In a live scene, the player's own F5 camera as it is (behind, or {@code liveFront} in front), not moved alongside. */
     static volatile boolean liveF5, liveFront;
 
@@ -101,6 +103,11 @@ final class AbilityScenes {
                 new Scene("flight_live_2", p -> liveWukong(p, 2), p -> {}, 40, false, 0f),
                 new Scene("flight_live_3", p -> liveWukong(p, 3), p -> {}, 40, false, 0f),
                 // as F5 shows it, unmoved: from behind and in front, the staff in hand
+                // cruising at Flight III, then sprint: he somersaults onto his cloud (caught mid-flip, then on it)
+                new Scene("flip_a", p -> { liveWukong(p, 3); liveCruise = true; liveSprintAt = 5; }, p -> {}, 40, false, 0f),
+                new Scene("flip_b", p -> { liveWukong(p, 3); liveCruise = true; liveSprintAt = 8; }, p -> {}, 40, false, 0f),
+                new Scene("flip_c", p -> { liveWukong(p, 3); liveCruise = true; liveSprintAt = 11; }, p -> {}, 40, false, 0f),
+                new Scene("flip_d", p -> { liveWukong(p, 3); liveCruise = true; liveSprintAt = 25; }, p -> {}, 40, false, 0f),
                 new Scene("flight_live_cruise_3", p -> { liveWukong(p, 3); liveCruise = true; }, p -> {}, 40, false, 0f),
                 new Scene("flight_f5_back_2", p -> { liveWukong(p, 2); liveF5 = true; staffInHand(p); }, p -> {}, 40, false, 0f),
                 new Scene("flight_f5_back_3", p -> { liveWukong(p, 3); liveF5 = true; staffInHand(p); }, p -> {}, 40, false, 0f),
@@ -817,6 +824,7 @@ final class AbilityScenes {
         live = false;
         liveF5 = false;
         liveCruise = false;
+        liveSprintAt = 0;
         liveFront = false;
         com.jttw.engine.client.flight.FlightPose.posedUnderWay = -1;
         if (NineSpiritsAbilityHandler.inTrueForm(p)) NineSpiritsAbilityHandler.endTrueForm(p);

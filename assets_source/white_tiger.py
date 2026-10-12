@@ -81,6 +81,30 @@ for leg in ('right_front_leg', 'left_front_leg'):
         PARTS.append((base, leg, (cx, 11.4, -3.8), (0.45, 0, 0), [(-0.22, -0.22, -1.1, 0.44, 0.44, 1.1, 'claw')], False))
         PARTS.append((base + '_tip', base, (0, 0, -1.1), (1.0, 0, 0), [(-0.16, -0.16, -0.8, 0.32, 0.32, 0.8, 'clawtip')], False))
 
+# ── the legs longer: each upper leg LEG_EXTRA taller, what is below it lowered by as much, and
+# everything else raised by as much, so the paws stay on the ground ──
+LEG_EXTRA = 3.0
+LEGS = ('right_front_leg', 'left_front_leg', 'right_hind_leg', 'left_hind_leg')
+
+
+def lengthen(parts):
+    out = []
+    for name, parent, (x_, y_, z_), rot, boxes, mirror in parts:
+        if name in LEGS:
+            y_ -= LEG_EXTRA
+            nb = [boxes[0][:4] + (boxes[0][4] + LEG_EXTRA,) + boxes[0][5:]]
+            nb += [b[:1] + (b[1] + LEG_EXTRA,) + b[2:] for b in boxes[1:]]
+            boxes = nb
+        elif parent in LEGS:          # what hangs from a leg (its claws) goes down with its paw
+            y_ += LEG_EXTRA
+        elif parent == 'root':
+            y_ -= LEG_EXTRA
+        out.append((name, parent, (x_, y_, z_), rot, boxes, mirror))
+    return out
+
+
+PARTS = lengthen(PARTS)
+
 # ── the body larger about the head: every part but the head (and its jaw) scaled by BODY,
 # from the ground up, so the feet stay on it; the head keeps its size, set on the larger neck ──
 BODY = 1.35

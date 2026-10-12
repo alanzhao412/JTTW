@@ -87,6 +87,15 @@ public class HumanoidModelMixin<T extends LivingEntity> {
             jttw$toward(rightLeg, stretched, 0.04f, 0, 0.03f);
             jttw$toward(leftLeg, stretched, -0.04f, 0, -0.03f);
         }
+        // somersaulting onto the cloud, tucked: knees to the chest, arms wrapped round the shins
+        float tuck = com.jttw.engine.client.flight.FlightPose.tuck(p, ageInTicks - (int) ageInTicks);
+        if (tuck > 0) {
+            jttw$toward(rightLeg, tuck, -1.75f, 0.1f, 0.05f);
+            jttw$toward(leftLeg, tuck, -1.75f, -0.1f, -0.05f);
+            jttw$toward(rightArm, tuck, -1.45f, -0.35f, 0.1f);
+            jttw$toward(leftArm, tuck, -1.45f, 0.35f, -0.1f);
+            return;
+        }
         if (cloud > 0) {
             float trail = 0.55f + 0.55f * move, flutter = 0.06f * Mth.sin(ageInTicks * 0.35f) * (0.4f + move);
             jttw$toward(rightArm, cloud, trail + flutter, 0.1f, 0.22f);

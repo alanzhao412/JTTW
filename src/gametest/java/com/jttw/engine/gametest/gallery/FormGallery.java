@@ -196,6 +196,9 @@ public final class FormGallery {
                 if (sp != null) sc.trigger().accept(sp);
             });
         }
+        if (AbilityScenes.live && AbilityScenes.liveSprintAt > 0 && wait == AbilityScenes.liveSprintAt) {
+            mc.options.keySprint.setDown(true);
+        }
         if (--wait > 0) return;
 
         File dir = new File(mc.gameDirectory, "screenshots/" + RUN_DIR);

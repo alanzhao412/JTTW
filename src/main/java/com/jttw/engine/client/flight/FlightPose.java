@@ -52,6 +52,26 @@ public final class FlightPose {
      * (0 on foot), how far onto the cloud, how much under way (0 hovering), how far into a squall.
      */
     private static final Map<Integer, float[]> STATE = new ConcurrentHashMap<>();
+    /** Ticks of Wukong's somersault onto his cloud: a tucked front flip, the cloud gathering as he lands it. */
+    public static final int FLIP_TICKS = 12;
+    /** When each flier (by entity id) began his somersault, in client game time; absent when not flipping. */
+    private static final Map<Integer, Long> FLIP = new ConcurrentHashMap<>();
+
+    /** How far through his somersault, 0 to 1; below 0 when not somersaulting. */
+    public static float flip(Player p, float partialTick) {
+        Long start = FLIP.get(p.getId());
+        Minecraft mc = Minecraft.getInstance();
+        if (start == null || mc.level == null) return -1;
+        float t = (mc.level.getGameTime() - start + partialTick) / FLIP_TICKS;
+        return t >= 1 ? -1 : Math.max(0, t);
+    }
+
+    /** How tucked, 0 to 1: drawn up as he goes over, opening out to land on the cloud. */
+    public static float tuck(Player p, float partialTick) {
+        float t = flip(p, partialTick);
+        return t < 0 ? 0 : Mth.sin(t * Mth.PI) * 1.25f > 1 ? 1 : Mth.sin(t * Mth.PI) * 1.25f;
+    }
+
     /** The angles put aside while a flier is drawn turned, to put back after. */
     private static final Map<Integer, float[]> SAVED = new HashMap<>();
 
@@ -122,6 +142,14 @@ public final class FlightPose {
             Player p = mc.level.getEntity(e.getKey()) instanceof Player pl ? pl : null;
             boolean on = p != null && flying(p), cloud = p != null && onCloud(p);
             float[] f = e.getValue();
+            // coming onto the cloud from flight, he somersaults onto it: the cloud gathers once he is over
+            long now = mc.level.getGameTime();
+            if (cloud && f[2] == 0 && f[0] > 0.5f && !FLIP.containsKey(e.getKey())) FLIP.put(e.getKey(), now);
+            Long flipStart = FLIP.get(e.getKey());
+            boolean flipping = flipStart != null && now - flipStart < FLIP_TICKS;
+            if (flipStart != null && !flipping && !cloud) FLIP.remove(e.getKey());
+            if (flipStart != null && !cloud && f[2] == 0) FLIP.remove(e.getKey());
+            if (flipping && cloud) cloud = now - flipStart >= FLIP_TICKS / 2; // it gathers in the flip's second half
             f[1] = f[0];
             f[3] = f[2];
             f[5] = f[4];
@@ -138,6 +166,7 @@ public final class FlightPose {
             return p == null || (f[0] == 0 && f[1] == 0 && f[6] == 0 && f[7] == 0 && !on);
         });
         MODE.keySet().removeIf(id -> !(mc.level.getEntity(id) instanceof Player));
+        FLIP.keySet().removeIf(id -> !(mc.level.getEntity(id) instanceof Player));
         for (Player p : mc.level.players()) {
             float c = presence(p, 1) * cloud(p, 1);
             if (c > 0) NimbusCloud.wisps(p, c);
@@ -197,6 +226,16 @@ public final class FlightPose {
         pose.pushPose();
         pose.translate(0, PIVOT, 0);
         pose.mulPose(pose(p, yaw, t));
+        float flip = flip(p, t);
+        if (flip >= 0) {
+            // the somersault: a full turn forward about his own side, head going down and under, eased
+            // in and out; turned about his middle, low as he is tucked
+            float eased = flip * flip * (3 - 2 * flip);
+            float body = 180f - p.getViewYRot(t);
+            pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(body));
+            pose.mulPose(com.mojang.math.Axis.XP.rotationDegrees(-360f * eased));
+            pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-body));
+        }
         pose.translate(0, -PIVOT, 0);
     }
 
