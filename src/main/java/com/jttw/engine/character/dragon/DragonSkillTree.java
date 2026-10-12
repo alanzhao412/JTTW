@@ -107,7 +107,7 @@ public final class DragonSkillTree {
         ));
         TREE.add(new SkillNode(
                 FLIGHT_3, "Dimension Travel",
-                new String[]{ "Scroll to select a dimension.", "Press V to travel there.", "Costs 20 Qi per jump." },
+                new String[]{ "Shift + scroll: choose a", "dimension. Shift + V: go", "there. 20 Qi a jump." },
                 4, 2, 2, List.of(FLIGHT_2), AbilityType.PASSIVE, 3, "Flight"
         ));
 
@@ -143,7 +143,7 @@ public final class DragonSkillTree {
         ));
         TREE.add(new SkillNode(
                 WAVE_2, "Tidal Wave II",
-                new String[]{ "Larger cone. Extinguishes", "fires. Breaks weak blocks.", "" },
+                new String[]{ "Larger cone. Puts out fires.", "Tears away leaves, plants,", "glass and snow in its way." },
                 3, 5, 1, List.of(WAVE_1), AbilityType.TOGGLE, 2, "Tidal Wave"
         ));
         TREE.add(new SkillNode(

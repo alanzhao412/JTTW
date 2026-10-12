@@ -31,19 +31,23 @@ public final class DragonCharacter implements PlayableCharacter {
     @Override
     public List<AbilitySlot> skillBar(Set<String> unlocked) {
         SkillTree tree = skillTree();
-        // Slot 2 is Tidal Wave once learned; before that, flight tier 3 puts Dimension Travel there
-        AbilitySlot slot2 = AbilitySlot.fromBranch(tree, unlocked, "dr_wave", "Tidal Wave", AbilityType.TOGGLE);
-        if (slot2.isEmpty()) {
-            int flightTier = tree.highestTier(unlocked, "dr_flight");
-            if (flightTier >= 3) {
-                slot2 = new AbilitySlot("dr_dimension", "Dimension Travel", AbilityType.TOGGLE, flightTier);
-            }
-        }
         return PlayableCharacter.bar(
-                AbilitySlot.fromBranch(tree, unlocked, "dr_lightning", "Lightning Strike", AbilityType.TOGGLE),
+                AbilitySlot.fromBranch(tree, unlocked, "dr_lightning", "Call Thunder", AbilityType.TOGGLE),
                 AbilitySlot.fromBranch(tree, unlocked, "dr_weather", "Weather Control", AbilityType.TOGGLE),
-                slot2,
+                AbilitySlot.fromBranch(tree, unlocked, "dr_wave", "Tidal Wave", AbilityType.TOGGLE),
                 AbilitySlot.fromBranch(tree, unlocked, "dr_transform", "18 Transformations", AbilityType.MENU));
+    }
+
+    /**
+     * Shift + V: Dimension Travel (Flight III). Holding Shift, the scroll wheel picks where it
+     * goes (DimensionScrollHandler); V, still holding it, goes.
+     */
+    @Override
+    public List<AbilitySlot> shiftBar(Set<String> unlocked) {
+        int flightTier = skillTree().highestTier(unlocked, "dr_flight");
+        return PlayableCharacter.bar(
+                flightTier >= 3 ? new AbilitySlot("dr_dimension", "Dimension Travel", AbilityType.TOGGLE, flightTier) : AbilitySlot.EMPTY,
+                AbilitySlot.EMPTY, AbilitySlot.EMPTY, AbilitySlot.EMPTY);
     }
 
     @Override
@@ -52,9 +56,9 @@ public final class DragonCharacter implements PlayableCharacter {
         switch (slot) {
             case 0 -> DragonAbilityHandler.castLightning(player);
             case 1 -> DragonAbilityHandler.toggleWeather(player);
-            case 2 -> {
-                if (SkillTreeData.getDrWaveTier(player) >= 1) DragonAbilityHandler.castTidalWave(player);
-                else DragonAbilityHandler.travelDimension(player);
+            case 2 -> DragonAbilityHandler.castTidalWave(player);
+            case 4 -> {
+                if (SkillTreeData.getDrFlightTier(player) >= 3) DragonAbilityHandler.travelDimension(player);
             }
             default -> {}
         }

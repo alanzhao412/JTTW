@@ -106,13 +106,14 @@ class CharacterSkillBarTest {
     }
 
     @Test
-    void dragonPutsDimensionTravelInSlotTwoUntilTidalWaveIsLearned() {
+    void dragonKeepsDimensionTravelOnShiftVWhateverElseItLearns() {
         PlayableCharacter dragon = Characters.byOutcome("dragon");
         Set<String> flight3 = Set.of("dr_flight_1", "dr_flight_2", "dr_flight_3");
-        assertEquals("dr_dimension", dragon.skillBar(flight3).get(2).id());
+        assertEquals("dr_dimension", dragon.shiftBar(flight3).get(0).id()); // Shift + V
         Set<String> withWave = new HashSet<>(flight3);
         withWave.add("dr_wave_1");
         assertEquals("dr_wave", dragon.skillBar(withWave).get(2).id());
+        assertEquals("dr_dimension", dragon.shiftBar(withWave).get(0).id(), "learning Tidal Wave does not take it away");
         assertTrue(dragon.skillBar(Set.of("dr_flight_1", "dr_flight_2")).get(2).isEmpty());
     }
 

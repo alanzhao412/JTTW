@@ -13,13 +13,15 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.item.ItemDisplayContext;
 
 /**
- * The Ruyi Jingu Bang at ease (StaffStance): across the shoulders behind the neck, level, its
- * middle at the nape, the arms draped over it (HumanoidModelMixin poses them).
+ * The Ruyi Jingu Bang at ease (StaffStance): resting on the right shoulder, slanting up and back
+ * behind him, the right hand loosely holding it low in front (HumanoidModelMixin poses the arm).
  */
 public class StaffRestLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
 
-    /** Where it lies on the body, in blocks of the body's own frame (y down, z to the back). */
-    public static final float Y = 0.02f, Z = 0.22f;
+    /** Where it rests on the body (the top of the right shoulder), in blocks of the body's frame (x to his left, y down, z back). */
+    public static final float X = -0.31f, Y = -0.03f, Z = 0.04f;
+    /** How it slants: back from upright, and out from the head (degrees). */
+    public static final float BACK = 45f, OUT = 12f;
 
     public StaffRestLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> parent) {
         super(parent);
@@ -31,10 +33,12 @@ public class StaffRestLayer extends RenderLayer<AbstractClientPlayer, PlayerMode
         if (p.isInvisible() || !StaffStance.resting(p)) return;
         pose.pushPose();
         getParentModel().body.translateAndRotate(pose);
-        pose.translate(0, Y, Z);
-        // the model's frame is upside down: right the item, then lay its length across the shoulders
+        pose.translate(X, Y, Z);
+        // slanting up and back over the shoulder (and a little out from the head); then, the model's
+        // frame being upside down, the item righted along that slant
+        pose.mulPose(Axis.XP.rotationDegrees(-BACK));
+        pose.mulPose(Axis.ZP.rotationDegrees(-OUT));
         pose.mulPose(Axis.ZP.rotationDegrees(180));
-        pose.mulPose(Axis.ZP.rotationDegrees(90));
         Minecraft.getInstance().getItemRenderer().renderStatic(p, p.getMainHandItem(), ItemDisplayContext.NONE, false,
                 pose, buffers, p.level(), light, OverlayTexture.NO_OVERLAY, p.getId());
         pose.popPose();

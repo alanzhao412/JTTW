@@ -162,9 +162,12 @@ public class PlacedStaffGameTests {
         });
     }
 
-    /** A tall staff struck down topples as the heavy thing it is: it is pushed over, never flung up. */
-    // its own batch: 44 blocks long, it falls across where the other staff tests stand
-    @GameTest(template = PLATFORM, batch = "staff_tall", timeoutTicks = 200)
+    /**
+     * A tall staff struck down topples as the heavy thing it is: pushed over, never flung up. Watched
+     * over its first 30 ticks, while it tips through open air (44 blocks long, what it reaches after
+     * that lies beyond the platform, wherever the other tests stand).
+     */
+    @GameTest(template = PLATFORM, batch = "staff_tall", timeoutTicks = 100)
     public static void aTallStaffTopplesAndIsNeverFlungUp(GameTestHelper h) {
         ServerPlayer owner = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
         PlacedStaffEntity staff = felled(h, owner, new net.minecraft.core.BlockPos(2, 2, 1), 30f);
@@ -175,8 +178,11 @@ public class PlacedStaffGameTests {
             highest[0] = Math.max(highest[0], staff.rodBase().y);
             highest[1] = Math.max(highest[1], staff.rodTip().y);
         });
-        h.runAfterDelay(60, () -> {
-            check(h, highest[0] < floor + 0.3, "its foot stays down: rose " + (highest[0] - floor));
+        h.runAfterDelay(30, () -> {
+            Vec3 d = staff.rodTip().subtract(staff.rodBase());
+            double elevation = Math.toDegrees(Math.asin(d.y / d.length()));
+            check(h, elevation < 80, "it is toppling: " + elevation + " degrees above flat");
+            check(h, highest[0] < floor + 0.3, "its foot stays down as it topples: rose " + (highest[0] - floor));
             check(h, highest[1] < tipStart + 0.3, "its tip never rises above where it stood: " + (highest[1] - tipStart));
             h.succeed();
         });

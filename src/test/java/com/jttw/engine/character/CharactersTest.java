@@ -44,7 +44,7 @@ class CharactersTest {
 
     /**
      * Holding Shift shows a second page of four: the 18 Transformations, for those whose first four
-     * keys are full (the Saurian, the World Turtle); nobody else has one.
+     * keys are full (the Saurian, the World Turtle), and the Dragon's Dimension Travel; nobody else has one.
      */
     @Test
     void theShiftPageHoldsTheEighteenTransformations() {
@@ -56,7 +56,7 @@ class CharactersTest {
         assertEquals(2, page.get(0).tier());
         assertEquals("tu_transform", TurtleCharacter.INSTANCE.shiftBar(java.util.Set.of("tu_transform_1")).get(0).id());
         for (PlayableCharacter c : Characters.all()) {
-            if (c == saurian || c == TurtleCharacter.INSTANCE) continue;
+            if (c == saurian || c == TurtleCharacter.INSTANCE || c == DragonCharacter.INSTANCE) continue;
             assertTrue(c.shiftBar(new java.util.HashSet<>(c.skillTree().nodes().keySet())).stream().allMatch(AbilitySlot::isEmpty), c.outcomeId());
         }
     }

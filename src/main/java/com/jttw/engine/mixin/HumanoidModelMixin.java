@@ -91,24 +91,25 @@ public class HumanoidModelMixin<T extends LivingEntity> {
             float trail = 0.55f + 0.55f * move, flutter = 0.06f * Mth.sin(ageInTicks * 0.35f) * (0.4f + move);
             jttw$toward(rightArm, cloud, trail + flutter, 0.1f, 0.22f);
             jttw$toward(leftArm, cloud, trail - flutter, -0.1f, -0.22f);
-            jttw$toward(rightLeg, cloud, -0.42f, 0.06f, 0.07f);
-            jttw$toward(leftLeg, cloud, -0.18f, -0.06f, -0.07f);
+            // standing on it, one foot ahead of the other: the right forward, knee a little bent, the left back
+            jttw$toward(rightLeg, cloud, -0.38f, 0.04f, 0.05f);
+            jttw$toward(leftLeg, cloud, 0.28f, -0.04f, -0.05f);
         }
     }
 
-    /** The staff across the shoulders (StaffStance): the arms out along it, draped over it. */
+    /**
+     * The staff on the shoulder (StaffStance): the right arm reaching forward and down to hold it
+     * loosely where it slants in front; the left arm free, swinging as it walks.
+     */
     private void jttw$staffAtEase(net.minecraft.world.entity.player.Player p) {
         if (!com.jttw.engine.client.StaffStance.resting(p)) return;
-        rightArm.xRot = ARM_BACK;
-        rightArm.yRot = 0;
-        rightArm.zRot = ARM_OUT;
-        leftArm.xRot = ARM_BACK;
-        leftArm.yRot = 0;
-        leftArm.zRot = -ARM_OUT;
+        rightArm.xRot = GRIP_FORWARD;
+        rightArm.yRot = GRIP_IN;
+        rightArm.zRot = 0.05f;
     }
 
-    /** At ease with the staff: how far back, and out (radians), the arms lie along it. */
-    private static final float ARM_BACK = -0.3f, ARM_OUT = 2.0f;
+    /** At ease: how far forward (radians, negative) and in the right arm reaches to the staff. */
+    private static final float GRIP_FORWARD = -0.75f, GRIP_IN = -0.1f;
 
     private static void jttw$toward(ModelPart part, float weight, float x, float y, float z) {
         part.xRot = Mth.lerp(weight, part.xRot, x);

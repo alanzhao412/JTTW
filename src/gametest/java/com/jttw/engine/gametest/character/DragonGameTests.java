@@ -34,7 +34,7 @@ import java.util.List;
 import static com.jttw.engine.gametest.GT.*;
 import static com.jttw.engine.gametest.character.CharTest.*;
 
-/** The Dragon: Lightning Strike, Weather Control, Dimension Travel, Tidal Wave, Scales, Tidal Force. */
+/** The Dragon: Call Thunder, Weather Control, Tidal Wave, Dimension Travel (Shift + V), Scales, Tidal Force. */
 @GameTestHolder(JTTWEngine.MOD_ID)
 @PrefixGameTestTemplate(false)
 public class DragonGameTests {
@@ -198,13 +198,13 @@ public class DragonGameTests {
         });
     }
 
-    // ── Slot 2: Dimension Travel until Tidal Wave is learned ────────
+    // ── Shift + V (slot 4): Dimension Travel ──────────────────────────
 
     @GameTest(template = PLATFORM, batch = "dimensionTravelNeedsFlightTierThree")
     public static void dimensionTravelNeedsFlightTierThree(GameTestHelper h) {
         ServerPlayer p = dragon(h);
         grant(p, "dr_flight_1", "dr_flight_2");
-        character().activate(p, 2, AbilityAction.USE);
+        character().activate(p, 4, AbilityAction.USE);
         near(h, 100f, QiData.getCurrent(p), "nothing happens below flight tier 3");
         h.succeed();
     }
@@ -229,7 +229,7 @@ public class DragonGameTests {
         grant(p, "dr_flight_1", "dr_flight_2", "dr_flight_3");
         eq(h, Level.OVERWORLD, p.level().dimension(), "tests run in the overworld");
         QiData.setCurrent(p, 50f);
-        character().activate(p, 2, AbilityAction.USE); // selected: Overworld
+        character().activate(p, 4, AbilityAction.USE); // Shift + V; selected: Overworld
         near(h, 50f, QiData.getCurrent(p), "20 Qi refunded");
         eq(h, Level.OVERWORLD, p.level().dimension(), "stayed");
         QiData.setCurrent(p, 19f);
@@ -254,7 +254,7 @@ public class DragonGameTests {
         IronGolem ahead = mob(h, EntityType.IRON_GOLEM, 2, 4);
         Pig aside = mob(h, EntityType.PIG, 1, 4);
         Husk behind = mob(h, EntityType.HUSK, 2, 0);
-        character().activate(p, 2, AbilityAction.USE); // the wave replaces dimension travel
+        character().activate(p, 2, AbilityAction.USE); // N: the wave
         near(h, 90f, QiData.getCurrent(p), "10 Qi");
         check(h, ahead.getDeltaMovement().z >= 2.0, "golem swept south, motion " + ahead.getDeltaMovement());
         eq(h, 1, amp(ahead, MobEffects.MOVEMENT_SLOWDOWN), "Slowness II");
@@ -443,5 +443,26 @@ public class DragonGameTests {
         c.activate(p, 2, AbilityAction.USE);
         near(h, 82f, QiData.getCurrent(p), "slot 2 is the wave (10 Qi)");
         h.succeed();
+    }
+
+    /** Tidal Wave II tears away the weak things in its cone (leaves, glass), never earth. */
+    @GameTest(template = PLATFORM, batch = "tidalWaveTwoTearsAwayWeakBlocks", timeoutTicks = 60)
+    public static void tidalWaveTwoTearsAwayWeakBlocks(GameTestHelper h) {
+        ServerPlayer p = dragon(h);
+        grant(p, "dr_wave_1", "dr_wave_2");
+        var at = h.absoluteVec(new net.minecraft.world.phys.Vec3(2.5, 2, 0.5));
+        p.moveTo(at.x, at.y, at.z, 0f, 0f); // facing south, along the platform
+        var leaves = new net.minecraft.core.BlockPos(2, 3, 3);
+        var glass = new net.minecraft.core.BlockPos(2, 3, 4);
+        var dirt = new net.minecraft.core.BlockPos(2, 2, 3);
+        h.setBlock(leaves, net.minecraft.world.level.block.Blocks.OAK_LEAVES);
+        h.setBlock(glass, net.minecraft.world.level.block.Blocks.GLASS);
+        h.setBlock(dirt, net.minecraft.world.level.block.Blocks.DIRT);
+        DragonAbilityHandler.castTidalWave(p);
+        h.succeedWhen(() -> {
+            h.assertBlockNotPresent(net.minecraft.world.level.block.Blocks.OAK_LEAVES, leaves);
+            h.assertBlockNotPresent(net.minecraft.world.level.block.Blocks.GLASS, glass);
+            h.assertBlockPresent(net.minecraft.world.level.block.Blocks.DIRT, dirt);
+        });
     }
 }

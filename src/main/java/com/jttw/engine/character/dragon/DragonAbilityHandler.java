@@ -288,6 +288,8 @@ public final class DragonAbilityHandler {
     private static final float QI_COST_WAVE = 10.0f;
     private static final int WAVE_COOLDOWN_TICKS = 300; // 15 seconds
     private static final double WAVE_RANGE = 10.0;
+    /** The hardest a block may be for Tidal Wave II to tear it away: glass is 0.3; dirt, at 0.5, stays. */
+    public static final float WEAK_BLOCK_HARDNESS = 0.3f;
     private static final Map<UUID, Long> WAVE_COOLDOWNS = new HashMap<>();
 
     /**
@@ -365,6 +367,25 @@ public final class DragonAbilityHandler {
                         target.getId(), player.getUUID(), 60 // 3 seconds = 60 ticks
                 ));
             }
+        }
+
+        // T2+: the water tears away what is weak in its cone: leaves, plants, glass, snow, torches
+        // (blocks a hand breaks at once, or nearly), never earth or stone
+        if (tier >= 2 && player.level() instanceof ServerLevel waveLevel) {
+            java.util.List<net.minecraft.core.BlockPos> torn = new java.util.ArrayList<>();
+            net.minecraft.core.BlockPos.MutableBlockPos at = new net.minecraft.core.BlockPos.MutableBlockPos();
+            int reach = (int) Math.ceil(WAVE_RANGE);
+            for (int dx = -reach; dx <= reach; dx++) for (int dy = -reach; dy <= reach; dy++) for (int dz = -reach; dz <= reach; dz++) {
+                at.set(eyePos.x + dx, eyePos.y + dy, eyePos.z + dz);
+                Vec3 to = Vec3.atCenterOf(at).subtract(eyePos);
+                double dist = to.length();
+                if (dist > WAVE_RANGE || dist < 0.5 || to.normalize().dot(lookDir) < maxAngleCos) continue;
+                var state = waveLevel.getBlockState(at);
+                if (state.isAir() || !state.getFluidState().isEmpty()) continue;
+                float hardness = state.getDestroySpeed(waveLevel, at);
+                if (hardness >= 0 && hardness <= WEAK_BLOCK_HARDNESS) torn.add(at.immutable());
+            }
+            com.jttw.engine.world.TerrainBreaker.breakBlocks(waveLevel, torn);
         }
 
         // Visual: water splash particles in cone direction
