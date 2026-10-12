@@ -95,7 +95,7 @@ public final class YuanDiSkillTree {
         ));
         TREE.add(new SkillNode(
                 TRANSFORM_2, "Controlled Shift",
-                new String[]{ "Press V to transform at", "will. 60s duration with a", "recharge timer." },
+                new String[]{ "Press M to transform at", "will. 60s duration with a", "recharge timer." },
                 3, 0, 1, List.of(TRANSFORM_1), AbilityType.TOGGLE, 2, "Transform"
         ));
         TREE.add(new SkillNode(
@@ -124,7 +124,7 @@ public final class YuanDiSkillTree {
         // ── DEMON'S BREATH (col 2, HELD type) ───────────────────────────
         TREE.add(new SkillNode(
                 BREATH_1, "Demon's Breath I",
-                new String[]{ "Hold B: exhale dark smoke.", "Range scales with level.", "Cannot move while active." },
+                new String[]{ "Hold V: exhale dark smoke.", "Range scales with level.", "Cannot move while active." },
                 2, 2, 0, List.of(), AbilityType.HELD, 1, "Breath"
         ));
         TREE.add(new SkillNode(
@@ -141,7 +141,7 @@ public final class YuanDiSkillTree {
         // ── PRIMORDIAL SMITE (col 3, USE type) ──────────────────────────
         TREE.add(new SkillNode(
                 SMITE_1, "Primordial Smite I",
-                new String[]{ "V: Slam the ground. 5-block", "shockwave. Knockback. No", "terrain damage. 20s CD." },
+                new String[]{ "B: Slam the ground. 5-block", "shockwave. Knockback. No", "terrain damage. 20s CD." },
                 2, 3, 0, List.of(), AbilityType.TOGGLE, 1, "Smite"
         ));
         TREE.add(new SkillNode(
@@ -197,7 +197,7 @@ public final class YuanDiSkillTree {
         // ── ABYSSAL GRAVITY (col 7, USE active) ────────────────────────
         TREE.add(new SkillNode(
                 GRAVITY_1, "Abyssal Gravity I",
-                new String[]{ "Press M: gravity well at", "cursor. Pulls all mobs", "within 8 blocks for 3s." },
+                new String[]{ "Press N: gravity well at", "cursor. Pulls all mobs", "within 8 blocks for 3s." },
                 2, 7, 0, List.of(), AbilityType.TOGGLE, 1, "Abyssal Gravity"
         ));
         TREE.add(new SkillNode(
@@ -214,7 +214,7 @@ public final class YuanDiSkillTree {
         // ── PRIMORDIAL STEP (col 8, USE mobility) ───────────────────────
         TREE.add(new SkillNode(
                 STEP_1, "Primordial Step I",
-                new String[]{ "Press M: blink 8 blocks", "in look direction.", "10s cooldown. Costs 5 Qi." },
+                new String[]{ "Press N: blink 8 blocks", "in look direction.", "10s cooldown. Costs 5 Qi." },
                 2, 8, 0, List.of(), AbilityType.TOGGLE, 1, "Primordial Step"
         ));
         TREE.add(new SkillNode(

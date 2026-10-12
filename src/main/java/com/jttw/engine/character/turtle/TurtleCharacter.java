@@ -34,30 +34,30 @@ public final class TurtleCharacter implements PlayableCharacter {
                 AbilitySlot.fromBranch(tree, unlocked, "tu_shell", "Shell Guard", AbilityType.HELD),
                 AbilitySlot.fromBranch(tree, unlocked, "tu_force", "Unstoppable Force", AbilityType.TOGGLE),
                 AbilitySlot.fromBranch(tree, unlocked, "tu_tectonic", "Tectonic Slam", AbilityType.TOGGLE),
-                AbilitySlot.fromBranch(tree, unlocked, "tu_gravity", "Gravity Well", AbilityType.TOGGLE));
+                AbilitySlot.fromBranch(tree, unlocked, "tu_transform", "18 Transformations", AbilityType.MENU));
+    }
+
+    /** Shift + V, B, N and M (see PlayableCharacter#activate for the layout). */
+    @Override
+    public List<AbilitySlot> shiftBar(Set<String> unlocked) {
+        return PlayableCharacter.shiftPage(AbilitySlot.fromBranch(skillTree(), unlocked, "tu_gravity", "Gravity Well", AbilityType.TOGGLE),
+                AbilitySlot.EMPTY, AbilitySlot.EMPTY,
+                AbilitySlot.fromBranch(skillTree(), unlocked, "tu_true", "Black Tortoise", AbilityType.TOGGLE));
     }
 
     @Override
-    public void activate(ServerPlayer player, int slot, AbilityAction action) {
-        switch (slot) {
-            case 0 -> {
+    public void use(ServerPlayer player, String abilityId, AbilityAction action) {
+        switch (abilityId) {
+            case "tu_shell" -> {
                 if (action == AbilityAction.START) TurtleAbilityHandler.startGuard(player);
                 else if (action == AbilityAction.STOP) TurtleAbilityHandler.stopGuard(player);
             }
-            case 1 -> {
-                if (action == AbilityAction.USE) TurtleAbilityHandler.castUnstoppableForce(player);
-            }
-            case 2 -> {
-                if (action == AbilityAction.USE) TurtleAbilityHandler.castTectonicSlam(player);
-            }
-            case 3 -> {
-                if (action == AbilityAction.USE) TurtleAbilityHandler.toggleGravityWell(player);
-            }
-            case 5 -> {
-                if (action == AbilityAction.USE) com.jttw.engine.character.divinebeast.TrueForm.toggle(player,
-                        com.jttw.engine.registry.ModEntities.BLACK_TORTOISE.get(), skillTree().highestTier(
-                                com.jttw.engine.progression.skilltree.SkillTreeData.getUnlockedNodes(player), "tu_true"), "tu_true");
-            }
+            case "tu_force" -> { if (action == AbilityAction.USE) TurtleAbilityHandler.castUnstoppableForce(player); }
+            case "tu_tectonic" -> { if (action == AbilityAction.USE) TurtleAbilityHandler.castTectonicSlam(player); }
+            case "tu_gravity" -> { if (action == AbilityAction.USE) TurtleAbilityHandler.toggleGravityWell(player); }
+            case "tu_true" -> { if (action == AbilityAction.USE) com.jttw.engine.character.divinebeast.TrueForm.toggle(player,
+                    com.jttw.engine.registry.ModEntities.BLACK_TORTOISE.get(), skillTree().highestTier(
+                            com.jttw.engine.progression.skilltree.SkillTreeData.getUnlockedNodes(player), "tu_true"), "tu_true"); }
             default -> {}
         }
     }
@@ -72,11 +72,4 @@ public final class TurtleCharacter implements PlayableCharacter {
     }
 
     /** Shift + V: the 18 Transformations (a menu, opened client-side). */
-    @Override
-    public List<AbilitySlot> shiftBar(Set<String> unlocked) {
-        return PlayableCharacter.bar(
-                AbilitySlot.fromBranch(skillTree(), unlocked, "tu_transform", "18 Transformations", AbilityType.MENU),
-                AbilitySlot.fromBranch(skillTree(), unlocked, "tu_true", "Black Tortoise", AbilityType.TOGGLE),
-                AbilitySlot.EMPTY, AbilitySlot.EMPTY);
-    }
 }

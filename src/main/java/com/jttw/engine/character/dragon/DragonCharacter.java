@@ -42,28 +42,26 @@ public final class DragonCharacter implements PlayableCharacter {
      * Shift + V: Dimension Travel (Flight III). Holding Shift, the scroll wheel picks where it
      * goes (DimensionScrollHandler); V, still holding it, goes.
      */
+    /** Shift + V, B, N and M (see PlayableCharacter#activate for the layout). */
     @Override
     public List<AbilitySlot> shiftBar(Set<String> unlocked) {
-        int flightTier = skillTree().highestTier(unlocked, "dr_flight");
-        return PlayableCharacter.bar(
-                flightTier >= 3 ? new AbilitySlot("dr_dimension", "Dimension Travel", AbilityType.TOGGLE, flightTier) : AbilitySlot.EMPTY,
-                AbilitySlot.fromBranch(skillTree(), unlocked, "dr_true", "Azure Dragon", AbilityType.TOGGLE),
-                AbilitySlot.EMPTY, AbilitySlot.EMPTY);
+        return PlayableCharacter.shiftPage(skillTree().highestTier(unlocked, "dr_flight") >= 3
+                        ? new AbilitySlot("dr_dimension", "Dimension Travel", AbilityType.TOGGLE, skillTree().highestTier(unlocked, "dr_flight"))
+                        : AbilitySlot.EMPTY,
+                AbilitySlot.EMPTY, AbilitySlot.EMPTY,
+                AbilitySlot.fromBranch(skillTree(), unlocked, "dr_true", "Azure Dragon", AbilityType.TOGGLE));
     }
 
     @Override
-    public void activate(ServerPlayer player, int slot, AbilityAction action) {
-        if (action != AbilityAction.USE) return;
-        switch (slot) {
-            case 0 -> DragonAbilityHandler.castLightning(player);
-            case 1 -> DragonAbilityHandler.toggleWeather(player);
-            case 2 -> DragonAbilityHandler.castTidalWave(player);
-            case 4 -> {
-                if (SkillTreeData.getDrFlightTier(player) >= 3) DragonAbilityHandler.travelDimension(player);
-            }
-            case 5 -> com.jttw.engine.character.divinebeast.TrueForm.toggle(player,
+    public void use(ServerPlayer player, String abilityId, AbilityAction action) {
+        switch (abilityId) {
+            case "dr_lightning" -> { if (action == AbilityAction.USE) DragonAbilityHandler.castLightning(player); }
+            case "dr_weather" -> { if (action == AbilityAction.USE) DragonAbilityHandler.toggleWeather(player); }
+            case "dr_wave" -> { if (action == AbilityAction.USE) DragonAbilityHandler.castTidalWave(player); }
+            case "dr_dimension" -> { if (action == AbilityAction.USE) DragonAbilityHandler.travelDimension(player); }
+            case "dr_true" -> { if (action == AbilityAction.USE) com.jttw.engine.character.divinebeast.TrueForm.toggle(player,
                     com.jttw.engine.registry.ModEntities.AZURE_DRAGON.get(),
-                    skillTree().highestTier(SkillTreeData.getUnlockedNodes(player), "dr_true"), "dr_true");
+                    skillTree().highestTier(SkillTreeData.getUnlockedNodes(player), "dr_true"), "dr_true"); }
             default -> {}
         }
     }

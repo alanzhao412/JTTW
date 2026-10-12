@@ -61,9 +61,9 @@ public class BullDemonGameTests {
         eq(h, BullDemonCharacter.INSTANCE, Characters.of(p), "character");
         List<AbilitySlot> bar = BullDemonCharacter.INSTANCE.skillBar(Set.of("bdk_rush_1", "bdk_transform_1", "bdk_bull_1"));
         eq(h, AbilityType.HELD, bar.get(0).type(), "V: rush, held");
-        eq(h, AbilityType.MENU, bar.get(1).type(), "B: the 72 Transformations");
-        check(h, bar.get(2).isEmpty(), "N empty");
-        eq(h, "bdk_bull", bar.get(3).id(), "M: the Great White Bull");
+        check(h, bar.get(1).isEmpty() && bar.get(2).isEmpty(), "B and N empty");
+        eq(h, AbilityType.MENU, bar.get(3).type(), "M: the 72 Transformations");
+        eq(h, "bdk_bull", BullDemonCharacter.INSTANCE.shiftBar(Set.of("bdk_bull_1")).get(3).id(), "Shift + M: the Great White Bull");
         h.succeed();
     }
 
@@ -74,7 +74,7 @@ public class BullDemonGameTests {
         ServerPlayer p = bull(h, "bdk_rush_1");
         Zombie z = mob(h, EntityType.ZOMBIE, 2, 3);
         List<Hit> log = watch(z);
-        BullDemonCharacter.INSTANCE.activate(p, 0, AbilityAction.START);
+        BullDemonCharacter.INSTANCE.use(p, "bdk_rush", AbilityAction.START);
         check(h, BullDemonAbilityHandler.isRushing(p), "charging");
         BullDemonAbilityHandler.tickRush(p);
         near(h, BullDemonAbilityHandler.rushSpeed(1), p.getDeltaMovement().z, "driven forward");
@@ -118,7 +118,7 @@ public class BullDemonGameTests {
     public static void theRushRunsOutAndLettingGoEndsIt(GameTestHelper h) {
         ServerPlayer p = bull(h, "bdk_rush_1");
         BullDemonAbilityHandler.startRush(p);
-        BullDemonCharacter.INSTANCE.activate(p, 0, AbilityAction.STOP);
+        BullDemonCharacter.INSTANCE.use(p, "bdk_rush", AbilityAction.STOP);
         check(h, !BullDemonAbilityHandler.isRushing(p), "let go: stops");
         eq(h, 40, BullDemonAbilityHandler.rushTicks(1), "I: two seconds at most");
         eq(h, 80, BullDemonAbilityHandler.rushTicks(3), "III: four");
@@ -134,7 +134,7 @@ public class BullDemonGameTests {
         LevelManager.reapplyStats(p);
         double baseHealth = p.getMaxHealth();
         double baseAttack = p.getAttributeValue(Attributes.ATTACK_DAMAGE);
-        BullDemonCharacter.INSTANCE.activate(p, 3, AbilityAction.USE);
+        BullDemonCharacter.INSTANCE.use(p, "bdk_bull", AbilityAction.USE);
         check(h, BullDemonAbilityHandler.inGreatBull(p), "the bull");
         TransformationData data = TransformationManager.getTransformation(p);
         check(h, data != null && data.getEntityType() == com.jttw.engine.registry.ModEntities.GREAT_WHITE_BULL.get(), "the Great White Bull");
@@ -145,7 +145,7 @@ public class BullDemonGameTests {
         tick(p, BullDemonAbilityHandler::onPlayerTick, 10);
         check(h, QiData.getCurrent(p) < 200f - 2.9f, "drains Qi");
 
-        BullDemonCharacter.INSTANCE.activate(p, 3, AbilityAction.USE);
+        BullDemonCharacter.INSTANCE.use(p, "bdk_bull", AbilityAction.USE);
         check(h, !BullDemonAbilityHandler.inGreatBull(p), "back to himself");
         check(h, TransformationManager.getTransformation(p) == null, "demorphed");
         near(h, baseHealth, p.getMaxHealth(), "health as before");

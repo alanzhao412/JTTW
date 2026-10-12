@@ -19,8 +19,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Each character's skill bar must be exactly what the old SyncAbilitiesPacket builder produced
- * for the same outcome and unlocked nodes ({@link LegacySkillBar}).
+ * Each character's skill bar: four slots, laid out the one way (see PlayableCharacter#activate).
  */
 class CharacterSkillBarTest {
 
@@ -50,30 +49,30 @@ class CharacterSkillBarTest {
         return cases;
     }
 
-    /**
-     * Kits built after the old builder, which have no legacy bar to match: the Marshal's changed
-     * on purpose (36 Transformations became a skill branch, then gained abilities), the Peng's
-     * was empty, the Grand Saint, the Bull Demon King and the Saurian Demon King had no character, and
-     * the divine beasts took up the 18 Transformations (Byakko, the Phoenix and the Dragon on a key
-     * of their bar; the Turtle on its Shift page, its bar unchanged).
-     */
-    private static final Set<PlayableCharacter> NEWER_THAN_THE_OLD_BUILDER = Set.of(
-            MarshalCharacter.INSTANCE,
-            com.jttw.engine.character.ninespirits.NineSpiritsCharacter.INSTANCE,
-            com.jttw.engine.character.peng.PengCharacter.INSTANCE,
-            com.jttw.engine.character.bulldemon.BullDemonCharacter.INSTANCE,
-            com.jttw.engine.character.saurian.SaurianCharacter.INSTANCE,
-            com.jttw.engine.character.byakko.ByakkoCharacter.INSTANCE,
-            com.jttw.engine.character.phoenix.PhoenixCharacter.INSTANCE,
-            com.jttw.engine.character.dragon.DragonCharacter.INSTANCE);
+    /** The true forms and ultimates, which belong on Shift + M (where M holds a transformation art). */
+    private static final Set<String> ULTIMATES = Set.of("bk_true", "dr_true", "tu_true", "ph_true", "bdk_bull", "sdk_wrath");
 
+    /**
+     * One key layout for everyone (PlayableCharacter#activate): a transformation art on M; the
+     * true form or ultimate on Shift + M; V, B and N filled from V, without gaps.
+     */
     @TestFactory
-    Stream<DynamicTest> barMatchesTheOldBuilder() {
-        return Characters.all().stream().filter(c -> !NEWER_THAN_THE_OLD_BUILDER.contains(c))
-                .map(c -> DynamicTest.dynamicTest(c.outcomeId(), () -> {
+    Stream<DynamicTest> everyCharacterFollowsTheOneKeyLayout() {
+        return Characters.all().stream().map(c -> DynamicTest.dynamicTest(c.outcomeId(), () -> {
             for (Set<String> unlocked : cases(c)) {
-                assertEquals(LegacySkillBar.build(c.outcomeId(), unlocked), c.skillBar(unlocked),
-                        c.outcomeId() + " with " + unlocked);
+                List<AbilitySlot> bar = c.skillBar(unlocked), shift = c.shiftBar(unlocked);
+                for (int i = 0; i < 4; i++) {
+                    if (bar.get(i).type() == AbilityType.MENU) assertEquals(3, i, c.outcomeId() + ": the transformation art is on M");
+                    if (ULTIMATES.contains(bar.get(i).id())) fail(c.outcomeId() + ": " + bar.get(i).id() + " belongs on Shift + M");
+                    if (ULTIMATES.contains(shift.get(i).id())) assertEquals(3, i, c.outcomeId() + ": the true form is on Shift + M");
+                }
+            }
+            // everything learned: V, B and N filled from V, no gaps
+            List<AbilitySlot> all = c.skillBar(new HashSet<>(c.skillTree().nodes().keySet()));
+            boolean gap = false;
+            for (int i = 0; i < 3; i++) {
+                if (all.get(i).isEmpty()) gap = true;
+                else assertFalse(gap, c.outcomeId() + ": a gap before " + all.get(i).id());
             }
         }));
     }
@@ -91,18 +90,18 @@ class CharacterSkillBarTest {
     void wukongBarFillsAsBranchesAreLearned() {
         List<AbilitySlot> bar = Characters.byOutcome("celestial_primate")
                 .skillBar(Set.of("wu_transform_1", "wu_transform_2", "wu_ring_1"));
-        assertEquals("wu_transform", bar.get(0).id());
-        assertEquals(2, bar.get(0).tier());
+        assertEquals("wu_ring", bar.get(0).id(), "V: Ring of Fire");
         assertTrue(bar.get(1).isEmpty(), "clone not learned");
-        assertEquals("wu_ring", bar.get(2).id());
-        assertTrue(bar.get(3).isEmpty());
+        assertTrue(bar.get(2).isEmpty(), "N: the Golden Eyes, not yet granted");
+        assertEquals("wu_transform", bar.get(3).id(), "M: the 72 Transformations");
+        assertEquals(2, bar.get(3).tier());
     }
 
     @Test
     void yuanDiTransformOnlyTakesAKeyFromTierTwo() {
         PlayableCharacter yd = Characters.byOutcome("yuan_di");
-        assertTrue(yd.skillBar(Set.of("yd_transform_1")).get(0).isEmpty());
-        assertEquals(2, yd.skillBar(Set.of("yd_transform_1", "yd_transform_2")).get(0).tier());
+        assertTrue(yd.skillBar(Set.of("yd_transform_1")).get(3).isEmpty());
+        assertEquals(2, yd.skillBar(Set.of("yd_transform_1", "yd_transform_2")).get(3).tier(), "on M, its form");
     }
 
     @Test

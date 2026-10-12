@@ -32,30 +32,25 @@ public final class YuanDiCharacter implements PlayableCharacter {
     public List<AbilitySlot> skillBar(Set<String> unlocked) {
         SkillTree tree = skillTree();
         return PlayableCharacter.bar(
-                // Tier 1 transformation is automatic; it becomes a key at tier 2
-                AbilitySlot.fromBranch(tree, unlocked, "yd_transform", "Primordial Form", AbilityType.TOGGLE, 2),
                 AbilitySlot.fromBranch(tree, unlocked, "yd_breath", "Demon's Breath", AbilityType.HELD),
                 AbilitySlot.fromBranch(tree, unlocked, "yd_smite", "Primordial Smite", AbilityType.TOGGLE),
-                AbilitySlot.fromBranch(tree, unlocked, "yd_gravity", "Abyssal Gravity", AbilityType.TOGGLE));
+                AbilitySlot.fromBranch(tree, unlocked, "yd_gravity", "Abyssal Gravity", AbilityType.TOGGLE),
+                AbilitySlot.fromBranch(tree, unlocked, "yd_transform", "Primordial Form", AbilityType.TOGGLE, 2));
     }
 
     @Override
-    public void activate(ServerPlayer player, int slot, AbilityAction action) {
-        switch (slot) {
-            case 0 -> {
+    public void use(ServerPlayer player, String abilityId, AbilityAction action) {
+        switch (abilityId) {
+            case "yd_transform" -> {
                 // Sovereign's Command fires innately on activation
                 if (action == AbilityAction.USE) YuanDiAbilityHandler.toggleTransform(player);
             }
-            case 1 -> {
+            case "yd_breath" -> {
                 if (action == AbilityAction.START) YuanDiAbilityHandler.startBreath(player);
                 else if (action == AbilityAction.STOP) YuanDiAbilityHandler.stopBreath(player);
             }
-            case 2 -> {
-                if (action == AbilityAction.USE) YuanDiAbilityHandler.usePrimordialSmite(player);
-            }
-            case 3 -> {
-                if (action == AbilityAction.USE) YuanDiAbilityHandler.useAbyssalGravity(player);
-            }
+            case "yd_smite" -> { if (action == AbilityAction.USE) YuanDiAbilityHandler.usePrimordialSmite(player); }
+            case "yd_gravity" -> { if (action == AbilityAction.USE) YuanDiAbilityHandler.useAbyssalGravity(player); }
             default -> {}
         }
     }

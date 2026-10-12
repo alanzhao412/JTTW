@@ -44,17 +44,10 @@ public final class SaurianCharacter implements PlayableCharacter {
                 AbilitySlot.fromBranch(tree, unlocked, "sdk_surge", "Riptide Surge", AbilityType.HELD),
                 AbilitySlot.fromBranch(tree, unlocked, "sdk_lash", "Tidal Lash", AbilityType.TOGGLE),
                 AbilitySlot.fromBranch(tree, unlocked, "sdk_whirl", "Whirlpool", AbilityType.TOGGLE),
-                AbilitySlot.fromBranch(tree, unlocked, "sdk_wrath", "Flood-Dragon's Wrath", AbilityType.TOGGLE));
+                AbilitySlot.fromBranch(tree, unlocked, "sdk_transform", "18 Transformations", AbilityType.MENU));
     }
 
     /** Shift + V: the 18 Transformations (a menu, opened client-side). */
-    @Override
-    public List<AbilitySlot> shiftBar(Set<String> unlocked) {
-        return PlayableCharacter.bar(
-                AbilitySlot.fromBranch(skillTree(), unlocked, "sdk_transform", "18 Transformations", AbilityType.MENU),
-                AbilitySlot.EMPTY, AbilitySlot.EMPTY, AbilitySlot.EMPTY);
-    }
-
     @Override public TransformationSchool transformationSchool() { return TransformationSchool.EIGHTEEN; }
 
     @Override
@@ -62,16 +55,23 @@ public final class SaurianCharacter implements PlayableCharacter {
         return skillTree().highestTier(unlocked, "sdk_transform");
     }
 
+    /** Shift + V, B, N and M (see PlayableCharacter#activate for the layout). */
     @Override
-    public void activate(ServerPlayer player, int slot, AbilityAction action) {
-        switch (slot) {
-            case 0 -> {
+    public List<AbilitySlot> shiftBar(Set<String> unlocked) {
+        return PlayableCharacter.shiftPage(AbilitySlot.EMPTY, AbilitySlot.EMPTY, AbilitySlot.EMPTY,
+                AbilitySlot.fromBranch(skillTree(), unlocked, "sdk_wrath", "Flood-Dragon's Wrath", AbilityType.TOGGLE));
+    }
+
+    @Override
+    public void use(ServerPlayer player, String abilityId, AbilityAction action) {
+        switch (abilityId) {
+            case "sdk_surge" -> {
                 if (action == AbilityAction.START) SaurianAbilityHandler.startCharge(player);
                 else if (action == AbilityAction.STOP) SaurianAbilityHandler.release(player);
             }
-            case 1 -> { if (action == AbilityAction.USE) SaurianAbilityHandler.lash(player); }
-            case 2 -> { if (action == AbilityAction.USE) SaurianAbilityHandler.whirlpool(player); }
-            case 3 -> { if (action == AbilityAction.USE) SaurianAbilityHandler.wrath(player); }
+            case "sdk_lash" -> { if (action == AbilityAction.USE) SaurianAbilityHandler.lash(player); }
+            case "sdk_whirl" -> { if (action == AbilityAction.USE) SaurianAbilityHandler.whirlpool(player); }
+            case "sdk_wrath" -> { if (action == AbilityAction.USE) SaurianAbilityHandler.wrath(player); }
             default -> {}
         }
     }

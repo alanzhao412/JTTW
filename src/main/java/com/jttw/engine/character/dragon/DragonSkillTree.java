@@ -203,7 +203,7 @@ public final class DragonSkillTree {
         // ── TRUE FORM (col 9, TOGGLE) ──────────────────────────────────
         TREE.add(new SkillNode(
                 TRUE_1, "Azure Dragon I",
-                new String[]{ "Shift + B: become the Azure Dragon,", "20 s. x3 health, x2.5", "attack. Then exhausted 1 min." },
+                new String[]{ "Shift + M: become the Azure Dragon,", "20 s. x3 health, x2.5", "attack. Then exhausted 1 min." },
                 4, 9, 0, List.of(), AbilityType.TOGGLE, 1, "Azure Dragon"
         ));
         TREE.add(new SkillNode(

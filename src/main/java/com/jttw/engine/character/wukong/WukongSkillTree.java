@@ -69,7 +69,7 @@ public final class WukongSkillTree {
         // ── 72 TRANSFORMATIONS (col 0, MENU type) ───────────────────────
         TREE.add(new SkillNode(
                 TRANSFORM_1, "72 Transformations I",
-                new String[]{ "Press V to open the", "72 Transformations.",
+                new String[]{ "Press M to open the", "72 Transformations.",
                               "Neutral land, water and sky forms." },
                 3, 0, 0, List.of(), AbilityType.MENU, 1, "Transformations"
         ));
@@ -107,7 +107,7 @@ public final class WukongSkillTree {
         // ── RING OF FIRE (col 2, HELD type) ─────────────────────────────
         TREE.add(new SkillNode(
                 RING_1, "Ring of Fire I",
-                new String[]{ "Hold N: creates a ring of", "fire. Pushes & ignites",
+                new String[]{ "Hold V: creates a ring of", "fire. Pushes & ignites",
                               "all nearby entities." },
                 2, 2, 0, List.of(), AbilityType.HELD, 1, "Ring of Fire"
         ));

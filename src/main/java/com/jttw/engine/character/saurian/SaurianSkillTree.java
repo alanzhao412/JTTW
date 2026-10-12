@@ -57,7 +57,7 @@ public final class SaurianSkillTree {
                         {"Wider, longer, deeper", "still.", ""}});
         branch(new String[]{WRATH_1, WRATH_2, WRATH_3}, "Flood-Dragon's Wrath", "Flood-Dragon's Wrath", 3, AbilityType.TOGGLE, new int[]{4, 5, 6},
                 new String[][]{
-                        {"M: for 12 s your blows burst", "in floodwater round the one", "struck. Surge free while wet."},
+                        {"Shift + M: 12 s your blows", "burst in floodwater round the", "one struck. Surge free while wet."},
                         {"15 s; the bursts hit harder.", "", ""},
                         {"20 s; harder still.", "", ""}});
         branch(new String[]{RIVER_1, RIVER_2, RIVER_3}, "Riverborn", "Riverborn", 4, AbilityType.PASSIVE, new int[]{2, 3, 4},
@@ -77,7 +77,7 @@ public final class SaurianSkillTree {
                         {"Up to 7 stacks, stronger", "still.", ""}});
         branch(new String[]{TRANSFORM_1, TRANSFORM_2, TRANSFORM_3}, "18 Transformations", "18 Transformations", 7, AbilityType.MENU, new int[]{3, 4, 5},
                 new String[][]{
-                        {"Shift + V: the 18", "Transformations. Neutral", "land forms."},
+                        {"Press M: the 18", "Transformations. Neutral", "land forms."},
                         {"Adds neutral", "water forms.", ""},
                         {"Adds neutral", "flying forms.", ""}});
     }

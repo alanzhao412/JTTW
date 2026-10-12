@@ -79,8 +79,31 @@ public interface PlayableCharacter {
         return 0;
     }
 
-    /** Runs the ability in {@code slot} for a key event. Unused slots do nothing. */
-    default void activate(ServerPlayer player, int slot, AbilityAction action) {}
+    /**
+     * Runs the ability in {@code slot} (0-3 the keys V B N M, 4-7 the same with Shift) for a key
+     * event: whatever ability this player's bar holds there, by its id ({@link #use}). Unused
+     * slots do nothing.
+     *
+     * <p>Every character's keys follow one layout: V, B and N hold its own abilities, its
+     * signature first, without gaps; M its transformation art (the 18, 36 or 72), or, if it has
+     * none, its own form; Shift with V, B or N any further abilities; Shift with M its true form or
+     * ultimate, where M holds its art.
+     */
+    default void activate(ServerPlayer player, int slot, AbilityAction action) {
+        // exhausted after a true form, no ability answers
+        if (com.jttw.engine.character.divinebeast.TrueForm.exhausted(player)) return;
+        List<AbilitySlot> bar = fullBar(player);
+        if (slot < 0 || slot >= bar.size() || bar.get(slot).isEmpty()) return;
+        use(player, bar.get(slot).id(), action);
+    }
+
+    /** Runs the ability {@code abilityId} for a key event (USE, or START and STOP for one held). */
+    default void use(ServerPlayer player, String abilityId, AbilityAction action) {}
+
+    /** Shift + V, B, N and M: the second page, of further abilities and the true form. */
+    static List<AbilitySlot> shiftPage(AbilitySlot shiftV, AbilitySlot shiftB, AbilitySlot shiftN, AbilitySlot shiftM) {
+        return bar(shiftV, shiftB, shiftN, shiftM);
+    }
 
     static List<AbilitySlot> emptyBar() {
         AbilitySlot[] slots = new AbilitySlot[SLOT_COUNT];

@@ -67,7 +67,7 @@ public class PhoenixGameTests {
         ServerPlayer p = phoenix(h);
         IronGolem golem = golemInFlame(h, p);
         List<Hit> hits = watch(golem);
-        character().activate(p, 0, AbilityAction.START);
+        character().use(p, "ph_flame", AbilityAction.START);
         ticks(p, 5);
         check(h, hits.isEmpty(), "no flame");
         eq(h, null, modifier(p, Attributes.MOVEMENT_SPEED, "jttw:flamethrower_slow"), "not rooted");
@@ -81,7 +81,7 @@ public class PhoenixGameTests {
         grant(p, "ph_flame_1");
         IronGolem golem = golemInFlame(h, p);
         List<Hit> hits = watch(golem);
-        character().activate(p, 0, AbilityAction.START);
+        character().use(p, "ph_flame", AbilityAction.START);
         eq(h, -1.0, modifier(p, Attributes.MOVEMENT_SPEED, "jttw:flamethrower_slow"), "cannot move");
         ticks(p, 10);
         near(h, 97.5f, QiData.getCurrent(p), "0.25 Qi per tick");
@@ -92,7 +92,7 @@ public class PhoenixGameTests {
         near(h, 0.25, physical.get(0).amount(), "half of 0.5");
         near(h, 0.25, magic.get(0).amount(), "half of 0.5");
         eq(h, 40, golem.getRemainingFireTicks(), "burning for 2 s");
-        character().activate(p, 0, AbilityAction.STOP);
+        character().use(p, "ph_flame", AbilityAction.STOP);
         eq(h, null, modifier(p, Attributes.MOVEMENT_SPEED, "jttw:flamethrower_slow"), "free to move");
         ticks(p, 5);
         near(h, 97.5f, QiData.getCurrent(p), "no drain after release");
@@ -190,7 +190,7 @@ public class PhoenixGameTests {
         Pig far = mob(h, EntityType.PIG, 2, 2);
         far.moveTo(p.getX() + 9, p.getY(), p.getZ()); // beyond its 6 blocks
         List<Hit> undeadHits = watch(undead), pigHits = watch(pig), farHits = watch(far);
-        character().activate(p, 1, AbilityAction.USE);
+        character().use(p, "ph_radiance", AbilityAction.USE);
         near(h, 80f, QiData.getCurrent(p), "20 Qi");
         check(h, p.hasEffect(com.jttw.engine.registry.ModEffects.SOLAR_FLARE.get()), "it is a sun");
         h.runAfterDelay(25, () -> {
@@ -432,13 +432,13 @@ public class PhoenixGameTests {
         ServerPlayer p = phoenix(h);
         grant(p, "ph_flame_1", "ph_radiance_1");
         PlayableCharacter c = character();
-        c.activate(p, 0, AbilityAction.USE);
+        c.use(p, "ph_flame", AbilityAction.USE);
         eq(h, null, modifier(p, Attributes.MOVEMENT_SPEED, "jttw:flamethrower_slow"), "flame ignores USE");
-        c.activate(p, 1, AbilityAction.START);
+        c.use(p, "ph_radiance", AbilityAction.START);
         check(h, !com.jttw.engine.character.phoenix.SolarFlare.active(p), "the flare ignores START");
-        c.activate(p, 0, AbilityAction.START);
+        c.use(p, "ph_flame", AbilityAction.START);
         eq(h, -1.0, modifier(p, Attributes.MOVEMENT_SPEED, "jttw:flamethrower_slow"), "flame starts on START");
-        c.activate(p, 0, AbilityAction.STOP);
+        c.use(p, "ph_flame", AbilityAction.STOP);
         eq(h, null, modifier(p, Attributes.MOVEMENT_SPEED, "jttw:flamethrower_slow"), "and stops on STOP");
         h.succeed();
     }

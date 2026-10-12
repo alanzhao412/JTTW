@@ -40,17 +40,17 @@ public final class ErlangShenCharacter implements PlayableCharacter {
     public List<AbilitySlot> skillBar(Set<String> unlocked) {
         SkillTree tree = skillTree();
         return PlayableCharacter.bar(
-                AbilitySlot.fromBranch(tree, unlocked, "es_transform", "72 Transformations", AbilityType.MENU),
                 AbilitySlot.fromBranch(tree, unlocked, "es_xtq", "Xiaotian Quan", AbilityType.TOGGLE),
-                AbilitySlot.fromBranch(tree, unlocked, "es_eye", "Eye of Heaven", AbilityType.TOGGLE));
+                AbilitySlot.fromBranch(tree, unlocked, "es_eye", "Eye of Heaven", AbilityType.TOGGLE),
+                AbilitySlot.EMPTY,
+                AbilitySlot.fromBranch(tree, unlocked, "es_transform", "72 Transformations", AbilityType.MENU));
     }
 
     @Override
-    public void activate(ServerPlayer player, int slot, AbilityAction action) {
-        if (action != AbilityAction.USE) return;
-        switch (slot) {
-            case 1 -> XiaotianQuanManager.toggle(player);
-            case 2 -> ErlangShenAbilityHandler.toggleEye(player);
+    public void use(ServerPlayer player, String abilityId, AbilityAction action) {
+        switch (abilityId) {
+            case "es_xtq" -> { if (action == AbilityAction.USE) XiaotianQuanManager.toggle(player); }
+            case "es_eye" -> { if (action == AbilityAction.USE) ErlangShenAbilityHandler.toggleEye(player); }
             default -> {}
         }
     }

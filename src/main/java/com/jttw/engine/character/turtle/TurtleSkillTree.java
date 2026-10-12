@@ -165,7 +165,7 @@ public final class TurtleSkillTree {
         // ── 18 TRANSFORMATIONS (col 7, MENU) ───────────────────────
         TREE.add(new SkillNode(
                 TRANSFORM_1, "18 Transformations I",
-                new String[]{ "Shift + V: the 18", "Transformations. Neutral", "land forms." },
+                new String[]{ "Press M: the 18", "Transformations. Neutral", "land forms." },
                 3, 7, 0, List.of(), AbilityType.MENU, 1, "18 Transformations"
         ));
         TREE.add(new SkillNode(
@@ -182,7 +182,7 @@ public final class TurtleSkillTree {
         // ── TRUE FORM (col 8, TOGGLE) ──────────────────────────────────
         TREE.add(new SkillNode(
                 TRUE_1, "Black Tortoise I",
-                new String[]{ "Shift + B: become the Black Tortoise,", "20 s. x3 health, x2.5", "attack. Then exhausted 1 min." },
+                new String[]{ "Shift + M: become the Black Tortoise,", "20 s. x3 health, x2.5", "attack. Then exhausted 1 min." },
                 4, 8, 0, List.of(), AbilityType.TOGGLE, 1, "Black Tortoise"
         ));
         TREE.add(new SkillNode(

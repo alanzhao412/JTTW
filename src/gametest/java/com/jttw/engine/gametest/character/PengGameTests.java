@@ -110,7 +110,7 @@ public class PengGameTests {
     @GameTest(template = PLATFORM)
     public static void holdingVTakesOffAndAcceleratesLettingGoSlows(GameTestHelper h) {
         ServerPlayer p = peng(h, "gp_soar_1");
-        PengCharacter.INSTANCE.activate(p, 0, AbilityAction.START);
+        PengCharacter.INSTANCE.use(p, "gp_soar", AbilityAction.START);
         check(h, p.getAbilities().flying, "takes off");
         qi(p, 1000f, 1000f);
         tick(p, PengAbilityHandler::onPlayerTick, 100);
@@ -121,7 +121,7 @@ public class PengGameTests {
         near(h, 2.0, PengAbilityHandler.boost(p), "I tops out at 2x after 10 seconds");
         check(h, QiData.getCurrent(p) < 1000f - 199 * PengAbilityHandler.SOAR_QI_PER_TICK + 0.01f, "drains Qi");
 
-        PengCharacter.INSTANCE.activate(p, 0, AbilityAction.STOP);
+        PengCharacter.INSTANCE.use(p, "gp_soar", AbilityAction.STOP);
         tick(p, PengAbilityHandler::onPlayerTick, 20);
         near(h, 1.0, PengAbilityHandler.boost(p), "let go: back to cruising");
         near(h, 3.6, PengAbilityHandler.maxBoost(3), "III tops out at 3.6x");
@@ -132,7 +132,7 @@ public class PengGameTests {
     public static void soaringStopsWhenQiRunsOut(GameTestHelper h) {
         ServerPlayer p = peng(h, "gp_soar_1");
         qi(p, 2f, 200f);
-        PengCharacter.INSTANCE.activate(p, 0, AbilityAction.START);
+        PengCharacter.INSTANCE.use(p, "gp_soar", AbilityAction.START);
         tick(p, PengAbilityHandler::onPlayerTick, 20);
         check(h, !p.getPersistentData().getBoolean(PengAbilityHandler.KEY_SOARING), "wings tire without Qi");
         check(h, PengAbilityHandler.boost(p) < 1.3, "and he slows: " + PengAbilityHandler.boost(p));

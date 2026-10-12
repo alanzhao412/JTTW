@@ -71,7 +71,7 @@ public final class ErlangShenSkillTree {
         // ── 72 TRANSFORMATIONS (col 0, MENU type) ─────────────────────
         TREE.add(new SkillNode(
                 TRANSFORM_1, "72 Transformations I",
-                new String[]{ "Press V to open the", "72 Transformations.",
+                new String[]{ "Press M to open the", "72 Transformations.",
                               "Neutral land, water and sky forms." },
                 3, 0, 0, List.of(), AbilityType.MENU, 1, "Transformations"
         ));
@@ -90,7 +90,7 @@ public final class ErlangShenSkillTree {
         // ── XIAOTIAN QUAN (col 1, TOGGLE type) ────────────────────────
         TREE.add(new SkillNode(
                 XTQ_1, "Xiaotian Quan I",
-                new String[]{ "Press B: summon your", "celestial hound companion.",
+                new String[]{ "Press V: summon your", "celestial hound companion.",
                               "Costs Qi to maintain." },
                 3, 1, 0, List.of(), AbilityType.TOGGLE, 1, "Xiaotian Quan"
         ));
@@ -110,7 +110,7 @@ public final class ErlangShenSkillTree {
         // ── EYE OF HEAVEN (col 2, TOGGLE type) ───────────────────────
         TREE.add(new SkillNode(
                 EYE_1, "Eye of Heaven I",
-                new String[]{ "Press V: activate the", "Third Eye. See through",
+                new String[]{ "Press B: activate the", "Third Eye. See through",
                               "72 Transformations." },
                 3, 2, 0, List.of(), AbilityType.TOGGLE, 1, "Eye of Heaven"
         ));

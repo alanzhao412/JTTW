@@ -148,7 +148,7 @@ public final class ByakkoSkillTree {
         // ── 18 TRANSFORMATIONS (col 6, MENU) ───────────────────────
         TREE.add(new SkillNode(
                 TRANSFORM_1, "18 Transformations I",
-                new String[]{ "Press N: the 18", "Transformations. Neutral", "land forms." },
+                new String[]{ "Press M: the 18", "Transformations. Neutral", "land forms." },
                 3, 6, 0, List.of(), AbilityType.MENU, 1, "18 Transformations"
         ));
         TREE.add(new SkillNode(
@@ -165,7 +165,7 @@ public final class ByakkoSkillTree {
         // ── TRUE FORM (col 7, TOGGLE) ──────────────────────────────────
         TREE.add(new SkillNode(
                 TRUE_1, "White Tiger I",
-                new String[]{ "Press M: become the White", "Tiger, 20 s. x3 health, x2.5", "attack. Then exhausted 1 min." },
+                new String[]{ "Shift + M: become the White", "Tiger, 20 s. x3 health, x2.5", "attack. Then exhausted 1 min." },
                 4, 7, 0, List.of(), AbilityType.TOGGLE, 1, "White Tiger"
         ));
         TREE.add(new SkillNode(

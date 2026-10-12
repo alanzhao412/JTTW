@@ -40,14 +40,14 @@ public final class PengCharacter implements PlayableCharacter {
     }
 
     @Override
-    public void activate(ServerPlayer player, int slot, AbilityAction action) {
-        switch (slot) {
-            case 0 -> {
+    public void use(ServerPlayer player, String abilityId, AbilityAction action) {
+        switch (abilityId) {
+            case "gp_soar" -> {
                 if (action == AbilityAction.START) PengAbilityHandler.startSoaring(player);
                 else if (action == AbilityAction.STOP) PengAbilityHandler.stopSoaring(player);
             }
-            case 1 -> { if (action == AbilityAction.USE) PengAbilityHandler.featherStorm(player); }
-            case 2 -> { if (action == AbilityAction.USE) PengAbilityHandler.eclipse(player); }
+            case "gp_feathers" -> { if (action == AbilityAction.USE) PengAbilityHandler.featherStorm(player); }
+            case "gp_eclipse" -> { if (action == AbilityAction.USE) PengAbilityHandler.eclipse(player); }
             default -> {}
         }
     }

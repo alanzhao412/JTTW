@@ -29,25 +29,28 @@ public final class PhoenixCharacter implements PlayableCharacter {
         return PlayableCharacter.bar(
                 AbilitySlot.fromBranch(tree, unlocked, "ph_flame", "Flamethrower", AbilityType.HELD),
                 AbilitySlot.fromBranch(tree, unlocked, "ph_radiance", "Solar Flare", AbilityType.TOGGLE),
-                AbilitySlot.fromBranch(tree, unlocked, "ph_transform", "18 Transformations", AbilityType.MENU),
-                AbilitySlot.fromBranch(tree, unlocked, "ph_true", "Vermilion Bird", AbilityType.TOGGLE));
+                AbilitySlot.EMPTY,
+                AbilitySlot.fromBranch(tree, unlocked, "ph_transform", "18 Transformations", AbilityType.MENU));
+    }
+
+    /** Shift + V, B, N and M (see PlayableCharacter#activate for the layout). */
+    @Override
+    public List<AbilitySlot> shiftBar(Set<String> unlocked) {
+        return PlayableCharacter.shiftPage(AbilitySlot.EMPTY, AbilitySlot.EMPTY, AbilitySlot.EMPTY,
+                AbilitySlot.fromBranch(skillTree(), unlocked, "ph_true", "Vermilion Bird", AbilityType.TOGGLE));
     }
 
     @Override
-    public void activate(ServerPlayer player, int slot, AbilityAction action) {
-        switch (slot) {
-            case 0 -> {
+    public void use(ServerPlayer player, String abilityId, AbilityAction action) {
+        switch (abilityId) {
+            case "ph_flame" -> {
                 if (action == AbilityAction.START) PhoenixAbilityHandler.startFlame(player);
                 else if (action == AbilityAction.STOP) PhoenixAbilityHandler.stopFlame(player);
             }
-            case 1 -> {
-                if (action == AbilityAction.USE) SolarFlare.cast(player);
-            }
-            case 3 -> {
-                if (action == AbilityAction.USE) com.jttw.engine.character.divinebeast.TrueForm.toggle(player,
-                        com.jttw.engine.registry.ModEntities.VERMILION_BIRD.get(), skillTree().highestTier(
-                                com.jttw.engine.progression.skilltree.SkillTreeData.getUnlockedNodes(player), "ph_true"), "ph_true");
-            }
+            case "ph_radiance" -> { if (action == AbilityAction.USE) SolarFlare.cast(player); }
+            case "ph_true" -> { if (action == AbilityAction.USE) com.jttw.engine.character.divinebeast.TrueForm.toggle(player,
+                    com.jttw.engine.registry.ModEntities.VERMILION_BIRD.get(), skillTree().highestTier(
+                            com.jttw.engine.progression.skilltree.SkillTreeData.getUnlockedNodes(player), "ph_true"), "ph_true"); }
             default -> {}
         }
     }

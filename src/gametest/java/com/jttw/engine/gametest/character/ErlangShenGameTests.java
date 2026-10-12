@@ -60,7 +60,7 @@ public class ErlangShenGameTests {
     @GameTest(template = PLATFORM, batch = "eyeOfHeavenNeedsTierOne")
     public static void eyeOfHeavenNeedsTierOne(GameTestHelper h) {
         ServerPlayer p = erlang(h);
-        character().activate(p, 2, AbilityAction.USE);
+        character().use(p, "es_eye", AbilityAction.USE);
         check(h, !ErlangShenAbilityHandler.isActive(p.getUUID()), "eye stays closed");
         h.succeed();
     }
@@ -69,11 +69,11 @@ public class ErlangShenGameTests {
     public static void eyeOfHeavenTogglesOnUseOnly(GameTestHelper h) {
         ServerPlayer p = erlang(h);
         grant(p, "es_eye_1");
-        character().activate(p, 2, AbilityAction.START);
+        character().use(p, "es_eye", AbilityAction.START);
         check(h, !ErlangShenAbilityHandler.isActive(p.getUUID()), "START is not a toggle press");
-        character().activate(p, 2, AbilityAction.USE);
+        character().use(p, "es_eye", AbilityAction.USE);
         check(h, ErlangShenAbilityHandler.isActive(p.getUUID()), "open");
-        character().activate(p, 2, AbilityAction.USE);
+        character().use(p, "es_eye", AbilityAction.USE);
         check(h, !ErlangShenAbilityHandler.isActive(p.getUUID()), "closed again");
         h.succeed();
     }
@@ -123,7 +123,7 @@ public class ErlangShenGameTests {
     @GameTest(template = PLATFORM, batch = "houndNeedsTheXiaotianQuanNode")
     public static void houndNeedsTheXiaotianQuanNode(GameTestHelper h) {
         ServerPlayer p = erlang(h);
-        character().activate(p, 1, AbilityAction.USE);
+        character().use(p, "es_xtq", AbilityAction.USE);
         eq(h, 0, hounds(p).size(), "hounds");
         check(h, !XiaotianQuanManager.isActive(p.getUUID()), "not active");
         near(h, 100f, QiData.getCurrent(p), "Qi");
@@ -134,7 +134,7 @@ public class ErlangShenGameTests {
     public static void summoningTheHoundCosts15QiAndASecondPressDismissesIt(GameTestHelper h) {
         ServerPlayer p = erlang(h);
         grant(p, "es_xtq_1");
-        character().activate(p, 1, AbilityAction.USE);
+        character().use(p, "es_xtq", AbilityAction.USE);
         List<XiaotianQuanEntity> one = hounds(p);
         eq(h, 1, one.size(), "one hound");
         near(h, 85f, QiData.getCurrent(p), "Qi after summoning");
@@ -145,7 +145,7 @@ public class ErlangShenGameTests {
         near(h, 0.35, one.get(0).getAttributeBaseValue(Attributes.MOVEMENT_SPEED), "speed");
         near(h, 2.0, one.get(0).getAttributeBaseValue(Attributes.ARMOR), "armor");
 
-        character().activate(p, 1, AbilityAction.USE);
+        character().use(p, "es_xtq", AbilityAction.USE);
         check(h, one.get(0).isRemoved(), "hound dismissed");
         check(h, !XiaotianQuanManager.isActive(p.getUUID()), "not active");
         near(h, 85f, QiData.getCurrent(p), "dismissing costs nothing");
@@ -362,16 +362,16 @@ public class ErlangShenGameTests {
         ServerPlayer p = erlang(h);
         grant(p, "es_xtq_1", "es_eye_1", "es_transform_1");
         PlayableCharacter c = character();
-        c.activate(p, 1, AbilityAction.START);
-        c.activate(p, 1, AbilityAction.STOP);
+        c.use(p, "es_xtq", AbilityAction.START);
+        c.use(p, "es_xtq", AbilityAction.STOP);
         check(h, !XiaotianQuanManager.isActive(p.getUUID()), "hound key ignores START/STOP");
-        c.activate(p, 0, AbilityAction.USE); // 72 Transformations: client-side menu
-        c.activate(p, 3, AbilityAction.USE); // no fourth slot
+        c.activate(p, 3, AbilityAction.USE); // M, 72 Transformations: client-side menu
+        c.activate(p, 2, AbilityAction.USE); // N: nothing there
         near(h, 100f, QiData.getCurrent(p), "slots 0 and 3 do nothing server-side");
         check(h, !ErlangShenAbilityHandler.isActive(p.getUUID()), "eye untouched");
-        c.activate(p, 1, AbilityAction.USE);
+        c.use(p, "es_xtq", AbilityAction.USE);
         check(h, XiaotianQuanManager.isActive(p.getUUID()), "slot 1 summons the hound");
-        c.activate(p, 2, AbilityAction.USE);
+        c.use(p, "es_eye", AbilityAction.USE);
         check(h, ErlangShenAbilityHandler.isActive(p.getUUID()), "slot 2 opens the eye");
         ErlangShenAbilityHandler.toggleEye(p);
         XiaotianQuanManager.dismiss(p);

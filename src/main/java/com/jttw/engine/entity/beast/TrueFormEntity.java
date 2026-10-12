@@ -26,6 +26,20 @@ public class TrueFormEntity extends PathfinderMob {
                 .add(Attributes.MOVEMENT_SPEED, 0.3);
     }
 
+    /**
+     * Its eyes where its drawn head is (its body, the hitbox, is far smaller than it is drawn, so it
+     * can pass through the world): blocks above its feet.
+     */
+    @Override
+    protected float getStandingEyeHeight(net.minecraft.world.entity.Pose pose, net.minecraft.world.entity.EntityDimensions dims) {
+        return switch (EntityType.getKey(getType()).getPath()) {
+            case "azure_dragon" -> 6.6f;
+            case "black_tortoise" -> 3.6f;
+            case "vermilion_bird" -> 8.0f;
+            default -> super.getStandingEyeHeight(pose, dims);
+        };
+    }
+
     @Override
     public AABB getBoundingBoxForCulling() {
         return getBoundingBox().inflate(20);

@@ -48,19 +48,26 @@ public final class BullDemonCharacter implements PlayableCharacter {
         SkillTree tree = skillTree();
         return PlayableCharacter.bar(
                 AbilitySlot.fromBranch(tree, unlocked, "bdk_rush", "Bull Rush", AbilityType.HELD),
-                AbilitySlot.fromBranch(tree, unlocked, "bdk_transform", "72 Transformations", AbilityType.MENU),
                 AbilitySlot.EMPTY,
-                AbilitySlot.fromBranch(tree, unlocked, "bdk_bull", "Great White Bull", AbilityType.TOGGLE));
+                AbilitySlot.EMPTY,
+                AbilitySlot.fromBranch(tree, unlocked, "bdk_transform", "72 Transformations", AbilityType.MENU));
+    }
+
+    /** Shift + V, B, N and M (see PlayableCharacter#activate for the layout). */
+    @Override
+    public List<AbilitySlot> shiftBar(Set<String> unlocked) {
+        return PlayableCharacter.shiftPage(AbilitySlot.EMPTY, AbilitySlot.EMPTY, AbilitySlot.EMPTY,
+                AbilitySlot.fromBranch(skillTree(), unlocked, "bdk_bull", "Great White Bull", AbilityType.TOGGLE));
     }
 
     @Override
-    public void activate(ServerPlayer player, int slot, AbilityAction action) {
-        switch (slot) {
-            case 0 -> {
+    public void use(ServerPlayer player, String abilityId, AbilityAction action) {
+        switch (abilityId) {
+            case "bdk_rush" -> {
                 if (action == AbilityAction.START) BullDemonAbilityHandler.startRush(player);
                 else if (action == AbilityAction.STOP) BullDemonAbilityHandler.endRush(player);
             }
-            case 3 -> { if (action == AbilityAction.USE) BullDemonAbilityHandler.toggleGreatBull(player); }
+            case "bdk_bull" -> { if (action == AbilityAction.USE) BullDemonAbilityHandler.toggleGreatBull(player); }
             default -> {}
         }
     }

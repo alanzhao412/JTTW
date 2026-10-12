@@ -57,8 +57,8 @@ public class SaurianGameTests {
         ServerPlayer p = saurian(h, SaurianSkillTree.SURGE_1);
         Zombie z = still(h, new BlockPos(2, 2, 4));
         float before = z.getHealth();
-        SaurianCharacter.INSTANCE.activate(p, 0, AbilityAction.START);
-        SaurianCharacter.INSTANCE.activate(p, 0, AbilityAction.STOP);
+        SaurianCharacter.INSTANCE.use(p, "sdk_surge", AbilityAction.START);
+        SaurianCharacter.INSTANCE.use(p, "sdk_surge", AbilityAction.STOP);
         check(h, SaurianAbilityHandler.surging(p), "let go: he surges");
         check(h, p.isAutoSpinAttack(), "spinning, as with a riptide");
         check(h, p.getDeltaMovement().z > 1, "the way he looks: " + p.getDeltaMovement());
@@ -68,8 +68,8 @@ public class SaurianGameTests {
         eq(h, struck, z.getHealth(), "once a surge");
         SaurianAbilityHandler.endSurge(p);
         check(h, !p.isAutoSpinAttack() && !SaurianAbilityHandler.surging(p), "and it ends");
-        SaurianCharacter.INSTANCE.activate(p, 0, AbilityAction.START);
-        SaurianCharacter.INSTANCE.activate(p, 0, AbilityAction.STOP);
+        SaurianCharacter.INSTANCE.use(p, "sdk_surge", AbilityAction.START);
+        SaurianCharacter.INSTANCE.use(p, "sdk_surge", AbilityAction.STOP);
         check(h, !SaurianAbilityHandler.surging(p), "then it must rest");
         h.succeed();
     }

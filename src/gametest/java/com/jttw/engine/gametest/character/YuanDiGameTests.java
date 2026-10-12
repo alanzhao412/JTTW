@@ -64,7 +64,7 @@ public class YuanDiGameTests {
     public static void transformKeyNeedsTierTwo(GameTestHelper h) {
         ServerPlayer p = yuanDi(h);
         grant(p, "yd_transform_1");
-        character().activate(p, 0, AbilityAction.USE);
+        character().use(p, "yd_transform", AbilityAction.USE);
         check(h, !YuanDiAbilityHandler.isTransformed(p), "tier 1 is automatic only");
         h.succeed();
     }
@@ -73,7 +73,7 @@ public class YuanDiGameTests {
     public static void tierTwoTransformGivesItsBonusesAndRechargesFor90sAfterEnding(GameTestHelper h) {
         ServerPlayer p = yuanDi(h);
         grant(p, "yd_transform_1", "yd_transform_2");
-        character().activate(p, 0, AbilityAction.USE);
+        character().use(p, "yd_transform", AbilityAction.USE);
         check(h, YuanDiAbilityHandler.isTransformed(p), "transformed");
         eq(h, 2, YuanDiAbilityHandler.getTransformTier(p), "tier");
         eq(h, 0.18, modifier(p, Attributes.ATTACK_DAMAGE, "jttw:yd_transform_dmg"), "+18% damage");
@@ -81,11 +81,11 @@ public class YuanDiGameTests {
         eq(h, 24.0, modifier(p, PHYSICAL_RESISTANCE(), "jttw:yd_transform_pres"), "+24 physical resistance");
         eq(h, 0.40, modifier(p, Attributes.KNOCKBACK_RESISTANCE, "jttw:yd_transform_kb"), "+40% KB resist");
 
-        character().activate(p, 0, AbilityAction.USE);
+        character().use(p, "yd_transform", AbilityAction.USE);
         check(h, !YuanDiAbilityHandler.isTransformed(p), "second press ends it");
         eq(h, null, modifier(p, Attributes.ATTACK_DAMAGE, "jttw:yd_transform_dmg"), "bonuses removed");
 
-        character().activate(p, 0, AbilityAction.USE);
+        character().use(p, "yd_transform", AbilityAction.USE);
         check(h, !YuanDiAbilityHandler.isTransformed(p), "recharging");
         ticks(p, 1799);
         YuanDiAbilityHandler.toggleTransform(p);
@@ -284,7 +284,7 @@ public class YuanDiGameTests {
         ServerPlayer p = yuanDi(h);
         Pig pig = pigInBreath(h, p);
         List<Hit> hits = watch(pig);
-        character().activate(p, 1, AbilityAction.START);
+        character().use(p, "yd_breath", AbilityAction.START);
         ticks(p, 5);
         check(h, hits.isEmpty(), "no breath");
         eq(h, null, modifier(p, Attributes.MOVEMENT_SPEED, "jttw:yd_breath_slow"), "not rooted");
@@ -298,7 +298,7 @@ public class YuanDiGameTests {
         grant(p, "yd_breath_1");
         Pig pig = pigInBreath(h, p);
         List<Hit> hits = watch(pig);
-        character().activate(p, 1, AbilityAction.START);
+        character().use(p, "yd_breath", AbilityAction.START);
         eq(h, -1.0, modifier(p, Attributes.MOVEMENT_SPEED, "jttw:yd_breath_slow"), "cannot move");
         ticks(p, 10);
         near(h, 98f, QiData.getCurrent(p), "0.2 Qi per tick");
@@ -306,7 +306,7 @@ public class YuanDiGameTests {
         eq(h, 10, magic.size(), "one breath hit per tick");
         near(h, 0.4, magic.get(0).amount(), "damage per tick");
         eq(h, 0, amp(pig, MobEffects.WITHER), "Wither I");
-        character().activate(p, 1, AbilityAction.STOP);
+        character().use(p, "yd_breath", AbilityAction.STOP);
         eq(h, null, modifier(p, Attributes.MOVEMENT_SPEED, "jttw:yd_breath_slow"), "free to move");
         ticks(p, 5);
         eq(h, 10, of(hits, DamageTypes.MAGIC).size(), "no more hits after release");
@@ -351,11 +351,11 @@ public class YuanDiGameTests {
         ServerPlayer p = yuanDi(h);
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 4);
         List<Hit> hits = watch(golem);
-        character().activate(p, 2, AbilityAction.USE);
+        character().use(p, "yd_smite", AbilityAction.USE);
         check(h, hits.isEmpty(), "no node");
         grant(p, "yd_smite_1");
         QiData.setCurrent(p, 19f);
-        character().activate(p, 2, AbilityAction.USE);
+        character().use(p, "yd_smite", AbilityAction.USE);
         check(h, hits.isEmpty(), "19 Qi");
         near(h, 19f, QiData.getCurrent(p), "nothing spent");
         h.succeed();
@@ -442,12 +442,12 @@ public class YuanDiGameTests {
     @GameTest(template = PLATFORM, batch = "abyssalGravityCosts15QiPullsMobsAndHasA20SecondCooldown")
     public static void abyssalGravityCosts15QiPullsMobsAndHasA20SecondCooldown(GameTestHelper h) {
         ServerPlayer p = yuanDi(h);
-        character().activate(p, 3, AbilityAction.USE);
+        character().use(p, "yd_gravity", AbilityAction.USE);
         near(h, 100f, QiData.getCurrent(p), "needs the node");
         grant(p, "yd_gravity_1");
         p.setXRot(90f); // the well opens on the floor at the player's feet
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 4);
-        character().activate(p, 3, AbilityAction.USE);
+        character().use(p, "yd_gravity", AbilityAction.USE);
         near(h, 85f, QiData.getCurrent(p), "15 Qi");
         ticks(p, 1);
         Vec3 pull = golem.getDeltaMovement();
@@ -576,16 +576,16 @@ public class YuanDiGameTests {
         ServerPlayer p = yuanDi(h);
         grant(p, "yd_transform_1", "yd_transform_2", "yd_breath_1", "yd_smite_1", "yd_gravity_1");
         PlayableCharacter c = character();
-        c.activate(p, 0, AbilityAction.START);
+        c.use(p, "yd_transform", AbilityAction.START);
         check(h, !YuanDiAbilityHandler.isTransformed(p), "transform ignores START");
-        c.activate(p, 1, AbilityAction.USE);
+        c.use(p, "yd_breath", AbilityAction.USE);
         eq(h, null, modifier(p, Attributes.MOVEMENT_SPEED, "jttw:yd_breath_slow"), "breath ignores USE");
-        c.activate(p, 2, AbilityAction.START);
-        c.activate(p, 3, AbilityAction.START);
+        c.use(p, "yd_smite", AbilityAction.START);
+        c.use(p, "yd_gravity", AbilityAction.START);
         near(h, 100f, QiData.getCurrent(p), "smite and gravity ignore START");
-        c.activate(p, 1, AbilityAction.START);
+        c.use(p, "yd_breath", AbilityAction.START);
         eq(h, -1.0, modifier(p, Attributes.MOVEMENT_SPEED, "jttw:yd_breath_slow"), "breath starts on START");
-        c.activate(p, 1, AbilityAction.STOP);
+        c.use(p, "yd_breath", AbilityAction.STOP);
         eq(h, null, modifier(p, Attributes.MOVEMENT_SPEED, "jttw:yd_breath_slow"), "and stops on STOP");
         h.succeed();
     }

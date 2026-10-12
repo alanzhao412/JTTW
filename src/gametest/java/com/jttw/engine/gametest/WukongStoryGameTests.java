@@ -23,15 +23,15 @@ import static com.jttw.engine.gametest.GT.*;
 public class WukongStoryGameTests {
 
     @GameTest(template = PLATFORM)
-    public static void goldenEyesTakeSlotMOnceGranted(GameTestHelper h) {
+    public static void goldenEyesTakeSlotNOnceGranted(GameTestHelper h) {
         ServerPlayer p = player(h);
         AlignmentData.markReincarnated(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
         LevelManager.initClass(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
         List<AbilitySlot> before = WukongCharacter.INSTANCE.skillBar(p);
-        check(h, before.get(3).isEmpty(), "slot M empty before the eyes");
+        check(h, before.get(2).isEmpty(), "slot N empty before the eyes");
         ImmortalItems.grantFieryGoldenEyes(p);
         check(h, ImmortalItems.hasFieryGoldenEyes(p), "eyes granted");
-        eq(h, WukongCharacter.GOLDEN_EYES, WukongCharacter.INSTANCE.skillBar(p).get(3), "slot M");
+        eq(h, WukongCharacter.GOLDEN_EYES, WukongCharacter.INSTANCE.skillBar(p).get(2), "slot N");
         h.succeed();
     }
 

@@ -51,7 +51,7 @@ public final class BullDemonSkillTree {
 
         // ── 72 TRANSFORMATIONS (col 1) ──────────────────────────────────
         TREE.add(new SkillNode(TRANSFORM_1, "72 Transformations I",
-                new String[]{ "Press B to open the", "72 Transformations.", "Neutral land and water forms." },
+                new String[]{ "Press M to open the", "72 Transformations.", "Neutral land and water forms." },
                 3, 1, 0, List.of(), AbilityType.MENU, 1, "72 Transformations"));
         TREE.add(new SkillNode(TRANSFORM_2, "72 Transformations II",
                 new String[]{ "Adds neutral", "flying forms." },
@@ -62,7 +62,7 @@ public final class BullDemonSkillTree {
 
         // ── GREAT WHITE BULL (col 2) ────────────────────────────────────
         TREE.add(new SkillNode(BULL_1, "Great White Bull I",
-                new String[]{ "Press M: become the giant", "white bull. More health,", "harder hits. Drains Qi." },
+                new String[]{ "Shift + M: become the giant", "white bull. More health,", "harder hits. Drains Qi." },
                 3, 2, 0, List.of(), AbilityType.TOGGLE, 1, "Great White Bull"));
         TREE.add(new SkillNode(BULL_2, "Great White Bull II",
                 new String[]{ "More health, harder hits.", "", "" },

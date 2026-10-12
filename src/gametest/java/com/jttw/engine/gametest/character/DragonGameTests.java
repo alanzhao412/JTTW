@@ -62,7 +62,7 @@ public class DragonGameTests {
     public static void lightningNeedsTheNode(GameTestHelper h) {
         ServerPlayer p = dragon(h);
         p.setXRot(90f);
-        character().activate(p, 0, AbilityAction.USE);
+        character().use(p, "dr_lightning", AbilityAction.USE);
         near(h, 100f, QiData.getCurrent(p), "Qi");
         eq(h, 0, near(p, LightningBolt.class, 6).size(), "no bolt");
         h.succeed();
@@ -79,7 +79,7 @@ public class DragonGameTests {
         p.setXRot(90f); // strike the floor at the player's feet
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 3);
         List<Hit> hits = watch(golem);
-        character().activate(p, 0, AbilityAction.USE);
+        character().use(p, "dr_lightning", AbilityAction.USE);
         near(h, 92f, QiData.getCurrent(p), "Qi");
         eq(h, 1, near(p, LightningBolt.class, 6).size(), "one bolt");
         List<Hit> magic = of(hits, DamageTypes.INDIRECT_MAGIC);
@@ -175,7 +175,7 @@ public class DragonGameTests {
         grant(p, "dr_weather_1");
         level.setWeatherParameters(6000, 0, false, false);
         h.runAfterDelay(30, () -> { // let the sky fully clear
-            character().activate(p, 1, AbilityAction.USE);
+            character().use(p, "dr_weather", AbilityAction.USE);
             near(h, 85f, QiData.getCurrent(p), "15 Qi");
             check(h, data.isRaining(), "rain summoned");
             check(h, !data.isThundering(), "tier 1 brings no storm");
@@ -204,7 +204,7 @@ public class DragonGameTests {
     public static void dimensionTravelNeedsFlightTierThree(GameTestHelper h) {
         ServerPlayer p = dragon(h);
         grant(p, "dr_flight_1", "dr_flight_2");
-        character().activate(p, 4, AbilityAction.USE);
+        character().use(p, "dr_dimension", AbilityAction.USE);
         near(h, 100f, QiData.getCurrent(p), "nothing happens below flight tier 3");
         h.succeed();
     }
@@ -229,7 +229,7 @@ public class DragonGameTests {
         grant(p, "dr_flight_1", "dr_flight_2", "dr_flight_3");
         eq(h, Level.OVERWORLD, p.level().dimension(), "tests run in the overworld");
         QiData.setCurrent(p, 50f);
-        character().activate(p, 4, AbilityAction.USE); // Shift + V; selected: Overworld
+        character().use(p, "dr_dimension", AbilityAction.USE); // Shift + V; selected: Overworld
         near(h, 50f, QiData.getCurrent(p), "20 Qi refunded");
         eq(h, Level.OVERWORLD, p.level().dimension(), "stayed");
         QiData.setCurrent(p, 19f);
@@ -254,7 +254,7 @@ public class DragonGameTests {
         IronGolem ahead = mob(h, EntityType.IRON_GOLEM, 2, 4);
         Pig aside = mob(h, EntityType.PIG, 1, 4);
         Husk behind = mob(h, EntityType.HUSK, 2, 0);
-        character().activate(p, 2, AbilityAction.USE); // N: the wave
+        character().use(p, "dr_wave", AbilityAction.USE); // N: the wave
         near(h, 90f, QiData.getCurrent(p), "10 Qi");
         check(h, ahead.getDeltaMovement().z >= 2.0, "golem swept south, motion " + ahead.getDeltaMovement());
         eq(h, 1, amp(ahead, MobEffects.MOVEMENT_SLOWDOWN), "Slowness II");
@@ -438,9 +438,9 @@ public class DragonGameTests {
         }
         c.activate(p, 3, AbilityAction.USE);
         near(h, 100f, QiData.getCurrent(p), "START/STOP and the empty slot 3 do nothing");
-        c.activate(p, 0, AbilityAction.USE);
+        c.use(p, "dr_lightning", AbilityAction.USE);
         near(h, 92f, QiData.getCurrent(p), "slot 0 is lightning (8 Qi)");
-        c.activate(p, 2, AbilityAction.USE);
+        c.use(p, "dr_wave", AbilityAction.USE);
         near(h, 82f, QiData.getCurrent(p), "slot 2 is the wave (10 Qi)");
         h.succeed();
     }

@@ -34,28 +34,29 @@ public class TrueFormGameTests {
     public static void theWhiteTigerIsTakenPaidForAndMighty(GameTestHelper h) {
         ServerPlayer p = byakko(h);
         var c = Characters.of(p);
-        c.activate(p, 3, AbilityAction.USE);
+        c.use(p, "bk_true", AbilityAction.USE);
         check(h, !TrueForm.active(p), "not before it is learned");
         grant(p, "bk_true_1");
         float health = p.getMaxHealth();
         double attack = p.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
-        c.activate(p, 3, AbilityAction.USE);
+        c.use(p, "bk_true", AbilityAction.USE);
         check(h, TrueForm.active(p), "M: the White Tiger");
         eq(h, ModEntities.WHITE_TIGER.get(), TransformationManager.getTransformation(p).getEntityType(), "in its shape");
         near(h, 60f, QiData.getCurrent(p), "two fifths of its Qi");
         near(h, health * 3, p.getMaxHealth(), "three times the health");
         near(h, p.getMaxHealth(), p.getHealth(), "and all of it");
         near(h, attack * 2.5, p.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE), "two and a half times the strength");
-        c.activate(p, 3, AbilityAction.USE); // ended early
+        c.use(p, "bk_true", AbilityAction.USE); // ended early
         check(h, !TrueForm.active(p), "its key ends it");
         eq(h, null, TransformationManager.getTransformation(p), "back to himself");
         near(h, health, p.getMaxHealth(), "his own health again");
         check(h, TrueForm.exhausted(p), "and exhausted");
+        grant(p, "bk_leap_1");
         float qi = QiData.getCurrent(p);
-        c.activate(p, 0, AbilityAction.USE);
+        c.activate(p, 0, AbilityAction.USE); // V, Predator's Leap: exhausted, it is refused
         near(h, qi, QiData.getCurrent(p), "exhausted, no ability answers");
         p.removeEffect(ModEffects.EXHAUSTED.get());
-        c.activate(p, 3, AbilityAction.USE);
+        c.use(p, "bk_true", AbilityAction.USE);
         check(h, !TrueForm.active(p), "it rests ten minutes from its taking");
         h.succeed();
     }
@@ -72,13 +73,13 @@ public class TrueFormGameTests {
         });
     }
 
-    /** Each divine beast's key takes its own true form: the Dragon (Shift+B), Turtle (Shift+B), Phoenix (M). */
+    /** Each divine beast's Shift + M takes its own true form. */
     @GameTest(template = PLATFORM, batch = "trueFormsOfEach")
     public static void eachBeastTakesItsOwnTrueForm(GameTestHelper h) {
         Object[][] cases = {
-                {ReincarnationOutcome.DRAGON, "dr_true_1", 5, ModEntities.AZURE_DRAGON.get()},
-                {ReincarnationOutcome.TURTLE, "tu_true_1", 5, ModEntities.BLACK_TORTOISE.get()},
-                {ReincarnationOutcome.PHOENIX, "ph_true_1", 3, ModEntities.VERMILION_BIRD.get()}};
+                {ReincarnationOutcome.DRAGON, "dr_true_1", 7, ModEntities.AZURE_DRAGON.get()},
+                {ReincarnationOutcome.TURTLE, "tu_true_1", 7, ModEntities.BLACK_TORTOISE.get()},
+                {ReincarnationOutcome.PHOENIX, "ph_true_1", 7, ModEntities.VERMILION_BIRD.get()}};
         for (Object[] c : cases) {
             ServerPlayer p = as(h, (ReincarnationOutcome) c[0]);
             qi(p, 100f, 100f);
@@ -88,6 +89,17 @@ public class TrueFormGameTests {
             eq(h, c[3], TransformationManager.getTransformation(p).getEntityType(), c[0] + ": in its own shape");
             TrueForm.end(p);
         }
+        h.succeed();
+    }
+
+    /** In a true form drawn far larger than its body, its eyes are where its drawn head is. */
+    @GameTest(template = PLATFORM, batch = "trueFormEyes")
+    public static void aTrueFormSeesFromItsHead(GameTestHelper h) {
+        ServerPlayer p = as(h, ReincarnationOutcome.DRAGON);
+        qi(p, 100f, 100f);
+        TrueForm.toggle(p, ModEntities.AZURE_DRAGON.get(), 1, "dr_true");
+        near(h, 6.6f, p.getEyeHeight(), "the dragon's eyes, 6.6 blocks up");
+        TrueForm.end(p);
         h.succeed();
     }
 }

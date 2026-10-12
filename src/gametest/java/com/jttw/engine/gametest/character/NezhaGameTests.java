@@ -76,7 +76,7 @@ public class NezhaGameTests {
     @GameTest(template = PLATFORM, batch = "weaponCycleNeedsArmaments")
     public static void weaponCycleNeedsArmaments(GameTestHelper h) {
         ServerPlayer p = nezha(h);
-        character().activate(p, 0, AbilityAction.USE);
+        character().use(p, "nz_cycle", AbilityAction.USE);
         check(h, p.getMainHandItem().isEmpty(), "an empty armory: nothing comes to hand");
         h.succeed();
     }
@@ -85,12 +85,12 @@ public class NezhaGameTests {
     public static void theCycleTakesHisWeaponsFromHisArmory(GameTestHelper h) {
         ServerPlayer p = nezha(h);
         armory(p, new ItemStack(ModItems.FIRE_TIP_SPEAR.get()), new ItemStack(ModItems.QIANKUN_RING.get()));
-        character().activate(p, 0, AbilityAction.USE);
+        character().use(p, "nz_cycle", AbilityAction.USE);
         check(h, p.getMainHandItem().getItem() instanceof FireTipSpearItem, "first press: the spear");
-        character().activate(p, 0, AbilityAction.USE);
+        character().use(p, "nz_cycle", AbilityAction.USE);
         check(h, p.getMainHandItem().getItem() instanceof QiankunRingItem, "second: the ring");
         eq(h, 0, count(p, FireTipSpearItem.class), "the spear went back to his armory, not his inventory");
-        character().activate(p, 0, AbilityAction.USE);
+        character().use(p, "nz_cycle", AbilityAction.USE);
         check(h, p.getMainHandItem().isEmpty(), "third: weapons put away");
         eq(h, 0, count(p, QiankunRingItem.class), "the ring too");
         h.succeed();
@@ -129,11 +129,11 @@ public class NezhaGameTests {
     public static void samadhiFireNeedsTheNodeAndTheSpearInHand(GameTestHelper h) {
         ServerPlayer p = nezha(h);
         holdSpear(p);
-        character().activate(p, 1, AbilityAction.START);
+        character().use(p, "nz_fire", AbilityAction.START);
         check(h, !NezhaAbilityHandler.isStreaming(p), "no node: no fire");
         grant(p, "nz_fire_1");
         p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.QIANKUN_RING.get()));
-        character().activate(p, 1, AbilityAction.START);
+        character().use(p, "nz_fire", AbilityAction.START);
         check(h, !NezhaAbilityHandler.isStreaming(p), "ring in hand: no fire");
         near(h, 100f, QiData.getCurrent(p), "refusals cost nothing");
         h.succeed();
@@ -149,7 +149,7 @@ public class NezhaGameTests {
         List<Hit> hits = watch(pig);
         // as she is when the stream starts: the pig's death can level her up before the second is out
         double expected = perHit(p, 1);
-        character().activate(p, 1, AbilityAction.START);
+        character().use(p, "nz_fire", AbilityAction.START);
         check(h, NezhaAbilityHandler.isStreaming(p), "streaming");
         nezhaTicks(p, 20);
         near(h, 92f, QiData.getCurrent(p), "0.4 Qi per tick");
@@ -157,7 +157,7 @@ public class NezhaGameTests {
         eq(h, 4, burns.size(), "four burns in a second");
         near(h, expected, burns.get(0).amount(), "a quarter of 5 + 120% ATK");
         check(h, pig.isOnFire(), "set alight");
-        character().activate(p, 1, AbilityAction.STOP);
+        character().use(p, "nz_fire", AbilityAction.STOP);
         nezhaTicks(p, 10);
         eq(h, 4, of(hits, DamageTypes.INDIRECT_MAGIC).size(), "no burns after release");
         near(h, 92f, QiData.getCurrent(p), "no drain after release");
@@ -233,13 +233,13 @@ public class NezhaGameTests {
     @GameTest(template = PLATFORM, batch = "threeHeadsSixArmsAddsHalfAgainAttackUntilToggledOff")
     public static void threeHeadsSixArmsAddsHalfAgainAttackUntilToggledOff(GameTestHelper h) {
         ServerPlayer p = nezha(h);
-        character().activate(p, 3, AbilityAction.USE);
+        character().use(p, "nz_form", AbilityAction.USE);
         eq(h, null, modifier(p, Attributes.ATTACK_DAMAGE, "jttw:three_heads_atk"), "needs nz_form");
         grant(p, "nz_form_1");
-        character().activate(p, 3, AbilityAction.USE);
+        character().use(p, "nz_form", AbilityAction.USE);
         eq(h, 0.5, modifier(p, Attributes.ATTACK_DAMAGE, "jttw:three_heads_atk"), "+50% attack");
         check(h, p.getPersistentData().getBoolean("jttw_nz_three_heads"), "form flag on");
-        character().activate(p, 3, AbilityAction.USE);
+        character().use(p, "nz_form", AbilityAction.USE);
         eq(h, null, modifier(p, Attributes.ATTACK_DAMAGE, "jttw:three_heads_atk"), "removed");
         check(h, !p.getPersistentData().getBoolean("jttw_nz_three_heads"), "form flag off");
         h.succeed();
@@ -276,11 +276,11 @@ public class NezhaGameTests {
         ServerPlayer p = nezha(h);
         grant(p, "nz_det_1");
         PlayerLevel.setLevel(p, 49);
-        character().activate(p, 2, AbilityAction.START);
+        character().use(p, "nz_det", AbilityAction.START);
         check(h, !p.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "level 49 cannot charge");
         ServerPlayer noNode = nezha(h);
         PlayerLevel.setLevel(noNode, 50);
-        character().activate(noNode, 2, AbilityAction.START);
+        character().use(noNode, "nz_det", AbilityAction.START);
         check(h, !noNode.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "level 50 without the node cannot charge");
         h.succeed();
     }
@@ -290,10 +290,10 @@ public class NezhaGameTests {
         ServerPlayer p = detonator(h);
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 0, 0);
         List<Hit> hits = watch(golem);
-        character().activate(p, 2, AbilityAction.START);
+        character().use(p, "nz_det", AbilityAction.START);
         eq(h, 255, amp(p, MobEffects.MOVEMENT_SLOWDOWN), "rooted while charging");
         tick(p, NezhaAbilityHandler::onPlayerTick, 19);
-        character().activate(p, 2, AbilityAction.STOP);
+        character().use(p, "nz_det", AbilityAction.STOP);
         check(h, !p.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "root lifted");
         near(h, 100f, QiData.getCurrent(p), "no Qi spent");
         check(h, hits.isEmpty(), "no blast");
@@ -424,15 +424,15 @@ public class NezhaGameTests {
         ServerPlayer p = detonator(h);
         grant(p, "nz_arm_1", "nz_form_1");
         PlayableCharacter c = character();
-        c.activate(p, 0, AbilityAction.START);
+        c.use(p, "nz_cycle", AbilityAction.START);
         check(h, p.getMainHandItem().isEmpty(), "weapon cycle ignores START");
-        c.activate(p, 2, AbilityAction.USE);
+        c.use(p, "nz_det", AbilityAction.USE);
         check(h, !p.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "detonation ignores USE");
-        c.activate(p, 3, AbilityAction.START);
+        c.use(p, "nz_form", AbilityAction.START);
         eq(h, null, modifier(p, Attributes.ATTACK_DAMAGE, "jttw:three_heads_atk"), "form ignores START");
-        c.activate(p, 2, AbilityAction.START);
+        c.use(p, "nz_det", AbilityAction.START);
         check(h, p.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "detonation charges on START");
-        c.activate(p, 2, AbilityAction.STOP);
+        c.use(p, "nz_det", AbilityAction.STOP);
         check(h, !p.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "and releases on STOP");
         h.succeed();
     }

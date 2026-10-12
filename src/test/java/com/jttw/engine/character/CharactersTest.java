@@ -42,23 +42,16 @@ class CharactersTest {
                 Characters.resolve("saurian_demon_king", ProgressionClass.YAOGUAI, null));
     }
 
-    /**
-     * Holding Shift shows a second page of four: the 18 Transformations, for those whose first four
-     * keys are full (the Saurian, the World Turtle), and the Dragon's Dimension Travel; nobody else has one.
-     */
+    /** Holding Shift shows a second page: further abilities, and on Shift + M the true form or ultimate. */
     @Test
-    void theShiftPageHoldsTheEighteenTransformations() {
+    void theShiftPageHoldsFurtherAbilitiesAndTheTrueForm() {
         var saurian = com.jttw.engine.character.saurian.SaurianCharacter.INSTANCE;
         assertTrue(saurian.shiftBar(java.util.Set.of()).stream().allMatch(AbilitySlot::isEmpty), "nothing until learned");
-        var page = saurian.shiftBar(java.util.Set.of("sdk_transform_1", "sdk_transform_2"));
+        var page = saurian.shiftBar(java.util.Set.of("sdk_wrath_1", "sdk_wrath_2"));
         assertEquals(PlayableCharacter.SLOT_COUNT, page.size());
-        assertEquals("sdk_transform", page.get(0).id());
-        assertEquals(2, page.get(0).tier());
-        assertEquals("tu_transform", TurtleCharacter.INSTANCE.shiftBar(java.util.Set.of("tu_transform_1")).get(0).id());
-        for (PlayableCharacter c : Characters.all()) {
-            if (c == saurian || c == TurtleCharacter.INSTANCE || c == DragonCharacter.INSTANCE) continue;
-            assertTrue(c.shiftBar(new java.util.HashSet<>(c.skillTree().nodes().keySet())).stream().allMatch(AbilitySlot::isEmpty), c.outcomeId());
-        }
+        assertEquals("sdk_wrath", page.get(3).id(), "Shift + M: its Wrath");
+        assertEquals("tu_gravity", TurtleCharacter.INSTANCE.shiftBar(java.util.Set.of("tu_gravity_1")).get(0).id(), "Shift + V: its fourth");
+        assertEquals("sdk_transform", saurian.skillBar(java.util.Set.of("sdk_transform_1")).get(3).id(), "M: its 18");
     }
 
     /** Every divine beast practises the 18 Transformations: its level by its tier, its menu on a key. */

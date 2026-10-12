@@ -114,7 +114,7 @@ public class TurtleGameTests {
     @GameTest(template = PLATFORM, batch = "shellGuardNeedsTheNode")
     public static void shellGuardNeedsTheNode(GameTestHelper h) {
         ServerPlayer p = turtle(h);
-        character().activate(p, 0, AbilityAction.START);
+        character().use(p, "tu_shell", AbilityAction.START);
         check(h, !TurtleAbilityHandler.isGuarding(p.getUUID()), "not guarding");
         near(h, 8f, hurt(p, h.getLevel().damageSources().generic(), 8f), "full damage");
         h.succeed();
@@ -126,7 +126,7 @@ public class TurtleGameTests {
         grant(p, "tu_shell_1");
         Husk husk = mob(h, EntityType.HUSK, 0, 0);
         var ds = h.getLevel().damageSources();
-        character().activate(p, 0, AbilityAction.START);
+        character().use(p, "tu_shell", AbilityAction.START);
         check(h, TurtleAbilityHandler.isGuarding(p.getUUID()), "guarding");
         eq(h, -0.70, modifier(p, Attributes.MOVEMENT_SPEED, "jttw:shell_guard_slow"), "70% slower");
         near(h, 2f, hurt(p, ds.mobAttack(husk), 8f), "a quarter of the damage");
@@ -137,7 +137,7 @@ public class TurtleGameTests {
         check(h, swing.isCanceled(), "cannot attack from the shell");
         ticks(p, 10);
         near(h, 98.5f, QiData.getCurrent(p), "0.15 Qi per tick");
-        character().activate(p, 0, AbilityAction.STOP);
+        character().use(p, "tu_shell", AbilityAction.STOP);
         check(h, !TurtleAbilityHandler.isGuarding(p.getUUID()), "out of the shell");
         eq(h, null, modifier(p, Attributes.MOVEMENT_SPEED, "jttw:shell_guard_slow"), "speed restored");
         near(h, 8f, hurt(p, ds.mobAttack(husk), 8f), "full damage again");
@@ -177,11 +177,11 @@ public class TurtleGameTests {
     @GameTest(template = PLATFORM, batch = "unstoppableForceNeedsTheNodeAndFifteenQi")
     public static void unstoppableForceNeedsTheNodeAndFifteenQi(GameTestHelper h) {
         ServerPlayer p = turtle(h);
-        character().activate(p, 1, AbilityAction.USE);
+        character().use(p, "tu_force", AbilityAction.USE);
         near(h, 100f, QiData.getCurrent(p), "no node");
         grant(p, "tu_force_1");
         QiData.setCurrent(p, 14f);
-        character().activate(p, 1, AbilityAction.USE);
+        character().use(p, "tu_force", AbilityAction.USE);
         near(h, 14f, QiData.getCurrent(p), "14 Qi");
         near(h, 0.0, p.getDeltaMovement().length(), "no launch");
         h.succeed();
@@ -197,10 +197,10 @@ public class TurtleGameTests {
         p.setXRot(0f);
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 4); // 2 blocks ahead
         List<Hit> hits = watch(golem);
-        character().activate(p, 1, AbilityAction.USE);
+        character().use(p, "tu_force", AbilityAction.USE);
         near(h, 85f, QiData.getCurrent(p), "15 Qi");
         near(h, 3.5, p.getDeltaMovement().z, "launched forward at 3.5");
-        character().activate(p, 1, AbilityAction.USE);
+        character().use(p, "tu_force", AbilityAction.USE);
         near(h, 0.0, p.getDeltaMovement().length(), "stopped on impact");
         List<Hit> blows = of(hits, DamageTypes.PLAYER_ATTACK);
         eq(h, 1, blows.size(), "impact hits the golem");
@@ -256,14 +256,14 @@ public class TurtleGameTests {
     @GameTest(template = PLATFORM, timeoutTicks = 300, batch = "tectonicSlamCostsTenQiHitsAroundAndHasATenSecondCooldown")
     public static void tectonicSlamCostsTenQiHitsAroundAndHasATenSecondCooldown(GameTestHelper h) {
         ServerPlayer p = turtle(h);
-        character().activate(p, 2, AbilityAction.USE);
+        character().use(p, "tu_tectonic", AbilityAction.USE);
         near(h, 100f, QiData.getCurrent(p), "needs the node");
         grant(p, "tu_tectonic_1");
         levelTwenty(p);
         presTwentyFive(p);
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 4);
         List<Hit> hits = watch(golem);
-        character().activate(p, 2, AbilityAction.USE);
+        character().use(p, "tu_tectonic", AbilityAction.USE);
         near(h, 90f, QiData.getCurrent(p), "10 Qi");
         // (4 + resistance 25 x 0.04) x power, no falloff
         near(h, 5.0 * LevelPower.of(20), of(hits, DamageTypes.PLAYER_ATTACK).get(0).amount(), "slam damage");
@@ -301,16 +301,16 @@ public class TurtleGameTests {
     @GameTest(template = PLATFORM, batch = "gravityWellPullsMobsInAndDrainsQiUntilToggledOff")
     public static void gravityWellPullsMobsInAndDrainsQiUntilToggledOff(GameTestHelper h) {
         ServerPlayer p = turtle(h);
-        character().activate(p, 3, AbilityAction.USE);
+        character().use(p, "tu_gravity", AbilityAction.USE);
         check(h, !TurtleAbilityHandler.isGravityWellActive(p.getUUID()), "needs the node");
         grant(p, "tu_gravity_1");
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 4); // 2 blocks south
-        character().activate(p, 3, AbilityAction.USE);
+        character().use(p, "tu_gravity", AbilityAction.USE);
         check(h, TurtleAbilityHandler.isGravityWellActive(p.getUUID()), "on");
         ticks(p, 10);
         near(h, 99f, QiData.getCurrent(p), "0.1 Qi per tick");
         near(h, -0.75, golem.getDeltaMovement().z, "pulled north at 1.5 blocks/s for 10 ticks");
-        character().activate(p, 3, AbilityAction.USE);
+        character().use(p, "tu_gravity", AbilityAction.USE);
         check(h, !TurtleAbilityHandler.isGravityWellActive(p.getUUID()), "off");
         ticks(p, 5);
         near(h, 99f, QiData.getCurrent(p), "no drain when off");
@@ -400,16 +400,16 @@ public class TurtleGameTests {
         ServerPlayer p = turtle(h);
         grant(p, "tu_shell_1", "tu_force_1", "tu_tectonic_1", "tu_gravity_1");
         PlayableCharacter c = character();
-        c.activate(p, 0, AbilityAction.USE);
+        c.use(p, "tu_shell", AbilityAction.USE);
         check(h, !TurtleAbilityHandler.isGuarding(p.getUUID()), "shell ignores USE");
-        c.activate(p, 1, AbilityAction.START);
-        c.activate(p, 2, AbilityAction.START);
+        c.use(p, "tu_force", AbilityAction.START);
+        c.use(p, "tu_tectonic", AbilityAction.START);
         near(h, 100f, QiData.getCurrent(p), "force and slam ignore START");
-        c.activate(p, 3, AbilityAction.STOP);
+        c.use(p, "tu_gravity", AbilityAction.STOP);
         check(h, !TurtleAbilityHandler.isGravityWellActive(p.getUUID()), "well ignores STOP");
-        c.activate(p, 0, AbilityAction.START);
+        c.use(p, "tu_shell", AbilityAction.START);
         check(h, TurtleAbilityHandler.isGuarding(p.getUUID()), "shell on START");
-        c.activate(p, 0, AbilityAction.STOP);
+        c.use(p, "tu_shell", AbilityAction.STOP);
         check(h, !TurtleAbilityHandler.isGuarding(p.getUUID()), "shell off on STOP");
         h.succeed();
     }

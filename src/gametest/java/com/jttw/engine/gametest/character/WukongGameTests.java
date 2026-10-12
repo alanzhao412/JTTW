@@ -61,7 +61,7 @@ public class WukongGameTests {
         ServerPlayer p = wukong(h);
         online(h, p);
         Pig pig = mob(h, EntityType.PIG, 2, 4);
-        character().activate(p, 2, AbilityAction.START);
+        character().use(p, "wu_ring", AbilityAction.START);
         h.runAfterDelay(5, () -> {
             near(h, 100f, QiData.getCurrent(p), "no Qi drained");
             check(h, pig.getRemainingFireTicks() <= 0, "pig not burning, fire ticks " + pig.getRemainingFireTicks());
@@ -77,7 +77,7 @@ public class WukongGameTests {
         Pig pig = mob(h, EntityType.PIG, 2, 4); // 2 blocks south of the player
         List<Hit> hits = watch(pig);
         long start = h.getTick();
-        character().activate(p, 2, AbilityAction.START);
+        character().use(p, "wu_ring", AbilityAction.START);
         h.runAfterDelay(1, () -> {
             // read straight after the ring's server tick, before the pig's own movement damps it
             check(h, pig.getDeltaMovement().z > 1.0, "pig pushed away (south), motion " + pig.getDeltaMovement());
@@ -168,10 +168,10 @@ public class WukongGameTests {
         ServerPlayer p = wukong(h);
         online(h, p);
         grant(p, "wu_ring_1");
-        character().activate(p, 2, AbilityAction.START);
+        character().use(p, "wu_ring", AbilityAction.START);
         h.runAfterDelay(3, () -> {
             check(h, QiData.getCurrent(p) < 100f, "draining while held");
-            character().activate(p, 2, AbilityAction.STOP);
+            character().use(p, "wu_ring", AbilityAction.STOP);
             float after = QiData.getCurrent(p);
             h.runAfterDelay(3, () -> {
                 near(h, after, QiData.getCurrent(p), "no drain after release");
@@ -194,9 +194,9 @@ public class WukongGameTests {
         online(h, p);
         Pig pig = pigOverhead(h, p);
         List<Hit> hits = watch(pig);
-        WukongCharacter.INSTANCE.activate(p, 3, AbilityAction.USE); // laser
+        WukongCharacter.INSTANCE.use(p, "wu_golden_eyes", AbilityAction.USE); // laser
         p.setShiftKeyDown(true);
-        WukongCharacter.INSTANCE.activate(p, 3, AbilityAction.USE); // x-ray
+        WukongCharacter.INSTANCE.use(p, "wu_golden_eyes", AbilityAction.USE); // x-ray
         h.runAfterDelay(5, () -> {
             near(h, 100f, QiData.getCurrent(p), "Qi untouched");
             check(h, hits.isEmpty(), "no laser hit");
@@ -211,7 +211,7 @@ public class WukongGameTests {
         PlayerLevel.setLevel(p, 20); // 8 at level 1, scaled by his power
         Pig pig = pigOverhead(h, p);
         List<Hit> hits = watch(pig);
-        WukongCharacter.INSTANCE.activate(p, 3, AbilityAction.USE);
+        WukongCharacter.INSTANCE.use(p, "wu_golden_eyes", AbilityAction.USE);
         near(h, 90f, QiData.getCurrent(p), "Qi after the laser");
         List<Hit> magic = of(hits, DamageTypes.MAGIC);
         check(h, !magic.isEmpty(), "pig in the beam is hit");
@@ -276,12 +276,12 @@ public class WukongGameTests {
         List<Hit> hits = watch(pig);
         p.setShiftKeyDown(true);
         long start = h.getTick();
-        WukongCharacter.INSTANCE.activate(p, 3, AbilityAction.USE);
+        WukongCharacter.INSTANCE.use(p, "wu_golden_eyes", AbilityAction.USE);
         check(h, hits.isEmpty(), "sneaking does not fire the laser");
         h.runAfterDelay(10, () -> {
             long ticks = h.getTick() - start;
             close(h, 100.0 - 0.05 * ticks, QiData.getCurrent(p), 0.06, "x-ray drains 0.05 Qi per tick");
-            WukongCharacter.INSTANCE.activate(p, 3, AbilityAction.USE);
+            WukongCharacter.INSTANCE.use(p, "wu_golden_eyes", AbilityAction.USE);
             float after = QiData.getCurrent(p);
             h.runAfterDelay(3, () -> {
                 near(h, after, QiData.getCurrent(p), "x-ray off: no drain");
@@ -404,7 +404,7 @@ public class WukongGameTests {
     }
 
     private static void summon(ServerPlayer p, int times) {
-        for (int i = 0; i < times; i++) WukongCharacter.INSTANCE.activate(p, 1, AbilityAction.USE);
+        for (int i = 0; i < times; i++) WukongCharacter.INSTANCE.use(p, "wu_clone", AbilityAction.USE);
     }
 
     @GameTest(template = PLATFORM, batch = "shadowCloneNeedsTheCloneNode")
@@ -601,12 +601,12 @@ public class WukongGameTests {
         ServerPlayer p = wukong(h);
         grant(p, "wu_clone_1");
         PlayableCharacter c = character();
-        c.activate(p, 1, AbilityAction.START);
-        c.activate(p, 1, AbilityAction.STOP);
+        c.use(p, "wu_clone", AbilityAction.START);
+        c.use(p, "wu_clone", AbilityAction.STOP);
         eq(h, 0, clones(p).size(), "clone key ignores START/STOP");
-        c.activate(p, 1, AbilityAction.USE);
+        c.use(p, "wu_clone", AbilityAction.USE);
         eq(h, 1, clones(p).size(), "clone key USE summons");
-        c.activate(p, 0, AbilityAction.USE); // 72 Transformations is a client-side menu
+        c.activate(p, 3, AbilityAction.USE); // M, 72 Transformations, is a client-side menu
         near(h, 90f, QiData.getCurrent(p), "slot 0 does nothing server-side");
         WuCloneManager.dismissAll(p);
         h.succeed();

@@ -94,11 +94,11 @@ public class ByakkoGameTests {
     @GameTest(template = PLATFORM, batch = "leapNeedsTheNodeAndTenQi")
     public static void leapNeedsTheNodeAndTenQi(GameTestHelper h) {
         ServerPlayer p = byakko(h);
-        character().activate(p, 0, AbilityAction.USE);
+        character().use(p, "bk_leap", AbilityAction.USE);
         near(h, 0.0, p.getDeltaMovement().length(), "no node: no leap");
         grant(p, "bk_leap_1");
         QiData.setCurrent(p, 9f);
-        character().activate(p, 0, AbilityAction.USE);
+        character().use(p, "bk_leap", AbilityAction.USE);
         near(h, 9f, QiData.getCurrent(p), "9 Qi: refused");
         near(h, 0.0, p.getDeltaMovement().length(), "no launch");
         h.succeed();
@@ -114,7 +114,7 @@ public class ByakkoGameTests {
         p.setXRot(0f);
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 3); // 1 block away
         List<Hit> hits = watch(golem);
-        character().activate(p, 0, AbilityAction.USE);
+        character().use(p, "bk_leap", AbilityAction.USE);
         near(h, 90f, QiData.getCurrent(p), "10 Qi");
         near(h, 2.0, p.getDeltaMovement().z, "launched forward at 2");
         check(h, hits.isEmpty(), "no impact before landing");
@@ -193,14 +193,14 @@ public class ByakkoGameTests {
     @GameTest(template = PLATFORM, batch = "roarCostsEightQiAndPinsDownEverythingWithinEightBlocks")
     public static void roarCostsEightQiAndPinsDownEverythingWithinEightBlocks(GameTestHelper h) {
         ServerPlayer p = byakko(h);
-        character().activate(p, 1, AbilityAction.USE);
+        character().use(p, "bk_roar", AbilityAction.USE);
         near(h, 100f, QiData.getCurrent(p), "needs the node");
         grant(p, "bk_roar_1");
         Husk husk = mob(h, EntityType.HUSK, 2, 4);
         husk.setTarget(p);
         Pig hound = mob(h, EntityType.PIG, 0, 0);
         hound.setCustomName(Component.literal("jttw_xtq:" + p.getUUID()));
-        character().activate(p, 1, AbilityAction.USE);
+        character().use(p, "bk_roar", AbilityAction.USE);
         near(h, 92f, QiData.getCurrent(p), "8 Qi");
         eq(h, 5, amp(husk, MobEffects.MOVEMENT_SLOWDOWN), "Slowness VI");
         eq(h, 60, duration(husk, MobEffects.MOVEMENT_SLOWDOWN), "for 3 s");
@@ -406,11 +406,11 @@ public class ByakkoGameTests {
             c.activate(p, slot, AbilityAction.STOP);
         }
         c.activate(p, 2, AbilityAction.USE);
-        c.activate(p, 3, AbilityAction.USE);
+        c.use(p, "bk_true", AbilityAction.USE);
         near(h, 100f, QiData.getCurrent(p), "nothing fired");
-        c.activate(p, 0, AbilityAction.USE);
+        c.use(p, "bk_leap", AbilityAction.USE);
         near(h, 90f, QiData.getCurrent(p), "slot 0: leap");
-        c.activate(p, 1, AbilityAction.USE);
+        c.use(p, "bk_roar", AbilityAction.USE);
         near(h, 82f, QiData.getCurrent(p), "slot 1: roar");
         h.succeed();
     }

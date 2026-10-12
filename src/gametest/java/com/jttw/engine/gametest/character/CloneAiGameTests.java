@@ -38,7 +38,7 @@ public class CloneAiGameTests {
     /** Wukong with a clone out, holding nothing; the clone is returned. */
     private static WuCloneEntity clone(GameTestHelper h, ServerPlayer p) {
         grant(p, "wu_clone_1");
-        WukongCharacter.INSTANCE.activate(p, 1, AbilityAction.USE);
+        WukongCharacter.INSTANCE.use(p, "wu_clone", AbilityAction.USE);
         List<WuCloneEntity> mine = near(p, WuCloneEntity.class, 8).stream()
                 .filter(c -> c.getOwnerUUID().map(p.getUUID()::equals).orElse(false)).toList();
         check(h, mine.size() == 1, "one clone out");
@@ -194,7 +194,7 @@ public class CloneAiGameTests {
         ServerPlayer p = wukong(h);
         grant(p, "wu_ring_1", "wu_clone_2");
         WuCloneEntity c = clone(h, p);
-        WukongCharacter.INSTANCE.activate(p, 1, AbilityAction.USE); // a second clone, by it
+        WukongCharacter.INSTANCE.use(p, "wu_clone", AbilityAction.USE); // a second clone, by it
         var zombie = h.spawn(EntityType.ZOMBIE, new BlockPos(1, 2, 3));
         zombie.setNoAi(true);
         c.getPersistentData().putFloat(WuCloneManager.CLONE_QI_TAG, 50f);

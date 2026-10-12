@@ -29,19 +29,25 @@ public final class ByakkoCharacter implements PlayableCharacter {
         return PlayableCharacter.bar(
                 AbilitySlot.fromBranch(tree, unlocked, "bk_leap", "Predator's Leap", AbilityType.TOGGLE),
                 AbilitySlot.fromBranch(tree, unlocked, "bk_roar", "Territorial Roar", AbilityType.TOGGLE),
-                AbilitySlot.fromBranch(tree, unlocked, "bk_transform", "18 Transformations", AbilityType.MENU),
-                AbilitySlot.fromBranch(tree, unlocked, "bk_true", "White Tiger", AbilityType.TOGGLE));
+                AbilitySlot.EMPTY,
+                AbilitySlot.fromBranch(tree, unlocked, "bk_transform", "18 Transformations", AbilityType.MENU));
+    }
+
+    /** Shift + V, B, N and M (see PlayableCharacter#activate for the layout). */
+    @Override
+    public List<AbilitySlot> shiftBar(Set<String> unlocked) {
+        return PlayableCharacter.shiftPage(AbilitySlot.EMPTY, AbilitySlot.EMPTY, AbilitySlot.EMPTY,
+                AbilitySlot.fromBranch(skillTree(), unlocked, "bk_true", "White Tiger", AbilityType.TOGGLE));
     }
 
     @Override
-    public void activate(ServerPlayer player, int slot, AbilityAction action) {
-        if (action != AbilityAction.USE) return;
-        switch (slot) {
-            case 0 -> ByakkoAbilityHandler.castLeap(player);
-            case 1 -> ByakkoAbilityHandler.castRoar(player);
-            case 3 -> com.jttw.engine.character.divinebeast.TrueForm.toggle(player,
+    public void use(ServerPlayer player, String abilityId, AbilityAction action) {
+        switch (abilityId) {
+            case "bk_leap" -> { if (action == AbilityAction.USE) ByakkoAbilityHandler.castLeap(player); }
+            case "bk_roar" -> { if (action == AbilityAction.USE) ByakkoAbilityHandler.castRoar(player); }
+            case "bk_true" -> { if (action == AbilityAction.USE) com.jttw.engine.character.divinebeast.TrueForm.toggle(player,
                     com.jttw.engine.registry.ModEntities.WHITE_TIGER.get(), skillTree().highestTier(
-                            com.jttw.engine.progression.skilltree.SkillTreeData.getUnlockedNodes(player), "bk_true"), "bk_true");
+                            com.jttw.engine.progression.skilltree.SkillTreeData.getUnlockedNodes(player), "bk_true"), "bk_true"); }
             default -> {}
         }
     }

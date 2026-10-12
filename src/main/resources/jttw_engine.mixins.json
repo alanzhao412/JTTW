@@ -25,6 +25,7 @@
   ],
   "client": [
     "AbstractClientPlayerMixin",
+    "CameraMixin",
     "EntityTurnMixin",
     "HumanoidModelMixin",
     "ItemRendererMixin",

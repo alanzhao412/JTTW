@@ -41,29 +41,25 @@ public final class NezhaCharacter implements PlayableCharacter {
                 ? new AbilitySlot("nz_cycle", "Weapon Cycle", AbilityType.TOGGLE, armTier)
                 : AbilitySlot.EMPTY;
         return PlayableCharacter.bar(
-                cycle,
                 AbilitySlot.fromBranch(tree, unlocked, "nz_fire", "Samadhi Fire", AbilityType.HELD),
                 AbilitySlot.fromBranch(tree, unlocked, "nz_det", "Lotus Detonation", AbilityType.HELD),
+                cycle,
                 AbilitySlot.fromBranch(tree, unlocked, "nz_form", "Three Heads Six Arms", AbilityType.TOGGLE));
     }
 
     @Override
-    public void activate(ServerPlayer player, int slot, AbilityAction action) {
-        switch (slot) {
-            case 0 -> {
-                if (action == AbilityAction.USE) NezhaAbilityHandler.cycleWeapon(player);
-            }
-            case 1 -> {
+    public void use(ServerPlayer player, String abilityId, AbilityAction action) {
+        switch (abilityId) {
+            case "nz_cycle" -> { if (action == AbilityAction.USE) NezhaAbilityHandler.cycleWeapon(player); }
+            case "nz_fire" -> {
                 if (action == AbilityAction.START) NezhaAbilityHandler.startSamadhiFire(player);
                 if (action == AbilityAction.STOP) NezhaAbilityHandler.stopSamadhiFire(player);
             }
-            case 2 -> {
+            case "nz_det" -> {
                 if (action == AbilityAction.START) NezhaAbilityHandler.startDetonationCharge(player);
                 if (action == AbilityAction.STOP) NezhaAbilityHandler.stopDetonationCharge(player);
             }
-            case 3 -> {
-                if (action == AbilityAction.USE) NezhaAbilityHandler.toggleThreeHeadsSixArms(player);
-            }
+            case "nz_form" -> { if (action == AbilityAction.USE) NezhaAbilityHandler.toggleThreeHeadsSixArms(player); }
             default -> {}
         }
     }

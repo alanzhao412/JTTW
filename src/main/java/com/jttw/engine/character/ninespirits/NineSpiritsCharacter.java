@@ -41,16 +41,16 @@ public final class NineSpiritsCharacter implements PlayableCharacter {
     }
 
     @Override
-    public void activate(ServerPlayer player, int slot, AbilityAction action) {
-        if (action != AbilityAction.USE) return;
-        switch (slot) {
-            case 0 -> {
+    public void use(ServerPlayer player, String abilityId, AbilityAction action) {
+        switch (abilityId) {
+            case "ns_heads" -> {
+                if (action != AbilityAction.USE) return;
                 if (player.isShiftKeyDown()) NineSpiritsAbilityHandler.rotateHead(player);
                 else NineSpiritsAbilityHandler.fireHead(player);
             }
-            case 1 -> NineSpiritsAbilityHandler.roar(player);
-            case 2 -> NineSpiritsAbilityHandler.flare(player);
-            case 3 -> NineSpiritsAbilityHandler.toggleTrueForm(player);
+            case "ns_roar" -> { if (action == AbilityAction.USE) NineSpiritsAbilityHandler.roar(player); }
+            case "ns_flare" -> { if (action == AbilityAction.USE) NineSpiritsAbilityHandler.flare(player); }
+            case "ns_form" -> { if (action == AbilityAction.USE) NineSpiritsAbilityHandler.toggleTrueForm(player); }
             default -> {}
         }
     }

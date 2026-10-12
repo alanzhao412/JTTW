@@ -45,13 +45,14 @@ public final class WukongCharacter implements PlayableCharacter {
     public List<AbilitySlot> skillBar(Set<String> unlocked) {
         SkillTree tree = skillTree();
         return PlayableCharacter.bar(
-                AbilitySlot.fromBranch(tree, unlocked, "wu_transform", "72 Transformations", AbilityType.MENU),
+                AbilitySlot.fromBranch(tree, unlocked, "wu_ring", "Ring of Fire", AbilityType.HELD),
                 // each press summons one more clone
                 AbilitySlot.fromBranch(tree, unlocked, "wu_clone", "Shadow Clone", AbilityType.TOGGLE),
-                AbilitySlot.fromBranch(tree, unlocked, "wu_ring", "Ring of Fire", AbilityType.HELD));
+                AbilitySlot.EMPTY,
+                AbilitySlot.fromBranch(tree, unlocked, "wu_transform", "72 Transformations", AbilityType.MENU));
     }
 
-    /** Slot 3 (M): Fiery Golden Eyes, once the story has granted them. Not a skill-tree ability. */
+    /** N: Fiery Golden Eyes, once the story has granted them. Not a skill-tree ability. */
     public static final AbilitySlot GOLDEN_EYES =
             new AbilitySlot("wu_golden_eyes", "Fiery Golden Eyes", AbilityType.TOGGLE, 1);
 
@@ -59,20 +60,18 @@ public final class WukongCharacter implements PlayableCharacter {
     public List<AbilitySlot> skillBar(net.minecraft.world.entity.player.Player player) {
         List<AbilitySlot> bar = skillBar(com.jttw.engine.progression.skilltree.SkillTreeData.getUnlockedNodes(player));
         if (!ImmortalItems.hasFieryGoldenEyes(player)) return bar;
-        return PlayableCharacter.bar(bar.get(0), bar.get(1), bar.get(2), GOLDEN_EYES);
+        return PlayableCharacter.bar(bar.get(0), bar.get(1), GOLDEN_EYES, bar.get(3));
     }
 
     @Override
-    public void activate(ServerPlayer player, int slot, AbilityAction action) {
-        switch (slot) {
-            case 1 -> {
-                if (action == AbilityAction.USE) WuCloneManager.summon(player);
-            }
-            case 2 -> {
+    public void use(ServerPlayer player, String abilityId, AbilityAction action) {
+        switch (abilityId) {
+            case "wu_ring" -> {
                 if (action == AbilityAction.START) WukongAbilityHandler.startRing(player);
                 else if (action == AbilityAction.STOP) WukongAbilityHandler.stopRing(player);
             }
-            case 3 -> {
+            case "wu_clone" -> { if (action == AbilityAction.USE) WuCloneManager.summon(player); }
+            case "wu_golden_eyes" -> {
                 // Fiery Golden Eyes: sneaking toggles x-ray, otherwise fires the eye laser
                 if (action == AbilityAction.USE) {
                     if (player.isShiftKeyDown()) WukongAbilityHandler.toggleGoldenEyesXray(player);

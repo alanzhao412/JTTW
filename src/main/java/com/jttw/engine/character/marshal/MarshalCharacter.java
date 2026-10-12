@@ -54,11 +54,10 @@ public final class MarshalCharacter implements PlayableCharacter {
     }
 
     @Override
-    public void activate(ServerPlayer player, int slot, AbilityAction action) {
-        if (action != AbilityAction.USE) return;
-        switch (slot) {
-            case 0 -> MarshalAbilityHandler.bellySlam(player);
-            case 1 -> MarshalAbilityHandler.sniff(player);
+    public void use(ServerPlayer player, String abilityId, AbilityAction action) {
+        switch (abilityId) {
+            case "mc_slam" -> { if (action == AbilityAction.USE) MarshalAbilityHandler.bellySlam(player); }
+            case "mc_snout" -> { if (action == AbilityAction.USE) MarshalAbilityHandler.sniff(player); }
             default -> {}
         }
     }
