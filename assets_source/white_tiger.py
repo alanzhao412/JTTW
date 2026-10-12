@@ -36,10 +36,6 @@ PARTS = [
     ('head', 'root', (0, 4.5, -21), (0, 0, 0), [
         (-5.5, -4.5, -8, 11, 8, 8, 'skull'),       # the head: broad, its face flat
         (-5.8, -5.2, -8.6, 11.6, 1.8, 1.6, 'brow'),  # the brow, heavy, over the eyes
-        (-8, -2, -7, 2.8, 7.5, 5.5, 'ruff'),       # the cheek ruffs, heavy, flaring wide
-        (5.2, -2, -7, 2.8, 7.5, 5.5, 'ruff'),
-        (-9, 1, -6, 1.6, 3.5, 3.5, 'ruff'),        # their points, out past them
-        (7.4, 1, -6, 1.6, 3.5, 3.5, 'ruff'),
         (-3.5, 0, -11, 7, 3.5, 3, 'muzzle'),       # the upper muzzle, its lip drawn back
         (-3.2, 2.5, -7.8, 6.4, 5.5, 0.6, 'throat'),  # the throat, dark, at the back of the mouth
         (-2.9, 3.5, -10.8, 1, 3.2, 1, 'fang'),     # the upper fangs, long
@@ -48,6 +44,13 @@ PARTS = [
         (-5, -6.5, -3, 3, 2.5, 1.5, 'ear'),        # the ears, round, laid back
         (2, -6.5, -3, 3, 2.5, 1.5, 'ear'),
     ], False),
+    # the cheek fur: thin tufts low along the jaw, sweeping back and out to points
+    ('right_ruff', 'head', (-5.3, 1.5, -6.5), (0, 0.45, 0.15), [
+        (-1, -1.5, 0, 1, 4, 5, 'ruff'),
+        (-1.6, 0.5, 4, 1, 2.5, 2.5, 'ruff')], False),
+    ('left_ruff', 'head', (5.3, 1.5, -6.5), (0, -0.45, -0.15), [
+        (0, -1.5, 0, 1, 4, 5, 'ruff'),
+        (0.6, 0.5, 4, 1, 2.5, 2.5, 'ruff')], True),
     ('jaw', 'head', (0, 3.5, -7.5), (0.75, 0, 0), [  # the jaw, dropped wide in a roar
         (-3, 0, -3.5, 6, 1.8, 4, 'jaw'),
         (-2.2, 0.4, -3, 4.4, 0.6, 3, 'tongue'),     # the tongue
@@ -71,7 +74,7 @@ for leg in ('right_front_leg', 'left_front_leg'):
 # ── the body larger about the head: every part but the head (and its jaw) scaled by BODY,
 # from the ground up, so the feet stay on it; the head keeps its size, set on the larger neck ──
 BODY = 1.35
-HEADS = ('head', 'jaw')
+HEADS = ('head', 'jaw', 'right_ruff', 'left_ruff')
 
 
 def grow(parts):
@@ -179,14 +182,19 @@ def eye(fx, fy, inward):
     X = lambda i: fx + i * inward
     top = [1, 1, 1, 2, 2]
     bottom = [2, 2, 3, 3, 3]
-    for i in range(-2, 8):                   # the black it is sunk in
-        for j in range(-1, 6):
-            px((X(i), fy + j), STRIPE)
+    for i in range(-1, 6):                   # a thin dark rim hugging the eye
+        t_ = top[min(max(i, 0), 4)]
+        b_ = bottom[min(max(i, 0), 4)]
+        px((X(i), fy + t_ - 1), STRIPE)
+        px((X(i), fy + b_ + 1), STRIPE)
+    px((X(-1), fy + 1), STRIPE)
+    px((X(-1), fy + 2), STRIPE)
+    px((X(5), fy + 2), STRIPE)
+    px((X(5), fy + 3), STRIPE)
     for i in range(6):                       # white fur above the black, then the brow stripe
         px((X(i), fy - 2), (252, 252, 250))
         px((X(i), fy - 3), (252, 252, 250))
-    for i in range(8):
-        px((X(i), fy - 5 + i // 3), STRIPE)
+    for i in range(7):                       # the brow stripe above, slanting down toward the nose
         px((X(i), fy - 4 + i // 3), STRIPE)
     for i in range(5):
         for j in range(top[i], bottom[i] + 1):
@@ -196,8 +204,8 @@ def eye(fx, fy, inward):
     for j in (top[2], top[2] + 1):           # the pupil, a dark slit
         px((X(2), fy + j), (8, 10, 14))
         glow.putpixel((int(X(2)), int(fy + j)), (0, 0, 0, 0))
-    for j in range(6, 11):                   # the tear line, down from the inner corner
-        px((X(6) + (j - 6) // 3 * inward, fy + j), STRIPE)
+    for j in range(4, 10):                   # the tear line, down from the inner corner
+        px((X(5) + (j - 4) // 3 * inward, fy + j), STRIPE)
 
 
 for (w, h, d, style), (u, v) in slots.items():
