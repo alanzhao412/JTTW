@@ -162,8 +162,13 @@ public final class FormGallery {
         // a pause menu or chat would cover the picture; a scene of a screen keeps its own
         if (mc.screen != null && !AbilityScenes.keepScreen) mc.setScreen(null);
         Shot shot = shots.get(next);
-        holdPose(mc.player, shot.kind() == Kind.SCENE ? scene(shot).pitch() : shot.view() == View.UP ? UP_PITCH : 0f,
-                shot.kind() != Kind.BOAT_ON_WATER && !AbilityScenes.live);
+        if (AbilityScenes.live && wait < scene(shot).triggerBefore()) {
+            // flown as a player flies: not held at an angle, but turned by the mouse, a little each tick
+            com.jttw.engine.client.flight.FlightOrientation.turn(mc.player, 2.0, 0.0);
+        } else {
+            holdPose(mc.player, shot.kind() == Kind.SCENE ? scene(shot).pitch() : shot.view() == View.UP ? UP_PITCH : 0f,
+                    shot.kind() != Kind.BOAT_ON_WATER && !AbilityScenes.live);
+        }
         if (AbilityScenes.topSpeed) {
             UUID held = mc.player.getUUID();
             mc.getSingleplayerServer().execute(() -> {
@@ -229,7 +234,7 @@ public final class FormGallery {
      */
     @SubscribeEvent
     public static void onCameraAngles(net.minecraftforge.client.event.ViewportEvent.ComputeCameraAngles event) {
-        if (!AbilityScenes.live) return;
+        if (!AbilityScenes.live || AbilityScenes.liveF5) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
         net.minecraft.world.phys.Vec3 at = mc.player.getPosition((float) event.getPartialTick()).add(0, 0.9, 0);
@@ -320,7 +325,8 @@ public final class FormGallery {
             }
             if (shot.kind() == Kind.SCENE) {
                 if (AbilityScenes.live) { // his own camera, from outside him, moved alongside (onCameraAngles)
-                    mc.execute(() -> mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK));
+                    mc.execute(() -> mc.options.setCameraType(AbilityScenes.liveFront
+                            ? net.minecraft.client.CameraType.THIRD_PERSON_FRONT : net.minecraft.client.CameraType.THIRD_PERSON_BACK));
                     return;
                 }
                 if (!scene(shot).firstPerson()) {

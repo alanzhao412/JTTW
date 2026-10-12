@@ -50,7 +50,17 @@ public final class FormCatalog {
             new ResourceLocation("minecraft", "block_display"),
             new ResourceLocation("minecraft", "item_display"),
             new ResourceLocation("minecraft", "text_display"),
-            new ResourceLocation("minecraft", "tnt"));
+            new ResourceLocation("minecraft", "tnt"),
+            // Wukong's shadow clone is a piece of his ability, made in his likeness: to "become"
+            // it is to take a body like his own that is not his (no flight of his, nothing in hand)
+            new ResourceLocation(com.jttw.engine.JTTWEngine.MOD_ID, "wu_clone"));
+
+    /**
+     * Forms only a character's own ability takes, never offered in a menu: the Great White Bull
+     * is the Bull Demon King's true form, with its own cost and strength (BullDemonAbilityHandler).
+     */
+    public static final Set<ResourceLocation> ABILITY_FORMS = Set.of(
+            new ResourceLocation(com.jttw.engine.JTTWEngine.MOD_ID, "great_white_bull"));
 
     /** The blocks a player can become, each with its own behaviour. */
     public static final List<Block> BLOCK_FORMS = List.of(Blocks.CHEST, Blocks.OAK_SIGN, Blocks.TNT);
@@ -60,7 +70,7 @@ public final class FormCatalog {
      * thrown spear, howl, placed staff) are machinery, not forms.
      */
     public static boolean isOffered(ResourceLocation id, Entity instance) {
-        if (NOT_FORMS.contains(id)) return false;
+        if (NOT_FORMS.contains(id) || ABILITY_FORMS.contains(id)) return false;
         return !(com.jttw.engine.JTTWEngine.MOD_ID.equals(id.getNamespace()) && !(instance instanceof LivingEntity));
     }
 
@@ -78,7 +88,7 @@ public final class FormCatalog {
             EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(key);
             if (type == null || type == EntityType.PLAYER) continue;
             Entity e = create(type, level);
-            if (!(e instanceof LivingEntity)) continue;
+            if (!(e instanceof LivingEntity) || !isOffered(key, e)) continue;
             byCategory.computeIfAbsent(FormClassifier.classify(type, e), k -> new ArrayList<>()).add(key);
         }
         byCategory.values().forEach(l -> l.sort(Comparator.comparing(ResourceLocation::toString)));

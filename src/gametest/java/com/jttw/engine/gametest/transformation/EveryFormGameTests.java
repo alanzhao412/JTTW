@@ -91,6 +91,7 @@ public class EveryFormGameTests {
             if (!offered.contains(id)) missing.add(id);
         }
         List<ResourceLocation> expectedMissing = new ArrayList<>(FormCatalog.NOT_FORMS);
+        expectedMissing.addAll(FormCatalog.ABILITY_FORMS); // taken only by a character's own ability
         for (String machinery : List.of("bone_shard", "howl_projectile", "placed_staff", "qi_wave", "thrown_spear")) {
             expectedMissing.add(new ResourceLocation(JTTWEngine.MOD_ID, machinery));
         }

@@ -264,6 +264,12 @@ public class TransformationManager {
     public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
         Player player = event.getEntity();
         TransformationData data = loadFromPlayer(player);
+        if (data != null && data.getEntityId() != null && FormCatalog.NOT_FORMS.contains(data.getEntityId())) {
+            // saved in a shape that is no form at all (a shadow clone, taken before it was refused): back to themselves
+            clearFromPlayer(player);
+            TRANSFORMATIONS.remove(player.getUUID());
+            data = null;
+        }
         if (data != null) {
             TRANSFORMATIONS.put(player.getUUID(), data);
             applyTransformation(player, data);

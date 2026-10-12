@@ -268,4 +268,25 @@ public class TransformAccessGameTests {
         TransformationData d = TransformationManager.getTransformation(p);
         return d == null ? null : d.getEntityType();
     }
+
+    /**
+     * Wukong's shadow clone is no form, and the Great White Bull is the Bull Demon King's alone (by
+     * his ability): neither is offered; a clone form saved before is dropped on logging in.
+     */
+    @GameTest(template = PLATFORM)
+    public static void theCloneAndTheBullAreNotOfferedAsForms(GameTestHelper h) {
+        var offered = com.jttw.engine.transformation.FormCatalog.mobForms(h.getLevel()).values().stream()
+                .flatMap(java.util.List::stream).toList();
+        ResourceLocation clone = new ResourceLocation(JTTWEngine.MOD_ID, "wu_clone");
+        ResourceLocation bull = new ResourceLocation(JTTWEngine.MOD_ID, "great_white_bull");
+        check(h, !offered.contains(clone), "the shadow clone is not a form");
+        check(h, !offered.contains(bull), "the Great White Bull is not on offer");
+        check(h, offered.contains(new ResourceLocation("minecraft", "pig")), "while ordinary creatures are");
+
+        ServerPlayer p = CharTest.as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
+        TransformationManager.transform(p, com.jttw.engine.registry.ModEntities.WU_CLONE.get()); // as an old save might hold
+        TransformationManager.onPlayerLogin(new net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent(p));
+        eq(h, null, TransformationManager.getTransformation(p), "logging in, a saved clone form is dropped: he is himself");
+        h.succeed();
+    }
 }

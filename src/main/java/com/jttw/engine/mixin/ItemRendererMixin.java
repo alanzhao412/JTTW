@@ -39,7 +39,12 @@ public class ItemRendererMixin {
         if (largeAxe) {
             poseStack.scale(2.0f, 2.0f, 2.0f); // Erlang's axe, enlarged: twice its size
         } else if (RuyiJinguBangItem.isLargeMode(stack)) {
-            poseStack.scale(3.0f, 3.0f, 3.0f);
+            // three times its plain size; in first person, where the plain staff is held at 0.68
+            // rather than the old 0.4, the same size in view as before
+            boolean firstPerson = displayContext == ItemDisplayContext.FIRST_PERSON_RIGHT_HAND
+                    || displayContext == ItemDisplayContext.FIRST_PERSON_LEFT_HAND;
+            float k = firstPerson ? 3.0f * 0.4f / 0.68f : 3.0f;
+            poseStack.scale(k, k, k);
         }
     }
 

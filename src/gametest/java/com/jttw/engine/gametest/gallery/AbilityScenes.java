@@ -59,6 +59,8 @@ final class AbilityScenes {
     static volatile boolean openSkillTree;
     /** Played, not posed: forward and sprint held from the trigger, the player moving freely, seen from behind. */
     static volatile boolean live;
+    /** In a live scene, the player's own F5 camera as it is (behind, or {@code liveFront} in front), not moved alongside. */
+    static volatile boolean liveF5, liveFront;
 
     /** Set by a scene of Wukong at his top speed: the gallery keeps his momentum at its height. */
     static volatile boolean topSpeed;
@@ -96,6 +98,13 @@ final class AbilityScenes {
                 new Scene("flight_live_1", p -> liveWukong(p, 1), p -> {}, 40, false, 0f),
                 new Scene("flight_live_2", p -> liveWukong(p, 2), p -> {}, 40, false, 0f),
                 new Scene("flight_live_3", p -> liveWukong(p, 3), p -> {}, 40, false, 0f),
+                // as F5 shows it, unmoved: from behind and in front, the staff in hand
+                new Scene("flight_f5_back_2", p -> { liveWukong(p, 2); liveF5 = true; staffInHand(p); }, p -> {}, 40, false, 0f),
+                new Scene("flight_f5_back_3", p -> { liveWukong(p, 3); liveF5 = true; staffInHand(p); }, p -> {}, 40, false, 0f),
+                new Scene("flight_f5_front_2", p -> { liveWukong(p, 2); liveF5 = true; liveFront = true; staffInHand(p); }, p -> {}, 40, false, 0f),
+                new Scene("flight_f5_front_3", p -> { liveWukong(p, 3); liveF5 = true; liveFront = true; staffInHand(p); }, p -> {}, 40, false, 0f),
+                new Scene("flight_live_survival_2", p -> { liveWukong(p, 2); p.setGameMode(GameType.SURVIVAL); p.getAbilities().flying = true; p.onUpdateAbilities(); }, p -> {}, 40, false, 0f),
+                new Scene("flight_live_survival_3", p -> { liveWukong(p, 3); p.setGameMode(GameType.SURVIVAL); p.getAbilities().flying = true; p.onUpdateAbilities(); }, p -> {}, 40, false, 0f),
                 new Scene("flight_cloud_hover", p -> fly(p, ReincarnationOutcome.CELESTIAL_PRIMATE, 0), p -> {}, 1, false, 0f),
                 new Scene("flight_cloud_under_way", p -> fly(p, ReincarnationOutcome.CELESTIAL_PRIMATE, 1), p -> {}, 1, false, 0f),
                 new Scene("flight_squall_hover", p -> fly(p, ReincarnationOutcome.EYE_OF_HEAVEN, 0), p -> {}, 1, false, 0f),
@@ -580,6 +589,10 @@ final class AbilityScenes {
         live = true;
     }
 
+    private static void staffInHand(ServerPlayer p) {
+        p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(com.jttw.engine.registry.ModItems.RUYI_JINGU_BANG.get()));
+    }
+
     private static void plainStaff(ServerPlayer p) {
         AlignmentData.markReincarnated(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
         LevelManager.initClass(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
@@ -762,6 +775,8 @@ final class AbilityScenes {
         holdUse = false;
         openSkillTree = false;
         live = false;
+        liveF5 = false;
+        liveFront = false;
         com.jttw.engine.client.flight.FlightPose.posedUnderWay = -1;
         if (NineSpiritsAbilityHandler.inTrueForm(p)) NineSpiritsAbilityHandler.endTrueForm(p);
         if (BullDemonAbilityHandler.inGreatBull(p)) BullDemonAbilityHandler.endGreatBull(p);
