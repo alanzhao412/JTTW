@@ -9,7 +9,15 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 
+import net.minecraft.gametest.framework.GameTestBatch;
+import net.minecraft.gametest.framework.GameTestInfo;
+import net.minecraft.gametest.framework.GameTestServer;
+
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -19,8 +27,8 @@ import java.util.function.Consumer;
  *
  * <p>The GameTest runner starts a test in the tick its platform is placed, and there is no
  * per-test hook in between, so this swaps each registered test's body for a gated one when the
- * test server starts, before the first test runs. The runner's batches hold the same
- * {@link TestFunction} objects, so they run the gated bodies. A test whose platform never
+ * test server starts, before the first test runs; the server's already-built batches are
+ * pointed at the gated copies too, so they run the gated bodies. A test whose platform never
  * becomes ready within {@value #MAX_WAIT_TICKS} ticks fails, saying so.
  *
  * <p>A held test's body runs once, however it is reached. The wait is a chain of one-tick
@@ -37,23 +45,41 @@ public final class ReadyGate {
 
     @SubscribeEvent
     public static void onServerStarting(ServerStartingEvent event) {
-        Field function;
-        try {
-            function = TestFunction.class.getDeclaredField("function");
-            function.setAccessible(true);
-        } catch (ReflectiveOperationException e) {
-            throw new IllegalStateException("cannot gate GameTests: TestFunction.function not found", e);
+        // TestFunction is a record, so its body cannot be swapped in place: each test is replaced
+        // by a gated copy, in the registry (tests started later by command) and in the batches
+        // the test server has already built from it (their GameTestInfos hold the old copy).
+        Map<TestFunction, TestFunction> gated = new IdentityHashMap<>();
+        List<TestFunction> all = new ArrayList<>(GameTestRegistry.getAllTestFunctions());
+        GameTestRegistry.getAllTestFunctions().clear();
+        for (TestFunction test : all) {
+            GameTestRegistry.getAllTestFunctions().add(gated.computeIfAbsent(test, ReadyGate::gate));
         }
-        for (TestFunction test : GameTestRegistry.getAllTestFunctions()) {
+        if (event.getServer() instanceof GameTestServer server) {
             try {
+                Field batchesField = GameTestServer.class.getDeclaredField("testBatches");
+                batchesField.setAccessible(true);
+                Field infoFunction = GameTestInfo.class.getDeclaredField("testFunction");
+                infoFunction.setAccessible(true);
                 @SuppressWarnings("unchecked")
-                Consumer<GameTestHelper> body = (Consumer<GameTestHelper>) function.get(test);
-                if (body instanceof Gated) continue;
-                function.set(test, new Gated(body));
-            } catch (IllegalAccessException e) {
-                throw new IllegalStateException("cannot gate GameTest " + test.getTestName(), e);
+                List<GameTestBatch> batches = (List<GameTestBatch>) batchesField.get(server);
+                for (GameTestBatch batch : batches) {
+                    for (GameTestInfo info : batch.gameTestInfos()) {
+                        TestFunction test = info.getTestFunction();
+                        infoFunction.set(info, gated.computeIfAbsent(test, ReadyGate::gate));
+                    }
+                }
+            } catch (ReflectiveOperationException e) {
+                throw new IllegalStateException("cannot gate GameTests in the test server's batches", e);
             }
         }
+    }
+
+    /** {@code test} with its body gated (unchanged if it already is). */
+    private static TestFunction gate(TestFunction t) {
+        if (t.function() instanceof Gated) return t;
+        return new TestFunction(t.batchName(), t.testName(), t.structureName(), t.rotation(), t.maxTicks(),
+                t.setupTicks(), t.required(), t.manualOnly(), t.maxAttempts(), t.requiredSuccesses(),
+                t.skyAccess(), new Gated(t.function()));
     }
 
     /** A test body that waits for its platform. */

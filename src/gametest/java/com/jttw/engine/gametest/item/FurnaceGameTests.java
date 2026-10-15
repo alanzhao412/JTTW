@@ -125,8 +125,8 @@ public class FurnaceGameTests {
     }
 
     private static double attackBonus(ItemStack stack) {
-        return stack.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE).stream()
-                .mapToDouble(net.minecraft.world.entity.ai.attributes.AttributeModifier::getAmount).sum();
+        return ItemTestSupport.modifiers(stack, EquipmentSlot.MAINHAND, Attributes.ATTACK_DAMAGE).stream()
+                .mapToDouble(net.minecraft.world.entity.ai.attributes.AttributeModifier::amount).sum();
     }
 
     @GameTest(template = PLATFORM)
@@ -142,11 +142,11 @@ public class FurnaceGameTests {
 
     @GameTest(template = PLATFORM)
     public static void noVanillaRecipeMakesAnArmament(GameTestHelper h) {
-        for (Recipe<?> r : h.getLevel().getRecipeManager().getRecipes()) {
-            ItemStack out = r.getResultItem(h.getLevel().registryAccess());
-            check(h, Armaments.of(out) == null, r.getId() + " makes an armament: only the furnace forges them");
+        for (net.minecraft.world.item.crafting.RecipeHolder<?> r : h.getLevel().getRecipeManager().getRecipes()) {
+            ItemStack out = r.value().getResultItem(h.getLevel().registryAccess());
+            check(h, Armaments.of(out) == null, r.id() + " makes an armament: only the furnace forges them");
         }
-        check(h, h.getLevel().getRecipeManager().byKey(new net.minecraft.resources.ResourceLocation(JTTWEngine.MOD_ID, "eight_trigrams_furnace")).isPresent(),
+        check(h, h.getLevel().getRecipeManager().byKey(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "eight_trigrams_furnace")).isPresent(),
                 "the furnace itself is crafted");
         h.succeed();
     }

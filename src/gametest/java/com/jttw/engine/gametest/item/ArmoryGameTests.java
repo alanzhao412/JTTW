@@ -77,12 +77,12 @@ public class ArmoryGameTests {
     @GameTest(template = PLATFORM)
     public static void wornArmamentsWorkFromTheArmory(GameTestHelper h) {
         ServerPlayer p = as(h, ReincarnationOutcome.THIRD_LOTUS_PRINCE);
-        double mres = p.getAttributeValue(ModAttributes.MAGIC_RESISTANCE.get());
+        double mres = p.getAttributeValue(ModAttributes.MAGIC_RESISTANCE);
         put(p, new ItemStack(ModItems.HUNTIAN_CLOTH.get()));
         put(p, new ItemStack(ModItems.WIND_FIRE_WHEELS.get()));
         NezhaAbilityHandler.onPlayerTick(new PlayerTickEvent.Post(p));
-        check(h, p.getAttributeValue(ModAttributes.MAGIC_RESISTANCE.get()) > mres, "the sash's magic resistance, unworn");
-        check(h, p.getAttribute(Attributes.MOVEMENT_SPEED).getModifiers().stream().anyMatch(m -> m.getName().contains("wind_fire")), "the wheels' speed");
+        check(h, p.getAttributeValue(ModAttributes.MAGIC_RESISTANCE) > mres, "the sash's magic resistance, unworn");
+        check(h, p.getAttribute(Attributes.MOVEMENT_SPEED).getModifiers().stream().anyMatch(m -> m.id().equals(com.jttw.engine.JTTWEngine.id("wheels_speed"))), "the wheels' speed");
         check(h, p.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.FEET).isEmpty(), "his armour slots stay free");
         h.succeed();
     }
@@ -123,7 +123,7 @@ public class ArmoryGameTests {
         List<ItemEntity> drops = new ArrayList<>();
         drops.add(new ItemEntity(h.getLevel(), p.getX(), p.getY(), p.getZ(), new ItemStack(ModItems.ERLANG_AXE.get())));
         drops.add(new ItemEntity(h.getLevel(), p.getX(), p.getY(), p.getZ(), new ItemStack(Items.DIRT)));
-        LivingDropsEvent event = new LivingDropsEvent(p, h.getLevel().damageSources().generic(), drops, 0, true);
+        LivingDropsEvent event = new LivingDropsEvent(p, h.getLevel().damageSources().generic(), drops, true);
         Armory.onDrops(event);
         eq(h, 1, event.getDrops().size(), "only the dirt drops");
         check(h, Armory.find(p, "erlang_axe").is(ModItems.ERLANG_AXE.get()), "the axe is in his armory");

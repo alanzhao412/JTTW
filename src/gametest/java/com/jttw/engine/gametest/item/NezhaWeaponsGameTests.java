@@ -147,12 +147,12 @@ public class NezhaWeaponsGameTests {
         eq(h, 3, QiankunRingItem.getSize(r), "size 3");
         QiankunRingItem.setSize(r, 9);
         eq(h, 5, QiankunRingItem.getSize(r), "set above 5 clamps");
-        eq(h, 5, r.getTag().getInt(QiankunRingItem.TAG_SIZE), "stored clamped");
+        eq(h, 5, com.jttw.engine.item.StackData.getInt(r, QiankunRingItem.TAG_SIZE), "stored clamped");
         QiankunRingItem.setSize(r, 0);
         eq(h, 1, QiankunRingItem.getSize(r), "set below 1 clamps");
-        r.getOrCreateTag().putInt(QiankunRingItem.TAG_SIZE, 42);
+        com.jttw.engine.item.StackData.putInt(r, QiankunRingItem.TAG_SIZE, 42);
         eq(h, 5, QiankunRingItem.getSize(r), "out-of-range stored value reads as 5");
-        r.getOrCreateTag().putInt(QiankunRingItem.TAG_SIZE, -3);
+        com.jttw.engine.item.StackData.putInt(r, QiankunRingItem.TAG_SIZE, -3);
         eq(h, 1, QiankunRingItem.getSize(r), "negative stored value reads as 1");
         h.succeed();
     }

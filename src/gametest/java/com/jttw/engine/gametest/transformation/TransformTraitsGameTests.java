@@ -18,7 +18,6 @@ import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
@@ -46,8 +45,8 @@ public class TransformTraitsGameTests {
         // speed x sqrt(7/3) = 1.5275; reach + (7/3 - 1) * 4.5 = +6
         ServerPlayer p = Tf.playerAs(h, EntityType.IRON_GOLEM);
         near(h, 0.15275252, p.getAttributeValue(Attributes.MOVEMENT_SPEED), "speed");
-        near(h, 10.5, p.getAttributeValue(NeoForgeMod.BLOCK_REACH.get()), "block reach");
-        near(h, 9.0, p.getAttributeValue(NeoForgeMod.ENTITY_REACH.get()), "entity reach");
+        near(h, 10.5, p.getAttributeValue(Attributes.BLOCK_INTERACTION_RANGE), "block reach");
+        near(h, 9.0, p.getAttributeValue(Attributes.ENTITY_INTERACTION_RANGE), "entity reach");
         h.succeed();
     }
 
@@ -55,8 +54,8 @@ public class TransformTraitsGameTests {
     public static void hugeFormsAreCappedAtTwoAndAHalfSpeedAndThirtyTwoReach(GameTestHelper h) {
         ServerPlayer p = Tf.playerAs(h, EntityType.ENDER_DRAGON);
         near(h, 0.25, p.getAttributeValue(Attributes.MOVEMENT_SPEED), "speed capped at x2.5");
-        near(h, 4.5 + 32.0, p.getAttributeValue(NeoForgeMod.BLOCK_REACH.get()), "block reach bonus capped at 32");
-        near(h, 3.0 + 32.0, p.getAttributeValue(NeoForgeMod.ENTITY_REACH.get()), "entity reach bonus capped at 32");
+        near(h, 4.5 + 32.0, p.getAttributeValue(Attributes.BLOCK_INTERACTION_RANGE), "block reach bonus capped at 32");
+        near(h, 3.0 + 32.0, p.getAttributeValue(Attributes.ENTITY_INTERACTION_RANGE), "entity reach bonus capped at 32");
         h.succeed();
     }
 
@@ -64,8 +63,8 @@ public class TransformTraitsGameTests {
     public static void smallFormsAreNeverSlowerOrShorterReachedThanVanilla(GameTestHelper h) {
         ServerPlayer p = Tf.playerAs(h, EntityType.CHICKEN);
         near(h, 0.1, p.getAttributeValue(Attributes.MOVEMENT_SPEED), "speed");
-        near(h, 4.5, p.getAttributeValue(NeoForgeMod.BLOCK_REACH.get()), "block reach");
-        near(h, 3.0, p.getAttributeValue(NeoForgeMod.ENTITY_REACH.get()), "entity reach");
+        near(h, 4.5, p.getAttributeValue(Attributes.BLOCK_INTERACTION_RANGE), "block reach");
+        near(h, 3.0, p.getAttributeValue(Attributes.ENTITY_INTERACTION_RANGE), "entity reach");
         h.succeed();
     }
 
@@ -74,8 +73,8 @@ public class TransformTraitsGameTests {
         ServerPlayer p = Tf.playerAs(h, EntityType.IRON_GOLEM);
         TransformationManager.demorph(p);
         near(h, 0.1, p.getAttributeValue(Attributes.MOVEMENT_SPEED), "speed");
-        near(h, 4.5, p.getAttributeValue(NeoForgeMod.BLOCK_REACH.get()), "block reach");
-        near(h, 3.0, p.getAttributeValue(NeoForgeMod.ENTITY_REACH.get()), "entity reach");
+        near(h, 4.5, p.getAttributeValue(Attributes.BLOCK_INTERACTION_RANGE), "block reach");
+        near(h, 3.0, p.getAttributeValue(Attributes.ENTITY_INTERACTION_RANGE), "entity reach");
         h.succeed();
     }
 
@@ -138,7 +137,7 @@ public class TransformTraitsGameTests {
         TransformationManager.onPlayerJump(new LivingEvent.LivingJumpEvent(p));
         near(h, 0.42, p.getDeltaMovement().y, "no second boost before landing");
         p.setOnGround(true);
-        TransformationManager.onLivingTick(new LivingEvent.LivingTickEvent(p));
+        TransformationManager.onLivingTick(new net.neoforged.neoforge.event.tick.EntityTickEvent.Pre(p));
         TransformationManager.onPlayerJump(new LivingEvent.LivingJumpEvent(p));
         near(h, 0.95, p.getDeltaMovement().y, "boosted again after landing");
         h.succeed();
@@ -340,7 +339,7 @@ public class TransformTraitsGameTests {
         creeper.setTarget(p);
         creeper.setSwellDir(1);
         TransformationManager.transform(p, EntityType.ZOMBIE);
-        TransformationManager.onLivingTick(new LivingEvent.LivingTickEvent(creeper));
+        TransformationManager.onLivingTick(new net.neoforged.neoforge.event.tick.EntityTickEvent.Pre(creeper));
         check(h, creeper.getTarget() == null, "target dropped");
         eq(h, -1, creeper.getSwellDir(), "creeper stops swelling");
         h.succeed();
@@ -352,7 +351,7 @@ public class TransformTraitsGameTests {
         ServerPlayer p = Tf.playerAs(h, EntityType.ZOMBIE);
         var event = new LivingChangeTargetEvent(wolf, p, LivingChangeTargetEvent.LivingTargetType.MOB_TARGET);
         TransformationManager.onHostileChangeTarget(event);
-        check(h, event.getNewTarget() == p, "a wolf is not an Enemy, so it keeps its target");
+        check(h, event.getNewAboutToBeSetTarget() == p, "a wolf is not an Enemy, so it keeps its target");
         h.succeed();
     }
 
@@ -378,7 +377,7 @@ public class TransformTraitsGameTests {
 
     /** One server tick of the transformation handlers (fake players do not tick themselves). */
     private static void tick(ServerPlayer p) {
-        TransformationManager.onLivingTick(new LivingEvent.LivingTickEvent(p));
+        TransformationManager.onLivingTick(new net.neoforged.neoforge.event.tick.EntityTickEvent.Pre(p));
     }
 
     /** Fills the player's two blocks with water and lets the player notice it. */

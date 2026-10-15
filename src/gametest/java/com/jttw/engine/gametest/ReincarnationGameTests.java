@@ -7,7 +7,7 @@ import com.jttw.engine.reincarnation.AlignmentData;
 import com.jttw.engine.reincarnation.AlignmentEarningHandler;
 import com.jttw.engine.reincarnation.ReincarnationHandler;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
-import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -129,8 +129,8 @@ public class ReincarnationGameTests {
 
     // ── Death and rebirth ─────────────────────────────────────────
 
-    private static Advancement advancement(GameTestHelper h, String path) {
-        Advancement a = h.getLevel().getServer().getAdvancements().getAdvancement(ResourceLocation.fromNamespaceAndPath("minecraft", path));
+    private static AdvancementHolder advancement(GameTestHelper h, String path) {
+        AdvancementHolder a = h.getLevel().getServer().getAdvancements().get(ResourceLocation.fromNamespaceAndPath("minecraft", path));
         if (a == null) throw new IllegalStateException("missing advancement " + path);
         return a;
     }
@@ -140,9 +140,9 @@ public class ReincarnationGameTests {
      * so the criteria are granted on the progress record directly.
      */
     private static void enterNether(GameTestHelper h, ServerPlayer p) {
-        Advancement adv = advancement(h, "story/enter_the_nether");
+        AdvancementHolder adv = advancement(h, "story/enter_the_nether");
         var progress = p.getAdvancements().getOrStartProgress(adv);
-        for (String criterion : adv.getCriteria().keySet()) progress.grantProgress(criterion);
+        for (String criterion : adv.value().criteria().keySet()) progress.grantProgress(criterion);
         check(h, progress.isDone(), "Nether advancement done");
     }
 

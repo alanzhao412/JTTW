@@ -150,7 +150,7 @@ final class AbilityScenes {
                     f.setItem(2, new net.minecraft.world.item.ItemStack(com.jttw.engine.registry.ModItems.CAPTAINS_SIGIL.get(), 2));
                     f.setItem(com.jttw.engine.world.furnace.TrigramsFurnaceBlockEntity.FUEL, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.COAL, 9));
                     keepScreen = true;
-                    net.neoforged.neoforge.network.NetworkHooks.openScreen(p, f, at);
+                    p.openMenu(f, at);
                 }, p -> {}, 1, true),
                 new Scene("ui_armory", p -> {
                     AlignmentData.markReincarnated(p, ReincarnationOutcome.THIRD_LOTUS_PRINCE);
@@ -277,7 +277,7 @@ final class AbilityScenes {
                     p.setGameMode(GameType.SURVIVAL); // the skill bar shows outside creative
                     LevelManager.syncToClient(p); // the skill bar, as a player's would show it
                 }, p -> net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(
-                        new net.neoforged.neoforge.event.entity.living.LivingDamageEvent(p, p.damageSources().generic(), 24f)), 10, true),
+                        com.jttw.engine.gametest.GT.damage(p, p.damageSources().generic(), 24f)), 10, true),
                 // the Ruyi Jingu Bang, plain, in hand: as he sees it, and as others do
                 new Scene("staff_base_hand", p -> plainStaff(p), p -> {}, 1, true, 10f),
                 new Scene("staff_base_held", p -> { plainStaff(p); closeUp = true; facing = -40f; }, p -> {}, 1, false),
@@ -661,7 +661,7 @@ final class AbilityScenes {
     private static void beast(ServerPlayer p, ReincarnationOutcome who, String prefix) {
         p.getPersistentData().remove("jttw_skill_nodes");
         p.getPersistentData().remove(com.jttw.engine.character.divinebeast.TrueForm.KEY_READY);
-        p.removeEffect(com.jttw.engine.registry.ModEffects.EXHAUSTED.get());
+        p.removeEffect(com.jttw.engine.registry.ModEffects.EXHAUSTED);
         AlignmentData.markReincarnated(p, who);
         LevelManager.initClass(p, who);
         for (int t = 1; t <= 3; t++) SkillTreeData.grantNode(p, prefix + "_" + t);
@@ -685,7 +685,7 @@ final class AbilityScenes {
     private static void byakko(ServerPlayer p) {
         p.getPersistentData().remove("jttw_skill_nodes");
         p.getPersistentData().remove(com.jttw.engine.character.divinebeast.TrueForm.KEY_READY);
-        p.removeEffect(com.jttw.engine.registry.ModEffects.EXHAUSTED.get());
+        p.removeEffect(com.jttw.engine.registry.ModEffects.EXHAUSTED);
         AlignmentData.markReincarnated(p, ReincarnationOutcome.WHITE_TIGER);
         LevelManager.initClass(p, ReincarnationOutcome.WHITE_TIGER);
         for (String n : List.of("bk_true_1", "bk_true_2", "bk_true_3")) SkillTreeData.grantNode(p, n);
@@ -709,7 +709,7 @@ final class AbilityScenes {
         com.jttw.engine.progression.level.PlayerLevel.setLevel(p, 60);
         LevelManager.reapplyStats(p);
         var stack = new ItemStack(com.jttw.engine.registry.ModItems.RUYI_JINGU_BANG.get());
-        stack.getOrCreateTag().putBoolean(com.jttw.engine.item.RuyiJinguBangItem.TAG_QI_EMPOWERED, true);
+        com.jttw.engine.item.StackData.putBoolean(stack, com.jttw.engine.item.RuyiJinguBangItem.TAG_QI_EMPOWERED, true);
         p.setItemInHand(InteractionHand.MAIN_HAND, stack);
     }
 
@@ -780,7 +780,7 @@ final class AbilityScenes {
         for (String k : List.of("jttw_sdk_surge_ready", "jttw_sdk_lash_ready", "jttw_sdk_whirl_ready", "jttw_sdk_wrath_ready")) {
             p.getPersistentData().remove(k);
         }
-        p.removeEffect(com.jttw.engine.registry.ModEffects.FLOOD_WRATH.get());
+        p.removeEffect(com.jttw.engine.registry.ModEffects.FLOOD_WRATH);
         QiData.setMax(p, 1000f);
         QiData.setCurrent(p, 1000f);
     }
@@ -881,7 +881,7 @@ final class AbilityScenes {
         sceneCam = null;
         if (p.getPersistentData().contains(com.jttw.engine.character.divinebeast.TrueForm.KEY_UNTIL)) {
             com.jttw.engine.character.divinebeast.TrueForm.end(p);
-            p.removeEffect(com.jttw.engine.registry.ModEffects.EXHAUSTED.get());
+            p.removeEffect(com.jttw.engine.registry.ModEffects.EXHAUSTED);
             p.removeAllEffects();
         }
         live = false;

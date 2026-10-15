@@ -59,9 +59,9 @@ public class ModItemsGameTests {
             Map.entry("yin_yang_vase", com.jttw.engine.item.YinYangVaseItem.class),
             Map.entry("mixed_iron_cudgel", com.jttw.engine.item.MixedIronCudgelItem.class),
             Map.entry("banana_leaf_fan", com.jttw.engine.item.BananaLeafFanItem.class),
-            Map.entry("bone_servant_spawn_egg", net.neoforged.neoforge.common.ForgeSpawnEggItem.class),
-            Map.entry("wraith_spawn_egg", net.neoforged.neoforge.common.ForgeSpawnEggItem.class),
-            Map.entry("lady_white_bone_spawn_egg", net.neoforged.neoforge.common.ForgeSpawnEggItem.class),
+            Map.entry("bone_servant_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("wraith_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("lady_white_bone_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
             Map.entry("eight_trigrams_furnace", com.jttw.engine.world.furnace.TrigramsFurnaceItem.class),
             Map.entry("true_samadhi_fire", Item.class),
             Map.entry("jade_block", BlockItem.class),
@@ -87,7 +87,7 @@ public class ModItemsGameTests {
         for (DeferredHolder<Item, ? extends Item> entry : ModItems.ITEMS.getEntries()) {
             String id = entry.getId().getPath();
             eq(h, JTTWEngine.MOD_ID, entry.getId().getNamespace(), id + " namespace");
-            check(h, entry.isPresent(), id + " is present");
+            check(h, entry.isBound(), id + " is present");
             Item item = entry.get();
             check(h, item != null, id + " is non-null");
             Class<? extends Item> expected = EXPECTED.get(id);
@@ -125,13 +125,13 @@ public class ModItemsGameTests {
 
     @GameTest(template = PLATFORM)
     public static void stackSizesRarityAndFireResistance(GameTestHelper h) {
-        eq(h, 16, ModItems.IMMORTAL_PEACH.get().getMaxStackSize(), "peach stack size");
-        eq(h, 1, ModItems.IMMORTAL_PILL.get().getMaxStackSize(), "pill stack size");
+        eq(h, 16, ModItems.IMMORTAL_PEACH.get().getDefaultMaxStackSize(), "peach stack size");
+        eq(h, 1, ModItems.IMMORTAL_PILL.get().getDefaultMaxStackSize(), "pill stack size");
         for (DeferredHolder<Item, ? extends Item> artifact : List.of(ModItems.RUYI_JINGU_BANG, ModItems.THREE_POINTED_SPEAR,
                 ModItems.ERLANG_AXE, ModItems.FIRE_TIP_SPEAR, ModItems.QIANKUN_RING, ModItems.YIN_YANG_SWORD,
                 ModItems.WIND_FIRE_WHEELS, ModItems.HUNTIAN_CLOTH, ModItems.BELL_OF_TAIYI,
                 ModItems.NINE_TOOTH_RAKE, ModItems.YIN_YANG_VASE, ModItems.MIXED_IRON_CUDGEL, ModItems.BANANA_LEAF_FAN)) {
-            eq(h, 1, artifact.get().getMaxStackSize(), artifact.getId().getPath() + " stack size");
+            eq(h, 1, artifact.get().getDefaultMaxStackSize(), artifact.getId().getPath() + " stack size");
         }
         for (DeferredHolder<Item, ? extends Item> epic : List.of(ModItems.IMMORTAL_PEACH, ModItems.IMMORTAL_PILL,
                 ModItems.RUYI_JINGU_BANG, ModItems.THREE_POINTED_SPEAR, ModItems.ERLANG_AXE,
@@ -143,14 +143,14 @@ public class ModItemsGameTests {
         for (DeferredHolder<Item, ? extends Item> fireproof : List.of(ModItems.RUYI_JINGU_BANG, ModItems.THREE_POINTED_SPEAR,
                 ModItems.ERLANG_AXE, ModItems.FIRE_TIP_SPEAR, ModItems.WIND_FIRE_WHEELS,
                 ModItems.NINE_TOOTH_RAKE, ModItems.MIXED_IRON_CUDGEL)) {
-            check(h, fireproof.get().isFireResistant(), fireproof.getId().getPath() + " survives lava");
+            check(h, new ItemStack(fireproof.get()).has(net.minecraft.core.component.DataComponents.FIRE_RESISTANT), fireproof.getId().getPath() + " survives lava");
         }
         for (DeferredHolder<Item, ? extends Item> burnable : List.of(ModItems.QIANKUN_RING, ModItems.YIN_YANG_SWORD,
                 ModItems.HUNTIAN_CLOTH, ModItems.IMMORTAL_PEACH)) {
-            check(h, !burnable.get().isFireResistant(), burnable.getId().getPath() + " is not fire resistant");
+            check(h, !new ItemStack(burnable.get()).has(net.minecraft.core.component.DataComponents.FIRE_RESISTANT), burnable.getId().getPath() + " is not fire resistant");
         }
-        check(h, ModItems.IMMORTAL_PEACH.get().isEdible(), "peach is edible");
-        check(h, ModItems.IMMORTAL_PILL.get().isEdible(), "pill is edible");
+        check(h, new ItemStack(ModItems.IMMORTAL_PEACH.get()).has(net.minecraft.core.component.DataComponents.FOOD), "peach is edible");
+        check(h, new ItemStack(ModItems.IMMORTAL_PILL.get()).has(net.minecraft.core.component.DataComponents.FOOD), "pill is edible");
         h.succeed();
     }
 
