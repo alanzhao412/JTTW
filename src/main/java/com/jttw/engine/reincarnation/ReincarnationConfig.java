@@ -1,6 +1,6 @@
 package com.jttw.engine.reincarnation;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
  * Common config for reincarnation.
@@ -8,29 +8,29 @@ import net.minecraftforge.common.ForgeConfigSpec;
 public final class ReincarnationConfig {
     private ReincarnationConfig() {}
 
-    public static final ForgeConfigSpec SPEC;
-    public static final ForgeConfigSpec.IntValue THRESHOLD_TOTAL_POINTS;
+    public static final ModConfigSpec SPEC;
+    public static final ModConfigSpec.IntValue THRESHOLD_TOTAL_POINTS;
 
     /**
      * Entity ids are optional. If set to a valid LivingEntity registry id, the engine will
      * auto-transform the player into that entity on reincarnation.
      */
-    public static final ForgeConfigSpec.ConfigValue<String> ENTITY_CELESTIAL_PRIMATE;
-    public static final ForgeConfigSpec.ConfigValue<String> ENTITY_YUAN_DI;
-    public static final ForgeConfigSpec.ConfigValue<String> ENTITY_EYE_OF_HEAVEN;
-    public static final ForgeConfigSpec.ConfigValue<String> ENTITY_THIRD_LOTUS_PRINCE;
-    public static final ForgeConfigSpec.ConfigValue<String> ENTITY_MARSHAL_HEAVENLY_CANOPY;
-    public static final ForgeConfigSpec.ConfigValue<String> ENTITY_PHOENIX;
-    public static final ForgeConfigSpec.ConfigValue<String> ENTITY_DRAGON;
-    public static final ForgeConfigSpec.ConfigValue<String> ENTITY_WHITE_TIGER;
-    public static final ForgeConfigSpec.ConfigValue<String> ENTITY_TURTLE;
-    public static final ForgeConfigSpec.ConfigValue<String> ENTITY_BULL_DEMON;
-    public static final ForgeConfigSpec.ConfigValue<String> ENTITY_SAURIAN_DEMON_KING;
-    public static final ForgeConfigSpec.ConfigValue<String> ENTITY_GRAND_SAINT_NINE_SPIRITS;
-    public static final ForgeConfigSpec.ConfigValue<String> ENTITY_GOLD_WINGED_PENG;
+    public static final ModConfigSpec.ConfigValue<String> ENTITY_CELESTIAL_PRIMATE;
+    public static final ModConfigSpec.ConfigValue<String> ENTITY_YUAN_DI;
+    public static final ModConfigSpec.ConfigValue<String> ENTITY_EYE_OF_HEAVEN;
+    public static final ModConfigSpec.ConfigValue<String> ENTITY_THIRD_LOTUS_PRINCE;
+    public static final ModConfigSpec.ConfigValue<String> ENTITY_MARSHAL_HEAVENLY_CANOPY;
+    public static final ModConfigSpec.ConfigValue<String> ENTITY_PHOENIX;
+    public static final ModConfigSpec.ConfigValue<String> ENTITY_DRAGON;
+    public static final ModConfigSpec.ConfigValue<String> ENTITY_WHITE_TIGER;
+    public static final ModConfigSpec.ConfigValue<String> ENTITY_TURTLE;
+    public static final ModConfigSpec.ConfigValue<String> ENTITY_BULL_DEMON;
+    public static final ModConfigSpec.ConfigValue<String> ENTITY_SAURIAN_DEMON_KING;
+    public static final ModConfigSpec.ConfigValue<String> ENTITY_GRAND_SAINT_NINE_SPIRITS;
+    public static final ModConfigSpec.ConfigValue<String> ENTITY_GOLD_WINGED_PENG;
 
     static {
-        ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder b = new ModConfigSpec.Builder();
 
         b.push("reincarnation");
 

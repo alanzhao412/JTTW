@@ -4,16 +4,28 @@ import com.jttw.engine.character.phoenix.PhoenixReviveData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import com.jttw.engine.JTTWEngine;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.function.Supplier;
 
 /**
  * Syncs Phoenix revive charge count from server to client for HUD display.
  */
-public class SyncReviveCountPacket {
+public class SyncReviveCountPacket implements CustomPacketPayload {
+
+    public static final Type<SyncReviveCountPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "sync_revive_count"));
+    public static final StreamCodec<FriendlyByteBuf, SyncReviveCountPacket> STREAM_CODEC = StreamCodec.of((buf, pkt) -> encode(pkt, buf), SyncReviveCountPacket::decode);
+
+    @Override
+    public Type<SyncReviveCountPacket> type() {
+        return TYPE;
+    }
 
     private final int remaining;
 
@@ -29,9 +41,8 @@ public class SyncReviveCountPacket {
         return new SyncReviveCountPacket(buf.readInt());
     }
 
-    public static void handle(SyncReviveCountPacket pkt, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> handleClient(pkt));
-        ctx.get().setPacketHandled(true);
+    public static void handle(SyncReviveCountPacket pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> handleClient(pkt));
     }
 
     @OnlyIn(Dist.CLIENT)

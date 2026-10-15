@@ -1,5 +1,7 @@
 package com.jttw.engine.item;
 
+import net.minecraft.resources.ResourceLocation;
+import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.registry.ModItems;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
@@ -31,9 +33,9 @@ import java.util.UUID;
 
 public class YinYangSwordItem extends Item {
 
-    private static final UUID UUID_ATK = UUID.fromString("e3c4d5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f");
+    private static final ResourceLocation UUID_ATK = JTTWEngine.id("yin_yang_sword_atk");
     /** The off-hand sword needs its own id, or the two hands overwrite each other's bonus. */
-    private static final UUID UUID_ATK_OFFHAND = UUID.fromString("e3c4d5f6-a7b8-4c9d-0e1f-2a3b4c5d6e80");
+    private static final ResourceLocation UUID_ATK_OFFHAND = JTTWEngine.id("atk_offhand");
     public static final String TAG_SIDE = "jttw_yy_side";
 
     public YinYangSwordItem() {
@@ -65,8 +67,8 @@ public class YinYangSwordItem extends Item {
         if (slot != EquipmentSlot.MAINHAND && slot != EquipmentSlot.OFFHAND) return ImmutableMultimap.of();
         ImmutableMultimap.Builder<Attribute, AttributeModifier> b = ImmutableMultimap.builder();
         UUID id = slot == EquipmentSlot.MAINHAND ? UUID_ATK : UUID_ATK_OFFHAND;
-        b.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(id, "jttw:yy_atk",
-                0.5 * Armaments.refineMultiplier(stack), AttributeModifier.Operation.MULTIPLY_TOTAL));
+        b.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(id,
+                0.5 * Armaments.refineMultiplier(stack), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
         return b.build();
     }
 

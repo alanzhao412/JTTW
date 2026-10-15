@@ -26,13 +26,15 @@ import net.minecraft.world.entity.ai.goal.target.TargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import java.util.*;
 
@@ -51,7 +53,7 @@ import java.util.*;
  * Each press of the key summons one more clone (10 Qi), up to the tier's cap (1 / 2 / 9).
  * Hitting your own clone dismisses it; clones fade when your Qi runs out.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
 public final class WuCloneManager {
 
     private WuCloneManager() {}
@@ -168,8 +170,7 @@ public final class WuCloneManager {
     // =========================================================================
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent e) {
-        if (e.phase != TickEvent.Phase.END) return;
+    public static void onServerTick(ServerTickEvent.Post e) {
 
         MinecraftServer server = net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();
         if (server == null) return;
@@ -270,7 +271,7 @@ public final class WuCloneManager {
 
     /** Prevent clones from ever damaging their owner. */
     @SubscribeEvent
-    public static void onCloneAttacks(LivingAttackEvent e) {
+    public static void onCloneAttacks(LivingIncomingDamageEvent e) {
         if (!(e.getSource().getEntity() instanceof WuCloneEntity clone)) return;
         if (e.getEntity() instanceof ServerPlayer player && isOwner(clone, player)) {
             e.setCanceled(true);

@@ -5,9 +5,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import com.jttw.engine.JTTWEngine;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -19,7 +23,15 @@ import java.util.function.Supplier;
  * needs {@link AlignmentData#KEY_REINCARNATED} and {@link AlignmentData#KEY_REINCARNATION_OUTCOME}
  * to render subclass + description reliably.
  */
-public final class SyncReincarnationPacket {
+public final class SyncReincarnationPacket implements CustomPacketPayload {
+
+    public static final Type<SyncReincarnationPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "sync_reincarnation"));
+    public static final StreamCodec<FriendlyByteBuf, SyncReincarnationPacket> STREAM_CODEC = StreamCodec.of((buf, pkt) -> encode(pkt, buf), SyncReincarnationPacket::decode);
+
+    @Override
+    public Type<SyncReincarnationPacket> type() {
+        return TYPE;
+    }
 
     private final UUID playerId;
     private final boolean reincarnated;
@@ -44,9 +56,8 @@ public final class SyncReincarnationPacket {
         return new SyncReincarnationPacket(id, reincarnated, outcomeId);
     }
 
-    public static void handle(SyncReincarnationPacket pkt, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> handleClient(pkt));
-        ctx.get().setPacketHandled(true);
+    public static void handle(SyncReincarnationPacket pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> handleClient(pkt));
     }
 
     @OnlyIn(Dist.CLIENT)

@@ -21,10 +21,10 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.monster.Husk;
 import net.minecraft.world.entity.projectile.Arrow;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import java.util.List;
 
@@ -62,7 +62,7 @@ public class TurtleGameTests {
     }
 
     private static float hurt(ServerPlayer p, DamageSource src, float amount) {
-        LivingHurtEvent ev = new LivingHurtEvent(p, src, amount);
+        LivingIncomingDamageEvent ev = new LivingIncomingDamageEvent(p, src, amount);
         TurtleAbilityHandler.onLivingHurt(ev);
         return ev.isCanceled() ? 0f : ev.getAmount();
     }
@@ -103,7 +103,7 @@ public class TurtleGameTests {
         ServerPlayer p = turtle(h);
         java.util.UUID id = java.util.UUID.fromString("c3d4e5f6-a7b8-9012-cdef-234567890100");
         p.getAttribute(Attributes.ARMOR).addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(
-                id, "jttw:turtle_def", 20.0, net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADDITION));
+                id, 20.0, net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE));
         LevelManager.reapplyStats(p);
         eq(h, null, modifier(p, Attributes.ARMOR, "jttw:turtle_def"), "old armor bonus");
         h.succeed();
@@ -338,11 +338,11 @@ public class TurtleGameTests {
         grant(p, "tu_gravity_1", "tu_gravity_2");
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 4);
         var ds = h.getLevel().damageSources();
-        LivingHurtEvent before = new LivingHurtEvent(golem, ds.generic(), 10f);
+        LivingIncomingDamageEvent before = new LivingIncomingDamageEvent(golem, ds.generic(), 10f);
         TurtleAbilityHandler.onLivingHurt(before);
         near(h, 10f, before.getAmount(), "no well");
         TurtleAbilityHandler.toggleGravityWell(p);
-        LivingHurtEvent during = new LivingHurtEvent(golem, ds.generic(), 10f);
+        LivingIncomingDamageEvent during = new LivingIncomingDamageEvent(golem, ds.generic(), 10f);
         TurtleAbilityHandler.onLivingHurt(during);
         near(h, 11.5f, during.getAmount(), "+15% inside the well");
         TurtleAbilityHandler.toggleGravityWell(p);
@@ -370,8 +370,8 @@ public class TurtleGameTests {
         qi(p, 100f, 100f);
         grant(p, "tu_tectonic_1", "tu_tremor_1");
         var ds = h.getLevel().damageSources();
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.living.LivingDamageEvent(p, ds.generic(), 6f));
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.living.LivingDamageEvent(p, ds.generic(), 4f));
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.living.LivingDamageEvent(p, ds.generic(), 6f));
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.living.LivingDamageEvent(p, ds.generic(), 4f));
         near(h, 10f, com.jttw.engine.character.turtle.StoredTremor.stored(p), "both blows stored");
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 3);
         List<Hit> hits = watch(golem);
@@ -386,7 +386,7 @@ public class TurtleGameTests {
     public static void storedTremorForgetsBlowsAfterTenSeconds(GameTestHelper h) {
         ServerPlayer p = as(h, ReincarnationOutcome.TURTLE);
         grant(p, "tu_tremor_1");
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.living.LivingDamageEvent(p, h.getLevel().damageSources().generic(), 6f));
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.living.LivingDamageEvent(p, h.getLevel().damageSources().generic(), 6f));
         h.runAfterDelay(com.jttw.engine.character.turtle.StoredTremor.WINDOW + 5, () -> {
             near(h, 0f, com.jttw.engine.character.turtle.StoredTremor.stored(p), "gone after 10 s");
             h.succeed();

@@ -1,6 +1,8 @@
 // FILE: src/main/java/com/jttw/engine/transformation/traits/AnimalSpeedTraits.java
 package com.jttw.engine.transformation.traits;
 
+import net.minecraft.resources.ResourceLocation;
+import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.transformation.TransformationData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
@@ -23,8 +25,7 @@ public final class AnimalSpeedTraits {
     private AnimalSpeedTraits() {}
 
     // one UUID; amount varies by type
-    private static final UUID JTTW_ANIMAL_SPEED_UUID =
-            UUID.fromString("9c2c6cf8-1b65-4c47-bd4d-0a548fd7e9a1");
+    private static final ResourceLocation JTTW_ANIMAL_SPEED_UUID = JTTWEngine.id("jttw_animal_speed");
 
     /**
      * MULTIPLY_BASE amounts
@@ -82,9 +83,8 @@ public final class AnimalSpeedTraits {
 
         move.addPermanentModifier(new AttributeModifier(
                 JTTW_ANIMAL_SPEED_UUID,
-                "jttw:animal_family_speed",
                 amount,
-                AttributeModifier.Operation.MULTIPLY_BASE
+                AttributeModifier.Operation.ADD_MULTIPLIED_BASE
         ));
     }
 }

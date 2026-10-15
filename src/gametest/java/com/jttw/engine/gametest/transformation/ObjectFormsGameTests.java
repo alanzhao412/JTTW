@@ -24,10 +24,10 @@ import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import java.util.List;
 
@@ -39,7 +39,7 @@ import static com.jttw.engine.gametest.GT.*;
 public class ObjectFormsGameTests {
 
     private static ResourceLocation id(String path) {
-        return new ResourceLocation("minecraft", path);
+        return ResourceLocation.fromNamespaceAndPath("minecraft", path);
     }
 
     /** A Wukong with 72 Transformations III: may take objects. */
@@ -68,7 +68,7 @@ public class ObjectFormsGameTests {
             check(h, !objects.contains(id(gone)), gone + " is not a form");
         }
         for (String mod : List.of("qi_wave", "thrown_spear", "howl_projectile", "placed_staff")) {
-            check(h, !objects.contains(new ResourceLocation(JTTWEngine.MOD_ID, mod)), "the mod's " + mod + " is not a form");
+            check(h, !objects.contains(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, mod)), "the mod's " + mod + " is not a form");
         }
         check(h, objects.contains(id("boat")) && objects.contains(id("minecart")), "real objects still are");
         eq(h, List.of(id("chest"), id("oak_sign"), id("tnt")), FormCatalog.blockForms(), "block forms");
@@ -82,7 +82,7 @@ public class ObjectFormsGameTests {
         check(h, !TransformationManager.isTransformed(p), "no lightning form");
         send(p, new RequestTransformPacket(RequestTransformPacket.Kind.OBJECT_ENTITY, id("tnt")));
         check(h, !TransformationManager.isTransformed(p), "no primed-TNT form");
-        send(p, new RequestTransformPacket(RequestTransformPacket.Kind.OBJECT_ENTITY, new ResourceLocation(JTTWEngine.MOD_ID, "qi_wave")));
+        send(p, new RequestTransformPacket(RequestTransformPacket.Kind.OBJECT_ENTITY, ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "qi_wave")));
         check(h, !TransformationManager.isTransformed(p), "no Qi Wave form");
         send(p, RequestTransformPacket.block(id("stone")));
         check(h, !TransformationManager.isTransformed(p), "stone is not a block form");

@@ -23,10 +23,10 @@ import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.monster.Husk;
 import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.entity.projectile.SmallFireball;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import java.util.List;
 
@@ -134,7 +134,7 @@ public class PhoenixGameTests {
     // ── Burning Plumage (passive) ───────────────────────────────────
 
     private static void hitBy(GameTestHelper h, ServerPlayer p, net.minecraft.world.damagesource.DamageSource src) {
-        PhoenixAbilityHandler.onTakeDamageRadiance(new LivingHurtEvent(p, src, 4f));
+        PhoenixAbilityHandler.onTakeDamageRadiance(new LivingIncomingDamageEvent(p, src, 4f));
     }
 
     @GameTest(template = PLATFORM, batch = "burningPlumageSetsMeleeAttackersAlight")
@@ -257,7 +257,7 @@ public class PhoenixGameTests {
         List<Hit> hits = watch(golem);
         float max = p.getMaxHealth();
         p.setHealth(max * 0.5f);
-        LivingHurtEvent hit = new LivingHurtEvent(p, h.getLevel().damageSources().generic(), max * 0.45f);
+        LivingIncomingDamageEvent hit = new LivingIncomingDamageEvent(p, h.getLevel().damageSources().generic(), max * 0.45f);
         PhoenixAbilityHandler.onTakeDamage(hit);
         check(h, hit.isCanceled(), "hit dropping HP to 5% is cancelled");
         near(h, max, p.getHealth(), "fully healed");
@@ -275,14 +275,14 @@ public class PhoenixGameTests {
         ServerPlayer p = phoenix(h);
         float max = p.getMaxHealth();
         p.setHealth(max);
-        LivingHurtEvent glancing = new LivingHurtEvent(p, h.getLevel().damageSources().generic(), max * 0.5f);
+        LivingIncomingDamageEvent glancing = new LivingIncomingDamageEvent(p, h.getLevel().damageSources().generic(), max * 0.5f);
         PhoenixAbilityHandler.onTakeDamage(glancing);
         check(h, !glancing.isCanceled(), "leaves 50%: no rebirth");
         eq(h, 5, PhoenixReviveData.getRevives(p), "no revive spent");
 
         PhoenixReviveData.setRevives(p, 0);
         p.setHealth(max * 0.5f);
-        LivingHurtEvent lethal = new LivingHurtEvent(p, h.getLevel().damageSources().generic(), max);
+        LivingIncomingDamageEvent lethal = new LivingIncomingDamageEvent(p, h.getLevel().damageSources().generic(), max);
         PhoenixAbilityHandler.onTakeDamage(lethal);
         check(h, !lethal.isCanceled(), "no charges left: the hit lands");
         h.succeed();
@@ -296,7 +296,7 @@ public class PhoenixGameTests {
         List<Hit> hits = watch(far);
         float max = p.getMaxHealth();
         p.setHealth(max * 0.05f);
-        PhoenixAbilityHandler.onTakeDamage(new LivingHurtEvent(p, h.getLevel().damageSources().generic(), 1f));
+        PhoenixAbilityHandler.onTakeDamage(new LivingIncomingDamageEvent(p, h.getLevel().damageSources().generic(), 1f));
         double dist = p.distanceTo(far);
         // tier 1: 8-block radius
         near(h, max * 0.25 * (1 - dist / 8.0), of(hits, DamageTypes.ON_FIRE).get(0).amount(), "blast damage at 8-block radius");
@@ -356,13 +356,13 @@ public class PhoenixGameTests {
         Pig pig = mob(h, EntityType.PIG, 0, 0);
         var ds = h.getLevel().damageSources();
         p.setHealth(10f);
-        PhoenixAbilityHandler.onDealDamage(new LivingHurtEvent(pig, ds.playerAttack(p), 3f));
+        PhoenixAbilityHandler.onDealDamage(new LivingIncomingDamageEvent(pig, ds.playerAttack(p), 3f));
         near(h, 10f, p.getHealth(), "no node, no heal");
         grant(p, "ph_drain_1");
-        PhoenixAbilityHandler.onDealDamage(new LivingHurtEvent(pig, ds.playerAttack(p), 3f));
+        PhoenixAbilityHandler.onDealDamage(new LivingIncomingDamageEvent(pig, ds.playerAttack(p), 3f));
         near(h, 10f + power, p.getHealth(), "tier 1: half a heart at level 1, scaled to 20");
         grant(p, "ph_drain_2");
-        PhoenixAbilityHandler.onDealDamage(new LivingHurtEvent(pig, ds.playerAttack(p), 3f));
+        PhoenixAbilityHandler.onDealDamage(new LivingIncomingDamageEvent(pig, ds.playerAttack(p), 3f));
         near(h, 10f + 3 * power, p.getHealth(), "tier 2: a heart at level 1, scaled to 20");
         h.succeed();
     }
@@ -373,18 +373,18 @@ public class PhoenixGameTests {
         grant(p, "ph_talons_1");
         Pig pig = mob(h, EntityType.PIG, 0, 0);
         var ds = h.getLevel().damageSources();
-        PhoenixAbilityHandler.onDealDamage(new LivingHurtEvent(pig, ds.playerAttack(p), 3f));
+        PhoenixAbilityHandler.onDealDamage(new LivingIncomingDamageEvent(pig, ds.playerAttack(p), 3f));
         eq(h, 60, pig.getRemainingFireTicks(), "melee sets fire for 3 s");
 
         Pig shot = mob(h, EntityType.PIG, 4, 0);
         Arrow arrow = EntityType.ARROW.create(h.getLevel());
-        PhoenixAbilityHandler.onDealDamage(new LivingHurtEvent(shot, ds.arrow(arrow, p), 3f));
+        PhoenixAbilityHandler.onDealDamage(new LivingIncomingDamageEvent(shot, ds.arrow(arrow, p), 3f));
         check(h, shot.getRemainingFireTicks() <= 0, "arrows do not ignite");
 
         grant(p, "ph_talons_2");
         p.setHealth(10f);
         SmallFireball ball = new SmallFireball(h.getLevel(), p, 0, 0, 0);
-        PhoenixAbilityHandler.onDealDamage(new LivingHurtEvent(shot, ds.fireball(ball, p), 8f));
+        PhoenixAbilityHandler.onDealDamage(new LivingIncomingDamageEvent(shot, ds.fireball(ball, p), 8f));
         near(h, 12f, p.getHealth(), "fire damage heals 25% of 8");
         ball.discard();
         h.succeed();
@@ -409,14 +409,14 @@ public class PhoenixGameTests {
     public static void risingEmberTierTwoMakesThePhoenixFireproof(GameTestHelper h) {
         ServerPlayer p = phoenix(h);
         var ds = h.getLevel().damageSources();
-        LivingHurtEvent before = new LivingHurtEvent(p, ds.inFire(), 2f);
+        LivingIncomingDamageEvent before = new LivingIncomingDamageEvent(p, ds.inFire(), 2f);
         PhoenixAbilityHandler.onTakeDamageRadiance(before);
         check(h, !before.isCanceled(), "fire hurts without Rising Ember II");
         grant(p, "ph_ember_1", "ph_ember_2");
-        LivingHurtEvent fire = new LivingHurtEvent(p, ds.inFire(), 2f);
+        LivingIncomingDamageEvent fire = new LivingIncomingDamageEvent(p, ds.inFire(), 2f);
         PhoenixAbilityHandler.onTakeDamageRadiance(fire);
         check(h, fire.isCanceled(), "fire cancelled");
-        LivingHurtEvent lava = new LivingHurtEvent(p, ds.lava(), 4f);
+        LivingIncomingDamageEvent lava = new LivingIncomingDamageEvent(p, ds.lava(), 4f);
         PhoenixAbilityHandler.onTakeDamageRadiance(lava);
         check(h, lava.isCanceled(), "lava cancelled");
         p.setRemainingFireTicks(100);

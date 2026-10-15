@@ -4,10 +4,11 @@ import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.network.s2c.QiSeenPacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import java.util.Map;
 import java.util.UUID;
@@ -17,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Each player's Qi, shared with the players who can see them, so truth-seeing eyes (the Fiery
  * Golden Eyes, the Eye of Heaven) can read it. Sent as it changes, by whole points.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class QiShown {
 
     private QiShown() {}
@@ -29,8 +30,8 @@ public final class QiShown {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p) || p.tickCount % 10 != 0) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer p) || p.tickCount % 10 != 0) return;
         long now = packed(p);
         Long was = LAST.put(p.getUUID(), now);
         if (was == null || was != now) {

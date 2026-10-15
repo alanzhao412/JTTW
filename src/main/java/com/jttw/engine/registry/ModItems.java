@@ -14,10 +14,10 @@ import com.jttw.engine.item.WindFireWheelsItem;
 import com.jttw.engine.item.YinYangSwordItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.minecraft.core.registries.Registries;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 /** The mod's items: consumables, block items and the characters' artifacts. */
 public final class ModItems {
@@ -25,115 +25,115 @@ public final class ModItems {
     private ModItems() {}
 
     public static final DeferredRegister<Item> ITEMS =
-            DeferredRegister.create(ForgeRegistries.ITEMS, JTTWEngine.MOD_ID);
+            DeferredRegister.create(Registries.ITEM, JTTWEngine.MOD_ID);
 
     // ── Consumables and blocks ────────────────────────────────────
-    public static final RegistryObject<Item> IMMORTAL_PEACH =
+    public static final DeferredHolder<Item, Item> IMMORTAL_PEACH =
             ITEMS.register("immortal_peach", ImmortalPeachItem::new);
 
-    public static final RegistryObject<Item> CELESTIAL_CLOUD_ITEM =
+    public static final DeferredHolder<Item, Item> CELESTIAL_CLOUD_ITEM =
             ITEMS.register("celestial_cloud", () -> new BlockItem(
                     ModBlocks.CELESTIAL_CLOUD.get(), new Item.Properties()));
 
     // ── Forging: the furnace, and the zones' materials ─────────────
-    public static final RegistryObject<Item> EIGHT_TRIGRAMS_FURNACE_ITEM =
+    public static final DeferredHolder<Item, Item> EIGHT_TRIGRAMS_FURNACE_ITEM =
             ITEMS.register("eight_trigrams_furnace", () -> new com.jttw.engine.world.furnace.TrigramsFurnaceItem(ModBlocks.EIGHT_TRIGRAMS_FURNACE.get(), new Item.Properties()));
     /** The furnace's only fuel: forged from the zones' materials (Nezha and the Phoenix need none: their fire lights it). */
-    public static final RegistryObject<Item> TRUE_SAMADHI_FIRE = ITEMS.register("true_samadhi_fire",
+    public static final DeferredHolder<Item, Item> TRUE_SAMADHI_FIRE = ITEMS.register("true_samadhi_fire",
             () -> new Item(new Item.Properties().rarity(net.minecraft.world.item.Rarity.RARE).fireResistant()));
     /** Erlang Shen's Golden Bow (see GoldenBowItem). */
-    public static final RegistryObject<Item> GOLDEN_BOW = ITEMS.register("golden_bow", com.jttw.engine.item.GoldenBowItem::new);
+    public static final DeferredHolder<Item, Item> GOLDEN_BOW = ITEMS.register("golden_bow", com.jttw.engine.item.GoldenBowItem::new);
     /** The ji of Heaven's soldiers; now and then one falls from a soldier struck down. */
-    public static final RegistryObject<Item> HEAVENLY_HALBERD = ITEMS.register("heavenly_halberd",
+    public static final DeferredHolder<Item, Item> HEAVENLY_HALBERD = ITEMS.register("heavenly_halberd",
             () -> new net.minecraft.world.item.SwordItem(net.minecraft.world.item.Tiers.GOLD, 4, -2.8f,
                     new Item.Properties().durability(600).rarity(net.minecraft.world.item.Rarity.UNCOMMON)));
     /** From Bone Servants. */
-    public static final RegistryObject<Item> SERVANT_BONE = ITEMS.register("servant_bone", () -> new Item(new Item.Properties()));
+    public static final DeferredHolder<Item, Item> SERVANT_BONE = ITEMS.register("servant_bone", () -> new Item(new Item.Properties()));
     /** From Wraiths. */
-    public static final RegistryObject<Item> WRAITH_WISP = ITEMS.register("wraith_wisp", () -> new Item(new Item.Properties()));
+    public static final DeferredHolder<Item, Item> WRAITH_WISP = ITEMS.register("wraith_wisp", () -> new Item(new Item.Properties()));
     /** From any captain. */
-    public static final RegistryObject<Item> CAPTAINS_SIGIL = ITEMS.register("captains_sigil",
+    public static final DeferredHolder<Item, Item> CAPTAINS_SIGIL = ITEMS.register("captains_sigil",
             () -> new Item(new Item.Properties().rarity(net.minecraft.world.item.Rarity.UNCOMMON)));
     /** From Lady White Bone. */
-    public static final RegistryObject<Item> HEART_BONE = ITEMS.register("heart_bone",
+    public static final DeferredHolder<Item, Item> HEART_BONE = ITEMS.register("heart_bone",
             () -> new Item(new Item.Properties().rarity(net.minecraft.world.item.Rarity.EPIC).fireResistant()));
 
     // ── Heaven and Hell ───────────────────────────────────────────
-    public static final RegistryObject<Item> JADE_BLOCK_ITEM =
+    public static final DeferredHolder<Item, Item> JADE_BLOCK_ITEM =
             ITEMS.register("jade_block", () -> new BlockItem(ModBlocks.JADE_BLOCK.get(), new Item.Properties()));
-    public static final RegistryObject<Item> HEAVENLY_WINE = ITEMS.register("heavenly_wine",
+    public static final DeferredHolder<Item, Item> HEAVENLY_WINE = ITEMS.register("heavenly_wine",
             () -> new com.jttw.engine.world.heaven.HeavenlyWineItem(new Item.Properties().stacksTo(16).rarity(net.minecraft.world.item.Rarity.RARE)));
 
     // ── White Bone Ridge spawn eggs ───────────────────────────────
-    public static final RegistryObject<Item> BONE_SERVANT_SPAWN_EGG = ITEMS.register("bone_servant_spawn_egg",
-            () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.jttw.engine.registry.ModEntities.BONE_SERVANT, 0xE8E4D8, 0x6B6458, new Item.Properties()));
-    public static final RegistryObject<Item> WRAITH_SPAWN_EGG = ITEMS.register("wraith_spawn_egg",
-            () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.jttw.engine.registry.ModEntities.WRAITH, 0xF4F6FA, 0x9AA3B5, new Item.Properties()));
-    public static final RegistryObject<Item> LADY_WHITE_BONE_SPAWN_EGG = ITEMS.register("lady_white_bone_spawn_egg",
-            () -> new net.minecraftforge.common.ForgeSpawnEggItem(com.jttw.engine.registry.ModEntities.LADY_WHITE_BONE, 0xF2EFE6, 0x5A2D82, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> BONE_SERVANT_SPAWN_EGG = ITEMS.register("bone_servant_spawn_egg",
+            () -> new net.neoforged.neoforge.common.ForgeSpawnEggItem(com.jttw.engine.registry.ModEntities.BONE_SERVANT, 0xE8E4D8, 0x6B6458, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> WRAITH_SPAWN_EGG = ITEMS.register("wraith_spawn_egg",
+            () -> new net.neoforged.neoforge.common.ForgeSpawnEggItem(com.jttw.engine.registry.ModEntities.WRAITH, 0xF4F6FA, 0x9AA3B5, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> LADY_WHITE_BONE_SPAWN_EGG = ITEMS.register("lady_white_bone_spawn_egg",
+            () -> new net.neoforged.neoforge.common.ForgeSpawnEggItem(com.jttw.engine.registry.ModEntities.LADY_WHITE_BONE, 0xF2EFE6, 0x5A2D82, new Item.Properties()));
 
-    public static final RegistryObject<Item> IMMORTAL_PILL =
+    public static final DeferredHolder<Item, Item> IMMORTAL_PILL =
             ITEMS.register("jttw_immortal_pill", ImmortalItems.ImmortalPillItem::new);
 
     // True Samadhi Fire is an entity, not an item.
     // Call ImmortalItems.onSamadhiFireHit(player) when the fire entity hits a Wukong player.
 
     // ── Wukong ────────────────────────────────────────────────────
-    public static final RegistryObject<Item> RUYI_JINGU_BANG =
+    public static final DeferredHolder<Item, Item> RUYI_JINGU_BANG =
             ITEMS.register("ruyi_jingu_bang", RuyiJinguBangItem::new);
 
     // ── Erlang Shen ───────────────────────────────────────────────
-    public static final RegistryObject<Item> THREE_POINTED_SPEAR =
+    public static final DeferredHolder<Item, Item> THREE_POINTED_SPEAR =
             ITEMS.register("three_pointed_spear", ThreePointedSpearItem::new);
 
-    public static final RegistryObject<Item> ERLANG_AXE =
+    public static final DeferredHolder<Item, Item> ERLANG_AXE =
             ITEMS.register("erlang_axe", ErlangAxeItem::new);
 
     // ── Nezha ─────────────────────────────────────────────────────
-    public static final RegistryObject<Item> FIRE_TIP_SPEAR =
+    public static final DeferredHolder<Item, Item> FIRE_TIP_SPEAR =
             ITEMS.register("fire_tip_spear", FireTipSpearItem::new);
-    public static final RegistryObject<Item> QIANKUN_RING =
+    public static final DeferredHolder<Item, Item> QIANKUN_RING =
             ITEMS.register("qiankun_ring", QiankunRingItem::new);
-    public static final RegistryObject<Item> YIN_YANG_SWORD =
+    public static final DeferredHolder<Item, Item> YIN_YANG_SWORD =
             ITEMS.register("yin_yang_sword", YinYangSwordItem::new);
-    public static final RegistryObject<Item> WIND_FIRE_WHEELS =
+    public static final DeferredHolder<Item, Item> WIND_FIRE_WHEELS =
             ITEMS.register("wind_fire_wheels", WindFireWheelsItem::new);
-    public static final RegistryObject<Item> HUNTIAN_CLOTH =
+    public static final DeferredHolder<Item, Item> HUNTIAN_CLOTH =
             ITEMS.register("huntian_cloth", HuntianClothItem::new);
 
     // ── Grand Saint of Nine Spirits ───────────────────────────────
-    public static final RegistryObject<Item> BELL_OF_TAIYI =
+    public static final DeferredHolder<Item, Item> BELL_OF_TAIYI =
             ITEMS.register("bell_of_taiyi", BellOfTaiyiItem::new);
 
-    public static final RegistryObject<Item> NINE_TOOTH_RAKE =
+    public static final DeferredHolder<Item, Item> NINE_TOOTH_RAKE =
             ITEMS.register("nine_tooth_rake", com.jttw.engine.item.NineToothRakeItem::new);
 
-    public static final RegistryObject<Item> YIN_YANG_VASE =
+    public static final DeferredHolder<Item, Item> YIN_YANG_VASE =
             ITEMS.register("yin_yang_vase", com.jttw.engine.item.YinYangVaseItem::new);
 
-    public static final RegistryObject<Item> MIXED_IRON_CUDGEL =
+    public static final DeferredHolder<Item, Item> MIXED_IRON_CUDGEL =
             ITEMS.register("mixed_iron_cudgel", com.jttw.engine.item.MixedIronCudgelItem::new);
 
-    public static final RegistryObject<Item> BANANA_LEAF_FAN =
+    public static final DeferredHolder<Item, Item> BANANA_LEAF_FAN =
             ITEMS.register("banana_leaf_fan", com.jttw.engine.item.BananaLeafFanItem::new);
 
 
     // ── Tough stone ──
-    public static final RegistryObject<Item> BLEACHED_STONE_ITEM =
+    public static final DeferredHolder<Item, Item> BLEACHED_STONE_ITEM =
             ITEMS.register("bleached_stone", () -> new BlockItem(ModBlocks.BLEACHED_STONE.get(), new Item.Properties()));
-    public static final RegistryObject<Item> GRAVE_TUFF_ITEM =
+    public static final DeferredHolder<Item, Item> GRAVE_TUFF_ITEM =
             ITEMS.register("grave_tuff", () -> new BlockItem(ModBlocks.GRAVE_TUFF.get(), new Item.Properties()));
-    public static final RegistryObject<Item> BONE_ANDESITE_ITEM =
+    public static final DeferredHolder<Item, Item> BONE_ANDESITE_ITEM =
             ITEMS.register("bone_andesite", () -> new BlockItem(ModBlocks.BONE_ANDESITE.get(), new Item.Properties()));
-    public static final RegistryObject<Item> OSSIFIED_BONE_ITEM =
+    public static final DeferredHolder<Item, Item> OSSIFIED_BONE_ITEM =
             ITEMS.register("ossified_bone", () -> new BlockItem(ModBlocks.OSSIFIED_BONE.get(), new Item.Properties()));
-    public static final RegistryObject<Item> BONE_GRAVEL_ITEM =
+    public static final DeferredHolder<Item, Item> BONE_GRAVEL_ITEM =
             ITEMS.register("bone_gravel", () -> new BlockItem(ModBlocks.BONE_GRAVEL.get(), new Item.Properties()));
-    public static final RegistryObject<Item> CELESTIAL_MARBLE_ITEM =
+    public static final DeferredHolder<Item, Item> CELESTIAL_MARBLE_ITEM =
             ITEMS.register("celestial_marble", () -> new BlockItem(ModBlocks.CELESTIAL_MARBLE.get(), new Item.Properties()));
-    public static final RegistryObject<Item> UNDERWORLD_STONE_ITEM =
+    public static final DeferredHolder<Item, Item> UNDERWORLD_STONE_ITEM =
             ITEMS.register("underworld_stone", () -> new BlockItem(ModBlocks.UNDERWORLD_STONE.get(), new Item.Properties()));
-    public static final RegistryObject<Item> SOUL_ASH_ITEM =
+    public static final DeferredHolder<Item, Item> SOUL_ASH_ITEM =
             ITEMS.register("soul_ash", () -> new BlockItem(ModBlocks.SOUL_ASH.get(), new Item.Properties()));
 
     public static void register(IEventBus modEventBus) {

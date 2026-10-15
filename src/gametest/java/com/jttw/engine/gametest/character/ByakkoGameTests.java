@@ -26,11 +26,11 @@ import net.minecraft.world.entity.monster.Husk;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.common.NeoForgeMod;
+import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import java.util.List;
 
@@ -85,7 +85,7 @@ public class ByakkoGameTests {
         LevelManager.reapplyStats(p);
         // constants: +0.008 speed per level (80% at 100), step 1.0 + 0.01 per level (2.0 at 100)
         near(h, 0.8, modifier(p, Attributes.MOVEMENT_SPEED, "jttw:byakko_speed"), "speed bonus at 100");
-        near(h, 2.0, modifier(p, ForgeMod.STEP_HEIGHT_ADDITION.get(), "jttw:byakko_step"), "step bonus at 100");
+        near(h, 2.0, modifier(p, NeoForgeMod.STEP_HEIGHT_ADDITION.get(), "jttw:byakko_step"), "step bonus at 100");
         h.succeed();
     }
 
@@ -243,7 +243,7 @@ public class ByakkoGameTests {
     // ── Savage Bleed (passive) ──────────────────────────────────────
 
     private static void strike(GameTestHelper h, ServerPlayer p, IronGolem target, float amount) {
-        ByakkoAbilityHandler.onLivingHurt(new LivingHurtEvent(target, h.getLevel().damageSources().playerAttack(p), amount));
+        ByakkoAbilityHandler.onLivingHurt(new LivingIncomingDamageEvent(target, h.getLevel().damageSources().playerAttack(p), amount));
     }
 
     @GameTest(template = PLATFORM, batch = "bleedDealsDamageEverySecondScaledByAttack")
@@ -333,15 +333,15 @@ public class ByakkoGameTests {
         ServerPlayer p = byakko(h);
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 4);
         p.setDeltaMovement(new Vec3(0.5, 0, 0)); // 10 blocks per second
-        LivingHurtEvent none = new LivingHurtEvent(golem, h.getLevel().damageSources().playerAttack(p), 10f);
+        LivingIncomingDamageEvent none = new LivingIncomingDamageEvent(golem, h.getLevel().damageSources().playerAttack(p), 10f);
         ByakkoAbilityHandler.onLivingHurt(none);
         near(h, 10f, none.getAmount(), "no node");
         grant(p, "bk_velocity_1");
-        LivingHurtEvent t1 = new LivingHurtEvent(golem, h.getLevel().damageSources().playerAttack(p), 10f);
+        LivingIncomingDamageEvent t1 = new LivingIncomingDamageEvent(golem, h.getLevel().damageSources().playerAttack(p), 10f);
         ByakkoAbilityHandler.onLivingHurt(t1);
         near(h, 15f, t1.getAmount(), "tier 1: 5% per block/s");
         grant(p, "bk_velocity_2");
-        LivingHurtEvent t2 = new LivingHurtEvent(golem, h.getLevel().damageSources().playerAttack(p), 10f);
+        LivingIncomingDamageEvent t2 = new LivingIncomingDamageEvent(golem, h.getLevel().damageSources().playerAttack(p), 10f);
         ByakkoAbilityHandler.onLivingHurt(t2);
         near(h, 20f, t2.getAmount(), "tier 2: 10% per block/s");
         h.succeed();
@@ -359,12 +359,12 @@ public class ByakkoGameTests {
         check(h, !wounded.hasEffect(MobEffects.GLOWING), "for him alone: no glow the world sees");
         check(h, !com.jttw.engine.world.PrivateGlow.glowsFor(p, healthy), "healthy prey is not marked");
 
-        LivingHurtEvent t1 = new LivingHurtEvent(wounded, h.getLevel().damageSources().playerAttack(p), 10f);
+        LivingIncomingDamageEvent t1 = new LivingIncomingDamageEvent(wounded, h.getLevel().damageSources().playerAttack(p), 10f);
         ByakkoAbilityHandler.onLivingHurt(t1);
         near(h, 10f, t1.getAmount(), "tier 1 only marks");
 
         grant(p, "bk_instinct_2");
-        LivingHurtEvent first = new LivingHurtEvent(wounded, h.getLevel().damageSources().playerAttack(p), 10f);
+        LivingIncomingDamageEvent first = new LivingIncomingDamageEvent(wounded, h.getLevel().damageSources().playerAttack(p), 10f);
         ByakkoAbilityHandler.onLivingHurt(first);
         near(h, 20f, first.getAmount(), "tier 2: first hit doubled");
         check(h, !com.jttw.engine.world.PrivateGlow.glowsFor(p, wounded), "mark consumed");

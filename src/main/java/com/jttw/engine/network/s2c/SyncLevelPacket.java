@@ -5,9 +5,13 @@ import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.stats.ProgressionClass;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import com.jttw.engine.JTTWEngine;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -29,7 +33,15 @@ import java.util.function.Supplier;
  *     .add();
  * }</pre>
  */
-public class SyncLevelPacket {
+public class SyncLevelPacket implements CustomPacketPayload {
+
+    public static final Type<SyncLevelPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "sync_level"));
+    public static final StreamCodec<FriendlyByteBuf, SyncLevelPacket> STREAM_CODEC = StreamCodec.of((buf, pkt) -> encode(pkt, buf), SyncLevelPacket::decode);
+
+    @Override
+    public Type<SyncLevelPacket> type() {
+        return TYPE;
+    }
 
     private final UUID playerId;
     private final int level;
@@ -74,9 +86,8 @@ public class SyncLevelPacket {
     // Client-side handling
     // -----------------------------------------------------------------------
 
-    public static void handle(SyncLevelPacket pkt, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> handleClient(pkt));
-        ctx.get().setPacketHandled(true);
+    public static void handle(SyncLevelPacket pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> handleClient(pkt));
     }
 
     @OnlyIn(Dist.CLIENT)

@@ -1,5 +1,6 @@
 package com.jttw.engine.character.wukong;
 
+import net.minecraft.resources.ResourceLocation;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.qi.QiManager;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
@@ -26,10 +27,12 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import java.util.HashSet;
 import java.util.List;
@@ -39,7 +42,7 @@ import java.util.UUID;
 /**
  * Server-side handler for Wukong-specific active abilities.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
 public final class WukongAbilityHandler {
 
     private WukongAbilityHandler() {}
@@ -84,8 +87,7 @@ public final class WukongAbilityHandler {
     // -----------------------------------------------------------------------
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onServerTick(ServerTickEvent.Post event) {
 
         MinecraftServer server = event.getServer();
         Set<UUID> toRemove = new HashSet<>();
@@ -245,14 +247,13 @@ public final class WukongAbilityHandler {
     // Martial Arts passive — movement speed, reach, ATK, physical resistance
     // -----------------------------------------------------------------------
 
-    private static final UUID UUID_MARTIAL_SPEED = UUID.fromString("c5f4e3d2-9b6a-4e8f-0c7d-3a1e5f9b2d6c");
-    private static final UUID UUID_MARTIAL_ATK   = UUID.fromString("d6a5f4e3-0c7b-4f9a-1d8e-4b2f6a0c3e7d");
-    private static final UUID UUID_MARTIAL_ARMOR = UUID.fromString("e7b6a5f4-1d8c-4a0b-2e9f-5c3a7b1d4f8e");
+    private static final ResourceLocation UUID_MARTIAL_SPEED = JTTWEngine.id("martial_speed");
+    private static final ResourceLocation UUID_MARTIAL_ATK   = JTTWEngine.id("martial_atk");
+    private static final ResourceLocation UUID_MARTIAL_ARMOR = JTTWEngine.id("martial_armor");
 
     @SubscribeEvent
-    public static void onPlayerTickMartial(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.START) return;
-        if (!(event.player instanceof ServerPlayer sp)) return;
+    public static void onPlayerTickMartial(PlayerTickEvent.Pre event) {
+        if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         if (!isWukong(sp)) return;
         // Only check every 20 ticks
         if (sp.tickCount % 20 != 0) return;
@@ -261,17 +262,17 @@ public final class WukongAbilityHandler {
 
         // Tier 1: +15% movement speed
         applyOrRemove(sp, Attributes.MOVEMENT_SPEED, UUID_MARTIAL_SPEED, "jttw:martial_speed",
-                tier >= 1 ? 0.15 : 0, AttributeModifier.Operation.MULTIPLY_TOTAL);
+                tier >= 1 ? 0.15 : 0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 
         // Tier 3: +30% attack damage
         applyOrRemove(sp, Attributes.ATTACK_DAMAGE, UUID_MARTIAL_ATK, "jttw:martial_atk",
-                tier >= 3 ? 0.30 : 0, AttributeModifier.Operation.MULTIPLY_TOTAL);
+                tier >= 3 ? 0.30 : 0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 
         // Tier 3: +24 physical resistance
         applyOrRemove(sp, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get(), UUID_MARTIAL_ARMOR,
-                "jttw:martial_pres", tier >= 3 ? 24.0 : 0, AttributeModifier.Operation.ADDITION);
+                "jttw:martial_pres", tier >= 3 ? 24.0 : 0, AttributeModifier.Operation.ADD_VALUE);
         applyOrRemove(sp, Attributes.ARMOR, UUID_MARTIAL_ARMOR, "jttw:martial_armor", 0,
-                AttributeModifier.Operation.ADDITION); // the old armor version
+                AttributeModifier.Operation.ADD_VALUE); // the old armor version
     }
 
     private static void applyOrRemove(ServerPlayer sp, net.minecraft.world.entity.ai.attributes.Attribute attr,
@@ -284,7 +285,7 @@ public final class WukongAbilityHandler {
         if (amount > 0) {
             if (existing == null || existing.getAmount() != amount) {
                 if (existing != null) inst.removeModifier(uuid);
-                inst.addTransientModifier(new AttributeModifier(uuid, name, amount, op));
+                inst.addTransientModifier(new AttributeModifier(uuid, amount, op));
             }
         } else if (existing != null) {
             inst.removeModifier(uuid);
@@ -299,8 +300,8 @@ public final class WukongAbilityHandler {
      * When Wukong has consumed both Immortal Pills and Immortal Peaches,
      * he becomes immune to projectiles, explosions, fire, and lightning.
      */
-    @SubscribeEvent(priority = net.minecraftforge.eventbus.api.EventPriority.HIGHEST)
-    public static void onImmortalityDamage(net.minecraftforge.event.entity.living.LivingHurtEvent event) {
+    @SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.HIGHEST)
+    public static void onImmortalityDamage(net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (!isWukong(player)) return;
         if (!ImmortalItems.hasFullImmortality(player)) return;
@@ -336,7 +337,7 @@ public final class WukongAbilityHandler {
      * Full immortality grants knockback immunity.
      */
     @SubscribeEvent
-    public static void onKnockback(net.minecraftforge.event.entity.living.LivingKnockBackEvent event) {
+    public static void onKnockback(net.neoforged.neoforge.event.entity.living.LivingKnockBackEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (!isWukong(player)) return;
         if (!ImmortalItems.hasFullImmortality(player)) return;
@@ -349,9 +350,8 @@ public final class WukongAbilityHandler {
     // -----------------------------------------------------------------------
 
     @SubscribeEvent
-    public static void onPlayerTickImmortality(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.START) return;
-        if (!(event.player instanceof ServerPlayer sp)) return;
+    public static void onPlayerTickImmortality(PlayerTickEvent.Pre event) {
+        if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         if (!isWukong(sp)) return;
 
         // Clear visual fire ticks if fully immortal (except during Samadhi trial)
@@ -480,8 +480,7 @@ public final class WukongAbilityHandler {
 
     // Golden Eyes xray Qi drain — piggyback on the ring of fire server tick
     @SubscribeEvent
-    public static void onServerTickGoldenEyes(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onServerTickGoldenEyes(ServerTickEvent.Post event) {
 
         MinecraftServer server = event.getServer();
         Set<UUID> toRemove = new HashSet<>();
@@ -564,8 +563,8 @@ public final class WukongAbilityHandler {
     }
 
     @SubscribeEvent
-    public static void onPlayerTickMomentum(TickEvent.PlayerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && event.player instanceof ServerPlayer sp) tickMomentum(sp);
+    public static void onPlayerTickMomentum(PlayerTickEvent.Post event) {
+        if (event.getEntity() instanceof ServerPlayer sp) tickMomentum(sp);
     }
 
     // -----------------------------------------------------------------------

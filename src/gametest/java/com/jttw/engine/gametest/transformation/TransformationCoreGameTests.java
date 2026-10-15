@@ -15,11 +15,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -46,7 +46,7 @@ public class TransformationCoreGameTests {
         TransformationData data = TransformationManager.getTransformation(p);
         check(h, data != null, "transformed");
         eq(h, EntityType.IRON_GOLEM, data.getEntityType(), "form");
-        eq(h, new ResourceLocation("minecraft", "iron_golem"), data.getEntityId(), "form id");
+        eq(h, ResourceLocation.fromNamespaceAndPath("minecraft", "iron_golem"), data.getEntityId(), "form id");
         // vanilla iron golem is 1.4 x 2.7
         near(h, 1.4, p.getBbWidth(), "player hitbox width");
         near(h, 2.7, p.getBbHeight(), "player hitbox height");
@@ -269,7 +269,7 @@ public class TransformationCoreGameTests {
     @GameTest(template = PLATFORM)
     public static void truncatedNetworkDataDecodesAsNull(GameTestHelper h) {
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-        buf.writeResourceLocation(new ResourceLocation("minecraft", "cow"));
+        buf.writeResourceLocation(ResourceLocation.fromNamespaceAndPath("minecraft", "cow"));
         buf.writeFloat(1.3f);
         check(h, TransformationData.fromNetwork(buf) == null, "short buffer -> null rather than a throw");
         h.succeed();
@@ -333,15 +333,15 @@ public class TransformationCoreGameTests {
         var sources = h.getLevel().damageSources();
         ServerPlayer allay = Tf.playerAs(h, EntityType.ALLAY);
         allay.hurtTime = 5;
-        LivingAttackEvent attack = new LivingAttackEvent(allay, sources.inWall(), 1f);
+        LivingIncomingDamageEvent attack = new LivingIncomingDamageEvent(allay, sources.inWall(), 1f);
         SuffocationDamageBlocker.onLivingAttack(attack);
         check(h, attack.isCanceled(), "in-wall attack cancelled");
         eq(h, 0, allay.hurtTime, "hurt flash cleared");
-        LivingHurtEvent hurt = new LivingHurtEvent(allay, sources.inWall(), 1f);
+        LivingIncomingDamageEvent hurt = new LivingIncomingDamageEvent(allay, sources.inWall(), 1f);
         SuffocationDamageBlocker.onLivingHurt(hurt);
         check(h, hurt.isCanceled(), "in-wall hurt cancelled");
 
-        LivingAttackEvent other = new LivingAttackEvent(allay, sources.generic(), 1f);
+        LivingIncomingDamageEvent other = new LivingIncomingDamageEvent(allay, sources.generic(), 1f);
         SuffocationDamageBlocker.onLivingAttack(other);
         check(h, !other.isCanceled(), "other damage still lands on a phasing form");
         h.succeed();
@@ -351,11 +351,11 @@ public class TransformationCoreGameTests {
     public static void solidFormsStillSuffocate(GameTestHelper h) {
         var sources = h.getLevel().damageSources();
         ServerPlayer cow = Tf.playerAs(h, EntityType.COW);
-        LivingAttackEvent attack = new LivingAttackEvent(cow, sources.inWall(), 1f);
+        LivingIncomingDamageEvent attack = new LivingIncomingDamageEvent(cow, sources.inWall(), 1f);
         SuffocationDamageBlocker.onLivingAttack(attack);
         check(h, !attack.isCanceled(), "cow form suffocates");
         ServerPlayer human = Tf.player(h);
-        LivingHurtEvent hurt = new LivingHurtEvent(human, sources.inWall(), 1f);
+        LivingIncomingDamageEvent hurt = new LivingIncomingDamageEvent(human, sources.inWall(), 1f);
         SuffocationDamageBlocker.onLivingHurt(hurt);
         check(h, !hurt.isCanceled(), "untransformed player suffocates");
         h.succeed();

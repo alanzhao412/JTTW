@@ -1,5 +1,7 @@
 package com.jttw.engine.item;
 
+import net.minecraft.resources.ResourceLocation;
+import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.character.nezha.NezhaCharacter;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
@@ -32,7 +34,7 @@ import java.util.UUID;
 
 public class FireTipSpearItem extends Item {
 
-    private static final UUID UUID_ATK = UUID.fromString("c1a2b3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d");
+    private static final ResourceLocation UUID_ATK = JTTWEngine.id("fire_tip_spear_atk");
     /** Game time the fireball is ready again (on the player; absent = ready). */
     private static final String KEY_FIREBALL_READY_AT = "jttw_fire_spear_ready_at";
     private static final long FIREBALL_COOLDOWN_TICKS = 40L;
@@ -66,8 +68,8 @@ public class FireTipSpearItem extends Item {
         // The attack bonus is for anyone; the sneak fireball (use) is Nezha's alone
         double mult = isAflame(stack) ? 1.25 : 0.75; // +75% for everyone holding it, +125% lit; Nezha gets extra from handler
         ImmutableMultimap.Builder<Attribute, AttributeModifier> b = ImmutableMultimap.builder();
-        b.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK, "jttw:spear_atk",
-                mult * Armaments.refineMultiplier(stack), AttributeModifier.Operation.MULTIPLY_TOTAL));
+        b.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK,
+                mult * Armaments.refineMultiplier(stack), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
         return b.build();
     }
 

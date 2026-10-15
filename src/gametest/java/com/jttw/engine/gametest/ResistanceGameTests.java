@@ -13,8 +13,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.IronGolem;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import static com.jttw.engine.gametest.GT.*;
 
@@ -113,7 +113,7 @@ public class ResistanceGameTests {
         ServerPlayer p = player(h);
         LevelManager.initClass(p, ReincarnationOutcome.EYE_OF_HEAVEN);
         p.getAttribute(Attributes.ARMOR).addPermanentModifier(new AttributeModifier(
-                StatBlock.UUID_DEF, "jttw:level_def", 15.0, AttributeModifier.Operation.ADDITION));
+                StatBlock.UUID_DEF, 15.0, AttributeModifier.Operation.ADD_VALUE));
         LevelManager.reapplyStats(p);
         near(h, 0.0, p.getAttributeValue(Attributes.ARMOR), "vanilla armor");
         near(h, StatBlock.compute(ProgressionClass.HEAVENLY, 1).physicalResistance(), pres(p), "physical resistance");

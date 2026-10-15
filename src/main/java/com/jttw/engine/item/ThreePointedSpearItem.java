@@ -1,5 +1,7 @@
 package com.jttw.engine.item;
 
+import net.minecraft.resources.ResourceLocation;
+import com.jttw.engine.JTTWEngine;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.jttw.engine.reincarnation.AlignmentData;
@@ -37,9 +39,9 @@ import java.util.UUID;
  */
 public class ThreePointedSpearItem extends Item implements Charged {
 
-    private static final UUID UUID_ATK_ES = UUID.fromString("a1b2c3d4-e5f6-4789-abcd-ef0123456789");
-    private static final UUID UUID_ATK_OTHER = UUID.fromString("a1b2c3d4-e5f6-4789-abcd-ef012345678a");
-    private static final UUID UUID_REACH = UUID.fromString("a1b2c3d4-e5f6-4789-abcd-ef012345678b");
+    private static final ResourceLocation UUID_ATK_ES = JTTWEngine.id("atk_es");
+    private static final ResourceLocation UUID_ATK_OTHER = JTTWEngine.id("atk_other");
+    private static final ResourceLocation UUID_REACH = JTTWEngine.id("three_pointed_spear_reach");
 
     // Combo tracking — stored per-entity in persistent data
     private static final String TAG_COMBO = "jttw_spear_combo";
@@ -60,8 +62,8 @@ public class ThreePointedSpearItem extends Item implements Charged {
         // others get 20%. Detection is done at runtime in hurtEnemy.
         // For attribute display, show the base (lower) value.
         // The Erlang Shen bonus is applied via ErlangShenAbilityHandler event.
-        b.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK_OTHER, "jttw:spear_atk",
-                0.20 * Armaments.refineMultiplier(stack), AttributeModifier.Operation.MULTIPLY_TOTAL));
+        b.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK_OTHER,
+                0.20 * Armaments.refineMultiplier(stack), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 
         return b.build();
     }

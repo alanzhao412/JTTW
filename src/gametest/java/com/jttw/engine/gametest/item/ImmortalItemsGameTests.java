@@ -21,10 +21,10 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.projectile.Snowball;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingKnockBackEvent;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import static com.jttw.engine.gametest.GT.*;
 import static com.jttw.engine.gametest.item.ItemTestSupport.*;
@@ -199,7 +199,7 @@ public class ImmortalItemsGameTests {
     }
 
     private static boolean cancels(ServerPlayer p, DamageSource source) {
-        LivingHurtEvent event = new LivingHurtEvent(p, source, 5f);
+        LivingIncomingDamageEvent event = new LivingIncomingDamageEvent(p, source, 5f);
         WukongAbilityHandler.onImmortalityDamage(event);
         return event.isCanceled();
     }
@@ -247,10 +247,10 @@ public class ImmortalItemsGameTests {
         eatPeach(h, p);
         var zombie = h.spawnWithNoFreeWill(EntityType.ZOMBIE, new net.minecraft.core.BlockPos(0, 2, 0));
         Snowball snowball = new Snowball(EntityType.SNOWBALL, h.getLevel());
-        LivingHurtEvent thrown = new LivingHurtEvent(p, p.damageSources().thrown(snowball, zombie), 4f);
+        LivingIncomingDamageEvent thrown = new LivingIncomingDamageEvent(p, p.damageSources().thrown(snowball, zombie), 4f);
         WukongCheckpoints.onHurt(thrown);
         check(h, thrown.isCanceled(), "projectile cancelled");
-        LivingHurtEvent melee = new LivingHurtEvent(p, p.damageSources().mobAttack(zombie), 4f);
+        LivingIncomingDamageEvent melee = new LivingIncomingDamageEvent(p, p.damageSources().mobAttack(zombie), 4f);
         WukongCheckpoints.onHurt(melee);
         check(h, !melee.isCanceled(), "melee not cancelled");
         h.succeed();

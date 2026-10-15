@@ -8,7 +8,11 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkEvent;
+import com.jttw.engine.JTTWEngine;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.function.Supplier;
 
@@ -16,7 +20,15 @@ import java.util.function.Supplier;
  * Client -> Server packet: requests transmutation of the player's held item.
  * Carries the category (tool/crop/food) and the target index within that category's option list.
  */
-public class TransmuteItemPacket {
+public class TransmuteItemPacket implements CustomPacketPayload {
+
+    public static final Type<TransmuteItemPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "transmute_item"));
+    public static final StreamCodec<FriendlyByteBuf, TransmuteItemPacket> STREAM_CODEC = StreamCodec.of((buf, pkt) -> encode(pkt, buf), TransmuteItemPacket::decode);
+
+    @Override
+    public Type<TransmuteItemPacket> type() {
+        return TYPE;
+    }
 
     private final int categoryOrdinal;
     private final int targetIndex;
@@ -48,13 +60,12 @@ public class TransmuteItemPacket {
     // Handle (server)
     // -----------------------------------------------------------------------
 
-    public static void handle(TransmuteItemPacket pkt, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            ServerPlayer player = ctx.get().getSender();
+    public static void handle(TransmuteItemPacket pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
+            ServerPlayer player = (ServerPlayer) ctx.player();
             if (player == null) return;
             handleServer(player, pkt.categoryOrdinal, pkt.targetIndex);
         });
-        ctx.get().setPacketHandled(true);
     }
 
     private static void handleServer(ServerPlayer player, int catOrdinal, int targetIndex) {

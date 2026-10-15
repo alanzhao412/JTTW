@@ -1,6 +1,8 @@
 // FILE: src/main/java/com/jttw/engine/transformation/traits/JumpTraits.java
 package com.jttw.engine.transformation.traits;
 
+import net.minecraft.resources.ResourceLocation;
+import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.mixin.LivingEntityJumpingAccessor;
 import com.jttw.engine.transformation.TransformationData;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
@@ -8,7 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraftforge.event.entity.living.LivingEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEvent;
 
 import java.util.Map;
 import java.util.UUID;
@@ -50,8 +52,7 @@ public final class JumpTraits {
     private static final float GOAT_SAFE_FALL   = 14.0F; // goats take reduced fall damage
 
     // Rabbit horizontal speed boost UUID (separate from AnimalSpeedTraits UUID)
-    private static final UUID RABBIT_SPEED_UUID =
-            UUID.fromString("b3f4a1e2-9c87-4d56-a234-1f0e8d7c6b5a");
+    private static final ResourceLocation RABBIT_SPEED_UUID = JTTWEngine.id("rabbit_speed");
     private static final double RABBIT_SPEED_BOOST = 0.35D; // +35% move speed
 
     private static final String NBT_JUMP_BOOSTED = "jttw_jump_boosted";
@@ -84,9 +85,8 @@ public final class JumpTraits {
         if (data != null && data.getEntityType() == EntityType.RABBIT) {
             move.addPermanentModifier(new AttributeModifier(
                     RABBIT_SPEED_UUID,
-                    "jttw:rabbit_speed",
                     RABBIT_SPEED_BOOST,
-                    AttributeModifier.Operation.MULTIPLY_BASE
+                    AttributeModifier.Operation.ADD_MULTIPLIED_BASE
             ));
         }
     }

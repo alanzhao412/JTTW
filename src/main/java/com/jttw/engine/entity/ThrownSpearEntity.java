@@ -20,8 +20,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.level.BlockEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.level.BlockEvent;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -126,7 +126,7 @@ public class ThrownSpearEntity extends Projectile implements ItemSupplier {
                 com.jttw.engine.world.tough.Tough.strength(getOwner())));
         if (cost > budget) return false;
         if (getOwner() instanceof ServerPlayer owner
-                && MinecraftForge.EVENT_BUS.post(new BlockEvent.BreakEvent(level(), pos, state, owner))) {
+                && NeoForge.EVENT_BUS.post(new BlockEvent.BreakEvent(level(), pos, state, owner))) {
             return false; // a protected area
         }
         level().destroyBlock(pos, false, getOwner());

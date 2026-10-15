@@ -18,12 +18,12 @@ import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.event.entity.living.LivingFallEvent;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.common.NeoForgeMod;
+import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEvent;
+import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import static com.jttw.engine.gametest.GT.*;
 
@@ -46,8 +46,8 @@ public class TransformTraitsGameTests {
         // speed x sqrt(7/3) = 1.5275; reach + (7/3 - 1) * 4.5 = +6
         ServerPlayer p = Tf.playerAs(h, EntityType.IRON_GOLEM);
         near(h, 0.15275252, p.getAttributeValue(Attributes.MOVEMENT_SPEED), "speed");
-        near(h, 10.5, p.getAttributeValue(ForgeMod.BLOCK_REACH.get()), "block reach");
-        near(h, 9.0, p.getAttributeValue(ForgeMod.ENTITY_REACH.get()), "entity reach");
+        near(h, 10.5, p.getAttributeValue(NeoForgeMod.BLOCK_REACH.get()), "block reach");
+        near(h, 9.0, p.getAttributeValue(NeoForgeMod.ENTITY_REACH.get()), "entity reach");
         h.succeed();
     }
 
@@ -55,8 +55,8 @@ public class TransformTraitsGameTests {
     public static void hugeFormsAreCappedAtTwoAndAHalfSpeedAndThirtyTwoReach(GameTestHelper h) {
         ServerPlayer p = Tf.playerAs(h, EntityType.ENDER_DRAGON);
         near(h, 0.25, p.getAttributeValue(Attributes.MOVEMENT_SPEED), "speed capped at x2.5");
-        near(h, 4.5 + 32.0, p.getAttributeValue(ForgeMod.BLOCK_REACH.get()), "block reach bonus capped at 32");
-        near(h, 3.0 + 32.0, p.getAttributeValue(ForgeMod.ENTITY_REACH.get()), "entity reach bonus capped at 32");
+        near(h, 4.5 + 32.0, p.getAttributeValue(NeoForgeMod.BLOCK_REACH.get()), "block reach bonus capped at 32");
+        near(h, 3.0 + 32.0, p.getAttributeValue(NeoForgeMod.ENTITY_REACH.get()), "entity reach bonus capped at 32");
         h.succeed();
     }
 
@@ -64,8 +64,8 @@ public class TransformTraitsGameTests {
     public static void smallFormsAreNeverSlowerOrShorterReachedThanVanilla(GameTestHelper h) {
         ServerPlayer p = Tf.playerAs(h, EntityType.CHICKEN);
         near(h, 0.1, p.getAttributeValue(Attributes.MOVEMENT_SPEED), "speed");
-        near(h, 4.5, p.getAttributeValue(ForgeMod.BLOCK_REACH.get()), "block reach");
-        near(h, 3.0, p.getAttributeValue(ForgeMod.ENTITY_REACH.get()), "entity reach");
+        near(h, 4.5, p.getAttributeValue(NeoForgeMod.BLOCK_REACH.get()), "block reach");
+        near(h, 3.0, p.getAttributeValue(NeoForgeMod.ENTITY_REACH.get()), "entity reach");
         h.succeed();
     }
 
@@ -74,8 +74,8 @@ public class TransformTraitsGameTests {
         ServerPlayer p = Tf.playerAs(h, EntityType.IRON_GOLEM);
         TransformationManager.demorph(p);
         near(h, 0.1, p.getAttributeValue(Attributes.MOVEMENT_SPEED), "speed");
-        near(h, 4.5, p.getAttributeValue(ForgeMod.BLOCK_REACH.get()), "block reach");
-        near(h, 3.0, p.getAttributeValue(ForgeMod.ENTITY_REACH.get()), "entity reach");
+        near(h, 4.5, p.getAttributeValue(NeoForgeMod.BLOCK_REACH.get()), "block reach");
+        near(h, 3.0, p.getAttributeValue(NeoForgeMod.ENTITY_REACH.get()), "entity reach");
         h.succeed();
     }
 

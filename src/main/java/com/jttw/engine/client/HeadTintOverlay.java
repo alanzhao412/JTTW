@@ -1,8 +1,8 @@
 package com.jttw.engine.client;
 
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
-import net.minecraftforge.client.gui.overlay.IGuiOverlay;
+import net.neoforged.neoforge.client.gui.overlay.ForgeGui;
+import net.minecraft.client.gui.LayeredDraw;
 
 /**
  * The Grand Saint of Nine Spirits sees the edges of his view tinted with the colour of the head

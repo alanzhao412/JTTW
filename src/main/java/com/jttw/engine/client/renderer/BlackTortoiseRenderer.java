@@ -27,9 +27,9 @@ import net.minecraft.util.Mth;
  */
 public final class BlackTortoiseRenderer extends MobRenderer<TrueFormEntity, BlackTortoiseRenderer.Model> {
 
-    public static final ModelLayerLocation LAYER = new ModelLayerLocation(new ResourceLocation(JTTWEngine.MOD_ID, "black_tortoise"), "main");
-    public static final ResourceLocation TEXTURE = new ResourceLocation(JTTWEngine.MOD_ID, "textures/entity/black_tortoise.png");
-    private static final RenderType GLOW = RenderType.eyes(new ResourceLocation(JTTWEngine.MOD_ID, "textures/entity/black_tortoise_glow.png"));
+    public static final ModelLayerLocation LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "black_tortoise"), "main");
+    public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "textures/entity/black_tortoise.png");
+    private static final RenderType GLOW = RenderType.eyes(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "textures/entity/black_tortoise_glow.png"));
     public static final float SCALE = 4.2f;
 
     public BlackTortoiseRenderer(EntityRendererProvider.Context ctx) {

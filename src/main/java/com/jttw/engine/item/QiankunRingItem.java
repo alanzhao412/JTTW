@@ -1,11 +1,13 @@
 package com.jttw.engine.item;
 
+import net.minecraft.resources.ResourceLocation;
 import com.jttw.engine.JTTWEngine;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.EntityHitResult;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.event.entity.ProjectileImpactEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
@@ -31,10 +33,10 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
 public class QiankunRingItem extends Item {
 
-    private static final UUID UUID_ATK = UUID.fromString("d2b3c4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e");
+    private static final ResourceLocation UUID_ATK = JTTWEngine.id("qiankun_ring_atk");
     public static final String TAG_SIZE = "jttw_qk_size";
     /** On the thrown ring: the damage it deals on hitting a living target. */
     private static final String TAG_HIT_DAMAGE = "jttw_qk_damage";
@@ -56,8 +58,8 @@ public class QiankunRingItem extends Item {
     public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
         if (slot != EquipmentSlot.MAINHAND) return ImmutableMultimap.of();
         ImmutableMultimap.Builder<Attribute, AttributeModifier> b = ImmutableMultimap.builder();
-        b.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK, "jttw:ring_atk",
-                0.25 * Armaments.refineMultiplier(stack), AttributeModifier.Operation.MULTIPLY_TOTAL));
+        b.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK,
+                0.25 * Armaments.refineMultiplier(stack), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
         return b.build();
     }
 

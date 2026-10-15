@@ -2,23 +2,24 @@ package com.jttw.engine.transformation;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Prevent suffocation ("inWall") damage AND the associated hurt animation/sound while phasing.
  *
  * Key point:
- * - LivingAttackEvent happens BEFORE the engine applies hurt side-effects.
- * - LivingHurtEvent is kept as a backup + we also clear hurt timers.
+ * - LivingIncomingDamageEvent happens BEFORE the engine applies hurt side-effects.
+ * - LivingIncomingDamageEvent is kept as a backup + we also clear hurt timers.
  */
-@Mod.EventBusSubscriber(modid = "jttw_engine", bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = "jttw_engine", bus = EventBusSubscriber.Bus.GAME)
 public class SuffocationDamageBlocker {
 
     @SubscribeEvent
-    public static void onLivingAttack(LivingAttackEvent event) {
+    public static void onLivingAttack(LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
         if (player.level().isClientSide) return;
 
@@ -33,7 +34,7 @@ public class SuffocationDamageBlocker {
     }
 
     @SubscribeEvent
-    public static void onLivingHurt(LivingHurtEvent event) {
+    public static void onLivingHurt(LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
         if (player.level().isClientSide) return;
 

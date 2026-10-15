@@ -7,9 +7,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
-import net.minecraftforge.event.server.ServerAboutToStartEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ import java.util.List;
  * share of which hold one zone, a rough circle somewhere inside the cell. Terrain keeps the host
  * biome's shape; the zone changes what grows and lives there.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class Zones {
 
     private Zones() {}
@@ -39,7 +40,7 @@ public final class Zones {
     }
 
     private static ResourceLocation id(String path) {
-        return new ResourceLocation(JTTWEngine.MOD_ID, path);
+        return ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, path);
     }
 
     public static final ResourceKey<Biome> WHITE_BONE_RIDGE = ResourceKey.create(Registries.BIOME, id("white_bone_ridge"));

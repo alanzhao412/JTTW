@@ -7,9 +7,13 @@ import com.jttw.engine.progression.skilltree.AbilityType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import com.jttw.engine.JTTWEngine;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +26,15 @@ import java.util.function.Supplier;
  *
  * <p>Sent on login and whenever a skill node is unlocked.
  */
-public class SyncAbilitiesPacket {
+public class SyncAbilitiesPacket implements CustomPacketPayload {
+
+    public static final Type<SyncAbilitiesPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "sync_abilities"));
+    public static final StreamCodec<FriendlyByteBuf, SyncAbilitiesPacket> STREAM_CODEC = StreamCodec.of((buf, pkt) -> encode(pkt, buf), SyncAbilitiesPacket::decode);
+
+    @Override
+    public Type<SyncAbilitiesPacket> type() {
+        return TYPE;
+    }
 
     private final UUID playerId;
     private final List<AbilitySlot> abilities;
@@ -58,9 +70,8 @@ public class SyncAbilitiesPacket {
         return new SyncAbilitiesPacket(id, list);
     }
 
-    public static void handle(SyncAbilitiesPacket pkt, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> handleClient(pkt));
-        ctx.get().setPacketHandled(true);
+    public static void handle(SyncAbilitiesPacket pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> handleClient(pkt));
     }
 
     @OnlyIn(Dist.CLIENT)

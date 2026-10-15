@@ -3,9 +3,13 @@ package com.jttw.engine.network.s2c;
 import com.jttw.engine.character.marshal.MarshalAbilityHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import com.jttw.engine.JTTWEngine;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.function.Supplier;
 
@@ -13,7 +17,15 @@ import java.util.function.Supplier;
  * What the Marshal's Truffle Snout smelt: creatures by entity id and blocks with the colour to
  * outline them in, shown through walls for {@code ticks}.
  */
-public class TruffleScentPacket {
+public class TruffleScentPacket implements CustomPacketPayload {
+
+    public static final Type<TruffleScentPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "truffle_scent"));
+    public static final StreamCodec<FriendlyByteBuf, TruffleScentPacket> STREAM_CODEC = StreamCodec.of((buf, pkt) -> encode(pkt, buf), TruffleScentPacket::decode);
+
+    @Override
+    public Type<TruffleScentPacket> type() {
+        return TYPE;
+    }
 
     private final int ticks;
     private final int[] entityIds;
@@ -51,9 +63,8 @@ public class TruffleScentPacket {
         return new TruffleScentPacket(ticks, ids, blocks, colours);
     }
 
-    public static void handle(TruffleScentPacket pkt, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> handleClient(pkt));
-        ctx.get().setPacketHandled(true);
+    public static void handle(TruffleScentPacket pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> handleClient(pkt));
     }
 
     @OnlyIn(Dist.CLIENT)

@@ -13,10 +13,11 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Enemy;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 /**
  * What each true form does beyond its strength (TrueForm). The Black Tortoise (II): its serpent
@@ -24,7 +25,7 @@ import net.minecraftforge.fml.common.Mod;
  * Vermilion Bird (II): fire trails where it flies, and its wingbeats burn all within 4 blocks.
  * (The White Tiger's and the Azure Dragon's are in their own abilities.)
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class TrueFormPowers {
 
     private TrueFormPowers() {}
@@ -44,8 +45,8 @@ public final class TrueFormPowers {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p)) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer p)) return;
         if (!TrueForm.active(p)) return;
         if (is(p, ModEntities.BLACK_TORTOISE.get()) && tier(p, "tu_true") >= 2 && p.tickCount % 20 == 0) {
             // the serpent strikes the nearest foe within 5 blocks
@@ -76,7 +77,7 @@ public final class TrueFormPowers {
     }
 
     @SubscribeEvent
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(LivingIncomingDamageEvent event) {
         if (event.getEntity() instanceof ServerPlayer p && is(p, ModEntities.BLACK_TORTOISE.get()) && tier(p, "tu_true") >= 2) {
             event.setAmount(event.getAmount() * 0.5f); // its shell
         }

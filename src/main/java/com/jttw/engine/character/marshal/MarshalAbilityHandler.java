@@ -37,14 +37,15 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingFallEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.common.NeoForgeMod;
+import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,7 +69,7 @@ import java.util.Map;
  * With the Nine-Tooth Rake in hand, each full swing of his bursts in an explosion that harms
  * foes around the one struck and never breaks a block.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class MarshalAbilityHandler {
 
     private MarshalAbilityHandler() {}
@@ -388,8 +389,8 @@ public final class MarshalAbilityHandler {
     }
 
     private static void admiral(ServerPlayer p, int tier) {
-        PassiveModifiers.set(p, ForgeMod.SWIM_SPEED.get(), "mc_admiral_swim", swimBonus(tier),
-                AttributeModifier.Operation.MULTIPLY_BASE);
+        PassiveModifiers.set(p, NeoForgeMod.SWIM_SPEED.get(), "mc_admiral_swim", swimBonus(tier),
+                AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
         if (tier < 1) return;
         boolean under = underwater(p);
         if (under) p.setAirSupply(p.getMaxAirSupply());
@@ -430,7 +431,7 @@ public final class MarshalAbilityHandler {
     }
 
     @SubscribeEvent
-    public static void onHit(LivingHurtEvent event) {
+    public static void onHit(LivingIncomingDamageEvent event) {
         if (!(event.getSource().getEntity() instanceof ServerPlayer p)) return;
         if (event.getSource().getDirectEntity() != p || !event.getSource().is(DamageTypes.PLAYER_ATTACK)) return;
         if (!(p.getMainHandItem().getItem() instanceof NineToothRakeItem) || !MarshalCharacter.is(p)) return;
@@ -444,13 +445,13 @@ public final class MarshalAbilityHandler {
     // ── ticking and lifecycle ──────────────────────────────────────
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p)) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer p)) return;
         boolean marshal = MarshalCharacter.is(p);
         if (!marshal) {
             if (p.tickCount % 20 == 0) {
-                PassiveModifiers.set(p, ForgeMod.SWIM_SPEED.get(), "mc_admiral_swim", 0,
-                        AttributeModifier.Operation.MULTIPLY_BASE);
+                PassiveModifiers.set(p, NeoForgeMod.SWIM_SPEED.get(), "mc_admiral_swim", 0,
+                        AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
                 if (p.getPersistentData().getInt(KEY_RESERVE_SENT) > 1) syncStomach(p);
             }
             return;

@@ -14,11 +14,12 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.ForgeEventFactory;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import javax.annotation.Nullable;
 import java.util.ArrayDeque;
@@ -53,7 +54,7 @@ import java.util.Map;
  * Explosions keep vanilla's blast in full (its shape through hard and soft blocks, damage,
  * knockback, sound and smoke); only the blocks it breaks are taken out this way.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class TerrainBreaker {
 
     private TerrainBreaker() {}
@@ -235,15 +236,15 @@ public final class TerrainBreaker {
     }
 
     @SubscribeEvent
-    public static void onItemSpawn(net.minecraftforge.event.entity.EntityJoinLevelEvent event) {
+    public static void onItemSpawn(net.neoforged.neoforge.event.entity.EntityJoinLevelEvent event) {
         if (suppressingDrops && !event.loadedFromDisk() && event.getEntity() instanceof net.minecraft.world.entity.item.ItemEntity) {
             event.setCanceled(true);
         }
     }
 
     @SubscribeEvent
-    public static void onLevelTick(TickEvent.LevelTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && event.level instanceof ServerLevel level) work(level, BLOCKS_PER_TICK);
+    public static void onLevelTick(LevelTickEvent.Post event) {
+        if (event.getLevel() instanceof ServerLevel level) work(level, BLOCKS_PER_TICK);
     }
 
     @SubscribeEvent

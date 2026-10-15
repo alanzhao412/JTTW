@@ -5,10 +5,11 @@ import com.jttw.engine.item.RuyiJinguBangItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * carries it; striking, it is in hand, and it stays there a moment after the last blow before
  * going back up. Flying, swimming, crouching, riding, or with the staff grown large, it is held.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID, value = Dist.CLIENT)
 public final class StaffStance {
 
     private StaffStance() {}
@@ -31,8 +32,7 @@ public final class StaffStance {
     private static final Map<Integer, Long> LAST_SWING = new ConcurrentHashMap<>();
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) {
             LAST_SWING.clear();

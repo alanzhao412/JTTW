@@ -15,11 +15,11 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,7 +80,7 @@ public class ArmoryGameTests {
         double mres = p.getAttributeValue(ModAttributes.MAGIC_RESISTANCE.get());
         put(p, new ItemStack(ModItems.HUNTIAN_CLOTH.get()));
         put(p, new ItemStack(ModItems.WIND_FIRE_WHEELS.get()));
-        NezhaAbilityHandler.onPlayerTick(new TickEvent.PlayerTickEvent(TickEvent.Phase.END, p));
+        NezhaAbilityHandler.onPlayerTick(new PlayerTickEvent.Post(p));
         check(h, p.getAttributeValue(ModAttributes.MAGIC_RESISTANCE.get()) > mres, "the sash's magic resistance, unworn");
         check(h, p.getAttribute(Attributes.MOVEMENT_SPEED).getModifiers().stream().anyMatch(m -> m.getName().contains("wind_fire")), "the wheels' speed");
         check(h, p.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.FEET).isEmpty(), "his armour slots stay free");
@@ -91,13 +91,13 @@ public class ArmoryGameTests {
     public static void theMoreArmamentsTheStronger(GameTestHelper h) {
         ServerPlayer p = as(h, ReincarnationOutcome.THIRD_LOTUS_PRINCE);
         p.tickCount = 20;
-        Armory.onPlayerTick(new TickEvent.PlayerTickEvent(TickEvent.Phase.END, p));
+        Armory.onPlayerTick(new PlayerTickEvent.Post(p));
         double bare = p.getAttributeValue(Attributes.MAX_HEALTH);
         put(p, new ItemStack(ModItems.FIRE_TIP_SPEAR.get()));
         ItemStack ring = new ItemStack(ModItems.QIANKUN_RING.get());
         Armaments.setRefine(ring, 4);
         put(p, ring);
-        Armory.onPlayerTick(new TickEvent.PlayerTickEvent(TickEvent.Phase.END, p));
+        Armory.onPlayerTick(new PlayerTickEvent.Post(p));
         near(h, bare * (1 + 2 * 0.06 + 4 * 0.005), p.getAttributeValue(Attributes.MAX_HEALTH), "6% an armament, 0.5% a refinement level");
         near(h, 0.06 * 6 + 0.005 * 6 * 10, Armory.bonus(List.of(
                 full(ModItems.FIRE_TIP_SPEAR.get()), full(ModItems.QIANKUN_RING.get()), fullSword(true), fullSword(false),

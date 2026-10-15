@@ -20,10 +20,11 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 /**
  * A divine beast's true form: for a while (20, 30 or 45 seconds by tier) the player is the beast
@@ -33,7 +34,7 @@ import net.minecraftforge.fml.common.Mod;
  * When it ends (its time out, or ended early by its key) they are exhausted a minute: slowed,
  * weakened, their Qi not coming back, no ability answering.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class TrueForm {
 
     private TrueForm() {}
@@ -96,9 +97,9 @@ public final class TrueForm {
     }
 
     private static void boost(ServerPlayer p, boolean on) {
-        PassiveModifiers.set(p, Attributes.MAX_HEALTH, "jttw_true_health", on ? HEALTH : 0, AttributeModifier.Operation.MULTIPLY_TOTAL);
-        PassiveModifiers.set(p, Attributes.ATTACK_DAMAGE, "jttw_true_attack", on ? ATTACK : 0, AttributeModifier.Operation.MULTIPLY_TOTAL);
-        PassiveModifiers.set(p, Attributes.MOVEMENT_SPEED, "jttw_true_speed", on ? SPEED : 0, AttributeModifier.Operation.MULTIPLY_TOTAL);
+        PassiveModifiers.set(p, Attributes.MAX_HEALTH, "jttw_true_health", on ? HEALTH : 0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+        PassiveModifiers.set(p, Attributes.ATTACK_DAMAGE, "jttw_true_attack", on ? ATTACK : 0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+        PassiveModifiers.set(p, Attributes.MOVEMENT_SPEED, "jttw_true_speed", on ? SPEED : 0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
         PassiveModifiers.add(p, Attributes.KNOCKBACK_RESISTANCE, "jttw_true_steady", on ? 1.0 : 0);
     }
 
@@ -121,8 +122,8 @@ public final class TrueForm {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p)) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer p)) return;
         CompoundTag pd = p.getPersistentData();
         if (!pd.contains(KEY_UNTIL)) return;
         TransformationData data = TransformationManager.getTransformation(p);

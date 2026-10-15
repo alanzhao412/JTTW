@@ -29,12 +29,12 @@ public final class RidgeRenderers {
 
     private RidgeRenderers() {}
 
-    private static final ResourceLocation SKELETON = new ResourceLocation("minecraft", "textures/entity/skeleton/skeleton.png");
-    public static final ResourceLocation WRAITH = new ResourceLocation(JTTWEngine.MOD_ID, "textures/entity/wraith.png");
-    public static final ResourceLocation WRAITH_CAPTAIN = new ResourceLocation(JTTWEngine.MOD_ID, "textures/entity/wraith_captain.png");
+    private static final ResourceLocation SKELETON = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/entity/skeleton/skeleton.png");
+    public static final ResourceLocation WRAITH = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "textures/entity/wraith.png");
+    public static final ResourceLocation WRAITH_CAPTAIN = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "textures/entity/wraith_captain.png");
 
-    public static final ModelLayerLocation WRAITH_LAYER = new ModelLayerLocation(new ResourceLocation(JTTWEngine.MOD_ID, "wraith"), "main");
-    public static final ModelLayerLocation VEIL_LAYER = new ModelLayerLocation(new ResourceLocation(JTTWEngine.MOD_ID, "lady_white_bone"), "veil");
+    public static final ModelLayerLocation WRAITH_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "wraith"), "main");
+    public static final ModelLayerLocation VEIL_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "lady_white_bone"), "veil");
 
     /** Names over heads show only this close, so a crowd of the dead is not a wall of labels. */
     private static final double NAME_RANGE = 24;
@@ -43,7 +43,7 @@ public final class RidgeRenderers {
         return LayerDefinition.create(HumanoidModel.createMesh(CubeDeformation.NONE, 0f), 64, 32);
     }
 
-    public static final ResourceLocation LADY_VEIL = new ResourceLocation(JTTWEngine.MOD_ID, "textures/entity/lady_white_bone_veil.png");
+    public static final ResourceLocation LADY_VEIL = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "textures/entity/lady_white_bone_veil.png");
 
     /**
      * Her veil over the skeleton: a hood, long black hair down her back, a robe with sleeves, and a
@@ -304,9 +304,9 @@ public final class RidgeRenderers {
     // ── The bodies she leaves ───────────────────────────────────────────
 
     public static final ResourceLocation[] HUSKS = {
-            new ResourceLocation(JTTWEngine.MOD_ID, "textures/entity/lady_husk_girl.png"),
-            new ResourceLocation(JTTWEngine.MOD_ID, "textures/entity/lady_husk_old_woman.png"),
-            new ResourceLocation(JTTWEngine.MOD_ID, "textures/entity/lady_husk_old_man.png")};
+            ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "textures/entity/lady_husk_girl.png"),
+            ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "textures/entity/lady_husk_old_woman.png"),
+            ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "textures/entity/lady_husk_old_man.png")};
 
     /** A mortal's body, lying on its back where she fell. */
     public static final class HuskRenderer extends HumanoidMobRenderer<com.jttw.engine.entity.ridge.LadyHuskEntity,

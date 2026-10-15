@@ -150,7 +150,7 @@ final class AbilityScenes {
                     f.setItem(2, new net.minecraft.world.item.ItemStack(com.jttw.engine.registry.ModItems.CAPTAINS_SIGIL.get(), 2));
                     f.setItem(com.jttw.engine.world.furnace.TrigramsFurnaceBlockEntity.FUEL, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.COAL, 9));
                     keepScreen = true;
-                    net.minecraftforge.network.NetworkHooks.openScreen(p, f, at);
+                    net.neoforged.neoforge.network.NetworkHooks.openScreen(p, f, at);
                 }, p -> {}, 1, true),
                 new Scene("ui_armory", p -> {
                     AlignmentData.markReincarnated(p, ReincarnationOutcome.THIRD_LOTUS_PRINCE);
@@ -276,8 +276,8 @@ final class AbilityScenes {
                     LevelManager.reapplyStats(p);
                     p.setGameMode(GameType.SURVIVAL); // the skill bar shows outside creative
                     LevelManager.syncToClient(p); // the skill bar, as a player's would show it
-                }, p -> net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(
-                        new net.minecraftforge.event.entity.living.LivingDamageEvent(p, p.damageSources().generic(), 24f)), 10, true),
+                }, p -> net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(
+                        new net.neoforged.neoforge.event.entity.living.LivingDamageEvent(p, p.damageSources().generic(), 24f)), 10, true),
                 // the Ruyi Jingu Bang, plain, in hand: as he sees it, and as others do
                 new Scene("staff_base_hand", p -> plainStaff(p), p -> {}, 1, true, 10f),
                 new Scene("staff_base_held", p -> { plainStaff(p); closeUp = true; facing = -40f; }, p -> {}, 1, false),

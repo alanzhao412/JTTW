@@ -6,7 +6,11 @@ import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.stats.ProgressionClass;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import com.jttw.engine.JTTWEngine;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.function.Supplier;
 
@@ -14,7 +18,15 @@ import java.util.function.Supplier;
  * Sent client → server when the Dragon player scrolls to select a dimension.
  * The scroll direction (+1 or -1) cycles through the available dimensions.
  */
-public class DimensionSelectPacket {
+public class DimensionSelectPacket implements CustomPacketPayload {
+
+    public static final Type<DimensionSelectPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "dimension_select"));
+    public static final StreamCodec<FriendlyByteBuf, DimensionSelectPacket> STREAM_CODEC = StreamCodec.of((buf, pkt) -> encode(pkt, buf), DimensionSelectPacket::decode);
+
+    @Override
+    public Type<DimensionSelectPacket> type() {
+        return TYPE;
+    }
 
     private final int direction;
 
@@ -30,9 +42,9 @@ public class DimensionSelectPacket {
         return new DimensionSelectPacket(buf.readByte());
     }
 
-    public static void handle(DimensionSelectPacket pkt, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            ServerPlayer player = ctx.get().getSender();
+    public static void handle(DimensionSelectPacket pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
+            ServerPlayer player = (ServerPlayer) ctx.player();
             if (player == null) return;
 
             // Validate: must be a Dragon line Divine Beast
@@ -42,6 +54,5 @@ public class DimensionSelectPacket {
 
             DragonAbilityHandler.scrollDimension(player, pkt.direction);
         });
-        ctx.get().setPacketHandled(true);
     }
 }

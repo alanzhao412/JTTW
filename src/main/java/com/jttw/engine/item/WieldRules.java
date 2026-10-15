@@ -17,11 +17,12 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
-import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import javax.annotation.Nullable;
 
@@ -46,7 +47,7 @@ import javax.annotation.Nullable;
  * and Large ({@value #RUYI_LARGE_QI}), Erlang's large axe ({@value ErlangAxeItem#LARGE_QI_PER_SECOND}),
  * Nezha's lit spear ({@value FireTipSpearItem#AFLAME_QI_PER_SECOND}).
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class WieldRules {
 
     private WieldRules() {}
@@ -173,8 +174,8 @@ public final class WieldRules {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p)) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer p)) return;
         pairSwords(p);
         if (p.tickCount % 20 == 0) drawFormQi(p);
         if (p.tickCount % 4 == 0 && FireTipSpearItem.isAflame(p.getMainHandItem())) {

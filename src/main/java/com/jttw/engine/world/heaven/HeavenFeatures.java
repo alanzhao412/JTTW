@@ -37,8 +37,8 @@ public final class HeavenFeatures {
     /** The share of islands with a building, and of those, the share that are peach gardens. */
     public static final float BUILDING_CHANCE = 0.25f, GARDEN_CHANCE = 0.2f;
 
-    public static final ResourceLocation PAVILION_CHEST = new ResourceLocation(JTTWEngine.MOD_ID, "chests/heaven_pavilion");
-    public static final ResourceLocation PALACE_CHEST = new ResourceLocation(JTTWEngine.MOD_ID, "chests/jade_palace");
+    public static final ResourceLocation PAVILION_CHEST = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "chests/heaven_pavilion");
+    public static final ResourceLocation PALACE_CHEST = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "chests/jade_palace");
 
     private static void set(WorldGenLevel level, BlockPos p, BlockState s) {
         level.setBlock(p, s, Block.UPDATE_CLIENTS);

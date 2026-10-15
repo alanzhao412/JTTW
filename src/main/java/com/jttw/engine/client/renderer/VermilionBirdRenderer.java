@@ -27,9 +27,9 @@ import net.minecraft.util.Mth;
  */
 public final class VermilionBirdRenderer extends MobRenderer<TrueFormEntity, VermilionBirdRenderer.Model> {
 
-    public static final ModelLayerLocation LAYER = new ModelLayerLocation(new ResourceLocation(JTTWEngine.MOD_ID, "vermilion_bird"), "main");
-    public static final ResourceLocation TEXTURE = new ResourceLocation(JTTWEngine.MOD_ID, "textures/entity/vermilion_bird.png");
-    private static final RenderType GLOW = RenderType.eyes(new ResourceLocation(JTTWEngine.MOD_ID, "textures/entity/vermilion_bird_glow.png"));
+    public static final ModelLayerLocation LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "vermilion_bird"), "main");
+    public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "textures/entity/vermilion_bird.png");
+    private static final RenderType GLOW = RenderType.eyes(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "textures/entity/vermilion_bird_glow.png"));
     public static final float SCALE = 4.0f;
 
     public VermilionBirdRenderer(EntityRendererProvider.Context ctx) {

@@ -1,14 +1,26 @@
 package com.jttw.engine.network.s2c;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import com.jttw.engine.JTTWEngine;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.function.Supplier;
 
 /** A Divine Beast's line and how far grown into it (see BeastFormShown), for the client to draw. */
-public class BeastFormPacket {
+public class BeastFormPacket implements CustomPacketPayload {
+
+    public static final Type<BeastFormPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "beast_form"));
+    public static final StreamCodec<FriendlyByteBuf, BeastFormPacket> STREAM_CODEC = StreamCodec.of((buf, pkt) -> encode(pkt, buf), BeastFormPacket::decode);
+
+    @Override
+    public Type<BeastFormPacket> type() {
+        return TYPE;
+    }
 
     private final int entityId, packed;
 
@@ -26,9 +38,8 @@ public class BeastFormPacket {
         return new BeastFormPacket(buf.readVarInt(), buf.readInt());
     }
 
-    public static void handle(BeastFormPacket pkt, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> handleClient(pkt));
-        ctx.get().setPacketHandled(true);
+    public static void handle(BeastFormPacket pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> handleClient(pkt));
     }
 
     @OnlyIn(Dist.CLIENT)

@@ -4,7 +4,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraftforge.common.util.FakePlayer;
+import net.neoforged.neoforge.common.util.FakePlayer;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -131,7 +131,7 @@ public final class GT {
     /** The damage left after the resistance handler sees it. */
     public static float afterResistance(net.minecraft.world.entity.LivingEntity e,
                                         net.minecraft.world.damagesource.DamageSource source, float amount) {
-        var event = new net.minecraftforge.event.entity.living.LivingHurtEvent(e, source, amount);
+        var event = new net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent(e, source, amount);
         com.jttw.engine.progression.stats.ResistanceHandler.onHurt(event);
         return event.getAmount();
     }

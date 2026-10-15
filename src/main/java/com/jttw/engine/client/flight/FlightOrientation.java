@@ -6,11 +6,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ViewportEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ViewportEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 import org.joml.Quaternionf;
 
 /**
@@ -24,7 +25,7 @@ import org.joml.Quaternionf;
  * flight, as before) and a roll for the camera, which turns the view over at the top of a loop.
  * Landing, the roll eases back to level.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID, value = Dist.CLIENT)
 public final class FlightOrientation {
 
     private FlightOrientation() {}
@@ -94,8 +95,7 @@ public final class FlightOrientation {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(ClientTickEvent.Post event) {
         LocalPlayer p = Minecraft.getInstance().player;
         rollOld = roll;
         boolean flying = p != null && flies(p);

@@ -2,9 +2,13 @@ package com.jttw.engine.network.s2c;
 
 import com.jttw.engine.flight.FlightProfile;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import com.jttw.engine.JTTWEngine;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.function.Supplier;
 
@@ -12,7 +16,15 @@ import java.util.function.Supplier;
  * Tells a player's client how they fly (speed, glide-only, boost, thrust). The client moves the
  * player, so without this it would fly everyone at one speed.
  */
-public class SyncFlightPacket {
+public class SyncFlightPacket implements CustomPacketPayload {
+
+    public static final Type<SyncFlightPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "sync_flight"));
+    public static final StreamCodec<FriendlyByteBuf, SyncFlightPacket> STREAM_CODEC = StreamCodec.of((buf, pkt) -> encode(pkt, buf), SyncFlightPacket::decode);
+
+    @Override
+    public Type<SyncFlightPacket> type() {
+        return TYPE;
+    }
 
     private final FlightProfile profile;
 
@@ -41,9 +53,8 @@ public class SyncFlightPacket {
                 thrust, own));
     }
 
-    public static void handle(SyncFlightPacket pkt, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> handleClient(pkt));
-        ctx.get().setPacketHandled(true);
+    public static void handle(SyncFlightPacket pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> handleClient(pkt));
     }
 
     @OnlyIn(Dist.CLIENT)

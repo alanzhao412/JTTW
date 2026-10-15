@@ -1,5 +1,6 @@
 package com.jttw.engine.character.divinebeast;
 
+import net.minecraft.resources.ResourceLocation;
 import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.stats.DivineBeastLine;
 import com.jttw.engine.progression.stats.FormStage;
@@ -11,9 +12,9 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.UUID;
 
@@ -31,9 +32,9 @@ public final class DivineBeastHandler {
     // Domain buff attribute modifiers
     // -----------------------------------------------------------------------
 
-    private static final UUID UUID_DOMAIN_HP  = UUID.fromString("b2c3d4e5-f6a7-8901-bcde-f12345678900");
-    private static final UUID UUID_DOMAIN_STR = UUID.fromString("b2c3d4e5-f6a7-8901-bcde-f12345678901");
-    private static final UUID UUID_DOMAIN_DEF = UUID.fromString("b2c3d4e5-f6a7-8901-bcde-f12345678902");
+    private static final ResourceLocation UUID_DOMAIN_HP  = JTTWEngine.id("domain_hp");
+    private static final ResourceLocation UUID_DOMAIN_STR = JTTWEngine.id("domain_str");
+    private static final ResourceLocation UUID_DOMAIN_DEF = JTTWEngine.id("domain_def");
 
     private static final String MOD_DOMAIN_HP  = "jttw:domain_hp";
     private static final String MOD_DOMAIN_STR = "jttw:domain_str";
@@ -135,9 +136,8 @@ public final class DivineBeastHandler {
      * and apply or remove the stat buff accordingly.
      */
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
-        if (!(event.player instanceof ServerPlayer sp)) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         if (sp.tickCount % DOMAIN_CHECK_INTERVAL != 0) return;
 
         ProgressionClass cls = PlayerLevel.getProgressionClass(sp);
@@ -190,8 +190,8 @@ public final class DivineBeastHandler {
         // Don't re-apply if already present
         if (inst.getModifier(uuid) != null) return;
 
-        inst.addPermanentModifier(new AttributeModifier(uuid, name, multiplier,
-                AttributeModifier.Operation.MULTIPLY_TOTAL));
+        inst.addPermanentModifier(new AttributeModifier(uuid, multiplier,
+                AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
     }
 
     private static void removeDomainMod(ServerPlayer player,

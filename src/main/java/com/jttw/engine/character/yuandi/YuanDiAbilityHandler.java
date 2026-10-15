@@ -1,5 +1,7 @@
 package com.jttw.engine.character.yuandi;
 
+import net.minecraft.resources.ResourceLocation;
+import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.progression.qi.QiData;
@@ -29,11 +31,11 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -88,17 +90,16 @@ public final class YuanDiAbilityHandler {
     // Attribute modifier UUIDs
     // -----------------------------------------------------------------------
 
-    private static final UUID UUID_TRANSFORM_DMG   = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-100000000001");
-    private static final UUID UUID_TRANSFORM_SPEED  = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-100000000002");
-    private static final UUID UUID_TRANSFORM_ARMOR  = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-100000000003");
-    private static final UUID UUID_TRANSFORM_KB     = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-100000000004");
+    private static final ResourceLocation UUID_TRANSFORM_DMG   = JTTWEngine.id("transform_dmg");
+    private static final ResourceLocation UUID_TRANSFORM_SPEED  = JTTWEngine.id("transform_speed");
+    private static final ResourceLocation UUID_TRANSFORM_ARMOR  = JTTWEngine.id("transform_armor");
+    private static final ResourceLocation UUID_TRANSFORM_KB     = JTTWEngine.id("transform_kb");
 
-    private static final UUID UUID_NIGHT_DMG   = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-200000000001");
-    private static final UUID UUID_NIGHT_SPEED  = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-200000000002");
-    private static final UUID UUID_NIGHT_ARMOR  = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-200000000003");
+    private static final ResourceLocation UUID_NIGHT_DMG   = JTTWEngine.id("night_dmg");
+    private static final ResourceLocation UUID_NIGHT_SPEED  = JTTWEngine.id("night_speed");
+    private static final ResourceLocation UUID_NIGHT_ARMOR  = JTTWEngine.id("night_armor");
 
-    private static final UUID UUID_BREATH_SLOW =
-            UUID.fromString("a1b2c3d4-e5f6-7890-abcd-300000000001");
+    private static final ResourceLocation UUID_BREATH_SLOW = JTTWEngine.id("breath_slow");
 
     // -----------------------------------------------------------------------
     // Domination NBT keys
@@ -292,13 +293,13 @@ public final class YuanDiAbilityHandler {
         }
 
         addOrReplace(player, Attributes.ATTACK_DAMAGE, UUID_TRANSFORM_DMG,
-                "jttw:yd_transform_dmg", dmgMult, AttributeModifier.Operation.MULTIPLY_TOTAL);
+                "jttw:yd_transform_dmg", dmgMult, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
         addOrReplace(player, Attributes.MOVEMENT_SPEED, UUID_TRANSFORM_SPEED,
-                "jttw:yd_transform_speed", speedMult, AttributeModifier.Operation.MULTIPLY_TOTAL);
+                "jttw:yd_transform_speed", speedMult, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
         addOrReplace(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get(), UUID_TRANSFORM_ARMOR,
-                "jttw:yd_transform_pres", presFlat, AttributeModifier.Operation.ADDITION);
+                "jttw:yd_transform_pres", presFlat, AttributeModifier.Operation.ADD_VALUE);
         addOrReplace(player, Attributes.KNOCKBACK_RESISTANCE, UUID_TRANSFORM_KB,
-                "jttw:yd_transform_kb", kbResist, AttributeModifier.Operation.ADDITION);
+                "jttw:yd_transform_kb", kbResist, AttributeModifier.Operation.ADD_VALUE);
     }
 
     private static void removeTransformModifiers(ServerPlayer player) {
@@ -425,8 +426,8 @@ public final class YuanDiAbilityHandler {
         AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
         if (speed != null && speed.getModifier(UUID_BREATH_SLOW) == null) {
             speed.addTransientModifier(new AttributeModifier(
-                    UUID_BREATH_SLOW, "jttw:yd_breath_slow", -1.0,
-                    AttributeModifier.Operation.MULTIPLY_TOTAL));
+                    UUID_BREATH_SLOW, -1.0,
+                    AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
         }
     }
 
@@ -662,11 +663,11 @@ public final class YuanDiAbilityHandler {
         }
 
         addOrReplace(player, Attributes.ATTACK_DAMAGE, UUID_NIGHT_DMG,
-                "jttw:yd_night_dmg", dmgMult, AttributeModifier.Operation.MULTIPLY_TOTAL);
+                "jttw:yd_night_dmg", dmgMult, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
         addOrReplace(player, Attributes.MOVEMENT_SPEED, UUID_NIGHT_SPEED,
-                "jttw:yd_night_speed", speedMult, AttributeModifier.Operation.MULTIPLY_TOTAL);
+                "jttw:yd_night_speed", speedMult, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
         addOrReplace(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get(), UUID_NIGHT_ARMOR,
-                "jttw:yd_night_pres", presFlat, AttributeModifier.Operation.ADDITION);
+                "jttw:yd_night_pres", presFlat, AttributeModifier.Operation.ADD_VALUE);
     }
 
     private static void removeNightModifiers(ServerPlayer player) {
@@ -680,9 +681,8 @@ public final class YuanDiAbilityHandler {
     // =======================================================================
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
-        if (!(event.player instanceof ServerPlayer sp)) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         if (!isYuanDi(sp)) return;
 
         UUID uuid = sp.getUUID();
@@ -1089,7 +1089,7 @@ public final class YuanDiAbilityHandler {
      * </ul>
      */
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onYuanDiDealtDamage(LivingHurtEvent event) {
+    public static void onYuanDiDealtDamage(LivingIncomingDamageEvent event) {
         // Only when a Yuan Di player hits a mob
         if (!(event.getSource().getEntity() instanceof ServerPlayer attacker)) return;
         if (!isYuanDi(attacker)) return;
@@ -1105,7 +1105,7 @@ public final class YuanDiAbilityHandler {
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onDominionDamageReduction(LivingHurtEvent event) {
+    public static void onDominionDamageReduction(LivingIncomingDamageEvent event) {
         // Only when a mob attacks a player
         Entity sourceEntity = event.getSource().getEntity();
         if (!(sourceEntity instanceof LivingEntity attacker)) return;
@@ -1239,7 +1239,7 @@ public final class YuanDiAbilityHandler {
         AttributeInstance inst = player.getAttribute(attribute);
         if (inst == null) return;
         inst.removeModifier(uuid);
-        inst.addTransientModifier(new AttributeModifier(uuid, name, value, op));
+        inst.addTransientModifier(new AttributeModifier(uuid, value, op));
     }
 
     private static void removeMod(ServerPlayer player,

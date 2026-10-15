@@ -3,9 +3,13 @@ package com.jttw.engine.network.s2c;
 import net.minecraft.client.Minecraft;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import com.jttw.engine.JTTWEngine;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -19,7 +23,15 @@ import java.util.function.Supplier;
  * after a successful unlock. The client stores the data in
  * {@link com.jttw.engine.client.ClientAbilityData}.
  */
-public class SyncSkillTreePacket {
+public class SyncSkillTreePacket implements CustomPacketPayload {
+
+    public static final Type<SyncSkillTreePacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "sync_skill_tree"));
+    public static final StreamCodec<FriendlyByteBuf, SyncSkillTreePacket> STREAM_CODEC = StreamCodec.of((buf, pkt) -> encode(pkt, buf), SyncSkillTreePacket::decode);
+
+    @Override
+    public Type<SyncSkillTreePacket> type() {
+        return TYPE;
+    }
 
     private final UUID playerId;
     private final int availablePoints;
@@ -55,9 +67,8 @@ public class SyncSkillTreePacket {
     // Handle
     // -----------------------------------------------------------------------
 
-    public static void handle(SyncSkillTreePacket pkt, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> handleClient(pkt));
-        ctx.get().setPacketHandled(true);
+    public static void handle(SyncSkillTreePacket pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> handleClient(pkt));
     }
 
     @OnlyIn(Dist.CLIENT)

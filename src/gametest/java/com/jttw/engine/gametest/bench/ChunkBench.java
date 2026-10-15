@@ -17,10 +17,12 @@ import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +49,7 @@ import java.util.List;
  * Carrying him on regardless would make the server generate each chunk he lands in on the spot,
  * freezing its tick; that measures lag, not flight.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID, value = Dist.CLIENT)
 public final class ChunkBench {
 
     private ChunkBench() {}
@@ -88,8 +90,8 @@ public final class ChunkBench {
     private static double tickMsMax;
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (!ENABLED || event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(ClientTickEvent.Post event) {
+        if (!ENABLED) return;
         Minecraft mc = Minecraft.getInstance();
         if (!worldRequested && mc.level == null && mc.screen != null && mc.getOverlay() == null) {
             worldRequested = true;
@@ -112,13 +114,13 @@ public final class ChunkBench {
     }
 
     @SubscribeEvent
-    public static void onItemJoin(net.minecraftforge.event.entity.EntityJoinLevelEvent event) {
+    public static void onItemJoin(net.neoforged.neoforge.event.entity.EntityJoinLevelEvent event) {
         if (ENABLED && TERRAIN && !event.getLevel().isClientSide()) TerrainBench.onItemJoin(event);
     }
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (!ENABLED || event.phase != TickEvent.Phase.END || step == null || step == Step.DONE) return;
+    public static void onServerTick(ServerTickEvent.Post event) {
+        if (!ENABLED || step == null || step == Step.DONE) return;
         MinecraftServer server = event.getServer();
         if (server.getPlayerList().getPlayers().isEmpty()) return;
         ServerPlayer p = server.getPlayerList().getPlayers().get(0);

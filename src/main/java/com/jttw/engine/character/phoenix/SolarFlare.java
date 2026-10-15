@@ -22,10 +22,11 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LightBlock;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +40,7 @@ import java.util.UUID;
  * It ends in a blinding burst. A ring of flame marks how far it reaches; its own sight is rimmed
  * in white-gold while it lasts (client.SolarFlareOverlay).
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class SolarFlare {
 
     private SolarFlare() {}
@@ -78,8 +79,8 @@ public final class SolarFlare {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p)) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer p)) return;
         long ends = p.getPersistentData().getLong(KEY_ENDS);
         if (ends == 0) return;
         long now = p.level().getGameTime();
@@ -176,7 +177,7 @@ public final class SolarFlare {
     }
 
     @SubscribeEvent
-    public static void onDeath(net.minecraftforge.event.entity.living.LivingDeathEvent event) {
+    public static void onDeath(net.neoforged.neoforge.event.entity.living.LivingDeathEvent event) {
         if (event.getEntity() instanceof ServerPlayer p) end(p);
     }
 }

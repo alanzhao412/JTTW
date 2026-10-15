@@ -1,5 +1,7 @@
 package com.jttw.engine.character.turtle;
 
+import net.minecraft.resources.ResourceLocation;
+import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.qi.QiManager;
@@ -25,12 +27,12 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -67,10 +69,8 @@ public final class TurtleAbilityHandler {
     /** +1.0 physical resistance per level (100 at level 100). */
     private static final double PRES_PER_LEVEL = 1.0;
 
-    private static final UUID UUID_TURTLE_DEF =
-            UUID.fromString("c3d4e5f6-a7b8-9012-cdef-234567890100");
-    private static final UUID UUID_TURTLE_TOUGHNESS =
-            UUID.fromString("c3d4e5f6-a7b8-9012-cdef-234567890101");
+    private static final ResourceLocation UUID_TURTLE_DEF = JTTWEngine.id("turtle_def");
+    private static final ResourceLocation UUID_TURTLE_TOUGHNESS = JTTWEngine.id("turtle_toughness");
 
     // -----------------------------------------------------------------------
     // Unstoppable Force state
@@ -97,8 +97,7 @@ public final class TurtleAbilityHandler {
     /** Damage multiplier while Shell Guard is active (25% of original). */
     private static final float SHELL_DAMAGE_MULT = 0.25f;
 
-    private static final UUID UUID_SHELL_SLOW =
-            UUID.fromString("c3d4e5f6-a7b8-9012-cdef-234567890102");
+    private static final ResourceLocation UUID_SHELL_SLOW = JTTWEngine.id("shell_slow");
 
     // -----------------------------------------------------------------------
     // Tectonic Slam state
@@ -154,8 +153,8 @@ public final class TurtleAbilityHandler {
         AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
         if (speed != null && speed.getModifier(UUID_SHELL_SLOW) == null) {
             speed.addTransientModifier(new AttributeModifier(
-                    UUID_SHELL_SLOW, "jttw:shell_guard_slow", -0.70,
-                    AttributeModifier.Operation.MULTIPLY_TOTAL));
+                    UUID_SHELL_SLOW, -0.70,
+                    AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
         }
 
         player.sendSystemMessage(Component.literal("\u00a77[World Turtle] \u00a7rYou hunker into your shell."));
@@ -209,8 +208,8 @@ public final class TurtleAbilityHandler {
         AttributeInstance inst = player.getAttribute(attr);
         if (inst == null) return;
         inst.removeModifier(uuid);
-        inst.addPermanentModifier(new AttributeModifier(uuid, name, amount,
-                AttributeModifier.Operation.ADDITION));
+        inst.addPermanentModifier(new AttributeModifier(uuid, amount,
+                AttributeModifier.Operation.ADD_VALUE));
     }
 
     private static void removeMod(ServerPlayer player,
@@ -465,7 +464,7 @@ public final class TurtleAbilityHandler {
         }
     }
 
-    /** Check if a player has Gravity Well active (used by LivingHurtEvent). */
+    /** Check if a player has Gravity Well active (used by LivingIncomingDamageEvent). */
     public static boolean isGravityWellActive(UUID playerId) {
         return ACTIVE_WELLS.contains(playerId);
     }
@@ -475,9 +474,8 @@ public final class TurtleAbilityHandler {
     // -----------------------------------------------------------------------
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
-        if (!(event.player instanceof ServerPlayer sp)) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         if (!isTurtle(sp)) return;
 
         UUID uuid = sp.getUUID();
@@ -624,7 +622,7 @@ public final class TurtleAbilityHandler {
     // -----------------------------------------------------------------------
 
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onLivingHurt(LivingHurtEvent event) {
+    public static void onLivingHurt(LivingIncomingDamageEvent event) {
         // --- Shell Guard damage reduction (defender is a guarding Turtle) ---
         if (event.getEntity() instanceof ServerPlayer sp
                 && ACTIVE_GUARDS.contains(sp.getUUID())) {

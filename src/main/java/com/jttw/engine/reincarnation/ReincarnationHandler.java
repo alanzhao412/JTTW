@@ -10,17 +10,18 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 /**
  * Auto-reincarnate on death if the player has entered the Nether (advancement)
  * and has enough total alignment points.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
 public final class ReincarnationHandler {
 
     private static final String KEY_PENDING = "jttw_pending_reincarnation";
@@ -118,7 +119,7 @@ public final class ReincarnationHandler {
             return;
         }
 
-        EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(rl);
+        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(rl);
         if (type == null) {
             player.sendSystemMessage(Component.literal("Reincarnation mapping entity not found: " + entityId));
             return;

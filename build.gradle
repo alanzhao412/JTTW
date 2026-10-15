@@ -1,19 +1,19 @@
 plugins {
+    id 'java-library'
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
-    id 'org.spongepowered.mixin' version '0.7.+'
+    id 'net.neoforged.moddev' version "${moddev_version}"
 }
 
-version = '1.0.0'
+version = mod_version
 group = 'com.jttw.engine'
 
 base {
-    archivesName = 'jttw_engine'
+    archivesName = mod_id
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 // GameTests: in-world tests run by ./gradlew runGameTestServer. A separate source set so
 // the test code and its structure files stay out of the mod jar.
@@ -28,119 +28,80 @@ configurations {
     gametestRuntimeOnly.extendsFrom runtimeOnly
 }
 
-minecraft {
-    mappings channel: 'official', version: '1.20.1'
+neoForge {
+    version = neo_version
 
-    copyIdeResources = true
+    // Unit tests and GameTests compile against Minecraft too
+    addModdingDependenciesTo sourceSets.test
+    addModdingDependenciesTo sourceSets.gametest
 
     runs {
         configureEach {
-            workingDirectory project.file('run')
-
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${layout.buildDirectory.get().asFile}/createSrgToMcp/output.srg"
-
-            mods {
-                jttw_engine {
-                    source sourceSets.main
-                }
-            }
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.DEBUG
+            systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
         }
 
         client {
-            property 'forge.enabledGameTestNamespaces', 'jttw_engine'
+            client()
         }
 
         server {
-            property 'forge.enabledGameTestNamespaces', 'jttw_engine'
-            args '--nogui'
+            server()
+            programArgument '--nogui'
         }
 
         gameTestServer {
-            property 'forge.enabledGameTestNamespaces', 'jttw_engine'
-            mods {
-                jttw_engine {
-                    source sourceSets.gametest
-                }
-            }
+            type = 'gameTestServer'
         }
 
         // Photographs every transformation form in a real client (see FormGallery)
         formGallery {
-            parent runs.client
-            workingDirectory project.file('run-gallery')
-            property 'jttw.formGallery', 'true'
+            client()
+            gameDirectory = project.file('run-gallery')
+            systemProperty 'jttw.formGallery', 'true'
             // e.g. ./gradlew runFormGallery -Pgallery.only=block,special
-            property 'jttw.formGallery.only', (project.findProperty('gallery.only') ?: '').toString()
-            mods {
-                jttw_engine {
-                    source sourceSets.main
-                    source sourceSets.gametest
-                }
-            }
+            systemProperty 'jttw.formGallery.only', (project.findProperty('gallery.only') ?: '').toString()
         }
 
-        // Measures world generation and flight look-ahead in a real client (see ChunkBench).
-        // Runs are set up in name order, so a child of 'client' must sort after it to inherit its main class.
+        // Measures world generation and flight look-ahead in a real client (see ChunkBench)
         worldgenBench {
-            parent runs.client
-            workingDirectory project.file('run-bench')
-            property 'jttw.chunkBench', 'true'
+            client()
+            gameDirectory = project.file('run-bench')
+            systemProperty 'jttw.chunkBench', 'true'
             // e.g. ./gradlew runWorldgenBench -Pbench.view=6 (the server's view distance, in chunks)
-            property 'jttw.chunkBench.view', (project.findProperty('bench.view') ?: '0').toString()
+            systemProperty 'jttw.chunkBench.view', (project.findProperty('bench.view') ?: '0').toString()
             // -Pbench.mode=terrain measures the abilities that break terrain instead (see TerrainBench)
-            property 'jttw.chunkBench.mode', (project.findProperty('bench.mode') ?: '').toString()
-            mods {
-                jttw_engine {
-                    source sourceSets.main
-                    source sourceSets.gametest
-                }
-            }
+            systemProperty 'jttw.chunkBench.mode', (project.findProperty('bench.mode') ?: '').toString()
         }
 
-        // An automated play-test in a real client (see ClientPass); named after 'client' to inherit it
+        // An automated play-test in a real client (see ClientPass)
         playtestPass {
-            parent runs.client
-            workingDirectory project.file('run-playtest')
-            property 'jttw.playtest', 'true'
-            mods {
-                jttw_engine {
-                    source sourceSets.main
-                    source sourceSets.gametest
-                }
-            }
+            client()
+            gameDirectory = project.file('run-playtest')
+            systemProperty 'jttw.playtest', 'true'
         }
 
         data {
-            workingDirectory project.file('run-data')
-            args '--mod', 'jttw_engine', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            data()
+            gameDirectory = project.file('run-data')
+            programArguments.addAll '--mod', mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
     }
-}
 
-mixin {
-    add sourceSets.main, "jttw_engine.refmap.json"
-    
-    config "jttw_engine.mixins.json"
+    // ModDevGradle loads a mod from its source sets, so the GameTest code is part of the mod in
+    // every dev run; it is still left out of the built jar.
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+            sourceSet sourceSets.gametest
+        }
+    }
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
-repositories {
-    maven {
-        url = "https://maven.minecraftforge.net/"
-    }
-    mavenCentral()
-}
-
 dependencies {
-    minecraft "net.minecraftforge:forge:1.20.1-47.4.10"
-
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-
     testImplementation platform('org.junit:junit-bom:5.10.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -150,7 +111,7 @@ dependencies {
 // Behaviour inside a running world is covered by GameTests (./gradlew runGameTestServer).
 tasks.named('test', Test).configure {
     useJUnitPlatform()
-    // Forge's logging writes a logs/ folder into the working directory; keep it in the build dir
+    // NeoForge's logging writes a logs/ folder into the working directory; keep it in the build dir
     def testRunDir = layout.buildDirectory.dir('test-run').get().asFile
     workingDir = testRunDir
     doFirst { testRunDir.mkdirs() }
@@ -161,48 +122,32 @@ tasks.named('test', Test).configure {
     }
 }
 
-tasks.named('processResources', ProcessResources).configure {
+var generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
     var replaceProperties = [
-            minecraft_version: '1.20.1',
-            minecraft_version_range: '[1.20.1]',
-            forge_version: '47.4.10',
-            forge_version_range: '[47,)',
-            loader_version_range: '[47,)',
-            mod_id: 'jttw_engine',
-            mod_name: 'JTTW Engine',
-            mod_license: 'All Rights Reserved',
-            mod_version: '1.0.0',
-            mod_authors: 'JTTW Team',
-            mod_description: 'Core engine for Journey to the West mod'
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version            : neo_version,
+            neo_version_range      : neo_version_range,
+            loader_version_range   : loader_version_range,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+            mod_authors            : mod_authors,
+            mod_description        : mod_description
     ]
     inputs.properties replaceProperties
-
-    filesMatching(['META-INF/mods.toml']) {
-        expand replaceProperties + [project: project]
-    }
+    expand replaceProperties
+    from 'src/main/templates'
+    into 'build/generated/sources/modMetadata'
 }
-
-tasks.named('jar', Jar).configure {
-    manifest {
-        attributes([
-                'Specification-Title'     : 'jttw_engine',
-                'Specification-Vendor'    : 'JTTW Team',
-                'Specification-Version'   : '1',
-                'Implementation-Title'    : project.name,
-                'Implementation-Version'  : project.jar.archiveVersion,
-                'Implementation-Vendor'   : 'JTTW Team',
-                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                'MixinConfigs'           : 'jttw_engine.mixins.json'
-        ])
-    }
-
-    finalizedBy 'reobfJar'
-}
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata
 
 publishing {
     publications {
         register('mavenJava', MavenPublication) {
-            artifact jar
+            from components.java
         }
     }
     repositories {
@@ -214,4 +159,12 @@ publishing {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+    options.compilerArgs << '-Xmaxerrs' << '10000'
+}
+
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
 }

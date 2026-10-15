@@ -1,13 +1,15 @@
 package com.jttw.engine.item;
 
+import net.minecraft.resources.ResourceLocation;
+import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
 import com.jttw.engine.reincarnation.AlignmentData;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.common.NeoForgeMod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.UUID;
 
@@ -18,8 +20,7 @@ import java.util.UUID;
 public final class RuyiJinguBangHandler {
     private RuyiJinguBangHandler() {}
 
-    private static final UUID UUID_REACH =
-            UUID.fromString("b4e3d2f1-8a5c-4f9b-0d7e-2c6f4a8b3e5d");
+    private static final ResourceLocation UUID_REACH = JTTWEngine.id("ruyi_jingu_bang_reach");
     private static final double REACH_NORMAL = 5.0;       // 3 base + 5 = 8
     private static final double REACH_QI_EMPOWERED = 5.0; // 3 base + 5 = 8
     private static final double REACH_LARGE = 10.0;       // 3 base + 10 = 13
@@ -27,11 +28,10 @@ public final class RuyiJinguBangHandler {
     private static final double REACH_SPEAR_ES = 5.0;     // Three-Pointed Spear: +5 for Erlang Shen
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.START) return;
+    public static void onPlayerTick(PlayerTickEvent.Pre event) {
 
-        Player player = event.player;
-        AttributeInstance reach = player.getAttribute(ForgeMod.ENTITY_REACH.get());
+        Player player = event.getEntity();
+        AttributeInstance reach = player.getAttribute(NeoForgeMod.ENTITY_REACH.get());
         if (reach == null) return;
 
         double desiredReach = 0.0;
@@ -69,8 +69,8 @@ public final class RuyiJinguBangHandler {
             // Remove old and apply new
             if (existing != null) reach.removeModifier(UUID_REACH);
             reach.addTransientModifier(new AttributeModifier(
-                    UUID_REACH, "jttw:ruyi_reach",
-                    desiredReach, AttributeModifier.Operation.ADDITION));
+                    UUID_REACH,
+                    desiredReach, AttributeModifier.Operation.ADD_VALUE));
         } else if (desiredReach == 0 && existing != null) {
             reach.removeModifier(UUID_REACH);
         }

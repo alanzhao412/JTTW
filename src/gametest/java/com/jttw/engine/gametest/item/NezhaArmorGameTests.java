@@ -13,9 +13,9 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import static com.jttw.engine.gametest.GT.*;
 import static com.jttw.engine.gametest.item.ItemTestSupport.*;
@@ -59,7 +59,7 @@ public class NezhaArmorGameTests {
     }
 
     private static void endTick(ServerPlayer p) {
-        NezhaAbilityHandler.onPlayerTick(new TickEvent.PlayerTickEvent(TickEvent.Phase.END, p));
+        NezhaAbilityHandler.onPlayerTick(new PlayerTickEvent.Post(p));
     }
 
     @GameTest(template = PLATFORM)
@@ -111,7 +111,7 @@ public class NezhaArmorGameTests {
         ServerPlayer p = nezha(h);
         SkillTreeData.grantNode(p, "nz_flight_1");
         p.setItemSlot(EquipmentSlot.FEET, wheels());
-        NezhaAbilityHandler.onPlayerTick(new TickEvent.PlayerTickEvent(TickEvent.Phase.START, p));
+        NezhaAbilityHandler.onPlayerTick(new PlayerTickEvent.Pre(p));
         check(h, !JTTWFlight.hasUniversalFlight(p), "START phase ignored");
         h.succeed();
     }

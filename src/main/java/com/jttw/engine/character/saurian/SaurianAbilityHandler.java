@@ -36,14 +36,16 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.event.entity.living.LivingFallEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.common.NeoForgeMod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEvent;
+import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -71,7 +73,7 @@ import java.util.UUID;
  *   <li><b>Venom Fangs</b> (passive): his blows envenom; the venom stacks and burns by his power.</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class SaurianAbilityHandler {
 
     private SaurianAbilityHandler() {}
@@ -392,8 +394,8 @@ public final class SaurianAbilityHandler {
     }
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || WHIRLPOOLS.isEmpty()) return;
+    public static void onServerTick(ServerTickEvent.Post event) {
+        if (WHIRLPOOLS.isEmpty()) return;
         var server = event.getServer();
         Iterator<Whirlpool> it = WHIRLPOOLS.iterator();
         while (it.hasNext()) {
@@ -408,7 +410,7 @@ public final class SaurianAbilityHandler {
     }
 
     @SubscribeEvent
-    public static void onServerStopped(net.minecraftforge.event.server.ServerStoppedEvent event) {
+    public static void onServerStopped(net.neoforged.neoforge.event.server.ServerStoppedEvent event) {
         WHIRLPOOLS.clear();
     }
 
@@ -456,7 +458,7 @@ public final class SaurianAbilityHandler {
     // ── blows: Riverborn's might, the Wrath's bursts, the fangs' venom ──
 
     @SubscribeEvent
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(LivingIncomingDamageEvent event) {
         if (!(event.getSource().getEntity() instanceof ServerPlayer p) || !SaurianCharacter.is(p) || event.getEntity() == p) return;
         float bonus = wet(p) ? wetBonus(tier(p, "sdk_river")) : 0;
         if (bonus > 0) event.setAmount(event.getAmount() * (1 + bonus));
@@ -513,7 +515,7 @@ public final class SaurianAbilityHandler {
     /** His passives, as they stand: refreshed each second. Public for tests. */
     public static void passives(ServerPlayer p, boolean saurian) {
         int river = saurian ? tier(p, "sdk_river") : 0, hide = saurian ? tier(p, "sdk_hide") : 0;
-        PassiveModifiers.set(p, ForgeMod.SWIM_SPEED.get(), "sdk_river_swim", river >= 1 ? 0.8 : 0, AttributeModifier.Operation.MULTIPLY_BASE);
+        PassiveModifiers.set(p, NeoForgeMod.SWIM_SPEED.get(), "sdk_river_swim", river >= 1 ? 0.8 : 0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
         PassiveModifiers.add(p, ModAttributes.PHYSICAL_RESISTANCE.get(), "sdk_hide_pres", hide * 10);
         PassiveModifiers.add(p, ModAttributes.MAGIC_RESISTANCE.get(), "sdk_hide_mres", hide >= 3 ? 10 : 0);
         if (river >= 2 && wet(p) && p.getHealth() < p.getMaxHealth()) {
@@ -522,8 +524,8 @@ public final class SaurianAbilityHandler {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p)) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer p)) return;
         boolean saurian = SaurianCharacter.is(p);
         if (surging(p)) {
             if (saurian) tickSurge(p);

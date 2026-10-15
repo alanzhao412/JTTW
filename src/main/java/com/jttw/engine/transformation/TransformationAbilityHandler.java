@@ -34,11 +34,12 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.living.LivingEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -72,7 +73,7 @@ import java.util.UUID;
  *   <li>Slime/Magma Cube: immune to fall damage</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
 public final class TransformationAbilityHandler {
 
     private TransformationAbilityHandler() {}
@@ -807,11 +808,11 @@ public final class TransformationAbilityHandler {
     }
 
     // -------------------------------------------------------------------------
-    // Melee attack effects (LivingHurtEvent)
+    // Melee attack effects (LivingIncomingDamageEvent)
     // -------------------------------------------------------------------------
 
     @SubscribeEvent
-    public static void onLivingHurt(LivingHurtEvent event) {
+    public static void onLivingHurt(LivingIncomingDamageEvent event) {
         // --- Melee attack effects (attacker must be a transformed player) ---
         if (!(event.getSource().getEntity() instanceof ServerPlayer attacker)) return;
         if (attacker.level().isClientSide) return;

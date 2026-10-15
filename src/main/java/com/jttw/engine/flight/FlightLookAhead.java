@@ -6,10 +6,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -30,7 +31,7 @@ import java.util.UUID;
  * chunks wide, nearest first. The requests are short-lived tickets: a turn or a stop lets the old
  * path go within seconds, and what is loaded is loaded, not ticked.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class FlightLookAhead {
 
     private FlightLookAhead() {}
@@ -115,8 +116,8 @@ public final class FlightLookAhead {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && event.player instanceof ServerPlayer p) tick(p);
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (event.getEntity() instanceof ServerPlayer p) tick(p);
     }
 
     @SubscribeEvent
@@ -125,7 +126,7 @@ public final class FlightLookAhead {
     }
 
     @SubscribeEvent
-    public static void onServerStopped(net.minecraftforge.event.server.ServerStoppedEvent event) {
+    public static void onServerStopped(net.neoforged.neoforge.event.server.ServerStoppedEvent event) {
         TRACKS.clear(); // each track holds its world
     }
 }

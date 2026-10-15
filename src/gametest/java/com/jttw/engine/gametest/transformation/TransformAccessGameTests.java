@@ -16,8 +16,8 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import java.util.Map;
 
@@ -203,7 +203,7 @@ public class TransformAccessGameTests {
     public static void unknownEntityIdIsRefusedNotAPig(GameTestHelper h) {
         ServerPlayer p = wukong(h, 3);
         Tf.send(p, new RequestTransformPacket(RequestTransformPacket.Kind.ENTITY,
-                new ResourceLocation("jttw_engine", "no_such_mob")));
+                ResourceLocation.fromNamespaceAndPath("jttw_engine", "no_such_mob")));
         check(h, formOf(p) == null, "unknown id, but became " + formOf(p));
         h.succeed();
     }
@@ -277,15 +277,15 @@ public class TransformAccessGameTests {
     public static void theCloneAndTheBullAreNotOfferedAsForms(GameTestHelper h) {
         var offered = com.jttw.engine.transformation.FormCatalog.mobForms(h.getLevel()).values().stream()
                 .flatMap(java.util.List::stream).toList();
-        ResourceLocation clone = new ResourceLocation(JTTWEngine.MOD_ID, "wu_clone");
-        ResourceLocation bull = new ResourceLocation(JTTWEngine.MOD_ID, "great_white_bull");
+        ResourceLocation clone = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "wu_clone");
+        ResourceLocation bull = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "great_white_bull");
         check(h, !offered.contains(clone), "the shadow clone is not a form");
         check(h, !offered.contains(bull), "the Great White Bull is not on offer");
-        check(h, offered.contains(new ResourceLocation("minecraft", "pig")), "while ordinary creatures are");
+        check(h, offered.contains(ResourceLocation.fromNamespaceAndPath("minecraft", "pig")), "while ordinary creatures are");
 
         ServerPlayer p = CharTest.as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
         TransformationManager.transform(p, com.jttw.engine.registry.ModEntities.WU_CLONE.get()); // as an old save might hold
-        TransformationManager.onPlayerLogin(new net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent(p));
+        TransformationManager.onPlayerLogin(new net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent(p));
         eq(h, null, TransformationManager.getTransformation(p), "logging in, a saved clone form is dropped: he is himself");
         h.succeed();
     }

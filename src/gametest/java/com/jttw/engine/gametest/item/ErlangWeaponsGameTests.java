@@ -25,8 +25,8 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import static com.jttw.engine.gametest.GT.*;
 import static com.jttw.engine.gametest.item.ItemTestSupport.*;
@@ -557,7 +557,7 @@ public class ErlangWeaponsGameTests {
         ServerPlayer before = thrower(h);
         thrust(h, before, spear(), 20);
         ServerPlayer after = player(h);
-        SpearReturn.onPlayerClone(new net.minecraftforge.event.entity.player.PlayerEvent.Clone(after, before, true));
+        SpearReturn.onPlayerClone(new net.neoforged.neoforge.event.entity.player.PlayerEvent.Clone(after, before, true));
         check(h, SpearReturn.isOut(after), "the note moved to the respawned player");
         eq(h, SpearReturn.returnAt(before), SpearReturn.returnAt(after), "same return time");
         thrownSpears(h, before).forEach(e -> e.discard());

@@ -1,9 +1,13 @@
 package com.jttw.engine.network.s2c;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import com.jttw.engine.JTTWEngine;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.function.Supplier;
 
@@ -12,7 +16,15 @@ import java.util.function.Supplier;
  * flying to the player themself, so without this nobody else could draw them lying along their
  * flight on their cloud.
  */
-public class FlyingStatePacket {
+public class FlyingStatePacket implements CustomPacketPayload {
+
+    public static final Type<FlyingStatePacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "flying_state"));
+    public static final StreamCodec<FriendlyByteBuf, FlyingStatePacket> STREAM_CODEC = StreamCodec.of((buf, pkt) -> encode(pkt, buf), FlyingStatePacket::decode);
+
+    @Override
+    public Type<FlyingStatePacket> type() {
+        return TYPE;
+    }
 
     private final int entityId;
     /** {@link com.jttw.engine.flight.FlyingState#GROUNDED}, {@code FLYING}, {@code ON_CLOUD} or {@code IN_SQUALL}. */
@@ -32,9 +44,8 @@ public class FlyingStatePacket {
         return new FlyingStatePacket(buf.readVarInt(), Math.max(0, Math.min(3, buf.readByte())));
     }
 
-    public static void handle(FlyingStatePacket pkt, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> handleClient(pkt));
-        ctx.get().setPacketHandled(true);
+    public static void handle(FlyingStatePacket pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> handleClient(pkt));
     }
 
     @OnlyIn(Dist.CLIENT)

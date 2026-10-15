@@ -17,11 +17,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -33,7 +34,7 @@ import java.util.List;
  * a rope of water beads shooting from his hand to what it caught, and the Whirlpool as a turning
  * spiral of water laid on the ground.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID, value = Dist.CLIENT)
 public final class WaterFxRenderer {
 
     private WaterFxRenderer() {}
@@ -44,7 +45,7 @@ public final class WaterFxRenderer {
     private static final List<Lash> LASHES = new ArrayList<>();
     private static final List<Pool> POOLS = new ArrayList<>();
 
-    private static final ResourceLocation SWIRL = new ResourceLocation(JTTWEngine.MOD_ID, "whirlpool_swirl");
+    private static final ResourceLocation SWIRL = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "whirlpool_swirl");
     private static final RenderType SWIRL_TYPE = RenderType.text(SWIRL);
     private static boolean swirlMade;
 
@@ -62,8 +63,7 @@ public final class WaterFxRenderer {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(ClientTickEvent.Post event) {
         var level = Minecraft.getInstance().level;
         if (level == null) {
             LASHES.clear();

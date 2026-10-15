@@ -2,14 +2,26 @@ package com.jttw.engine.network.s2c;
 
 import com.jttw.engine.client.gui.TransformationScreen;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import com.jttw.engine.JTTWEngine;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.function.Supplier;
 
 /** Server → client: open the transformation menu. */
-public class OpenTransformationMenuPacket {
+public class OpenTransformationMenuPacket implements CustomPacketPayload {
+
+    public static final Type<OpenTransformationMenuPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "open_transformation_menu"));
+    public static final StreamCodec<FriendlyByteBuf, OpenTransformationMenuPacket> STREAM_CODEC = StreamCodec.of((buf, pkt) -> encode(pkt, buf), OpenTransformationMenuPacket::decode);
+
+    @Override
+    public Type<OpenTransformationMenuPacket> type() {
+        return TYPE;
+    }
 
     public OpenTransformationMenuPacket() {}
 
@@ -21,9 +33,8 @@ public class OpenTransformationMenuPacket {
         return new OpenTransformationMenuPacket();
     }
 
-    public static void handle(OpenTransformationMenuPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(OpenTransformationMenuPacket::handleClient);
-        ctx.get().setPacketHandled(true);
+    public static void handle(OpenTransformationMenuPacket msg, IPayloadContext ctx) {
+        ctx.enqueueWork(OpenTransformationMenuPacket::handleClient);
     }
 
     /**

@@ -1,5 +1,7 @@
 package com.jttw.engine.item;
 
+import net.minecraft.resources.ResourceLocation;
+import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.character.wukong.WukongCheckpoints;
 import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.network.s2c.SyncQiPacket;
@@ -36,10 +38,8 @@ public class ImmortalPeachItem extends Item {
     private static final double MRES_BONUS = 40.0;
 
     // Ids kept from the armor/toughness version so it can be removed from old saves
-    private static final UUID MOD_ARMOR_UUID =
-            UUID.nameUUIDFromBytes("jttw_peach_armor".getBytes());
-    private static final UUID MOD_TOUGHNESS_UUID =
-            UUID.nameUUIDFromBytes("jttw_peach_toughness".getBytes());
+    private static final ResourceLocation MOD_ARMOR_UUID = JTTWEngine.id("mod_armor");
+    private static final ResourceLocation MOD_TOUGHNESS_UUID = JTTWEngine.id("mod_toughness");
 
     private static final FoodProperties FOOD = new FoodProperties.Builder()
             .nutrition(6) // 3 hunger bars
@@ -122,7 +122,7 @@ public class ImmortalPeachItem extends Item {
     private static void setMod(AttributeInstance inst, UUID id, String name, double amount) {
         if (inst == null) return;
         inst.removeModifier(id);
-        inst.addPermanentModifier(new AttributeModifier(id, name, amount, AttributeModifier.Operation.ADDITION));
+        inst.addPermanentModifier(new AttributeModifier(id, amount, AttributeModifier.Operation.ADD_VALUE));
     }
 
     private static void removeMod(AttributeInstance inst, UUID id) {

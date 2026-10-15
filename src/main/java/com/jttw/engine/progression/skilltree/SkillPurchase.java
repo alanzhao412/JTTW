@@ -12,9 +12,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import java.util.List;
 import java.util.Set;
@@ -24,7 +25,7 @@ import java.util.UUID;
  * Spending a skill point: validate the node, unlock it, apply what it does immediately,
  * and sync the tree and skill bar back to the client.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class SkillPurchase {
 
     private SkillPurchase() {}
@@ -110,16 +111,16 @@ public final class SkillPurchase {
             if (existing != null && existing.getAmount() == amount) continue;
             if (existing != null) attr.removeModifier(modUUID);
             if (amount != 0) {
-                attr.addPermanentModifier(new AttributeModifier(modUUID, "JTTW Vitality " + id,
-                        amount, AttributeModifier.Operation.ADDITION));
+                attr.addPermanentModifier(new AttributeModifier(modUUID,
+                        amount, AttributeModifier.Operation.ADD_VALUE));
             }
         }
         if (player.getHealth() > player.getMaxHealth()) player.setHealth(player.getMaxHealth());
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer sp)) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         if (sp.tickCount % 20 == 0) refreshVitality(sp);
     }
 }

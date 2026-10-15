@@ -25,10 +25,10 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.bus.api.EventPriority;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -72,7 +72,7 @@ public final class CharTest {
     public static void tick(ServerPlayer p, Consumer<TickEvent.PlayerTickEvent> handler, int times) {
         for (int i = 0; i < times; i++) {
             p.tickCount++;
-            handler.accept(new TickEvent.PlayerTickEvent(TickEvent.Phase.END, p));
+            handler.accept(new PlayerTickEvent.Post(p));
         }
     }
 
@@ -161,12 +161,12 @@ public final class CharTest {
     private static boolean listening;
 
     /**
-     * Records every hurt attempt on {@code e} from now on. Uses LivingAttackEvent, which fires
+     * Records every hurt attempt on {@code e} from now on. Uses LivingIncomingDamageEvent, which fires
      * at the start of {@code hurt()} with the requested amount.
      */
     public static synchronized List<Hit> watch(LivingEntity e) {
         if (!listening) {
-            MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true, LivingAttackEvent.class, ev -> {
+            NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, true, LivingIncomingDamageEvent.class, ev -> {
                 List<Hit> log = WATCHED.get(ev.getEntity().getUUID());
                 if (log != null) log.add(new Hit(ev.getSource(), ev.getAmount()));
             });

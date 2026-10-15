@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * the Yin-Yang swords on his back; Erlang Shen's spear and Golden Bow crossed on his back, his axe
  * at his hip. The more a character has forged, the more they are seen to carry.
  */
-@net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = com.jttw.engine.JTTWEngine.MOD_ID, value = net.minecraftforge.api.distmarker.Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = com.jttw.engine.JTTWEngine.MOD_ID, value = net.neoforged.api.distmarker.Dist.CLIENT)
 public class ArmamentLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
 
     /** Which armaments each player's body shows (by entity id), as the server says. */
@@ -38,8 +38,8 @@ public class ArmamentLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
     }
 
     /** Leaving a world, its players' ids mean nothing in the next. */
-    @net.minecraftforge.eventbus.api.SubscribeEvent
-    public static void onClientTick(net.minecraftforge.event.TickEvent.ClientTickEvent event) {
+    @net.neoforged.bus.api.SubscribeEvent
+    public static void onClientTick(net.neoforged.neoforge.event.TickEvent.ClientTickEvent event) {
         if (Minecraft.getInstance().level == null && !SHOWN.isEmpty()) SHOWN.clear();
     }
 

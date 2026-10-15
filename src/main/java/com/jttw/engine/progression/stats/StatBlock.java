@@ -1,5 +1,7 @@
 package com.jttw.engine.progression.stats;
 
+import net.minecraft.resources.ResourceLocation;
+import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.progression.level.LevelConstants;
 import com.jttw.engine.registry.ModAttributes;
 import net.minecraft.server.level.ServerPlayer;
@@ -95,12 +97,12 @@ public record StatBlock(
     // Attribute modifier UUIDs — must be stable across sessions
     // -----------------------------------------------------------------------
 
-    public static final UUID UUID_HP  = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567800");
-    public static final UUID UUID_STR = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567801");
+    public static final ResourceLocation UUID_HP  = JTTWEngine.id("hp");
+    public static final ResourceLocation UUID_STR = JTTWEngine.id("str");
     /** The old DEF → vanilla armor modifier. Only removed now, from players who still carry it. */
-    public static final UUID UUID_DEF = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567802");
-    public static final UUID UUID_PRES = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567803");
-    public static final UUID UUID_MRES = UUID.fromString("a1b2c3d4-e5f6-7890-abcd-ef1234567804");
+    public static final ResourceLocation UUID_DEF = JTTWEngine.id("def");
+    public static final ResourceLocation UUID_PRES = JTTWEngine.id("pres");
+    public static final ResourceLocation UUID_MRES = JTTWEngine.id("mres");
 
     private static final String MOD_HP  = "jttw:level_hp";
     private static final String MOD_STR = "jttw:level_str";
@@ -235,8 +237,8 @@ public record StatBlock(
         if (inst == null) return;
         inst.removeModifier(uuid);
         if (value != 0.0) {
-            inst.addPermanentModifier(new AttributeModifier(uuid, name, value,
-                    AttributeModifier.Operation.ADDITION));
+            inst.addPermanentModifier(new AttributeModifier(uuid, value,
+                    AttributeModifier.Operation.ADD_VALUE));
         }
     }
 

@@ -23,7 +23,7 @@ import net.minecraft.world.item.ItemStack;
 public class PlacedStaffRenderer extends EntityRenderer<PlacedStaffEntity> {
 
     private static final ResourceLocation TEXTURE =
-            new ResourceLocation(JTTWEngine.MOD_ID, "textures/item/ruyi_jingu_bang_base.png");
+            ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "textures/item/ruyi_jingu_bang_base.png");
 
     public PlacedStaffRenderer(EntityRendererProvider.Context ctx) {
         super(ctx);

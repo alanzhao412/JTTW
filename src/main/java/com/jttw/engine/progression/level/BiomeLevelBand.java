@@ -2,7 +2,6 @@ package com.jttw.engine.progression.level;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -18,14 +17,14 @@ import java.util.List;
  * <pre>{@code
  * // Phase 1: early biome band (levels 21–40)
  * BiomeLevelBand.register(new BiomeLevelBand(
- *     new ResourceLocation("minecraft", "jungle"),
+ *     ResourceLocation.fromNamespaceAndPath("minecraft", "jungle"),
  *     21, 40,
  *     80   // grunt gives 80 XP, general 400, boss 1600
  * ));
  *
  * // Phase 2: mid biome band (levels 41–65)
  * BiomeLevelBand.register(new BiomeLevelBand(
- *     new ResourceLocation("minecraft", "deep_dark"),
+ *     ResourceLocation.fromNamespaceAndPath("minecraft", "deep_dark"),
  *     41, 65,
  *     200
  * ));
@@ -73,7 +72,7 @@ public record BiomeLevelBand(
     @Nullable
     public static BiomeLevelBand forPlayer(ServerPlayer player) {
         var biomeHolder = player.level().getBiome(player.blockPosition());
-        ResourceLocation biomeId = ForgeRegistries.BIOMES.getKey(biomeHolder.value());
+        ResourceLocation biomeId = biomeHolder.unwrapKey().map(net.minecraft.resources.ResourceKey::location).orElse(null);
         if (biomeId == null) return null;
 
         for (BiomeLevelBand band : REGISTRY) {

@@ -16,10 +16,11 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * soldiers come down on their clouds in waves, round about them and above: the more wanted, the
  * larger and more often, and from the second degree with Heavenly Generals at their head.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class HeavenlyHost {
 
     private HeavenlyHost() {}
@@ -51,8 +52,8 @@ public final class HeavenlyHost {
     private static final Map<UUID, Long> NEXT_WAVE = new ConcurrentHashMap<>();
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p) || p.tickCount % 20 != 0) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer p) || p.tickCount % 20 != 0) return;
         int degree = Morality.wanted(p);
         if (degree == 0 || p.isCreative() || p.isSpectator() || !p.level().dimension().equals(JTTWDimensions.HEAVEN)) {
             NEXT_WAVE.remove(p.getUUID());

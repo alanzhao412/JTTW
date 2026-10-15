@@ -9,10 +9,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Nezha's passive skills (Heavenly Qi's regen is in {@link com.jttw.engine.progression.qi.QiManager}).
@@ -23,14 +24,14 @@ import net.minecraftforge.fml.common.Mod;
  *       resistance and immunity to fire and lava.</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class NezhaPassives {
 
     private NezhaPassives() {}
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer sp)) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         if (sp.tickCount % 20 != 0) return;
         boolean nezha = NezhaCharacter.is(sp);
         int body = 0; // Lotus Body nodes carry no tier number, so count them
@@ -44,17 +45,17 @@ public final class NezhaPassives {
         // Refreshed every second, so the bonus keeps pace with level power
         PassiveModifiers.add(sp, Attributes.MAX_HEALTH, "nz_fort_hp", 20.0 * body * LevelPower.of(sp));
         PassiveModifiers.set(sp, Attributes.MOVEMENT_SPEED, "nz_combat_speed", warrior >= 1 ? 0.15 : 0,
-                AttributeModifier.Operation.MULTIPLY_BASE);
+                AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
         // A share of his whole attack: his base is 1, so MULTIPLY_BASE would add only 0.2
         PassiveModifiers.set(sp, Attributes.ATTACK_DAMAGE, "nz_combat_dmg", warrior >= 2 ? 0.20 : 0,
-                AttributeModifier.Operation.MULTIPLY_TOTAL);
+                AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
         PassiveModifiers.add(sp, ModAttributes.PHYSICAL_RESISTANCE.get(), "nz_combat_pres", warrior >= 3 ? 24.0 : 0);
         if (warrior >= 3 && sp.isOnFire()) sp.clearFire();
     }
 
     /** Heavenly Warrior III: fire does not touch him. */
     @SubscribeEvent
-    public static void onAttacked(LivingAttackEvent event) {
+    public static void onAttacked(LivingIncomingDamageEvent event) {
         if (event.getEntity() instanceof ServerPlayer sp && event.getSource().is(DamageTypeTags.IS_FIRE)
                 && NezhaCharacter.is(sp) && SkillTreeData.getNzCombatTier(sp) >= 3) {
             event.setCanceled(true);

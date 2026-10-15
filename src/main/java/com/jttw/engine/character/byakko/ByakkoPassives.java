@@ -5,9 +5,10 @@ import com.jttw.engine.character.Characters;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 /**
  * The White Tiger's passive skills.
@@ -16,7 +17,7 @@ import net.minecraftforge.fml.common.Mod;
  *   <li><b>Scent of Blood</b> I: +15% damage to targets below half health. II: +30%.</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class ByakkoPassives {
 
     private ByakkoPassives() {}
@@ -26,7 +27,7 @@ public final class ByakkoPassives {
     }
 
     @SubscribeEvent
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(LivingIncomingDamageEvent event) {
         if (!(event.getSource().getEntity() instanceof ServerPlayer sp)) return;
         if (Characters.of(sp) != ByakkoCharacter.INSTANCE) return;
         LivingEntity target = event.getEntity();

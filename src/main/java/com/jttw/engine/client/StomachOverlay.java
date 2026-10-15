@@ -2,8 +2,8 @@ package com.jttw.engine.client;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
-import net.minecraftforge.client.gui.overlay.IGuiOverlay;
+import net.neoforged.neoforge.client.gui.overlay.ForgeGui;
+import net.minecraft.client.gui.LayeredDraw;
 
 /**
  * The Marshal of the Heavenly Canopy's second stomach, drawn as a golden row of shanks above
@@ -13,7 +13,7 @@ public final class StomachOverlay {
 
     private StomachOverlay() {}
 
-    private static final ResourceLocation ICONS = new ResourceLocation("textures/gui/icons.png");
+    private static final ResourceLocation ICONS = ResourceLocation.parse("textures/gui/icons.png");
 
     /** 0-20, or -1 when there is no second stomach to draw. */
     private static int reserve = -1;

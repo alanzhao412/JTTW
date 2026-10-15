@@ -27,12 +27,12 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.monster.Husk;
 import net.minecraft.world.entity.projectile.Arrow;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingKnockBackEvent;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import java.util.List;
 
@@ -293,7 +293,7 @@ public class WukongGameTests {
     // ── Full immortality and damage rules ───────────────────────────
 
     private static boolean cancels(ServerPlayer p, DamageSource src) {
-        LivingHurtEvent ev = new LivingHurtEvent(p, src, 5f);
+        LivingIncomingDamageEvent ev = new LivingIncomingDamageEvent(p, src, 5f);
         WukongAbilityHandler.onImmortalityDamage(ev);
         return ev.isCanceled();
     }
@@ -377,7 +377,7 @@ public class WukongGameTests {
     public static void martialArtsTiersAddSpeedThenAttackAndResistance(GameTestHelper h) {
         ServerPlayer p = wukong(h);
         p.tickCount = 20;
-        TickEvent.PlayerTickEvent tick = new TickEvent.PlayerTickEvent(TickEvent.Phase.START, p);
+        TickEvent.PlayerTickEvent tick = new PlayerTickEvent.Pre(p);
 
         WukongAbilityHandler.onPlayerTickMartial(tick);
         eq(h, null, modifier(p, Attributes.MOVEMENT_SPEED, "jttw:martial_speed"), "no speed bonus untrained");
@@ -564,18 +564,18 @@ public class WukongGameTests {
         Arrow arrow = EntityType.ARROW.create(h.getLevel());
         var ds = h.getLevel().damageSources();
 
-        LivingHurtEvent before = new LivingHurtEvent(p, ds.arrow(arrow, husk), 4f);
+        LivingIncomingDamageEvent before = new LivingIncomingDamageEvent(p, ds.arrow(arrow, husk), 4f);
         WukongCheckpoints.onHurt(before);
         check(h, !before.isCanceled(), "arrows hurt without the flag");
 
         p.getPersistentData().putBoolean("jttw_projectile_immune", true);
-        LivingHurtEvent shot = new LivingHurtEvent(p, ds.arrow(arrow, husk), 4f);
+        LivingIncomingDamageEvent shot = new LivingIncomingDamageEvent(p, ds.arrow(arrow, husk), 4f);
         WukongCheckpoints.onHurt(shot);
         check(h, shot.isCanceled(), "arrow cancelled");
-        LivingHurtEvent boom = new LivingHurtEvent(p, ds.sonicBoom(husk), 4f);
+        LivingIncomingDamageEvent boom = new LivingIncomingDamageEvent(p, ds.sonicBoom(husk), 4f);
         WukongCheckpoints.onHurt(boom);
         check(h, boom.isCanceled(), "sonic boom cancelled");
-        LivingHurtEvent punch = new LivingHurtEvent(p, ds.mobAttack(husk), 4f);
+        LivingIncomingDamageEvent punch = new LivingIncomingDamageEvent(p, ds.mobAttack(husk), 4f);
         WukongCheckpoints.onHurt(punch);
         check(h, !punch.isCanceled(), "melee still hurts");
         h.succeed();

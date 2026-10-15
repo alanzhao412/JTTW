@@ -20,11 +20,12 @@ import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.ProjectileImpactEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Erlang Shen's Golden Bow. In anyone else's hands it is a bow. In his, it needs no arrows: it
@@ -32,7 +33,7 @@ import net.minecraftforge.fml.common.Mod;
  * Erlang's arrow is a level-80 blow), vanish when they land, and send Xiaotian Quan after
  * whatever they hit. Like his other hits, they mark it for the Celestial Hunt.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public class GoldenBowItem extends BowItem {
 
     /** A golden arrow's damage at level 1 before its speed multiplies it (a vanilla arrow's is 2). */
@@ -86,7 +87,7 @@ public class GoldenBowItem extends BowItem {
 
     /** Where a golden arrow strikes, the hound follows. */
     @SubscribeEvent
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(LivingIncomingDamageEvent event) {
         if (!(event.getSource().getDirectEntity() instanceof AbstractArrow arrow) || !arrow.getPersistentData().getBoolean(KEY_GOLDEN)) return;
         if (!(event.getSource().getEntity() instanceof ServerPlayer erlang)) return;
         var hound = XiaotianQuanManager.houndOf(erlang);

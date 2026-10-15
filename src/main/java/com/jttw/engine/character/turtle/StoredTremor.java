@@ -5,11 +5,12 @@ import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.network.s2c.AbilityNotePacket;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.entity.living.LivingDamageEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;
@@ -22,7 +23,7 @@ import java.util.UUID;
  * of what it took in the last {@value #WINDOW} ticks, added to the slam's blow on each it strikes.
  * The store shows on the slam's key (client: the slot's note).
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class StoredTremor {
 
     private StoredTremor() {}
@@ -79,8 +80,8 @@ public final class StoredTremor {
 
     /** Stored blows fade as they leave the window: the note follows, once a second. */
     @SubscribeEvent
-    public static void onPlayerTick(net.minecraftforge.event.TickEvent.PlayerTickEvent event) {
-        if (event.phase != net.minecraftforge.event.TickEvent.Phase.END || !(event.player instanceof ServerPlayer p)) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.TickEvent.PlayerTickEvent event) {
+        if (event.phase != net.neoforged.neoforge.event.TickEvent.Phase.END || !(event.player instanceof ServerPlayer p)) return;
         if (p.tickCount % 20 != 0 || !STORED.containsKey(p.getUUID())) return;
         show(p);
         if (stored(p) == 0) STORED.remove(p.getUUID());

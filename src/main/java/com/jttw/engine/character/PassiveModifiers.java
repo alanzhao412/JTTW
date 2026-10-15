@@ -29,11 +29,11 @@ public final class PassiveModifiers {
         AttributeModifier existing = inst.getModifier(id);
         if (existing != null && existing.getAmount() == amount && existing.getOperation() == op) return;
         if (existing != null) inst.removeModifier(id);
-        if (amount != 0) inst.addTransientModifier(new AttributeModifier(id, name, amount, op));
+        if (amount != 0) inst.addTransientModifier(new AttributeModifier(id, amount, op));
         if (e.getHealth() > e.getMaxHealth()) e.setHealth(e.getMaxHealth());
     }
 
     public static void add(LivingEntity e, Attribute attribute, String name, double amount) {
-        set(e, attribute, name, amount, AttributeModifier.Operation.ADDITION);
+        set(e, attribute, name, amount, AttributeModifier.Operation.ADD_VALUE);
     }
 }

@@ -3,9 +3,13 @@ package com.jttw.engine.network.s2c;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import com.jttw.engine.JTTWEngine;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.function.Supplier;
 
@@ -13,7 +17,15 @@ import java.util.function.Supplier;
  * Syncs Yuan Di transformation state to the client for HUD rendering.
  * Includes: active flag, tier, duration remaining/max, recharge remaining/max.
  */
-public class SyncTransformStatePacket {
+public class SyncTransformStatePacket implements CustomPacketPayload {
+
+    public static final Type<SyncTransformStatePacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "sync_transform_state"));
+    public static final StreamCodec<FriendlyByteBuf, SyncTransformStatePacket> STREAM_CODEC = StreamCodec.of((buf, pkt) -> encode(pkt, buf), SyncTransformStatePacket::decode);
+
+    @Override
+    public Type<SyncTransformStatePacket> type() {
+        return TYPE;
+    }
 
     private final boolean transformed;
     private final int tier;
@@ -66,9 +78,8 @@ public class SyncTransformStatePacket {
     // Handle (client)
     // -----------------------------------------------------------------------
 
-    public static void handle(SyncTransformStatePacket pkt, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> handleClient(pkt));
-        ctx.get().setPacketHandled(true);
+    public static void handle(SyncTransformStatePacket pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> handleClient(pkt));
     }
 
     @OnlyIn(Dist.CLIENT)

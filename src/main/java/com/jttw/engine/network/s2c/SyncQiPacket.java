@@ -4,9 +4,13 @@ import net.minecraft.client.Minecraft;
 import com.jttw.engine.progression.qi.QiData;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import com.jttw.engine.JTTWEngine;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.function.Supplier;
 
@@ -26,7 +30,15 @@ import java.util.function.Supplier;
  *     .add();
  * }</pre>
  */
-public class SyncQiPacket {
+public class SyncQiPacket implements CustomPacketPayload {
+
+    public static final Type<SyncQiPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "sync_qi"));
+    public static final StreamCodec<FriendlyByteBuf, SyncQiPacket> STREAM_CODEC = StreamCodec.of((buf, pkt) -> encode(pkt, buf), SyncQiPacket::decode);
+
+    @Override
+    public Type<SyncQiPacket> type() {
+        return TYPE;
+    }
 
     private final float current;
     private final float max;
@@ -53,9 +65,8 @@ public class SyncQiPacket {
     // Handle (client)
     // -----------------------------------------------------------------------
 
-    public static void handle(SyncQiPacket pkt, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> handleClient(pkt));
-        ctx.get().setPacketHandled(true);
+    public static void handle(SyncQiPacket pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> handleClient(pkt));
     }
 
     @OnlyIn(Dist.CLIENT)

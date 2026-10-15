@@ -5,10 +5,11 @@ import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.network.s2c.FlyingStatePacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import java.util.Map;
 import java.util.Set;
@@ -19,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Shares who is flying, and who rides a cloud, with the players who can see them, so each client can draw a flier lying
  * along their flight on a cloud. Sent when it changes, and to anyone who comes in sight of a flier.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class FlyingState {
 
     private FlyingState() {}
@@ -69,8 +70,8 @@ public final class FlyingState {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p)) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer p)) return;
         int now = mode(p);
         Integer was = LAST.put(p.getUUID(), now);
         if (was == null ? now != GROUNDED : was != now) {

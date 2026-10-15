@@ -35,12 +35,14 @@ import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -66,7 +68,7 @@ import java.util.Set;
  *       nothing.</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class BullDemonAbilityHandler {
 
     private BullDemonAbilityHandler() {}
@@ -256,14 +258,14 @@ public final class BullDemonAbilityHandler {
         PassiveModifiers.add(p, Attributes.MAX_HEALTH, "bdk_bull_health", greatBullHealth(tier) * LevelPower.of(p));
         // A share of his whole attack: his base is 1, so MULTIPLY_BASE would add only the fraction
         PassiveModifiers.set(p, Attributes.ATTACK_DAMAGE, "bdk_bull_attack", greatBullAttack(tier),
-                AttributeModifier.Operation.MULTIPLY_TOTAL);
+                AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
         PassiveModifiers.add(p, Attributes.KNOCKBACK_RESISTANCE, "bdk_bull_steady", 1.0);
     }
 
     public static void endGreatBull(ServerPlayer p) {
         p.getPersistentData().remove(KEY_GREAT_BULL);
         PassiveModifiers.add(p, Attributes.MAX_HEALTH, "bdk_bull_health", 0);
-        PassiveModifiers.set(p, Attributes.ATTACK_DAMAGE, "bdk_bull_attack", 0, AttributeModifier.Operation.MULTIPLY_TOTAL);
+        PassiveModifiers.set(p, Attributes.ATTACK_DAMAGE, "bdk_bull_attack", 0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
         PassiveModifiers.add(p, Attributes.KNOCKBACK_RESISTANCE, "bdk_bull_steady", 0);
         TransformationData data = TransformationManager.getTransformation(p);
         if (data != null && data.getEntityType() == com.jttw.engine.registry.ModEntities.GREAT_WHITE_BULL.get()) TransformationManager.demorph(p);
@@ -279,7 +281,7 @@ public final class BullDemonAbilityHandler {
     }
 
     @SubscribeEvent
-    public static void onAttacked(LivingAttackEvent event) {
+    public static void onAttacked(LivingIncomingDamageEvent event) {
         if (event.getEntity() instanceof ServerPlayer p && event.getSource().is(DamageTypeTags.IS_FIRE)
                 && BullDemonCharacter.is(p) && tier(p, "bdk_hide") >= 1) {
             event.setCanceled(true);
@@ -418,23 +420,23 @@ public final class BullDemonAbilityHandler {
     }
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || WAVES.isEmpty()) return;
+    public static void onServerTick(ServerTickEvent.Post event) {
+        if (WAVES.isEmpty()) return;
         for (Iterator<Shockwave> it = WAVES.iterator(); it.hasNext(); ) {
             if (!advance(it.next())) it.remove();
         }
     }
 
     @SubscribeEvent
-    public static void onServerStopped(net.minecraftforge.event.server.ServerStoppedEvent event) {
+    public static void onServerStopped(net.neoforged.neoforge.event.server.ServerStoppedEvent event) {
         WAVES.clear(); // a wave in flight holds its world
     }
 
     // ── ticking and lifecycle ──────────────────────────────────────
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p)) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer p)) return;
         boolean bull = BullDemonCharacter.is(p);
         if (isRushing(p)) {
             if (bull) tickRush(p);

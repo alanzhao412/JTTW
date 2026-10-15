@@ -1,5 +1,7 @@
 package com.jttw.engine.item;
 
+import net.minecraft.resources.ResourceLocation;
+import com.jttw.engine.JTTWEngine;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.jttw.engine.reincarnation.AlignmentData;
@@ -32,8 +34,8 @@ import java.util.UUID;
  */
 public class ErlangAxeItem extends Item implements Charged {
 
-    private static final UUID UUID_ATK = UUID.fromString("b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6f");
-    private static final UUID UUID_SPEED = UUID.fromString("b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d70");
+    private static final ResourceLocation UUID_ATK = JTTWEngine.id("erlang_axe_atk");
+    private static final ResourceLocation UUID_SPEED = JTTWEngine.id("speed");
     public static final String TAG_LARGE = "jttw_axe_large";
     public static final float LARGE_QI_PER_SECOND = 4f;
 
@@ -56,11 +58,11 @@ public class ErlangAxeItem extends Item implements Charged {
         ImmutableMultimap.Builder<Attribute, AttributeModifier> b = ImmutableMultimap.builder();
         // Base +50% for everyone (large: twice that, x3); Erlang Shen bonus applied via handler event.
         boolean large = isLarge(stack);
-        b.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK, "jttw:axe_atk",
-                (large ? 2.0 : 0.50) * Armaments.refineMultiplier(stack), AttributeModifier.Operation.MULTIPLY_TOTAL));
+        b.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK,
+                (large ? 2.0 : 0.50) * Armaments.refineMultiplier(stack), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
         // Slower attack speed (-20%; large: half speed)
-        b.put(Attributes.ATTACK_SPEED, new AttributeModifier(UUID_SPEED, "jttw:axe_speed",
-                large ? -0.5 : -0.2, AttributeModifier.Operation.MULTIPLY_TOTAL));
+        b.put(Attributes.ATTACK_SPEED, new AttributeModifier(UUID_SPEED,
+                large ? -0.5 : -0.2, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
         return b.build();
     }
 

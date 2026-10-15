@@ -1,6 +1,6 @@
 package com.jttw.engine.reincarnation;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
  * Final reincarnation forms (primary + secondary alignment).
@@ -28,9 +28,9 @@ public enum ReincarnationOutcome {
     GRAND_SAINT_NINE_SPIRITS("grand_saint_of_nine_spirits", ReincarnationConfig.ENTITY_GRAND_SAINT_NINE_SPIRITS);
 
     public final String id;
-    private final ForgeConfigSpec.ConfigValue<String> entityIdConfig;
+    private final ModConfigSpec.ConfigValue<String> entityIdConfig;
 
-    ReincarnationOutcome(String id, ForgeConfigSpec.ConfigValue<String> entityIdConfig) {
+    ReincarnationOutcome(String id, ModConfigSpec.ConfigValue<String> entityIdConfig) {
         this.id = id;
         this.entityIdConfig = entityIdConfig;
     }

@@ -11,10 +11,10 @@ import com.jttw.engine.reincarnation.ReincarnationOutcome;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import static com.jttw.engine.gametest.GT.*;
 
@@ -31,7 +31,7 @@ public class RespawnGameTests {
     private static ServerPlayer respawn(GameTestHelper h, ServerPlayer dead) {
         ServerPlayer reborn = player(h);
         reborn.restoreFrom(dead, false);
-        MinecraftForge.EVENT_BUS.post(new PlayerEvent.Clone(reborn, dead, true));
+        NeoForge.EVENT_BUS.post(new PlayerEvent.Clone(reborn, dead, true));
         return reborn;
     }
 

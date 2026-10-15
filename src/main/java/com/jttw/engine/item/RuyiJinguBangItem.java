@@ -1,5 +1,7 @@
 package com.jttw.engine.item;
 
+import net.minecraft.resources.ResourceLocation;
+import com.jttw.engine.JTTWEngine;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.jttw.engine.entity.PlacedStaffEntity;
@@ -57,8 +59,8 @@ public class RuyiJinguBangItem extends Item implements Charged {
     private static final int MIN_CHARGE_TICKS = 10;  // 0.5 seconds minimum to fire
 
     // Stable UUIDs for attribute modifiers
-    private static final UUID UUID_ATK_MULT = UUID.fromString("a3d2c1e0-7f4b-4e8a-9c6d-1b5e3f7a2d4c");
-    private static final UUID UUID_REACH   = UUID.fromString("b4e3d2f1-8a5c-4f9b-0d7e-2c6f4a8b3e5d");
+    private static final ResourceLocation UUID_ATK_MULT = JTTWEngine.id("atk_mult");
+    private static final ResourceLocation UUID_REACH   = JTTWEngine.id("ruyi_jingu_bang_reach");
 
     public static final String TAG_QI_EMPOWERED = "jttw_qi_empowered";
     public static final String TAG_LARGE_MODE = "jttw_large_mode";
@@ -299,8 +301,8 @@ public class RuyiJinguBangItem extends Item implements Charged {
         // Both Qi Empowered and Large get 3× ATK (2.0 MULTIPLY_TOTAL = ×3)
         double atkMult = (isQiEmpowered(stack) || isLargeMode(stack)) ? 2.0 : 1.0;
         builder.put(Attributes.ATTACK_DAMAGE,
-                new AttributeModifier(UUID_ATK_MULT, "jttw:ruyi_atk",
-                        atkMult, AttributeModifier.Operation.MULTIPLY_TOTAL));
+                new AttributeModifier(UUID_ATK_MULT,
+                        atkMult, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 
         return builder.build();
     }

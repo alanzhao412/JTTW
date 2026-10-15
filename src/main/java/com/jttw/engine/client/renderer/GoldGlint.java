@@ -16,7 +16,7 @@ public final class GoldGlint extends RenderType {
         super(name, format, mode, size, crumbling, sort, setup, clear);
     }
 
-    public static final ResourceLocation TEXTURE = new ResourceLocation(JTTWEngine.MOD_ID, "textures/misc/gold_glint.png");
+    public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "textures/misc/gold_glint.png");
 
     /** Over an item in the hand, in a frame, on the ground. */
     public static final RenderType ITEM = create("jttw_gold_glint", DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS, 256, false, false,

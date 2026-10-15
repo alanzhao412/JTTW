@@ -8,7 +8,7 @@ import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.ListTag;
@@ -63,7 +63,7 @@ public class TransformationData {
         this.signLines = List.copyOf(signLines);
         this.litUntil = litUntil;
         this.entityType = entityType;
-        this.entityId = ForgeRegistries.ENTITY_TYPES.getKey(entityType);
+        this.entityId = BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
         this.eyeHeight = eyeHeight;
         this.width = width;
         this.height = height;
@@ -144,7 +144,7 @@ public class TransformationData {
 
     /** The block's id, or the entity's for other forms: what the player has become. */
     public ResourceLocation getFormId() {
-        return block != null ? ForgeRegistries.BLOCKS.getKey(block) : entityId;
+        return block != null ? BuiltInRegistries.BLOCK.getKey(block) : entityId;
     }
 
     /** A sign form's text: up to {@value #SIGN_LINES} lines. */
@@ -199,13 +199,13 @@ public class TransformationData {
     @Nullable
     private static EntityType<?> knownType(ResourceLocation id) {
         // The registry returns its default (pig) for unknown ids rather than null
-        return ForgeRegistries.ENTITY_TYPES.containsKey(id) ? ForgeRegistries.ENTITY_TYPES.getValue(id) : null;
+        return BuiltInRegistries.ENTITY_TYPE.containsKey(id) ? BuiltInRegistries.ENTITY_TYPE.get(id) : null;
     }
 
     /** The block for a saved or received id, or null if no such block is registered. */
     @Nullable
     private static Block knownBlock(ResourceLocation id) {
-        return ForgeRegistries.BLOCKS.containsKey(id) ? ForgeRegistries.BLOCKS.getValue(id) : null;
+        return BuiltInRegistries.BLOCK.containsKey(id) ? BuiltInRegistries.BLOCK.get(id) : null;
     }
 
     public EntityType<?> getEntityType() {
@@ -254,7 +254,7 @@ public class TransformationData {
             tag.putString("disguise_name", disguiseName == null ? "" : disguiseName);
         }
         if (block != null) {
-            tag.putString("block", ForgeRegistries.BLOCKS.getKey(block).toString());
+            tag.putString("block", BuiltInRegistries.BLOCK.getKey(block).toString());
             ListTag lines = new ListTag();
             for (String line : signLines) lines.add(StringTag.valueOf(line));
             tag.put("sign_lines", lines);
@@ -307,7 +307,7 @@ public class TransformationData {
         }
         buf.writeBoolean(block != null);
         if (block != null) {
-            buf.writeResourceLocation(ForgeRegistries.BLOCKS.getKey(block));
+            buf.writeResourceLocation(BuiltInRegistries.BLOCK.getKey(block));
             buf.writeVarInt(signLines.size());
             for (String line : signLines) buf.writeUtf(line, SIGN_LINE_LENGTH);
             buf.writeLong(litUntil);

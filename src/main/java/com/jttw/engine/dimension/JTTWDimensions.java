@@ -18,11 +18,11 @@ public final class JTTWDimensions {
 
     public static final ResourceKey<Level> HELL =
             ResourceKey.create(Registries.DIMENSION,
-                    new ResourceLocation(JTTWEngine.MOD_ID, "hell"));
+                    ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "hell"));
 
     public static final ResourceKey<Level> HEAVEN =
             ResourceKey.create(Registries.DIMENSION,
-                    new ResourceLocation(JTTWEngine.MOD_ID, "heaven"));
+                    ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "heaven"));
 
     /**
      * Teleport a player to the given dimension at a safe spawn position.

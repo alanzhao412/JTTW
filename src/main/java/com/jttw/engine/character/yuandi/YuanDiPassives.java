@@ -8,9 +8,10 @@ import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.registry.ModAttributes;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Yuan Di's passive skills (Qi Flow's regen and max Qi are in
@@ -22,14 +23,14 @@ import net.minecraftforge.fml.common.Mod;
  *       scaled by his power; re-applied every second, so it keeps up with level-ups.</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class YuanDiPassives {
 
     private YuanDiPassives() {}
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer sp)) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         if (sp.tickCount % 20 != 0) return;
         int flesh = 0;
         if (Characters.of(sp) == YuanDiCharacter.INSTANCE) {

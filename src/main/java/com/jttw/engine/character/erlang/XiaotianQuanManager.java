@@ -32,12 +32,13 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import java.util.*;
 
@@ -51,7 +52,7 @@ import java.util.*;
  * <p>Tier 2+ grants tracking (Glowing effect on nearest hostile).
  * Every bite applies Slowness I for 3 seconds.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
 public final class XiaotianQuanManager {
 
     private XiaotianQuanManager() {}
@@ -131,8 +132,7 @@ public final class XiaotianQuanManager {
     // =========================================================================
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent e) {
-        if (e.phase != TickEvent.Phase.END) return;
+    public static void onServerTick(ServerTickEvent.Post e) {
 
         MinecraftServer server = net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();
         if (server == null) return;
@@ -219,7 +219,7 @@ public final class XiaotianQuanManager {
 
     /** XTQ attacks always apply Slowness I for 3 seconds. */
     @SubscribeEvent
-    public static void onXtqAttacks(LivingHurtEvent e) {
+    public static void onXtqAttacks(LivingIncomingDamageEvent e) {
         if (!(e.getSource().getEntity() instanceof XiaotianQuanEntity xtq)) return;
         ServerPlayer owner = resolveOwner(xtq);
         if (owner == null) return;

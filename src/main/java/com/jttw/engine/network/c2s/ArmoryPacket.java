@@ -6,13 +6,25 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.NetworkHooks;
+import com.jttw.engine.JTTWEngine;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.NetworkHooks;
 
 import java.util.function.Supplier;
 
 /** Client → server: open the armory, or cycle the next weapon from it into hand. */
-public class ArmoryPacket {
+public class ArmoryPacket implements CustomPacketPayload {
+
+    public static final Type<ArmoryPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "armory"));
+    public static final StreamCodec<FriendlyByteBuf, ArmoryPacket> STREAM_CODEC = StreamCodec.of((buf, pkt) -> encode(pkt, buf), ArmoryPacket::decode);
+
+    @Override
+    public Type<ArmoryPacket> type() {
+        return TYPE;
+    }
 
     public enum Action { OPEN, CYCLE }
 
@@ -30,9 +42,9 @@ public class ArmoryPacket {
         return new ArmoryPacket(buf.readEnum(Action.class));
     }
 
-    public static void handle(ArmoryPacket pkt, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            ServerPlayer p = ctx.get().getSender();
+    public static void handle(ArmoryPacket pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
+            ServerPlayer p = (ServerPlayer) ctx.player();
             if (p == null) return;
             if (pkt.action == Action.CYCLE) {
                 Armory.cycle(p);
@@ -44,7 +56,6 @@ public class ArmoryPacket {
             }
             open(p);
         });
-        ctx.get().setPacketHandled(true);
     }
 
     /** Opens the player's armory to them. */

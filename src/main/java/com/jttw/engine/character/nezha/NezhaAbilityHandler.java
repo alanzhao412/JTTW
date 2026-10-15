@@ -1,5 +1,6 @@
 package com.jttw.engine.character.nezha;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.nbt.CompoundTag;
 import com.jttw.engine.registry.ModItems;
 import com.jttw.engine.progression.level.PlayerLevel;
@@ -27,16 +28,17 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import java.util.*;
 
-@Mod.EventBusSubscriber(modid = com.jttw.engine.JTTWEngine.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = com.jttw.engine.JTTWEngine.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
 public final class NezhaAbilityHandler {
 
     private NezhaAbilityHandler() {}
@@ -54,13 +56,12 @@ public final class NezhaAbilityHandler {
     public static final double SAMADHI_THREE_HEADS_RANGE = 12.0;
 
     // Wind Fire Wheels: +25% movement speed for Nezha while worn
-    private static final UUID WHEELS_SPEED_ID = UUID.fromString("5f3a1c2e-8b7d-4e6f-9a0b-1c2d3e4f5a6b");
-    private static final UUID CLOTH_MRES_ID = UUID.fromString("5b0e6c1a-8f2d-4e7b-9a31-c4d2e8f6a713");
+    private static final ResourceLocation WHEELS_SPEED_ID = JTTWEngine.id("wheels_speed");
+    private static final ResourceLocation CLOTH_MRES_ID = JTTWEngine.id("cloth_mres");
     private static final double WHEELS_SPEED_BONUS = 0.25;
     private static final Map<UUID, Long> DET_COOLDOWNS = new HashMap<>();
 
-    private static final UUID THREE_HEADS_ATK_UUID =
-            UUID.fromString("f4d5e6a7-b8c9-4d0e-1f2a-3b4c5d6e7f80");
+    private static final ResourceLocation THREE_HEADS_ATK_UUID = JTTWEngine.id("three_heads_atk");
     private static final float THREE_HEADS_QI_DRAIN = 0.15f;
     /** Armament Mastery I-III: what his armaments in hand add to his attack. */
     private static final double[] ARM_MASTERY = {0, 0.05, 0.10, 0.25};
@@ -238,8 +239,7 @@ public final class NezhaAbilityHandler {
             var atkAttr = player.getAttribute(Attributes.ATTACK_DAMAGE);
             if (atkAttr != null) {
                 atkAttr.removeModifier(THREE_HEADS_ATK_UUID);
-                atkAttr.addTransientModifier(new AttributeModifier(THREE_HEADS_ATK_UUID,
-                        "jttw:three_heads_atk", 0.5, AttributeModifier.Operation.MULTIPLY_TOTAL));
+                atkAttr.addTransientModifier(new AttributeModifier(THREE_HEADS_ATK_UUID, 0.5, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
             }
             player.getPersistentData().putBoolean("jttw_nz_three_heads", true);
             player.sendSystemMessage(Component.literal(
@@ -258,27 +258,26 @@ public final class NezhaAbilityHandler {
         AttributeModifier now = attr.getModifier(id);
         if (now != null && now.getAmount() == amount) return;
         if (now != null) attr.removeModifier(id);
-        if (amount != 0) attr.addTransientModifier(new AttributeModifier(id, name, amount, op));
+        if (amount != 0) attr.addTransientModifier(new AttributeModifier(id, amount, op));
     }
 
     /** Wind Fire Wheels: speed while Nezha has them, the more the better refined. */
     private static void applyWheelsSpeed(ServerPlayer sp, ItemStack wheels) {
         setTransient(sp.getAttribute(Attributes.MOVEMENT_SPEED), WHEELS_SPEED_ID, "jttw:wind_fire_wheels",
                 wheels.isEmpty() ? 0 : WHEELS_SPEED_BONUS * com.jttw.engine.item.Armaments.refineMultiplier(wheels),
-                AttributeModifier.Operation.MULTIPLY_BASE);
+                AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
     }
 
     /** Huntian Cloth: magic resistance while Nezha has it, the more the better refined. */
     private static void applyClothResistance(ServerPlayer sp, ItemStack cloth) {
         setTransient(sp.getAttribute(com.jttw.engine.registry.ModAttributes.MAGIC_RESISTANCE.get()), CLOTH_MRES_ID, "jttw:huntian_cloth",
                 cloth.isEmpty() ? 0 : HuntianClothItem.MAGIC_RESISTANCE * com.jttw.engine.item.Armaments.refineMultiplier(cloth),
-                AttributeModifier.Operation.ADDITION);
+                AttributeModifier.Operation.ADD_VALUE);
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
-        if (!(event.player instanceof ServerPlayer sp)) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         if (!isNezha(sp)) return;
 
         // Flight: require Wind Fire Wheels (worn, or in his armory) + flight tier
@@ -302,7 +301,7 @@ public final class NezhaAbilityHandler {
         int arm = SkillTreeData.getNzArmTier(sp);
         boolean armed = com.jttw.engine.item.Armaments.of(sp.getMainHandItem()) != null;
         com.jttw.engine.character.PassiveModifiers.set(sp, Attributes.ATTACK_DAMAGE, "nz_arm_mastery",
-                armed ? ARM_MASTERY[Math.min(arm, 3)] : 0, AttributeModifier.Operation.MULTIPLY_TOTAL);
+                armed ? ARM_MASTERY[Math.min(arm, 3)] : 0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 
         // Three Heads Qi drain
         if (ACTIVE_THREE_HEADS.contains(sp.getUUID())) {
@@ -334,7 +333,7 @@ public final class NezhaAbilityHandler {
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onDetonationSelfDamage(LivingHurtEvent event) {
+    public static void onDetonationSelfDamage(LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         if (DETONATION_IMMUNE.contains(sp.getUUID())) {
             event.setCanceled(true);

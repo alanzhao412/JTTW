@@ -1,14 +1,26 @@
 package com.jttw.engine.network.s2c;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import com.jttw.engine.JTTWEngine;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.function.Supplier;
 
 /** Another player's Qi, for truth-seeing eyes to read (see QiShown). */
-public class QiSeenPacket {
+public class QiSeenPacket implements CustomPacketPayload {
+
+    public static final Type<QiSeenPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "qi_seen"));
+    public static final StreamCodec<FriendlyByteBuf, QiSeenPacket> STREAM_CODEC = StreamCodec.of((buf, pkt) -> encode(pkt, buf), QiSeenPacket::decode);
+
+    @Override
+    public Type<QiSeenPacket> type() {
+        return TYPE;
+    }
 
     private final int entityId;
     private final float qi, max;
@@ -31,9 +43,8 @@ public class QiSeenPacket {
         return new QiSeenPacket(id, Float.isFinite(qi) ? qi : 0, Float.isFinite(max) ? max : 0);
     }
 
-    public static void handle(QiSeenPacket pkt, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> handleClient(pkt));
-        ctx.get().setPacketHandled(true);
+    public static void handle(QiSeenPacket pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> handleClient(pkt));
     }
 
     @OnlyIn(Dist.CLIENT)

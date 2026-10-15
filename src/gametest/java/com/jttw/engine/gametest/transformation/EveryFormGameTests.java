@@ -19,9 +19,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.animal.axolotl.Axolotl;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +60,7 @@ public class EveryFormGameTests {
     }
 
     private static EntityType<?> type(ResourceLocation id) {
-        return ForgeRegistries.ENTITY_TYPES.getValue(id);
+        return BuiltInRegistries.ENTITY_TYPE.get(id);
     }
 
     private static boolean near(double a, double b) {
@@ -86,20 +86,20 @@ public class EveryFormGameTests {
         List<ResourceLocation> offered = new ArrayList<>(objects);
         mobs.values().forEach(offered::addAll);
         List<ResourceLocation> missing = new ArrayList<>();
-        for (ResourceLocation id : ForgeRegistries.ENTITY_TYPES.getKeys()) {
+        for (ResourceLocation id : BuiltInRegistries.ENTITY_TYPE.keySet()) {
             if (type(id) == EntityType.PLAYER) continue;
             if (!offered.contains(id)) missing.add(id);
         }
         List<ResourceLocation> expectedMissing = new ArrayList<>(FormCatalog.NOT_FORMS);
         expectedMissing.addAll(FormCatalog.ABILITY_FORMS); // taken only by a character's own ability
         for (String machinery : List.of("bone_shard", "howl_projectile", "placed_staff", "qi_wave", "thrown_spear")) {
-            expectedMissing.add(new ResourceLocation(JTTWEngine.MOD_ID, machinery));
+            expectedMissing.add(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, machinery));
         }
         missing.sort(java.util.Comparator.comparing(ResourceLocation::toString));
         expectedMissing.sort(java.util.Comparator.comparing(ResourceLocation::toString));
         eq(h, expectedMissing, missing, "entities offered nowhere");
         eq(h, offered.size(), new java.util.HashSet<>(offered).size(), "no form offered twice");
-        check(h, !offered.contains(ForgeRegistries.ENTITY_TYPES.getKey(EntityType.PLAYER)), "the player is not a mob form");
+        check(h, !offered.contains(BuiltInRegistries.ENTITY_TYPE.getKey(EntityType.PLAYER)), "the player is not a mob form");
         check(h, !mobs.containsKey(FormCategory.OBJECT) && !mobs.containsKey(FormCategory.PLAYER),
                 "mob tabs hold only mobs");
         for (ResourceLocation id : objects) {
@@ -268,7 +268,7 @@ public class EveryFormGameTests {
     @GameTest(template = PLATFORM)
     public static void onlyTheEnderDragonIsTurnedAndOnlyThePhantomTiltsBackwards(GameTestHelper h) {
         List<String> turned = new ArrayList<>(), inverted = new ArrayList<>();
-        for (ResourceLocation id : ForgeRegistries.ENTITY_TYPES.getKeys()) {
+        for (ResourceLocation id : BuiltInRegistries.ENTITY_TYPE.keySet()) {
             if (MorphPose.yawOffset(type(id)) != 0f) turned.add(id.getPath());
             if (MorphPose.invertsPitch(type(id))) inverted.add(id.getPath());
         }

@@ -3,8 +3,8 @@ package com.jttw.engine.client;
 import com.jttw.engine.character.AbilitySlot;
 import com.jttw.engine.progression.skilltree.AbilityType;
 import com.jttw.engine.network.s2c.SyncAbilitiesPacket;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.Collections;

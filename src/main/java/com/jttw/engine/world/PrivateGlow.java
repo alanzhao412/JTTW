@@ -16,7 +16,7 @@ import java.util.UUID;
  * out for their owner: Byakko's nose for the wounded, Erlang Shen's marks and his hound's
  * tracking, the Peng's eclipse, Yuan Di's dominated.
  */
-@net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = com.jttw.engine.JTTWEngine.MOD_ID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = com.jttw.engine.JTTWEngine.MOD_ID)
 public final class PrivateGlow {
 
     private PrivateGlow() {}
@@ -53,8 +53,8 @@ public final class PrivateGlow {
     }
 
     /** A viewer gone: what glowed for them is forgotten. */
-    @net.minecraftforge.eventbus.api.SubscribeEvent
-    public static void onLogout(net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) {
+    @net.neoforged.bus.api.SubscribeEvent
+    public static void onLogout(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) {
         SHOWN.remove(event.getEntity().getUUID());
     }
 }

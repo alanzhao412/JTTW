@@ -6,9 +6,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Wukong's Journey checkpoints — XP gates that block leveling until completed.
@@ -26,7 +27,7 @@ import net.minecraftforge.fml.common.Mod;
  *   <li>Lv 90 — Eat Human Ginseng Fruit (from Zhen Yuan Zi's tree)</li>
  * </ol>
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
 public final class WukongCheckpoints {
 
     private WukongCheckpoints() {}
@@ -121,7 +122,7 @@ public final class WukongCheckpoints {
 
     // ── Projectile immunity damage handler ──────────────────────────
     @SubscribeEvent
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (!player.getPersistentData().getBoolean("jttw_projectile_immune")) return;
 

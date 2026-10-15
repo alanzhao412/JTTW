@@ -4,11 +4,11 @@ import com.jttw.engine.JTTWEngine;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.RangedAttribute;
-import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.event.entity.EntityAttributeModificationEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.minecraft.core.registries.Registries;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 /**
  * The mod's own attributes: physical and magic resistance.
@@ -22,14 +22,14 @@ public final class ModAttributes {
     private ModAttributes() {}
 
     public static final DeferredRegister<Attribute> ATTRIBUTES =
-            DeferredRegister.create(ForgeRegistries.ATTRIBUTES, JTTWEngine.MOD_ID);
+            DeferredRegister.create(Registries.ATTRIBUTE, JTTWEngine.MOD_ID);
 
-    public static final RegistryObject<Attribute> PHYSICAL_RESISTANCE =
+    public static final DeferredHolder<Attribute, Attribute> PHYSICAL_RESISTANCE =
             ATTRIBUTES.register("physical_resistance", () ->
                     new RangedAttribute("attribute.name.jttw_engine.physical_resistance", 0.0, 0.0, 100000.0)
                             .setSyncable(true));
 
-    public static final RegistryObject<Attribute> MAGIC_RESISTANCE =
+    public static final DeferredHolder<Attribute, Attribute> MAGIC_RESISTANCE =
             ATTRIBUTES.register("magic_resistance", () ->
                     new RangedAttribute("attribute.name.jttw_engine.magic_resistance", 0.0, 0.0, 100000.0)
                             .setSyncable(true));

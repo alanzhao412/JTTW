@@ -27,11 +27,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -48,8 +48,8 @@ import java.util.concurrent.ConcurrentHashMap;
  *   <li>Weather Manipulation — toggle rain/thunderstorm</li>
  *   <li>Dimension Travel — teleport to selected dimension (flight tier 3)</li>
  *   <li>Tidal Wave — cone-shaped water blast (USE active, slot 2)</li>
- *   <li>Dragon Scales — passive damage resistance (LivingHurtEvent)</li>
- *   <li>Tidal Force — passive knockback multiplier (LivingHurtEvent)</li>
+ *   <li>Dragon Scales — passive damage resistance (LivingIncomingDamageEvent)</li>
+ *   <li>Tidal Force — passive knockback multiplier (LivingIncomingDamageEvent)</li>
  * </ul>
  */
 public final class DragonAbilityHandler {
@@ -424,7 +424,7 @@ public final class DragonAbilityHandler {
     private record BubbleEntry(int entityId, UUID sourcePlayerId, int remainingTicks) {}
 
     // -----------------------------------------------------------------------
-    // Dragon Scales (PASSIVE defense — LivingHurtEvent)
+    // Dragon Scales (PASSIVE defense — LivingIncomingDamageEvent)
     // -----------------------------------------------------------------------
 
     /** Tracks the last time Dragon Scales T3 hardening was activated (game time). */
@@ -437,7 +437,7 @@ public final class DragonAbilityHandler {
     private static final int SCALES_HARDEN_COOLDOWN = 1200; // 60 seconds
 
     /**
-     * Dragon Scales passive defense — subscribes to LivingHurtEvent at HIGH priority.
+     * Dragon Scales passive defense — subscribes to LivingIncomingDamageEvent at HIGH priority.
      * <ul>
      *   <li>T1: 10% damage resistance. Projectile damage * 0.75.</li>
      *   <li>T2: 20% resistance. Reflect 15% of melee damage back to attacker as magic.</li>
@@ -445,7 +445,7 @@ public final class DragonAbilityHandler {
      * </ul>
      */
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onDragonScalesHurt(LivingHurtEvent event) {
+    public static void onDragonScalesHurt(LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (!isDragon(player)) return;
 
@@ -508,7 +508,7 @@ public final class DragonAbilityHandler {
      * Reflects 15% of original melee damage back to the attacker as magic damage.
      * Only at T2+, only for direct entity (melee) attacks.
      */
-    private static void applyScalesReflect(ServerPlayer player, LivingHurtEvent event,
+    private static void applyScalesReflect(ServerPlayer player, LivingIncomingDamageEvent event,
                                            int tier, float originalAmount) {
         if (tier < 2) return;
         Entity attacker = event.getSource().getEntity();
@@ -534,7 +534,7 @@ public final class DragonAbilityHandler {
      * player being hurt.
      */
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onLightningSelfDamage(LivingHurtEvent event) {
+    public static void onLightningSelfDamage(LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (!event.getSource().is(DamageTypes.LIGHTNING_BOLT)) return;
 
@@ -545,7 +545,7 @@ public final class DragonAbilityHandler {
     }
 
     // -----------------------------------------------------------------------
-    // Tidal Force (PASSIVE knockback — LivingHurtEvent)
+    // Tidal Force (PASSIVE knockback — LivingIncomingDamageEvent)
     // -----------------------------------------------------------------------
 
     /** Tracks entities that were recently knocked back for wall impact check. */
@@ -562,7 +562,7 @@ public final class DragonAbilityHandler {
      * </ul>
      */
     @SubscribeEvent(priority = EventPriority.NORMAL)
-    public static void onTidalForceHurt(LivingHurtEvent event) {
+    public static void onTidalForceHurt(LivingIncomingDamageEvent event) {
         // Only for player attacks (melee)
         if (!(event.getSource().getEntity() instanceof ServerPlayer attacker)) return;
         if (!isDragon(attacker)) return;
@@ -606,9 +606,8 @@ public final class DragonAbilityHandler {
     // -----------------------------------------------------------------------
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
-        if (!(event.player instanceof ServerPlayer sp)) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         if (!isDragon(sp)) return;
 
         // Tick global bubble drowning (every 20 ticks)

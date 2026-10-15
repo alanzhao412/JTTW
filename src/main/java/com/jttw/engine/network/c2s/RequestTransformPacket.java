@@ -11,8 +11,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.registries.ForgeRegistries;
+import com.jttw.engine.JTTWEngine;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -24,7 +28,15 @@ import java.util.function.Supplier;
  * <p>The server re-checks the choice against the player's transformation art and level
  * ({@link TransformationAccess}); the menu only shows what passes the same check.
  */
-public class RequestTransformPacket {
+public class RequestTransformPacket implements CustomPacketPayload {
+
+    public static final Type<RequestTransformPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "request_transform"));
+    public static final StreamCodec<FriendlyByteBuf, RequestTransformPacket> STREAM_CODEC = StreamCodec.of((buf, pkt) -> encode(pkt, buf), RequestTransformPacket::decode);
+
+    @Override
+    public Type<RequestTransformPacket> type() {
+        return TYPE;
+    }
 
     public enum Kind {
         /** A mob (living entity). */
@@ -75,11 +87,9 @@ public class RequestTransformPacket {
         return new RequestTransformPacket(kind, buf.readResourceLocation());
     }
 
-    public static void handle(RequestTransformPacket msg, Supplier<NetworkEvent.Context> ctxSupplier) {
-        NetworkEvent.Context ctx = ctxSupplier.get();
-        ServerPlayer sender = ctx.getSender();
+    public static void handle(RequestTransformPacket msg, IPayloadContext ctx) {
+        ServerPlayer sender = (ServerPlayer) ctx.player();
         if (sender != null) ctx.enqueueWork(() -> handleServer(sender, msg));
-        ctx.setPacketHandled(true);
     }
 
     private static void handleServer(ServerPlayer sender, RequestTransformPacket msg) {
@@ -94,8 +104,8 @@ public class RequestTransformPacket {
         }
 
         if (msg.kind == Kind.BLOCK) {
-            if (!ForgeRegistries.BLOCKS.containsKey(msg.entityId)) return;
-            var block = ForgeRegistries.BLOCKS.getValue(msg.entityId);
+            if (!BuiltInRegistries.BLOCK.containsKey(msg.entityId)) return;
+            var block = BuiltInRegistries.BLOCK.get(msg.entityId);
             if (!FormCatalog.BLOCK_FORMS.contains(block)) return; // only the blocks that are forms
             if (!TransformationAccess.mayTake(sender, unlocked, FormCategory.OBJECT)) return;
             TransformationManager.transformIntoBlock(sender, block);
@@ -103,8 +113,8 @@ public class RequestTransformPacket {
         }
 
         // The registry returns its default (pig) for unknown ids rather than null
-        if (!ForgeRegistries.ENTITY_TYPES.containsKey(msg.entityId)) return;
-        EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(msg.entityId);
+        if (!BuiltInRegistries.ENTITY_TYPE.containsKey(msg.entityId)) return;
+        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(msg.entityId);
         if (type == null || type == EntityType.PLAYER) return; // players go through Kind.PLAYER
 
         Entity created = type.create(sender.serverLevel());

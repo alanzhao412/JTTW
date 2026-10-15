@@ -4,9 +4,10 @@ import com.jttw.engine.JTTWEngine;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.GameTestRegistry;
 import net.minecraft.gametest.framework.TestFunction;
-import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import java.lang.reflect.Field;
 import java.util.function.Consumer;
@@ -27,7 +28,7 @@ import java.util.function.Consumer;
  * an entry again, and before this guard a held test's body could run two or three times (its
  * scene set up twice, its end declared twice: "This test already has final clause").
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class ReadyGate {
 
     private ReadyGate() {}

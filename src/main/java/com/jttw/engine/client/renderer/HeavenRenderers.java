@@ -16,8 +16,8 @@ public final class HeavenRenderers {
 
     private HeavenRenderers() {}
 
-    public static final ResourceLocation SOLDIER = new ResourceLocation(JTTWEngine.MOD_ID, "textures/entity/heavenly_soldier.png");
-    public static final ResourceLocation GENERAL = new ResourceLocation(JTTWEngine.MOD_ID, "textures/entity/heavenly_general.png");
+    public static final ResourceLocation SOLDIER = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "textures/entity/heavenly_soldier.png");
+    public static final ResourceLocation GENERAL = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "textures/entity/heavenly_general.png");
     /** Names over heads show only this close, so a host is not a wall of labels. */
     private static final double NAME_RANGE = 24;
     /** The cloud a soldier rides, against Wukong's: a small one. */

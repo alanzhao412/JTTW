@@ -22,11 +22,12 @@ import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,7 +52,7 @@ import java.util.UUID;
  * Pictures go to {@code run-gallery/screenshots/gallery-<time>/}, with {@code index.txt} listing them;
  * then the client closes. {@code tools/form_sheets.py} lays them out as contact sheets.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID, value = Dist.CLIENT)
 public final class FormGallery {
 
     private FormGallery() {}
@@ -109,8 +110,8 @@ public final class FormGallery {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (!ENABLED || event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(ClientTickEvent.Post event) {
+        if (!ENABLED) return;
         Minecraft mc = Minecraft.getInstance();
         if (!worldRequested) {
             // at a menu, with loading finished
@@ -136,11 +137,11 @@ public final class FormGallery {
             for (View v : View.values()) {
                 for (ResourceLocation id : forms) all.add(new Shot(id, v, Kind.ENTITY));
                 for (ResourceLocation id : FormCatalog.blockForms()) all.add(new Shot(id, v, Kind.BLOCK));
-                all.add(new Shot(new ResourceLocation("minecraft", "tnt"), v, Kind.LIT_TNT));
-                all.add(new Shot(new ResourceLocation("minecraft", "boat"), v, Kind.BOAT_ON_WATER));
+                all.add(new Shot(ResourceLocation.fromNamespaceAndPath("minecraft", "tnt"), v, Kind.LIT_TNT));
+                all.add(new Shot(ResourceLocation.fromNamespaceAndPath("minecraft", "boat"), v, Kind.BOAT_ON_WATER));
             }
             for (AbilityScenes.Scene scene : AbilityScenes.all()) {
-                all.add(new Shot(new ResourceLocation(JTTWEngine.MOD_ID, scene.name()), View.FRONT, Kind.SCENE));
+                all.add(new Shot(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, scene.name()), View.FRONT, Kind.SCENE));
             }
             all.sort(java.util.Comparator.comparing(Shot::key));
             for (Shot shot : all) {
@@ -236,7 +237,7 @@ public final class FormGallery {
      * his right side, level with him, looking at him, as he goes.
      */
     @SubscribeEvent
-    public static void onCameraAngles(net.minecraftforge.client.event.ViewportEvent.ComputeCameraAngles event) {
+    public static void onCameraAngles(net.neoforged.neoforge.client.event.ViewportEvent.ComputeCameraAngles event) {
         if (!AbilityScenes.live || AbilityScenes.liveF5) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
@@ -245,7 +246,7 @@ public final class FormGallery {
         double rx = -Math.cos(rad), rz = -Math.sin(rad); // his right
         net.minecraft.world.phys.Vec3 cam = at.add(rx * 3.5, 0.3, rz * 3.5);
         try {
-            java.lang.reflect.Method setPosition = net.minecraftforge.fml.util.ObfuscationReflectionHelper.findMethod(
+            java.lang.reflect.Method setPosition = net.neoforged.fml.util.ObfuscationReflectionHelper.findMethod(
                     net.minecraft.client.Camera.class, "m_90584_", net.minecraft.world.phys.Vec3.class);
             setPosition.invoke(event.getCamera(), cam);
         } catch (ReflectiveOperationException e) {
@@ -310,9 +311,9 @@ public final class FormGallery {
             TransformationManager.demorph(sp);
             switch (shot.kind()) {
                 case SCENE -> scene(shot).setup().accept(sp);
-                case ENTITY, BOAT_ON_WATER -> TransformationManager.transform(sp, ForgeRegistries.ENTITY_TYPES.getValue(shot.form()));
+                case ENTITY, BOAT_ON_WATER -> TransformationManager.transform(sp, BuiltInRegistries.ENTITY_TYPE.get(shot.form()));
                 case BLOCK -> {
-                    var block = ForgeRegistries.BLOCKS.getValue(shot.form());
+                    var block = BuiltInRegistries.BLOCK.get(shot.form());
                     TransformationManager.transformIntoBlock(sp, block);
                     if (block instanceof net.minecraft.world.level.block.SignBlock) {
                         TransformationManager.update(sp, TransformationManager.getTransformation(sp)

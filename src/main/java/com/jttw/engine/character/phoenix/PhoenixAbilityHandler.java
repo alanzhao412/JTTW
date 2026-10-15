@@ -1,5 +1,6 @@
 package com.jttw.engine.character.phoenix;
 
+import net.minecraft.resources.ResourceLocation;
 import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.qi.QiManager;
@@ -27,13 +28,14 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import java.util.HashSet;
 import java.util.List;
@@ -62,7 +64,7 @@ import java.util.UUID;
  *       T2: fire damage heals 25%. T3: killing burning enemy causes explosion.</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
 public final class PhoenixAbilityHandler {
     private PhoenixAbilityHandler() {}
 
@@ -86,8 +88,7 @@ public final class PhoenixAbilityHandler {
     /** Fire ticks applied to targets. */
     private static final int FLAME_FIRE_TICKS = 40; // 2 seconds
 
-    private static final UUID UUID_FLAME_SLOW =
-            UUID.fromString("e4f5a6b7-c8d9-0123-ef01-456789012300");
+    private static final ResourceLocation UUID_FLAME_SLOW = JTTWEngine.id("flame_slow");
 
     // -----------------------------------------------------------------------
     // Revive — explosion base radius
@@ -110,8 +111,8 @@ public final class PhoenixAbilityHandler {
         AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
         if (speed != null && speed.getModifier(UUID_FLAME_SLOW) == null) {
             speed.addTransientModifier(new AttributeModifier(
-                    UUID_FLAME_SLOW, "jttw:flamethrower_slow", -1.0,
-                    AttributeModifier.Operation.MULTIPLY_TOTAL));
+                    UUID_FLAME_SLOW, -1.0,
+                    AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
         }
     }
 
@@ -131,8 +132,7 @@ public final class PhoenixAbilityHandler {
      * Apply innate higher regen for Phoenix players.
      * Called from {@link LevelManager#reapplyStats} and on level-up.
      */
-    private static final UUID UUID_PHOENIX_REGEN =
-            UUID.fromString("e4f5a6b7-c8d9-0123-ef01-456789012301");
+    private static final ResourceLocation UUID_PHOENIX_REGEN = JTTWEngine.id("phoenix_regen");
 
     public static void applyPassiveScaling(ServerPlayer player) {
         if (!isPhoenix(player)) return;
@@ -154,9 +154,8 @@ public final class PhoenixAbilityHandler {
     // -----------------------------------------------------------------------
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
-        if (!(event.player instanceof ServerPlayer sp)) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         if (!isPhoenix(sp)) return;
 
         UUID uuid = sp.getUUID();
@@ -328,7 +327,7 @@ public final class PhoenixAbilityHandler {
      * Molten Talons T2: fire damage dealt heals the player for 25%.
      */
     @SubscribeEvent(priority = EventPriority.NORMAL)
-    public static void onDealDamage(LivingHurtEvent event) {
+    public static void onDealDamage(LivingIncomingDamageEvent event) {
         // Attacker is Phoenix
         if (!(event.getSource().getEntity() instanceof ServerPlayer attacker)) return;
         if (!isPhoenix(attacker)) return;
@@ -370,7 +369,7 @@ public final class PhoenixAbilityHandler {
      * Rising Ember T2: cancel fire and lava damage entirely.
      */
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onTakeDamageRadiance(LivingHurtEvent event) {
+    public static void onTakeDamageRadiance(LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (!isPhoenix(player)) return;
 
@@ -428,7 +427,7 @@ public final class PhoenixAbilityHandler {
      */
     // LOWEST: decide on the damage left after resistances
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onTakeDamage(LivingHurtEvent event) {
+    public static void onTakeDamage(LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (!isPhoenix(player)) return;
 

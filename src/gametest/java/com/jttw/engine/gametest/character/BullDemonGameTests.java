@@ -31,9 +31,9 @@ import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import java.util.List;
 import java.util.Set;
@@ -168,10 +168,10 @@ public class BullDemonGameTests {
     @GameTest(template = PLATFORM)
     public static void thickHideTakesNoFireAndToughens(GameTestHelper h) {
         ServerPlayer p = bull(h, "bdk_hide_1");
-        LivingAttackEvent fire = new LivingAttackEvent(p, p.damageSources().inFire(), 4f);
+        LivingIncomingDamageEvent fire = new LivingIncomingDamageEvent(p, p.damageSources().inFire(), 4f);
         BullDemonAbilityHandler.onAttacked(fire);
         check(h, fire.isCanceled(), "fire cannot burn him");
-        LivingAttackEvent blow = new LivingAttackEvent(p, p.damageSources().generic(), 4f);
+        LivingIncomingDamageEvent blow = new LivingIncomingDamageEvent(p, p.damageSources().generic(), 4f);
         BullDemonAbilityHandler.onAttacked(blow);
         check(h, !blow.isCanceled(), "a blow still lands");
         tick(p, BullDemonAbilityHandler::onPlayerTick, 20);

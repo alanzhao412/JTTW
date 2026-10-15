@@ -17,11 +17,12 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ import java.util.Map;
  * refinement across them all {@value #PER_REFINE_TENTHS}/10 of a percent more. Nezha, with the
  * most, gains the most.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class Armory {
 
     private Armory() {}
@@ -283,11 +284,11 @@ public final class Armory {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer sp) || sp.tickCount % 20 != 0) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer sp) || sp.tickCount % 20 != 0) return;
         double share = slots(sp).isEmpty() ? 0 : bonus(held(sp));
-        PassiveModifiers.set(sp, Attributes.MAX_HEALTH, "jttw_armory_hp", share, AttributeModifier.Operation.MULTIPLY_TOTAL);
-        PassiveModifiers.set(sp, Attributes.ATTACK_DAMAGE, "jttw_armory_atk", share, AttributeModifier.Operation.MULTIPLY_TOTAL);
+        PassiveModifiers.set(sp, Attributes.MAX_HEALTH, "jttw_armory_hp", share, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+        PassiveModifiers.set(sp, Attributes.ATTACK_DAMAGE, "jttw_armory_atk", share, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
     }
 
     // ── Kept through death ───────────────────────────────────────────────

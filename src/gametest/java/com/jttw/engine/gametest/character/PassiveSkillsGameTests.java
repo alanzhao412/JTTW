@@ -25,11 +25,11 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.monster.Zombie;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -48,9 +48,9 @@ public class PassiveSkillsGameTests {
         tick(p, handler, 1);
     }
 
-    private static float hurt(Consumer<LivingHurtEvent> handler, net.minecraft.world.entity.LivingEntity target,
+    private static float hurt(Consumer<LivingIncomingDamageEvent> handler, net.minecraft.world.entity.LivingEntity target,
                               net.minecraft.world.damagesource.DamageSource src, float amount) {
-        LivingHurtEvent e = new LivingHurtEvent(target, src, amount);
+        LivingIncomingDamageEvent e = new LivingIncomingDamageEvent(target, src, amount);
         handler.accept(e);
         return e.getAmount();
     }
@@ -135,16 +135,16 @@ public class PassiveSkillsGameTests {
     public static void heavenlyWarriorThreeIsImmuneToFire(GameTestHelper h) {
         ServerPlayer p = as(h, ReincarnationOutcome.THIRD_LOTUS_PRINCE);
         grant(p, "nz_combat_1", "nz_combat_2");
-        LivingAttackEvent before = new LivingAttackEvent(p, p.damageSources().onFire(), 1f);
+        LivingIncomingDamageEvent before = new LivingIncomingDamageEvent(p, p.damageSources().onFire(), 1f);
         NezhaPassives.onAttacked(before);
         check(h, !before.isCanceled(), "fire still burns at tier 2");
         grant(p, "nz_combat_3");
         for (var src : List.of(p.damageSources().onFire(), p.damageSources().inFire(), p.damageSources().lava())) {
-            LivingAttackEvent e = new LivingAttackEvent(p, src, 1f);
+            LivingIncomingDamageEvent e = new LivingIncomingDamageEvent(p, src, 1f);
             NezhaPassives.onAttacked(e);
             check(h, e.isCanceled(), src.getMsgId() + " blocked at tier 3");
         }
-        LivingAttackEvent cactus = new LivingAttackEvent(p, p.damageSources().cactus(), 1f);
+        LivingIncomingDamageEvent cactus = new LivingIncomingDamageEvent(p, p.damageSources().cactus(), 1f);
         NezhaPassives.onAttacked(cactus);
         check(h, !cactus.isCanceled(), "other damage still lands");
         h.succeed();
@@ -186,7 +186,7 @@ public class PassiveSkillsGameTests {
     public static void qiFlowRaisesMaxQiAndItSticks(GameTestHelper h) {
         ServerPlayer p = as(h, ReincarnationOutcome.YUAN_DI);
         grant(p, "yd_qi_1", "yd_qi_2");
-        QiManager.onPlayerTick(new TickEvent.PlayerTickEvent(TickEvent.Phase.END, p));
+        QiManager.onPlayerTick(new PlayerTickEvent.Post(p));
         double base = StatBlock.compute(PlayerLevel.getProgressionClass(p), PlayerLevel.getLevel(p)).qi();
         near(h, base + 100, QiData.getMax(p), "+50 max Qi per node");
         h.succeed();
@@ -197,7 +197,7 @@ public class PassiveSkillsGameTests {
     public static void peachMaxQiSurvivesTheQiTick(GameTestHelper h) {
         ServerPlayer p = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
         p.getPersistentData().putBoolean(ImmortalPeachItem.KEY_PEACH_CONSUMED, true);
-        QiManager.onPlayerTick(new TickEvent.PlayerTickEvent(TickEvent.Phase.END, p));
+        QiManager.onPlayerTick(new PlayerTickEvent.Post(p));
         double base = StatBlock.compute(PlayerLevel.getProgressionClass(p), PlayerLevel.getLevel(p)).qi();
         near(h, base + ImmortalPeachItem.QI_POOL_BONUS, QiData.getMax(p), "max Qi with the peach");
         h.succeed();

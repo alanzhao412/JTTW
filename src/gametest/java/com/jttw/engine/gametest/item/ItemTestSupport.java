@@ -14,9 +14,9 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.bus.api.EventPriority;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,7 +92,7 @@ final class ItemTestSupport {
      * Records every hurt that reaches one entity, after all of the mod's damage handlers have
      * adjusted it (LOWEST priority) and before armour. Close it at the end of the test.
      */
-    static final class HurtLog implements Consumer<LivingHurtEvent> {
+    static final class HurtLog implements Consumer<LivingIncomingDamageEvent> {
         record Hit(DamageSource source, float amount) {}
 
         private final Entity target;
@@ -104,12 +104,12 @@ final class ItemTestSupport {
 
         static HurtLog on(Entity target) {
             HurtLog log = new HurtLog(target);
-            MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, false, LivingHurtEvent.class, log);
+            NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, false, LivingIncomingDamageEvent.class, log);
             return log;
         }
 
         @Override
-        public void accept(LivingHurtEvent event) {
+        public void accept(LivingIncomingDamageEvent event) {
             if (event.getEntity() == target) hits.add(new Hit(event.getSource(), event.getAmount()));
         }
 
@@ -127,7 +127,7 @@ final class ItemTestSupport {
         }
 
         void close() {
-            MinecraftForge.EVENT_BUS.unregister(this);
+            NeoForge.EVENT_BUS.unregister(this);
         }
     }
 

@@ -12,11 +12,12 @@ import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.player.AdvancementEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.player.AdvancementEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Awards alignment points from gameplay actions (before first reincarnation).
@@ -32,7 +33,7 @@ import net.minecraftforge.fml.common.Mod;
  *   <li>Primordial requires ancient debris, boss kills, exploration</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
 public final class AlignmentEarningHandler {
 
     private AlignmentEarningHandler() {}
@@ -177,7 +178,7 @@ public final class AlignmentEarningHandler {
 
     // ~250 food eaten × 1 = ~250
     @SubscribeEvent
-    public static void onEatFood(net.minecraftforge.event.entity.living.LivingEntityUseItemEvent.Finish event) {
+    public static void onEatFood(net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent.Finish event) {
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         if (AlignmentData.hasReincarnated(sp)) return;
 

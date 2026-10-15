@@ -23,8 +23,8 @@ import net.minecraft.util.Mth;
  */
 public final class GreatWhiteBullRenderer extends MobRenderer<GreatWhiteBullEntity, GreatWhiteBullRenderer.Model> {
 
-    public static final ModelLayerLocation LAYER = new ModelLayerLocation(new ResourceLocation(JTTWEngine.MOD_ID, "great_white_bull"), "main");
-    public static final ResourceLocation TEXTURE = new ResourceLocation(JTTWEngine.MOD_ID, "textures/entity/great_white_bull.png");
+    public static final ModelLayerLocation LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "great_white_bull"), "main");
+    public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "textures/entity/great_white_bull.png");
     /** How much larger than its model's pixels it is drawn: a great bull. */
     public static final float SCALE = 1.35f;
 

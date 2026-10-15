@@ -5,10 +5,11 @@ import com.jttw.engine.network.c2s.DimensionSelectPacket;
 import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.character.dragon.DragonSkillTree;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Client-side scroll wheel handler for Dragon dimension selection.
@@ -16,7 +17,7 @@ import net.minecraftforge.fml.common.Mod;
  * <p>When a Dragon player has flight tier 3 unlocked, scrolling while sneaking
  * cycles through available dimensions instead of switching hotbar slots.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.GAME)
 public final class DimensionScrollHandler {
     private DimensionScrollHandler() {}
 

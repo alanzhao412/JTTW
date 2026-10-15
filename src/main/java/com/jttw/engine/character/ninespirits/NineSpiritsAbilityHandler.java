@@ -37,14 +37,15 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.ProjectileImpactEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -70,7 +71,7 @@ import java.util.Set;
  * </ul>
  * Foes rung by the Bell of Taiyi take {@value #BELL_MARK_BONUS}x damage from his heads.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class NineSpiritsAbilityHandler {
 
     private NineSpiritsAbilityHandler() {}
@@ -412,8 +413,8 @@ public final class NineSpiritsAbilityHandler {
     // ── ticks and hits ─────────────────────────────────────────────
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p)) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer p)) return;
         CompoundTag pd = p.getPersistentData();
         // The view tint follows the leading head (a new head unlocked, a respec, a new character)
         if (p.tickCount % 40 == 0 && pd.getInt(KEY_HEAD_SENT) != shownHead(p) + 1) syncHead(p);
@@ -439,7 +440,7 @@ public final class NineSpiritsAbilityHandler {
 
     /** True form: a melee hit strikes with every head. */
     @SubscribeEvent
-    public static void onHit(LivingHurtEvent event) {
+    public static void onHit(LivingIncomingDamageEvent event) {
         if (!(event.getSource().getEntity() instanceof ServerPlayer p) || !inTrueForm(p)) return;
         if (event.getSource().getDirectEntity() != p || !event.getSource().is(DamageTypes.PLAYER_ATTACK)) return;
         event.setAmount(event.getAmount() * formHitMultiplier(tier(p, "ns_form")));

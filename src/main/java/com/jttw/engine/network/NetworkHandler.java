@@ -24,267 +24,77 @@ import com.jttw.engine.network.s2c.SyncXtqStatsPacket;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.network.s2c.SyncReincarnationPacket;
 import com.jttw.engine.network.c2s.TransmuteItemPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.network.simple.SimpleChannel;
 
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public final class NetworkHandler {
 
     private static final String PROTOCOL_VERSION = "1";
 
-    public static final SimpleChannel CHANNEL = NetworkRegistry.ChannelBuilder
-        .named(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "main"))
-        .networkProtocolVersion(() -> PROTOCOL_VERSION)
-        .clientAcceptedVersions(PROTOCOL_VERSION::equals)
-        .serverAcceptedVersions(PROTOCOL_VERSION::equals)
-        .simpleChannel();
-
-    private static int id = 0;
-
     private NetworkHandler() {}
 
-    public static void register() {
-        // PLAY_TO_CLIENT
-        CHANNEL.messageBuilder(SyncTransformationPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(SyncTransformationPacket::encode)
-                .decoder(SyncTransformationPacket::decode)
-                .consumerMainThread(SyncTransformationPacket::handle)
-                .add();
-
-        CHANNEL.messageBuilder(OpenTransformationMenuPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(OpenTransformationMenuPacket::encode)
-                .decoder(OpenTransformationMenuPacket::decode)
-                .consumerMainThread(OpenTransformationMenuPacket::handle)
-                .add();
-
-        CHANNEL.messageBuilder(SyncLevelPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(SyncLevelPacket::encode)
-                .decoder(SyncLevelPacket::decode)
-                .consumerMainThread(SyncLevelPacket::handle)
-                .add();
-
-        CHANNEL.messageBuilder(SyncAbilitiesPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(SyncAbilitiesPacket::encode)
-                .decoder(SyncAbilitiesPacket::decode)
-                .consumerMainThread(SyncAbilitiesPacket::handle)
-                .add();
-
-        CHANNEL.messageBuilder(SyncCooldownPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(SyncCooldownPacket::encode)
-                .decoder(SyncCooldownPacket::decode)
-                .consumerMainThread(SyncCooldownPacket::handle)
-                .add();
-
-        CHANNEL.messageBuilder(SyncSkillTreePacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(SyncSkillTreePacket::encode)
-                .decoder(SyncSkillTreePacket::decode)
-                .consumerMainThread(SyncSkillTreePacket::handle)
-                .add();
-
-        CHANNEL.messageBuilder(SyncQiPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(SyncQiPacket::encode)
-                .decoder(SyncQiPacket::decode)
-                .consumerMainThread(SyncQiPacket::handle)
-                .add();
-
-        CHANNEL.messageBuilder(SyncReincarnationPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(SyncReincarnationPacket::encode)
-                .decoder(SyncReincarnationPacket::decode)
-                .consumerMainThread(SyncReincarnationPacket::handle)
-                .add();
-
-        // ✅ NEW: ring visual state sync (server → client)
-        CHANNEL.messageBuilder(SyncRingStatePacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(SyncRingStatePacket::encode)
-                .decoder(SyncRingStatePacket::decode)
-                .consumerMainThread(SyncRingStatePacket::handle)
-                .add();
-
-        // Eye of Heaven state sync (server → client)
-        CHANNEL.messageBuilder(SyncEyeOfHeavenPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(SyncEyeOfHeavenPacket::encode)
-                .decoder(SyncEyeOfHeavenPacket::decode)
-                .consumerMainThread(SyncEyeOfHeavenPacket::handle)
-                .add();
-
-        // Yuan Di transformation state (server → client)
-        CHANNEL.messageBuilder(SyncTransformStatePacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(SyncTransformStatePacket::encode)
-                .decoder(SyncTransformStatePacket::decode)
-                .consumerMainThread(SyncTransformStatePacket::handle)
-                .add();
-
-        // Phoenix revive counter (server → client)
-        CHANNEL.messageBuilder(SyncReviveCountPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(SyncReviveCountPacket::encode)
-                .decoder(SyncReviveCountPacket::decode)
-                .consumerMainThread(SyncReviveCountPacket::handle)
-                .add();
-
-        // Xiaotian Quan stats (server → client)
-        CHANNEL.messageBuilder(SyncXtqStatsPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(SyncXtqStatsPacket::encode)
-                .decoder(SyncXtqStatsPacket::decode)
-                .consumerMainThread(SyncXtqStatsPacket::handle)
-                .add();
-
-        // PLAY_TO_SERVER
-        CHANNEL.messageBuilder(SpendSkillPointPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
-                .encoder(SpendSkillPointPacket::encode)
-                .decoder(SpendSkillPointPacket::decode)
-                .consumerMainThread(SpendSkillPointPacket::handle)
-                .add();
-
-        CHANNEL.messageBuilder(ActivateAbilityPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
-                .encoder(ActivateAbilityPacket::encode)
-                .decoder(ActivateAbilityPacket::decode)
-                .consumerMainThread(ActivateAbilityPacket::handle)
-                .add();
-
-        CHANNEL.messageBuilder(RequestTransformPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
-                .encoder(RequestTransformPacket::encode)
-                .decoder(RequestTransformPacket::decode)
-                .consumerMainThread(RequestTransformPacket::handle)
-                .add();
-
-        CHANNEL.messageBuilder(UseFormPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
-                .encoder(UseFormPacket::encode)
-                .decoder(UseFormPacket::decode)
-                .consumerMainThread(UseFormPacket::handle)
-                .add();
-
-        CHANNEL.messageBuilder(SetSignTextPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
-                .encoder(SetSignTextPacket::encode)
-                .decoder(SetSignTextPacket::decode)
-                .consumerMainThread(SetSignTextPacket::handle)
-                .add();
-
-        CHANNEL.messageBuilder(StaffScalePacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
-                .encoder(StaffScalePacket::encode)
-                .decoder(StaffScalePacket::decode)
-                .consumerMainThread(StaffScalePacket::handle)
-                .add();
-
-        CHANNEL.messageBuilder(com.jttw.engine.network.c2s.StaffTopplePacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
-                .encoder(com.jttw.engine.network.c2s.StaffTopplePacket::encode)
-                .decoder(com.jttw.engine.network.c2s.StaffTopplePacket::decode)
-                .consumerMainThread(com.jttw.engine.network.c2s.StaffTopplePacket::handle)
-                .add();
-
-        CHANNEL.messageBuilder(DimensionSelectPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
-                .encoder(DimensionSelectPacket::encode)
-                .decoder(DimensionSelectPacket::decode)
-                .consumerMainThread(DimensionSelectPacket::handle)
-                .add();
-
-        // T3 transmutation (client → server)
-        CHANNEL.messageBuilder(TransmuteItemPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
-                .encoder(TransmuteItemPacket::encode)
-                .decoder(TransmuteItemPacket::decode)
-                .consumerMainThread(TransmuteItemPacket::handle)
-                .add();
-
-        // Fiery Golden Eyes mode (passive / x-ray) for the eye renderer
-        CHANNEL.messageBuilder(SyncLeadHeadPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(SyncLeadHeadPacket::encode)
-                .decoder(SyncLeadHeadPacket::decode)
-                .consumerMainThread(SyncLeadHeadPacket::handle)
-                .add();
-
-        CHANNEL.messageBuilder(com.jttw.engine.network.s2c.SyncStomachPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(com.jttw.engine.network.s2c.SyncStomachPacket::encode)
-                .decoder(com.jttw.engine.network.s2c.SyncStomachPacket::decode)
-                .consumerMainThread(com.jttw.engine.network.s2c.SyncStomachPacket::handle)
-                .add();
-
-        CHANNEL.messageBuilder(com.jttw.engine.network.s2c.SyncFlightPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(com.jttw.engine.network.s2c.SyncFlightPacket::encode)
-                .decoder(com.jttw.engine.network.s2c.SyncFlightPacket::decode)
-                .consumerMainThread(com.jttw.engine.network.s2c.SyncFlightPacket::handle)
-                .add();
-
-        CHANNEL.messageBuilder(com.jttw.engine.network.s2c.AbilityNotePacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(com.jttw.engine.network.s2c.AbilityNotePacket::encode)
-                .decoder(com.jttw.engine.network.s2c.AbilityNotePacket::decode)
-                .consumerMainThread(com.jttw.engine.network.s2c.AbilityNotePacket::handle)
-                .add();
-        CHANNEL.messageBuilder(com.jttw.engine.network.s2c.PrivateGlowPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(com.jttw.engine.network.s2c.PrivateGlowPacket::encode)
-                .decoder(com.jttw.engine.network.s2c.PrivateGlowPacket::decode)
-                .consumerMainThread(com.jttw.engine.network.s2c.PrivateGlowPacket::handle)
-                .add();
-        CHANNEL.messageBuilder(com.jttw.engine.network.s2c.TruffleScentPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(com.jttw.engine.network.s2c.TruffleScentPacket::encode)
-                .decoder(com.jttw.engine.network.s2c.TruffleScentPacket::decode)
-                .consumerMainThread(com.jttw.engine.network.s2c.TruffleScentPacket::handle)
-                .add();
-
-        CHANNEL.messageBuilder(SyncGoldenEyesPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(SyncGoldenEyesPacket::encode)
-                .decoder(SyncGoldenEyesPacket::decode)
-                .consumerMainThread(SyncGoldenEyesPacket::handle)
-                .add();
-
-        CHANNEL.messageBuilder(com.jttw.engine.network.c2s.ArmoryPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
-                .encoder(com.jttw.engine.network.c2s.ArmoryPacket::encode)
-                .decoder(com.jttw.engine.network.c2s.ArmoryPacket::decode)
-                .consumerMainThread(com.jttw.engine.network.c2s.ArmoryPacket::handle)
-                .add();
-
-        CHANNEL.messageBuilder(com.jttw.engine.network.s2c.FlyingStatePacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(com.jttw.engine.network.s2c.FlyingStatePacket::encode)
-                .decoder(com.jttw.engine.network.s2c.FlyingStatePacket::decode)
-                .consumerMainThread(com.jttw.engine.network.s2c.FlyingStatePacket::handle)
-                .add();
-
-        CHANNEL.messageBuilder(com.jttw.engine.network.s2c.SyncKarmaPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(com.jttw.engine.network.s2c.SyncKarmaPacket::encode)
-                .decoder(com.jttw.engine.network.s2c.SyncKarmaPacket::decode)
-                .consumerMainThread(com.jttw.engine.network.s2c.SyncKarmaPacket::handle)
-                .add();
-
-        CHANNEL.messageBuilder(com.jttw.engine.network.s2c.ArmamentsShownPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(com.jttw.engine.network.s2c.ArmamentsShownPacket::encode)
-                .decoder(com.jttw.engine.network.s2c.ArmamentsShownPacket::decode)
-                .consumerMainThread(com.jttw.engine.network.s2c.ArmamentsShownPacket::handle)
-                .add();
-
-        CHANNEL.messageBuilder(com.jttw.engine.network.s2c.BeastFormPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(com.jttw.engine.network.s2c.BeastFormPacket::encode)
-                .decoder(com.jttw.engine.network.s2c.BeastFormPacket::decode)
-                .consumerMainThread(com.jttw.engine.network.s2c.BeastFormPacket::handle)
-                .add();
-
-        CHANNEL.messageBuilder(com.jttw.engine.network.s2c.QiSeenPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(com.jttw.engine.network.s2c.QiSeenPacket::encode)
-                .decoder(com.jttw.engine.network.s2c.QiSeenPacket::decode)
-                .consumerMainThread(com.jttw.engine.network.s2c.QiSeenPacket::handle)
-                .add();
-
-        CHANNEL.messageBuilder(com.jttw.engine.network.s2c.WaterFxPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(com.jttw.engine.network.s2c.WaterFxPacket::encode)
-                .decoder(com.jttw.engine.network.s2c.WaterFxPacket::decode)
-                .consumerMainThread(com.jttw.engine.network.s2c.WaterFxPacket::handle)
-                .add();
+    @SubscribeEvent
+    public static void register(RegisterPayloadHandlersEvent event) {
+        PayloadRegistrar registrar = event.registrar(PROTOCOL_VERSION);
+        registrar.playToClient(SyncTransformationPacket.TYPE, SyncTransformationPacket.STREAM_CODEC, SyncTransformationPacket::handle);
+        registrar.playToClient(OpenTransformationMenuPacket.TYPE, OpenTransformationMenuPacket.STREAM_CODEC, OpenTransformationMenuPacket::handle);
+        registrar.playToClient(SyncLevelPacket.TYPE, SyncLevelPacket.STREAM_CODEC, SyncLevelPacket::handle);
+        registrar.playToClient(SyncAbilitiesPacket.TYPE, SyncAbilitiesPacket.STREAM_CODEC, SyncAbilitiesPacket::handle);
+        registrar.playToClient(SyncCooldownPacket.TYPE, SyncCooldownPacket.STREAM_CODEC, SyncCooldownPacket::handle);
+        registrar.playToClient(SyncSkillTreePacket.TYPE, SyncSkillTreePacket.STREAM_CODEC, SyncSkillTreePacket::handle);
+        registrar.playToClient(SyncQiPacket.TYPE, SyncQiPacket.STREAM_CODEC, SyncQiPacket::handle);
+        registrar.playToClient(SyncReincarnationPacket.TYPE, SyncReincarnationPacket.STREAM_CODEC, SyncReincarnationPacket::handle);
+        registrar.playToClient(SyncRingStatePacket.TYPE, SyncRingStatePacket.STREAM_CODEC, SyncRingStatePacket::handle);
+        registrar.playToClient(SyncEyeOfHeavenPacket.TYPE, SyncEyeOfHeavenPacket.STREAM_CODEC, SyncEyeOfHeavenPacket::handle);
+        registrar.playToClient(SyncTransformStatePacket.TYPE, SyncTransformStatePacket.STREAM_CODEC, SyncTransformStatePacket::handle);
+        registrar.playToClient(SyncReviveCountPacket.TYPE, SyncReviveCountPacket.STREAM_CODEC, SyncReviveCountPacket::handle);
+        registrar.playToClient(SyncXtqStatsPacket.TYPE, SyncXtqStatsPacket.STREAM_CODEC, SyncXtqStatsPacket::handle);
+        registrar.playToServer(SpendSkillPointPacket.TYPE, SpendSkillPointPacket.STREAM_CODEC, SpendSkillPointPacket::handle);
+        registrar.playToServer(ActivateAbilityPacket.TYPE, ActivateAbilityPacket.STREAM_CODEC, ActivateAbilityPacket::handle);
+        registrar.playToServer(RequestTransformPacket.TYPE, RequestTransformPacket.STREAM_CODEC, RequestTransformPacket::handle);
+        registrar.playToServer(UseFormPacket.TYPE, UseFormPacket.STREAM_CODEC, UseFormPacket::handle);
+        registrar.playToServer(SetSignTextPacket.TYPE, SetSignTextPacket.STREAM_CODEC, SetSignTextPacket::handle);
+        registrar.playToServer(StaffScalePacket.TYPE, StaffScalePacket.STREAM_CODEC, StaffScalePacket::handle);
+        registrar.playToServer(com.jttw.engine.network.c2s.StaffTopplePacket.TYPE, com.jttw.engine.network.c2s.StaffTopplePacket.STREAM_CODEC, com.jttw.engine.network.c2s.StaffTopplePacket::handle);
+        registrar.playToServer(DimensionSelectPacket.TYPE, DimensionSelectPacket.STREAM_CODEC, DimensionSelectPacket::handle);
+        registrar.playToServer(TransmuteItemPacket.TYPE, TransmuteItemPacket.STREAM_CODEC, TransmuteItemPacket::handle);
+        registrar.playToClient(SyncLeadHeadPacket.TYPE, SyncLeadHeadPacket.STREAM_CODEC, SyncLeadHeadPacket::handle);
+        registrar.playToClient(com.jttw.engine.network.s2c.SyncStomachPacket.TYPE, com.jttw.engine.network.s2c.SyncStomachPacket.STREAM_CODEC, com.jttw.engine.network.s2c.SyncStomachPacket::handle);
+        registrar.playToClient(com.jttw.engine.network.s2c.SyncFlightPacket.TYPE, com.jttw.engine.network.s2c.SyncFlightPacket.STREAM_CODEC, com.jttw.engine.network.s2c.SyncFlightPacket::handle);
+        registrar.playToClient(com.jttw.engine.network.s2c.AbilityNotePacket.TYPE, com.jttw.engine.network.s2c.AbilityNotePacket.STREAM_CODEC, com.jttw.engine.network.s2c.AbilityNotePacket::handle);
+        registrar.playToClient(com.jttw.engine.network.s2c.PrivateGlowPacket.TYPE, com.jttw.engine.network.s2c.PrivateGlowPacket.STREAM_CODEC, com.jttw.engine.network.s2c.PrivateGlowPacket::handle);
+        registrar.playToClient(com.jttw.engine.network.s2c.TruffleScentPacket.TYPE, com.jttw.engine.network.s2c.TruffleScentPacket.STREAM_CODEC, com.jttw.engine.network.s2c.TruffleScentPacket::handle);
+        registrar.playToClient(SyncGoldenEyesPacket.TYPE, SyncGoldenEyesPacket.STREAM_CODEC, SyncGoldenEyesPacket::handle);
+        registrar.playToServer(com.jttw.engine.network.c2s.ArmoryPacket.TYPE, com.jttw.engine.network.c2s.ArmoryPacket.STREAM_CODEC, com.jttw.engine.network.c2s.ArmoryPacket::handle);
+        registrar.playToClient(com.jttw.engine.network.s2c.FlyingStatePacket.TYPE, com.jttw.engine.network.s2c.FlyingStatePacket.STREAM_CODEC, com.jttw.engine.network.s2c.FlyingStatePacket::handle);
+        registrar.playToClient(com.jttw.engine.network.s2c.SyncKarmaPacket.TYPE, com.jttw.engine.network.s2c.SyncKarmaPacket.STREAM_CODEC, com.jttw.engine.network.s2c.SyncKarmaPacket::handle);
+        registrar.playToClient(com.jttw.engine.network.s2c.ArmamentsShownPacket.TYPE, com.jttw.engine.network.s2c.ArmamentsShownPacket.STREAM_CODEC, com.jttw.engine.network.s2c.ArmamentsShownPacket::handle);
+        registrar.playToClient(com.jttw.engine.network.s2c.BeastFormPacket.TYPE, com.jttw.engine.network.s2c.BeastFormPacket.STREAM_CODEC, com.jttw.engine.network.s2c.BeastFormPacket::handle);
+        registrar.playToClient(com.jttw.engine.network.s2c.QiSeenPacket.TYPE, com.jttw.engine.network.s2c.QiSeenPacket.STREAM_CODEC, com.jttw.engine.network.s2c.QiSeenPacket::handle);
+        registrar.playToClient(com.jttw.engine.network.s2c.WaterFxPacket.TYPE, com.jttw.engine.network.s2c.WaterFxPacket.STREAM_CODEC, com.jttw.engine.network.s2c.WaterFxPacket::handle);
     }
 
-    public static void sendToServer(Object msg) {
-        CHANNEL.sendToServer(msg);
+    public static void sendToServer(CustomPacketPayload msg) {
+        PacketDistributor.sendToServer(msg);
     }
 
-    public static void sendToPlayer(ServerPlayer player, Object msg) {
-        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), msg);
+    public static void sendToPlayer(ServerPlayer player, CustomPacketPayload msg) {
+        PacketDistributor.sendToPlayer(player, msg);
     }
 
     /** To every player within {@code radius} blocks of {@code at} in that world. */
-    public static void sendToNear(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at, double radius, Object msg) {
-        CHANNEL.send(PacketDistributor.NEAR.with(PacketDistributor.TargetPoint.p(at.x, at.y, at.z, radius, level.dimension())), msg);
+    public static void sendToNear(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at, double radius, CustomPacketPayload msg) {
+        PacketDistributor.sendToPlayersNear(level, null, at.x, at.y, at.z, radius, msg);
     }
 
-    public static void sendToTrackingPlayers(ServerPlayer player, Object msg) {
-        CHANNEL.send(PacketDistributor.TRACKING_ENTITY.with(() -> player), msg);
+    /** To every player tracking {@code player} (not the player themselves). */
+    public static void sendToTrackingPlayers(ServerPlayer player, CustomPacketPayload msg) {
+        PacketDistributor.sendToPlayersTrackingEntity(player, msg);
     }
 }

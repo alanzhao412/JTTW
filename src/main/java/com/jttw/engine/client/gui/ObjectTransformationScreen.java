@@ -18,7 +18,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.*;
 
@@ -164,7 +164,7 @@ public class ObjectTransformationScreen extends Screen {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) return null;
 
-        EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(id);
+        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(id);
         if (type == null) return null;
 
         try {
@@ -206,7 +206,7 @@ public class ObjectTransformationScreen extends Screen {
 
             if (blockIds.contains(entityId)) {
                 // A block form: its item icon, twice the usual size
-                var block = ForgeRegistries.BLOCKS.getValue(entityId);
+                var block = BuiltInRegistries.BLOCK.get(entityId);
                 g.pose().pushPose();
                 g.pose().translate(getX() + width / 2f - 16, getY() + 8, 0);
                 g.pose().scale(2f, 2f, 1f);

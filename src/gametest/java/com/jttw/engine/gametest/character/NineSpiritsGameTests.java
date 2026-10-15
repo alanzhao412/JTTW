@@ -26,11 +26,11 @@ import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.entity.projectile.Snowball;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.ProjectileImpactEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import java.util.List;
 
@@ -232,7 +232,7 @@ public class NineSpiritsGameTests {
         check(h, NineSpiritsAbilityHandler.inTrueForm(p), "in true form");
         eq(h, 30.0, modifier(p, PHYSICAL_RESISTANCE(), "ns_form_pres"), "tougher (II)");
         Pig pig = mob(h, EntityType.PIG, 2, 4);
-        LivingHurtEvent hit = new LivingHurtEvent(pig, p.damageSources().playerAttack(p), 10f);
+        LivingIncomingDamageEvent hit = new LivingIncomingDamageEvent(pig, p.damageSources().playerAttack(p), 10f);
         NineSpiritsAbilityHandler.onHit(hit);
         near(h, 20.0, hit.getAmount(), "three heads: 10 x 2.0");
         tick(p, NineSpiritsAbilityHandler::onPlayerTick, 20);

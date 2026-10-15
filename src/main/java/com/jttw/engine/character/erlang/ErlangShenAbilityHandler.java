@@ -14,12 +14,13 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,7 +35,7 @@ import java.util.UUID;
  * Visual effects (ore highlighting, username reveal) are entirely client-side;
  * the server just manages Qi drain and tells the client on/off + tier.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
 public final class ErlangShenAbilityHandler {
 
     private ErlangShenAbilityHandler() {}
@@ -88,8 +89,7 @@ public final class ErlangShenAbilityHandler {
     // =========================================================================
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onServerTick(ServerTickEvent.Post event) {
 
         MinecraftServer server = net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();
         if (server == null) return;
@@ -180,7 +180,7 @@ public final class ErlangShenAbilityHandler {
 
     /** Erlang Shen gets +100% damage (total +80% on top of the item's +20%) with the spear. */
     @SubscribeEvent(priority = EventPriority.LOW)
-    public static void onWeaponDamageBonus(LivingHurtEvent event) {
+    public static void onWeaponDamageBonus(LivingIncomingDamageEvent event) {
         if (!(event.getSource().getEntity() instanceof ServerPlayer sp)) return;
         if (!isErlangShen(sp)) return;
 
@@ -201,7 +201,7 @@ public final class ErlangShenAbilityHandler {
     }
 
     @SubscribeEvent(priority = EventPriority.NORMAL)
-    public static void onCelestialTacticsHit(LivingHurtEvent event) {
+    public static void onCelestialTacticsHit(LivingIncomingDamageEvent event) {
         Entity sourceEntity = event.getSource().getEntity();
         if (sourceEntity == null) return;
 

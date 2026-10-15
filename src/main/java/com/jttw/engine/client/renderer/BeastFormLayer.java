@@ -22,10 +22,11 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -45,7 +46,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *       the turtle's spiked shell</li>
  * </ol>
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID, value = Dist.CLIENT)
 public class BeastFormLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
 
     /** Each player's line and stage, packed (line ordinal * 8 + stage), as the server says. */
@@ -258,7 +259,7 @@ public class BeastFormLayer extends RenderLayer<AbstractClientPlayer, PlayerMode
                     img.setPixelRGBA(x, y, 0xFF000000 | (b << 16) | (g << 8) | r);
                 }
             }
-            ResourceLocation id = new ResourceLocation(JTTWEngine.MOD_ID, "beast_hide_" + l.name().toLowerCase());
+            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "beast_hide_" + l.name().toLowerCase());
             Minecraft.getInstance().getTextureManager().register(id, new DynamicTexture(img));
             return id;
         });

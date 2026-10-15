@@ -80,6 +80,6 @@ public class HowlRenderer extends EntityRenderer<HowlProjectileEntity> {
 
     @Override
     public ResourceLocation getTextureLocation(HowlProjectileEntity e) {
-        return new ResourceLocation("minecraft", "textures/misc/white.png");
+        return ResourceLocation.fromNamespaceAndPath("minecraft", "textures/misc/white.png");
     }
 }

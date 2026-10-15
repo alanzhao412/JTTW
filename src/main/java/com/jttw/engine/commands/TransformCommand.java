@@ -17,7 +17,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.Collection;
 
@@ -80,7 +80,7 @@ public final class TransformCommand {
      * - check instanceof LivingEntity
      */
     private static EntityType<?> requireLivingEntityType(ServerPlayer validationPlayer, ResourceLocation id) {
-        EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(id);
+        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(id);
         if (type == null) return null;
 
         Entity created = type.create(validationPlayer.serverLevel());

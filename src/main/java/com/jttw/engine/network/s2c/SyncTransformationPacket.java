@@ -3,7 +3,11 @@ package com.jttw.engine.network.s2c;
 import com.jttw.engine.transformation.TransformationData;
 import com.jttw.engine.transformation.TransformationManager;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import com.jttw.engine.JTTWEngine;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -12,7 +16,15 @@ import java.util.function.Supplier;
 /**
  * Packet to synchronize transformation state from server to client
  */
-public class SyncTransformationPacket {
+public class SyncTransformationPacket implements CustomPacketPayload {
+
+    public static final Type<SyncTransformationPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "sync_transformation"));
+    public static final StreamCodec<FriendlyByteBuf, SyncTransformationPacket> STREAM_CODEC = StreamCodec.of((buf, pkt) -> encode(pkt, buf), SyncTransformationPacket::decode);
+
+    @Override
+    public Type<SyncTransformationPacket> type() {
+        return TYPE;
+    }
     private final UUID playerId;
     @Nullable
     private final TransformationData data;
@@ -52,12 +64,11 @@ public class SyncTransformationPacket {
     /**
      * Handle packet on client
      */
-    public static void handle(SyncTransformationPacket packet, Supplier<NetworkEvent.Context> contextSupplier) {
+    public static void handle(SyncTransformationPacket packet, IPayloadContext ctx) {
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() -> {
             // Client-side handling
             TransformationManager.handleClientSync(packet.playerId, packet.data);
         });
-        context.setPacketHandled(true);
     }
 }

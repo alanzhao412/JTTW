@@ -21,7 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.*;
 
@@ -201,7 +201,7 @@ public class TransformationScreen extends Screen {
         if (cached != null) return cached;
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) return null;
-        EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(id);
+        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(id);
         if (type == null) return null;
         try {
             Entity e = type.create(mc.level);

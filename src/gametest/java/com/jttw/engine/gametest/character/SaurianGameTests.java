@@ -17,8 +17,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import static com.jttw.engine.gametest.GT.*;
 import static com.jttw.engine.gametest.character.CharTest.as;
@@ -147,7 +147,7 @@ public class SaurianGameTests {
         double pres = p.getAttributeValue(ModAttributes.PHYSICAL_RESISTANCE.get());
         SaurianAbilityHandler.passives(p, true);
         check(h, p.getAttributeValue(ModAttributes.PHYSICAL_RESISTANCE.get()) >= pres + 30, "his hide, tougher against blows");
-        check(h, p.getAttributeValue(net.minecraftforge.common.ForgeMod.SWIM_SPEED.get()) > 1.5, "and he swims swiftly");
+        check(h, p.getAttributeValue(net.neoforged.neoforge.common.NeoForgeMod.SWIM_SPEED.get()) > 1.5, "and he swims swiftly");
         SaurianAbilityHandler.passives(p, false);
         h.succeed();
     }

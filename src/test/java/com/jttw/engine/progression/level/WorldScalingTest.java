@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class WorldScalingTest {
 
     private static BiomeLevelBand band(int min, int max, int gruntXp) {
-        return new BiomeLevelBand(new ResourceLocation("minecraft", "plains"), min, max, gruntXp);
+        return new BiomeLevelBand(ResourceLocation.fromNamespaceAndPath("minecraft", "plains"), min, max, gruntXp);
     }
 
     @Test

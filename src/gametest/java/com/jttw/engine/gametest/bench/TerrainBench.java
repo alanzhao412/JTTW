@@ -44,7 +44,7 @@ final class TerrainBench {
     /** Where each kind of stray item came from, the first time it appeared (mob loot aside). */
     private static final java.util.Map<String, String> ORIGINS = new java.util.LinkedHashMap<>();
 
-    static void onItemJoin(net.minecraftforge.event.entity.EntityJoinLevelEvent event) {
+    static void onItemJoin(net.neoforged.neoforge.event.entity.EntityJoinLevelEvent event) {
         if (!measuring || event.loadedFromDisk() || !(event.getEntity() instanceof ItemEntity item)) return;
         String kind = scenarios.get(index).name().substring(0, 8) + ": " + item.getItem().getItem().toString();
         if (ORIGINS.containsKey(kind)) return;

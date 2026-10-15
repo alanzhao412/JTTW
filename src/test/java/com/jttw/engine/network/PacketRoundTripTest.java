@@ -59,9 +59,9 @@ class PacketRoundTripTest {
                 new ActivateAbilityPacket(3, AbilityAction.STOP),
                 new DimensionSelectPacket(-1),
                 new DimensionSelectPacket(1),
-                new RequestTransformPacket(RequestTransformPacket.Kind.ENTITY, new ResourceLocation("minecraft", "wolf")),
-                new RequestTransformPacket(RequestTransformPacket.Kind.OBJECT_ENTITY, new ResourceLocation("minecraft", "minecart")),
-                RequestTransformPacket.block(new ResourceLocation("minecraft", "chest")),
+                new RequestTransformPacket(RequestTransformPacket.Kind.ENTITY, ResourceLocation.fromNamespaceAndPath("minecraft", "wolf")),
+                new RequestTransformPacket(RequestTransformPacket.Kind.OBJECT_ENTITY, ResourceLocation.fromNamespaceAndPath("minecraft", "minecart")),
+                RequestTransformPacket.block(ResourceLocation.fromNamespaceAndPath("minecraft", "chest")),
                 new com.jttw.engine.network.c2s.UseFormPacket(),
                 new com.jttw.engine.network.c2s.SetSignTextPacket(List.of("Hello", "", "from a", "sign")),
                 new com.jttw.engine.network.c2s.SetSignTextPacket(List.of()),
@@ -157,7 +157,7 @@ class PacketRoundTripTest {
         // RequestTransformPacket falls back to ENTITY
         FriendlyByteBuf req = new FriendlyByteBuf(Unpooled.buffer());
         req.writeVarInt(42);
-        req.writeResourceLocation(new ResourceLocation("minecraft", "cow"));
+        req.writeResourceLocation(ResourceLocation.fromNamespaceAndPath("minecraft", "cow"));
         FriendlyByteBuf again = new FriendlyByteBuf(Unpooled.buffer());
         RequestTransformPacket.encode(RequestTransformPacket.decode(req), again);
         assertEquals(RequestTransformPacket.Kind.ENTITY.ordinal(), again.readVarInt());

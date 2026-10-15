@@ -23,10 +23,10 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.monster.Husk;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import java.util.List;
 
@@ -233,7 +233,7 @@ public class ErlangShenGameTests {
         XiaotianQuanManager.toggle(p);
         XiaotianQuanEntity hound = hounds(p).get(0);
         Pig pig = mob(h, EntityType.PIG, 0, 0);
-        XiaotianQuanManager.onXtqAttacks(new LivingHurtEvent(pig, h.getLevel().damageSources().mobAttack(hound), 2f));
+        XiaotianQuanManager.onXtqAttacks(new LivingIncomingDamageEvent(pig, h.getLevel().damageSources().mobAttack(hound), 2f));
         eq(h, 0, amp(pig, MobEffects.MOVEMENT_SLOWDOWN), "Slowness I");
         eq(h, 60, duration(pig, MobEffects.MOVEMENT_SLOWDOWN), "for 3 s");
         XiaotianQuanManager.dismiss(p);
@@ -270,7 +270,7 @@ public class ErlangShenGameTests {
     // ── Celestial Tactics (passive) ─────────────────────────────────
 
     private static float hit(GameTestHelper h, Pig target, net.minecraft.world.damagesource.DamageSource src) {
-        LivingHurtEvent ev = new LivingHurtEvent(target, src, 10f);
+        LivingIncomingDamageEvent ev = new LivingIncomingDamageEvent(target, src, 10f);
         ErlangShenAbilityHandler.onCelestialTacticsHit(ev);
         return ev.getAmount();
     }
@@ -333,23 +333,23 @@ public class ErlangShenGameTests {
         Pig pig = mob(h, EntityType.PIG, 0, 0);
         var ds = h.getLevel().damageSources();
 
-        LivingHurtEvent bare = new LivingHurtEvent(pig, ds.playerAttack(p), 10f);
+        LivingIncomingDamageEvent bare = new LivingIncomingDamageEvent(pig, ds.playerAttack(p), 10f);
         ErlangShenAbilityHandler.onWeaponDamageBonus(bare);
         near(h, 10f, bare.getAmount(), "bare hand");
 
         p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.THREE_POINTED_SPEAR.get()));
-        LivingHurtEvent spear = new LivingHurtEvent(pig, ds.playerAttack(p), 10f);
+        LivingIncomingDamageEvent spear = new LivingIncomingDamageEvent(pig, ds.playerAttack(p), 10f);
         ErlangShenAbilityHandler.onWeaponDamageBonus(spear);
         near(h, 16.67f, spear.getAmount(), "spear x1.667");
 
         p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.ERLANG_AXE.get()));
-        LivingHurtEvent axe = new LivingHurtEvent(pig, ds.playerAttack(p), 10f);
+        LivingIncomingDamageEvent axe = new LivingIncomingDamageEvent(pig, ds.playerAttack(p), 10f);
         ErlangShenAbilityHandler.onWeaponDamageBonus(axe);
         near(h, 16.67f, axe.getAmount(), "axe x1.667");
 
         ServerPlayer wukong = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
         wukong.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.THREE_POINTED_SPEAR.get()));
-        LivingHurtEvent other = new LivingHurtEvent(pig, ds.playerAttack(wukong), 10f);
+        LivingIncomingDamageEvent other = new LivingIncomingDamageEvent(pig, ds.playerAttack(wukong), 10f);
         ErlangShenAbilityHandler.onWeaponDamageBonus(other);
         near(h, 10f, other.getAmount(), "no bonus for other characters");
         h.succeed();

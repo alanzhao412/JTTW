@@ -17,21 +17,22 @@ import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.progression.skilltree.AbilityType;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.api.distmarker.Dist;
+import net.neoforged.api.distmarker.Dist;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterGuiOverlaysEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.RenderGuiOverlayEvent;
+import net.neoforged.neoforge.client.gui.overlay.VanillaGuiOverlay;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 import org.lwjgl.glfw.GLFW;
 
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class ClientInit {
 
     // -----------------------------------------------------------------------
@@ -179,7 +180,7 @@ public final class ClientInit {
 
     /** The great furnace's models, which no block state names: its renderer draws them. */
     @SubscribeEvent
-    public static void registerModels(net.minecraftforge.client.event.ModelEvent.RegisterAdditional event) {
+    public static void registerModels(net.neoforged.neoforge.client.event.ModelEvent.RegisterAdditional event) {
         event.register(com.jttw.engine.client.renderer.TrigramsFurnaceRenderer.GREAT);
         event.register(com.jttw.engine.client.renderer.TrigramsFurnaceRenderer.GREAT_LIT);
         event.register(com.jttw.engine.client.renderer.TrigramsFurnaceRenderer.HATCH);
@@ -193,7 +194,7 @@ public final class ClientInit {
         event.registerBelowAll("jttw_head_tint", HeadTintOverlay.OVERLAY);
         event.registerAbove(VanillaGuiOverlay.VIGNETTE.id(), "jttw_flood_wrath", FloodWrathOverlay.OVERLAY);
         event.registerAbove(VanillaGuiOverlay.VIGNETTE.id(), "jttw_solar_flare", SolarFlareOverlay.OVERLAY);
-        event.registerAbove(net.minecraftforge.client.gui.overlay.VanillaGuiOverlay.FOOD_LEVEL.id(),
+        event.registerAbove(net.neoforged.neoforge.client.gui.overlay.VanillaGuiOverlay.FOOD_LEVEL.id(),
                 "jttw_second_stomach", StomachOverlay.OVERLAY);
     }
 
@@ -201,7 +202,7 @@ public final class ClientInit {
     // Client-side game events (FORGE bus)
     // -----------------------------------------------------------------------
 
-    @Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
+    @EventBusSubscriber(modid = JTTWEngine.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.GAME)
     public static final class ClientForgeEvents {
 
         /** Tracks whether N was held last tick to detect press/release transitions. */
@@ -228,8 +229,7 @@ public final class ClientInit {
         }
 
         @SubscribeEvent
-        public static void onClientTick(TickEvent.ClientTickEvent event) {
-            if (event.phase != TickEvent.Phase.END) return;
+        public static void onClientTick(ClientTickEvent.Post event) {
 
             Minecraft mc = Minecraft.getInstance();
             if (mc.player == null) return;

@@ -1,5 +1,7 @@
 package com.jttw.engine.character.byakko;
 
+import net.minecraft.resources.ResourceLocation;
+import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
@@ -24,13 +26,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.common.NeoForgeMod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,10 +70,8 @@ public final class ByakkoAbilityHandler {
     private static final double STEP_BASE = 1.0;
     private static final double STEP_PER_LEVEL = 0.01;
 
-    private static final UUID UUID_BK_SPEED =
-            UUID.fromString("d4e5f6a7-b8c9-0123-def0-345678901200");
-    private static final UUID UUID_BK_STEP =
-            UUID.fromString("d4e5f6a7-b8c9-0123-def0-345678901201");
+    private static final ResourceLocation UUID_BK_SPEED = JTTWEngine.id("bk_speed");
+    private static final ResourceLocation UUID_BK_STEP = JTTWEngine.id("bk_step");
 
     // -----------------------------------------------------------------------
     // Predator's Leap state
@@ -130,15 +130,15 @@ public final class ByakkoAbilityHandler {
 
         // Movement speed — MULTIPLY_TOTAL so it stacks multiplicatively
         applyMod(player, Attributes.MOVEMENT_SPEED, UUID_BK_SPEED,
-                "jttw:byakko_speed", speedBonus, AttributeModifier.Operation.MULTIPLY_TOTAL);
+                "jttw:byakko_speed", speedBonus, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 
         // Step height addition
-        AttributeInstance stepInst = player.getAttribute(ForgeMod.STEP_HEIGHT_ADDITION.get());
+        AttributeInstance stepInst = player.getAttribute(NeoForgeMod.STEP_HEIGHT_ADDITION.get());
         if (stepInst != null) {
             stepInst.removeModifier(UUID_BK_STEP);
             stepInst.addPermanentModifier(new AttributeModifier(
-                    UUID_BK_STEP, "jttw:byakko_step", stepBonus,
-                    AttributeModifier.Operation.ADDITION));
+                    UUID_BK_STEP, stepBonus,
+                    AttributeModifier.Operation.ADD_VALUE));
         }
     }
 
@@ -147,7 +147,7 @@ public final class ByakkoAbilityHandler {
      */
     public static void removePassiveScaling(ServerPlayer player) {
         removeMod(player, Attributes.MOVEMENT_SPEED, UUID_BK_SPEED);
-        AttributeInstance stepInst = player.getAttribute(ForgeMod.STEP_HEIGHT_ADDITION.get());
+        AttributeInstance stepInst = player.getAttribute(NeoForgeMod.STEP_HEIGHT_ADDITION.get());
         if (stepInst != null) stepInst.removeModifier(UUID_BK_STEP);
     }
 
@@ -158,7 +158,7 @@ public final class ByakkoAbilityHandler {
         AttributeInstance inst = player.getAttribute(attr);
         if (inst == null) return;
         inst.removeModifier(uuid);
-        inst.addPermanentModifier(new AttributeModifier(uuid, name, amount, op));
+        inst.addPermanentModifier(new AttributeModifier(uuid, amount, op));
     }
 
     private static void removeMod(ServerPlayer player,
@@ -342,9 +342,8 @@ public final class ByakkoAbilityHandler {
     // -----------------------------------------------------------------------
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
-        if (!(event.player instanceof ServerPlayer sp)) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         if (!isByakko(sp)) return;
 
         UUID uuid = sp.getUUID();
@@ -419,7 +418,7 @@ public final class ByakkoAbilityHandler {
     // -----------------------------------------------------------------------
 
     @SubscribeEvent(priority = EventPriority.NORMAL)
-    public static void onLivingHurt(LivingHurtEvent event) {
+    public static void onLivingHurt(LivingIncomingDamageEvent event) {
         // Only for player attacks
         if (!(event.getSource().getEntity() instanceof ServerPlayer attacker)) return;
         if (!isByakko(attacker)) return;
@@ -529,7 +528,7 @@ public final class ByakkoAbilityHandler {
     }
 
     private static void handleInstinctBonusDamage(ServerPlayer attacker, LivingEntity target,
-                                                   LivingHurtEvent event) {
+                                                   LivingIncomingDamageEvent event) {
         Set<String> nodes = SkillTreeData.getUnlockedNodes(attacker);
         int instinctTier = ByakkoSkillTree.TREE.highestTier(nodes, "bk_instinct");
         if (instinctTier < 2) return;

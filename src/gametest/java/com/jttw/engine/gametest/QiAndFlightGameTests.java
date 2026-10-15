@@ -18,9 +18,9 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import static com.jttw.engine.gametest.GT.*;
 
@@ -30,7 +30,7 @@ import static com.jttw.engine.gametest.GT.*;
 public class QiAndFlightGameTests {
 
     private static void qiTick(ServerPlayer p) {
-        QiManager.onPlayerTick(new TickEvent.PlayerTickEvent(TickEvent.Phase.END, p));
+        QiManager.onPlayerTick(new PlayerTickEvent.Post(p));
     }
 
     // ── Qi ─────────────────────────────────────────────────────────
@@ -165,7 +165,7 @@ public class QiAndFlightGameTests {
         ServerLevel heaven = h.getLevel().getServer().getLevel(JTTWDimensions.HEAVEN);
         p.teleportTo(heaven, 0.5, -200, 0.5, 0, 0);
         p.fallDistance = 50f;
-        HeavenVoidHandler.onPlayerTick(new TickEvent.PlayerTickEvent(TickEvent.Phase.END, p));
+        HeavenVoidHandler.onPlayerTick(new PlayerTickEvent.Post(p));
         eq(h, Level.OVERWORLD, p.level().dimension(), "dimension");
         near(h, 0.0, p.fallDistance, "fall damage cancelled");
         leaveWorld(p);

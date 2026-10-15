@@ -37,9 +37,9 @@ import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -573,7 +573,7 @@ public class TransformAbilityGameTests {
         Pig shot = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(2, 2, 4));
         ServerPlayer bee = Tf.playerAs(h, EntityType.BEE);
         Arrow arrow = new Arrow(h.getLevel(), bee);
-        LivingHurtEvent e = new LivingHurtEvent(shot, h.getLevel().damageSources().arrow(arrow, bee), 1f);
+        LivingIncomingDamageEvent e = new LivingIncomingDamageEvent(shot, h.getLevel().damageSources().arrow(arrow, bee), 1f);
         TransformationAbilityHandler.onLivingHurt(e);
         eq(h, 0, shot.getActiveEffects().size(), "projectile hit from a bee form adds nothing");
         h.succeed();
@@ -763,7 +763,7 @@ public class TransformAbilityGameTests {
     }
 
     private static void hit(GameTestHelper h, ServerPlayer attacker, LivingEntity target) {
-        LivingHurtEvent e = new LivingHurtEvent(target, h.getLevel().damageSources().playerAttack(attacker), 1f);
+        LivingIncomingDamageEvent e = new LivingIncomingDamageEvent(target, h.getLevel().damageSources().playerAttack(attacker), 1f);
         TransformationAbilityHandler.onLivingHurt(e);
     }
 

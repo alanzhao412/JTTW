@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.data.ModelData;
 
 /**
  * Draws the great Eight Trigrams Furnace whole from its core: its eight-sided body with the trigram
@@ -21,9 +21,9 @@ import net.minecraftforge.client.model.data.ModelData;
  */
 public class TrigramsFurnaceRenderer implements BlockEntityRenderer<TrigramsFurnaceBlockEntity> {
 
-    public static final ResourceLocation GREAT = new ResourceLocation(JTTWEngine.MOD_ID, "block/eight_trigrams_furnace_great");
-    public static final ResourceLocation GREAT_LIT = new ResourceLocation(JTTWEngine.MOD_ID, "block/eight_trigrams_furnace_great_lit");
-    public static final ResourceLocation HATCH = new ResourceLocation(JTTWEngine.MOD_ID, "block/eight_trigrams_furnace_hatch");
+    public static final ResourceLocation GREAT = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "block/eight_trigrams_furnace_great");
+    public static final ResourceLocation GREAT_LIT = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "block/eight_trigrams_furnace_great_lit");
+    public static final ResourceLocation HATCH = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "block/eight_trigrams_furnace_hatch");
 
     public TrigramsFurnaceRenderer(BlockEntityRendererProvider.Context context) {}
 

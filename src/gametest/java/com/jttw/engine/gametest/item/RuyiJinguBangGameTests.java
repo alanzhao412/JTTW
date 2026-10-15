@@ -26,10 +26,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.common.NeoForgeMod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import java.util.List;
 
@@ -453,14 +453,14 @@ public class RuyiJinguBangGameTests {
 
     private static double reachAfterTick(ServerPlayer p, ItemStack mainHand) {
         p.setItemInHand(InteractionHand.MAIN_HAND, mainHand);
-        RuyiJinguBangHandler.onPlayerTick(new TickEvent.PlayerTickEvent(TickEvent.Phase.START, p));
-        return p.getAttributeValue(ForgeMod.ENTITY_REACH.get());
+        RuyiJinguBangHandler.onPlayerTick(new PlayerTickEvent.Pre(p));
+        return p.getAttributeValue(NeoForgeMod.ENTITY_REACH.get());
     }
 
     @GameTest(template = PLATFORM)
     public static void wukongReachIsEightWithTheStaffAndThirteenWhenLarge(GameTestHelper h) {
         ServerPlayer p = wukong(h);
-        near(h, 3.0, p.getAttributeValue(ForgeMod.ENTITY_REACH.get()), "base reach");
+        near(h, 3.0, p.getAttributeValue(NeoForgeMod.ENTITY_REACH.get()), "base reach");
         near(h, 8.0, reachAfterTick(p, staff()), "normal");
         near(h, 8.0, reachAfterTick(p, staff(true, false)), "empowered");
         near(h, 13.0, reachAfterTick(p, staff(false, true)), "large");
@@ -508,8 +508,8 @@ public class RuyiJinguBangGameTests {
     public static void reachHandlerOnlyActsAtTheStartOfTheTick(GameTestHelper h) {
         ServerPlayer p = wukong(h);
         p.setItemInHand(InteractionHand.MAIN_HAND, staff());
-        RuyiJinguBangHandler.onPlayerTick(new TickEvent.PlayerTickEvent(TickEvent.Phase.END, p));
-        near(h, 3.0, p.getAttributeValue(ForgeMod.ENTITY_REACH.get()), "END phase ignored");
+        RuyiJinguBangHandler.onPlayerTick(new PlayerTickEvent.Post(p));
+        near(h, 3.0, p.getAttributeValue(NeoForgeMod.ENTITY_REACH.get()), "END phase ignored");
         h.succeed();
     }
 }

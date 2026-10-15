@@ -5,10 +5,11 @@ import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.network.s2c.ArmamentsShownPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * armory, worn, or in hand) but what is in their hands, which is drawn there. Shared with the
  * players who can see them, as it changes.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class ArmamentsShown {
 
     private ArmamentsShown() {}
@@ -40,8 +41,8 @@ public final class ArmamentsShown {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p) || p.tickCount % 10 != 0) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer p) || p.tickCount % 10 != 0) return;
         List<String> now = shown(p);
         List<String> was = LAST.put(p.getUUID(), now);
         if (!now.equals(was == null ? List.of() : was)) {

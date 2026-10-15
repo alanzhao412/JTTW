@@ -2,8 +2,7 @@
   "required": true,
   "minVersion": "0.8",
   "package": "com.jttw.engine.mixin",
-  "compatibilityLevel": "JAVA_17",
-  "refmap": "jttw_engine.refmap.json",
+  "compatibilityLevel": "JAVA_21",
   "mixins": [
     "BlockStateBaseMixin",
     "EntityPhaseMixin",

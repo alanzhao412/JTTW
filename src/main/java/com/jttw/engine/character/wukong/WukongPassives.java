@@ -11,10 +11,11 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Enemy;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Wukong's Yao Wang (Demon King) passive.
@@ -27,7 +28,7 @@ import net.minecraftforge.fml.common.Mod;
  *       back; while he has any fury, hostile mobs within 6 blocks are weakened (Weakness I).</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class WukongPassives {
 
     private WukongPassives() {}
@@ -63,7 +64,7 @@ public final class WukongPassives {
     }
 
     @SubscribeEvent
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(LivingIncomingDamageEvent event) {
         if (!(event.getSource().getEntity() instanceof ServerPlayer sp) || event.getEntity() == sp) return;
         int tier = tier(sp);
         if (tier < 1) return;
@@ -79,8 +80,8 @@ public final class WukongPassives {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer sp)) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         if (sp.tickCount % 20 != 0) return;
         int tier = tier(sp);
         CompoundTag pd = sp.getPersistentData();
@@ -90,7 +91,7 @@ public final class WukongPassives {
         int stacks = Math.min(pd.getInt(KEY_FURY), maxFury(tier));
 
         PassiveModifiers.set(sp, Attributes.MOVEMENT_SPEED, "wu_fury_speed", stacks * FURY_PER_STACK,
-                AttributeModifier.Operation.MULTIPLY_BASE);
+                AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
         PassiveModifiers.add(sp, Attributes.KNOCKBACK_RESISTANCE, "wu_fury_kb", tier >= 3 && stacks >= 10 ? 1.0 : 0.0);
         if (tier >= 3 && stacks > 0) {
             for (LivingEntity e : sp.level().getEntitiesOfClass(LivingEntity.class,

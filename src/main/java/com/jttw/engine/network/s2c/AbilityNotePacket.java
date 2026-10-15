@@ -1,12 +1,24 @@
 package com.jttw.engine.network.s2c;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import com.jttw.engine.JTTWEngine;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.function.Supplier;
 
 /** A short note on an ability's key (what it holds, say); empty to clear it. */
-public class AbilityNotePacket {
+public class AbilityNotePacket implements CustomPacketPayload {
+
+    public static final Type<AbilityNotePacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "ability_note"));
+    public static final StreamCodec<FriendlyByteBuf, AbilityNotePacket> STREAM_CODEC = StreamCodec.of((buf, pkt) -> encode(pkt, buf), AbilityNotePacket::decode);
+
+    @Override
+    public Type<AbilityNotePacket> type() {
+        return TYPE;
+    }
 
     private final String abilityId;
     private final String note;
@@ -25,8 +37,7 @@ public class AbilityNotePacket {
         return new AbilityNotePacket(buf.readUtf(64), buf.readUtf(16));
     }
 
-    public static void handle(AbilityNotePacket pkt, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> com.jttw.engine.client.ClientAbilityData.setNote(pkt.abilityId, pkt.note));
-        ctx.get().setPacketHandled(true);
+    public static void handle(AbilityNotePacket pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> com.jttw.engine.client.ClientAbilityData.setNote(pkt.abilityId, pkt.note));
     }
 }

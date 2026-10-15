@@ -19,13 +19,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
-import net.minecraftforge.event.entity.player.AdvancementEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
+import net.neoforged.neoforge.event.entity.player.AdvancementEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import static com.jttw.engine.gametest.GT.*;
 
@@ -130,7 +130,7 @@ public class ReincarnationGameTests {
     // ── Death and rebirth ─────────────────────────────────────────
 
     private static Advancement advancement(GameTestHelper h, String path) {
-        Advancement a = h.getLevel().getServer().getAdvancements().getAdvancement(new ResourceLocation("minecraft", path));
+        Advancement a = h.getLevel().getServer().getAdvancements().getAdvancement(ResourceLocation.fromNamespaceAndPath("minecraft", path));
         if (a == null) throw new IllegalStateException("missing advancement " + path);
         return a;
     }

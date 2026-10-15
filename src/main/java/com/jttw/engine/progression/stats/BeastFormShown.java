@@ -5,10 +5,11 @@ import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.network.s2c.BeastFormPacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 
 import java.util.Map;
 import java.util.UUID;
@@ -19,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * one step at each form (levels 20, 40, 60, 80) and the last at level 100. Shared with the players
  * who can see them, as it changes.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class BeastFormShown {
 
     private BeastFormShown() {}
@@ -48,8 +49,8 @@ public final class BeastFormShown {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p) || p.tickCount % 20 != 0) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer p) || p.tickCount % 20 != 0) return;
         int now = packed(p);
         Integer was = LAST.put(p.getUUID(), now);
         if (was == null ? now >= 0 : was != now) send(p, now);

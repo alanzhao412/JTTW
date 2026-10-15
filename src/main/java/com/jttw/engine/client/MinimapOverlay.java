@@ -18,11 +18,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.MapColor;
-import net.minecraftforge.client.gui.overlay.IGuiOverlay;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.api.distmarker.Dist;
+import net.minecraft.client.gui.LayeredDraw;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
 
 /**
  * The Heavenly's minimap: the land around them from above, in the top-right corner of the screen,
@@ -30,7 +31,7 @@ import net.minecraftforge.api.distmarker.Dist;
  * players blue, the rest yellow), their own facing as an arrow at its heart, and their position
  * under it. Heavenly characters see the world as Heaven does, from above.
  */
-@Mod.EventBusSubscriber(modid = JTTWEngine.MOD_ID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = JTTWEngine.MOD_ID, value = Dist.CLIENT)
 public final class MinimapOverlay {
 
     private MinimapOverlay() {}
@@ -54,9 +55,9 @@ public final class MinimapOverlay {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
+    public static void onClientTick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
-        if (event.phase != TickEvent.Phase.END || mc.player == null || mc.level == null || !shows(mc.player)) return;
+        if (mc.player == null || mc.level == null || !shows(mc.player)) return;
         if (mc.player.tickCount % REDRAW_EVERY != 0) return;
         redraw(mc.level, mc.player.blockPosition());
     }

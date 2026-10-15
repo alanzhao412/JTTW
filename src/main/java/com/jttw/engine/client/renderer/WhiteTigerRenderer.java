@@ -25,10 +25,10 @@ import net.minecraft.util.Mth;
  */
 public final class WhiteTigerRenderer extends MobRenderer<WhiteTigerEntity, WhiteTigerRenderer.Model> {
 
-    public static final ModelLayerLocation LAYER = new ModelLayerLocation(new ResourceLocation(JTTWEngine.MOD_ID, "white_tiger"), "main");
-    public static final ResourceLocation TEXTURE = new ResourceLocation(JTTWEngine.MOD_ID, "textures/entity/white_tiger.png");
+    public static final ModelLayerLocation LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "white_tiger"), "main");
+    public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "textures/entity/white_tiger.png");
     private static final net.minecraft.client.renderer.RenderType EYES = net.minecraft.client.renderer.RenderType.eyes(
-            new ResourceLocation(JTTWEngine.MOD_ID, "textures/entity/white_tiger_eyes.png"));
+            ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "textures/entity/white_tiger_eyes.png"));
     /** How much larger than its model's pixels it is drawn: a beast five blocks long. */
     public static final float SCALE = 1.75f;
 

@@ -1,9 +1,13 @@
 package com.jttw.engine.network.s2c;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import com.jttw.engine.JTTWEngine;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -14,7 +18,15 @@ import java.util.function.Supplier;
  * <p>When active, the client renders ore highlights (tier 2+) and
  * reveals real usernames above transformed players (tier 1+).
  */
-public class SyncEyeOfHeavenPacket {
+public class SyncEyeOfHeavenPacket implements CustomPacketPayload {
+
+    public static final Type<SyncEyeOfHeavenPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "sync_eye_of_heaven"));
+    public static final StreamCodec<FriendlyByteBuf, SyncEyeOfHeavenPacket> STREAM_CODEC = StreamCodec.of((buf, pkt) -> encode(pkt, buf), SyncEyeOfHeavenPacket::decode);
+
+    @Override
+    public Type<SyncEyeOfHeavenPacket> type() {
+        return TYPE;
+    }
 
     private final UUID playerId;
     private final boolean active;
@@ -36,9 +48,8 @@ public class SyncEyeOfHeavenPacket {
         return new SyncEyeOfHeavenPacket(buf.readUUID(), buf.readBoolean(), buf.readByte());
     }
 
-    public static void handle(SyncEyeOfHeavenPacket pkt, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> handleClient(pkt));
-        ctx.get().setPacketHandled(true);
+    public static void handle(SyncEyeOfHeavenPacket pkt, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> handleClient(pkt));
     }
 
     @OnlyIn(Dist.CLIENT)
