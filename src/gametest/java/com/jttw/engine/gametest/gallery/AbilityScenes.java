@@ -536,6 +536,15 @@ final class AbilityScenes {
                     bull(p, "bdk_bull_1", "bdk_bull_2", "bdk_bull_3");
                     BullDemonAbilityHandler.toggleGreatBull(p);
                 }, p -> {}, 1, false),
+                // the Great White Bull close: its shape from the side, its head, its horns
+                new Scene("bull_side", p -> { bull(p, "bdk_bull_1", "bdk_bull_2", "bdk_bull_3"); facing = -90f; sceneCam = new double[]{0.5, 2.0, 10.0, 0.5, 1.6, 0.5}; },
+                        BullDemonAbilityHandler::toggleGreatBull, 45, false),
+                new Scene("bull_front", p -> { bull(p, "bdk_bull_1", "bdk_bull_2", "bdk_bull_3"); facing = -50f; sceneCam = new double[]{7.5, 2.0, 8.0, 0.5, 1.6, 0.5}; },
+                        BullDemonAbilityHandler::toggleGreatBull, 45, false),
+                new Scene("bull_face", p -> { bull(p, "bdk_bull_1", "bdk_bull_2", "bdk_bull_3"); facing = -90f; sceneCam = new double[]{5.5, 2.0, 1.6, 2.0, 1.5, 0.5}; },
+                        BullDemonAbilityHandler::toggleGreatBull, 45, false),
+                new Scene("bull_rear", p -> { bull(p, "bdk_bull_1", "bdk_bull_2", "bdk_bull_3"); facing = -90f; sceneCam = new double[]{-6.0, 2.6, 6.5, 0.5, 1.4, 0.5}; },
+                        BullDemonAbilityHandler::toggleGreatBull, 45, false),
                 new Scene("bdk_cudgel_shockwave", p -> {
                     bull(p);
                     p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.MIXED_IRON_CUDGEL.get()));

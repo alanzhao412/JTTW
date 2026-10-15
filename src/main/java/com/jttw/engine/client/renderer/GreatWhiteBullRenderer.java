@@ -18,18 +18,30 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 /**
- * The Great White Bull: a vast white bull, humped at the shoulder, with a broad head, a pink-nosed
- * snout and great horns curving out and up, gold at the tips; a long tail that swishes.
+ * The Great White Bull: a vast, wedge-shaped bull, all its weight in a towering chest and shoulder
+ * hump crested with bone spikes, tapering to lean hindquarters. Its head is carried low as it
+ * charges, under a heavy brow with eyes that burn red; a long, dark, squared snout with flared
+ * nostrils and a gold ring; horns thick and black at the skull that sweep out, then forward and in
+ * to gold points; a whip of a tail.
  */
 public final class GreatWhiteBullRenderer extends MobRenderer<GreatWhiteBullEntity, GreatWhiteBullRenderer.Model> {
 
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "great_white_bull"), "main");
     public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "textures/entity/great_white_bull.png");
-    /** How much larger than its model's pixels it is drawn: a great bull. */
-    public static final float SCALE = 1.35f;
+    private static final net.minecraft.client.renderer.RenderType EYES = net.minecraft.client.renderer.RenderType.eyes(
+            ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "textures/entity/great_white_bull_eyes.png"));
+    /** How much larger than its model's pixels it is drawn: a great bull, its hump at its height. */
+    public static final float SCALE = 1.25f;
 
     public GreatWhiteBullRenderer(EntityRendererProvider.Context ctx) {
         super(ctx, new Model(ctx.bakeLayer(LAYER)), 1.2f);
+        // its eyes burn under the brow: drawn full-bright over the skin, even in the dark
+        addLayer(new net.minecraft.client.renderer.entity.layers.EyesLayer<>(this) {
+            @Override
+            public net.minecraft.client.renderer.RenderType renderType() {
+                return EYES;
+            }
+        });
     }
 
     @Override
@@ -49,38 +61,59 @@ public final class GreatWhiteBullRenderer extends MobRenderer<GreatWhiteBullEnti
     public static LayerDefinition layer() {
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
-        // a deep body on tall legs, a great hump over the shoulders, a thick neck thrust forward
+        // a wedge: a towering chest and shoulders, lean hindquarters, a hump crested with bone
+        // spikes, and a thick neck thrust forward and down
         root.addOrReplaceChild("body", CubeListBuilder.create()
-                .texOffs(0, 0).addBox(-9, -9, -15, 18, 17, 30)
-                .texOffs(0, 47).addBox(-7, -15, -14, 14, 7, 13)
-                .texOffs(40, 93).addBox(-6, -8, -20, 12, 12, 6), PartPose.ZERO);
-        // the head carried low, horns and all, as a bull about to charge
+                .texOffs(0, 0).addBox(-10, -9, -16, 20, 19, 14)     // chest and shoulders
+                .texOffs(0, 33).addBox(-8, -5, -2, 16, 15, 17)      // hindquarters, lower than the shoulders
+                .texOffs(28, 104).addBox(-6, -11, -4, 12, 5, 9)     // the back, stepping down from the hump
+                .texOffs(0, 104).addBox(-4, 5, -21, 8, 6, 6)        // the dewlap, heavy under the neck
+                .texOffs(68, 0).addBox(-7, -16, -15, 14, 8, 11)     // the hump
+                .texOffs(68, 19).addBox(-7, -8, -22, 14, 13, 8)     // the neck
+                .texOffs(84, 80).addBox(-1, -19, -13, 2, 4, 2)      // the hump's spikes, falling away
+                .texOffs(84, 80).addBox(-1, -18, -9, 2, 4, 2)
+                .texOffs(84, 80).addBox(-1, -17, -5, 2, 4, 2), PartPose.ZERO);
+        // the head carried low, as a bull about to charge: a skull under a heavy brow, a long
+        // squared snout and jaw, a ring through the nose
         PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create()
-                .texOffs(54, 47).addBox(-6, -6, -11, 12, 12, 12)
-                .texOffs(102, 47).addBox(-4, 0, -15, 8, 6, 5), PartPose.offsetAndRotation(0, -1, -19, 0.2f, 0, 0));
+                .texOffs(68, 40).addBox(-6, -6, -10, 12, 10, 10)     // skull
+                .texOffs(66, 60).addBox(-7, -7, -11, 14, 3, 4)       // brow, overhanging the eyes
+                .texOffs(0, 66).addBox(-4.5f, -2, -17, 9, 7, 7)      // snout
+                .texOffs(32, 66).addBox(-4, 5, -15, 8, 2, 5)         // jaw
+                .texOffs(92, 80).addBox(-2.5f, 5, -17.8f, 5, 1, 1)   // nose ring
+                .texOffs(104, 80).addBox(-2.5f, 2, -17.8f, 1, 3, 1)
+                .texOffs(104, 80).addBox(1.5f, 2, -17.8f, 1, 3, 1),
+                PartPose.offsetAndRotation(0, -3, -21, 0.25f, 0, 0));
         for (int side : new int[]{-1, 1}) {
             String n = side < 0 ? "right" : "left";
-            // out from the brow, then sweeping up and forward, gold at the points
+            // ears laid back under the horns
+            head.addOrReplaceChild(n + "_ear", CubeListBuilder.create()
+                    .texOffs(72, 80).mirror(side < 0).addBox(side < 0 ? -4 : 0, 0, 0, 4, 2, 1),
+                    PartPose.offsetAndRotation(side * 6, -3, -3, 0.3f, side * -0.5f, side * 0.4f));
+            // thick from the skull and out, then forward and up, then in to the points
             PartDefinition base = head.addOrReplaceChild(n + "_horn", CubeListBuilder.create()
-                    .texOffs(102, 58).mirror(side < 0).addBox(side < 0 ? -8 : 0, -1.5f, -1.5f, 8, 3, 3),
-                    PartPose.offsetAndRotation(side * 5, -5, -6, 0, side * 0.25f, side * -0.15f));
-            PartDefinition up = base.addOrReplaceChild(n + "_horn_up", CubeListBuilder.create()
-                    .texOffs(102, 64).addBox(-1.5f, -7, -1.5f, 3, 7, 3),
-                    PartPose.offsetAndRotation(side * 7, 0, 0, -0.55f, 0, side * 0.35f));
-            up.addOrReplaceChild(n + "_horn_tip", CubeListBuilder.create()
-                    .texOffs(114, 64).addBox(-1, -5, -1, 2, 5, 2),
-                    PartPose.offsetAndRotation(0, -7, 0, -0.45f, 0, side * -0.35f));
+                    .texOffs(58, 67).mirror(side < 0).addBox(side < 0 ? -9 : 0, -2, -2, 9, 4, 4),
+                    PartPose.offsetAndRotation(side * 6, -5, -6, 0, side * 0.2f, side * -0.15f));
+            PartDefinition mid = base.addOrReplaceChild(n + "_horn_up", CubeListBuilder.create()
+                    .texOffs(84, 67).addBox(-1.5f, -8, -1.5f, 3, 8, 3),
+                    PartPose.offsetAndRotation(side * 8.5f, 0, 0, 0.6f, 0, side * 0.45f));
+            mid.addOrReplaceChild(n + "_horn_tip", CubeListBuilder.create()
+                    .texOffs(96, 67).addBox(-1, -6, -1, 2, 6, 2),
+                    PartPose.offsetAndRotation(0, -8, 0, 0.5f, 0, side * -0.6f));
         }
+        // thick forelegs under the weight, leaner hind legs
         for (int i = 0; i < 4; i++) {
             boolean front = i < 2, left = i % 2 == 1;
-            root.addOrReplaceChild(legName(i), CubeListBuilder.create()
-                    .texOffs(0, 71).mirror(left).addBox(-3, 0, -3, 6, 16, 6),
-                    PartPose.offset(left ? 5.5f : -5.5f, 8, front ? -10 : 11));
+            CubeListBuilder leg = front
+                    ? CubeListBuilder.create().texOffs(0, 80).mirror(left).addBox(-3.5f, 0, -3.5f, 7, 14, 7)
+                    : CubeListBuilder.create().texOffs(28, 80).mirror(left).addBox(-3, 0, -3, 6, 14, 6);
+            root.addOrReplaceChild(legName(i), leg,
+                    PartPose.offset(front ? (left ? 6 : -6) : (left ? 5 : -5), 10, front ? -10 : 11));
         }
         PartDefinition tail = root.addOrReplaceChild("tail", CubeListBuilder.create()
-                .texOffs(24, 71).addBox(-1, 0, -1, 2, 14, 2), PartPose.offsetAndRotation(0, -7, 15, 0.35f, 0, 0));
+                .texOffs(52, 80).addBox(-1, 0, -1, 2, 14, 2), PartPose.offsetAndRotation(0, -5, 15, 0.35f, 0, 0));
         tail.addOrReplaceChild("tuft", CubeListBuilder.create()
-                .texOffs(32, 71).addBox(-1.5f, 13, -1.5f, 3, 4, 3), PartPose.ZERO);
+                .texOffs(60, 80).addBox(-1.5f, 13, -1.5f, 3, 5, 3), PartPose.ZERO);
         return LayerDefinition.create(mesh, 128, 128);
     }
 
@@ -107,7 +140,7 @@ public final class GreatWhiteBullRenderer extends MobRenderer<GreatWhiteBullEnti
         @Override
         public void setupAnim(GreatWhiteBullEntity e, float swing, float amount, float age, float yaw, float pitch) {
             head.yRot = yaw * Mth.DEG_TO_RAD * 0.6f;
-            head.xRot = pitch * Mth.DEG_TO_RAD * 0.5f + 0.2f;
+            head.xRot = pitch * Mth.DEG_TO_RAD * 0.5f + 0.25f;
             // a heavy, diagonal gait
             for (int i = 0; i < 4; i++) {
                 boolean diagonal = i == 0 || i == 3;
