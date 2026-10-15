@@ -200,7 +200,7 @@ public final class LevelManager {
         EnemyTier tier = EnemyTier.parse(tierStr);
         String zone = event.getEntity().getPersistentData().getString(ZONE_TAG);
         BiomeLevelBand band = zone.isEmpty() ? BiomeLevelBand.forPlayer(killer)
-                : BiomeLevelBand.forBiome(new net.minecraft.resources.ResourceLocation(zone));
+                : BiomeLevelBand.forBiome(net.minecraft.resources.ResourceLocation.parse(zone));
 
         if (band == null) {
             // Mob was tagged but player isn't in a registered biome band.

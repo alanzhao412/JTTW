@@ -26,7 +26,7 @@ import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Block;
@@ -281,7 +281,7 @@ public final class TransformationAbilityHandler {
         if (isLarge) {
             LargeFireball fireball = new LargeFireball(
                     sp.level(), sp,
-                    look.x, look.y, look.z,
+                    look,
                     1 // explosion power
             );
             fireball.setPos(pos.x + look.x * 1.5, pos.y + look.y * 1.5, pos.z + look.z * 1.5);
@@ -289,7 +289,7 @@ public final class TransformationAbilityHandler {
         } else {
             SmallFireball fireball = new SmallFireball(
                     sp.level(), sp,
-                    look.x, look.y, look.z
+                    look
             );
             fireball.setPos(pos.x + look.x * 1.5, pos.y + look.y * 1.5, pos.z + look.z * 1.5);
             sp.level().addFreshEntity(fireball);
@@ -408,7 +408,7 @@ public final class TransformationAbilityHandler {
 
         // Create and fire an arrow
         Vec3 look = sp.getLookAngle();
-        Arrow arrow = new Arrow(sp.level(), sp);
+        Arrow arrow = new Arrow(sp.level(), sp, new ItemStack(Items.ARROW), null);
         arrow.shootFromRotation(sp, sp.getXRot(), sp.getYRot(), 0.0F, 3.0F, 1.0F);
         arrow.pickup = AbstractArrow.Pickup.DISALLOWED; // no free arrows from transform
 
@@ -446,8 +446,7 @@ public final class TransformationAbilityHandler {
         WITCH_POTION_COOLDOWNS.put(sp.getUUID(), now + WITCH_POTION_COOLDOWN_TICKS);
 
         // Create a Poison II splash potion item
-        ItemStack potionStack = new ItemStack(Items.SPLASH_POTION);
-        PotionUtils.setPotion(potionStack, Potions.STRONG_POISON); // Poison II
+        ItemStack potionStack = PotionContents.createItemStack(Items.SPLASH_POTION, Potions.STRONG_POISON); // Poison II
 
         ThrownPotion thrownPotion = new ThrownPotion(sp.level(), sp);
         thrownPotion.setItem(potionStack);
@@ -948,12 +947,15 @@ public final class TransformationAbilityHandler {
 
     public static void applyHorseStepAssist(ServerPlayer sp, TransformationData data) {
         var pd = sp.getPersistentData();
+        // the step height's base value (bonuses, Byakko's among them, are modifiers on top)
+        var step = sp.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.STEP_HEIGHT);
+        if (step == null) return;
         if (data != null && HORSE_TYPES.contains(data.getEntityType())) {
-            if (!pd.contains(NBT_STEP_BEFORE_HORSE)) pd.putFloat(NBT_STEP_BEFORE_HORSE, sp.maxUpStep());
-            sp.setMaxUpStep(1.5F + 0.6F); // vanilla 0.6 + 1.5 bonus
+            if (!pd.contains(NBT_STEP_BEFORE_HORSE)) pd.putFloat(NBT_STEP_BEFORE_HORSE, (float) step.getBaseValue());
+            step.setBaseValue(1.5F + 0.6F); // vanilla 0.6 + 1.5 bonus
         } else if (pd.contains(NBT_STEP_BEFORE_HORSE)) {
-            // Put back exactly what was there (a server player's 1.0, Byakko's bonus, ...)
-            sp.setMaxUpStep(pd.getFloat(NBT_STEP_BEFORE_HORSE));
+            // Put back exactly what was there
+            step.setBaseValue(pd.getFloat(NBT_STEP_BEFORE_HORSE));
             pd.remove(NBT_STEP_BEFORE_HORSE);
         }
     }
@@ -1042,7 +1044,7 @@ public final class TransformationAbilityHandler {
         Vec3 look = sp.getLookAngle();
         net.minecraft.world.entity.projectile.WitherSkull skull =
                 new net.minecraft.world.entity.projectile.WitherSkull(
-                        sp.level(), sp, look.x, look.y, look.z);
+                        sp.level(), sp, look);
         skull.setPos(sp.getX() + look.x * 1.5,
                 sp.getEyeY() + look.y * 1.5,
                 sp.getZ() + look.z * 1.5);

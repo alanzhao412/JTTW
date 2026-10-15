@@ -7,7 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -64,7 +63,7 @@ public final class HeavenBlocks {
 
         @Override
         @SuppressWarnings("deprecation")
-        public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
             if (level.isClientSide) return InteractionResult.SUCCESS;
             int cups = state.getValue(CUPS);
             if (cups == 0) {
@@ -101,7 +100,7 @@ public final class HeavenBlocks {
 
         @Override
         @SuppressWarnings("deprecation")
-        public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
             if (level.isClientSide) return InteractionResult.SUCCESS;
             if (!WukongCharacter.is(player)) {
                 player.displayClientMessage(Component.literal("§7Your name is written here, and the day you will die."), true);

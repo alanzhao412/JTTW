@@ -105,10 +105,10 @@ public final class SkillPurchase {
         if (attr == null) return;
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
         for (String id : List.of(WukongSkillTree.VITALITY_1, WukongSkillTree.VITALITY_2)) {
-            UUID modUUID = UUID.nameUUIDFromBytes(("jttw_vitality_" + id).getBytes());
+            net.minecraft.resources.ResourceLocation modUUID = com.jttw.engine.JTTWEngine.id("vitality_" + id);
             double amount = nodes.contains(id) ? VITALITY_HEALTH * LevelPower.of(player) : 0;
             AttributeModifier existing = attr.getModifier(modUUID);
-            if (existing != null && existing.getAmount() == amount) continue;
+            if (existing != null && existing.amount() == amount) continue;
             if (existing != null) attr.removeModifier(modUUID);
             if (amount != 0) {
                 attr.addPermanentModifier(new AttributeModifier(modUUID,

@@ -74,7 +74,7 @@ public final class HeavenlyHost {
     private static void announce(ServerPlayer p, int degree) {
         p.connection.send(new ClientboundSetTitleTextPacket(Component.literal("§cHeaven's host descends")));
         p.connection.send(new ClientboundSetSubtitleTextPacket(Component.literal("§7You are " + Morality.standing(Morality.karma(p)))));
-        p.level().playSound(null, p.blockPosition(), SoundEvents.RAID_HORN.get(), SoundSource.HOSTILE, 4f, degree >= 3 ? 0.8f : 1f);
+        p.level().playSound(null, p.blockPosition(), SoundEvents.RAID_HORN.value(), SoundSource.HOSTILE, 4f, degree >= 3 ? 0.8f : 1f);
     }
 
     /** The soldiers already out after {@code quarry}. */
@@ -96,7 +96,7 @@ public final class HeavenlyHost {
             HeavenlySoldierEntity s = ModEntities.HEAVENLY_SOLDIER.get().create(level);
             if (s == null) continue;
             s.moveTo(at.x, at.y, at.z, level.random.nextFloat() * 360f, 0f);
-            s.finalizeSpawn(level, level.getCurrentDifficultyAt(s.blockPosition()), MobSpawnType.EVENT, null, null);
+            s.finalizeSpawn(level, level.getCurrentDifficultyAt(s.blockPosition()), MobSpawnType.EVENT, null);
             s.become(base + (general ? GENERAL_ABOVE : 0) + level.random.nextInt(3) - 1, general, quarry.getUUID());
             s.setTarget(quarry);
             level.addFreshEntity(s);
@@ -112,7 +112,7 @@ public final class HeavenlyHost {
             double a = (i + level.random.nextDouble() * 0.6) * Math.PI * 2 / Math.max(1, of) + tries;
             double d = 18 + level.random.nextDouble() * 8;
             Vec3 at = quarry.position().add(Math.cos(a) * d, 4 + level.random.nextDouble() * 6, Math.sin(a) * d);
-            var box = ModEntities.HEAVENLY_SOLDIER.get().getAABB(at.x, at.y, at.z);
+            var box = ModEntities.HEAVENLY_SOLDIER.get().getDimensions().makeBoundingBox(at.x, at.y, at.z);
             if (level.noCollision(box)) return at;
         }
         return quarry.position().add(0, 6, 0);

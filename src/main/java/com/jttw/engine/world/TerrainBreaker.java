@@ -14,7 +14,7 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.event.ForgeEventFactory;
+import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -126,15 +126,17 @@ public final class TerrainBreaker {
     @Nullable
     public static Explosion explode(ServerLevel level, @Nullable Entity source, double x, double y, double z, float power) {
         Explosion explosion = new Explosion(level, source, null, null, x, y, z, power, false,
-                Explosion.BlockInteraction.DESTROY);
-        if (ForgeEventFactory.onExplosionStart(level, explosion)) return null;
+                Explosion.BlockInteraction.DESTROY, net.minecraft.core.particles.ParticleTypes.EXPLOSION,
+                net.minecraft.core.particles.ParticleTypes.EXPLOSION_EMITTER, net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE);
+        if (EventHooks.onExplosionStart(level, explosion)) return null;
         explosion.explode(); // the blast: what it reaches, and the creatures it hurts and throws
         List<BlockPos> blocks = new ArrayList<>(explosion.getToBlow());
         // Each nearby player sees and hears it, and is thrown by it; the blocks follow from the server
         for (ServerPlayer player : level.players()) {
             if (player.distanceToSqr(x, y, z) < 4096.0) {
                 player.connection.send(new ClientboundExplodePacket(x, y, z, power, List.of(),
-                        explosion.getHitPlayers().get(player)));
+                        explosion.getHitPlayers().get(player), explosion.getBlockInteraction(),
+                        explosion.getSmallExplosionParticles(), explosion.getLargeExplosionParticles(), explosion.getExplosionSound()));
             }
         }
         if (!blocks.isEmpty()) enqueue(level, new Job(dedupe(blocks), explosion, false, null));

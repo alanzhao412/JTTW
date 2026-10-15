@@ -6,11 +6,9 @@
   "mixins": [
     "BlockStateBaseMixin",
     "EntityPhaseMixin",
-    "FoodDataMixin",
     "LivingEntityMixin",
     "MultiNoiseBiomeSourceMixin",
     "OverworldBiomeBuilderMixin",
-    "EntityEyeHeightInvoker",
     "LivingEntityJumpingAccessor",
     "LivingEntityFlagInvoker",
     "LivingEntityJumpInvoker",

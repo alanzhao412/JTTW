@@ -10,7 +10,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
 import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
-import net.neoforged.neoforge.event.entity.living.LivingEvent;
+import net.minecraft.world.entity.LivingEntity;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -33,19 +33,19 @@ public final class AggroTraits {
         if (!(event.getEntity() instanceof Mob mob)) return;
         if (!(mob instanceof Enemy)) return;
 
-        if (!(event.getNewTarget() instanceof ServerPlayer sp)) return;
+        if (!(event.getNewAboutToBeSetTarget() instanceof ServerPlayer sp)) return;
         if (!isHostileMorph(sp, transformations)) return;
 
-        event.setNewTarget(null);
+        event.setNewAboutToBeSetTarget(null);
 
         if (mob.getTarget() == sp) {
             mob.setTarget(null);
         }
     }
 
-    public static void onHostileTick(LivingEvent.LivingTickEvent event,
+    public static void onHostileTick(LivingEntity entity,
                                     Map<UUID, TransformationData> transformations) {
-        if (!(event.getEntity() instanceof Mob mob)) return;
+        if (!(entity instanceof Mob mob)) return;
         if (mob.level().isClientSide) return;
         if (!(mob instanceof Enemy)) return;
 

@@ -274,8 +274,8 @@ public class PlayerRendererMixin {
             // and this stand-in sign is in none
             var tag = new net.minecraft.nbt.CompoundTag();
             tag.put("front_text", net.minecraft.world.level.block.entity.SignText.DIRECT_CODEC
-                    .encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, text).getOrThrow(false, e -> {}));
-            sign.load(tag);
+                    .encodeStart(player.registryAccess().createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE), text).getOrThrow());
+            sign.loadCustomOnly(tag, player.registryAccess());
             mc.getBlockEntityRenderDispatcher().renderItem(sign, poseStack, buffer, light, overlay);
         } else {
             mc.getBlockRenderer().renderSingleBlock(state, poseStack, buffer, light, overlay);

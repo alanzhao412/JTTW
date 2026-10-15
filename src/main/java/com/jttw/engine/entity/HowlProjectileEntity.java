@@ -69,7 +69,7 @@ public class HowlProjectileEntity extends ThrowableItemProjectile {
     }
 
     @Override
-    protected float getGravity() {
+    protected double getDefaultGravity() {
         return 0.01F; // Nearly flat trajectory for a sonic wave
     }
 }

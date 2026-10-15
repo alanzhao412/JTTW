@@ -62,7 +62,7 @@ public class LairFeature extends Feature<NoneFeatureConfiguration> {
         LadyWhiteBoneEntity lady = ModEntities.LADY_WHITE_BONE.get().create(level.getLevel());
         if (lady != null) {
             lady.moveTo(c[0] + 0.5, y + 1, c[1] + 0.5, context.random().nextFloat() * 360f, 0f);
-            lady.finalizeSpawn(level, level.getCurrentDifficultyAt(centre), MobSpawnType.STRUCTURE, null, null);
+            lady.finalizeSpawn(level, level.getCurrentDifficultyAt(centre), MobSpawnType.STRUCTURE, null);
             level.addFreshEntityWithPassengers(lady);
         }
         return true;

@@ -68,7 +68,14 @@ public final class Tough {
 
     /** Tough but loose: it falls as gravel and sand do. */
     public static class Loose extends FallingBlock {
+        public static final com.mojang.serialization.MapCodec<Loose> CODEC = simpleCodec(Loose::new);
+
         public Loose(Properties p) { super(p); }
+
+        @Override
+        protected com.mojang.serialization.MapCodec<? extends FallingBlock> codec() {
+            return CODEC;
+        }
 
         @Override
         public float getExplosionResistance(BlockState state, BlockGetter level, BlockPos pos, @Nullable Explosion explosion) {

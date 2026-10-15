@@ -51,7 +51,7 @@ public class TrigramsFurnaceBlockEntity extends BlockEntity implements Container
     public static final float BURN_SHARE = 0.10f;
     public static final net.minecraft.resources.ResourceKey<net.minecraft.world.damagesource.DamageType> SAMADHI_FIRE =
             net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.DAMAGE_TYPE,
-                    new net.minecraft.resources.ResourceLocation(com.jttw.engine.JTTWEngine.MOD_ID, "samadhi_fire"));
+                    com.jttw.engine.JTTWEngine.id("samadhi_fire"));
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(SLOTS, ItemStack.EMPTY);
     private int progress, needed, burn, burnMax;
@@ -329,28 +329,31 @@ public class TrigramsFurnaceBlockEntity extends BlockEntity implements Container
         return true;
     }
 
-    /** It is drawn across all its parts, not only its core's block. */
-    @Override
+    /**
+     * It is drawn across all its parts, not only its core's block. (The render bounds are the
+     * renderer's now: TrigramsFurnaceRenderer#getRenderBoundingBox returns this.)
+     */
     public net.minecraft.world.phys.AABB getRenderBoundingBox() {
-        return new net.minecraft.world.phys.AABB(worldPosition.offset(-1, 0, -1), worldPosition.offset(2, 5, 2));
+        return new net.minecraft.world.phys.AABB(worldPosition.getX() - 1, worldPosition.getY(), worldPosition.getZ() - 1,
+                worldPosition.getX() + 2, worldPosition.getY() + 5, worldPosition.getZ() + 2);
     }
 
     // ── Saving ───────────────────────────────────────────────────────────
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
-        ContainerHelper.saveAllItems(tag, items);
+    protected void saveAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
+        ContainerHelper.saveAllItems(tag, items, registries);
         tag.putInt("Progress", progress);
         tag.putInt("Burn", burn);
         tag.putInt("BurnMax", burnMax);
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
+    protected void loadAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
         items.clear();
-        ContainerHelper.loadAllItems(tag, items);
+        ContainerHelper.loadAllItems(tag, items, registries);
         progress = tag.getInt("Progress");
         burn = tag.getInt("Burn");
         burnMax = tag.getInt("BurnMax");

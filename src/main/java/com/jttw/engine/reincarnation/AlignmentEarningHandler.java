@@ -110,7 +110,7 @@ public final class AlignmentEarningHandler {
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         if (AlignmentData.hasReincarnated(sp)) return;
 
-        String id = event.getAdvancement().getId().toString();
+        String id = event.getAdvancement().id().toString();
 
         // Structure/exploration advancements
         if (id.contains("adventure/") || id.contains("nether/") || id.contains("end/")) {
@@ -149,7 +149,9 @@ public final class AlignmentEarningHandler {
 
         // -- Heavenly: killing undead --
         // ~150 undead × 2 = ~300
-        if (victim instanceof Monster monster && monster.getMobType() == net.minecraft.world.entity.MobType.UNDEAD) {
+        // (undead is the entity-type tag now; the mod's own undead answer isInvertedHealAndHarm)
+        if (victim instanceof Monster monster && (monster.getType().is(net.minecraft.tags.EntityTypeTags.UNDEAD)
+                || monster.isInvertedHealAndHarm())) {
             AlignmentData.addHeavenly(sp, 2);
             return;
         }
@@ -183,7 +185,7 @@ public final class AlignmentEarningHandler {
         if (AlignmentData.hasReincarnated(sp)) return;
 
         ItemStack stack = event.getItem();
-        if (!stack.getItem().isEdible()) return;
+        if (stack.getFoodProperties(sp) == null) return;
 
         AlignmentData.addYaoguai(sp, 1);
     }

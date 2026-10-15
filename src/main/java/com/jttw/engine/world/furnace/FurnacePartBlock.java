@@ -4,7 +4,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -84,7 +83,7 @@ public class FurnacePartBlock extends Block {
 
     @Override
     @SuppressWarnings("deprecation")
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (level.isClientSide) return InteractionResult.SUCCESS;
         BlockPos core = corePos(state, pos);
         if (!(level.getBlockEntity(core) instanceof TrigramsFurnaceBlockEntity furnace)) return InteractionResult.PASS;
@@ -98,7 +97,7 @@ public class FurnacePartBlock extends Block {
                     SoundSource.BLOCKS, 1f, 0.6f);
             return InteractionResult.CONSUME;
         }
-        return level.getBlockState(core).use(level, player, hand, hit.withPosition(core));
+        return level.getBlockState(core).useWithoutItem(level, player, hit.withPosition(core));
     }
 
     /** Breaking any part breaks the whole furnace. */
@@ -113,7 +112,7 @@ public class FurnacePartBlock extends Block {
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
+    public ItemStack getCloneItemStack(net.minecraft.world.level.LevelReader level, BlockPos pos, BlockState state) {
         return new ItemStack(com.jttw.engine.registry.ModItems.EIGHT_TRIGRAMS_FURNACE_ITEM.get());
     }
 }

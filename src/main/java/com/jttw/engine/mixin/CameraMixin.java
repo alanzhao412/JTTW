@@ -23,14 +23,14 @@ public abstract class CameraMixin {
     private static final Set<String> DRAWN_LARGE = Set.of(
             "jttw_engine:azure_dragon", "jttw_engine:black_tortoise", "jttw_engine:vermilion_bird");
 
-    @ModifyArg(method = "setup", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;getMaxZoom(D)D"), index = 0)
-    private double jttw_standBack(double distance) {
+    @ModifyArg(method = "setup", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;getMaxZoom(F)F"), index = 0)
+    private float jttw_standBack(float distance) {
         Player p = Minecraft.getInstance().player;
         if (p == null) return distance;
         TransformationData data = TransformationManager.getTransformation(p);
         if (data == null || data.getEntityId() == null) return distance;
         double size = Math.max(Math.max(data.getHeight(), data.getWidth()), data.getEyeHeight());
         double scaled = size * 2.2 * (DRAWN_LARGE.contains(data.getEntityId().toString()) ? 1.9 : 1.0);
-        return Math.max(distance, scaled);
+        return (float) Math.max(distance, scaled);
     }
 }

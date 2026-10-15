@@ -35,7 +35,7 @@ public class BoneShardEntity extends ThrowableItemProjectile {
     }
 
     @Override
-    protected float getGravity() {
+    protected double getDefaultGravity() {
         return 0.005f;
     }
 

@@ -116,15 +116,15 @@ public class PlacedStaffEntity extends Entity {
     }
 
     @Override
-    protected void defineSynchedData() {
-        this.entityData.define(STAFF_SCALE, 1.0f);
-        this.entityData.define(FALLING, false);
-        this.entityData.define(OWNER_UUID, Optional.empty());
-        this.entityData.define(TOPPLE_YAW, 0.0f);
-        this.entityData.define(ROD_BASE, new org.joml.Vector3f());
-        this.entityData.define(ROD_TIP, new org.joml.Vector3f());
-        this.entityData.define(ROD_SPIN, 0f);
-        this.entityData.define(GROW_REACH, MAX_SCALE);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        builder.define(STAFF_SCALE, 1.0f);
+        builder.define(FALLING, false);
+        builder.define(OWNER_UUID, Optional.empty());
+        builder.define(TOPPLE_YAW, 0.0f);
+        builder.define(ROD_BASE, new org.joml.Vector3f());
+        builder.define(ROD_TIP, new org.joml.Vector3f());
+        builder.define(ROD_SPIN, 0f);
+        builder.define(GROW_REACH, MAX_SCALE);
     }
 
     // ── Getters / Setters ────────────────────────────────────────────
@@ -429,7 +429,7 @@ public class PlacedStaffEntity extends Entity {
 
     /** Blasts (its own landing's among them) do not move or harm it: only he does. */
     @Override
-    public boolean ignoreExplosion() {
+    public boolean ignoreExplosion(net.minecraft.world.level.Explosion explosion) {
         return true;
     }
 
@@ -479,7 +479,7 @@ public class PlacedStaffEntity extends Entity {
             float distToLine = distanceToSegment(target.getX(), target.getZ(), foot.x, foot.z, tip.x, tip.z);
             float falloff = Math.max(0.2f, 1.0f - (distToLine / damageRadius));
             target.hurt(level().damageSources().playerAttack(owner), damage * falloff);
-            target.setSecondsOnFire((int)(2 + scale * 0.1f));
+            target.igniteForSeconds((int)(2 + scale * 0.1f));
         }
 
         java.util.List<BlockPos> firePoints = new java.util.ArrayList<>();

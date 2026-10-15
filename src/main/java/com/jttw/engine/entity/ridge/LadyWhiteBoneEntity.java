@@ -21,7 +21,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -103,10 +102,10 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(DISGUISE, HERSELF);
-        entityData.define(DEATHS, 0);
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DISGUISE, HERSELF);
+        builder.define(DEATHS, 0);
     }
 
     /**
@@ -157,10 +156,10 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
     }
 
     @Override
-    public net.minecraft.world.entity.EntityDimensions getDimensions(net.minecraft.world.entity.Pose pose) {
+    protected net.minecraft.world.entity.EntityDimensions getDefaultDimensions(net.minecraft.world.entity.Pose pose) {
         // the frame of what she wears
         int d = disguise();
-        if (d == HERSELF) return super.getDimensions(pose);
+        if (d == HERSELF) return super.getDefaultDimensions(pose);
         var frame = (wraith(d) ? ModEntities.WRAITH : ModEntities.BONE_SERVANT).get().getDimensions();
         return captain(d) ? frame.scale(RidgeMonster.CAPTAIN_SCALE) : frame;
     }
@@ -421,9 +420,9 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
     @Override
     public net.minecraft.world.entity.SpawnGroupData finalizeSpawn(net.minecraft.world.level.ServerLevelAccessor level,
             net.minecraft.world.DifficultyInstance difficulty, net.minecraft.world.entity.MobSpawnType reason,
-            @javax.annotation.Nullable net.minecraft.world.entity.SpawnGroupData data, @javax.annotation.Nullable CompoundTag tag) {
+            @javax.annotation.Nullable net.minecraft.world.entity.SpawnGroupData data) {
         restrictTo(blockPosition(), HIDING_GROUND);
-        net.minecraft.world.entity.SpawnGroupData result = super.finalizeSpawn(level, difficulty, reason, data, tag);
+        net.minecraft.world.entity.SpawnGroupData result = super.finalizeSpawn(level, difficulty, reason, data);
         // wherever the world puts her, she is one of her dead until someone finds her out
         if (reason == net.minecraft.world.entity.MobSpawnType.STRUCTURE || reason == net.minecraft.world.entity.MobSpawnType.NATURAL
                 || reason == net.minecraft.world.entity.MobSpawnType.CHUNK_GENERATION) setDisguise(randomDisguise(random));
@@ -435,9 +434,16 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
         return false;
     }
 
+    // She is undead (MobType is gone: undead is the entity-type tag now; these keep the
+    // healing/harm inversion and the poison/regeneration immunity without it)
     @Override
-    public MobType getMobType() {
-        return MobType.UNDEAD;
+    public boolean isInvertedHealAndHarm() {
+        return true;
+    }
+
+    @Override
+    public boolean canBeAffected(MobEffectInstance effect) {
+        return !effect.is(MobEffects.REGENERATION) && !effect.is(MobEffects.POISON) && super.canBeAffected(effect);
     }
 
     @Override
@@ -478,7 +484,11 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
         marks = tag.getInt("Marks");
         entityData.set(DEATHS, tag.getInt("FalseDeaths"));
         setDisguise(tag.getInt("Disguise"));
-        if (tag.contains("Lair")) restrictTo(NbtUtils.readBlockPos(tag.getCompound("Lair")), HIDING_GROUND);
+        NbtUtils.readBlockPos(tag, "Lair").ifPresent(lair -> restrictTo(lair, HIDING_GROUND));
+        if (tag.contains("Lair", Tag.TAG_COMPOUND)) { // as saved before 1.21: {X, Y, Z}
+            CompoundTag lair = tag.getCompound("Lair");
+            restrictTo(new BlockPos(lair.getInt("X"), lair.getInt("Y"), lair.getInt("Z")), HIDING_GROUND);
+        }
         for (Tag id : tag.getList("Slayers", Tag.TAG_INT_ARRAY)) slayers.add(NbtUtils.loadUUID(id));
     }
 }

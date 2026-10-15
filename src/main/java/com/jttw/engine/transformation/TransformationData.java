@@ -83,14 +83,14 @@ public class TransformationData {
         if (entity instanceof LivingEntity le) {
             eye = le.getEyeHeight(pose);
         } else {
-            eye = objectEyeHeight(dims.height);
+            eye = objectEyeHeight(dims.height());
         }
 
         // Flying trait: cover common vanilla flyers + class-based flyers
         boolean canFly = FormClassifier.isFlyer(entity);
         boolean canPhase = isPhasingMob(entity);
 
-        return new TransformationData(type, eye, dims.width, dims.height, canFly, canPhase);
+        return new TransformationData(type, eye, dims.width(), dims.height(), canFly, canPhase);
     }
 
 
@@ -281,8 +281,8 @@ public class TransformationData {
             if (type == EntityType.PLAYER) return null; // a player form must say whose
 
             float eyeHeight = tag.getFloat("eye_height");
-            float width = tag.contains("width") ? tag.getFloat("width") : type.getDimensions().width;
-            float height = tag.contains("height") ? tag.getFloat("height") : type.getDimensions().height;
+            float width = tag.contains("width") ? tag.getFloat("width") : type.getDimensions().width();
+            float height = tag.contains("height") ? tag.getFloat("height") : type.getDimensions().height();
 
             boolean canFly = tag.contains("can_fly") && tag.getBoolean("can_fly");
             boolean canPhase = tag.contains("can_phase") && tag.getBoolean("can_phase");

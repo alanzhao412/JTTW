@@ -19,7 +19,6 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
@@ -315,7 +314,7 @@ public class TransformationManager {
     }
 
     @SubscribeEvent
-    public static void onLivingTick(LivingEvent.LivingTickEvent event) {
+    public static void onLivingTick(net.neoforged.neoforge.event.tick.EntityTickEvent.Pre event) {
         if (event.getEntity() instanceof ServerPlayer sp) {
             if (!sp.level().isClientSide) {
                 JumpTraits.onPlayerTick(sp, TRANSFORMATIONS);
@@ -336,17 +335,11 @@ public class TransformationManager {
             }
             return;
         }
-        AggroTraits.onHostileTick(event, TRANSFORMATIONS);
+        if (event.getEntity() instanceof net.minecraft.world.entity.LivingEntity living) {
+            AggroTraits.onHostileTick(living, TRANSFORMATIONS);
+        }
     }
 
-    @SubscribeEvent
-    public static void onPlayerTickEnd(TickEvent.PlayerTickEvent event) {
-        // Nothing needed here — phasing is passive via mixins, flight handled in onLivingTick
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    @SubscribeEvent
-    public static void onClientTickEnd(TickEvent.ClientTickEvent event) {
-        // Nothing needed here — client flight handled in ClientInit.ClientForgeEvents
-    }
+    // (Phasing is passive via mixins and flight is handled in onLivingTick; client flight in
+    // ClientInit.ClientForgeEvents. The empty player/client tick handlers that stood here are gone.)
 }

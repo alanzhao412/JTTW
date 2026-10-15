@@ -51,7 +51,8 @@ public final class BoatForms {
         if (seats(boat) == 1) along = 0.15F; // a chest boat's only seat sits forward of the chest
         if (passenger instanceof Animal) along += 0.2F;
         Vec3 offset = new Vec3(along, 0, 0).yRot(-boat.getYRot() * Mth.DEG_TO_RAD - Mth.HALF_PI);
-        double y = boat.getY() + -0.1D + passenger.getMyRidingOffset();
+        // a boat's seat a third of its height up, less how far down the rider's own attachment sits
+        double y = boat.getY() + EntityType.BOAT.getDimensions().height() / 3.0F - passenger.getVehicleAttachmentPoint(boat).y;
         return new Vec3(boat.getX() + offset.x, y, boat.getZ() + offset.z);
     }
 
