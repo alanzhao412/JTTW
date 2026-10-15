@@ -203,9 +203,9 @@ public class WieldRulesGameTests {
         h.succeed();
     }
 
-    private static double modOf(ItemStack stack, net.minecraft.world.entity.ai.attributes.Attribute attr) {
-        return stack.getAttributeModifiers(EquipmentSlot.MAINHAND).get(attr).stream()
-                .mapToDouble(net.minecraft.world.entity.ai.attributes.AttributeModifier::getAmount).sum();
+    private static double modOf(ItemStack stack, net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attr) {
+        return ItemTestSupport.modifiers(stack, EquipmentSlot.MAINHAND, attr).stream()
+                .mapToDouble(net.minecraft.world.entity.ai.attributes.AttributeModifier::amount).sum();
     }
 
     @GameTest(template = PLATFORM)
@@ -258,7 +258,7 @@ public class WieldRulesGameTests {
 
         ServerPlayer wukong = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
         ItemStack staff = new ItemStack(ModItems.RUYI_JINGU_BANG.get());
-        staff.getOrCreateTag().putBoolean(com.jttw.engine.item.RuyiJinguBangItem.TAG_LARGE_MODE, true);
+        com.jttw.engine.item.StackData.putBoolean(staff, com.jttw.engine.item.RuyiJinguBangItem.TAG_LARGE_MODE, true);
         wukong.setItemInHand(InteractionHand.MAIN_HAND, staff);
         qi(wukong, 20f, 100f);
         WieldRules.drawFormQi(wukong);
@@ -278,7 +278,7 @@ public class WieldRulesGameTests {
     public static void tooltipsShowTheStrNeededAgainstTheReaders(GameTestHelper h) {
         ServerPlayer marshal = as(h, ReincarnationOutcome.MARSHAL_HEAVENLY_CANOPY);
         for (ItemStack s : List.of(new ItemStack(ModItems.RUYI_JINGU_BANG.get()), new ItemStack(ModItems.ERLANG_AXE.get()))) {
-            List<String> lines = s.getTooltipLines(marshal, net.minecraft.world.item.TooltipFlag.NORMAL).stream()
+            List<String> lines = s.getTooltipLines(net.minecraft.world.item.Item.TooltipContext.of(marshal.level()), marshal, net.minecraft.world.item.TooltipFlag.NORMAL).stream()
                     .map(net.minecraft.network.chat.Component::getString).toList();
             check(h, lines.stream().anyMatch(l -> l.startsWith("Requires") && l.contains("STR (you have")),
                     s.getHoverName().getString() + " shows the STR it needs: " + lines);

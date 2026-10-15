@@ -224,7 +224,7 @@ public final class ClientPass {
             for (ItemStack s : List.of(new ItemStack(ModItems.RUYI_JINGU_BANG.get()), new ItemStack(ModItems.ERLANG_AXE.get()),
                     new ItemStack(ModItems.FIRE_TIP_SPEAR.get()), new ItemStack(ModItems.QIANKUN_RING.get()),
                     YinYangSwordItem.createYin(), new ItemStack(ModItems.HUNTIAN_CLOTH.get()))) {
-                List<String> lines = s.getTooltipLines(mc.player, TooltipFlag.NORMAL).stream().map(Component::getString).toList();
+                List<String> lines = s.getTooltipLines(net.minecraft.world.item.Item.TooltipContext.of(mc.level), mc.player, TooltipFlag.NORMAL).stream().map(Component::getString).toList();
                 report.add("  " + lines.get(0) + ": " + String.join(" | ", lines.subList(1, lines.size())));
             }
         }));
@@ -256,7 +256,7 @@ public final class ClientPass {
             mc.getSingleplayerServer().execute(() -> {
                 ServerPlayer sp = server(mc);
                 report.add("  server: selected " + sp.getInventory().selected + ", main " + sp.getMainHandItem()
-                        + " " + sp.getMainHandItem().getTag() + ", off " + sp.getOffhandItem() + ", game mode " + sp.gameMode.getGameModeForPlayer()
+                        + " " + sp.getMainHandItem().getComponentsPatch() + ", off " + sp.getOffhandItem() + ", game mode " + sp.gameMode.getGameModeForPlayer()
                         + ", frozen " + sp.getTicksFrozen() + ", fire " + sp.getRemainingFireTicks());
             });
             report.add("  client: selected " + mc.player.getInventory().selected + ", main " + mc.player.getMainHandItem());
@@ -283,7 +283,7 @@ public final class ClientPass {
                         false, Difficulty.PEACEFUL, true, rules, WorldDataConfiguration.DEFAULT);
                 mc.createWorldOpenFlows().createFreshLevel(settings.levelName(), settings, new WorldOptions(7L, false, false),
                         access -> access.registryOrThrow(Registries.WORLD_PRESET).getHolderOrThrow(WorldPresets.FLAT)
-                                .value().createWorldDimensions());
+                                .value().createWorldDimensions(), new net.minecraft.client.gui.screens.TitleScreen());
             }
             return;
         }

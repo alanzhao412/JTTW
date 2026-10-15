@@ -100,7 +100,7 @@ public final class ChunkBench {
                     false, Difficulty.PEACEFUL, true, new GameRules(), WorldDataConfiguration.DEFAULT);
             mc.createWorldOpenFlows().createFreshLevel(settings.levelName(), settings, new WorldOptions(12345L, true, false),
                     access -> access.registryOrThrow(Registries.WORLD_PRESET).getHolderOrThrow(WorldPresets.NORMAL)
-                            .value().createWorldDimensions());
+                            .value().createWorldDimensions(), new net.minecraft.client.gui.screens.TitleScreen());
         }
         if (mc.level != null) {
             // A paused singleplayer game stops the server, and the bench with it

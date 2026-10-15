@@ -119,7 +119,7 @@ public class RidgeGameTests {
         for (int i = 0; i < 60; i++) {
             BoneServantEntity m = ModEntities.BONE_SERVANT.get().create(h.getLevel());
             m.moveTo(h.absoluteVec(new net.minecraft.world.phys.Vec3(2.5, 2, 2.5)));
-            m.finalizeSpawn(h.getLevel(), h.getLevel().getCurrentDifficultyAt(m.blockPosition()), MobSpawnType.MOB_SUMMONED, null, null);
+            m.finalizeSpawn(h.getLevel(), h.getLevel().getCurrentDifficultyAt(m.blockPosition()), MobSpawnType.MOB_SUMMONED, null);
             check(h, !m.isCaptain(), "a summoned servant is never a captain");
             check(h, Math.abs(m.mobLevel() - RidgeMonster.LEVEL) <= 1, "level about 20: " + m.mobLevel());
             check(h, m.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND).is(net.minecraft.world.item.Items.BONE), "it swings a bone");
@@ -300,7 +300,7 @@ public class RidgeGameTests {
         h.getLevel().getEntitiesOfClass(com.jttw.engine.entity.ridge.LadyHuskEntity.class, lady.getBoundingBox().inflate(40)).forEach(Entity::discard);
         check(h, CurseOfTheDead.isCursed(p), "cursed");
         near(h, CurseOfTheDead.LASTS, CurseOfTheDead.remaining(p), "for ten days");
-        check(h, p.hasEffect(ModEffects.CURSE_OF_THE_DEAD.get()), "and it shows");
+        check(h, p.hasEffect(ModEffects.CURSE_OF_THE_DEAD), "and it shows");
         h.succeed();
     }
 
@@ -311,7 +311,7 @@ public class RidgeGameTests {
         lady.setNoAi(true);
         lady.setDisguise(LadyWhiteBoneEntity.SERVANT_CAPTAIN);
         check(h, lady.getDisplayName().getString().startsWith("Bone Servant Captain · Lv " + RidgeMonster.CAPTAIN_LEVEL), "named as a servant captain: " + lady.getDisplayName().getString());
-        close(h, ModEntities.BONE_SERVANT.get().getDimensions().height * RidgeMonster.CAPTAIN_SCALE, lady.getBbHeight(), "a captain's height");
+        close(h, ModEntities.BONE_SERVANT.get().getDimensions().height() * RidgeMonster.CAPTAIN_SCALE, lady.getBbHeight(), "a captain's height");
         lady.setDisguise(LadyWhiteBoneEntity.WRAITH);
         check(h, lady.isNoGravity() && lady.getNavigation() instanceof net.minecraft.world.entity.ai.navigation.FlyingPathNavigation, "as a Wraith she drifts");
         check(h, lady.getDisplayName().getString().startsWith("Wraith · Lv " + RidgeMonster.LEVEL), "and is named one");
@@ -388,7 +388,7 @@ public class RidgeGameTests {
         p.getPersistentData().putLong(CurseOfTheDead.KEY_UNTIL, h.getLevel().getGameTime() - 1);
         eq(h, 0, CurseOfTheDead.check(p, MIDNIGHT).size(), "nothing rises once it is over");
         check(h, !p.getPersistentData().contains(CurseOfTheDead.KEY_UNTIL), "the curse is gone");
-        check(h, !p.hasEffect(ModEffects.CURSE_OF_THE_DEAD.get()), "and its icon");
+        check(h, !p.hasEffect(ModEffects.CURSE_OF_THE_DEAD), "and its icon");
         h.succeed();
     }
 
@@ -396,9 +396,9 @@ public class RidgeGameTests {
     public static void theCurseOutlastsDeathAndMilk(GameTestHelper h) {
         ServerPlayer p = player(h);
         CurseOfTheDead.lay(p);
-        check(h, !p.curePotionEffects(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.MILK_BUCKET))
-                || p.hasEffect(ModEffects.CURSE_OF_THE_DEAD.get()), "milk does not take it");
-        check(h, p.hasEffect(ModEffects.CURSE_OF_THE_DEAD.get()), "still showing after milk");
+        check(h, !p.removeEffectsCuredBy(net.neoforged.neoforge.common.EffectCures.MILK)
+                || p.hasEffect(ModEffects.CURSE_OF_THE_DEAD), "milk does not take it");
+        check(h, p.hasEffect(ModEffects.CURSE_OF_THE_DEAD), "still showing after milk");
         ServerPlayer reborn = player(h);
         CurseOfTheDead.onClone(new PlayerEvent.Clone(reborn, p, true));
         check(h, CurseOfTheDead.isCursed(reborn), "still cursed after dying");

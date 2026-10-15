@@ -106,7 +106,7 @@ public final class FormGallery {
         mc.createWorldOpenFlows().createFreshLevel(settings.levelName(), settings,
                 new WorldOptions(0L, false, false),
                 access -> access.registryOrThrow(Registries.WORLD_PRESET).getHolderOrThrow(WorldPresets.FLAT)
-                        .value().createWorldDimensions());
+                        .value().createWorldDimensions(), new net.minecraft.client.gui.screens.TitleScreen());
     }
 
     @SubscribeEvent

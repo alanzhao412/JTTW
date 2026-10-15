@@ -8,6 +8,7 @@ import com.jttw.engine.transformation.TransformationAbilityHandler;
 import com.jttw.engine.transformation.TransformationManager;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
@@ -33,7 +34,7 @@ import net.minecraft.world.entity.projectile.SmallFireball;
 import net.minecraft.world.entity.projectile.Snowball;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.entity.projectile.WitherSkull;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
@@ -159,7 +160,8 @@ public class TransformAbilityGameTests {
         Tf.rightClick(p);
         List<ThrownPotion> potions = Tf.near(p, ThrownPotion.class, 3);
         eq(h, 1, potions.size(), "potions");
-        eq(h, Potions.STRONG_POISON, PotionUtils.getPotion(potions.get(0).getItem()), "potion");
+        eq(h, Potions.STRONG_POISON, potions.get(0).getItem()
+                .getOrDefault(net.minecraft.core.component.DataComponents.POTION_CONTENTS, PotionContents.EMPTY).potion().orElse(null), "potion");
         Tf.discard(potions);
         Tf.rightClick(p);
         eq(h, 0, discardCount(p, ThrownPotion.class), "on cooldown at once");
@@ -572,7 +574,7 @@ public class TransformAbilityGameTests {
 
         Pig shot = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(2, 2, 4));
         ServerPlayer bee = Tf.playerAs(h, EntityType.BEE);
-        Arrow arrow = new Arrow(h.getLevel(), bee);
+        Arrow arrow = new Arrow(h.getLevel(), bee, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.ARROW), null);
         LivingIncomingDamageEvent e = incoming(shot, h.getLevel().damageSources().arrow(arrow, bee), 1f);
         TransformationAbilityHandler.onLivingHurt(e);
         eq(h, 0, shot.getActiveEffects().size(), "projectile hit from a bee form adds nothing");
@@ -741,16 +743,14 @@ public class TransformAbilityGameTests {
     }
 
     private static List<MobEffectInstance> arrowEffects(Arrow arrow) {
-        CompoundTag nbt = new CompoundTag();
-        arrow.saveWithoutId(nbt);
-        List<MobEffectInstance> out = new ArrayList<>();
-        ListTag list = nbt.getList("CustomPotionEffects", Tag.TAG_COMPOUND);
-        for (int i = 0; i < list.size(); i++) out.add(MobEffectInstance.load(list.getCompound(i)));
-        return out;
+        // An arrow's own effects now live on the item it would drop, as potion contents
+        PotionContents contents = arrow.getPickupItemStackOrigin()
+                .getOrDefault(net.minecraft.core.component.DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+        return new ArrayList<>(contents.customEffects());
     }
 
-    private static void effectIs(GameTestHelper h, MobEffectInstance inst, MobEffect effect, int amp, int dur, String what) {
-        check(h, inst != null && inst.getEffect() == effect, what + ": wrong effect " + inst);
+    private static void effectIs(GameTestHelper h, MobEffectInstance inst, Holder<MobEffect> effect, int amp, int dur, String what) {
+        check(h, inst != null && inst.getEffect().is(effect), what + ": wrong effect " + inst);
         eq(h, amp, inst.getAmplifier(), what + " amplifier");
         eq(h, dur, inst.getDuration(), what + " duration");
     }

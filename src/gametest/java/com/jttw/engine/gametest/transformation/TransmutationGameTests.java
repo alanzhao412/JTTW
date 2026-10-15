@@ -7,6 +7,7 @@ import com.jttw.engine.reincarnation.ReincarnationOutcome;
 import com.jttw.engine.transformation.transmute.TransmutationCategory;
 import com.jttw.engine.transformation.transmute.TransmutationHelper;
 import io.netty.buffer.Unpooled;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.FriendlyByteBuf;
@@ -117,20 +118,22 @@ public class TransmutationGameTests {
         ServerPlayer p = Tf.player(h);
         Tf.grantWukongTier(p, 3);
         ItemStack sword = new ItemStack(Items.IRON_SWORD);
-        sword.enchant(Enchantments.UNBREAKING, 2);
+        var unbreaking = h.getLevel().registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT)
+                .getOrThrow(Enchantments.UNBREAKING);
+        sword.enchant(unbreaking, 2);
         sword.setDamageValue(100);
-        sword.setHoverName(Component.literal("Ruyi"));
-        sword.setRepairCost(7);
+        sword.set(DataComponents.CUSTOM_NAME, Component.literal("Ruyi"));
+        sword.set(DataComponents.REPAIR_COST, 7);
         p.setItemInHand(InteractionHand.MAIN_HAND, sword);
         Tf.send(p, new TransmuteItemPacket(TransmutationCategory.TOOL, 1));
         ItemStack out = p.getMainHandItem();
         eq(h, Items.IRON_AXE, out.getItem(), "iron sword -> option 1, the iron axe");
         eq(h, 1, out.getCount(), "one tool");
-        eq(h, 2, EnchantmentHelper.getItemEnchantmentLevel(Enchantments.UNBREAKING, out), "unbreaking kept");
+        eq(h, 2, EnchantmentHelper.getItemEnchantmentLevel(unbreaking, out), "unbreaking kept");
         // same tier, same max durability (250): wear carries over unchanged
         eq(h, 100, out.getDamageValue(), "damage kept");
         eq(h, "Ruyi", out.getHoverName().getString(), "name kept");
-        eq(h, 7, out.getBaseRepairCost(), "repair cost kept");
+        eq(h, 7, out.getOrDefault(DataComponents.REPAIR_COST, 0), "repair cost kept");
         h.succeed();
     }
 
@@ -155,7 +158,7 @@ public class TransmutationGameTests {
         ServerPlayer p = Tf.player(h);
         Tf.grantWukongTier(p, 3);
         ItemStack carrots = new ItemStack(Items.CARROT, 17);
-        carrots.setHoverName(Component.literal("Peach seeds"));
+        carrots.set(DataComponents.CUSTOM_NAME, Component.literal("Peach seeds"));
         p.setItemInHand(InteractionHand.MAIN_HAND, carrots);
         Tf.send(p, new TransmuteItemPacket(TransmutationCategory.CROP, 2));
         ItemStack out = p.getMainHandItem();

@@ -53,9 +53,9 @@ public class ObjectFormsGameTests {
 
     private static void send(ServerPlayer p, Object packet) {
         var ctx = Tf.serverContext(p);
-        if (packet instanceof RequestTransformPacket r) RequestTransformPacket.handle(r, () -> ctx);
-        else if (packet instanceof SetSignTextPacket s) SetSignTextPacket.handle(s, () -> ctx);
-        else if (packet instanceof UseFormPacket u) UseFormPacket.handle(u, () -> ctx);
+        if (packet instanceof RequestTransformPacket r) RequestTransformPacket.handle(r, ctx);
+        else if (packet instanceof SetSignTextPacket s) SetSignTextPacket.handle(s, ctx);
+        else if (packet instanceof UseFormPacket u) UseFormPacket.handle(u, ctx);
     }
 
     // ── what may be chosen ─────────────────────────────────────────
@@ -294,7 +294,9 @@ public class ObjectFormsGameTests {
         boat.positionRider(a);
         boat.positionRider(b);
         check(h, a.position().distanceTo(b.position()) > 0.7, "two seats, not one: " + a.position() + " " + b.position());
-        near(h, boat.getY() - 0.1 + a.getMyRidingOffset(), a.getY(), "deck height");
+        // a 1.21 boat seats riders a third of its height up, less the rider's own vehicle attachment
+        near(h, boat.getY() + EntityType.BOAT.getDimensions().height() / 3.0F - a.getVehicleAttachmentPoint(boat).y,
+                a.getY(), "deck height");
         check(h, a.position().subtract(boat.position()).horizontalDistance() < 1.0, "in the boat");
 
         TransformationManager.demorph(boat);

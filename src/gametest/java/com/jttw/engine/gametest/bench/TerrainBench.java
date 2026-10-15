@@ -104,7 +104,7 @@ final class TerrainBench {
                     com.jttw.engine.reincarnation.ReincarnationOutcome.EYE_OF_HEAVEN);
             ItemStack axe = new ItemStack(ModItems.ERLANG_AXE.get());
             p.getPersistentData().remove("jttw_axe_cleave_ready_at");
-            axe.releaseUsing(p.level(), p, axe.getUseDuration() - 60);
+            axe.releaseUsing(p.level(), p, axe.getUseDuration(p) - 60);
         }, p -> {}));
         return all;
     }

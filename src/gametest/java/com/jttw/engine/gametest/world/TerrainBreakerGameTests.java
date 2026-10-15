@@ -43,7 +43,8 @@ public class TerrainBreakerGameTests {
     private static List<ItemEntity> items(GameTestHelper h) {
         // This test's own platform: a neighbour's spilled chest is not this test's drop
         return h.getLevel().getEntitiesOfClass(ItemEntity.class,
-                new AABB(h.absolutePos(BlockPos.ZERO), h.absolutePos(new BlockPos(5, 7, 5))).inflate(1), e -> true);
+                new AABB(net.minecraft.world.phys.Vec3.atLowerCornerOf(h.absolutePos(BlockPos.ZERO)),
+                        net.minecraft.world.phys.Vec3.atLowerCornerOf(h.absolutePos(new BlockPos(5, 7, 5)))).inflate(1), e -> true);
     }
 
     /**

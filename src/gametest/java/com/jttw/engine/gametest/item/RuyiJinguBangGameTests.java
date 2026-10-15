@@ -52,8 +52,8 @@ public class RuyiJinguBangGameTests {
 
     private static ItemStack staff(boolean empowered, boolean large) {
         ItemStack s = staff();
-        s.getOrCreateTag().putBoolean(RuyiJinguBangItem.TAG_QI_EMPOWERED, empowered);
-        s.getOrCreateTag().putBoolean(RuyiJinguBangItem.TAG_LARGE_MODE, large);
+        com.jttw.engine.item.StackData.putBoolean(s, RuyiJinguBangItem.TAG_QI_EMPOWERED, empowered);
+        com.jttw.engine.item.StackData.putBoolean(s, RuyiJinguBangItem.TAG_LARGE_MODE, large);
         return s;
     }
 
@@ -444,7 +444,7 @@ public class RuyiJinguBangGameTests {
             near(h, 10.0, p.getAttributeValue(Attributes.ATTACK_DAMAGE), "ATK after unequipping " + i);
         }
         for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.OFFHAND, EquipmentSlot.HEAD, EquipmentSlot.FEET}) {
-            check(h, staff(true, true).getAttributeModifiers(slot).isEmpty(), "no modifiers in " + slot);
+            check(h, modifiers(staff(true, true), slot).isEmpty(), "no modifiers in " + slot);
         }
         h.succeed();
     }
@@ -454,13 +454,13 @@ public class RuyiJinguBangGameTests {
     private static double reachAfterTick(ServerPlayer p, ItemStack mainHand) {
         p.setItemInHand(InteractionHand.MAIN_HAND, mainHand);
         RuyiJinguBangHandler.onPlayerTick(new PlayerTickEvent.Pre(p));
-        return p.getAttributeValue(NeoForgeMod.ENTITY_REACH.get());
+        return p.getAttributeValue(Attributes.ENTITY_INTERACTION_RANGE);
     }
 
     @GameTest(template = PLATFORM)
     public static void wukongReachIsEightWithTheStaffAndThirteenWhenLarge(GameTestHelper h) {
         ServerPlayer p = wukong(h);
-        near(h, 3.0, p.getAttributeValue(NeoForgeMod.ENTITY_REACH.get()), "base reach");
+        near(h, 3.0, p.getAttributeValue(Attributes.ENTITY_INTERACTION_RANGE), "base reach");
         near(h, 8.0, reachAfterTick(p, staff()), "normal");
         near(h, 8.0, reachAfterTick(p, staff(true, false)), "empowered");
         near(h, 13.0, reachAfterTick(p, staff(false, true)), "large");
@@ -508,8 +508,10 @@ public class RuyiJinguBangGameTests {
     public static void reachHandlerOnlyActsAtTheStartOfTheTick(GameTestHelper h) {
         ServerPlayer p = wukong(h);
         p.setItemInHand(InteractionHand.MAIN_HAND, staff());
-        RuyiJinguBangHandler.onPlayerTick(new PlayerTickEvent.Post(p));
-        near(h, 3.0, p.getAttributeValue(NeoForgeMod.ENTITY_REACH.get()), "END phase ignored");
+        // NeoForge splits the tick event by phase and the handler takes only PlayerTickEvent.Pre,
+        // so the end of the tick is posted on the bus to show it reaches nothing that sets reach.
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new PlayerTickEvent.Post(p));
+        near(h, 3.0, p.getAttributeValue(Attributes.ENTITY_INTERACTION_RANGE), "END phase ignored");
         h.succeed();
     }
 }

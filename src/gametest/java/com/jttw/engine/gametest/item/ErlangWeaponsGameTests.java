@@ -73,7 +73,7 @@ public class ErlangWeaponsGameTests {
         ItemStack s = spear();
         applyEquipmentModifiers(p, s, EquipmentSlot.MAINHAND);
         near(h, 12.0, p.getAttributeValue(Attributes.ATTACK_DAMAGE), "ATK");
-        check(h, s.getAttributeModifiers(EquipmentSlot.OFFHAND).isEmpty(), "nothing off-hand");
+        check(h, modifiers(s, EquipmentSlot.OFFHAND).isEmpty(), "nothing off-hand");
         eq(h, UseAnim.SPEAR, s.getUseAnimation(), "spear animation");
         h.succeed();
     }
@@ -526,7 +526,7 @@ public class ErlangWeaponsGameTests {
     public static void thrownSpearReturnsToTheInventoryAfterTwentySeconds(GameTestHelper h) {
         ServerPlayer p = thrower(h);
         ItemStack s = spear();
-        s.setHoverName(net.minecraft.network.chat.Component.literal("Named"));
+        s.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, net.minecraft.network.chat.Component.literal("Named"));
         thrust(h, p, s, 20);
         long now = h.getLevel().getGameTime();
         eq(h, now + 400, SpearReturn.returnAt(p), "returns 400 ticks after the throw");
@@ -575,7 +575,7 @@ public class ErlangWeaponsGameTests {
         applyEquipmentModifiers(p, a, EquipmentSlot.MAINHAND);
         near(h, 15.0, p.getAttributeValue(Attributes.ATTACK_DAMAGE), "ATK");
         near(h, 3.2, p.getAttributeValue(Attributes.ATTACK_SPEED), "attack speed");
-        check(h, a.getAttributeModifiers(EquipmentSlot.OFFHAND).isEmpty(), "nothing off-hand");
+        check(h, modifiers(a, EquipmentSlot.OFFHAND).isEmpty(), "nothing off-hand");
         eq(h, UseAnim.BOW, a.getUseAnimation(), "draw animation");
         h.succeed();
     }

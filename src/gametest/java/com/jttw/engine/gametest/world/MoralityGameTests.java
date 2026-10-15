@@ -65,8 +65,12 @@ public class MoralityGameTests {
         h.setBlock(book, ModBlocks.BOOK_OF_LIFE_AND_DEATH.get());
         for (BlockPos at : List.of(jar, book)) {
             BlockPos abs = h.absolutePos(at);
-            h.getLevel().getBlockState(abs).use(h.getLevel(), wukong, InteractionHand.MAIN_HAND,
-                    new BlockHitResult(Vec3.atCenterOf(abs), Direction.UP, abs, false));
+            var state = h.getLevel().getBlockState(abs);
+            var hit = new BlockHitResult(Vec3.atCenterOf(abs), Direction.UP, abs, false);
+            if (state.useItemOn(wukong.getItemInHand(InteractionHand.MAIN_HAND), h.getLevel(), wukong, InteractionHand.MAIN_HAND, hit)
+                    == net.minecraft.world.ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION) {
+                state.useWithoutItem(h.getLevel(), wukong, hit);
+            }
         }
         eq(h, Morality.STEAL_WINE + Morality.STRIKE_THE_BOOK, Morality.karma(wukong), "the wine and the Book");
         h.setBlock(new BlockPos(2, 3, 3), ModBlocks.PEACH_FRUIT.get());

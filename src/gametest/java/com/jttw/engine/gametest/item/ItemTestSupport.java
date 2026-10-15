@@ -3,8 +3,13 @@ package com.jttw.engine.gametest.item;
 import com.jttw.engine.gametest.GT;
 import com.jttw.engine.reincarnation.AlignmentData;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -64,11 +69,28 @@ final class ItemTestSupport {
      * equipment change during an entity tick. A fake player never ticks, so tests do it.
      */
     static void applyEquipmentModifiers(ServerPlayer p, ItemStack stack, EquipmentSlot slot) {
-        p.getAttributes().addTransientAttributeModifiers(stack.getAttributeModifiers(slot));
+        p.getAttributes().addTransientAttributeModifiers(modifiers(stack, slot));
     }
 
     static void removeEquipmentModifiers(ServerPlayer p, ItemStack stack, EquipmentSlot slot) {
-        p.getAttributes().removeAttributeModifiers(stack.getAttributeModifiers(slot));
+        p.getAttributes().removeAttributeModifiers(modifiers(stack, slot));
+    }
+
+    /**
+     * The stack's attribute modifiers that apply in {@code slot}, keyed by attribute (what
+     * 1.20's {@code ItemStack.getAttributeModifiers(slot)} returned).
+     */
+    static Multimap<Holder<Attribute>, AttributeModifier> modifiers(ItemStack stack, EquipmentSlot slot) {
+        Multimap<Holder<Attribute>, AttributeModifier> map = ArrayListMultimap.create();
+        stack.forEachModifier(slot, map::put);
+        return map;
+    }
+
+    /** The stack's modifiers in {@code slot} on one attribute. */
+    static java.util.Collection<AttributeModifier> modifiers(ItemStack stack, EquipmentSlot slot, Holder<Attribute> attr) {
+        List<AttributeModifier> out = new ArrayList<>();
+        stack.forEachModifier(slot, (a, m) -> { if (a.value() == attr.value()) out.add(m); });
+        return out;
     }
 
     static InteractionResult use(GameTestHelper h, ServerPlayer p, ItemStack stack) {
@@ -80,7 +102,8 @@ final class ItemTestSupport {
     static AABB area(GameTestHelper h, double margin) {
         BlockPos min = h.absolutePos(BlockPos.ZERO);
         BlockPos max = h.absolutePos(new BlockPos(5, 6, 5));
-        return new AABB(min, max).inflate(margin);
+        return new AABB(net.minecraft.world.phys.Vec3.atLowerCornerOf(min),
+                net.minecraft.world.phys.Vec3.atLowerCornerOf(max)).inflate(margin);
     }
 
     static <T extends Entity> List<T> entitiesNear(GameTestHelper h, Class<T> type, double margin,

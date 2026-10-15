@@ -36,8 +36,13 @@ public class HeavenGameTests {
 
     private static void use(GameTestHelper h, ServerPlayer p, BlockPos rel) {
         BlockPos at = h.absolutePos(rel);
-        h.getLevel().getBlockState(at).use(h.getLevel(), p, InteractionHand.MAIN_HAND,
-                new BlockHitResult(Vec3.atCenterOf(at), Direction.UP, at, false));
+        // a right-click on the block, as the server resolves it: the held item first, then the empty hand
+        var state = h.getLevel().getBlockState(at);
+        var hit = new BlockHitResult(Vec3.atCenterOf(at), Direction.UP, at, false);
+        if (state.useItemOn(p.getItemInHand(InteractionHand.MAIN_HAND), h.getLevel(), p, InteractionHand.MAIN_HAND, hit)
+                == net.minecraft.world.ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION) {
+            state.useWithoutItem(h.getLevel(), p, hit);
+        }
     }
 
     @GameTest(template = PLATFORM)
@@ -128,8 +133,9 @@ public class HeavenGameTests {
     }
 
     /** How often the pills turn up in so many of these chests. */
-    private static double pillRate(GameTestHelper h, net.minecraft.resources.ResourceLocation table, int rolls) {
-        var loot = h.getLevel().getServer().getLootData().getLootTable(table);
+    private static double pillRate(GameTestHelper h,
+                                   net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable> table, int rolls) {
+        var loot = h.getLevel().getServer().reloadableRegistries().getLootTable(table);
         int with = 0;
         for (int i = 0; i < rolls; i++) {
             var items = loot.getRandomItems(new LootParams.Builder(h.getLevel())

@@ -54,7 +54,7 @@ public class NezhaArmorGameTests {
         near(h, 3.0, p.getAttributeValue(Attributes.ARMOR), "armor");
         near(h, 3.0, p.getAttributeValue(Attributes.ARMOR_TOUGHNESS), "toughness");
         near(h, 0.1, p.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE), "knockback resistance");
-        check(h, w.getAttributeModifiers(EquipmentSlot.MAINHAND).isEmpty(), "nothing when held");
+        check(h, modifiers(w, EquipmentSlot.MAINHAND).isEmpty(), "nothing when held");
         h.succeed();
     }
 
@@ -111,7 +111,9 @@ public class NezhaArmorGameTests {
         ServerPlayer p = nezha(h);
         SkillTreeData.grantNode(p, "nz_flight_1");
         p.setItemSlot(EquipmentSlot.FEET, wheels());
-        NezhaAbilityHandler.onPlayerTick(new PlayerTickEvent.Pre(p));
+        // NeoForge splits the tick event by phase and the handler takes only PlayerTickEvent.Post,
+        // so the start of the tick is posted on the bus to show it reaches nothing that grants flight.
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new PlayerTickEvent.Pre(p));
         check(h, !JTTWFlight.hasUniversalFlight(p), "START phase ignored");
         h.succeed();
     }

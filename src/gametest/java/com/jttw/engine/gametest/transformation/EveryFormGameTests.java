@@ -127,8 +127,8 @@ public class EveryFormGameTests {
             TransformationData data = TransformationManager.getTransformation(p);
             if (data == null || !id.equals(data.getEntityId())) { broken.add(id + " did not transform"); continue; }
             var dims = mob.getDimensions(Pose.STANDING);
-            if (!near(dims.width, p.getBbWidth()) || !near(dims.height, p.getBbHeight())) {
-                broken.add(id + " hitbox " + p.getBbWidth() + "x" + p.getBbHeight() + " not " + dims.width + "x" + dims.height);
+            if (!near(dims.width(), p.getBbWidth()) || !near(dims.height(), p.getBbHeight())) {
+                broken.add(id + " hitbox " + p.getBbWidth() + "x" + p.getBbHeight() + " not " + dims.width() + "x" + dims.height());
             }
             if (!near(mob.getEyeHeight(Pose.STANDING), p.getEyeHeight())) {
                 broken.add(id + " eye " + p.getEyeHeight() + " not " + mob.getEyeHeight(Pose.STANDING));
@@ -167,10 +167,10 @@ public class EveryFormGameTests {
             TransformationData data = TransformationManager.getTransformation(p);
             if (data == null || !id.equals(data.getEntityId())) { broken.add(id + " did not transform"); continue; }
             var dims = object.getDimensions(Pose.STANDING);
-            if (!near(dims.width, p.getBbWidth()) || !near(dims.height, p.getBbHeight())) {
-                broken.add(id + " hitbox " + p.getBbWidth() + "x" + p.getBbHeight() + " not " + dims.width + "x" + dims.height);
+            if (!near(dims.width(), p.getBbWidth()) || !near(dims.height(), p.getBbHeight())) {
+                broken.add(id + " hitbox " + p.getBbWidth() + "x" + p.getBbHeight() + " not " + dims.width() + "x" + dims.height());
             }
-            float eye = Math.max(0.25f, Math.min(1.62f, dims.height * 0.85f));
+            float eye = Math.max(0.25f, Math.min(1.62f, dims.height() * 0.85f));
             if (!near(eye, p.getEyeHeight())) broken.add(id + " camera " + p.getEyeHeight() + " not " + eye);
             if (p.getAbilities().mayfly) broken.add(id + " may fly");
             TransformationManager.demorph(p);

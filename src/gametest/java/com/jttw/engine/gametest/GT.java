@@ -53,8 +53,13 @@ public final class GT {
             net.minecraft.gametest.framework.GameTestInfo info = (net.minecraft.gametest.framework.GameTestInfo) f.get(helper);
             info.addListener(new net.minecraft.gametest.framework.GameTestListener() {
                 @Override public void testStructureLoaded(net.minecraft.gametest.framework.GameTestInfo i) {}
-                @Override public void testPassed(net.minecraft.gametest.framework.GameTestInfo i) { cleanup.run(); }
-                @Override public void testFailed(net.minecraft.gametest.framework.GameTestInfo i) { cleanup.run(); }
+                @Override public void testPassed(net.minecraft.gametest.framework.GameTestInfo i,
+                                                 net.minecraft.gametest.framework.GameTestRunner r) { cleanup.run(); }
+                @Override public void testFailed(net.minecraft.gametest.framework.GameTestInfo i,
+                                                 net.minecraft.gametest.framework.GameTestRunner r) { cleanup.run(); }
+                @Override public void testAddedForRerun(net.minecraft.gametest.framework.GameTestInfo old,
+                                                        net.minecraft.gametest.framework.GameTestInfo rerun,
+                                                        net.minecraft.gametest.framework.GameTestRunner r) {}
             });
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException("cannot hook test end", e);
@@ -64,8 +69,8 @@ public final class GT {
     /** This test's platform, as an absolute box (floor at relative y=1, five blocks of air above). */
     private static net.minecraft.world.phys.AABB platform(GameTestHelper helper) {
         return new net.minecraft.world.phys.AABB(
-                helper.absolutePos(new net.minecraft.core.BlockPos(0, 1, 0)),
-                helper.absolutePos(new net.minecraft.core.BlockPos(5, 7, 5)));
+                net.minecraft.world.phys.Vec3.atLowerCornerOf(helper.absolutePos(new net.minecraft.core.BlockPos(0, 1, 0))),
+                net.minecraft.world.phys.Vec3.atLowerCornerOf(helper.absolutePos(new net.minecraft.core.BlockPos(5, 7, 5))));
     }
 
     /**
@@ -112,26 +117,26 @@ public final class GT {
 
     /** Resistances fixed at these values: modifiers cleared, base set. */
     public static void setResistances(net.minecraft.world.entity.LivingEntity e, double pres, double mres) {
-        var p = e.getAttribute(com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get());
+        var p = e.getAttribute(com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE);
         p.removeModifiers();
         p.setBaseValue(pres);
-        var m = e.getAttribute(com.jttw.engine.registry.ModAttributes.MAGIC_RESISTANCE.get());
+        var m = e.getAttribute(com.jttw.engine.registry.ModAttributes.MAGIC_RESISTANCE);
         m.removeModifiers();
         m.setBaseValue(mres);
     }
 
     public static double pres(net.minecraft.world.entity.LivingEntity e) {
-        return e.getAttributeValue(com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get());
+        return e.getAttributeValue(com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE);
     }
 
     public static double mres(net.minecraft.world.entity.LivingEntity e) {
-        return e.getAttributeValue(com.jttw.engine.registry.ModAttributes.MAGIC_RESISTANCE.get());
+        return e.getAttributeValue(com.jttw.engine.registry.ModAttributes.MAGIC_RESISTANCE);
     }
 
     /** The damage left after the resistance handler sees it. */
     public static float afterResistance(net.minecraft.world.entity.LivingEntity e,
                                         net.minecraft.world.damagesource.DamageSource source, float amount) {
-        var event = new net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent(e, source, amount);
+        var event = incoming(e, source, amount);
         com.jttw.engine.progression.stats.ResistanceHandler.onHurt(event);
         return event.getAmount();
     }
@@ -148,7 +153,7 @@ public final class GT {
                             ? " joined " + x.getPersistentData().getLong(EntityAge.JOINED_AT) : " unstamped"))
                 .toList();
         return "alive=" + e.isAlive() + " removed=" + e.getRemovalReason()
-                + " inLevel=" + (level.getEntity(e.getUUID()) == e) + " addedToWorld=" + e.isAddedToWorld()
+                + " inLevel=" + (level.getEntity(e.getUUID()) == e) + " addedToWorld=" + e.isAddedToLevel()
                 + " entityTicking=" + level.isPositionEntityTicking(e.blockPosition())
                 + " pos=" + h.relativePos(e.blockPosition())
                 + " joined=" + e.getPersistentData().getLong(EntityAge.JOINED_AT)
