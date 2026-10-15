@@ -65,7 +65,7 @@ public final class KeenEarsOverlay implements SoundEventListener {
     }
 
     @Override
-    public void onPlaySound(SoundInstance sound, WeighedSoundEvents sounds) {
+    public void onPlaySound(SoundInstance sound, WeighedSoundEvents sounds, float range) {
         if (!listening() || sounds.getSubtitle() == null || sound.isRelative()) return;
         Component caption = sounds.getSubtitle();
         Vec3 at = new Vec3(sound.getX(), sound.getY(), sound.getZ());
@@ -111,7 +111,7 @@ public final class KeenEarsOverlay implements SoundEventListener {
             pose.pushPose();
             pose.translate(h.at.x - eye.x, h.at.y + 0.5 - eye.y, h.at.z - eye.z); // at the source, a little over it
             pose.mulPose(camera.rotation()); // facing him, as a nameplate does
-            pose.scale(-SCALE, -SCALE, SCALE);
+            pose.scale(SCALE, -SCALE, SCALE); // (the camera's rotation now faces the other way about Y)
             float x = -font.width(text) / 2f;
             int background = (int) (fade * 0.4f * 255) << 24;
             font.drawInBatch(text, x, 0, (alpha << 24) | 0xF5C6D0, false, pose.last().pose(), buffers,

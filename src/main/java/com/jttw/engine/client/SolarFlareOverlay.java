@@ -5,7 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.neoforged.neoforge.client.gui.overlay.ForgeGui;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.LayeredDraw;
 
 /**
@@ -21,14 +21,16 @@ public final class SolarFlareOverlay {
     private static final int BAND = 56;
     private static final int MAX_ALPHA = 0xA0;
 
-    public static final IGuiOverlay OVERLAY = SolarFlareOverlay::render;
+    public static final LayeredDraw.Layer OVERLAY = SolarFlareOverlay::render;
 
-    private static void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    private static void render(GuiGraphics g, DeltaTracker deltaTracker) {
+        int width = g.guiWidth();
+        int height = g.guiHeight();
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
-        MobEffectInstance flare = mc.player.getEffect(ModEffects.SOLAR_FLARE.get());
+        MobEffectInstance flare = mc.player.getEffect(ModEffects.SOLAR_FLARE);
         if (flare == null) return;
-        float t = mc.player.tickCount + partialTick;
+        float t = mc.player.tickCount + deltaTracker.getGameTimeDeltaPartialTick(true);
         float flicker = 0.75f + 0.15f * Mth.sin(t * 0.9f) + 0.1f * Mth.sin(t * 2.3f);
         float strength = flicker * (flare.getDuration() < 10 ? 1.4f : 1f);
         for (int i = 0; i < BAND; i++) {

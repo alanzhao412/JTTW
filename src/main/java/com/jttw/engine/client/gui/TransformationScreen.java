@@ -185,7 +185,7 @@ public class TransformationScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double delta) {
         if (delta > 0 && currentPage > 0) { currentPage--; rebuildGrid(); }
         else if (delta < 0 && currentPage < totalPages() - 1) { currentPage++; rebuildGrid(); }
         return true;
@@ -242,7 +242,7 @@ public class TransformationScreen extends Screen {
                 int baseY = getY() + height - 12;
                 float h = Math.max(0.8f, preview.getBbHeight());
                 int scale = Math.max(10, Math.min(28, (int) (22f / h)));
-                InventoryScreen.renderEntityInInventoryFollowsMouse(g, cx, baseY, scale,
+                CharacterScreen.renderEntityFollowing(g, cx, baseY, scale,
                         (float) (cx - minecraft.mouseHandler.xpos()), (float) (baseY - minecraft.mouseHandler.ypos()), preview);
             }
             String raw = entityId.getPath().replace('_', ' ');
@@ -262,7 +262,7 @@ public class TransformationScreen extends Screen {
 
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground(g);
+        this.renderTransparentBackground(g);
         g.drawCenteredString(this.font, Component.literal(school.title() + "  ·  Level " + roman(level)),
                 this.width / 2, 6, school.color);
         g.drawCenteredString(this.font,
@@ -273,6 +273,10 @@ public class TransformationScreen extends Screen {
         }
         super.render(g, mouseX, mouseY, partialTicks);
     }
+
+    /** Drawn by {@link #render} itself, under the titles; not again when the widgets are drawn. */
+    @Override
+    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTicks) {}
 
     @Override
     public boolean isPauseScreen() {

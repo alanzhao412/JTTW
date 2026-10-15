@@ -21,11 +21,12 @@ import net.neoforged.api.distmarker.Dist;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.RegisterGuiOverlaysEvent;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.event.RenderGuiOverlayEvent;
-import net.neoforged.neoforge.client.gui.overlay.VanillaGuiOverlay;
+import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -121,7 +122,7 @@ public final class ClientInit {
     @SubscribeEvent
     @SuppressWarnings("unchecked")
     public static void addLayers(EntityRenderersEvent.AddLayers event) {
-        for (String skin : event.getSkins()) {
+        for (net.minecraft.client.resources.PlayerSkin.Model skin : event.getSkins()) {
             if (event.getSkin(skin) instanceof net.minecraft.client.renderer.entity.player.PlayerRenderer renderer) {
                 renderer.addLayer(new com.jttw.engine.client.renderer.ArmamentLayer(renderer));
                 renderer.addLayer(new com.jttw.engine.client.renderer.BeastFormLayer(renderer));
@@ -163,19 +164,23 @@ public final class ClientInit {
         event.enqueueWork(() -> {
             // the Golden Bow draws as a bow does
             net.minecraft.client.renderer.item.ItemProperties.register(com.jttw.engine.registry.ModItems.GOLDEN_BOW.get(),
-                    new net.minecraft.resources.ResourceLocation("pull"), (stack, level, e, seed) ->
-                            e == null || e.getUseItem() != stack ? 0f : (stack.getUseDuration() - e.getUseItemRemainingTicks()) / 20f);
+                    net.minecraft.resources.ResourceLocation.withDefaultNamespace("pull"), (stack, level, e, seed) ->
+                            e == null || e.getUseItem() != stack ? 0f : (stack.getUseDuration(e) - e.getUseItemRemainingTicks()) / 20f);
             net.minecraft.client.renderer.item.ItemProperties.register(com.jttw.engine.registry.ModItems.GOLDEN_BOW.get(),
-                    new net.minecraft.resources.ResourceLocation("pulling"), (stack, level, e, seed) ->
+                    net.minecraft.resources.ResourceLocation.withDefaultNamespace("pulling"), (stack, level, e, seed) ->
                             e != null && e.isUsingItem() && e.getUseItem() == stack ? 1f : 0f);
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.CELESTIAL_CLOUD.get(), RenderType.translucent());
-            net.minecraft.client.gui.screens.MenuScreens.register(com.jttw.engine.registry.ModMenus.TRIGRAMS_FURNACE.get(),
-                                    com.jttw.engine.client.gui.TrigramsFurnaceScreen::new);
-            net.minecraft.client.gui.screens.MenuScreens.register(com.jttw.engine.registry.ModMenus.ARMORY.get(),
-                                    com.jttw.engine.client.gui.ArmoryScreen::new);
             // Zhu Bajie's Keen Ears hear what the sound engine plays
             Minecraft.getInstance().getSoundManager().addListener(KeenEarsOverlay.INSTANCE);
         });
+    }
+
+    @SubscribeEvent
+    public static void registerScreens(RegisterMenuScreensEvent event) {
+        event.register(com.jttw.engine.registry.ModMenus.TRIGRAMS_FURNACE.get(),
+                com.jttw.engine.client.gui.TrigramsFurnaceScreen::new);
+        event.register(com.jttw.engine.registry.ModMenus.ARMORY.get(),
+                com.jttw.engine.client.gui.ArmoryScreen::new);
     }
 
     /** The great furnace's models, which no block state names: its renderer draws them. */
@@ -187,15 +192,16 @@ public final class ClientInit {
     }
 
     @SubscribeEvent
-    public static void registerOverlays(RegisterGuiOverlaysEvent event) {
-        event.registerAboveAll("jttw_hud",       JTTWHudRenderer.OVERLAY);
-        event.registerAboveAll("jttw_skill_bar", SkillBarRenderer.OVERLAY);
-        event.registerAboveAll("jttw_minimap",   MinimapOverlay.OVERLAY);
-        event.registerBelowAll("jttw_head_tint", HeadTintOverlay.OVERLAY);
-        event.registerAbove(VanillaGuiOverlay.VIGNETTE.id(), "jttw_flood_wrath", FloodWrathOverlay.OVERLAY);
-        event.registerAbove(VanillaGuiOverlay.VIGNETTE.id(), "jttw_solar_flare", SolarFlareOverlay.OVERLAY);
-        event.registerAbove(net.neoforged.neoforge.client.gui.overlay.VanillaGuiOverlay.FOOD_LEVEL.id(),
-                "jttw_second_stomach", StomachOverlay.OVERLAY);
+    public static void registerOverlays(RegisterGuiLayersEvent event) {
+        event.registerAboveAll(JTTWEngine.id("jttw_hud"),       JTTWHudRenderer.OVERLAY);
+        event.registerAboveAll(JTTWEngine.id("jttw_skill_bar"), SkillBarRenderer.OVERLAY);
+        event.registerAboveAll(JTTWEngine.id("jttw_minimap"),   MinimapOverlay.OVERLAY);
+        event.registerBelowAll(JTTWEngine.id("jttw_head_tint"), HeadTintOverlay.OVERLAY);
+        // the vignette is drawn among the camera overlays now
+        event.registerAbove(VanillaGuiLayers.CAMERA_OVERLAYS, JTTWEngine.id("jttw_flood_wrath"), FloodWrathOverlay.OVERLAY);
+        event.registerAbove(VanillaGuiLayers.CAMERA_OVERLAYS, JTTWEngine.id("jttw_solar_flare"), SolarFlareOverlay.OVERLAY);
+        event.registerAbove(VanillaGuiLayers.FOOD_LEVEL,
+                JTTWEngine.id("jttw_second_stomach"), StomachOverlay.OVERLAY);
     }
 
     // -----------------------------------------------------------------------
@@ -218,9 +224,8 @@ public final class ClientInit {
 
         /** Cancel vanilla hearts so our HP bar takes over — only after reincarnation. */
         @SubscribeEvent
-        public static void onCancelVanillaHealth(RenderGuiOverlayEvent.Pre event) {
-            if (event.getOverlay() != null
-                    && event.getOverlay().id().equals(VanillaGuiOverlay.PLAYER_HEALTH.id())) {
+        public static void onCancelVanillaHealth(RenderGuiLayerEvent.Pre event) {
+            if (event.getName().equals(VanillaGuiLayers.PLAYER_HEALTH)) {
                 Minecraft mc = Minecraft.getInstance();
                 if (mc.player != null && mc.player.getPersistentData().getBoolean("jttw_reincarnated")) {
                     event.setCanceled(true);

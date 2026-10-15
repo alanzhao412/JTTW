@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
@@ -21,9 +22,9 @@ import net.neoforged.neoforge.client.model.data.ModelData;
  */
 public class TrigramsFurnaceRenderer implements BlockEntityRenderer<TrigramsFurnaceBlockEntity> {
 
-    public static final ResourceLocation GREAT = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "block/eight_trigrams_furnace_great");
-    public static final ResourceLocation GREAT_LIT = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "block/eight_trigrams_furnace_great_lit");
-    public static final ResourceLocation HATCH = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "block/eight_trigrams_furnace_hatch");
+    public static final ModelResourceLocation GREAT = ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "block/eight_trigrams_furnace_great"));
+    public static final ModelResourceLocation GREAT_LIT = ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "block/eight_trigrams_furnace_great_lit"));
+    public static final ModelResourceLocation HATCH = ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "block/eight_trigrams_furnace_hatch"));
 
     public TrigramsFurnaceRenderer(BlockEntityRendererProvider.Context context) {}
 

@@ -226,7 +226,7 @@ public class SkillTreeScreen extends Screen {
 
     @Override
     public void render(GuiGraphics gfx, int mouseX, int mouseY, float partial) {
-        renderBackground(gfx);
+        renderTransparentBackground(gfx);
 
         Set<String> unlocked = ClientAbilityData.getUnlockedNodes();
         int points = ClientAbilityData.getSkillPoints();
@@ -546,7 +546,7 @@ public class SkillTreeScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollDeltaX, double delta) {
         // the wheel scrolls across; held Shift (or a tree only too tall), up and down
         boolean down = hasShiftDown() || contentW <= panelW;
         if (down) scrollY -= delta * 30;

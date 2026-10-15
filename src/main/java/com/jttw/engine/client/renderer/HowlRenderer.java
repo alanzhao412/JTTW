@@ -68,14 +68,14 @@ public class HowlRenderer extends EntityRenderer<HowlProjectileEntity> {
     /** A strip of the cone between two angles, from radius r0 at z0 to r1 at z1, both faces. */
     private static void band(VertexConsumer vc, Matrix4f m, float a0, float a1, float z0, float r0, float z1, float r1, float alpha0, float alpha1) {
         float c0 = Mth.cos(a0), s0 = Mth.sin(a0), c1 = Mth.cos(a1), s1 = Mth.sin(a1);
-        vc.vertex(m, c0 * r0, s0 * r0, z0).color(R, G, B, alpha0).endVertex();
-        vc.vertex(m, c1 * r0, s1 * r0, z0).color(R, G, B, alpha0).endVertex();
-        vc.vertex(m, c1 * r1, s1 * r1, z1).color(R, G, B, alpha1).endVertex();
-        vc.vertex(m, c0 * r1, s0 * r1, z1).color(R, G, B, alpha1).endVertex();
-        vc.vertex(m, c0 * r1, s0 * r1, z1).color(R, G, B, alpha1).endVertex();
-        vc.vertex(m, c1 * r1, s1 * r1, z1).color(R, G, B, alpha1).endVertex();
-        vc.vertex(m, c1 * r0, s1 * r0, z0).color(R, G, B, alpha0).endVertex();
-        vc.vertex(m, c0 * r0, s0 * r0, z0).color(R, G, B, alpha0).endVertex();
+        vc.addVertex(m, c0 * r0, s0 * r0, z0).setColor(R, G, B, alpha0);
+        vc.addVertex(m, c1 * r0, s1 * r0, z0).setColor(R, G, B, alpha0);
+        vc.addVertex(m, c1 * r1, s1 * r1, z1).setColor(R, G, B, alpha1);
+        vc.addVertex(m, c0 * r1, s0 * r1, z1).setColor(R, G, B, alpha1);
+        vc.addVertex(m, c0 * r1, s0 * r1, z1).setColor(R, G, B, alpha1);
+        vc.addVertex(m, c1 * r1, s1 * r1, z1).setColor(R, G, B, alpha1);
+        vc.addVertex(m, c1 * r0, s1 * r0, z0).setColor(R, G, B, alpha0);
+        vc.addVertex(m, c0 * r0, s0 * r0, z0).setColor(R, G, B, alpha0);
     }
 
     @Override

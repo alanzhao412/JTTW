@@ -49,10 +49,14 @@ public class SignFormScreen extends Screen {
 
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
+        renderTransparentBackground(g);
         g.drawCenteredString(this.font, this.title, this.width / 2, this.height / 2 - 72, 0xFFFFFF);
         super.render(g, mouseX, mouseY, partialTick);
     }
+
+    /** Drawn by {@link #render} itself, under the title; not again when the widgets are drawn. */
+    @Override
+    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {}
 
     @Override
     public boolean isPauseScreen() {

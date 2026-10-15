@@ -205,8 +205,8 @@ public final class WhiteTigerRenderer extends MobRenderer<WhiteTigerEntity, Whit
         }
 
         @Override
-        public void renderToBuffer(PoseStack pose, VertexConsumer vc, int light, int overlay, float r, float g, float b, float a) {
-            root.render(pose, vc, light, overlay, r, g, b, a);
+        public void renderToBuffer(PoseStack pose, VertexConsumer vc, int light, int overlay, int color) {
+            root.render(pose, vc, light, overlay, color);
         }
     }
 }

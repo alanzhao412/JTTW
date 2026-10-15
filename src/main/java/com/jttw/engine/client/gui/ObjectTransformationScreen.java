@@ -143,7 +143,7 @@ public class ObjectTransformationScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double delta) {
         int rowStride = TILE_H + TILE_PAD;
         scrollY += (int) (-delta * rowStride);
         rebuildGrid();
@@ -317,7 +317,7 @@ public class ObjectTransformationScreen extends Screen {
 
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground(g);
+        this.renderTransparentBackground(g);
 
         g.drawCenteredString(this.font, this.title, this.width / 2, 6, 0xFFFFFF);
 
@@ -342,6 +342,10 @@ public class ObjectTransformationScreen extends Screen {
 
         super.render(g, mouseX, mouseY, partialTicks);
     }
+
+    /** Drawn by {@link #render} itself, under the titles; not again when the widgets are drawn. */
+    @Override
+    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTicks) {}
 
     @Override
     public boolean isPauseScreen() {

@@ -97,20 +97,20 @@ public final class FireRingVisualRenderer {
      */
     private static void drawQuad(PoseStack pose, VertexConsumer vc, float r, float presence) {
         var matrix = pose.last().pose();
-        var normal = pose.last().normal();
+        var normal = pose.last();
         float a = 0.9f * presence;
 
         // Face up
-        vc.vertex(matrix, -r, 0f, -r).color(1f,1f,1f,a).uv(0f,0f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULL_BRIGHT).normal(normal, 0f,1f,0f).endVertex();
-        vc.vertex(matrix, -r, 0f,  r).color(1f,1f,1f,a).uv(0f,1f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULL_BRIGHT).normal(normal, 0f,1f,0f).endVertex();
-        vc.vertex(matrix,  r, 0f,  r).color(1f,1f,1f,a).uv(1f,1f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULL_BRIGHT).normal(normal, 0f,1f,0f).endVertex();
-        vc.vertex(matrix,  r, 0f, -r).color(1f,1f,1f,a).uv(1f,0f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULL_BRIGHT).normal(normal, 0f,1f,0f).endVertex();
+        vc.addVertex(matrix, -r, 0f, -r).setColor(1f,1f,1f,a).setUv(0f,0f).setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_BRIGHT).setNormal(normal, 0f,1f,0f);
+        vc.addVertex(matrix, -r, 0f,  r).setColor(1f,1f,1f,a).setUv(0f,1f).setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_BRIGHT).setNormal(normal, 0f,1f,0f);
+        vc.addVertex(matrix,  r, 0f,  r).setColor(1f,1f,1f,a).setUv(1f,1f).setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_BRIGHT).setNormal(normal, 0f,1f,0f);
+        vc.addVertex(matrix,  r, 0f, -r).setColor(1f,1f,1f,a).setUv(1f,0f).setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_BRIGHT).setNormal(normal, 0f,1f,0f);
 
         // Face down (reversed winding)
-        vc.vertex(matrix,  r, 0f, -r).color(1f,1f,1f,a).uv(1f,0f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULL_BRIGHT).normal(normal, 0f,-1f,0f).endVertex();
-        vc.vertex(matrix,  r, 0f,  r).color(1f,1f,1f,a).uv(1f,1f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULL_BRIGHT).normal(normal, 0f,-1f,0f).endVertex();
-        vc.vertex(matrix, -r, 0f,  r).color(1f,1f,1f,a).uv(0f,1f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULL_BRIGHT).normal(normal, 0f,-1f,0f).endVertex();
-        vc.vertex(matrix, -r, 0f, -r).color(1f,1f,1f,a).uv(0f,0f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULL_BRIGHT).normal(normal, 0f,-1f,0f).endVertex();
+        vc.addVertex(matrix,  r, 0f, -r).setColor(1f,1f,1f,a).setUv(1f,0f).setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_BRIGHT).setNormal(normal, 0f,-1f,0f);
+        vc.addVertex(matrix,  r, 0f,  r).setColor(1f,1f,1f,a).setUv(1f,1f).setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_BRIGHT).setNormal(normal, 0f,-1f,0f);
+        vc.addVertex(matrix, -r, 0f,  r).setColor(1f,1f,1f,a).setUv(0f,1f).setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_BRIGHT).setNormal(normal, 0f,-1f,0f);
+        vc.addVertex(matrix, -r, 0f, -r).setColor(1f,1f,1f,a).setUv(0f,0f).setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULL_BRIGHT).setNormal(normal, 0f,-1f,0f);
     }
 
     // =========================================================================

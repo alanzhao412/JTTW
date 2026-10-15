@@ -61,8 +61,7 @@ public class ArmoryScreen extends AbstractContainerScreen<ArmoryMenu> {
 
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
-        super.render(g, mouseX, mouseY, partialTick);
+        super.render(g, mouseX, mouseY, partialTick); // (the dimmed background is drawn by it now)
         // name the empty slot under the mouse
         for (int i = 0; i < menu.armaments().size(); i++) {
             Slot s = menu.slots.get(i);

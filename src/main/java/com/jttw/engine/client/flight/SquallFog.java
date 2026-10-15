@@ -26,7 +26,7 @@ final class SquallFog {
     static void draw(PoseStack pose, MultiBufferSource buffers, Player p, float amount, float move, int light) {
         if (amount <= 0) return;
         long seed = p.getUUID().getMostSignificantBits() * 31 + p.getUUID().getLeastSignificantBits();
-        float t = (p.tickCount + Minecraft.getInstance().getFrameTime()) / 20f;
+        float t = (p.tickCount + Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true)) / 20f;
         // the way he is going, or else the way he looks
         Vec3 way = new Vec3(p.getX() - p.xo, p.getY() - p.yo, p.getZ() - p.zo);
         way = way.lengthSqr() > 1.0e-4 ? way.normalize() : p.getLookAngle();

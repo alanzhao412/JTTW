@@ -5,7 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.neoforged.neoforge.client.gui.overlay.ForgeGui;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.LayeredDraw;
 
 /**
@@ -21,14 +21,16 @@ public final class FloodWrathOverlay {
     private static final int BAND = 48;
     private static final int MAX_ALPHA = 0xB4;
 
-    public static final IGuiOverlay OVERLAY = FloodWrathOverlay::render;
+    public static final LayeredDraw.Layer OVERLAY = FloodWrathOverlay::render;
 
-    private static void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    private static void render(GuiGraphics g, DeltaTracker deltaTracker) {
+        int width = g.guiWidth();
+        int height = g.guiHeight();
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
-        MobEffectInstance wrath = mc.player.getEffect(ModEffects.FLOOD_WRATH.get());
+        MobEffectInstance wrath = mc.player.getEffect(ModEffects.FLOOD_WRATH);
         if (wrath == null) return;
-        float t = mc.player.tickCount + partialTick;
+        float t = mc.player.tickCount + deltaTracker.getGameTimeDeltaPartialTick(true);
         float strength = Math.min(1, wrath.getDuration() / 40f) * (0.7f + 0.3f * Mth.sin(t * 0.12f));
         // the band's inner edge ripples, so it reads as water rather than a frame
         for (int i = 0; i < BAND; i++) {

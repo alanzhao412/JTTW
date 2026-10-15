@@ -271,11 +271,12 @@ public final class FlightPose {
         Minecraft mc = Minecraft.getInstance();
         Player p = mc.player;
         if (p == null || !mc.options.getCameraType().isFirstPerson()) return;
-        float t = event.getPartialTick(), presence = presence(p, t) * cloud(p, t);
+        float t = event.getPartialTick().getGameTimeDeltaPartialTick(false), presence = presence(p, t) * cloud(p, t);
         if (presence <= 0) return;
         Vec3 cam = event.getCamera().getPosition();
         Vec3 at = p.getPosition(t);
-        PoseStack pose = event.getPoseStack();
+        // this stage hands no PoseStack: the camera's rotation is already in the model-view matrix
+        PoseStack pose = new PoseStack();
         pose.pushPose();
         pose.translate(at.x - cam.x, at.y - cam.y, at.z - cam.z);
         float yaw = p.getViewYRot(t);

@@ -1,7 +1,7 @@
 package com.jttw.engine.client;
 
 import net.minecraft.client.gui.GuiGraphics;
-import net.neoforged.neoforge.client.gui.overlay.ForgeGui;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.LayeredDraw;
 
 /**
@@ -28,9 +28,11 @@ public final class HeadTintOverlay {
         return leadHead;
     }
 
-    public static final IGuiOverlay OVERLAY = HeadTintOverlay::render;
+    public static final LayeredDraw.Layer OVERLAY = HeadTintOverlay::render;
 
-    private static void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    private static void render(GuiGraphics g, DeltaTracker deltaTracker) {
+        int width = g.guiWidth();
+        int height = g.guiHeight();
         if (leadHead < 0 || leadHead >= COLOURS.length) return;
         int rgb = COLOURS[leadHead];
         for (int i = 0; i < BAND; i++) {

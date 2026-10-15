@@ -54,7 +54,8 @@ public final class TruffleScentRenderer {
         if (mc.level == null || mc.level.getGameTime() >= fadesAt) return;
 
         Vec3 cam = event.getCamera().getPosition();
-        PoseStack pose = event.getPoseStack();
+        // this stage hands no PoseStack: the camera's rotation is already in the model-view matrix
+        PoseStack pose = new PoseStack();
         pose.pushPose();
         pose.translate(-cam.x, -cam.y, -cam.z);
         RenderSystem.enableBlend();
@@ -62,15 +63,14 @@ public final class TruffleScentRenderer {
         RenderSystem.disableDepthTest();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder buf = tesselator.getBuilder();
-        buf.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder buf = tesselator.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
         Matrix4f m = pose.last().pose();
 
         for (int i = 0; i < blocks.length; i++) {
             BlockPos p = BlockPos.of(blocks[i]);
             box(buf, m, p.getX(), p.getY(), p.getZ(), p.getX() + 1, p.getY() + 1, p.getZ() + 1, colours[i]);
         }
-        float pt = event.getPartialTick();
+        float pt = event.getPartialTick().getGameTimeDeltaPartialTick(false);
         for (int id : entityIds) {
             Entity e = mc.level.getEntity(id);
             if (e == null || !e.isAlive()) continue;
@@ -80,7 +80,8 @@ public final class TruffleScentRenderer {
             box(buf, m, (float) b.minX, (float) b.minY, (float) b.minZ, (float) b.maxX, (float) b.maxY, (float) b.maxZ, colour);
         }
 
-        tesselator.end();
+        MeshData mesh = buf.build();
+        if (mesh != null) BufferUploader.drawWithShader(mesh);
         RenderSystem.enableDepthTest();
         RenderSystem.disableBlend();
         pose.popPose();
@@ -94,8 +95,8 @@ public final class TruffleScentRenderer {
                 {x0, y1, z0, x1, y1, z0}, {x1, y1, z0, x1, y1, z1}, {x1, y1, z1, x0, y1, z1}, {x0, y1, z1, x0, y1, z0},
                 {x0, y0, z0, x0, y1, z0}, {x1, y0, z0, x1, y1, z0}, {x1, y0, z1, x1, y1, z1}, {x0, y0, z1, x0, y1, z1}};
         for (float[] e : edges) {
-            buf.vertex(m, e[0], e[1], e[2]).color(r, g, b, a).endVertex();
-            buf.vertex(m, e[3], e[4], e[5]).color(r, g, b, a).endVertex();
+            buf.addVertex(m, e[0], e[1], e[2]).setColor(r, g, b, a);
+            buf.addVertex(m, e[3], e[4], e[5]).setColor(r, g, b, a);
         }
     }
 }

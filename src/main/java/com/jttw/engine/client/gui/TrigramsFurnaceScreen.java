@@ -116,8 +116,7 @@ public class TrigramsFurnaceScreen extends AbstractContainerScreen<TrigramsFurna
 
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
-        super.render(g, mouseX, mouseY, partialTick);
+        super.render(g, mouseX, mouseY, partialTick); // (the dimmed background is drawn by it now)
         renderTooltip(g, mouseX, mouseY);
     }
 }

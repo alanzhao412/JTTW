@@ -34,7 +34,7 @@ public final class DimensionScrollHandler {
 
         // Cancel vanilla scroll and send dimension selection to server
         event.setCanceled(true);
-        int direction = (event.getScrollDelta() > 0) ? 1 : -1;
+        int direction = (event.getScrollDeltaY() > 0) ? 1 : -1;
         NetworkHandler.sendToServer(new DimensionSelectPacket(direction));
     }
 }
