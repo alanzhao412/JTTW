@@ -55,7 +55,7 @@ public final class TruthSightHud {
 
     @SubscribeEvent
     public static void onRenderGuiOverlay(RenderGuiLayerEvent.Post event) {
-        if (!event.getName().equals(VanillaGuiLayers.CROSSHAIR) || !seeing()) return;
+        if (!event.getName().equals(VanillaGuiLayers.CROSSHAIR) || !seeing() || Minecraft.getInstance().options.hideGui) return; // F1 hides it
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) return;
         if (!(target(mc) instanceof LivingEntity living)) return;

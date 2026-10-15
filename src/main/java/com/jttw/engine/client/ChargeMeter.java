@@ -85,7 +85,7 @@ public final class ChargeMeter {
 
     @SubscribeEvent
     public static void onRenderGuiOverlay(RenderGuiLayerEvent.Post event) {
-        if (!event.getName().equals(VanillaGuiLayers.CROSSHAIR)) return;
+        if (!event.getName().equals(VanillaGuiLayers.CROSSHAIR) || Minecraft.getInstance().options.hideGui) return; // F1 hides it
         Minecraft mc = Minecraft.getInstance();
         Reading c = reading(mc);
         if (c == null) return;

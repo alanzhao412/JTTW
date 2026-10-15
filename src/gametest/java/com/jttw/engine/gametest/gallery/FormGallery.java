@@ -221,7 +221,8 @@ public final class FormGallery {
                         mc.player.position().subtract(mc.player.xo, mc.player.yo, mc.player.zo).length(),
                         com.jttw.engine.client.flight.FlightPose.presence(mc.player, 1),
                         com.jttw.engine.client.flight.FlightPose.underWay(mc.player, 1),
-                        com.jttw.engine.client.flight.FlightPose.cloud(mc.player, 1)));
+                        com.jttw.engine.client.flight.FlightPose.cloud(mc.player, 1))
+                + " spin=" + mc.player.isAutoSpinAttack() + " pose=" + mc.player.getPose());
         next++;
         if (next < shots.size()) {
             startShot(mc);
@@ -247,7 +248,7 @@ public final class FormGallery {
         net.minecraft.world.phys.Vec3 cam = at.add(rx * 3.5, 0.3, rz * 3.5);
         try {
             java.lang.reflect.Method setPosition = net.neoforged.fml.util.ObfuscationReflectionHelper.findMethod(
-                    net.minecraft.client.Camera.class, "m_90584_", net.minecraft.world.phys.Vec3.class);
+                    net.minecraft.client.Camera.class, "setPosition", net.minecraft.world.phys.Vec3.class);
             setPosition.invoke(event.getCamera(), cam);
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException(e);

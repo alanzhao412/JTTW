@@ -390,8 +390,9 @@ final class AbilityScenes {
                     p.level().getEntitiesOfClass(net.minecraft.world.entity.monster.Zombie.class, p.getBoundingBox().inflate(6))
                             .stream().min(java.util.Comparator.comparingDouble(m -> m.distanceToSqr(p))).ifPresent(p::attack);
                 }, 3, true),
+                // four ticks: on 1.21 the riptide pose reaches the client a tick later than it did
                 new Scene("saurian_surge", p -> saurian(p, com.jttw.engine.character.saurian.SaurianSkillTree.SURGE_1),
-                        p -> com.jttw.engine.character.saurian.SaurianAbilityHandler.surge(p, 1f), 2, false),
+                        p -> com.jttw.engine.character.saurian.SaurianAbilityHandler.surge(p, 1f), 4, false),
                 new Scene("heaven_host", p -> {
                     soldier(p, -2, 2, false);
                     soldier(p, 1, 4, true);

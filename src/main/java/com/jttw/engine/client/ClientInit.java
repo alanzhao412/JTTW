@@ -193,15 +193,25 @@ public final class ClientInit {
 
     @SubscribeEvent
     public static void registerOverlays(RegisterGuiLayersEvent event) {
-        event.registerAboveAll(JTTWEngine.id("jttw_hud"),       JTTWHudRenderer.OVERLAY);
-        event.registerAboveAll(JTTWEngine.id("jttw_skill_bar"), SkillBarRenderer.OVERLAY);
-        event.registerAboveAll(JTTWEngine.id("jttw_minimap"),   MinimapOverlay.OVERLAY);
-        event.registerBelowAll(JTTWEngine.id("jttw_head_tint"), HeadTintOverlay.OVERLAY);
+        event.registerAboveAll(JTTWEngine.id("jttw_hud"),       shownWithGui(JTTWHudRenderer.OVERLAY));
+        event.registerAboveAll(JTTWEngine.id("jttw_skill_bar"), shownWithGui(SkillBarRenderer.OVERLAY));
+        event.registerAboveAll(JTTWEngine.id("jttw_minimap"),   shownWithGui(MinimapOverlay.OVERLAY));
+        event.registerBelowAll(JTTWEngine.id("jttw_head_tint"), shownWithGui(HeadTintOverlay.OVERLAY));
         // the vignette is drawn among the camera overlays now
-        event.registerAbove(VanillaGuiLayers.CAMERA_OVERLAYS, JTTWEngine.id("jttw_flood_wrath"), FloodWrathOverlay.OVERLAY);
-        event.registerAbove(VanillaGuiLayers.CAMERA_OVERLAYS, JTTWEngine.id("jttw_solar_flare"), SolarFlareOverlay.OVERLAY);
+        event.registerAbove(VanillaGuiLayers.CAMERA_OVERLAYS, JTTWEngine.id("jttw_flood_wrath"), shownWithGui(FloodWrathOverlay.OVERLAY));
+        event.registerAbove(VanillaGuiLayers.CAMERA_OVERLAYS, JTTWEngine.id("jttw_solar_flare"), shownWithGui(SolarFlareOverlay.OVERLAY));
         event.registerAbove(VanillaGuiLayers.FOOD_LEVEL,
-                JTTWEngine.id("jttw_second_stomach"), StomachOverlay.OVERLAY);
+                JTTWEngine.id("jttw_second_stomach"), shownWithGui(StomachOverlay.OVERLAY));
+    }
+
+    /**
+     * {@code layer}, drawn only while the GUI is shown (F1 hides it). Before 1.21 the game skipped
+     * the whole GUI with F1; now it draws the GUI regardless and each layer asks.
+     */
+    private static net.minecraft.client.gui.LayeredDraw.Layer shownWithGui(net.minecraft.client.gui.LayeredDraw.Layer layer) {
+        return (g, delta) -> {
+            if (!net.minecraft.client.Minecraft.getInstance().options.hideGui) layer.render(g, delta);
+        };
     }
 
     // -----------------------------------------------------------------------
