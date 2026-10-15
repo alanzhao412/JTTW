@@ -65,7 +65,7 @@ public final class SpearReturn {
             Entity thrown = SummonLeash.find(player.server, note.getUUID(ENTITY));
             if (thrown != null) thrown.discard();
         }
-        ItemStack spear = ItemStack.parseOptional(player.registryAccess(), note.getCompound(ITEM));
+        ItemStack spear = ItemStack.parseOptional(player.registryAccess(), LegacyItems.upgrade(note.getCompound(ITEM)));
         if (spear.isEmpty()) return;
         if (!player.getInventory().add(spear)) player.drop(spear, false);
         player.sendSystemMessage(Component.literal("§6[JTTW] §eYour spear returns to you."));

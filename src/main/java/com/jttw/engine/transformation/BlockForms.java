@@ -75,7 +75,7 @@ public final class BlockForms {
 
     public static NonNullList<ItemStack> loadChest(Player player) {
         NonNullList<ItemStack> items = NonNullList.withSize(CHEST_SLOTS, ItemStack.EMPTY);
-        ContainerHelper.loadAllItems(player.getPersistentData().getCompound(KEY_CHEST), items, player.registryAccess());
+        ContainerHelper.loadAllItems(com.jttw.engine.item.LegacyItems.upgradeContainer(player.getPersistentData().getCompound(KEY_CHEST)), items, player.registryAccess());
         return items;
     }
 

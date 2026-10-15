@@ -259,6 +259,31 @@ public class MarshalGameTests {
     }
 
     @GameTest(template = PLATFORM)
+    public static void goldenHeartsOutlastAnApplesAbsorptionButKeepNoneOfIt(GameTestHelper h) {
+        ServerPlayer p = marshal(h, "mc_stomach_1", "mc_stomach_2", "mc_stomach_3");
+        tick(p, MarshalAbilityHandler::onPlayerTick, 1);
+        p.addEffect(new net.minecraft.world.effect.MobEffectInstance(MobEffects.ABSORPTION, 2400, 0));
+        near(h, 4f, p.getAbsorptionAmount(), "an apple's 2 hearts");
+        p.removeEffect(MobEffects.ABSORPTION);
+        p.setAbsorptionAmount(p.getAbsorptionAmount()); // re-clamped, as the next tick's attribute refresh does
+        near(h, 0f, p.getAbsorptionAmount(), "they end with it: the stomach gave none");
+
+        fill(p, 20, 20);
+        p.setHealth(p.getMaxHealth() - 2f);
+        p.eat(p.level(), new ItemStack(Items.COOKED_BEEF));
+        near(h, 14f, p.getAbsorptionAmount(), "golden hearts from the feast");
+        p.addEffect(new net.minecraft.world.effect.MobEffectInstance(MobEffects.ABSORPTION, 2400, 0));
+        p.removeEffect(MobEffects.ABSORPTION);
+        p.setAbsorptionAmount(p.getAbsorptionAmount());
+        near(h, 14f, p.getAbsorptionAmount(), "the stomach's outlast the apple's");
+
+        p.setAbsorptionAmount(6f); // a blow takes 8
+        tick(p, MarshalAbilityHandler::onPlayerTick, 1);
+        near(h, 6f, p.getMaxAbsorption(), "hearts lost are not kept room for");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
     public static void theSecondStomachFeedsTheFirst(GameTestHelper h) {
         ServerPlayer p = marshal(h, "mc_stomach_1");
         fill(p, 10, 15);

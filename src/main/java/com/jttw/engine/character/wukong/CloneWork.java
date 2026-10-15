@@ -36,7 +36,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.tags.TagKey;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -101,16 +100,25 @@ public final class CloneWork {
 
     /** Vanilla tiers, weakest first (the order the old tier sorting registry gave them). */
     private static final List<Tier> TIER_ORDER = List.of(Tiers.WOOD, Tiers.GOLD, Tiers.STONE, Tiers.IRON, Tiers.DIAMOND, Tiers.NETHERITE);
-    /** The "incorrect for" block tags of those tiers, in the same order, to place modded tiers among them. */
-    private static final List<TagKey<Block>> TIER_TAGS = List.of(BlockTags.INCORRECT_FOR_WOODEN_TOOL, BlockTags.INCORRECT_FOR_GOLD_TOOL,
-            BlockTags.INCORRECT_FOR_STONE_TOOL, BlockTags.INCORRECT_FOR_IRON_TOOL, BlockTags.INCORRECT_FOR_DIAMOND_TOOL,
-            BlockTags.INCORRECT_FOR_NETHERITE_TOOL);
+    /**
+     * A block each harvest level first opens (iron ore: stone tools; diamond ore: iron; obsidian:
+     * diamond), to find a modded tier's level from what it can mine.
+     */
+    private static final List<Block> LEVEL_BLOCKS = List.of(Blocks.IRON_ORE, Blocks.DIAMOND_ORE, Blocks.OBSIDIAN);
+    /** For each harvest level, the vanilla tier a modded tier of that level is placed just above. */
+    private static final List<Tier> LEVEL_ANCHORS = List.of(Tiers.GOLD, Tiers.STONE, Tiers.IRON, Tiers.DIAMOND);
 
+    /**
+     * Vanilla tiers in the old registry's order. NeoForge no longer sorts tiers, so a modded tier
+     * goes where mods used to put theirs: just above the vanilla tiers that mine what it mines
+     * (a diamond-level one below netherite), the faster first among modded tiers of a level.
+     */
     private static int tierRank(Tier tier) {
         int i = TIER_ORDER.indexOf(tier);
-        if (i >= 0) return i;
-        i = TIER_TAGS.indexOf(tier.getIncorrectBlocksForDrops());
-        return i >= 0 ? i : 0;
+        if (i >= 0) return i * 1000;
+        int level = 0;
+        while (level < LEVEL_BLOCKS.size() && !LEVEL_BLOCKS.get(level).defaultBlockState().is(tier.getIncorrectBlocksForDrops())) level++;
+        return TIER_ORDER.indexOf(LEVEL_ANCHORS.get(level)) * 1000 + 500 + Math.min(499, Math.round(tier.getSpeed() * 10));
     }
 
     /** The owner's best tool of this kind (pickaxe or axe), copied for the clone, or empty. */

@@ -353,7 +353,7 @@ public class TrigramsFurnaceBlockEntity extends BlockEntity implements Container
     protected void loadAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         items.clear();
-        ContainerHelper.loadAllItems(tag, items, registries);
+        ContainerHelper.loadAllItems(com.jttw.engine.item.LegacyItems.upgradeContainer(tag), items, registries);
         progress = tag.getInt("Progress");
         burn = tag.getInt("Burn");
         burnMax = tag.getInt("BurnMax");

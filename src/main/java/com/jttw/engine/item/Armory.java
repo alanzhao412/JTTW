@@ -119,7 +119,7 @@ public final class Armory {
         for (int i = 0; i < list.size(); i++) {
             CompoundTag t = list.getCompound(i);
             int slot = t.getInt("Slot");
-            if (slot >= 0 && slot < slots.size()) kept.place(slot, ItemStack.parseOptional(p.registryAccess(), t));
+            if (slot >= 0 && slot < slots.size()) kept.place(slot, ItemStack.parseOptional(p.registryAccess(), LegacyItems.upgrade(t)));
         }
         return kept;
     }
