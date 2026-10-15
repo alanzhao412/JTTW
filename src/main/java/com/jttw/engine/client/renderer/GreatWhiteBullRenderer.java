@@ -64,15 +64,15 @@ public final class GreatWhiteBullRenderer extends MobRenderer<GreatWhiteBullEnti
         // a wedge: a towering chest and shoulders, lean hindquarters, a hump crested with bone
         // spikes, and a thick neck thrust forward and down
         root.addOrReplaceChild("body", CubeListBuilder.create()
-                .texOffs(0, 0).addBox(-10, -9, -16, 20, 19, 14)     // chest and shoulders
-                .texOffs(0, 33).addBox(-8, -5, -2, 16, 15, 17)      // hindquarters, lower than the shoulders
-                .texOffs(28, 104).addBox(-6, -11, -4, 12, 5, 9)     // the back, stepping down from the hump
-                .texOffs(0, 104).addBox(-4, 5, -21, 8, 6, 6)        // the dewlap, heavy under the neck
-                .texOffs(68, 0).addBox(-7, -16, -15, 14, 8, 11)     // the hump
-                .texOffs(68, 19).addBox(-7, -8, -22, 14, 13, 8)     // the neck
-                .texOffs(84, 80).addBox(-1, -19, -13, 2, 4, 2)      // the hump's spikes, falling away
-                .texOffs(84, 80).addBox(-1, -18, -9, 2, 4, 2)
-                .texOffs(84, 80).addBox(-1, -17, -5, 2, 4, 2), PartPose.ZERO);
+                .texOffs(128, 0).addBox(-10, -9, -18, 20, 19, 16)   // chest and shoulders
+                .texOffs(128, 35).addBox(-8, -5, -2, 16, 15, 22)   // a long barrel and hindquarters, lower than the shoulders
+                .texOffs(128, 72).addBox(-6, -11, -6, 12, 5, 16)   // the back, stepping down from the hump
+                .texOffs(0, 104).addBox(-4, 5, -23, 8, 6, 6)        // the dewlap, heavy under the neck
+                .texOffs(68, 0).addBox(-7, -16, -17, 14, 8, 11)     // the hump
+                .texOffs(68, 19).addBox(-7, -8, -24, 14, 13, 8)     // the neck
+                .texOffs(84, 80).addBox(-1, -19, -15, 2, 4, 2)      // the hump's spikes, falling away
+                .texOffs(84, 80).addBox(-1, -18, -11, 2, 4, 2)
+                .texOffs(84, 80).addBox(-1, -17, -7, 2, 4, 2), PartPose.ZERO);
         // the head carried low, as a bull about to charge: a skull under a heavy brow, a long
         // squared snout and jaw, a ring through the nose
         PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create()
@@ -83,7 +83,7 @@ public final class GreatWhiteBullRenderer extends MobRenderer<GreatWhiteBullEnti
                 .texOffs(92, 80).addBox(-2.5f, 5, -17.8f, 5, 1, 1)   // nose ring
                 .texOffs(104, 80).addBox(-2.5f, 2, -17.8f, 1, 3, 1)
                 .texOffs(104, 80).addBox(1.5f, 2, -17.8f, 1, 3, 1),
-                PartPose.offsetAndRotation(0, -3, -21, 0.25f, 0, 0));
+                PartPose.offsetAndRotation(0, -3, -23, 0.25f, 0, 0));
         for (int side : new int[]{-1, 1}) {
             String n = side < 0 ? "right" : "left";
             // ears laid back under the horns
@@ -108,13 +108,13 @@ public final class GreatWhiteBullRenderer extends MobRenderer<GreatWhiteBullEnti
                     ? CubeListBuilder.create().texOffs(0, 80).mirror(left).addBox(-3.5f, 0, -3.5f, 7, 14, 7)
                     : CubeListBuilder.create().texOffs(28, 80).mirror(left).addBox(-3, 0, -3, 6, 14, 6);
             root.addOrReplaceChild(legName(i), leg,
-                    PartPose.offset(front ? (left ? 6 : -6) : (left ? 5 : -5), 10, front ? -10 : 11));
+                    PartPose.offset(front ? (left ? 6 : -6) : (left ? 5 : -5), 10, front ? -12 : 16));
         }
         PartDefinition tail = root.addOrReplaceChild("tail", CubeListBuilder.create()
-                .texOffs(52, 80).addBox(-1, 0, -1, 2, 14, 2), PartPose.offsetAndRotation(0, -5, 15, 0.35f, 0, 0));
+                .texOffs(52, 80).addBox(-1, 0, -1, 2, 14, 2), PartPose.offsetAndRotation(0, -5, 20, 0.35f, 0, 0));
         tail.addOrReplaceChild("tuft", CubeListBuilder.create()
                 .texOffs(60, 80).addBox(-1.5f, 13, -1.5f, 3, 5, 3), PartPose.ZERO);
-        return LayerDefinition.create(mesh, 128, 128);
+        return LayerDefinition.create(mesh, 256, 128);
     }
 
     private static String legName(int i) {

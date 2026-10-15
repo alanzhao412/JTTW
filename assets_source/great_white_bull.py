@@ -1,4 +1,4 @@
-"""Paints the Great White Bull's skin (textures/entity/great_white_bull.png, 128x128) to the box
+"""Paints the Great White Bull's skin (textures/entity/great_white_bull.png, 256x128) to the box
 layout of GreatWhiteBullRenderer.layer(): each box's six faces in the standard box-UV places. Also
 paints its eyes alone (great_white_bull_eyes.png), drawn full-bright over the skin so they burn.
 
@@ -6,7 +6,7 @@ Run from the repository root: python assets_source/great_white_bull.py"""
 import random
 from PIL import Image
 
-W = H = 128
+W, H = 256, 128
 img = Image.new('RGBA', (W, H), (0, 0, 0, 0))
 glow = Image.new('RGBA', (W, H), (0, 0, 0, 0))
 rnd = random.Random(7)
@@ -59,13 +59,13 @@ CHARCOAL = (52, 48, 50)      # snout, hooves, tuft
 HORN_ROOT = (34, 30, 32)
 BONE = (196, 186, 160)
 GOLD = (214, 168, 62)
-EMBER = (255, 54, 24)
-EMBER_CORE = (255, 196, 96)
+EMBER = (104, 14, 8)         # the eyes smoulder: a deep red, not a blaze
+EMBER_CORE = (140, 34, 14)
 
 # ── the body ──────────────────────────────────────────────────────────
-box(0, 0, 20, 19, 14, WHITE, grad=0.3)                 # chest and shoulders: shadowed toward the belly
-box(0, 33, 16, 15, 17, WHITE, grad=0.32)               # hindquarters
-box(28, 104, 12, 5, 9, WHITE, grad=0.1)                # the back, stepping down from the hump
+box(128, 0, 20, 19, 16, WHITE, grad=0.3)               # chest and shoulders: shadowed toward the belly
+box(128, 35, 16, 15, 22, WHITE, grad=0.32)             # the long barrel and hindquarters
+box(128, 72, 12, 5, 16, WHITE, grad=0.1)               # the back, stepping down from the hump
 box(0, 104, 8, 6, 6, WHITE, grad=0.4, to=SHADOW)       # the dewlap
 box(68, 0, 14, 8, 11, WHITE, grad=0.05, top=1.0)       # the hump
 box(68, 19, 14, 13, 8, WHITE, grad=0.35, to=SHADOW)    # the neck, darkening to the dewlap
@@ -77,7 +77,7 @@ for j in range(11):
         put(68 + 11 + i, j, shade(SHADOW, 0.9 + 0.02 * rnd.randint(-2, 2)))
 
 # scars: a few pale-dark gashes across the chest's flanks
-for (sx, sy) in ((4, 20), (40, 24), (58, 18)):
+for (sx, sy) in ((131, 22), (167, 25), (134, 60), (171, 63)):  # chest and barrel, both flanks
     for k in range(5):
         put(sx + k, sy + k // 2, shade(SHADOW, 0.75))
 
@@ -101,13 +101,13 @@ for ex in (fx + 1, fx + fw - 3):
     for i in range(2):
         put(ex + i, fy + 1, (16, 12, 14, 255))          # the socket's shadow under the brow
         for j, c in ((2, EMBER), (3, EMBER_CORE if i == (0 if ex > fx + 5 else 1) else EMBER)):
-            put(ex + i, fy + j, c + (255,))
+            put(ex + i, fy + j, shade(c, 0.35))  # the skin dark beneath: the glow is drawn over it
             glow.putpixel((ex + i, fy + j), c + (255,))
         put(ex + i, fy + 4, (24, 20, 22, 255))
 # the eyes show at the skull's sides too, a glint of red under the brow
 for (sx, sy) in ((68 + 10 - 2, 40 + 10 + 2), (68 + 10 + 12, 40 + 10 + 2)):
     for i in range(2):
-        put(sx + i, sy, EMBER + (255,))
+        put(sx + i, sy, shade(EMBER, 0.35))
         glow.putpixel((sx + i, sy), EMBER + (255,))
 
 # the brow's front: darkest at its underside, a V that scowls toward the nose
