@@ -9,6 +9,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.SwordItem;
@@ -36,7 +37,8 @@ public class MixedIronCudgelItem extends SwordItem implements Charged {
     public static final int COOLDOWN = 40;
 
     public MixedIronCudgelItem() {
-        super(Tiers.NETHERITE, 6, -3.2f, new Properties().rarity(Rarity.EPIC).fireResistant());
+        super(Tiers.NETHERITE, new Properties().rarity(Rarity.EPIC).fireResistant()
+                .attributes(SwordItem.createAttributes(Tiers.NETHERITE, 6, -3.2f)));
     }
 
     /** Charge from ticks held: 0 (too short) to 3. */
@@ -60,7 +62,7 @@ public class MixedIronCudgelItem extends SwordItem implements Charged {
     }
 
     @Override
-    public int getUseDuration(ItemStack stack) {
+    public int getUseDuration(ItemStack stack, LivingEntity entity) {
         return 72000;
     }
 
@@ -72,7 +74,7 @@ public class MixedIronCudgelItem extends SwordItem implements Charged {
     @Override
     public void releaseUsing(ItemStack stack, Level level, LivingEntity entity, int timeLeft) {
         if (level.isClientSide || !(entity instanceof ServerPlayer p) || !BullDemonCharacter.is(p)) return;
-        int charge = charge(getUseDuration(stack) - timeLeft);
+        int charge = charge(getUseDuration(stack, entity) - timeLeft);
         if (charge < 1) return;
         BullDemonAbilityHandler.startShockwave(p, charge);
         p.getCooldowns().addCooldown(this, COOLDOWN);
@@ -80,7 +82,7 @@ public class MixedIronCudgelItem extends SwordItem implements Charged {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.literal("A heavy club.").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.literal("Bull Demon King:").withStyle(ChatFormatting.GOLD));
         tooltip.add(Component.literal(" hold right-click and let go").withStyle(ChatFormatting.GOLD));

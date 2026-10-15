@@ -3,8 +3,6 @@ package com.jttw.engine.item;
 import net.minecraft.resources.ResourceLocation;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.character.nezha.NezhaCharacter;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import com.jttw.engine.reincarnation.AlignmentData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -14,9 +12,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
@@ -25,6 +22,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
@@ -46,11 +44,11 @@ public class FireTipSpearItem extends Item {
     public static final float AFLAME_QI_PER_SECOND = 3f;
 
     public static boolean isAflame(ItemStack stack) {
-        return stack.hasTag() && stack.getTag().getBoolean(TAG_AFLAME);
+        return StackData.getBoolean(stack, TAG_AFLAME);
     }
 
     public static void setAflame(ItemStack stack, boolean aflame) {
-        stack.getOrCreateTag().putBoolean(TAG_AFLAME, aflame);
+        StackData.putBoolean(stack, TAG_AFLAME, aflame);
     }
 
     @Override
@@ -63,13 +61,13 @@ public class FireTipSpearItem extends Item {
     }
 
     @Override
-    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
-        if (slot != EquipmentSlot.MAINHAND) return ImmutableMultimap.of();
+    public ItemAttributeModifiers getDefaultAttributeModifiers(ItemStack stack) {
         // The attack bonus is for anyone; the sneak fireball (use) is Nezha's alone
         double mult = isAflame(stack) ? 1.25 : 0.75; // +75% for everyone holding it, +125% lit; Nezha gets extra from handler
-        ImmutableMultimap.Builder<Attribute, AttributeModifier> b = ImmutableMultimap.builder();
-        b.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK,
-                mult * Armaments.refineMultiplier(stack), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+        ItemAttributeModifiers.Builder b = ItemAttributeModifiers.builder();
+        b.add(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK,
+                mult * Armaments.refineMultiplier(stack), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL),
+                EquipmentSlotGroup.MAINHAND);
         return b.build();
     }
 
@@ -117,7 +115,7 @@ public class FireTipSpearItem extends Item {
             double spread = (i == 0) ? 0 : (Math.random() - 0.5) * 0.3;
             SmallFireball fb = new SmallFireball(level,
                     sp.getX(), sp.getEyeY() - 0.1, sp.getZ(),
-                    look.x + spread, look.y + spread * 0.5, look.z + spread);
+                    new Vec3(look.x + spread, look.y + spread * 0.5, look.z + spread));
             fb.setOwner(sp);
             level.addFreshEntity(fb);
         }
@@ -128,7 +126,7 @@ public class FireTipSpearItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.literal("§6Fire-Tipped Spear of Nezha").withStyle(ChatFormatting.GOLD));
         tooltip.add(Component.literal(isAflame(stack) ? "§c+125% damage, every hit ignites (lit)" : "§e+75% damage"));
         tooltip.add(Component.literal("§7Nezha: right-click: Fireball"));

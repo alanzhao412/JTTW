@@ -81,7 +81,7 @@ public class BellOfTaiyiItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.literal("Taiyi Tianzun's bell").withStyle(ChatFormatting.GOLD));
         tooltip.add(Component.literal("Right-click: everything within 6 blocks freezes for 2 s").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.literal("Grand Saint of Nine Spirits: 16 blocks, 3 s,").withStyle(ChatFormatting.YELLOW));

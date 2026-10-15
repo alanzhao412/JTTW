@@ -8,8 +8,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -17,8 +15,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
@@ -27,6 +24,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
@@ -46,20 +44,20 @@ public class QiankunRingItem extends Item {
     }
 
     public static int getSize(ItemStack stack) {
-        if (!stack.hasTag() || !stack.getTag().contains(TAG_SIZE)) return 1;
-        return Math.max(1, Math.min(5, stack.getTag().getInt(TAG_SIZE)));
+        if (!StackData.has(stack, TAG_SIZE)) return 1;
+        return Math.max(1, Math.min(5, StackData.getInt(stack, TAG_SIZE)));
     }
 
     public static void setSize(ItemStack stack, int size) {
-        stack.getOrCreateTag().putInt(TAG_SIZE, Math.max(1, Math.min(5, size)));
+        StackData.putInt(stack, TAG_SIZE, Math.max(1, Math.min(5, size)));
     }
 
     @Override
-    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
-        if (slot != EquipmentSlot.MAINHAND) return ImmutableMultimap.of();
-        ImmutableMultimap.Builder<Attribute, AttributeModifier> b = ImmutableMultimap.builder();
-        b.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK,
-                0.25 * Armaments.refineMultiplier(stack), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+    public ItemAttributeModifiers getDefaultAttributeModifiers(ItemStack stack) {
+        ItemAttributeModifiers.Builder b = ItemAttributeModifiers.builder();
+        b.add(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK,
+                0.25 * Armaments.refineMultiplier(stack), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL),
+                EquipmentSlotGroup.MAINHAND);
         return b.build();
     }
 
@@ -91,7 +89,7 @@ public class QiankunRingItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         int size = getSize(stack);
         tooltip.add(Component.literal("§6Qiankun Ring").withStyle(ChatFormatting.GOLD));
         tooltip.add(Component.literal("§eSize: " + size + "/5"));

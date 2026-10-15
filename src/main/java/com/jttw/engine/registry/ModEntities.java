@@ -165,15 +165,15 @@ public final class ModEntities {
     }
 
     /** The ridge's dead rise in any light (their spawn lists are the ridge's alone). */
-    private static void onSpawnPlacements(net.neoforged.neoforge.event.entity.SpawnPlacementRegisterEvent event) {
-        event.register(BONE_SERVANT.get(), net.minecraft.world.entity.SpawnPlacements.Type.ON_GROUND,
+    private static void onSpawnPlacements(net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent event) {
+        event.register(BONE_SERVANT.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
                 net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
-                net.neoforged.neoforge.event.entity.SpawnPlacementRegisterEvent.Operation.REPLACE);
-        event.register(WRAITH.get(), net.minecraft.world.entity.SpawnPlacements.Type.ON_GROUND,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(WRAITH.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
                 net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
-                net.neoforged.neoforge.event.entity.SpawnPlacementRegisterEvent.Operation.REPLACE);
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
     }
 
     private static void onAttributeCreate(EntityAttributeCreationEvent event) {

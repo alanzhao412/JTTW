@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.HoeItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.Tiers;
@@ -31,7 +32,8 @@ import java.util.List;
 public class NineToothRakeItem extends HoeItem {
 
     public NineToothRakeItem() {
-        super(Tiers.NETHERITE, 4, -3.0f, new Properties().rarity(Rarity.EPIC).fireResistant());
+        super(Tiers.NETHERITE, new Properties().rarity(Rarity.EPIC).fireResistant()
+                .attributes(HoeItem.createAttributes(Tiers.NETHERITE, 4, -3.0f)));
     }
 
     @Override
@@ -52,7 +54,7 @@ public class NineToothRakeItem extends HoeItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.literal("Tills a 3x3 patch at once.").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.literal("Marshal of the Heavenly Canopy:").withStyle(ChatFormatting.GOLD));
         tooltip.add(Component.literal(" every full swing explodes,").withStyle(ChatFormatting.GOLD));

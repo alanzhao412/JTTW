@@ -85,7 +85,7 @@ public class BananaLeafFanItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.literal("A gust that throws back").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.literal("everything in front.").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.literal("Bull Demon King:").withStyle(ChatFormatting.GOLD));

@@ -39,7 +39,7 @@ public final class SpearReturn {
     /** Records a throw: the spear comes back at {@code now + RETURN_TICKS}. */
     public static void recordThrow(ServerPlayer player, ItemStack spear, Entity thrown) {
         CompoundTag note = new CompoundTag();
-        note.put(ITEM, spear.save(new CompoundTag()));
+        note.put(ITEM, spear.saveOptional(player.registryAccess()));
         note.putLong(RETURN_AT, player.level().getGameTime() + RETURN_TICKS);
         note.putUUID(ENTITY, thrown.getUUID());
         player.getPersistentData().put(KEY, note);
@@ -65,7 +65,7 @@ public final class SpearReturn {
             Entity thrown = SummonLeash.find(player.server, note.getUUID(ENTITY));
             if (thrown != null) thrown.discard();
         }
-        ItemStack spear = ItemStack.of(note.getCompound(ITEM));
+        ItemStack spear = ItemStack.parseOptional(player.registryAccess(), note.getCompound(ITEM));
         if (spear.isEmpty()) return;
         if (!player.getInventory().add(spear)) player.drop(spear, false);
         player.sendSystemMessage(Component.literal("§6[JTTW] §eYour spear returns to you."));

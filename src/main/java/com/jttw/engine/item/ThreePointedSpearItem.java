@@ -2,14 +2,11 @@ package com.jttw.engine.item;
 
 import net.minecraft.resources.ResourceLocation;
 import com.jttw.engine.JTTWEngine;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import com.jttw.engine.reincarnation.AlignmentData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
@@ -17,6 +14,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
@@ -39,8 +37,8 @@ import java.util.UUID;
  */
 public class ThreePointedSpearItem extends Item implements Charged {
 
-    private static final ResourceLocation UUID_ATK_ES = JTTWEngine.id("atk_es");
-    private static final ResourceLocation UUID_ATK_OTHER = JTTWEngine.id("atk_other");
+    private static final ResourceLocation UUID_ATK_ES = JTTWEngine.id("three_pointed_spear_atk_es");
+    private static final ResourceLocation UUID_ATK_OTHER = JTTWEngine.id("three_pointed_spear_atk");
     private static final ResourceLocation UUID_REACH = JTTWEngine.id("three_pointed_spear_reach");
 
     // Combo tracking — stored per-entity in persistent data
@@ -53,17 +51,16 @@ public class ThreePointedSpearItem extends Item implements Charged {
     }
 
     @Override
-    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
-        if (slot != EquipmentSlot.MAINHAND) return ImmutableMultimap.of();
-
-        ImmutableMultimap.Builder<Attribute, AttributeModifier> b = ImmutableMultimap.builder();
+    public ItemAttributeModifiers getDefaultAttributeModifiers(ItemStack stack) {
+        ItemAttributeModifiers.Builder b = ItemAttributeModifiers.builder();
 
         // Damage is applied generically here — Erlang Shen gets full 100%,
         // others get 20%. Detection is done at runtime in hurtEnemy.
         // For attribute display, show the base (lower) value.
         // The Erlang Shen bonus is applied via ErlangShenAbilityHandler event.
-        b.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK_OTHER,
-                0.20 * Armaments.refineMultiplier(stack), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+        b.add(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK_OTHER,
+                0.20 * Armaments.refineMultiplier(stack), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL),
+                EquipmentSlotGroup.MAINHAND);
 
         return b.build();
     }
@@ -127,7 +124,7 @@ public class ThreePointedSpearItem extends Item implements Charged {
     private static final double WRATH_LUNGE_BONUS = 1.5;
 
     @Override
-    public int getUseDuration(ItemStack stack) {
+    public int getUseDuration(ItemStack stack, LivingEntity entity) {
         return 72000;
     }
 
@@ -148,7 +145,7 @@ public class ThreePointedSpearItem extends Item implements Charged {
     public void releaseUsing(ItemStack stack, Level level, LivingEntity entity, int timeLeft) {
         if (level.isClientSide() || !(entity instanceof net.minecraft.server.level.ServerPlayer sp)) return;
 
-        int chargeTime = getUseDuration(stack) - timeLeft;
+        int chargeTime = getUseDuration(stack, entity) - timeLeft;
         if (chargeTime < MIN_CHARGE_TICKS) return;
 
         // Cooldown check
@@ -269,7 +266,7 @@ public class ThreePointedSpearItem extends Item implements Charged {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.literal("§6Three-Pointed Double-Edged Spear").withStyle(ChatFormatting.GOLD));
         tooltip.add(Component.literal("§e+100% damage (Erlang Shen)"));
         tooltip.add(Component.literal("§e+20% damage (others)"));

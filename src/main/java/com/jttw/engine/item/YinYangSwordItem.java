@@ -3,8 +3,6 @@ package com.jttw.engine.item;
 import net.minecraft.resources.ResourceLocation;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.registry.ModItems;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -13,9 +11,8 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
@@ -23,6 +20,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -35,7 +33,7 @@ public class YinYangSwordItem extends Item {
 
     private static final ResourceLocation UUID_ATK = JTTWEngine.id("yin_yang_sword_atk");
     /** The off-hand sword needs its own id, or the two hands overwrite each other's bonus. */
-    private static final ResourceLocation UUID_ATK_OFFHAND = JTTWEngine.id("atk_offhand");
+    private static final ResourceLocation UUID_ATK_OFFHAND = JTTWEngine.id("yin_yang_sword_atk_offhand");
     public static final String TAG_SIDE = "jttw_yy_side";
 
     public YinYangSwordItem() {
@@ -43,32 +41,33 @@ public class YinYangSwordItem extends Item {
     }
 
     public static boolean isYin(ItemStack stack) {
-        return stack.hasTag() && "yin".equals(stack.getTag().getString(TAG_SIDE));
+        return "yin".equals(StackData.getString(stack, TAG_SIDE));
     }
 
     public static boolean isYang(ItemStack stack) {
-        return stack.hasTag() && "yang".equals(stack.getTag().getString(TAG_SIDE));
+        return "yang".equals(StackData.getString(stack, TAG_SIDE));
     }
 
     public static ItemStack createYin() {
         ItemStack stack = new ItemStack(ModItems.YIN_YANG_SWORD.get());
-        stack.getOrCreateTag().putString(TAG_SIDE, "yin");
+        StackData.putString(stack, TAG_SIDE, "yin");
         return stack;
     }
 
     public static ItemStack createYang() {
         ItemStack stack = new ItemStack(ModItems.YIN_YANG_SWORD.get());
-        stack.getOrCreateTag().putString(TAG_SIDE, "yang");
+        StackData.putString(stack, TAG_SIDE, "yang");
         return stack;
     }
 
     @Override
-    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
-        if (slot != EquipmentSlot.MAINHAND && slot != EquipmentSlot.OFFHAND) return ImmutableMultimap.of();
-        ImmutableMultimap.Builder<Attribute, AttributeModifier> b = ImmutableMultimap.builder();
-        UUID id = slot == EquipmentSlot.MAINHAND ? UUID_ATK : UUID_ATK_OFFHAND;
-        b.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(id,
-                0.5 * Armaments.refineMultiplier(stack), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+    public ItemAttributeModifiers getDefaultAttributeModifiers(ItemStack stack) {
+        ItemAttributeModifiers.Builder b = ItemAttributeModifiers.builder();
+        double amount = 0.5 * Armaments.refineMultiplier(stack);
+        b.add(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK,
+                amount, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL), EquipmentSlotGroup.MAINHAND);
+        b.add(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK_OFFHAND,
+                amount, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL), EquipmentSlotGroup.OFFHAND);
         return b.build();
     }
 
@@ -132,7 +131,7 @@ public class YinYangSwordItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.literal("§6Yin-Yang Swords of Nezha").withStyle(ChatFormatting.GOLD));
         tooltip.add(Component.literal("§e+50% damage"));
         if (isYin(stack)) {

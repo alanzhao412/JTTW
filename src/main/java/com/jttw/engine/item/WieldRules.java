@@ -196,7 +196,7 @@ public final class WieldRules {
         }
         if (p.tickCount % 20 != 0) return;
         if (holding(p, FireTipSpearItem.class) || holding(p, QiankunRingItem.class)) {
-            p.setSecondsOnFire(3);
+            p.igniteForSeconds(3);
         }
         if (p.getItemBySlot(EquipmentSlot.CHEST).getItem() instanceof HuntianClothItem) {
             // The cloth binds: slowed, clumsy, weakened, and wrung
@@ -223,7 +223,7 @@ public final class WieldRules {
                 ItemStack s = inv.items.get(i);
                 if (s.getItem() instanceof YinYangSwordItem && YinYangSwordItem.isYang(s) != mainYang) {
                     ItemStack partner = s.copy();
-                    partner.getOrCreateTag().putBoolean(TAG_DRAWN, true);
+                    StackData.putBoolean(partner, TAG_DRAWN, true);
                     inv.items.set(i, off.copy()); // what was in the off hand takes the partner's place
                     p.setItemSlot(EquipmentSlot.OFFHAND, partner);
                     return;
@@ -232,9 +232,9 @@ public final class WieldRules {
             return;
         }
         // The pair put away: the drawn sword goes back into the inventory
-        if (off.getItem() instanceof YinYangSwordItem && off.hasTag() && off.getTag().getBoolean(TAG_DRAWN)) {
+        if (off.getItem() instanceof YinYangSwordItem && StackData.getBoolean(off, TAG_DRAWN)) {
             ItemStack back = off.copy();
-            back.getTag().remove(TAG_DRAWN);
+            StackData.remove(back, TAG_DRAWN);
             int free = inv.getFreeSlot();
             if (free >= 0) {
                 inv.items.set(free, back);

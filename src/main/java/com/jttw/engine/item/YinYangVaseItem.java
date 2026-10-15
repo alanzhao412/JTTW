@@ -56,7 +56,7 @@ public class YinYangVaseItem extends Item {
     }
 
     public static boolean holds(ItemStack stack) {
-        return stack.hasTag() && stack.getTag().contains(TAG_SEALED);
+        return StackData.has(stack, TAG_SEALED);
     }
 
     /** Players and bosses are too great for the vase, but not for the Peng's hold. */
@@ -80,16 +80,17 @@ public class YinYangVaseItem extends Item {
         }
         if (holds(stack)) {
             sp.displayClientMessage(Component.literal("§7The vase already holds "
-                    + stack.getTag().getString(TAG_SEALED_NAME) + "."), true);
+                    + StackData.getString(stack, TAG_SEALED_NAME) + "."), true);
             return InteractionResult.FAIL;
         }
         CompoundTag saved = new CompoundTag();
         if (!target.saveAsPassenger(saved)) return InteractionResult.FAIL;
-        CompoundTag tag = stack.getOrCreateTag();
-        tag.put(TAG_SEALED, saved);
-        tag.putLong(TAG_SEALED_AT, sp.level().getGameTime());
-        tag.putString(TAG_SEALED_NAME, target.getName().getString());
-        tag.putBoolean(TAG_DISSOLVING, peng);
+        StackData.update(stack, tag -> {
+            tag.put(TAG_SEALED, saved);
+            tag.putLong(TAG_SEALED_AT, sp.level().getGameTime());
+            tag.putString(TAG_SEALED_NAME, target.getName().getString());
+            tag.putBoolean(TAG_DISSOLVING, peng);
+        });
         ServerLevel level = sp.serverLevel();
         level.sendParticles(ParticleTypes.REVERSE_PORTAL, target.getX(), target.getY() + target.getBbHeight() / 2, target.getZ(),
                 30, target.getBbWidth() / 2, target.getBbHeight() / 2, target.getBbWidth() / 2, 0.1);
@@ -117,14 +118,16 @@ public class YinYangVaseItem extends Item {
      */
     @Nullable
     public static Entity release(ItemStack stack, ServerLevel level, Vec3 at, @Nullable ServerPlayer by) {
-        CompoundTag tag = stack.getTag();
+        CompoundTag tag = StackData.read(stack);
         CompoundTag saved = tag.getCompound(TAG_SEALED);
         long sealedFor = level.getGameTime() - tag.getLong(TAG_SEALED_AT);
         boolean dissolving = tag.getBoolean(TAG_DISSOLVING);
-        tag.remove(TAG_SEALED);
-        tag.remove(TAG_SEALED_AT);
-        tag.remove(TAG_SEALED_NAME);
-        tag.remove(TAG_DISSOLVING);
+        StackData.update(stack, t -> {
+            t.remove(TAG_SEALED);
+            t.remove(TAG_SEALED_AT);
+            t.remove(TAG_SEALED_NAME);
+            t.remove(TAG_DISSOLVING);
+        });
 
         Entity released = EntityType.loadEntityRecursive(saved, level, e -> {
             e.moveTo(at.x, at.y, at.z, e.getYRot(), e.getXRot());
@@ -152,9 +155,9 @@ public class YinYangVaseItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         if (holds(stack)) {
-            tooltip.add(Component.literal("Holds: " + stack.getTag().getString(TAG_SEALED_NAME)).withStyle(ChatFormatting.WHITE));
+            tooltip.add(Component.literal("Holds: " + StackData.getString(stack, TAG_SEALED_NAME)).withStyle(ChatFormatting.WHITE));
         }
         tooltip.add(Component.literal("Right-click a creature to seal it;").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.literal("right-click a block to let it out.").withStyle(ChatFormatting.GRAY));

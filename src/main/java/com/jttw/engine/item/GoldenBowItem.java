@@ -18,6 +18,7 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
@@ -63,11 +64,11 @@ public class GoldenBowItem extends BowItem {
             return;
         }
         Player p = (Player) user;
-        float power = getPowerForTime(getUseDuration(stack) - timeLeft);
+        float power = getPowerForTime(getUseDuration(stack, user) - timeLeft);
         if (power < 0.1f) return;
         if (!level.isClientSide) {
             loose(p, power);
-            stack.hurtAndBreak(1, p, e -> e.broadcastBreakEvent(p.getUsedItemHand()));
+            stack.hurtAndBreak(1, p, LivingEntity.getSlotForHand(p.getUsedItemHand()));
         }
         level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS, 1f, 1.4f + power * 0.3f);
         p.awardStat(Stats.ITEM_USED.get(this));
@@ -75,7 +76,7 @@ public class GoldenBowItem extends BowItem {
 
     /** Looses one golden arrow at {@code power} (0 to 1) of a full draw. Public for tests. */
     public static Arrow loose(Player p, float power) {
-        Arrow arrow = new Arrow(p.level(), p);
+        Arrow arrow = new Arrow(p.level(), p, new ItemStack(Items.ARROW), null);
         arrow.shootFromRotation(p, p.getXRot(), p.getYRot(), 0, power * 3.4f, 0.4f);
         if (power >= 1f) arrow.setCritArrow(true);
         arrow.setBaseDamage(ARROW_DAMAGE * LevelPower.of(p));
