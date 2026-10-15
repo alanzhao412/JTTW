@@ -44,12 +44,12 @@ public final class StoredTremor {
 
     /** What gets through to it, last of all reductions, is stored. */
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onDamaged(LivingDamageEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer p) || event.getAmount() <= 0) return;
+    public static void onDamaged(LivingDamageEvent.Pre event) {
+        if (!(event.getEntity() instanceof ServerPlayer p) || event.getNewDamage() <= 0) return;
         if (!TurtlePassives.isTurtle(p) || tier(p) < 1) return;
         ArrayDeque<long[]> mine = STORED.computeIfAbsent(p.getUUID(), k -> new ArrayDeque<>());
         // stored as hundredths, so a long carries it
-        mine.addLast(new long[]{p.level().getGameTime(), Math.round(event.getAmount() * 100)});
+        mine.addLast(new long[]{p.level().getGameTime(), Math.round(event.getNewDamage() * 100)});
         show(p);
     }
 
@@ -80,8 +80,8 @@ public final class StoredTremor {
 
     /** Stored blows fade as they leave the window: the note follows, once a second. */
     @SubscribeEvent
-    public static void onPlayerTick(net.neoforged.neoforge.event.TickEvent.PlayerTickEvent event) {
-        if (event.phase != net.neoforged.neoforge.event.TickEvent.Phase.END || !(event.player instanceof ServerPlayer p)) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer p)) return;
         if (p.tickCount % 20 != 0 || !STORED.containsKey(p.getUUID())) return;
         show(p);
         if (stored(p) == 0) STORED.remove(p.getUUID());

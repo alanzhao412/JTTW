@@ -115,11 +115,11 @@ public final class DivineBeastHandler {
         if (state.is(BlockTags.NEEDS_IRON_TOOL))     return harvestLevel >= 2;
         if (state.is(BlockTags.NEEDS_STONE_TOOL))    return harvestLevel >= 1;
 
-        // Forge adds needs_netherite_tool for modded blocks
+        // NeoForge adds needs_netherite_tool for modded blocks
         // Check via string tag since it may not exist in all environments
         try {
             TagKey<net.minecraft.world.level.block.Block> netheriteTag =
-                    BlockTags.create(new net.minecraft.resources.ResourceLocation("forge", "needs_netherite_tool"));
+                    BlockTags.create(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("neoforge", "needs_netherite_tool"));
             if (state.is(netheriteTag)) return harvestLevel >= 4;
         } catch (Exception ignored) {}
 
@@ -163,16 +163,16 @@ public final class DivineBeastHandler {
     private static void applyDomainBuffs(ServerPlayer player) {
         applyDomainMod(player, Attributes.MAX_HEALTH, UUID_DOMAIN_HP, MOD_DOMAIN_HP, DOMAIN_BUFF_MULTIPLIER);
         applyDomainMod(player, Attributes.ATTACK_DAMAGE, UUID_DOMAIN_STR, MOD_DOMAIN_STR, DOMAIN_BUFF_MULTIPLIER);
-        applyDomainMod(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get(), UUID_DOMAIN_DEF, MOD_DOMAIN_DEF, DOMAIN_BUFF_MULTIPLIER);
-        applyDomainMod(player, com.jttw.engine.registry.ModAttributes.MAGIC_RESISTANCE.get(), UUID_DOMAIN_DEF, MOD_DOMAIN_MRES, DOMAIN_BUFF_MULTIPLIER);
+        applyDomainMod(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE, UUID_DOMAIN_DEF, MOD_DOMAIN_DEF, DOMAIN_BUFF_MULTIPLIER);
+        applyDomainMod(player, com.jttw.engine.registry.ModAttributes.MAGIC_RESISTANCE, UUID_DOMAIN_DEF, MOD_DOMAIN_MRES, DOMAIN_BUFF_MULTIPLIER);
         removeDomainMod(player, Attributes.ARMOR, UUID_DOMAIN_DEF); // the old armor version
     }
 
     private static void removeDomainBuffs(ServerPlayer player) {
         removeDomainMod(player, Attributes.MAX_HEALTH, UUID_DOMAIN_HP);
         removeDomainMod(player, Attributes.ATTACK_DAMAGE, UUID_DOMAIN_STR);
-        removeDomainMod(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get(), UUID_DOMAIN_DEF);
-        removeDomainMod(player, com.jttw.engine.registry.ModAttributes.MAGIC_RESISTANCE.get(), UUID_DOMAIN_DEF);
+        removeDomainMod(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE, UUID_DOMAIN_DEF);
+        removeDomainMod(player, com.jttw.engine.registry.ModAttributes.MAGIC_RESISTANCE, UUID_DOMAIN_DEF);
         removeDomainMod(player, Attributes.ARMOR, UUID_DOMAIN_DEF); // the old armor version
 
         // Clamp HP if we just lost the health buff
@@ -182,8 +182,8 @@ public final class DivineBeastHandler {
     }
 
     private static void applyDomainMod(ServerPlayer player,
-                                       net.minecraft.world.entity.ai.attributes.Attribute attr,
-                                       UUID uuid, String name, double multiplier) {
+                                       net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attr,
+                                       net.minecraft.resources.ResourceLocation uuid, String name, double multiplier) {
         var inst = player.getAttribute(attr);
         if (inst == null) return;
 
@@ -195,8 +195,8 @@ public final class DivineBeastHandler {
     }
 
     private static void removeDomainMod(ServerPlayer player,
-                                        net.minecraft.world.entity.ai.attributes.Attribute attr,
-                                        UUID uuid) {
+                                        net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attr,
+                                        net.minecraft.resources.ResourceLocation uuid) {
         var inst = player.getAttribute(attr);
         if (inst != null) inst.removeModifier(uuid);
     }

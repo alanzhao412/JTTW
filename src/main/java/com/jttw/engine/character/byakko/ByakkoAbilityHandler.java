@@ -133,7 +133,7 @@ public final class ByakkoAbilityHandler {
                 "jttw:byakko_speed", speedBonus, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 
         // Step height addition
-        AttributeInstance stepInst = player.getAttribute(NeoForgeMod.STEP_HEIGHT_ADDITION.get());
+        AttributeInstance stepInst = player.getAttribute(Attributes.STEP_HEIGHT);
         if (stepInst != null) {
             stepInst.removeModifier(UUID_BK_STEP);
             stepInst.addPermanentModifier(new AttributeModifier(
@@ -147,13 +147,13 @@ public final class ByakkoAbilityHandler {
      */
     public static void removePassiveScaling(ServerPlayer player) {
         removeMod(player, Attributes.MOVEMENT_SPEED, UUID_BK_SPEED);
-        AttributeInstance stepInst = player.getAttribute(NeoForgeMod.STEP_HEIGHT_ADDITION.get());
+        AttributeInstance stepInst = player.getAttribute(Attributes.STEP_HEIGHT);
         if (stepInst != null) stepInst.removeModifier(UUID_BK_STEP);
     }
 
     private static void applyMod(ServerPlayer player,
-                                 net.minecraft.world.entity.ai.attributes.Attribute attr,
-                                 UUID uuid, String name, double amount,
+                                 net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attr,
+                                 ResourceLocation uuid, String name, double amount,
                                  AttributeModifier.Operation op) {
         AttributeInstance inst = player.getAttribute(attr);
         if (inst == null) return;
@@ -162,8 +162,8 @@ public final class ByakkoAbilityHandler {
     }
 
     private static void removeMod(ServerPlayer player,
-                                  net.minecraft.world.entity.ai.attributes.Attribute attr,
-                                  UUID uuid) {
+                                  net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attr,
+                                  ResourceLocation uuid) {
         AttributeInstance inst = player.getAttribute(attr);
         if (inst != null) inst.removeModifier(uuid);
     }
@@ -461,7 +461,7 @@ public final class ByakkoAbilityHandler {
         if (!isByakko(sp)) return;
 
         ItemStack stack = event.getItem();
-        if (!stack.getItem().isEdible()) return;
+        if (stack.getFoodProperties(sp) == null) return;
 
         // Remove negative effects that come from eating raw/rotten foods
         // Schedule removal 1 tick later would be ideal, but removing immediately
@@ -617,7 +617,7 @@ public final class ByakkoAbilityHandler {
             if (tier >= 2) {
                 List<MobEffectInstance> toRemove = new ArrayList<>();
                 for (MobEffectInstance effect : mob.getActiveEffects()) {
-                    if (effect.getEffect().isBeneficial()) {
+                    if (effect.getEffect().value().isBeneficial()) {
                         toRemove.add(effect);
                     }
                 }

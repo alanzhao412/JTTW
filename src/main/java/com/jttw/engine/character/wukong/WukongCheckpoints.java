@@ -126,7 +126,7 @@ public final class WukongCheckpoints {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (!player.getPersistentData().getBoolean("jttw_projectile_immune")) return;
 
-        if (event.getSource().isIndirect()
+        if (!event.getSource().isDirect()
                 || event.getSource().getMsgId().equals("sonic_boom")) {
             event.setCanceled(true);
         }

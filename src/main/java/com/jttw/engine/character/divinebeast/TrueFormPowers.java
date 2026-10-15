@@ -69,7 +69,7 @@ public final class TrueFormPowers {
             if (p.tickCount % 20 == 0) {
                 for (LivingEntity e : p.level().getEntitiesOfClass(LivingEntity.class, p.getBoundingBox().inflate(4),
                         e -> e != p && e.isAlive() && e.distanceTo(p) <= 4)) {
-                    e.setSecondsOnFire(3);
+                    e.igniteForSeconds(3);
                     e.hurt(p.damageSources().playerAttack(p), LevelPower.scaled(p, 3f));
                 }
             }

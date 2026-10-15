@@ -38,7 +38,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
-import net.neoforged.neoforge.event.entity.living.LivingEvent;
+import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -274,8 +274,8 @@ public final class BullDemonAbilityHandler {
     // ── Thick Hide ─────────────────────────────────────────────────
 
     private static void thickHide(ServerPlayer p, int tier) {
-        PassiveModifiers.add(p, ModAttributes.PHYSICAL_RESISTANCE.get(), "bdk_hide_pres", tier * 10);
-        PassiveModifiers.add(p, ModAttributes.MAGIC_RESISTANCE.get(), "bdk_hide_mres", tier >= 2 ? (tier - 1) * 10 : 0);
+        PassiveModifiers.add(p, ModAttributes.PHYSICAL_RESISTANCE, "bdk_hide_pres", tier * 10);
+        PassiveModifiers.add(p, ModAttributes.MAGIC_RESISTANCE, "bdk_hide_mres", tier >= 2 ? (tier - 1) * 10 : 0);
         PassiveModifiers.add(p, Attributes.KNOCKBACK_RESISTANCE, "bdk_hide_steady", tier >= 3 ? 0.5 : 0);
         if (tier >= 1 && p.isOnFire()) p.clearFire();
     }
@@ -338,8 +338,8 @@ public final class BullDemonAbilityHandler {
     }
 
     @SubscribeEvent
-    public static void onLivingTick(LivingEvent.LivingTickEvent event) {
-        LivingEntity e = event.getEntity();
+    public static void onLivingTick(EntityTickEvent.Pre event) {
+        if (!(event.getEntity() instanceof LivingEntity e)) return;
         if (e.level().isClientSide || !e.getPersistentData().contains(KEY_BLOWN_AT)) return;
         if (e.level().getGameTime() >= e.getPersistentData().getLong(KEY_BLOWN_AT)) landBlown(e);
     }

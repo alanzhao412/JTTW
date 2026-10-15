@@ -134,7 +134,7 @@ public final class XiaotianQuanManager {
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post e) {
 
-        MinecraftServer server = net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();
+        MinecraftServer server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
         if (server == null) return;
 
         Set<UUID> toRemove = new HashSet<>();

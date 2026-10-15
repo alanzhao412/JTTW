@@ -261,7 +261,7 @@ public final class PhoenixAbilityHandler {
                 target.hurt(player.damageSources().mobAttack(player), half);
                 target.invulnerableTime = 0; // reset so magic hit lands
                 target.hurt(player.damageSources().magic(), half);
-                target.setSecondsOnFire(fireTicks / 20);
+                target.igniteForSeconds(fireTicks / 20);
             }
         }
 
@@ -349,7 +349,7 @@ public final class PhoenixAbilityHandler {
             // Only melee attacks (not projectiles / indirect)
             DamageSource src = event.getSource();
             if (src.getDirectEntity() == attacker) {
-                event.getEntity().setSecondsOnFire(3);
+                event.getEntity().igniteForSeconds(3);
             }
         }
 
@@ -401,7 +401,7 @@ public final class PhoenixAbilityHandler {
         } else {
             fireSeconds = 3;
         }
-        livingAttacker.setSecondsOnFire(fireSeconds);
+        livingAttacker.igniteForSeconds(fireSeconds);
 
         // T3: fire thorns deal 2x damage (applied as direct fire damage)
         if (plumageTier >= 3) {
@@ -499,7 +499,7 @@ public final class PhoenixAbilityHandler {
         for (Entity entity : nearby) {
             double dist = victim.distanceTo(entity);
             if (dist <= spreadRadius) {
-                entity.setSecondsOnFire(5);
+                entity.igniteForSeconds(5);
             }
         }
 
@@ -543,7 +543,7 @@ public final class PhoenixAbilityHandler {
 
             float falloff = Math.max(0.2f, 1.0f - (float) (dist / radius));
             target.hurt(player.damageSources().onFire(), explosionDamage * falloff);
-            target.setSecondsOnFire(5);
+            target.igniteForSeconds(5);
 
             // Knockback away
             Vec3 knockDir = target.position().subtract(player.position());

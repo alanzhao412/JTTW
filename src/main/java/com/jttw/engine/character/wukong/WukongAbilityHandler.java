@@ -269,21 +269,21 @@ public final class WukongAbilityHandler {
                 tier >= 3 ? 0.30 : 0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 
         // Tier 3: +24 physical resistance
-        applyOrRemove(sp, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get(), UUID_MARTIAL_ARMOR,
+        applyOrRemove(sp, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE, UUID_MARTIAL_ARMOR,
                 "jttw:martial_pres", tier >= 3 ? 24.0 : 0, AttributeModifier.Operation.ADD_VALUE);
         applyOrRemove(sp, Attributes.ARMOR, UUID_MARTIAL_ARMOR, "jttw:martial_armor", 0,
                 AttributeModifier.Operation.ADD_VALUE); // the old armor version
     }
 
-    private static void applyOrRemove(ServerPlayer sp, net.minecraft.world.entity.ai.attributes.Attribute attr,
-                                       UUID uuid, String name, double amount,
+    private static void applyOrRemove(ServerPlayer sp, net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attr,
+                                       net.minecraft.resources.ResourceLocation uuid, String name, double amount,
                                        AttributeModifier.Operation op) {
         AttributeInstance inst = sp.getAttribute(attr);
         if (inst == null) return;
 
         AttributeModifier existing = inst.getModifier(uuid);
         if (amount > 0) {
-            if (existing == null || existing.getAmount() != amount) {
+            if (existing == null || existing.amount() != amount) {
                 if (existing != null) inst.removeModifier(uuid);
                 inst.addTransientModifier(new AttributeModifier(uuid, amount, op));
             }

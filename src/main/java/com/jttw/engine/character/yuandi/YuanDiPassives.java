@@ -39,7 +39,7 @@ public final class YuanDiPassives {
             if (nodes.contains(YuanDiSkillTree.BODY_2)) flesh++;
         }
         PassiveModifiers.add(sp, Attributes.MAX_HEALTH, "yd_body_hp", 20.0 * flesh * LevelPower.of(sp));
-        PassiveModifiers.add(sp, ModAttributes.PHYSICAL_RESISTANCE.get(), "yd_body_pres", 8.0 * flesh);
+        PassiveModifiers.add(sp, ModAttributes.PHYSICAL_RESISTANCE, "yd_body_pres", 8.0 * flesh);
         PassiveModifiers.add(sp, Attributes.KNOCKBACK_RESISTANCE, "yd_body_kb",
                 flesh >= 2 ? 0.25 : flesh == 1 ? 0.10 : 0.0);
     }

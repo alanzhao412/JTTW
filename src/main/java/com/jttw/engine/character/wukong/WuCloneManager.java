@@ -172,7 +172,7 @@ public final class WuCloneManager {
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post e) {
 
-        MinecraftServer server = net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();
+        MinecraftServer server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
         if (server == null) return;
 
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -345,9 +345,9 @@ public final class WuCloneManager {
         if (atk != null) atk.setBaseValue(Math.max(1.0, playerAtk));
 
         // Same resistances as the player (uncapped, like theirs)
-        var pres = clone.getAttribute(ModAttributes.PHYSICAL_RESISTANCE.get());
+        var pres = clone.getAttribute(ModAttributes.PHYSICAL_RESISTANCE);
         if (pres != null) pres.setBaseValue(ResistanceHandler.physicalResistance(player));
-        var mres = clone.getAttribute(ModAttributes.MAGIC_RESISTANCE.get());
+        var mres = clone.getAttribute(ModAttributes.MAGIC_RESISTANCE);
         if (mres != null) mres.setBaseValue(ResistanceHandler.magicResistance(player));
 
         var spd = clone.getAttribute(Attributes.MOVEMENT_SPEED);

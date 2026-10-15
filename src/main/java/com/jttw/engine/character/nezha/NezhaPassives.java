@@ -49,7 +49,7 @@ public final class NezhaPassives {
         // A share of his whole attack: his base is 1, so MULTIPLY_BASE would add only 0.2
         PassiveModifiers.set(sp, Attributes.ATTACK_DAMAGE, "nz_combat_dmg", warrior >= 2 ? 0.20 : 0,
                 AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
-        PassiveModifiers.add(sp, ModAttributes.PHYSICAL_RESISTANCE.get(), "nz_combat_pres", warrior >= 3 ? 24.0 : 0);
+        PassiveModifiers.add(sp, ModAttributes.PHYSICAL_RESISTANCE, "nz_combat_pres", warrior >= 3 ? 24.0 : 0);
         if (warrior >= 3 && sp.isOnFire()) sp.clearFire();
     }
 

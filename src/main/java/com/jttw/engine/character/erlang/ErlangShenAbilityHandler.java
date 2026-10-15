@@ -91,7 +91,7 @@ public final class ErlangShenAbilityHandler {
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
 
-        MinecraftServer server = net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();
+        MinecraftServer server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
         if (server == null) return;
 
         Set<UUID> toRemove = new HashSet<>();
@@ -210,7 +210,7 @@ public final class ErlangShenAbilityHandler {
         if (ownerUUID == null) return;
 
         // Find the actual player to check tier
-        MinecraftServer server = net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();
+        MinecraftServer server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
         if (server == null) return;
         ServerPlayer owner = server.getPlayerList().getPlayer(ownerUUID);
         if (owner == null) return;

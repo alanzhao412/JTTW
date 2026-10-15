@@ -389,7 +389,7 @@ public final class MarshalAbilityHandler {
     }
 
     private static void admiral(ServerPlayer p, int tier) {
-        PassiveModifiers.set(p, NeoForgeMod.SWIM_SPEED.get(), "mc_admiral_swim", swimBonus(tier),
+        PassiveModifiers.set(p, NeoForgeMod.SWIM_SPEED, "mc_admiral_swim", swimBonus(tier),
                 AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
         if (tier < 1) return;
         boolean under = underwater(p);
@@ -450,7 +450,7 @@ public final class MarshalAbilityHandler {
         boolean marshal = MarshalCharacter.is(p);
         if (!marshal) {
             if (p.tickCount % 20 == 0) {
-                PassiveModifiers.set(p, NeoForgeMod.SWIM_SPEED.get(), "mc_admiral_swim", 0,
+                PassiveModifiers.set(p, NeoForgeMod.SWIM_SPEED, "mc_admiral_swim", 0,
                         AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
                 if (p.getPersistentData().getInt(KEY_RESERVE_SENT) > 1) syncStomach(p);
             }

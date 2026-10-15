@@ -251,7 +251,7 @@ public final class NineSpiritsAbilityHandler {
             for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(2.5),
                     e -> isFoe(e, owner))) {
                 e.hurt(owner.damageSources().indirectMagic(shot, owner), damage * markBonus(e));
-                e.setSecondsOnFire(4);
+                e.igniteForSeconds(4);
             }
             level.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 30, 0.8, 0.6, 0.8, 0.05);
             level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 1.0F, 1.0F);
@@ -380,8 +380,8 @@ public final class NineSpiritsAbilityHandler {
 
     private static void applyFormModifiers(ServerPlayer p, int tier) {
         double res = tier > 0 ? formResistance(tier) : 0;
-        PassiveModifiers.add(p, ModAttributes.PHYSICAL_RESISTANCE.get(), "ns_form_pres", res);
-        PassiveModifiers.add(p, ModAttributes.MAGIC_RESISTANCE.get(), "ns_form_mres", res);
+        PassiveModifiers.add(p, ModAttributes.PHYSICAL_RESISTANCE, "ns_form_pres", res);
+        PassiveModifiers.add(p, ModAttributes.MAGIC_RESISTANCE, "ns_form_mres", res);
         PassiveModifiers.add(p, Attributes.KNOCKBACK_RESISTANCE, "ns_form_kb", tier > 0 ? 0.6 : 0);
     }
 

@@ -58,7 +58,7 @@ public final class TrueForm {
     }
 
     public static boolean exhausted(Player p) {
-        return p.hasEffect(ModEffects.EXHAUSTED.get());
+        return p.hasEffect(ModEffects.EXHAUSTED);
     }
 
     /**
@@ -115,7 +115,7 @@ public final class TrueForm {
         TransformationData data = TransformationManager.getTransformation(p);
         if (data != null && data.getEntityId() != null && data.getEntityId().toString().equals(form)) TransformationManager.demorph(p);
         if (!p.isAlive()) return;
-        p.addEffect(new MobEffectInstance(ModEffects.EXHAUSTED.get(), EXHAUSTION, 0, false, true, true));
+        p.addEffect(new MobEffectInstance(ModEffects.EXHAUSTED, EXHAUSTION, 0, false, true, true));
         p.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, EXHAUSTION, 1, false, false, false));
         p.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, EXHAUSTION, 1, false, false, false));
         p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.PLAYER_BREATH, SoundSource.PLAYERS, 1.0f, 0.7f);

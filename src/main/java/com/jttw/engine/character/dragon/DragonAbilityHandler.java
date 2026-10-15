@@ -146,7 +146,7 @@ public final class DragonAbilityHandler {
 
                 // Tier 3: set on fire
                 if (tier >= 3) {
-                    entity.setSecondsOnFire(5);
+                    entity.igniteForSeconds(5);
                 }
             });
         }

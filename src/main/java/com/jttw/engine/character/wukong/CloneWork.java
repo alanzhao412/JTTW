@@ -36,7 +36,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.TierSortingRegistry;
+import net.minecraft.tags.TagKey;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -99,9 +99,18 @@ public final class CloneWork {
         return !tool.isEmpty() && tool.isCorrectToolForDrops(s);
     }
 
+    /** Vanilla tiers, weakest first (the order the old tier sorting registry gave them). */
+    private static final List<Tier> TIER_ORDER = List.of(Tiers.WOOD, Tiers.GOLD, Tiers.STONE, Tiers.IRON, Tiers.DIAMOND, Tiers.NETHERITE);
+    /** The "incorrect for" block tags of those tiers, in the same order, to place modded tiers among them. */
+    private static final List<TagKey<Block>> TIER_TAGS = List.of(BlockTags.INCORRECT_FOR_WOODEN_TOOL, BlockTags.INCORRECT_FOR_GOLD_TOOL,
+            BlockTags.INCORRECT_FOR_STONE_TOOL, BlockTags.INCORRECT_FOR_IRON_TOOL, BlockTags.INCORRECT_FOR_DIAMOND_TOOL,
+            BlockTags.INCORRECT_FOR_NETHERITE_TOOL);
+
     private static int tierRank(Tier tier) {
-        int i = TierSortingRegistry.getSortedTiers().indexOf(tier);
-        return i >= 0 ? i : tier == Tiers.NETHERITE ? 99 : 0;
+        int i = TIER_ORDER.indexOf(tier);
+        if (i >= 0) return i;
+        i = TIER_TAGS.indexOf(tier.getIncorrectBlocksForDrops());
+        return i >= 0 ? i : 0;
     }
 
     /** The owner's best tool of this kind (pickaxe or axe), copied for the clone, or empty. */

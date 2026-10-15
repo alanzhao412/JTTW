@@ -296,7 +296,7 @@ public final class YuanDiAbilityHandler {
                 "jttw:yd_transform_dmg", dmgMult, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
         addOrReplace(player, Attributes.MOVEMENT_SPEED, UUID_TRANSFORM_SPEED,
                 "jttw:yd_transform_speed", speedMult, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
-        addOrReplace(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get(), UUID_TRANSFORM_ARMOR,
+        addOrReplace(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE, UUID_TRANSFORM_ARMOR,
                 "jttw:yd_transform_pres", presFlat, AttributeModifier.Operation.ADD_VALUE);
         addOrReplace(player, Attributes.KNOCKBACK_RESISTANCE, UUID_TRANSFORM_KB,
                 "jttw:yd_transform_kb", kbResist, AttributeModifier.Operation.ADD_VALUE);
@@ -305,7 +305,7 @@ public final class YuanDiAbilityHandler {
     private static void removeTransformModifiers(ServerPlayer player) {
         removeMod(player, Attributes.ATTACK_DAMAGE, UUID_TRANSFORM_DMG);
         removeMod(player, Attributes.MOVEMENT_SPEED, UUID_TRANSFORM_SPEED);
-        removeMod(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get(), UUID_TRANSFORM_ARMOR);
+        removeMod(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE, UUID_TRANSFORM_ARMOR);
         removeMod(player, Attributes.KNOCKBACK_RESISTANCE, UUID_TRANSFORM_KB);
     }
 
@@ -368,7 +368,7 @@ public final class YuanDiAbilityHandler {
             if (player.distanceTo(target) > radius) continue;
 
             // Boss immunity
-            if (target instanceof Mob mob && !mob.canChangeDimensions()) continue;
+            if (target instanceof Mob mob && !mob.canChangeDimensions(mob.level(), mob.level())) continue;
 
             // Slowness III on all tiers
             target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,
@@ -616,7 +616,7 @@ public final class YuanDiAbilityHandler {
 
         // Visuals — earthquake, no explosion block damage
         if (player.level() instanceof ServerLevel sl) {
-            sl.playSound(null, player.blockPosition(), SoundEvents.GENERIC_EXPLODE,
+            sl.playSound(null, player.blockPosition(), SoundEvents.GENERIC_EXPLODE.value(),
                     SoundSource.PLAYERS, 1.5f, 0.4f);
             sl.playSound(null, player.blockPosition(), SoundEvents.WARDEN_SONIC_BOOM,
                     SoundSource.PLAYERS, 0.6f, 0.3f);
@@ -666,14 +666,14 @@ public final class YuanDiAbilityHandler {
                 "jttw:yd_night_dmg", dmgMult, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
         addOrReplace(player, Attributes.MOVEMENT_SPEED, UUID_NIGHT_SPEED,
                 "jttw:yd_night_speed", speedMult, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
-        addOrReplace(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get(), UUID_NIGHT_ARMOR,
+        addOrReplace(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE, UUID_NIGHT_ARMOR,
                 "jttw:yd_night_pres", presFlat, AttributeModifier.Operation.ADD_VALUE);
     }
 
     private static void removeNightModifiers(ServerPlayer player) {
         removeMod(player, Attributes.ATTACK_DAMAGE, UUID_NIGHT_DMG);
         removeMod(player, Attributes.MOVEMENT_SPEED, UUID_NIGHT_SPEED);
-        removeMod(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get(), UUID_NIGHT_ARMOR);
+        removeMod(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE, UUID_NIGHT_ARMOR);
     }
 
     // =======================================================================
@@ -1233,8 +1233,8 @@ public final class YuanDiAbilityHandler {
     }
 
     private static void addOrReplace(ServerPlayer player,
-                                      net.minecraft.world.entity.ai.attributes.Attribute attribute,
-                                      UUID uuid, String name, double value,
+                                      net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attribute,
+                                      net.minecraft.resources.ResourceLocation uuid, String name, double value,
                                       AttributeModifier.Operation op) {
         AttributeInstance inst = player.getAttribute(attribute);
         if (inst == null) return;
@@ -1243,8 +1243,8 @@ public final class YuanDiAbilityHandler {
     }
 
     private static void removeMod(ServerPlayer player,
-                                   net.minecraft.world.entity.ai.attributes.Attribute attribute,
-                                   UUID uuid) {
+                                   net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attribute,
+                                   net.minecraft.resources.ResourceLocation uuid) {
         AttributeInstance inst = player.getAttribute(attribute);
         if (inst != null) inst.removeModifier(uuid);
     }

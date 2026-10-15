@@ -39,7 +39,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
-import net.neoforged.neoforge.event.entity.living.LivingEvent;
+import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -163,7 +163,7 @@ public final class SaurianAbilityHandler {
     }
 
     public static boolean inWrath(LivingEntity p) {
-        return p.hasEffect(ModEffects.FLOOD_WRATH.get());
+        return p.hasEffect(ModEffects.FLOOD_WRATH);
     }
 
     private static void sound(ServerLevel level, Vec3 at, SoundEvent s, float volume, float pitch) {
@@ -216,7 +216,7 @@ public final class SaurianAbilityHandler {
         pd.putFloat(KEY_SURGE_HIT, surgeDamage(atk(p), tier, charge));
         // vanilla's riptide spin: the pose, the swirl round him, the narrow body, seen from all sides
         ((LivingEntityFlagInvoker) p).jttw_invokeSetLivingEntityFlag(4, true);
-        sound(p.serverLevel(), p.position(), charge >= 0.9f ? SoundEvents.TRIDENT_RIPTIDE_3 : charge >= 0.5f ? SoundEvents.TRIDENT_RIPTIDE_2 : SoundEvents.TRIDENT_RIPTIDE_1, 1f, 1f);
+        sound(p.serverLevel(), p.position(), (charge >= 0.9f ? SoundEvents.TRIDENT_RIPTIDE_3 : charge >= 0.5f ? SoundEvents.TRIDENT_RIPTIDE_2 : SoundEvents.TRIDENT_RIPTIDE_1).value(), 1f, 1f);
         if (!surgeFree(p)) startCooldown(p, KEY_SURGE_READY, "sdk_surge", surgeCooldown(tier) + surgeTicks(tier, charge));
         tickSurge(p);
     }
@@ -420,7 +420,7 @@ public final class SaurianAbilityHandler {
         int tier = SaurianCharacter.is(p) ? tier(p, "sdk_wrath") : 0;
         if (tier < 1 || inWrath(p) || onCooldown(p, KEY_WRATH_READY) || !spendQi(p, WRATH_QI)) return false;
         int ticks = wrathTicks(tier);
-        p.addEffect(new MobEffectInstance(ModEffects.FLOOD_WRATH.get(), ticks, tier - 1, false, false, true));
+        p.addEffect(new MobEffectInstance(ModEffects.FLOOD_WRATH, ticks, tier - 1, false, false, true));
         startCooldown(p, KEY_WRATH_READY, "sdk_wrath", ticks + WRATH_REST);
         sound(p.serverLevel(), p.position(), SoundEvents.CONDUIT_ACTIVATE, 1.5f, 0.8f);
         // a ring of water rising round his feet, not in his eyes
@@ -488,8 +488,8 @@ public final class SaurianAbilityHandler {
     }
 
     @SubscribeEvent
-    public static void onLivingTick(LivingEvent.LivingTickEvent event) {
-        LivingEntity e = event.getEntity();
+    public static void onLivingTick(EntityTickEvent.Pre event) {
+        if (!(event.getEntity() instanceof LivingEntity e)) return;
         if (e.level().isClientSide || e.tickCount % 20 != 0 || !e.getPersistentData().contains(KEY_VENOM)) return;
         CompoundTag v = e.getPersistentData().getCompound(KEY_VENOM);
         if (v.getLong("Until") <= e.level().getGameTime()) {
@@ -515,9 +515,9 @@ public final class SaurianAbilityHandler {
     /** His passives, as they stand: refreshed each second. Public for tests. */
     public static void passives(ServerPlayer p, boolean saurian) {
         int river = saurian ? tier(p, "sdk_river") : 0, hide = saurian ? tier(p, "sdk_hide") : 0;
-        PassiveModifiers.set(p, NeoForgeMod.SWIM_SPEED.get(), "sdk_river_swim", river >= 1 ? 0.8 : 0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
-        PassiveModifiers.add(p, ModAttributes.PHYSICAL_RESISTANCE.get(), "sdk_hide_pres", hide * 10);
-        PassiveModifiers.add(p, ModAttributes.MAGIC_RESISTANCE.get(), "sdk_hide_mres", hide >= 3 ? 10 : 0);
+        PassiveModifiers.set(p, NeoForgeMod.SWIM_SPEED, "sdk_river_swim", river >= 1 ? 0.8 : 0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+        PassiveModifiers.add(p, ModAttributes.PHYSICAL_RESISTANCE, "sdk_hide_pres", hide * 10);
+        PassiveModifiers.add(p, ModAttributes.MAGIC_RESISTANCE, "sdk_hide_mres", hide >= 3 ? 10 : 0);
         if (river >= 2 && wet(p) && p.getHealth() < p.getMaxHealth()) {
             p.heal(LevelPower.scaled(p, river >= 3 ? 2 : 1));
         }

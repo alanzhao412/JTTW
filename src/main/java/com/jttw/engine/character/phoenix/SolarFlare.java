@@ -17,7 +17,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LightBlock;
@@ -72,7 +72,7 @@ public final class SolarFlare {
         NetworkHandler.sendToPlayer(p, new SyncQiPacket(QiData.getCurrent(p), QiData.getMax(p)));
         p.getPersistentData().putLong(KEY_ENDS, now + TICKS);
         p.getPersistentData().putLong(KEY_READY, now + TICKS + COOLDOWN);
-        p.addEffect(new MobEffectInstance(ModEffects.SOLAR_FLARE.get(), TICKS, 0, false, false, true));
+        p.addEffect(new MobEffectInstance(ModEffects.SOLAR_FLARE, TICKS, 0, false, false, true));
         NetworkHandler.sendToPlayer(p, new SyncCooldownPacket(p.getUUID(), "ph_radiance", TICKS + COOLDOWN, TICKS + COOLDOWN));
         p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1.5f, 0.6f);
         return true;
@@ -104,8 +104,8 @@ public final class SolarFlare {
         if ((ends - now) % 20 == 0) {
             float burn = LevelPower.scaled(p, burnPerSecond(tier));
             for (LivingEntity e : within(p, r)) {
-                e.setSecondsOnFire(3);
-                e.hurt(p.damageSources().playerAttack(p), e.getMobType() == MobType.UNDEAD ? burn * 2 : burn);
+                e.igniteForSeconds(3);
+                e.hurt(p.damageSources().playerAttack(p), e.getType().is(EntityTypeTags.UNDEAD) ? burn * 2 : burn);
             }
         }
         // its body blazes; a ring of flame marks its reach
@@ -137,9 +137,9 @@ public final class SolarFlare {
         double r = reach(tier);
         float burn = LevelPower.scaled(p, burnPerSecond(tier)) * 2;
         for (LivingEntity e : within(p, r)) {
-            e.hurt(p.damageSources().playerAttack(p), e.getMobType() == MobType.UNDEAD ? burn * 2 : burn);
+            e.hurt(p.damageSources().playerAttack(p), e.getType().is(EntityTypeTags.UNDEAD) ? burn * 2 : burn);
             e.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 40, 0), p);
-            e.setSecondsOnFire(4);
+            e.igniteForSeconds(4);
         }
         ServerLevel level = p.serverLevel();
         level.sendParticles(ParticleTypes.FLASH, p.getX(), p.getY() + 1, p.getZ(), 1, 0, 0, 0, 0);
@@ -149,7 +149,7 @@ public final class SolarFlare {
 
     private static void end(ServerPlayer p) {
         p.getPersistentData().remove(KEY_ENDS);
-        p.removeEffect(ModEffects.SOLAR_FLARE.get());
+        p.removeEffect(ModEffects.SOLAR_FLARE);
         dropLight(p);
     }
 

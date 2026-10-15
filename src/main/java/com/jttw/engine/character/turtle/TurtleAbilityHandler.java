@@ -186,7 +186,7 @@ public final class TurtleAbilityHandler {
         if (line != DivineBeastLine.EARTH) return;
 
         int level = PlayerLevel.getLevel(player);
-        applyMod(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get(), UUID_TURTLE_DEF,
+        applyMod(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE, UUID_TURTLE_DEF,
                 "jttw:turtle_pres", level * PRES_PER_LEVEL);
         // The armor/toughness version of this passive, on players who still carry it
         removeMod(player, Attributes.ARMOR, UUID_TURTLE_DEF);
@@ -197,14 +197,14 @@ public final class TurtleAbilityHandler {
      * Remove the World Turtle's innate passive modifiers.
      */
     public static void removePassiveScaling(ServerPlayer player) {
-        removeMod(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get(), UUID_TURTLE_DEF);
+        removeMod(player, com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE, UUID_TURTLE_DEF);
         removeMod(player, Attributes.ARMOR, UUID_TURTLE_DEF);
         removeMod(player, Attributes.ARMOR_TOUGHNESS, UUID_TURTLE_TOUGHNESS);
     }
 
     private static void applyMod(ServerPlayer player,
-                                 net.minecraft.world.entity.ai.attributes.Attribute attr,
-                                 UUID uuid, String name, double amount) {
+                                 net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attr,
+                                 net.minecraft.resources.ResourceLocation uuid, String name, double amount) {
         AttributeInstance inst = player.getAttribute(attr);
         if (inst == null) return;
         inst.removeModifier(uuid);
@@ -213,8 +213,8 @@ public final class TurtleAbilityHandler {
     }
 
     private static void removeMod(ServerPlayer player,
-                                  net.minecraft.world.entity.ai.attributes.Attribute attr,
-                                  UUID uuid) {
+                                  net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attr,
+                                  net.minecraft.resources.ResourceLocation uuid) {
         AttributeInstance inst = player.getAttribute(attr);
         if (inst != null) inst.removeModifier(uuid);
     }

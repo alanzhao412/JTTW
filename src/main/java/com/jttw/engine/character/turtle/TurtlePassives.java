@@ -74,7 +74,7 @@ public final class TurtlePassives {
         int roots = turtle ? SkillTreeData.getTuRootsTier(sp) : 0;
         PassiveModifiers.set(sp, Attributes.MOVEMENT_SPEED, "tu_roots_slow", -rootedSlow(roots),
                 net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
-        PassiveModifiers.add(sp, ModAttributes.PHYSICAL_RESISTANCE.get(), "tu_bedrock_pres", bedrockResistance(bedrock));
+        PassiveModifiers.add(sp, ModAttributes.PHYSICAL_RESISTANCE, "tu_bedrock_pres", bedrockResistance(bedrock));
         PassiveModifiers.add(sp, Attributes.KNOCKBACK_RESISTANCE, "tu_bedrock_kb", bedrock >= 2 ? 1.0 : 0.0);
         if (bedrock >= 1 && sp.isAlive() && sp.getHealth() < sp.getMaxHealth()) {
             sp.heal(LevelPower.scaled(sp, bedrockRegenPerSecond(bedrock)));

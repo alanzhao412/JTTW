@@ -157,7 +157,7 @@ public final class NezhaAbilityHandler {
             // True Samadhi fire: burns even what fire cannot, and ignores i-frames so every beat lands
             target.invulnerableTime = 0;
             target.hurt(player.damageSources().indirectMagic(player, player), perHit);
-            target.setSecondsOnFire(5);
+            target.igniteForSeconds(5);
         }
     }
 
@@ -252,11 +252,11 @@ public final class NezhaAbilityHandler {
     // =========================================================================
 
     /** Sets (or clears, with no amount) a transient modifier, replacing it when its amount changes. */
-    private static void setTransient(net.minecraft.world.entity.ai.attributes.AttributeInstance attr, UUID id, String name,
+    private static void setTransient(net.minecraft.world.entity.ai.attributes.AttributeInstance attr, ResourceLocation id, String name,
                                      double amount, AttributeModifier.Operation op) {
         if (attr == null) return;
         AttributeModifier now = attr.getModifier(id);
-        if (now != null && now.getAmount() == amount) return;
+        if (now != null && now.amount() == amount) return;
         if (now != null) attr.removeModifier(id);
         if (amount != 0) attr.addTransientModifier(new AttributeModifier(id, amount, op));
     }
@@ -270,7 +270,7 @@ public final class NezhaAbilityHandler {
 
     /** Huntian Cloth: magic resistance while Nezha has it, the more the better refined. */
     private static void applyClothResistance(ServerPlayer sp, ItemStack cloth) {
-        setTransient(sp.getAttribute(com.jttw.engine.registry.ModAttributes.MAGIC_RESISTANCE.get()), CLOTH_MRES_ID, "jttw:huntian_cloth",
+        setTransient(sp.getAttribute(com.jttw.engine.registry.ModAttributes.MAGIC_RESISTANCE), CLOTH_MRES_ID, "jttw:huntian_cloth",
                 cloth.isEmpty() ? 0 : HuntianClothItem.MAGIC_RESISTANCE * com.jttw.engine.item.Armaments.refineMultiplier(cloth),
                 AttributeModifier.Operation.ADD_VALUE);
     }

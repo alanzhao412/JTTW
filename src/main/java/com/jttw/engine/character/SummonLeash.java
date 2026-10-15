@@ -4,13 +4,11 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.portal.PortalInfo;
+import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.util.ITeleporter;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
-import java.util.function.Function;
 
 /**
  * Keeps a player's summons (Xiaotian Quan, Wukong's clones) with them, like a tamed wolf, even
@@ -41,23 +39,9 @@ public final class SummonLeash {
             return summon;
         }
         Vec3 target = new Vec3(x, owner.getY(), z);
-        Entity moved = summon.changeDimension(owner.serverLevel(), new ITeleporter() {
-            @Override
-            public PortalInfo getPortalInfo(Entity entity, ServerLevel dest, Function<ServerLevel, PortalInfo> defaultInfo) {
-                return new PortalInfo(target, Vec3.ZERO, entity.getYRot(), entity.getXRot());
-            }
-
-            @Override
-            public Entity placeEntity(Entity entity, ServerLevel current, ServerLevel dest, float yaw,
-                                      Function<Boolean, Entity> reposition) {
-                return reposition.apply(false); // no portal search
-            }
-
-            @Override
-            public boolean playTeleportSound(ServerPlayer player, ServerLevel source, ServerLevel dest) {
-                return false;
-            }
-        });
+        // No portal search and no teleport sound.
+        Entity moved = summon.changeDimension(new DimensionTransition(owner.serverLevel(), target, Vec3.ZERO,
+                summon.getYRot(), summon.getXRot(), DimensionTransition.DO_NOTHING));
         return moved != null ? moved : summon;
     }
 }
