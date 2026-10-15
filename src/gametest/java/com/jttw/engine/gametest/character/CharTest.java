@@ -44,7 +44,7 @@ import java.util.function.Consumer;
 /**
  * Helpers for the character ability GameTests.
  *
- * <p>The test player is a Forge FakePlayer: it never ticks, cannot be hurt, and is not in the
+ * <p>The test player is a fake player (GT.TestPlayer): it never ticks, cannot be hurt, and is not in the
  * server's player list. Abilities that run from a player tick are driven with {@link #tick};
  * abilities whose server-tick loop looks the player up in the player list need {@link #online}.
  */
@@ -87,6 +87,10 @@ public final class CharTest {
         PlayerList list = h.getLevel().getServer().getPlayerList();
         Map<UUID, ServerPlayer> byUuid = field(list, "playersByUUID");
         List<ServerPlayer> players = field(list, "players"); // Forge's getPlayers() is a read-only view
+        // NeoForge asks every listed player's channel which payloads it takes; a fake player's
+        // connection (one, shared by all of them) has none, so give it an embedded one
+        var connection = p.connection.getConnection();
+        if (connection.channel() == null) new io.netty.channel.embedded.EmbeddedChannel(connection);
         players.add(p);
         byUuid.put(p.getUUID(), p);
         onEnd(h, () -> {

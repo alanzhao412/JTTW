@@ -4,7 +4,6 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
 
 import com.mojang.authlib.GameProfile;
-import net.neoforged.neoforge.common.util.FakePlayer;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -27,23 +26,102 @@ public final class GT {
     /**
      * A new server-side player standing on the platform, with its own empty saved data.
      *
-     * <p>A Forge {@link FakePlayer}: vanilla's {@code makeMockServerPlayerInLevel()} gives the
-     * player a connection with no channel, and Forge's login code dereferences it. A fake
-     * player's packets go nowhere, it does not tick by itself, and it cannot be damaged, so
-     * tests drive ticks and hit mobs rather than the player.
+     * <p>A {@link TestPlayer}, not vanilla's {@code makeMockServerPlayerInLevel()}: its packets
+     * go nowhere, it does not tick by itself, and it cannot be damaged, so tests drive ticks and
+     * hit mobs rather than the player.
      */
     public static ServerPlayer player(GameTestHelper helper) {
         sweepStrays(helper);
         onEnd(helper, () -> clearPlatform(helper));
         GameProfile profile = new GameProfile(UUID.randomUUID(), "jttw_test_" + PLAYERS.incrementAndGet());
         requireEntityReady(helper);
-        ServerPlayer p = new FakePlayer(helper.getLevel(), profile);
+        ServerPlayer p = new TestPlayer(helper.getLevel(), profile);
         var pos = helper.absolutePos(new net.minecraft.core.BlockPos(2, 2, 2));
         p.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
         return p;
     }
 
     private static final AtomicInteger PLAYERS = new AtomicInteger();
+
+    /**
+     * The fake player the tests were written against, Forge 1.20.1's: its packets go nowhere,
+     * it ignores teleport packets, it does not tick by itself and cannot be hurt, but it opens
+     * menus, rides, and keeps its advancements (in memory). NeoForge 1.21.1's FakePlayer refuses
+     * menus and riding and forgets every advancement criterion, which the forms' menus, boat
+     * forms and reincarnation rules all need.
+     */
+    static final class TestPlayer extends ServerPlayer {
+        private net.minecraft.server.PlayerAdvancements advancements;
+
+        TestPlayer(net.minecraft.server.level.ServerLevel level, GameProfile profile) {
+            super(level.getServer(), level, profile, net.minecraft.server.level.ClientInformation.createDefault());
+            var connection = new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND);
+            // NeoForge asks every listed player's channel which payloads it takes
+            new io.netty.channel.embedded.EmbeddedChannel(connection);
+            new Silent(level.getServer(), connection, this);
+        }
+
+        @Override
+        public boolean isFakePlayer() {
+            return true;
+        }
+
+        @Override
+        public void awardStat(net.minecraft.stats.Stat<?> stat, int amount) {}
+
+        @Override
+        public boolean isInvulnerableTo(net.minecraft.world.damagesource.DamageSource source) {
+            return true;
+        }
+
+        @Override
+        public boolean canHarmPlayer(net.minecraft.world.entity.player.Player player) {
+            return false;
+        }
+
+        @Override
+        public void die(net.minecraft.world.damagesource.DamageSource source) {}
+
+        @Override
+        public void tick() {}
+
+        @Override
+        public void updateOptions(net.minecraft.server.level.ClientInformation info) {}
+
+        @Override
+        public net.minecraft.server.PlayerAdvancements getAdvancements() {
+            if (advancements == null) {
+                var server = serverLevel().getServer();
+                // a file that does not exist: nothing is loaded, and nothing is ever saved to it
+                java.nio.file.Path none = server.getServerDirectory().resolve("jttw-gametest-advancements")
+                        .resolve(getUUID() + ".json");
+                advancements = new net.minecraft.server.PlayerAdvancements(server.getFixerUpper(), server.getPlayerList(),
+                        server.getAdvancements(), none, this);
+            }
+            return advancements;
+        }
+    }
+
+    /** A test player's connection: sends nothing and ignores teleports, as Forge's fake player's did. */
+    private static final class Silent extends net.minecraft.server.network.ServerGamePacketListenerImpl {
+        Silent(net.minecraft.server.MinecraftServer server, net.minecraft.network.Connection connection, ServerPlayer player) {
+            super(server, connection, player,
+                    net.minecraft.server.network.CommonListenerCookie.createInitial(player.getGameProfile(), false));
+        }
+
+        @Override
+        public void send(net.minecraft.network.protocol.Packet<?> packet) {}
+
+        @Override
+        public void send(net.minecraft.network.protocol.Packet<?> packet, @org.jetbrains.annotations.Nullable net.minecraft.network.PacketSendListener listener) {}
+
+        @Override
+        public void teleport(double x, double y, double z, float yaw, float pitch) {}
+
+        @Override
+        public void teleport(double x, double y, double z, float yaw, float pitch,
+                             java.util.Set<net.minecraft.world.entity.RelativeMovement> relative) {}
+    }
 
     /** Runs {@code cleanup} when the test ends, whether it passes or fails. */
     public static void onEnd(GameTestHelper helper, Runnable cleanup) {

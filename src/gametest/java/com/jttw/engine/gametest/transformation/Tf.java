@@ -53,9 +53,13 @@ final class Tf {
     /**
      * Gives a fake player a plain vanilla connection so that teleports move it (the Forge fake
      * player's own connection ignores them). Packets sent to it are queued and never delivered.
+     * The connection gets an embedded channel, as vanilla's mock players do: NeoForge asks every
+     * player's channel which payloads it takes.
      */
     static ServerPlayer teleportable(ServerPlayer p) {
-        new ServerGamePacketListenerImpl(p.server, new Connection(PacketFlow.SERVERBOUND), p,
+        Connection connection = new Connection(PacketFlow.SERVERBOUND);
+        new io.netty.channel.embedded.EmbeddedChannel(connection);
+        new ServerGamePacketListenerImpl(p.server, connection, p,
                 CommonListenerCookie.createInitial(p.getGameProfile(), false));
         return p;
     }

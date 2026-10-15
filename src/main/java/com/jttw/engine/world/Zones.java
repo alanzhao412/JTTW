@@ -54,6 +54,13 @@ public final class Zones {
     /** A climate no terrain reaches: listed here, a biome is known to the overworld but never chosen by it. */
     public static final Climate.ParameterPoint UNREACHABLE = Climate.parameters(10f, 10f, 10f, 10f, 10f, 10f, 0f);
 
+    /**
+     * True while vanilla builds its own registries in code (VanillaRegistries.createLookup: the
+     * server's startup check and data generation). Those know only vanilla's biomes, so the zones
+     * are not listed there; worlds load the overworld's list from data, where they are.
+     */
+    public static final ThreadLocal<Boolean> BUILDING_VANILLA_REGISTRIES = ThreadLocal.withInitial(() -> false);
+
     private static volatile long seed;
 
     public static long seed() {

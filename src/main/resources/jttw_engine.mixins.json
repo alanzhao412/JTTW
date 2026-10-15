@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "BlockStateBaseMixin",
+    "GameTestServerMixin",
     "EntityPhaseMixin",
     "LivingEntityMixin",
     "MultiNoiseBiomeSourceMixin",
@@ -18,6 +19,7 @@
     "RandomizableContainerMixin",
     "RangedAttributeAccessor",
     "ServerGamePacketListenerMixin",
+    "VanillaRegistriesMixin",
     "WalkAnimationStateAccessor"
   ],
   "client": [

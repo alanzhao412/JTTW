@@ -17,9 +17,9 @@ public final class PassiveModifiers {
 
     private PassiveModifiers() {}
 
-    /** A stable id for a named passive bonus. */
+    /** A stable id for a named passive bonus ("JTTW Peach Defense" is passive/jttw_peach_defense). */
     public static ResourceLocation id(String name) {
-        return JTTWEngine.id("passive/" + name);
+        return JTTWEngine.id("passive/" + name.toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z0-9/._-]", "_"));
     }
 
     public static void set(LivingEntity e, Holder<Attribute> attribute, String name, double amount,
