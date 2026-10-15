@@ -108,17 +108,19 @@ public class ImmortalPeachItem extends Item {
     }
 
     private static void applyResistances(ServerPlayer player) {
-        setMod(player.getAttribute(ModAttributes.PHYSICAL_RESISTANCE), MOD_ARMOR_UUID,
+        setMod(player.getAttribute(ModAttributes.PHYSICAL_RESISTANCE),
                 "JTTW Peach Physical Resistance", PRES_BONUS);
-        setMod(player.getAttribute(ModAttributes.MAGIC_RESISTANCE), MOD_TOUGHNESS_UUID,
+        setMod(player.getAttribute(ModAttributes.MAGIC_RESISTANCE),
                 "JTTW Peach Magic Resistance", MRES_BONUS);
         // The armor/toughness version of this bonus, on players who still carry it
         removeMod(player.getAttribute(Attributes.ARMOR), MOD_ARMOR_UUID);
         removeMod(player.getAttribute(Attributes.ARMOR_TOUGHNESS), MOD_TOUGHNESS_UUID);
     }
 
-    private static void setMod(AttributeInstance inst, ResourceLocation id, String name, double amount) {
+    /** Modifiers are keyed by id now; the bonus's id is derived from its name (passive/jttw_peach_...). */
+    private static void setMod(AttributeInstance inst, String name, double amount) {
         if (inst == null) return;
+        ResourceLocation id = com.jttw.engine.character.PassiveModifiers.id(name);
         inst.removeModifier(id);
         inst.addPermanentModifier(new AttributeModifier(id, amount, AttributeModifier.Operation.ADD_VALUE));
     }
