@@ -80,11 +80,12 @@ public final class WaterFxRenderer {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || (LASHES.isEmpty() && POOLS.isEmpty())) return;
-        float partial = event.getPartialTick();
+        float partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
         long now = mc.level.getGameTime();
         Camera cam = event.getCamera();
         Vec3 c = cam.getPosition();
-        PoseStack pose = event.getPoseStack();
+        // this stage hands no PoseStack: the camera's rotation is already in the model-view matrix
+        PoseStack pose = new PoseStack();
         MultiBufferSource.BufferSource buffers = mc.renderBuffers().bufferSource();
         pose.pushPose();
         pose.translate(-c.x, -c.y, -c.z);
@@ -174,14 +175,14 @@ public final class WaterFxRenderer {
         pose.mulPose(Axis.YP.rotation(angle));
         Matrix4f m = pose.last().pose();
         // both faces, so it shows from above and, through water, from below
-        vc.vertex(m, -r, 0, -r).color(1f, 1f, 1f, alpha).uv(0, 0).uv2(light).endVertex();
-        vc.vertex(m, -r, 0, r).color(1f, 1f, 1f, alpha).uv(0, 1).uv2(light).endVertex();
-        vc.vertex(m, r, 0, r).color(1f, 1f, 1f, alpha).uv(1, 1).uv2(light).endVertex();
-        vc.vertex(m, r, 0, -r).color(1f, 1f, 1f, alpha).uv(1, 0).uv2(light).endVertex();
-        vc.vertex(m, r, 0, -r).color(1f, 1f, 1f, alpha).uv(1, 0).uv2(light).endVertex();
-        vc.vertex(m, r, 0, r).color(1f, 1f, 1f, alpha).uv(1, 1).uv2(light).endVertex();
-        vc.vertex(m, -r, 0, r).color(1f, 1f, 1f, alpha).uv(0, 1).uv2(light).endVertex();
-        vc.vertex(m, -r, 0, -r).color(1f, 1f, 1f, alpha).uv(0, 0).uv2(light).endVertex();
+        vc.addVertex(m, -r, 0, -r).setColor(1f, 1f, 1f, alpha).setUv(0, 0).setLight(light);
+        vc.addVertex(m, -r, 0, r).setColor(1f, 1f, 1f, alpha).setUv(0, 1).setLight(light);
+        vc.addVertex(m, r, 0, r).setColor(1f, 1f, 1f, alpha).setUv(1, 1).setLight(light);
+        vc.addVertex(m, r, 0, -r).setColor(1f, 1f, 1f, alpha).setUv(1, 0).setLight(light);
+        vc.addVertex(m, r, 0, -r).setColor(1f, 1f, 1f, alpha).setUv(1, 0).setLight(light);
+        vc.addVertex(m, r, 0, r).setColor(1f, 1f, 1f, alpha).setUv(1, 1).setLight(light);
+        vc.addVertex(m, -r, 0, r).setColor(1f, 1f, 1f, alpha).setUv(0, 1).setLight(light);
+        vc.addVertex(m, -r, 0, -r).setColor(1f, 1f, 1f, alpha).setUv(0, 0).setLight(light);
         pose.popPose();
     }
 

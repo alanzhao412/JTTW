@@ -105,7 +105,7 @@ public final class NimbusCloud {
     public static void draw(PoseStack pose, MultiBufferSource buffers, net.minecraft.world.entity.Entity p, float presence, int light) {
         if (presence <= 0) return;
         long seed = p.getUUID().getLeastSignificantBits() ^ p.getUUID().getMostSignificantBits();
-        float t = (p.tickCount + Minecraft.getInstance().getFrameTime()) / 20f;
+        float t = (p.tickCount + Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true)) / 20f;
         drawPuffs(pose, buffers, puffs(seed, t, presence), Math.max(light, LightTexture.pack(14, 14))); // it glows a little, even at night
     }
 
@@ -116,12 +116,14 @@ public final class NimbusCloud {
     public static void drawPuffs(PoseStack pose, MultiBufferSource buffers, List<float[]> puffs, int light) {
         makeTexture();
         Matrix4f m = pose.last().pose();
+        // to the eye: the camera's turn now rides in the model-view matrix, not in the pose
+        Matrix4f eye = new Matrix4f(com.mojang.blaze3d.systems.RenderSystem.getModelViewMatrix()).mul(m);
         // the eye's right and up, in the puffs' own frame
-        Matrix3f toLocal = new Matrix3f(m).invert();
+        Matrix3f toLocal = new Matrix3f(eye).invert();
         Vector3f right = toLocal.transform(new Vector3f(1, 0, 0)).normalize();
         Vector3f up = toLocal.transform(new Vector3f(0, 1, 0)).normalize();
         // far ones first, so the near ones lie over them
-        puffs.sort(Comparator.comparingDouble(c -> m.transformPosition(new Vector3f(c[0], c[1], c[2])).z));
+        puffs.sort(Comparator.comparingDouble(c -> eye.transformPosition(new Vector3f(c[0], c[1], c[2])).z));
         VertexConsumer vc = buffers.getBuffer(TYPE);
         float[][] corners = {{-1, -1, 0, 1}, {1, -1, 1, 1}, {1, 1, 1, 0}, {-1, 1, 0, 0}};
         for (float[] c : puffs) {
@@ -130,8 +132,8 @@ public final class NimbusCloud {
             Vector3f a = new Vector3f(right).mul(cos).add(new Vector3f(up).mul(sin));
             Vector3f b = new Vector3f(up).mul(cos).sub(new Vector3f(right).mul(sin));
             for (float[] k : corners) {
-                vc.vertex(m, c[0] + a.x * k[0] + b.x * k[1], c[1] + a.y * k[0] + b.y * k[1], c[2] + a.z * k[0] + b.z * k[1])
-                        .color(c[6], c[7], c[8], c[5]).uv(k[2], k[3]).uv2(light).endVertex();
+                vc.addVertex(m, c[0] + a.x * k[0] + b.x * k[1], c[1] + a.y * k[0] + b.y * k[1], c[2] + a.z * k[0] + b.z * k[1])
+                        .setColor(c[6], c[7], c[8], c[5]).setUv(k[2], k[3]).setLight(light);
             }
         }
     }

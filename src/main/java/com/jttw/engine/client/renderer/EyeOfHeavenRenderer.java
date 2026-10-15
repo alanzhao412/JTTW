@@ -19,7 +19,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.event.RenderNameTagEvent;
-import net.neoforged.bus.api.Event;
+import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
@@ -103,7 +103,7 @@ public final class EyeOfHeavenRenderer {
 
         if (TransformationManager.isTransformed(target)) {
             event.setContent(target.getDisplayName());
-            event.setResult(Event.Result.ALLOW);
+            event.setCanRender(TriState.TRUE);
         }
     }
 
@@ -120,7 +120,8 @@ public final class EyeOfHeavenRenderer {
         if (mc.player == null || mc.level == null) return;
 
         Vec3 cam = event.getCamera().getPosition();
-        PoseStack poseStack = event.getPoseStack();
+        // this stage hands no PoseStack: the camera's rotation is already in the model-view matrix
+        PoseStack poseStack = new PoseStack();
         poseStack.pushPose();
         poseStack.translate(-cam.x, -cam.y, -cam.z);
 
@@ -130,8 +131,7 @@ public final class EyeOfHeavenRenderer {
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
 
         Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder buffer = tesselator.getBuilder();
-        buffer.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
 
         // ── Ore X-Ray (Tier 2+) ──────────────────────────────────────
         if (tier >= 2) {
@@ -150,7 +150,7 @@ public final class EyeOfHeavenRenderer {
         }
 
         // ── Entity Highlighting (Tier 1+) ────────────────────────────
-        float partialTick = event.getPartialTick();
+        float partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(false);
         int entityRange = (tier >= 3) ? 64 : (tier >= 2) ? 48 : 32;
         AABB scanBox = mc.player.getBoundingBox().inflate(entityRange);
         List<LivingEntity> entities = mc.level.getEntitiesOfClass(LivingEntity.class, scanBox,
@@ -172,7 +172,8 @@ public final class EyeOfHeavenRenderer {
                     color);
         }
 
-        tesselator.end();
+        MeshData mesh = buffer.build();
+        if (mesh != null) BufferUploader.drawWithShader(mesh);
 
         RenderSystem.enableDepthTest();
         RenderSystem.disableBlend();
@@ -238,8 +239,8 @@ public final class EyeOfHeavenRenderer {
                              float x1, float y1, float z1,
                              float x2, float y2, float z2,
                              float r, float g, float b, float a) {
-        buffer.vertex(matrix, x1, y1, z1).color(r, g, b, a).endVertex();
-        buffer.vertex(matrix, x2, y2, z2).color(r, g, b, a).endVertex();
+        buffer.addVertex(matrix, x1, y1, z1).setColor(r, g, b, a);
+        buffer.addVertex(matrix, x2, y2, z2).setColor(r, g, b, a);
     }
 
     // =========================================================================

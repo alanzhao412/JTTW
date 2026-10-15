@@ -33,7 +33,7 @@ public final class GoldGlint extends RenderType {
     /** Over an item drawn straight into the buffers (as some item renders are). */
     public static final RenderType DIRECT = create("jttw_gold_glint_direct", DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS, 256, false, false,
             CompositeState.builder()
-                    .setShaderState(RENDERTYPE_GLINT_DIRECT_SHADER)
+                    .setShaderState(RENDERTYPE_GLINT_SHADER) // (vanilla's direct glint shader is gone: one glint serves both)
                     .setTextureState(new TextureStateShard(TEXTURE, true, false))
                     .setWriteMaskState(COLOR_WRITE)
                     .setCullState(NO_CULL)

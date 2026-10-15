@@ -141,7 +141,7 @@ public class CharacterScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double delta) {
+    public boolean mouseScrolled(double mx, double my, double scrollX, double delta) {
         if (activeTab == Tab.SKILLS) {
             skillScrollY = Math.max(0, skillScrollY + (int)(-delta * 18));
             return true;
@@ -152,13 +152,17 @@ public class CharacterScreen extends Screen {
     @Override
     public boolean isPauseScreen() { return false; }
 
+    /** Drawn by {@link #render} itself, under the panel; not again when the widgets are drawn. */
+    @Override
+    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {}
+
     // -----------------------------------------------------------------------
     // Render
     // -----------------------------------------------------------------------
 
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(g);
+        this.renderTransparentBackground(g);
 
         Minecraft mc = Minecraft.getInstance();
         Player player = mc.player;
@@ -219,6 +223,32 @@ public class CharacterScreen extends Screen {
         }
     }
 
+    /**
+     * Draws an entity facing toward the given angles, its feet at (x, y): the pre-1.20.5
+     * {@code InventoryScreen.renderEntityInInventoryFollowsMouse}, which took the offsets directly
+     * rather than a box and the mouse's position.
+     */
+    static void renderEntityFollowing(GuiGraphics g, int x, int y, int scale, float angleX, float angleY,
+                                      net.minecraft.world.entity.LivingEntity e) {
+        float f = (float) Math.atan(angleX / 40.0F);
+        float f1 = (float) Math.atan(angleY / 40.0F);
+        org.joml.Quaternionf pose = new org.joml.Quaternionf().rotateZ((float) Math.PI);
+        org.joml.Quaternionf camera = new org.joml.Quaternionf().rotateX(f1 * 20.0F * ((float) Math.PI / 180F));
+        pose.mul(camera);
+        float bodyRot = e.yBodyRot, yRot = e.getYRot(), xRot = e.getXRot(), headRotO = e.yHeadRotO, headRot = e.yHeadRot;
+        e.yBodyRot = 180.0F + f * 20.0F;
+        e.setYRot(180.0F + f * 40.0F);
+        e.setXRot(-f1 * 20.0F);
+        e.yHeadRot = e.getYRot();
+        e.yHeadRotO = e.getYRot();
+        InventoryScreen.renderEntityInInventory(g, x, y, scale, new org.joml.Vector3f(), pose, camera, e);
+        e.yBodyRot = bodyRot;
+        e.setYRot(yRot);
+        e.setXRot(xRot);
+        e.yHeadRotO = headRotO;
+        e.yHeadRot = headRot;
+    }
+
     // -----------------------------------------------------------------------
     // TAB 1 — IDENTITY
     // -----------------------------------------------------------------------
@@ -236,7 +266,7 @@ public class CharacterScreen extends Screen {
         g.fill(cx + modelAreaW, cy, cx + modelAreaW + 1, cy + ch, C_SEPARATOR);
 
         if (player instanceof net.minecraft.client.player.LocalPlayer lp) {
-            InventoryScreen.renderEntityInInventoryFollowsMouse(
+            renderEntityFollowing(
                     g, modelX, modelY, 40,
                     (float)(modelX - mc.mouseHandler.xpos()),
                     (float)(modelY - 40 - mc.mouseHandler.ypos()),
@@ -470,16 +500,15 @@ public class CharacterScreen extends Screen {
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         Tesselator tess = Tesselator.getInstance();
-        BufferBuilder buf = tess.getBuilder();
         Matrix4f mat = g.pose().last().pose();
 
-        buf.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
-        buf.vertex(mat, cx, cy, 0).color(fr, fg, fb, fa).endVertex();
+        BufferBuilder buf = tess.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
+        buf.addVertex(mat, cx, cy, 0).setColor(fr, fg, fb, fa);
         for (int i = 0; i < RADAR_AXES; i++) {
-            buf.vertex(mat, px[i], py[i], 0).color(fr, fg, fb, fa).endVertex();
+            buf.addVertex(mat, px[i], py[i], 0).setColor(fr, fg, fb, fa);
         }
-        buf.vertex(mat, px[0], py[0], 0).color(fr, fg, fb, fa).endVertex();
-        tess.end();
+        buf.addVertex(mat, px[0], py[0], 0).setColor(fr, fg, fb, fa);
+        BufferUploader.drawWithShader(buf.buildOrThrow());
 
         RenderSystem.disableBlend();
 

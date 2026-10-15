@@ -62,7 +62,7 @@ public final class StaffScrollHandler {
         if (staff == null) return;
         // Cancel vanilla scroll (hotbar switching) and send scale packet
         event.setCanceled(true);
-        NetworkHandler.sendToServer(new StaffScalePacket(staff.getId(), (float) event.getScrollDelta()));
+        NetworkHandler.sendToServer(new StaffScalePacket(staff.getId(), (float) event.getScrollDeltaY()));
     }
 
     @SubscribeEvent

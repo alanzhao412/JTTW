@@ -54,13 +54,17 @@ public class PlayerFormScreen extends Screen {
 
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground(g);
+        this.renderTransparentBackground(g);
         g.drawCenteredString(this.font, this.title, this.width / 2, 12, 0xFFFFFF);
         if (others().isEmpty()) {
             g.drawCenteredString(this.font, Component.literal("No other players online."), this.width / 2, LIST_TOP + 8, 0xFF7777);
         }
         super.render(g, mouseX, mouseY, partialTicks);
     }
+
+    /** Drawn by {@link #render} itself, under the title; not again when the widgets are drawn. */
+    @Override
+    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {}
 
     @Override
     public boolean isPauseScreen() {
@@ -78,7 +82,7 @@ public class PlayerFormScreen extends Screen {
         @Override
         protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTicks) {
             g.fill(getX(), getY(), getX() + width, getY() + height, this.isHovered ? 0x55FFFFFF : 0x33000000);
-            PlayerFaceRenderer.draw(g, info.getSkinLocation(), getX() + 2, getY() + 2, 16);
+            PlayerFaceRenderer.draw(g, info.getSkin(), getX() + 2, getY() + 2, 16);
             g.drawString(font, info.getProfile().getName(), getX() + 24, getY() + 6, 0xFFFFFF);
         }
 

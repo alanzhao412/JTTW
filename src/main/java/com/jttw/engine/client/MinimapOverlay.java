@@ -47,7 +47,7 @@ public final class MinimapOverlay {
     private static int drawnX, drawnZ;
     private static boolean drawn;
 
-    public static final IGuiOverlay OVERLAY = (gui, g, partialTick, width, height) -> render(g, width);
+    public static final LayeredDraw.Layer OVERLAY = (g, deltaTracker) -> render(g, g.guiWidth());
 
     /** Whether this player has the map: the Heavenly do. */
     public static boolean shows(Player p) {

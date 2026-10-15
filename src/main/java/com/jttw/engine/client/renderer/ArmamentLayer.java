@@ -39,7 +39,7 @@ public class ArmamentLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
 
     /** Leaving a world, its players' ids mean nothing in the next. */
     @net.neoforged.bus.api.SubscribeEvent
-    public static void onClientTick(net.neoforged.neoforge.event.TickEvent.ClientTickEvent event) {
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
         if (Minecraft.getInstance().level == null && !SHOWN.isEmpty()) SHOWN.clear();
     }
 

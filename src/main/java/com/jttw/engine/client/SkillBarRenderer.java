@@ -9,7 +9,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.client.gui.overlay.ForgeGui;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.LayeredDraw;
 
 /**
@@ -40,7 +40,7 @@ public final class SkillBarRenderer {
 
     private SkillBarRenderer() {}
 
-    public static final IGuiOverlay OVERLAY = SkillBarRenderer::render;
+    public static final LayeredDraw.Layer OVERLAY = SkillBarRenderer::render;
 
     // -----------------------------------------------------------------------
     // Layout — slots are square; gap between them creates visual separation
@@ -141,8 +141,9 @@ public final class SkillBarRenderer {
     // Main render
     // -----------------------------------------------------------------------
 
-    private static void render(ForgeGui gui, GuiGraphics gfx,
-                               float partialTick, int screenW, int screenH) {
+    private static void render(GuiGraphics gfx, DeltaTracker deltaTracker) {
+        int screenW = gfx.guiWidth();
+        int screenH = gfx.guiHeight();
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
         if (player == null || mc.options.hideGui) return;

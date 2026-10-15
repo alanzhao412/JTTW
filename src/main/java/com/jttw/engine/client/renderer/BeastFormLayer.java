@@ -58,7 +58,7 @@ public class BeastFormLayer extends RenderLayer<AbstractClientPlayer, PlayerMode
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
+    public static void onClientTick(ClientTickEvent.Post event) {
         if (Minecraft.getInstance().level == null && !FORMS.isEmpty()) FORMS.clear();
     }
 

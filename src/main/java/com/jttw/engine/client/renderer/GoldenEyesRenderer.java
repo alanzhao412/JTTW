@@ -21,11 +21,9 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.client.event.RenderGuiOverlayEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.event.RenderNameTagEvent;
-import net.neoforged.neoforge.client.gui.overlay.VanillaGuiOverlay;
-import net.neoforged.bus.api.Event;
+import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
@@ -116,7 +114,7 @@ public final class GoldenEyesRenderer {
 
         if (TransformationManager.isTransformed(target)) {
             event.setContent(target.getDisplayName());
-            event.setResult(Event.Result.ALLOW);
+            event.setCanRender(TriState.TRUE);
         }
     }
 
@@ -133,7 +131,8 @@ public final class GoldenEyesRenderer {
         if (mc.player == null || mc.level == null) return;
 
         Vec3 cam = event.getCamera().getPosition();
-        PoseStack poseStack = event.getPoseStack();
+        // this stage hands no PoseStack: the camera's rotation is already in the model-view matrix
+        PoseStack poseStack = new PoseStack();
         poseStack.pushPose();
         poseStack.translate(-cam.x, -cam.y, -cam.z);
 
@@ -143,12 +142,11 @@ public final class GoldenEyesRenderer {
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
 
         Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder buffer = tesselator.getBuilder();
 
         // --- Entity highlighting (wireframe, passive, always on) ---
-        buffer.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder buffer = tesselator.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
 
-        float partialTick = event.getPartialTick();
+        float partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(false);
         int entityRange = 30;
         AABB scanBox = mc.player.getBoundingBox().inflate(entityRange);
         List<LivingEntity> entities = mc.level.getEntitiesOfClass(LivingEntity.class, scanBox,
@@ -169,7 +167,7 @@ public final class GoldenEyesRenderer {
                     color);
         }
 
-        tesselator.end();
+        draw(buffer);
 
         // --- Ore x-ray: solid filled blocks (only in xray mode) ---
         if (mode >= 2) {
@@ -181,16 +179,16 @@ public final class GoldenEyesRenderer {
                 cachedOres = scanOres(mc, 24);
             }
 
-            buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+            buffer = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
             for (OreEntry ore : cachedOres) {
                 drawSolidBlock(buffer, poseStack.last().pose(), ore.pos, ore.color);
             }
 
-            tesselator.end();
+            draw(buffer);
 
             // Wireframe mobs + items through walls (x-ray mode)
-            buffer.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
+            buffer = tesselator.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
 
             for (LivingEntity entity : entities) {
                 int color = getEntityColor(entity);
@@ -219,7 +217,7 @@ public final class GoldenEyesRenderer {
                         COLOR_ITEM);
             }
 
-            tesselator.end();
+            draw(buffer);
         }
 
         RenderSystem.enableDepthTest();
@@ -342,10 +340,10 @@ public final class GoldenEyesRenderer {
                              float x3, float y3, float z3,
                              float x4, float y4, float z4,
                              float r, float g, float b, float a) {
-        buffer.vertex(matrix, x1, y1, z1).color(r, g, b, a).endVertex();
-        buffer.vertex(matrix, x2, y2, z2).color(r, g, b, a).endVertex();
-        buffer.vertex(matrix, x3, y3, z3).color(r, g, b, a).endVertex();
-        buffer.vertex(matrix, x4, y4, z4).color(r, g, b, a).endVertex();
+        buffer.addVertex(matrix, x1, y1, z1).setColor(r, g, b, a);
+        buffer.addVertex(matrix, x2, y2, z2).setColor(r, g, b, a);
+        buffer.addVertex(matrix, x3, y3, z3).setColor(r, g, b, a);
+        buffer.addVertex(matrix, x4, y4, z4).setColor(r, g, b, a);
     }
 
     private static void drawWireBox(BufferBuilder buffer, Matrix4f matrix, BlockPos pos, int color) {
@@ -402,8 +400,14 @@ public final class GoldenEyesRenderer {
                              float x1, float y1, float z1,
                              float x2, float y2, float z2,
                              float r, float g, float b, float a) {
-        buffer.vertex(matrix, x1, y1, z1).color(r, g, b, a).endVertex();
-        buffer.vertex(matrix, x2, y2, z2).color(r, g, b, a).endVertex();
+        buffer.addVertex(matrix, x1, y1, z1).setColor(r, g, b, a);
+        buffer.addVertex(matrix, x2, y2, z2).setColor(r, g, b, a);
+    }
+
+    /** Draws what was built, if anything was. */
+    private static void draw(BufferBuilder buffer) {
+        MeshData mesh = buffer.build();
+        if (mesh != null) BufferUploader.drawWithShader(mesh);
     }
 
     private record OreEntry(BlockPos pos, int color) {}

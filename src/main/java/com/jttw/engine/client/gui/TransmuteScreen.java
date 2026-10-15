@@ -78,6 +78,10 @@ public class TransmuteScreen extends Screen {
         super.render(g, mouseX, mouseY, partialTicks);
     }
 
+    /** No background: the world shows round the panel, as it always has. */
+    @Override
+    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTicks) {}
+
     @Override
     public boolean isPauseScreen() {
         return false;

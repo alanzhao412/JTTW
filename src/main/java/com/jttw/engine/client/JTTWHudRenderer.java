@@ -8,7 +8,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.client.gui.overlay.ForgeGui;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.LayeredDraw;
 
 /**
@@ -27,7 +27,7 @@ public final class JTTWHudRenderer {
 
     private JTTWHudRenderer() {}
 
-    public static final IGuiOverlay OVERLAY = JTTWHudRenderer::render;
+    public static final LayeredDraw.Layer OVERLAY = JTTWHudRenderer::render;
 
     private static final int HP_BAR_WIDTH  = 81;
     private static final int HP_BAR_HEIGHT = 9;
@@ -66,8 +66,9 @@ public final class JTTWHudRenderer {
     private static final int   LABEL_PAD_X = 4;
     private static final float MIN_LABEL_SCALE = 0.55f;
 
-    private static void render(ForgeGui gui, GuiGraphics gfx,
-                               float partialTick, int screenW, int screenH) {
+    private static void render(GuiGraphics gfx, DeltaTracker deltaTracker) {
+        int screenW = gfx.guiWidth();
+        int screenH = gfx.guiHeight();
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
         if (player == null || mc.options.hideGui) return;

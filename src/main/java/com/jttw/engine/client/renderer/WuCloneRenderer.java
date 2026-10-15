@@ -37,11 +37,11 @@ public class WuCloneRenderer extends HumanoidMobRenderer<WuCloneEntity, Humanoid
             if (mc.level != null) {
                 Player player = mc.level.getPlayerByUUID(ownerId);
                 if (player instanceof AbstractClientPlayer owner) {
-                    return owner.getSkinTextureLocation();
+                    return owner.getSkin().texture();
                 }
             }
-            return DefaultPlayerSkin.getDefaultSkin(ownerId);
+            return DefaultPlayerSkin.get(ownerId).texture();
         }
-        return DefaultPlayerSkin.getDefaultSkin(entity.getUUID());
+        return DefaultPlayerSkin.get(entity.getUUID()).texture();
     }
 }

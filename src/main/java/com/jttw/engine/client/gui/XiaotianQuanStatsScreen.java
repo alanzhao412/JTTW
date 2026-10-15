@@ -69,9 +69,13 @@ public class XiaotianQuanStatsScreen extends Screen {
     @Override
     public boolean isPauseScreen() { return false; }
 
+    /** Drawn by {@link #render} itself, under the panel; not again when the widgets are drawn. */
+    @Override
+    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {}
+
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(g);
+        this.renderTransparentBackground(g);
         Minecraft mc = Minecraft.getInstance();
 
         // Panel

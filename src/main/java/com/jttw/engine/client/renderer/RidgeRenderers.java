@@ -22,6 +22,7 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 
 /** How White Bone Ridge's dead look: models and renderers for the Bone Servant, the Wraith and Lady White Bone. */
@@ -180,10 +181,12 @@ public final class RidgeRenderers {
         }
 
         @Override
-        public void renderToBuffer(PoseStack pose, VertexConsumer vc, int light, int overlay, float r, float g, float b, float a) {
+        public void renderToBuffer(PoseStack pose, VertexConsumer vc, int light, int overlay, int color) {
             // the mirage: pale, cold, and thin as breath
-            if (mirage < 1f) super.renderToBuffer(pose, vc, light, overlay, r * 0.8f, g * 0.9f, b, a * mirage);
-            else super.renderToBuffer(pose, vc, light, overlay, r, g, b, a);
+            if (mirage < 1f) super.renderToBuffer(pose, vc, light, overlay, FastColor.ARGB32.color(
+                    Math.round(FastColor.ARGB32.alpha(color) * mirage), Math.round(FastColor.ARGB32.red(color) * 0.8f),
+                    Math.round(FastColor.ARGB32.green(color) * 0.9f), FastColor.ARGB32.blue(color)));
+            else super.renderToBuffer(pose, vc, light, overlay, color);
         }
 
         @Override
@@ -245,7 +248,7 @@ public final class RidgeRenderers {
             if (seesTruth()) {
                 mirage = 0.55f + 0.12f * Mth.sin((e.tickCount + partial) * 0.3f);
                 // as tall as the shape she wears, so it is plainly that shape's wearer
-                float fill = e.getBbHeight() / com.jttw.engine.registry.ModEntities.LADY_WHITE_BONE.get().getDimensions().height;
+                float fill = e.getBbHeight() / com.jttw.engine.registry.ModEntities.LADY_WHITE_BONE.get().getDimensions().height();
                 pose.pushPose();
                 pose.scale(fill, fill, fill);
                 try {
@@ -323,7 +326,7 @@ public final class RidgeRenderers {
         }
 
         @Override
-        protected void setupRotations(com.jttw.engine.entity.ridge.LadyHuskEntity e, PoseStack pose, float age, float yaw, float partial) {
+        protected void setupRotations(com.jttw.engine.entity.ridge.LadyHuskEntity e, PoseStack pose, float age, float yaw, float partial, float scale) {
             pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180f - yaw));
             // laid out on its back, its feet where it stood
             pose.translate(0, 0.25f, 0);
@@ -357,7 +360,7 @@ public final class RidgeRenderers {
             veil.leftLeg.visible = false;
             veil.rightLeg.visible = false;
             VertexConsumer v = buffers.getBuffer(RenderType.entityTranslucent(LADY_VEIL));
-            veil.renderToBuffer(pose, v, light, LivingEntityRenderer.getOverlayCoords(e, 0f), 1f, 1f, 1f, 0.85f * mirage);
+            veil.renderToBuffer(pose, v, light, LivingEntityRenderer.getOverlayCoords(e, 0f), FastColor.ARGB32.colorFromFloat(0.85f * mirage, 1f, 1f, 1f));
         }
     }
 }
