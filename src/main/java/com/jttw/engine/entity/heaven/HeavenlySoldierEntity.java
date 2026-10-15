@@ -84,10 +84,10 @@ public class HeavenlySoldierEntity extends Monster {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(GENERAL, false);
-        entityData.define(MOB_LEVEL, 20);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(GENERAL, false);
+        builder.define(MOB_LEVEL, 20);
     }
 
     public boolean isGeneral() {
@@ -232,7 +232,7 @@ public class HeavenlySoldierEntity extends Monster {
 
     @Override
     protected net.minecraft.sounds.SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.ARMOR_EQUIP_GOLD;
+        return SoundEvents.ARMOR_EQUIP_GOLD.value();
     }
 
     @Override

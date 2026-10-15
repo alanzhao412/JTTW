@@ -75,14 +75,14 @@ public final class BlockForms {
 
     public static NonNullList<ItemStack> loadChest(Player player) {
         NonNullList<ItemStack> items = NonNullList.withSize(CHEST_SLOTS, ItemStack.EMPTY);
-        ContainerHelper.loadAllItems(player.getPersistentData().getCompound(KEY_CHEST), items);
+        ContainerHelper.loadAllItems(player.getPersistentData().getCompound(KEY_CHEST), items, player.registryAccess());
         return items;
     }
 
     private static void saveChest(Player player, SimpleContainer container) {
         NonNullList<ItemStack> items = NonNullList.withSize(CHEST_SLOTS, ItemStack.EMPTY);
         for (int i = 0; i < CHEST_SLOTS; i++) items.set(i, container.getItem(i));
-        player.getPersistentData().put(KEY_CHEST, ContainerHelper.saveAllItems(new CompoundTag(), items, true));
+        player.getPersistentData().put(KEY_CHEST, ContainerHelper.saveAllItems(new CompoundTag(), items, true, player.registryAccess()));
     }
 
     public static void openChest(ServerPlayer player) {
@@ -141,7 +141,7 @@ public final class BlockForms {
             if (data.isLit()) return;
             light(target);
             if (!user.getAbilities().instabuild) {
-                if (held.is(Items.FLINT_AND_STEEL)) held.hurtAndBreak(1, user, p -> p.broadcastBreakEvent(event.getHand()));
+                if (held.is(Items.FLINT_AND_STEEL)) held.hurtAndBreak(1, user, net.minecraft.world.entity.LivingEntity.getSlotForHand(event.getHand()));
                 else held.shrink(1);
             }
             event.setCancellationResult(InteractionResult.SUCCESS);

@@ -93,7 +93,7 @@ public final class WukongTrial {
         if (level instanceof ServerLevel server) {
             server.sendParticles(ParticleTypes.EXPLOSION_EMITTER, core.getX() + 0.5, core.getY() + 2.5, core.getZ() + 0.5, 3, 1, 1, 1, 0);
             server.sendParticles(ParticleTypes.FLAME, core.getX() + 0.5, core.getY() + 2.5, core.getZ() + 0.5, 200, 1.5, 2, 1.5, 0.2);
-            server.playSound(null, core, SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 4f, 0.6f);
+            server.playSound(null, core, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 4f, 0.6f);
             level.destroyBlock(core, false); // kicked over: the furnace is no more
         }
         p.teleportTo(core.getX() + 0.5, core.getY() + 5.5, core.getZ() + 0.5);

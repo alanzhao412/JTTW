@@ -61,7 +61,6 @@ public class BoneServantEntity extends RidgeMonster {
 
     public BoneServantEntity(EntityType<? extends BoneServantEntity> type, Level level) {
         super(type, level);
-        setMaxUpStep(1.5f);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -73,7 +72,8 @@ public class BoneServantEntity extends RidgeMonster {
                 .add(Attributes.MOVEMENT_SPEED, SPEED)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.9)
                 .add(Attributes.ARMOR, 4)
-                .add(Attributes.FOLLOW_RANGE, 32);
+                .add(Attributes.FOLLOW_RANGE, 32)
+                .add(Attributes.STEP_HEIGHT, 1.5);
     }
 
     @Override
@@ -87,9 +87,9 @@ public class BoneServantEntity extends RidgeMonster {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(RAISING, false);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(RAISING, false);
     }
 
     /** Whether its club is up, about to come down. */
@@ -116,9 +116,9 @@ public class BoneServantEntity extends RidgeMonster {
 
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason,
-                                        @Nullable SpawnGroupData data, @Nullable CompoundTag tag) {
+                                        @Nullable SpawnGroupData data) {
         populateDefaultEquipmentSlots(level.getRandom(), difficulty);
-        return super.finalizeSpawn(level, difficulty, reason, data, tag);
+        return super.finalizeSpawn(level, difficulty, reason, data);
     }
 
     /** Whether {@code target} is within its blow. */

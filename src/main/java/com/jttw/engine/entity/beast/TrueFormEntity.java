@@ -31,12 +31,13 @@ public class TrueFormEntity extends PathfinderMob {
      * can pass through the world): blocks above its feet.
      */
     @Override
-    protected float getStandingEyeHeight(net.minecraft.world.entity.Pose pose, net.minecraft.world.entity.EntityDimensions dims) {
+    protected net.minecraft.world.entity.EntityDimensions getDefaultDimensions(net.minecraft.world.entity.Pose pose) {
+        net.minecraft.world.entity.EntityDimensions dims = super.getDefaultDimensions(pose);
         return switch (EntityType.getKey(getType()).getPath()) {
-            case "azure_dragon" -> 6.6f;
-            case "black_tortoise" -> 3.6f;
-            case "vermilion_bird" -> 8.0f;
-            default -> super.getStandingEyeHeight(pose, dims);
+            case "azure_dragon" -> dims.withEyeHeight(6.6f);
+            case "black_tortoise" -> dims.withEyeHeight(3.6f);
+            case "vermilion_bird" -> dims.withEyeHeight(8.0f);
+            default -> dims;
         };
     }
 

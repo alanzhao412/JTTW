@@ -77,11 +77,11 @@ public final class ResistanceHandler {
     }
 
     public static double physicalResistance(LivingEntity entity) {
-        return value(entity, ModAttributes.PHYSICAL_RESISTANCE.get());
+        return value(entity, ModAttributes.PHYSICAL_RESISTANCE);
     }
 
     public static double magicResistance(LivingEntity entity) {
-        double res = value(entity, ModAttributes.MAGIC_RESISTANCE.get());
+        double res = value(entity, ModAttributes.MAGIC_RESISTANCE);
         if (entity instanceof Player p && WukongCharacter.is(p)) res += physicalResistance(entity);
         return res;
     }
@@ -107,7 +107,7 @@ public final class ResistanceHandler {
         event.setAmount((float) amount);
     }
 
-    private static double value(LivingEntity entity, Attribute attribute) {
+    private static double value(LivingEntity entity, net.minecraft.core.Holder<Attribute> attribute) {
         AttributeInstance inst = entity.getAttribute(attribute);
         return inst == null ? 0.0 : inst.getValue();
     }

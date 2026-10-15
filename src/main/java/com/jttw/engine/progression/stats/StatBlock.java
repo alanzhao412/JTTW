@@ -8,8 +8,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
-import java.util.UUID;
-
 /**
  * Computed stat snapshot for a player at a specific class and level.
  *
@@ -201,8 +199,8 @@ public record StatBlock(
     public void applyTo(ServerPlayer player) {
         applyMod(player, Attributes.MAX_HEALTH,    UUID_HP,  MOD_HP,  maxHealth - 20.0);
         applyMod(player, Attributes.ATTACK_DAMAGE, UUID_STR, MOD_STR, attackDamage - 1.0);
-        applyMod(player, ModAttributes.PHYSICAL_RESISTANCE.get(), UUID_PRES, MOD_PRES, physicalResistance);
-        applyMod(player, ModAttributes.MAGIC_RESISTANCE.get(),    UUID_MRES, MOD_MRES, magicResistance);
+        applyMod(player, ModAttributes.PHYSICAL_RESISTANCE, UUID_PRES, MOD_PRES, physicalResistance);
+        applyMod(player, ModAttributes.MAGIC_RESISTANCE,    UUID_MRES, MOD_MRES, magicResistance);
         removeMod(player, Attributes.ARMOR, UUID_DEF); // DEF no longer feeds vanilla armor
 
         // Clamp current HP to new max (avoids floating above max health after demotion)
@@ -222,8 +220,8 @@ public record StatBlock(
         removeMod(player, Attributes.MAX_HEALTH,    UUID_HP);
         removeMod(player, Attributes.ATTACK_DAMAGE, UUID_STR);
         removeMod(player, Attributes.ARMOR,         UUID_DEF);
-        removeMod(player, ModAttributes.PHYSICAL_RESISTANCE.get(), UUID_PRES);
-        removeMod(player, ModAttributes.MAGIC_RESISTANCE.get(),    UUID_MRES);
+        removeMod(player, ModAttributes.PHYSICAL_RESISTANCE, UUID_PRES);
+        removeMod(player, ModAttributes.MAGIC_RESISTANCE,    UUID_MRES);
     }
 
     // -----------------------------------------------------------------------
@@ -231,8 +229,8 @@ public record StatBlock(
     // -----------------------------------------------------------------------
 
     private static void applyMod(ServerPlayer player,
-                                 net.minecraft.world.entity.ai.attributes.Attribute attr,
-                                 UUID uuid, String name, double value) {
+                                 net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attr,
+                                 ResourceLocation uuid, String name, double value) {
         var inst = player.getAttribute(attr);
         if (inst == null) return;
         inst.removeModifier(uuid);
@@ -243,8 +241,8 @@ public record StatBlock(
     }
 
     private static void removeMod(ServerPlayer player,
-                                  net.minecraft.world.entity.ai.attributes.Attribute attr,
-                                  UUID uuid) {
+                                  net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attr,
+                                  ResourceLocation uuid) {
         var inst = player.getAttribute(attr);
         if (inst != null) inst.removeModifier(uuid);
     }

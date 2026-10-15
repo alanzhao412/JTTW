@@ -94,7 +94,7 @@ public final class CurseOfTheDead {
         if (!isCursed(p)) {
             p.getPersistentData().remove(KEY_UNTIL);
             p.getPersistentData().remove(KEY_LAST_NIGHT);
-            p.removeEffect(ModEffects.CURSE_OF_THE_DEAD.get());
+            p.removeEffect(ModEffects.CURSE_OF_THE_DEAD);
             p.sendSystemMessage(Component.literal("§7The Curse of the Dead lifts. The dead rest."));
             return List.of();
         }
@@ -143,10 +143,10 @@ public final class CurseOfTheDead {
 
     private static void showIcon(ServerPlayer p) {
         int left = (int) Math.min(Integer.MAX_VALUE, remaining(p));
-        MobEffectInstance on = p.getEffect(ModEffects.CURSE_OF_THE_DEAD.get());
+        MobEffectInstance on = p.getEffect(ModEffects.CURSE_OF_THE_DEAD);
         if (on == null || Math.abs(on.getDuration() - left) > 40) {
-            p.removeEffect(ModEffects.CURSE_OF_THE_DEAD.get());
-            p.addEffect(new MobEffectInstance(ModEffects.CURSE_OF_THE_DEAD.get(), left, 0, false, false, true));
+            p.removeEffect(ModEffects.CURSE_OF_THE_DEAD);
+            p.addEffect(new MobEffectInstance(ModEffects.CURSE_OF_THE_DEAD, left, 0, false, false, true));
         }
     }
 

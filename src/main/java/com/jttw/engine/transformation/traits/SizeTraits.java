@@ -9,7 +9,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.neoforged.neoforge.common.NeoForgeMod;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -71,7 +70,7 @@ public final class SizeTraits {
         reachBonus = Math.min(reachBonus, 32.0D);
 
         if (reachBonus > 0.0001D) {
-            AttributeInstance blockReach = sp.getAttribute(NeoForgeMod.BLOCK_REACH.get());
+            AttributeInstance blockReach = sp.getAttribute(Attributes.BLOCK_INTERACTION_RANGE);
             if (blockReach != null) {
                 blockReach.addPermanentModifier(new AttributeModifier(
                         JTTW_BLOCK_REACH_UUID,
@@ -80,7 +79,7 @@ public final class SizeTraits {
                 ));
             }
 
-            AttributeInstance entityReach = sp.getAttribute(NeoForgeMod.ENTITY_REACH.get());
+            AttributeInstance entityReach = sp.getAttribute(Attributes.ENTITY_INTERACTION_RANGE);
             if (entityReach != null) {
                 entityReach.addPermanentModifier(new AttributeModifier(
                         JTTW_ENTITY_REACH_UUID,
@@ -95,10 +94,10 @@ public final class SizeTraits {
         AttributeInstance move = sp.getAttribute(Attributes.MOVEMENT_SPEED);
         if (move != null) move.removeModifier(JTTW_MOVE_UUID);
 
-        AttributeInstance blockReach = sp.getAttribute(NeoForgeMod.BLOCK_REACH.get());
+        AttributeInstance blockReach = sp.getAttribute(Attributes.BLOCK_INTERACTION_RANGE);
         if (blockReach != null) blockReach.removeModifier(JTTW_BLOCK_REACH_UUID);
 
-        AttributeInstance entityReach = sp.getAttribute(NeoForgeMod.ENTITY_REACH.get());
+        AttributeInstance entityReach = sp.getAttribute(Attributes.ENTITY_INTERACTION_RANGE);
         if (entityReach != null) entityReach.removeModifier(JTTW_ENTITY_REACH_UUID);
     }
 }

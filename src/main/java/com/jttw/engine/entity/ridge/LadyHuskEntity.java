@@ -35,9 +35,9 @@ public class LadyHuskEntity extends Mob {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(MORTAL, GIRL);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(MORTAL, GIRL);
     }
 
     /** Whose body: {@link #GIRL}, {@link #OLD_WOMAN} or {@link #OLD_MAN}. */

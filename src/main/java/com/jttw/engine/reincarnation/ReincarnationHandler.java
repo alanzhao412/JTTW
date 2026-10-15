@@ -3,7 +3,6 @@ package com.jttw.engine.reincarnation;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.progression.level.LevelManager;
 import com.jttw.engine.transformation.TransformationManager;
-import net.minecraft.advancements.Advancement;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.chat.Component;
@@ -92,7 +91,7 @@ public final class ReincarnationHandler {
     }
 
     private static boolean hasEnteredNether(ServerPlayer sp) {
-        Advancement adv = sp.server.getAdvancements().getAdvancement(ADV_ENTER_NETHER);
+        net.minecraft.advancements.AdvancementHolder adv = sp.server.getAdvancements().get(ADV_ENTER_NETHER);
         if (adv == null) return false;
         return sp.getAdvancements().getOrStartProgress(adv).isDone();
     }

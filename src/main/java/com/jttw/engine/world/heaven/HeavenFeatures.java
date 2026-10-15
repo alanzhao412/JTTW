@@ -37,14 +37,16 @@ public final class HeavenFeatures {
     /** The share of islands with a building, and of those, the share that are peach gardens. */
     public static final float BUILDING_CHANCE = 0.25f, GARDEN_CHANCE = 0.2f;
 
-    public static final ResourceLocation PAVILION_CHEST = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "chests/heaven_pavilion");
-    public static final ResourceLocation PALACE_CHEST = ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "chests/jade_palace");
+    public static final net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable> PAVILION_CHEST =
+            net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "chests/heaven_pavilion"));
+    public static final net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable> PALACE_CHEST =
+            net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "chests/jade_palace"));
 
     private static void set(WorldGenLevel level, BlockPos p, BlockState s) {
         level.setBlock(p, s, Block.UPDATE_CLIENTS);
     }
 
-    private static void chest(WorldGenLevel level, BlockPos p, Direction facing, ResourceLocation loot, RandomSource r) {
+    private static void chest(WorldGenLevel level, BlockPos p, Direction facing, net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable> loot, RandomSource r) {
         set(level, p, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, facing));
         if (level.getBlockEntity(p) instanceof RandomizableContainerBlockEntity c) c.setLootTable(loot, r.nextLong());
     }

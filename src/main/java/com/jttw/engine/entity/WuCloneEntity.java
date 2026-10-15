@@ -91,10 +91,10 @@ public class WuCloneEntity extends PathfinderMob {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(DATA_OWNER_UUID, Optional.empty());
-        this.entityData.define(DATA_PRIORITY, Priority.FOLLOW.ordinal());
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_OWNER_UUID, Optional.empty());
+        builder.define(DATA_PRIORITY, Priority.FOLLOW.ordinal());
     }
 
     /** Set by WuCloneManager on summon (server side). Auto-synced to client. */
@@ -207,8 +207,8 @@ public class WuCloneEntity extends PathfinderMob {
                 .add(Attributes.ARMOR, 0.0)
                 .add(Attributes.FOLLOW_RANGE, 32.0)
                 // Clones carry their owner's resistances (copied on summon)
-                .add(com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get())
-                .add(com.jttw.engine.registry.ModAttributes.MAGIC_RESISTANCE.get());
+                .add(com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE)
+                .add(com.jttw.engine.registry.ModAttributes.MAGIC_RESISTANCE);
     }
 
     // Silent — no zombie groaning

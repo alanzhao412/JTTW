@@ -74,8 +74,8 @@ public class ThrownSpearEntity extends Projectile implements ItemSupplier {
     }
 
     @Override
-    protected void defineSynchedData() {
-        entityData.define(DATA_ITEM, ItemStack.EMPTY);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        builder.define(DATA_ITEM, ItemStack.EMPTY);
     }
 
     @Override
@@ -126,7 +126,7 @@ public class ThrownSpearEntity extends Projectile implements ItemSupplier {
                 com.jttw.engine.world.tough.Tough.strength(getOwner())));
         if (cost > budget) return false;
         if (getOwner() instanceof ServerPlayer owner
-                && NeoForge.EVENT_BUS.post(new BlockEvent.BreakEvent(level(), pos, state, owner))) {
+                && NeoForge.EVENT_BUS.post(new BlockEvent.BreakEvent(level(), pos, state, owner)).isCanceled()) {
             return false; // a protected area
         }
         level().destroyBlock(pos, false, getOwner());

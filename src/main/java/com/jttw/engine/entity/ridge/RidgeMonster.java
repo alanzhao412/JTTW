@@ -16,7 +16,6 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -62,10 +61,10 @@ public abstract class RidgeMonster extends Monster {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(CAPTAIN, false);
-        entityData.define(MOB_LEVEL, LEVEL);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(CAPTAIN, false);
+        builder.define(MOB_LEVEL, LEVEL);
     }
 
     public boolean isCaptain() {
@@ -117,8 +116,8 @@ public abstract class RidgeMonster extends Monster {
 
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason,
-                                        @Nullable SpawnGroupData data, @Nullable CompoundTag tag) {
-        SpawnGroupData result = super.finalizeSpawn(level, difficulty, reason, data, tag);
+                                        @Nullable SpawnGroupData data) {
+        SpawnGroupData result = super.finalizeSpawn(level, difficulty, reason, data);
         // Only the ones the world sends roll for captain; an escort, a summons or a command never does
         boolean captain = (reason == MobSpawnType.NATURAL || reason == MobSpawnType.CHUNK_GENERATION || reason == MobSpawnType.EVENT)
                 && random.nextFloat() < CAPTAIN_CHANCE;
@@ -148,7 +147,7 @@ public abstract class RidgeMonster extends Monster {
         if (mob == null) return null;
         BlockPos stand = standingSpot(level, mob, at);
         mob.moveTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, level.random.nextFloat() * 360f, 0f);
-        mob.finalizeSpawn(level, level.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.MOB_SUMMONED, null, null);
+        mob.finalizeSpawn(level, level.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.MOB_SUMMONED, null);
         mob.become(captain ? captainLevel(level.random) : regularLevel(level.random), captain);
         level.addFreshEntityWithPassengers(mob);
         return mob;
@@ -163,7 +162,7 @@ public abstract class RidgeMonster extends Monster {
         for (int dy = 3; dy >= -6; dy--) {
             p.setY(at.getY() + dy);
             if (!level.getBlockState(p.below()).blocksMotion()) continue;
-            var box = mob.getType().getAABB(p.getX() + 0.5, p.getY(), p.getZ() + 0.5);
+            var box = mob.getType().getDimensions().makeBoundingBox(p.getX() + 0.5, p.getY(), p.getZ() + 0.5);
             if (level.noCollision(box) && !level.containsAnyLiquid(box)) return p.immutable();
         }
         return at;
@@ -198,14 +197,32 @@ public abstract class RidgeMonster extends Monster {
 
     /** A captain leaves its sigil, for forging. */
     @Override
-    protected void dropCustomDeathLoot(net.minecraft.world.damagesource.DamageSource source, int looting, boolean hitByPlayer) {
-        super.dropCustomDeathLoot(source, looting, hitByPlayer);
+    protected void dropCustomDeathLoot(ServerLevel level, net.minecraft.world.damagesource.DamageSource source, boolean hitByPlayer) {
+        super.dropCustomDeathLoot(level, source, hitByPlayer);
+        int looting = lootingOf(level, source);
         if (isCaptain()) spawnAtLocation(new net.minecraft.world.item.ItemStack(com.jttw.engine.registry.ModItems.CAPTAINS_SIGIL.get(), 1 + random.nextInt(1 + looting)));
     }
 
+    /** The Looting of whoever killed it (enchantments are data-driven now, so looked up by key). */
+    public static int lootingOf(ServerLevel level, net.minecraft.world.damagesource.DamageSource source) {
+        if (!(source.getEntity() instanceof net.minecraft.world.entity.LivingEntity killer)) return 0;
+        return level.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT)
+                .get(net.minecraft.world.item.enchantment.Enchantments.LOOTING)
+                .map(looting -> net.minecraft.world.item.enchantment.EnchantmentHelper.getEnchantmentLevel(looting, killer))
+                .orElse(0);
+    }
+
+    // The ridge's dead are undead (MobType is gone: undead is the entity-type tag now; these keep
+    // the healing/harm inversion and the poison/regeneration immunity without it)
     @Override
-    public MobType getMobType() {
-        return MobType.UNDEAD;
+    public boolean isInvertedHealAndHarm() {
+        return true;
+    }
+
+    @Override
+    public boolean canBeAffected(net.minecraft.world.effect.MobEffectInstance effect) {
+        return !effect.is(net.minecraft.world.effect.MobEffects.REGENERATION) && !effect.is(net.minecraft.world.effect.MobEffects.POISON)
+                && super.canBeAffected(effect);
     }
 
     @Override

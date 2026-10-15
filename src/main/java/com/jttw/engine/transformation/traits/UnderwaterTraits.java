@@ -9,7 +9,6 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.animal.WaterAnimal;
 
 import java.util.HashMap;
@@ -64,7 +63,7 @@ public final class UnderwaterTraits {
             try {
                 Entity e = type.create(level);
                 if (e instanceof LivingEntity le) {
-                    aquatic = (le instanceof WaterAnimal) || (le.getMobType() == MobType.WATER);
+                    aquatic = (le instanceof WaterAnimal) || le.getType().is(net.minecraft.tags.EntityTypeTags.AQUATIC);
                 }
             } catch (Throwable ignored) {}
         }

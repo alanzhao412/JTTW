@@ -116,8 +116,8 @@ public class QiWaveEntity extends Entity {
     }
 
     @Override
-    protected void defineSynchedData() {
-        this.entityData.define(OWNER_UUID, Optional.empty());
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        builder.define(OWNER_UUID, Optional.empty());
     }
 
     @Nullable
@@ -208,7 +208,7 @@ public class QiWaveEntity extends Entity {
                 if (last != null && now - last < 10) continue;
                 struckAt.put(target.getId(), now);
                 target.hurt(dmgSource, attackDamage);
-                target.setSecondsOnFire(5);
+                target.igniteForSeconds(5);
 
                 // Massive explosion on impact
                 com.jttw.engine.world.TerrainBreaker.explode(serverLevel, owner,

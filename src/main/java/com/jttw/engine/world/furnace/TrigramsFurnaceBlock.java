@@ -6,7 +6,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -21,7 +20,6 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.neoforged.neoforge.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -41,9 +39,16 @@ public class TrigramsFurnaceBlock extends BaseEntityBlock {
 
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
 
+    public static final com.mojang.serialization.MapCodec<TrigramsFurnaceBlock> CODEC = simpleCodec(TrigramsFurnaceBlock::new);
+
     public TrigramsFurnaceBlock(Properties properties) {
         super(properties);
         registerDefaultState(stateDefinition.any().setValue(LIT, false));
+    }
+
+    @Override
+    protected com.mojang.serialization.MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
     }
 
     @Override
@@ -116,10 +121,10 @@ public class TrigramsFurnaceBlock extends BaseEntityBlock {
 
     @Override
     @SuppressWarnings("deprecation")
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (level.isClientSide) return InteractionResult.SUCCESS;
         if (level.getBlockEntity(pos) instanceof TrigramsFurnaceBlockEntity be && player instanceof ServerPlayer sp) {
-            NetworkHooks.openScreen(sp, be, pos);
+            sp.openMenu(be, pos);
         }
         return InteractionResult.CONSUME;
     }
