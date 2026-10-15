@@ -354,10 +354,20 @@ public final class MarshalAbilityHandler {
         p.heal(heal);
         if (tier >= 3 && heal > missing) {
             // Golden hearts up to 20 at level 1, a cap that grows with the heal
+            stomachHearts(p, tier);
             p.setAbsorptionAmount(Math.min(LevelPower.scaled(p, 20f), p.getAbsorptionAmount() + (heal - missing)));
         }
         p.serverLevel().sendParticles(ParticleTypes.HEART, p.getX(), p.getY() + 1.8, p.getZ(), 3, 0.4, 0.2, 0.4, 0);
         p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 1f, 0.8f);
+    }
+
+    /**
+     * Room for the stomach's golden hearts. Absorption is capped by the max absorption attribute
+     * (0 for a player) and clamped whenever it is set, so III keeps its cap there.
+     */
+    private static void stomachHearts(ServerPlayer p, int tier) {
+        PassiveModifiers.add(p, Attributes.MAX_ABSORPTION, "mc_stomach_hearts",
+                tier >= 3 ? LevelPower.scaled(p, 20f) : 0);
     }
 
     /** -1 tells the client he has no second stomach to draw. */
@@ -452,6 +462,7 @@ public final class MarshalAbilityHandler {
             if (p.tickCount % 20 == 0) {
                 PassiveModifiers.set(p, NeoForgeMod.SWIM_SPEED, "mc_admiral_swim", 0,
                         AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+                stomachHearts(p, 0);
                 if (p.getPersistentData().getInt(KEY_RESERVE_SENT) > 1) syncStomach(p);
             }
             return;
@@ -474,6 +485,7 @@ public final class MarshalAbilityHandler {
             setReserve(p, reserve - moved);
         }
         if (p.tickCount % 40 == 0 && pd.getInt(KEY_RESERVE_SENT) != shownReserve(p) + 2) syncStomach(p);
+        if (p.tickCount % 20 == 0) stomachHearts(p, tier(p, "mc_stomach"));
 
         admiral(p, tier(p, "mc_admiral"));
     }

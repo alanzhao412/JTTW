@@ -90,7 +90,8 @@ public class GreatFurnaceGameTests {
     public static void nezhasOrThePhoenixsFireLightsIt(GameTestHelper h) {
         TrigramsFurnaceBlockEntity f = build(h);
         var zombie = h.spawnWithNoFreeWill(EntityType.ZOMBIE, new BlockPos(0, 2, 0)); // stands in for the one breathing fire
-        Vec3 eye = h.absoluteVec(new Vec3(0.5, 4.5, -2.5));
+        // Inside the test's bounds: since 1.20.5 the harness walls each test in with barriers
+        Vec3 eye = h.absoluteVec(new Vec3(0.5, 4.5, 0.5));
         TrigramsFurnaceBlockEntity.igniteAlong(h.getLevel(), eye, new Vec3(0.4, -0.1, 1).normalize(), 10, zombie);
         check(h, f.isLit(), "his fire on its side lit it");
         zombie.discard();
