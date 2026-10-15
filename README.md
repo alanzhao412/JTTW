@@ -1,6 +1,6 @@
 # JTTW Engine
 
-A Minecraft Forge 1.20.1 mod implementing a full MMORPG progression system rooted in *Journey to the
+A NeoForge mod for Minecraft 1.21.1 implementing a full MMORPG progression system rooted in *Journey to the
 West* and Chinese mythology — four class archetypes, nine skill trees, an alignment-driven
 reincarnation system with twelve evolution outcomes, tiered flight, custom dimensions, and
 lore-accurate artifacts and abilities.
@@ -267,14 +267,14 @@ Largest components: `TransformationAbilityHandler` (1,385 lines), `YuanDiAbility
 
 ## Building
 
-Requires **JDK 17**.
+Requires **JDK 21** (Gradle downloads one if none is installed).
 
 ```bash
 ./gradlew build             # jar lands in build/libs/
 ./gradlew runClient         # launch a dev client
 ```
 
-Then drop the built jar into `mods/` alongside Minecraft Forge 1.20.1 (47.4.10+).
+Then drop the built jar into `mods/` alongside NeoForge for Minecraft 1.21.1 (21.1.253+).
 
 ## Testing
 
@@ -290,7 +290,7 @@ Then drop the built jar into `mods/` alongside Minecraft Forge 1.20.1 (47.4.10+)
   kill XP, skill purchases, alignment and reincarnation, what survives death, Qi, flight,
   dimensions, items, transformations and each character's abilities. They live in their own
   source set, so nothing from them ships in the mod jar. Each test runs in a small platform
-  structure with its own Forge `FakePlayer`.
+  structure with its own NeoForge `FakePlayer`.
 - **The form gallery** checks what tests can't: how each transformation looks.
   `./gradlew runFormGallery` opens a real client and photographs every form from the front, the
   side, and the front while looking up. It saves the photos to
@@ -319,5 +319,5 @@ Then drop the built jar into `mods/` alongside Minecraft Forge 1.20.1 (47.4.10+)
 
 ## License
 
-All rights reserved. *Journey to the West* is public-domain source material; Minecraft and Forge are
+All rights reserved. *Journey to the West* is public-domain source material; Minecraft and NeoForge are
 the property of their respective owners, and no Mojang assets or source are redistributed here.
