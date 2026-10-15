@@ -71,6 +71,7 @@ public class WukongGameTests {
 
     @GameTest(template = PLATFORM, batch = "ringOfFireTierOneBurnsPushesAndDrainsTwoQiPerSecond")
     public static void ringOfFireTierOneBurnsPushesAndDrainsTwoQiPerSecond(GameTestHelper h) {
+        openAir(h); // the pig is thrown off the platform's edge, where 1.21 builds a barrier wall
         ServerPlayer p = wukong(h);
         online(h, p);
         grant(p, "wu_ring_1");

@@ -208,6 +208,7 @@ public class NineSpiritsGameTests {
 
     @GameTest(template = PLATFORM, batch = "nineSpiritsFlare")
     public static void theManeBlindsOnlyThoseLookingAtHim(GameTestHelper h) {
+        openAir(h); // the watchers stand at z=5, where 1.21 builds a barrier wall that blocks their sight
         ServerPlayer p = saint(h);
         grant(p, "ns_flare_1");
         Zombie watching = mob(h, EntityType.ZOMBIE, 2, 5);

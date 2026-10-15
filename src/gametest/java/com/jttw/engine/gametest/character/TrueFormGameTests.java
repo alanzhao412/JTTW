@@ -76,6 +76,7 @@ public class TrueFormGameTests {
     /** Each divine beast's Shift + M takes its own true form. */
     @GameTest(template = PLATFORM, batch = "trueFormsOfEach")
     public static void eachBeastTakesItsOwnTrueForm(GameTestHelper h) {
+        openAir(h); // the tortoise is 6 wide: 1.21's barrier walls round the platform leave it no room
         Object[][] cases = {
                 {ReincarnationOutcome.DRAGON, "dr_true_1", 7, ModEntities.AZURE_DRAGON.get()},
                 {ReincarnationOutcome.TURTLE, "tu_true_1", 7, ModEntities.BLACK_TORTOISE.get()},

@@ -275,6 +275,15 @@ public final class GT {
     }
 
     /**
+     * Takes down the barrier walls and roof that 1.21's GameTest framework builds round every
+     * test structure (1.20.1 built none), for tests whose mobs stand at or are thrown to the
+     * platform's edge, or whose bodies are wider than it.
+     */
+    public static void openAir(GameTestHelper helper) {
+        net.minecraft.gametest.framework.StructureUtils.removeBarriers(helper.getBounds(), helper.getLevel());
+    }
+
+    /**
      * Fails the test straight away, saying why, if a chunk under its platform cannot hold
      * entities yet. {@link ReadyGate} should make this impossible; this keeps a regression loud.
      */

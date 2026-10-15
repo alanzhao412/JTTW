@@ -305,6 +305,7 @@ public class TransformAbilityGameTests {
 
     @GameTest(template = PLATFORM)
     public static void guardianLaserFatiguesAndHitsOncePerHalfSecond(GameTestHelper h) {
+        openAir(h); // the golem, 1.4 wide at the platform's edge, would choke in the barrier wall
         IronGolem golem = h.spawnWithNoFreeWill(EntityType.IRON_GOLEM, new BlockPos(2, 2, 4));
         ServerPlayer p = Tf.playerAs(h, EntityType.GUARDIAN);
         aim(p, golem);
@@ -328,6 +329,7 @@ public class TransformAbilityGameTests {
 
     @GameTest(template = PLATFORM, timeoutTicks = 160)
     public static void guardianLaserStopsAfterFiveSeconds(GameTestHelper h) {
+        openAir(h); // the golem, 1.4 wide at the platform's edge, would choke in the barrier wall
         IronGolem golem = h.spawnWithNoFreeWill(EntityType.IRON_GOLEM, new BlockPos(2, 2, 4));
         ServerPlayer p = Tf.playerAs(h, EntityType.GUARDIAN);
         aim(p, golem);
