@@ -101,7 +101,8 @@ public class TurtleGameTests {
     @GameTest(template = PLATFORM, batch = "turtlesOldArmorPassiveIsRemoved")
     public static void turtlesOldArmorPassiveIsRemoved(GameTestHelper h) {
         ServerPlayer p = turtle(h);
-        java.util.UUID id = java.util.UUID.fromString("c3d4e5f6-a7b8-9012-cdef-234567890100");
+        // the old modifier's UUID became this id when modifiers moved to ResourceLocation keys
+        net.minecraft.resources.ResourceLocation id = JTTWEngine.id("turtle_def");
         p.getAttribute(Attributes.ARMOR).addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(
                 id, 20.0, net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE));
         LevelManager.reapplyStats(p);
@@ -370,8 +371,8 @@ public class TurtleGameTests {
         qi(p, 100f, 100f);
         grant(p, "tu_tectonic_1", "tu_tremor_1");
         var ds = h.getLevel().damageSources();
-        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.living.LivingDamageEvent(p, ds.generic(), 6f));
-        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.living.LivingDamageEvent(p, ds.generic(), 4f));
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(damage(p, ds.generic(), 6f));
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(damage(p, ds.generic(), 4f));
         near(h, 10f, com.jttw.engine.character.turtle.StoredTremor.stored(p), "both blows stored");
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 3);
         List<Hit> hits = watch(golem);
@@ -386,7 +387,7 @@ public class TurtleGameTests {
     public static void storedTremorForgetsBlowsAfterTenSeconds(GameTestHelper h) {
         ServerPlayer p = as(h, ReincarnationOutcome.TURTLE);
         grant(p, "tu_tremor_1");
-        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.entity.living.LivingDamageEvent(p, h.getLevel().damageSources().generic(), 6f));
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(damage(p, h.getLevel().damageSources().generic(), 6f));
         h.runAfterDelay(com.jttw.engine.character.turtle.StoredTremor.WINDOW + 5, () -> {
             near(h, 0f, com.jttw.engine.character.turtle.StoredTremor.stored(p), "gone after 10 s");
             h.succeed();

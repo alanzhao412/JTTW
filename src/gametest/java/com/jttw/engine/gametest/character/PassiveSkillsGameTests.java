@@ -27,7 +27,6 @@ import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.monster.Zombie;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
-import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
@@ -43,7 +42,7 @@ import static com.jttw.engine.gametest.character.CharTest.*;
 public class PassiveSkillsGameTests {
 
     /** One refresh of a once-a-second passive. */
-    private static void second(ServerPlayer p, Consumer<TickEvent.PlayerTickEvent> handler) {
+    private static void second(ServerPlayer p, Consumer<PlayerTickEvent.Post> handler) {
         p.tickCount = 19;
         tick(p, handler, 1);
     }

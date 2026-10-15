@@ -192,7 +192,7 @@ public class PhoenixGameTests {
         List<Hit> undeadHits = watch(undead), pigHits = watch(pig), farHits = watch(far);
         character().use(p, "ph_radiance", AbilityAction.USE);
         near(h, 80f, QiData.getCurrent(p), "20 Qi");
-        check(h, p.hasEffect(com.jttw.engine.registry.ModEffects.SOLAR_FLARE.get()), "it is a sun");
+        check(h, p.hasEffect(com.jttw.engine.registry.ModEffects.SOLAR_FLARE), "it is a sun");
         h.runAfterDelay(25, () -> {
             float burn = com.jttw.engine.progression.stats.LevelPower.scaled(p, com.jttw.engine.character.phoenix.SolarFlare.burnPerSecond(1));
             Hit pigBurn = firstHit(h, pigHits, DamageTypes.PLAYER_ATTACK, pig);
@@ -234,7 +234,7 @@ public class PhoenixGameTests {
         check(h, !com.jttw.engine.character.phoenix.SolarFlare.cast(p), "not twice at once");
         h.runAfterDelay(com.jttw.engine.character.phoenix.SolarFlare.TICKS + 3, () -> {
             check(h, !com.jttw.engine.character.phoenix.SolarFlare.active(p), "8 s, then it ends");
-            check(h, !p.hasEffect(com.jttw.engine.registry.ModEffects.SOLAR_FLARE.get()), "the sun gone");
+            check(h, !p.hasEffect(com.jttw.engine.registry.ModEffects.SOLAR_FLARE), "the sun gone");
             check(h, golem.hasEffect(MobEffects.BLINDNESS), "the burst blinds");
             check(h, !com.jttw.engine.character.phoenix.SolarFlare.cast(p), "it rests 30 s before the next");
             h.succeed();
@@ -383,7 +383,7 @@ public class PhoenixGameTests {
 
         grant(p, "ph_talons_2");
         p.setHealth(10f);
-        SmallFireball ball = new SmallFireball(h.getLevel(), p, 0, 0, 0);
+        SmallFireball ball = new SmallFireball(h.getLevel(), p, net.minecraft.world.phys.Vec3.ZERO);
         PhoenixAbilityHandler.onDealDamage(incoming(shot, ds.fireball(ball, p), 8f));
         near(h, 12f, p.getHealth(), "fire damage heals 25% of 8");
         ball.discard();

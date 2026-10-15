@@ -377,7 +377,7 @@ public class WukongGameTests {
     public static void martialArtsTiersAddSpeedThenAttackAndResistance(GameTestHelper h) {
         ServerPlayer p = wukong(h);
         p.tickCount = 20;
-        TickEvent.PlayerTickEvent tick = new PlayerTickEvent.Pre(p);
+        PlayerTickEvent.Pre tick = new PlayerTickEvent.Pre(p);
 
         WukongAbilityHandler.onPlayerTickMartial(tick);
         eq(h, null, modifier(p, Attributes.MOVEMENT_SPEED, "jttw:martial_speed"), "no speed bonus untrained");

@@ -55,7 +55,7 @@ public class TrueFormGameTests {
         float qi = QiData.getCurrent(p);
         c.activate(p, 0, AbilityAction.USE); // V, Predator's Leap: exhausted, it is refused
         near(h, qi, QiData.getCurrent(p), "exhausted, no ability answers");
-        p.removeEffect(ModEffects.EXHAUSTED.get());
+        p.removeEffect(ModEffects.EXHAUSTED);
         c.use(p, "bk_true", AbilityAction.USE);
         check(h, !TrueForm.active(p), "it rests ten minutes from its taking");
         h.succeed();

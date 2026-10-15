@@ -1,5 +1,6 @@
 package com.jttw.engine.gametest.character;
 
+import com.jttw.engine.character.PassiveModifiers;
 import com.jttw.engine.gametest.GT;
 import com.jttw.engine.progression.level.LevelManager;
 import com.jttw.engine.progression.qi.QiData;
@@ -7,6 +8,8 @@ import com.jttw.engine.progression.skilltree.SkillTreeData;
 import com.jttw.engine.reincarnation.AlignmentData;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.GameTestInfo;
 import net.minecraft.gametest.framework.GameTestListener;
@@ -69,7 +72,7 @@ public final class CharTest {
     }
 
     /** Advances the player's tick counter and runs one END-phase player tick through {@code handler}. */
-    public static void tick(ServerPlayer p, Consumer<TickEvent.PlayerTickEvent> handler, int times) {
+    public static void tick(ServerPlayer p, Consumer<PlayerTickEvent.Post> handler, int times) {
         for (int i = 0; i < times; i++) {
             p.tickCount++;
             handler.accept(new PlayerTickEvent.Post(p));
@@ -122,25 +125,69 @@ public final class CharTest {
     // ── Assertions on entities ───────────────────────────────────────
 
     /** Amplifier of an active effect, or -1 if absent. */
-    public static int amp(LivingEntity e, MobEffect effect) {
+    public static int amp(LivingEntity e, Holder<MobEffect> effect) {
         MobEffectInstance inst = e.getEffect(effect);
         return inst == null ? -1 : inst.getAmplifier();
     }
 
     /** Duration of an active effect, or -1 if absent. */
-    public static int duration(LivingEntity e, MobEffect effect) {
+    public static int duration(LivingEntity e, Holder<MobEffect> effect) {
         MobEffectInstance inst = e.getEffect(effect);
         return inst == null ? -1 : inst.getDuration();
     }
 
-    /** The amount of the modifier with this name on the attribute, or null if none. */
-    public static Double modifier(LivingEntity e, Attribute attr, String name) {
+    /**
+     * The amount of the modifier with this name on the attribute, or null if none.
+     *
+     * <p>Modifiers are keyed by id now, not by name. A bare name is a skill passive's name
+     * ({@link PassiveModifiers#id}); a {@code jttw:} name is the modifier's old Forge name, mapped
+     * to the id the handler uses for it by {@link #LEGACY_IDS}.
+     */
+    public static Double modifier(LivingEntity e, Holder<Attribute> attr, String name) {
+        return modifier(e, attr, idOf(name));
+    }
+
+    /** The amount of the modifier with this id on the attribute, or null if none. */
+    public static Double modifier(LivingEntity e, Holder<Attribute> attr, ResourceLocation id) {
         AttributeInstance inst = e.getAttribute(attr);
         if (inst == null) return null;
-        for (AttributeModifier m : inst.getModifiers()) {
-            if (m.getName().equals(name)) return m.getAmount();
-        }
-        return null;
+        AttributeModifier m = inst.getModifier(id);
+        return m == null ? null : m.amount();
+    }
+
+    /** Old Forge modifier name -> the path of the id the handler now gives that modifier. */
+    private static final Map<String, String> LEGACY_IDS = Map.ofEntries(
+            Map.entry("jttw:yd_transform_dmg", "transform_dmg"),
+            Map.entry("jttw:yd_transform_speed", "transform_speed"),
+            Map.entry("jttw:yd_transform_pres", "transform_armor"),
+            Map.entry("jttw:yd_transform_kb", "transform_kb"),
+            Map.entry("jttw:yd_night_dmg", "night_dmg"),
+            Map.entry("jttw:yd_night_speed", "night_speed"),
+            Map.entry("jttw:yd_night_pres", "night_armor"),
+            Map.entry("jttw:yd_breath_slow", "breath_slow"),
+            Map.entry("jttw:martial_speed", "martial_speed"),
+            Map.entry("jttw:martial_atk", "martial_atk"),
+            Map.entry("jttw:martial_pres", "martial_armor"),
+            Map.entry("jttw:martial_armor", "martial_armor"),
+            Map.entry("jttw:turtle_pres", "turtle_def"),
+            Map.entry("jttw:turtle_def", "turtle_def"),
+            Map.entry("jttw:turtle_toughness", "turtle_toughness"),
+            Map.entry("jttw:shell_guard_slow", "shell_slow"),
+            Map.entry("jttw:byakko_speed", "bk_speed"),
+            Map.entry("jttw:byakko_step", "bk_step"),
+            Map.entry("jttw:three_heads_atk", "three_heads_atk"),
+            Map.entry("jttw:domain_hp", "domain_hp"),
+            Map.entry("jttw:domain_str", "domain_str"),
+            Map.entry("jttw:domain_def", "domain_def"),
+            Map.entry("jttw:domain_mres", "domain_def"),
+            Map.entry("jttw:flamethrower_slow", "flame_slow"));
+
+    private static ResourceLocation idOf(String name) {
+        if (!name.contains(":")) return PassiveModifiers.id(name);
+        String path = LEGACY_IDS.get(name);
+        // Fail loudly: an unmapped name would make every "modifier absent" assertion pass vacuously.
+        if (path == null) throw new IllegalArgumentException("no modifier id known for " + name);
+        return com.jttw.engine.JTTWEngine.id(path);
     }
 
     public static void close(GameTestHelper h, double expected, double actual, double tolerance, String what) {
@@ -208,11 +255,11 @@ public final class CharTest {
         }
     }
 
-    public static Attribute PHYSICAL_RESISTANCE() {
-        return com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE.get();
+    public static Holder<Attribute> PHYSICAL_RESISTANCE() {
+        return com.jttw.engine.registry.ModAttributes.PHYSICAL_RESISTANCE;
     }
 
-    public static Attribute MAGIC_RESISTANCE() {
-        return com.jttw.engine.registry.ModAttributes.MAGIC_RESISTANCE.get();
+    public static Holder<Attribute> MAGIC_RESISTANCE() {
+        return com.jttw.engine.registry.ModAttributes.MAGIC_RESISTANCE;
     }
 }

@@ -85,7 +85,7 @@ public class ByakkoGameTests {
         LevelManager.reapplyStats(p);
         // constants: +0.008 speed per level (80% at 100), step 1.0 + 0.01 per level (2.0 at 100)
         near(h, 0.8, modifier(p, Attributes.MOVEMENT_SPEED, "jttw:byakko_speed"), "speed bonus at 100");
-        near(h, 2.0, modifier(p, NeoForgeMod.STEP_HEIGHT_ADDITION.get(), "jttw:byakko_step"), "step bonus at 100");
+        near(h, 2.0, modifier(p, Attributes.STEP_HEIGHT, "jttw:byakko_step"), "step bonus at 100");
         h.succeed();
     }
 

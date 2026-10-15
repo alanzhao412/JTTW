@@ -194,7 +194,7 @@ public class NineSpiritsGameTests {
         var phantom = h.spawnWithNoFreeWill(EntityType.PHANTOM, new BlockPos(2, 4, 6));
         phantom.setOnGround(false);
         Arrow arrow = new Arrow(h.getLevel(), h.absoluteVec(new Vec3(2.5, 3, 6)).x, h.absoluteVec(new Vec3(2.5, 3, 6)).y,
-                h.absoluteVec(new Vec3(2.5, 3, 6)).z);
+                h.absoluteVec(new Vec3(2.5, 3, 6)).z, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.ARROW), null);
         h.getLevel().addFreshEntity(arrow);
         key(p, 1);
         eq(h, 0, amp(z, MobEffects.CONFUSION), "dizzy");

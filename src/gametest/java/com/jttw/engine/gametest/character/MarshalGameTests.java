@@ -274,7 +274,7 @@ public class MarshalGameTests {
     public static void theAdmiralSwimsFastAndBreathesUnderwater(GameTestHelper h) {
         ServerPlayer p = marshal(h, "mc_admiral_1");
         tick(p, MarshalAbilityHandler::onPlayerTick, 1);
-        near(h, 0.5, modifier(p, NeoForgeMod.SWIM_SPEED.get(), "mc_admiral_swim"), "I: +50% swim");
+        near(h, 0.5, modifier(p, NeoForgeMod.SWIM_SPEED, "mc_admiral_swim"), "I: +50% swim");
         h.setBlock(new BlockPos(2, 2, 2), Blocks.WATER);
         h.setBlock(new BlockPos(2, 3, 2), Blocks.WATER);
         p.setAirSupply(0);
@@ -282,7 +282,7 @@ public class MarshalGameTests {
         eq(h, p.getMaxAirSupply(), p.getAirSupply(), "breathes underwater");
         grant(p, "mc_admiral_2");
         tick(p, MarshalAbilityHandler::onPlayerTick, 20);
-        near(h, 1.0, modifier(p, NeoForgeMod.SWIM_SPEED.get(), "mc_admiral_swim"), "II: +100% swim");
+        near(h, 1.0, modifier(p, NeoForgeMod.SWIM_SPEED, "mc_admiral_swim"), "II: +100% swim");
         check(h, p.hasEffect(MobEffects.NIGHT_VISION), "II: sees underwater");
         h.succeed();
     }
@@ -311,7 +311,7 @@ public class MarshalGameTests {
         p.getPersistentData().putString(com.jttw.engine.reincarnation.AlignmentData.KEY_REINCARNATION_OUTCOME,
                 ReincarnationOutcome.CELESTIAL_PRIMATE.id);
         tick(p, MarshalAbilityHandler::onPlayerTick, 20);
-        check(h, modifier(p, NeoForgeMod.SWIM_SPEED.get(), "mc_admiral_swim") == null, "bonus gone");
+        check(h, modifier(p, NeoForgeMod.SWIM_SPEED, "mc_admiral_swim") == null, "bonus gone");
         h.succeed();
     }
 
