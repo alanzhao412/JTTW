@@ -98,11 +98,17 @@ for j in range(fh):
         if j <= 5 and (edge <= 3 or j <= 1):
             put(fx + i, fy + j, shade(MASK, 0.85 + 0.03 * rnd.randint(-1, 1)))
 for ex in (fx + 1, fx + fw - 3):
+    inner = 0 if ex > fx + 5 else 1                    # the column nearer the nose
     for i in range(2):
         put(ex + i, fy + 1, (16, 12, 14, 255))          # the socket's shadow under the brow
-        for j, c in ((2, EMBER), (3, EMBER_CORE if i == (0 if ex > fx + 5 else 1) else EMBER)):
+        # angled, glaring: two along the bottom, two tall at the outside, one at the inside, so
+        # the eye's top slopes down toward the nose
+        for j in ((3,) if i == inner else (2, 3)):
+            c = EMBER_CORE if (i == inner and j == 3) else EMBER
             put(ex + i, fy + j, shade(c, 0.35))  # the skin dark beneath: the glow is drawn over it
             glow.putpixel((ex + i, fy + j), c + (255,))
+        if i == inner:
+            put(ex + i, fy + 2, (16, 12, 14, 255))      # the brow's shadow, cutting the eye's inner corner
         put(ex + i, fy + 4, (24, 20, 22, 255))
 # the eyes show at the skull's sides too, a glint of red under the brow
 for (sx, sy) in ((68 + 10 - 2, 40 + 10 + 2), (68 + 10 + 12, 40 + 10 + 2)):
