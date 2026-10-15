@@ -333,15 +333,15 @@ public class TransformationCoreGameTests {
         var sources = h.getLevel().damageSources();
         ServerPlayer allay = Tf.playerAs(h, EntityType.ALLAY);
         allay.hurtTime = 5;
-        LivingIncomingDamageEvent attack = new LivingIncomingDamageEvent(allay, sources.inWall(), 1f);
+        LivingIncomingDamageEvent attack = incoming(allay, sources.inWall(), 1f);
         SuffocationDamageBlocker.onLivingAttack(attack);
         check(h, attack.isCanceled(), "in-wall attack cancelled");
         eq(h, 0, allay.hurtTime, "hurt flash cleared");
-        LivingIncomingDamageEvent hurt = new LivingIncomingDamageEvent(allay, sources.inWall(), 1f);
+        LivingIncomingDamageEvent hurt = incoming(allay, sources.inWall(), 1f);
         SuffocationDamageBlocker.onLivingHurt(hurt);
         check(h, hurt.isCanceled(), "in-wall hurt cancelled");
 
-        LivingIncomingDamageEvent other = new LivingIncomingDamageEvent(allay, sources.generic(), 1f);
+        LivingIncomingDamageEvent other = incoming(allay, sources.generic(), 1f);
         SuffocationDamageBlocker.onLivingAttack(other);
         check(h, !other.isCanceled(), "other damage still lands on a phasing form");
         h.succeed();
@@ -351,11 +351,11 @@ public class TransformationCoreGameTests {
     public static void solidFormsStillSuffocate(GameTestHelper h) {
         var sources = h.getLevel().damageSources();
         ServerPlayer cow = Tf.playerAs(h, EntityType.COW);
-        LivingIncomingDamageEvent attack = new LivingIncomingDamageEvent(cow, sources.inWall(), 1f);
+        LivingIncomingDamageEvent attack = incoming(cow, sources.inWall(), 1f);
         SuffocationDamageBlocker.onLivingAttack(attack);
         check(h, !attack.isCanceled(), "cow form suffocates");
         ServerPlayer human = Tf.player(h);
-        LivingIncomingDamageEvent hurt = new LivingIncomingDamageEvent(human, sources.inWall(), 1f);
+        LivingIncomingDamageEvent hurt = incoming(human, sources.inWall(), 1f);
         SuffocationDamageBlocker.onLivingHurt(hurt);
         check(h, !hurt.isCanceled(), "untransformed player suffocates");
         h.succeed();

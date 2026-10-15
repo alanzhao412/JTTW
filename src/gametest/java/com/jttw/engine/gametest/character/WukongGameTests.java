@@ -293,7 +293,7 @@ public class WukongGameTests {
     // ── Full immortality and damage rules ───────────────────────────
 
     private static boolean cancels(ServerPlayer p, DamageSource src) {
-        LivingIncomingDamageEvent ev = new LivingIncomingDamageEvent(p, src, 5f);
+        LivingIncomingDamageEvent ev = incoming(p, src, 5f);
         WukongAbilityHandler.onImmortalityDamage(ev);
         return ev.isCanceled();
     }
@@ -564,18 +564,18 @@ public class WukongGameTests {
         Arrow arrow = EntityType.ARROW.create(h.getLevel());
         var ds = h.getLevel().damageSources();
 
-        LivingIncomingDamageEvent before = new LivingIncomingDamageEvent(p, ds.arrow(arrow, husk), 4f);
+        LivingIncomingDamageEvent before = incoming(p, ds.arrow(arrow, husk), 4f);
         WukongCheckpoints.onHurt(before);
         check(h, !before.isCanceled(), "arrows hurt without the flag");
 
         p.getPersistentData().putBoolean("jttw_projectile_immune", true);
-        LivingIncomingDamageEvent shot = new LivingIncomingDamageEvent(p, ds.arrow(arrow, husk), 4f);
+        LivingIncomingDamageEvent shot = incoming(p, ds.arrow(arrow, husk), 4f);
         WukongCheckpoints.onHurt(shot);
         check(h, shot.isCanceled(), "arrow cancelled");
-        LivingIncomingDamageEvent boom = new LivingIncomingDamageEvent(p, ds.sonicBoom(husk), 4f);
+        LivingIncomingDamageEvent boom = incoming(p, ds.sonicBoom(husk), 4f);
         WukongCheckpoints.onHurt(boom);
         check(h, boom.isCanceled(), "sonic boom cancelled");
-        LivingIncomingDamageEvent punch = new LivingIncomingDamageEvent(p, ds.mobAttack(husk), 4f);
+        LivingIncomingDamageEvent punch = incoming(p, ds.mobAttack(husk), 4f);
         WukongCheckpoints.onHurt(punch);
         check(h, !punch.isCanceled(), "melee still hurts");
         h.succeed();

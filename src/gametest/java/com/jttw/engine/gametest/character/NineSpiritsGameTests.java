@@ -232,7 +232,7 @@ public class NineSpiritsGameTests {
         check(h, NineSpiritsAbilityHandler.inTrueForm(p), "in true form");
         eq(h, 30.0, modifier(p, PHYSICAL_RESISTANCE(), "ns_form_pres"), "tougher (II)");
         Pig pig = mob(h, EntityType.PIG, 2, 4);
-        LivingIncomingDamageEvent hit = new LivingIncomingDamageEvent(pig, p.damageSources().playerAttack(p), 10f);
+        LivingIncomingDamageEvent hit = incoming(pig, p.damageSources().playerAttack(p), 10f);
         NineSpiritsAbilityHandler.onHit(hit);
         near(h, 20.0, hit.getAmount(), "three heads: 10 x 2.0");
         tick(p, NineSpiritsAbilityHandler::onPlayerTick, 20);

@@ -545,25 +545,25 @@ public class YuanDiGameTests {
         Husk husk = mob(h, EntityType.HUSK, 0, 0);
         var ds = h.getLevel().damageSources();
 
-        YuanDiAbilityHandler.onYuanDiDealtDamage(new LivingIncomingDamageEvent(husk, ds.playerAttack(p), 4f));
+        YuanDiAbilityHandler.onYuanDiDealtDamage(incoming(husk, ds.playerAttack(p), 4f));
         check(h, !husk.getPersistentData().contains("jttw_dominion_by"), "no mark without the node");
 
         grant(p, "yd_dominion_1");
-        YuanDiAbilityHandler.onYuanDiDealtDamage(new LivingIncomingDamageEvent(husk, ds.playerAttack(p), 4f));
+        YuanDiAbilityHandler.onYuanDiDealtDamage(incoming(husk, ds.playerAttack(p), 4f));
         eq(h, p.getStringUUID(), husk.getPersistentData().getString("jttw_dominion_by"), "marked");
         eq(h, 200, husk.getPersistentData().getInt("jttw_dominion_ticks"), "for 10 s");
 
-        LivingIncomingDamageEvent back = new LivingIncomingDamageEvent(p, ds.mobAttack(husk), 10f);
+        LivingIncomingDamageEvent back = incoming(p, ds.mobAttack(husk), 10f);
         YuanDiAbilityHandler.onDominionDamageReduction(back);
         near(h, 8.5f, back.getAmount(), "15% less damage to Yuan Di");
 
         ServerPlayer ally = yuanDi(h);
-        LivingIncomingDamageEvent allyHit = new LivingIncomingDamageEvent(ally, ds.mobAttack(husk), 10f);
+        LivingIncomingDamageEvent allyHit = incoming(ally, ds.mobAttack(husk), 10f);
         YuanDiAbilityHandler.onDominionDamageReduction(allyHit);
         near(h, 10f, allyHit.getAmount(), "tier 1 protects only Yuan Di");
 
         grant(p, "yd_dominion_2");
-        LivingIncomingDamageEvent allyHit2 = new LivingIncomingDamageEvent(ally, ds.mobAttack(husk), 10f);
+        LivingIncomingDamageEvent allyHit2 = incoming(ally, ds.mobAttack(husk), 10f);
         YuanDiAbilityHandler.onDominionDamageReduction(allyHit2);
         near(h, 8.5f, allyHit2.getAmount(), "tier 2 protects players within 10 blocks");
         h.succeed();

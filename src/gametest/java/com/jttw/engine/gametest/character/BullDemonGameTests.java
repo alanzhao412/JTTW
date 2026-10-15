@@ -168,10 +168,10 @@ public class BullDemonGameTests {
     @GameTest(template = PLATFORM)
     public static void thickHideTakesNoFireAndToughens(GameTestHelper h) {
         ServerPlayer p = bull(h, "bdk_hide_1");
-        LivingIncomingDamageEvent fire = new LivingIncomingDamageEvent(p, p.damageSources().inFire(), 4f);
+        LivingIncomingDamageEvent fire = incoming(p, p.damageSources().inFire(), 4f);
         BullDemonAbilityHandler.onAttacked(fire);
         check(h, fire.isCanceled(), "fire cannot burn him");
-        LivingIncomingDamageEvent blow = new LivingIncomingDamageEvent(p, p.damageSources().generic(), 4f);
+        LivingIncomingDamageEvent blow = incoming(p, p.damageSources().generic(), 4f);
         BullDemonAbilityHandler.onAttacked(blow);
         check(h, !blow.isCanceled(), "a blow still lands");
         tick(p, BullDemonAbilityHandler::onPlayerTick, 20);

@@ -199,7 +199,7 @@ public class ImmortalItemsGameTests {
     }
 
     private static boolean cancels(ServerPlayer p, DamageSource source) {
-        LivingIncomingDamageEvent event = new LivingIncomingDamageEvent(p, source, 5f);
+        LivingIncomingDamageEvent event = incoming(p, source, 5f);
         WukongAbilityHandler.onImmortalityDamage(event);
         return event.isCanceled();
     }
@@ -247,10 +247,10 @@ public class ImmortalItemsGameTests {
         eatPeach(h, p);
         var zombie = h.spawnWithNoFreeWill(EntityType.ZOMBIE, new net.minecraft.core.BlockPos(0, 2, 0));
         Snowball snowball = new Snowball(EntityType.SNOWBALL, h.getLevel());
-        LivingIncomingDamageEvent thrown = new LivingIncomingDamageEvent(p, p.damageSources().thrown(snowball, zombie), 4f);
+        LivingIncomingDamageEvent thrown = incoming(p, p.damageSources().thrown(snowball, zombie), 4f);
         WukongCheckpoints.onHurt(thrown);
         check(h, thrown.isCanceled(), "projectile cancelled");
-        LivingIncomingDamageEvent melee = new LivingIncomingDamageEvent(p, p.damageSources().mobAttack(zombie), 4f);
+        LivingIncomingDamageEvent melee = incoming(p, p.damageSources().mobAttack(zombie), 4f);
         WukongCheckpoints.onHurt(melee);
         check(h, !melee.isCanceled(), "melee not cancelled");
         h.succeed();

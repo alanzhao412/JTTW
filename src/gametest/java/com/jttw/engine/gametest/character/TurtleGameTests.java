@@ -62,7 +62,7 @@ public class TurtleGameTests {
     }
 
     private static float hurt(ServerPlayer p, DamageSource src, float amount) {
-        LivingIncomingDamageEvent ev = new LivingIncomingDamageEvent(p, src, amount);
+        LivingIncomingDamageEvent ev = incoming(p, src, amount);
         TurtleAbilityHandler.onLivingHurt(ev);
         return ev.isCanceled() ? 0f : ev.getAmount();
     }
@@ -338,11 +338,11 @@ public class TurtleGameTests {
         grant(p, "tu_gravity_1", "tu_gravity_2");
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 4);
         var ds = h.getLevel().damageSources();
-        LivingIncomingDamageEvent before = new LivingIncomingDamageEvent(golem, ds.generic(), 10f);
+        LivingIncomingDamageEvent before = incoming(golem, ds.generic(), 10f);
         TurtleAbilityHandler.onLivingHurt(before);
         near(h, 10f, before.getAmount(), "no well");
         TurtleAbilityHandler.toggleGravityWell(p);
-        LivingIncomingDamageEvent during = new LivingIncomingDamageEvent(golem, ds.generic(), 10f);
+        LivingIncomingDamageEvent during = incoming(golem, ds.generic(), 10f);
         TurtleAbilityHandler.onLivingHurt(during);
         near(h, 11.5f, during.getAmount(), "+15% inside the well");
         TurtleAbilityHandler.toggleGravityWell(p);

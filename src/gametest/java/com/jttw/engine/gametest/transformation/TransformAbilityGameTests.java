@@ -573,7 +573,7 @@ public class TransformAbilityGameTests {
         Pig shot = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(2, 2, 4));
         ServerPlayer bee = Tf.playerAs(h, EntityType.BEE);
         Arrow arrow = new Arrow(h.getLevel(), bee);
-        LivingIncomingDamageEvent e = new LivingIncomingDamageEvent(shot, h.getLevel().damageSources().arrow(arrow, bee), 1f);
+        LivingIncomingDamageEvent e = incoming(shot, h.getLevel().damageSources().arrow(arrow, bee), 1f);
         TransformationAbilityHandler.onLivingHurt(e);
         eq(h, 0, shot.getActiveEffects().size(), "projectile hit from a bee form adds nothing");
         h.succeed();
@@ -763,7 +763,7 @@ public class TransformAbilityGameTests {
     }
 
     private static void hit(GameTestHelper h, ServerPlayer attacker, LivingEntity target) {
-        LivingIncomingDamageEvent e = new LivingIncomingDamageEvent(target, h.getLevel().damageSources().playerAttack(attacker), 1f);
+        LivingIncomingDamageEvent e = incoming(target, h.getLevel().damageSources().playerAttack(attacker), 1f);
         TransformationAbilityHandler.onLivingHurt(e);
     }
 

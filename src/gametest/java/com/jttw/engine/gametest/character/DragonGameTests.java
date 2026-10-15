@@ -149,10 +149,10 @@ public class DragonGameTests {
         ServerPlayer other = dragon(h);
         LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(h.getLevel());
         bolt.setCause(p);
-        LivingIncomingDamageEvent own = new LivingIncomingDamageEvent(p, src(h, DamageTypes.LIGHTNING_BOLT, bolt), 5f);
+        LivingIncomingDamageEvent own = incoming(p, src(h, DamageTypes.LIGHTNING_BOLT, bolt), 5f);
         DragonAbilityHandler.onLightningSelfDamage(own);
         check(h, own.isCanceled(), "caster immune to their bolt");
-        LivingIncomingDamageEvent theirs = new LivingIncomingDamageEvent(other, src(h, DamageTypes.LIGHTNING_BOLT, bolt), 5f);
+        LivingIncomingDamageEvent theirs = incoming(other, src(h, DamageTypes.LIGHTNING_BOLT, bolt), 5f);
         DragonAbilityHandler.onLightningSelfDamage(theirs);
         check(h, !theirs.isCanceled(), "others are hurt by it");
         h.succeed();
@@ -337,7 +337,7 @@ public class DragonGameTests {
     // ── Dragon Scales (passive) ─────────────────────────────────────
 
     private static float hurt(ServerPlayer p, net.minecraft.world.damagesource.DamageSource src, float amount) {
-        LivingIncomingDamageEvent ev = new LivingIncomingDamageEvent(p, src, amount);
+        LivingIncomingDamageEvent ev = incoming(p, src, amount);
         DragonAbilityHandler.onDragonScalesHurt(ev);
         return ev.getAmount();
     }
@@ -404,22 +404,22 @@ public class DragonGameTests {
         ServerPlayer p = dragon(h);
         var ds = h.getLevel().damageSources();
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 4);
-        DragonAbilityHandler.onTidalForceHurt(new LivingIncomingDamageEvent(golem, ds.playerAttack(p), 4f));
+        DragonAbilityHandler.onTidalForceHurt(incoming(golem, ds.playerAttack(p), 4f));
         near(h, 0.0, golem.getDeltaMovement().z, "no node, no extra knockback");
 
         grant(p, "dr_force_1");
-        DragonAbilityHandler.onTidalForceHurt(new LivingIncomingDamageEvent(golem, ds.playerAttack(p), 4f));
+        DragonAbilityHandler.onTidalForceHurt(incoming(golem, ds.playerAttack(p), 4f));
         near(h, 1.2, golem.getDeltaMovement().z, "tier 1: 0.4 x 3");
         near(h, 0.4, golem.getDeltaMovement().y, "lifted");
 
         IronGolem golem2 = mob(h, EntityType.IRON_GOLEM, 2, 0);
         grant(p, "dr_force_2");
-        DragonAbilityHandler.onTidalForceHurt(new LivingIncomingDamageEvent(golem2, ds.playerAttack(p), 4f));
+        DragonAbilityHandler.onTidalForceHurt(incoming(golem2, ds.playerAttack(p), 4f));
         near(h, -2.0, golem2.getDeltaMovement().z, "tier 2: 0.4 x 5, away from the player (north)");
 
         IronGolem golem3 = mob(h, EntityType.IRON_GOLEM, 4, 2);
         Arrow arrow = EntityType.ARROW.create(h.getLevel());
-        DragonAbilityHandler.onTidalForceHurt(new LivingIncomingDamageEvent(golem3, ds.arrow(arrow, p), 4f));
+        DragonAbilityHandler.onTidalForceHurt(incoming(golem3, ds.arrow(arrow, p), 4f));
         near(h, 0.0, golem3.getDeltaMovement().x, "arrows are not melee");
         h.succeed();
     }

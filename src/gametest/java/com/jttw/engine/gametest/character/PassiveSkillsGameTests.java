@@ -50,7 +50,7 @@ public class PassiveSkillsGameTests {
 
     private static float hurt(Consumer<LivingIncomingDamageEvent> handler, net.minecraft.world.entity.LivingEntity target,
                               net.minecraft.world.damagesource.DamageSource src, float amount) {
-        LivingIncomingDamageEvent e = new LivingIncomingDamageEvent(target, src, amount);
+        LivingIncomingDamageEvent e = incoming(target, src, amount);
         handler.accept(e);
         return e.getAmount();
     }
@@ -135,16 +135,16 @@ public class PassiveSkillsGameTests {
     public static void heavenlyWarriorThreeIsImmuneToFire(GameTestHelper h) {
         ServerPlayer p = as(h, ReincarnationOutcome.THIRD_LOTUS_PRINCE);
         grant(p, "nz_combat_1", "nz_combat_2");
-        LivingIncomingDamageEvent before = new LivingIncomingDamageEvent(p, p.damageSources().onFire(), 1f);
+        LivingIncomingDamageEvent before = incoming(p, p.damageSources().onFire(), 1f);
         NezhaPassives.onAttacked(before);
         check(h, !before.isCanceled(), "fire still burns at tier 2");
         grant(p, "nz_combat_3");
         for (var src : List.of(p.damageSources().onFire(), p.damageSources().inFire(), p.damageSources().lava())) {
-            LivingIncomingDamageEvent e = new LivingIncomingDamageEvent(p, src, 1f);
+            LivingIncomingDamageEvent e = incoming(p, src, 1f);
             NezhaPassives.onAttacked(e);
             check(h, e.isCanceled(), src.getMsgId() + " blocked at tier 3");
         }
-        LivingIncomingDamageEvent cactus = new LivingIncomingDamageEvent(p, p.damageSources().cactus(), 1f);
+        LivingIncomingDamageEvent cactus = incoming(p, p.damageSources().cactus(), 1f);
         NezhaPassives.onAttacked(cactus);
         check(h, !cactus.isCanceled(), "other damage still lands");
         h.succeed();

@@ -243,7 +243,7 @@ public class ByakkoGameTests {
     // ── Savage Bleed (passive) ──────────────────────────────────────
 
     private static void strike(GameTestHelper h, ServerPlayer p, IronGolem target, float amount) {
-        ByakkoAbilityHandler.onLivingHurt(new LivingIncomingDamageEvent(target, h.getLevel().damageSources().playerAttack(p), amount));
+        ByakkoAbilityHandler.onLivingHurt(incoming(target, h.getLevel().damageSources().playerAttack(p), amount));
     }
 
     @GameTest(template = PLATFORM, batch = "bleedDealsDamageEverySecondScaledByAttack")
@@ -333,15 +333,15 @@ public class ByakkoGameTests {
         ServerPlayer p = byakko(h);
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 4);
         p.setDeltaMovement(new Vec3(0.5, 0, 0)); // 10 blocks per second
-        LivingIncomingDamageEvent none = new LivingIncomingDamageEvent(golem, h.getLevel().damageSources().playerAttack(p), 10f);
+        LivingIncomingDamageEvent none = incoming(golem, h.getLevel().damageSources().playerAttack(p), 10f);
         ByakkoAbilityHandler.onLivingHurt(none);
         near(h, 10f, none.getAmount(), "no node");
         grant(p, "bk_velocity_1");
-        LivingIncomingDamageEvent t1 = new LivingIncomingDamageEvent(golem, h.getLevel().damageSources().playerAttack(p), 10f);
+        LivingIncomingDamageEvent t1 = incoming(golem, h.getLevel().damageSources().playerAttack(p), 10f);
         ByakkoAbilityHandler.onLivingHurt(t1);
         near(h, 15f, t1.getAmount(), "tier 1: 5% per block/s");
         grant(p, "bk_velocity_2");
-        LivingIncomingDamageEvent t2 = new LivingIncomingDamageEvent(golem, h.getLevel().damageSources().playerAttack(p), 10f);
+        LivingIncomingDamageEvent t2 = incoming(golem, h.getLevel().damageSources().playerAttack(p), 10f);
         ByakkoAbilityHandler.onLivingHurt(t2);
         near(h, 20f, t2.getAmount(), "tier 2: 10% per block/s");
         h.succeed();
@@ -359,12 +359,12 @@ public class ByakkoGameTests {
         check(h, !wounded.hasEffect(MobEffects.GLOWING), "for him alone: no glow the world sees");
         check(h, !com.jttw.engine.world.PrivateGlow.glowsFor(p, healthy), "healthy prey is not marked");
 
-        LivingIncomingDamageEvent t1 = new LivingIncomingDamageEvent(wounded, h.getLevel().damageSources().playerAttack(p), 10f);
+        LivingIncomingDamageEvent t1 = incoming(wounded, h.getLevel().damageSources().playerAttack(p), 10f);
         ByakkoAbilityHandler.onLivingHurt(t1);
         near(h, 10f, t1.getAmount(), "tier 1 only marks");
 
         grant(p, "bk_instinct_2");
-        LivingIncomingDamageEvent first = new LivingIncomingDamageEvent(wounded, h.getLevel().damageSources().playerAttack(p), 10f);
+        LivingIncomingDamageEvent first = incoming(wounded, h.getLevel().damageSources().playerAttack(p), 10f);
         ByakkoAbilityHandler.onLivingHurt(first);
         near(h, 20f, first.getAmount(), "tier 2: first hit doubled");
         check(h, !com.jttw.engine.world.PrivateGlow.glowsFor(p, wounded), "mark consumed");

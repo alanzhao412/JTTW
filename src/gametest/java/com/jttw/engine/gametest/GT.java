@@ -192,4 +192,18 @@ public final class GT {
                     + " (is ReadyGate installed?)");
         }
     }
+
+    /** The event a hit fires before armour and resistances (Forge's LivingAttackEvent and LivingHurtEvent). */
+    public static net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent incoming(
+            net.minecraft.world.entity.LivingEntity e, net.minecraft.world.damagesource.DamageSource source, float amount) {
+        return new net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent(e,
+                new net.neoforged.neoforge.common.damagesource.DamageContainer(source, amount));
+    }
+
+    /** The event a hit fires after armour and resistances (Forge's LivingDamageEvent). */
+    public static net.neoforged.neoforge.event.entity.living.LivingDamageEvent.Pre damage(
+            net.minecraft.world.entity.LivingEntity e, net.minecraft.world.damagesource.DamageSource source, float amount) {
+        return new net.neoforged.neoforge.event.entity.living.LivingDamageEvent.Pre(e,
+                new net.neoforged.neoforge.common.damagesource.DamageContainer(source, amount));
+    }
 }
