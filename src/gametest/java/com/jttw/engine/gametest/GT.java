@@ -148,7 +148,8 @@ public final class GT {
      * Opens this test's platform to the sky and its sides, as test platforms stood before 1.21:
      * since 1.21 the framework walls each test in with barriers and roofs it over at relative
      * y=6 (unless the test asks for sky access), and a barrier is as solid as bedrock to what is
-     * planted, grown, struck down or fallen there.
+     * planted, grown, struck down or fallen there, and walls in mobs standing at or thrown to the
+     * platform's edge, or wider than it.
      */
     public static void openAir(GameTestHelper helper) {
         net.minecraft.gametest.framework.StructureUtils.removeBarriers(helper.getBounds(), helper.getLevel());
@@ -272,15 +273,6 @@ public final class GT {
                     .append(loaded).append(" ticking=").append(ticking);
         }
         return bad.toString();
-    }
-
-    /**
-     * Takes down the barrier walls and roof that 1.21's GameTest framework builds round every
-     * test structure (1.20.1 built none), for tests whose mobs stand at or are thrown to the
-     * platform's edge, or whose bodies are wider than it.
-     */
-    public static void openAir(GameTestHelper helper) {
-        net.minecraft.gametest.framework.StructureUtils.removeBarriers(helper.getBounds(), helper.getLevel());
     }
 
     /**

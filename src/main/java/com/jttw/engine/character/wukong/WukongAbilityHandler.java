@@ -171,9 +171,6 @@ public final class WukongAbilityHandler {
 
             entity.setRemainingFireTicks(fireTicks);
             entity.hurt(fireSrc, ringDamage);
-            // Since 1.21 a hit with no attacker still knocks back (halving the push, in a random
-            // direction); the ring's own throw is the only push it gives
-            entity.setDeltaMovement(pushed);
 
             if (tier >= 3) {
                 double dist = entity.distanceTo(centre);
