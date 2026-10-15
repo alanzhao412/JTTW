@@ -162,14 +162,18 @@ public final class WukongAbilityHandler {
             }
 
             Vec3 current = entity.getDeltaMovement();
-            entity.setDeltaMovement(
+            Vec3 pushed = new Vec3(
                     current.x + dir.x * pushForce,
                     current.y + 0.3,
                     current.z + dir.z * pushForce
             );
+            entity.setDeltaMovement(pushed);
 
             entity.setRemainingFireTicks(fireTicks);
             entity.hurt(fireSrc, ringDamage);
+            // Since 1.21 a hit with no attacker still knocks back (halving the push, in a random
+            // direction); the ring's own throw is the only push it gives
+            entity.setDeltaMovement(pushed);
 
             if (tier >= 3) {
                 double dist = entity.distanceTo(centre);
