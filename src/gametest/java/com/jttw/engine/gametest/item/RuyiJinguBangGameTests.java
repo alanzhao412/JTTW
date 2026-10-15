@@ -156,6 +156,7 @@ public class RuyiJinguBangGameTests {
 
     @GameTest(template = PLATFORM)
     public static void sneakWithNoBlockInReachPlantsTheStaffAtTheFeet(GameTestHelper h) {
+        openAir(h); // nothing overhead: no barrier roof
         ServerPlayer p = playerAt(h, 2, 2, 0f, -90f); // looking straight up into open air
         setOutcome(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
         p.setShiftKeyDown(true);

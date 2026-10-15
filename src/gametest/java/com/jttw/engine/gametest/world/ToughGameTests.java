@@ -86,6 +86,7 @@ public class ToughGameTests {
     }
 
     private static PlacedStaffEntity felled(GameTestHelper h, ServerPlayer owner, float scale) {
+        openAir(h);
         var at = h.absolutePos(new BlockPos(2, 2, 1));
         PlacedStaffEntity staff = new PlacedStaffEntity(h.getLevel(), at.getX() + 0.5, at.getY(), at.getZ() + 0.5, owner.getUUID());
         staff.setStaffScale(scale);
@@ -173,6 +174,7 @@ public class ToughGameTests {
     // ── Growing pays for its column ──────────────────────────────────
 
     private static PlacedStaffEntity planted(GameTestHelper h, ServerPlayer owner) {
+        openAir(h);
         Vec3 at = h.absoluteVec(new Vec3(2.5, 2, 2.5));
         PlacedStaffEntity staff = new PlacedStaffEntity(h.getLevel(), at.x, at.y, at.z, owner.getUUID());
         h.getLevel().addFreshEntity(staff);

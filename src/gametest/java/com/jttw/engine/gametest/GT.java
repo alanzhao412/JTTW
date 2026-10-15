@@ -144,6 +144,16 @@ public final class GT {
         }
     }
 
+    /**
+     * Opens this test's platform to the sky and its sides, as test platforms stood before 1.21:
+     * since 1.21 the framework walls each test in with barriers and roofs it over at relative
+     * y=6 (unless the test asks for sky access), and a barrier is as solid as bedrock to what is
+     * planted, grown, struck down or fallen there.
+     */
+    public static void openAir(GameTestHelper helper) {
+        net.minecraft.gametest.framework.StructureUtils.removeBarriers(helper.getBounds(), helper.getLevel());
+    }
+
     /** This test's platform, as an absolute box (floor at relative y=1, five blocks of air above). */
     private static net.minecraft.world.phys.AABB platform(GameTestHelper helper) {
         return new net.minecraft.world.phys.AABB(

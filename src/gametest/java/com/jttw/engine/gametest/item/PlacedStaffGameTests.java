@@ -82,6 +82,7 @@ public class PlacedStaffGameTests {
 
     /** The staff, planted at {@code rel} on the platform, toppled by its owner facing +z (south). */
     private static PlacedStaffEntity felled(GameTestHelper h, ServerPlayer owner, net.minecraft.core.BlockPos rel, float scale) {
+        openAir(h);
         var at = h.absolutePos(rel);
         PlacedStaffEntity staff = new PlacedStaffEntity(h.getLevel(), at.getX() + 0.5, at.getY(), at.getZ() + 0.5, owner.getUUID());
         staff.setStaffScale(scale);
