@@ -95,8 +95,8 @@ public final class RidgeRenderers {
 
         @Override
         protected void scale(BoneServantEntity e, PoseStack pose, float partial) {
-            float s = SIZE * e.getScale();
-            pose.scale(s, s, s);
+            // a captain's getScale() is applied by LivingEntityRenderer
+            pose.scale(SIZE, SIZE, SIZE);
         }
 
         @Override
@@ -137,8 +137,6 @@ public final class RidgeRenderers {
 
         @Override
         protected void scale(WraithEntity e, PoseStack pose, float partial) {
-            float s = e.getScale();
-            pose.scale(s, s, s);
             // bobs as it hangs in the air
             pose.translate(0, Mth.sin((e.tickCount + partial) * 0.1f) * 0.06f, 0);
         }

@@ -40,11 +40,6 @@ public final class HeavenRenderers {
         }
 
         @Override
-        protected void scale(HeavenlySoldierEntity e, PoseStack pose, float partial) {
-            pose.scale(e.getScale(), e.getScale(), e.getScale());
-        }
-
-        @Override
         public ResourceLocation getTextureLocation(HeavenlySoldierEntity e) {
             return e.isGeneral() ? GENERAL : SOLDIER;
         }

@@ -53,4 +53,9 @@ public class TrigramsFurnaceRenderer implements BlockEntityRenderer<TrigramsFurn
     public boolean shouldRenderOffScreen(TrigramsFurnaceBlockEntity furnace) {
         return true; // it stands well beyond its core's block
     }
+
+    @Override
+    public net.minecraft.world.phys.AABB getRenderBoundingBox(TrigramsFurnaceBlockEntity furnace) {
+        return furnace.getRenderBoundingBox();
+    }
 }
