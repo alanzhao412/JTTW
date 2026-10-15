@@ -120,7 +120,7 @@ public class SaurianGameTests {
     public static void underTheWrathHisBlowsBurstInFloodwater(GameTestHelper h) {
         ServerPlayer p = saurian(h, SaurianSkillTree.WRATH_1);
         check(h, SaurianAbilityHandler.wrath(p), "the Wrath");
-        check(h, p.hasEffect(ModEffects.FLOOD_WRATH.get()), "on him, for a time");
+        check(h, p.hasEffect(ModEffects.FLOOD_WRATH), "on him, for a time");
         check(h, !SaurianAbilityHandler.wrath(p), "and not again while it lasts");
         Zombie struck = still(h, new BlockPos(2, 2, 3)), beside = still(h, new BlockPos(3, 2, 4));
         float before = beside.getHealth();
@@ -144,10 +144,10 @@ public class SaurianGameTests {
     @GameTest(template = PLATFORM)
     public static void scaledHideAndRiverborn(GameTestHelper h) {
         ServerPlayer p = saurian(h, SaurianSkillTree.HIDE_1, SaurianSkillTree.HIDE_2, SaurianSkillTree.HIDE_3, SaurianSkillTree.RIVER_1);
-        double pres = p.getAttributeValue(ModAttributes.PHYSICAL_RESISTANCE.get());
+        double pres = p.getAttributeValue(ModAttributes.PHYSICAL_RESISTANCE);
         SaurianAbilityHandler.passives(p, true);
-        check(h, p.getAttributeValue(ModAttributes.PHYSICAL_RESISTANCE.get()) >= pres + 30, "his hide, tougher against blows");
-        check(h, p.getAttributeValue(net.neoforged.neoforge.common.NeoForgeMod.SWIM_SPEED.get()) > 1.5, "and he swims swiftly");
+        check(h, p.getAttributeValue(ModAttributes.PHYSICAL_RESISTANCE) >= pres + 30, "his hide, tougher against blows");
+        check(h, p.getAttributeValue(net.neoforged.neoforge.common.NeoForgeMod.SWIM_SPEED) > 1.5, "and he swims swiftly");
         SaurianAbilityHandler.passives(p, false);
         h.succeed();
     }

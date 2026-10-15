@@ -27,7 +27,7 @@ import static com.jttw.engine.gametest.character.CharTest.*;
 public class DivineBeastGameTests {
 
     private static boolean canHarvest(ServerPlayer p, BlockState state) {
-        PlayerEvent.HarvestCheck ev = new PlayerEvent.HarvestCheck(p, state, false);
+        PlayerEvent.HarvestCheck ev = new PlayerEvent.HarvestCheck(p, state, p.level(), BlockPos.ZERO, false);
         DivineBeastHandler.onHarvestCheck(ev);
         return ev.canHarvest();
     }

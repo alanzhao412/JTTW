@@ -274,7 +274,7 @@ public class BullDemonGameTests {
         p.setItemInHand(InteractionHand.MAIN_HAND, cudgel);
         cudgel.use(p.level(), p, InteractionHand.MAIN_HAND);
         check(h, p.isUsingItem(), "the Bull raises it");
-        cudgel.releaseUsing(p.level(), p, cudgel.getUseDuration() - 40);
+        cudgel.releaseUsing(p.level(), p, cudgel.getUseDuration(p) - 40);
         check(h, p.getCooldowns().isOnCooldown(ModItems.MIXED_IRON_CUDGEL.get()), "smashed: the club rests");
         h.succeed();
     }

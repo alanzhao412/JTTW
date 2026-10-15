@@ -6,6 +6,7 @@ import com.jttw.engine.character.Characters;
 import com.jttw.engine.character.peng.PengAbilityHandler;
 import com.jttw.engine.character.peng.PengCharacter;
 import com.jttw.engine.flight.JTTWFlight;
+import com.jttw.engine.item.StackData;
 import com.jttw.engine.item.YinYangVaseItem;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.registry.ModItems;
@@ -30,7 +31,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
-import net.neoforged.neoforge.event.entity.living.LivingEvent;
+import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
@@ -268,7 +269,7 @@ public class PengGameTests {
         Zombie sealed = mob(h, EntityType.ZOMBIE, 2, 4);
         vase.interactLivingEntity(p, sealed, InteractionHand.MAIN_HAND);
         // five seconds inside: 5% of 20 health a second, 5 health gone
-        vase.getTag().putLong(YinYangVaseItem.TAG_SEALED_AT, p.level().getGameTime() - 100);
+        StackData.putLong(vase, YinYangVaseItem.TAG_SEALED_AT, p.level().getGameTime() - 100);
         Zombie bystander = mob(h, EntityType.ZOMBIE, 4, 3);
         List<Hit> log = watch(bystander);
         releaseOn(h, p, vase, 3, 3);
@@ -285,7 +286,7 @@ public class PengGameTests {
         ItemStack vase = vase(p);
         Pig pig = mob(h, EntityType.PIG, 2, 4);
         vase.interactLivingEntity(p, pig, InteractionHand.MAIN_HAND);
-        vase.getTag().putLong(YinYangVaseItem.TAG_SEALED_AT, p.level().getGameTime() - 400); // 20 s: all of it
+        StackData.putLong(vase, YinYangVaseItem.TAG_SEALED_AT, p.level().getGameTime() - 400); // 20 s: all of it
         releaseOn(h, p, vase, 3, 3);
         check(h, near(p, Pig.class, 5).stream().noneMatch(x -> x.getUUID().equals(pig.getUUID())), "dissolved away");
         h.succeed();
@@ -300,7 +301,7 @@ public class PengGameTests {
         eq(h, InteractionResult.CONSUME, vase(p).interactLivingEntity(p, held, InteractionHand.MAIN_HAND), "caught");
         check(h, PengAbilityHandler.isJailed(held), "held");
         held.moveTo(rel(h, 0.5, 0.5));
-        PengAbilityHandler.onLivingTick(new LivingEvent.LivingTickEvent(held));
+        PengAbilityHandler.onLivingTick(new EntityTickEvent.Pre(held));
         near(h, rel(h, 2.5, 4.5).z, held.getZ(), "pulled back where caught");
         AttackEntityEvent swing = new AttackEntityEvent(held, p);
         PengAbilityHandler.onJailedAttack(swing);
@@ -317,10 +318,10 @@ public class PengGameTests {
         Zombie beside = mob(h, EntityType.ZOMBIE, 3, 4);
         List<Hit> heldLog = watch(held), besideLog = watch(beside);
         PengAbilityHandler.jail(p, held);
-        PengAbilityHandler.onLivingTick(new LivingEvent.LivingTickEvent(held)); // on the second
+        PengAbilityHandler.onLivingTick(new EntityTickEvent.Pre(held)); // on the second
         check(h, !of(heldLog, DamageTypes.INDIRECT_MAGIC).isEmpty(), "dissolving");
         held.getPersistentData().putLong(PengAbilityHandler.KEY_JAIL_UNTIL, held.level().getGameTime());
-        PengAbilityHandler.onLivingTick(new LivingEvent.LivingTickEvent(held));
+        PengAbilityHandler.onLivingTick(new EntityTickEvent.Pre(held));
         check(h, !PengAbilityHandler.isJailed(held), "free after five seconds");
         check(h, !of(besideLog, DamageTypes.INDIRECT_MAGIC).isEmpty(), "bursting on those beside");
         h.succeed();
