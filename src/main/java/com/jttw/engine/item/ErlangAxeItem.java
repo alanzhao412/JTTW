@@ -2,14 +2,11 @@ package com.jttw.engine.item;
 
 import net.minecraft.resources.ResourceLocation;
 import com.jttw.engine.JTTWEngine;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import com.jttw.engine.reincarnation.AlignmentData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
@@ -17,6 +14,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
@@ -35,16 +33,16 @@ import java.util.UUID;
 public class ErlangAxeItem extends Item implements Charged {
 
     private static final ResourceLocation UUID_ATK = JTTWEngine.id("erlang_axe_atk");
-    private static final ResourceLocation UUID_SPEED = JTTWEngine.id("speed");
+    private static final ResourceLocation UUID_SPEED = JTTWEngine.id("erlang_axe_speed");
     public static final String TAG_LARGE = "jttw_axe_large";
     public static final float LARGE_QI_PER_SECOND = 4f;
 
     public static boolean isLarge(ItemStack stack) {
-        return stack.hasTag() && stack.getTag().getBoolean(TAG_LARGE);
+        return StackData.getBoolean(stack, TAG_LARGE);
     }
 
     public static void setLarge(ItemStack stack, boolean large) {
-        stack.getOrCreateTag().putBoolean(TAG_LARGE, large);
+        StackData.putBoolean(stack, TAG_LARGE, large);
     }
 
     public ErlangAxeItem() {
@@ -52,17 +50,17 @@ public class ErlangAxeItem extends Item implements Charged {
     }
 
     @Override
-    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
-        if (slot != EquipmentSlot.MAINHAND) return ImmutableMultimap.of();
-
-        ImmutableMultimap.Builder<Attribute, AttributeModifier> b = ImmutableMultimap.builder();
+    public ItemAttributeModifiers getDefaultAttributeModifiers(ItemStack stack) {
+        ItemAttributeModifiers.Builder b = ItemAttributeModifiers.builder();
         // Base +50% for everyone (large: twice that, x3); Erlang Shen bonus applied via handler event.
         boolean large = isLarge(stack);
-        b.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK,
-                (large ? 2.0 : 0.50) * Armaments.refineMultiplier(stack), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+        b.add(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK,
+                (large ? 2.0 : 0.50) * Armaments.refineMultiplier(stack), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL),
+                EquipmentSlotGroup.MAINHAND);
         // Slower attack speed (-20%; large: half speed)
-        b.put(Attributes.ATTACK_SPEED, new AttributeModifier(UUID_SPEED,
-                large ? -0.5 : -0.2, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+        b.add(Attributes.ATTACK_SPEED, new AttributeModifier(UUID_SPEED,
+                large ? -0.5 : -0.2, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL),
+                EquipmentSlotGroup.MAINHAND);
         return b.build();
     }
 
@@ -112,7 +110,7 @@ public class ErlangAxeItem extends Item implements Charged {
     private static final long CLEAVE_COOLDOWN_TICKS = 60L; // 3 seconds
 
     @Override
-    public int getUseDuration(ItemStack stack) {
+    public int getUseDuration(ItemStack stack, LivingEntity entity) {
         return 72000; // hold indefinitely like a bow
     }
 
@@ -178,7 +176,7 @@ public class ErlangAxeItem extends Item implements Charged {
         if (level.isClientSide() || !(entity instanceof net.minecraft.server.level.ServerPlayer sp)) return;
         if (!WieldRules.canCleave(sp) || !isLarge(stack)) return;
 
-        int chargeTime = getUseDuration(stack) - timeLeft;
+        int chargeTime = getUseDuration(stack, entity) - timeLeft;
         if (chargeTime < CLEAVE_MIN) return;
 
         sp.getPersistentData().putLong(KEY_CLEAVE_READY_AT, level.getGameTime() + CLEAVE_COOLDOWN_TICKS);
@@ -331,7 +329,7 @@ public class ErlangAxeItem extends Item implements Charged {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.literal("§6Divine Axe of Erlang Shen").withStyle(ChatFormatting.GOLD));
         tooltip.add(Component.literal("§e+150% damage (Erlang Shen)"));
         tooltip.add(Component.literal("§e+50% damage (others)"));

@@ -106,11 +106,11 @@ public final class Armaments {
     // ── Refinement ───────────────────────────────────────────────────────
 
     public static int refine(ItemStack stack) {
-        return stack.hasTag() ? Math.min(MAX_REFINE, stack.getTag().getInt(TAG_REFINE)) : 0;
+        return Math.min(MAX_REFINE, StackData.getInt(stack, TAG_REFINE));
     }
 
     public static void setRefine(ItemStack stack, int level) {
-        stack.getOrCreateTag().putInt(TAG_REFINE, Math.max(0, Math.min(MAX_REFINE, level)));
+        StackData.putInt(stack, TAG_REFINE, Math.max(0, Math.min(MAX_REFINE, level)));
     }
 
     /** What an armament's own bonus is multiplied by at its refinement: x1 unrefined, x2 at 10. */

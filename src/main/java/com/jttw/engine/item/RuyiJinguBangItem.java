@@ -2,8 +2,6 @@ package com.jttw.engine.item;
 
 import net.minecraft.resources.ResourceLocation;
 import com.jttw.engine.JTTWEngine;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import com.jttw.engine.entity.PlacedStaffEntity;
 import com.jttw.engine.entity.QiWaveEntity;
 import com.jttw.engine.progression.qi.QiData;
@@ -15,9 +13,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
@@ -26,6 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.BlockHitResult;
@@ -59,7 +57,7 @@ public class RuyiJinguBangItem extends Item implements Charged {
     private static final int MIN_CHARGE_TICKS = 10;  // 0.5 seconds minimum to fire
 
     // Stable UUIDs for attribute modifiers
-    private static final ResourceLocation UUID_ATK_MULT = JTTWEngine.id("atk_mult");
+    private static final ResourceLocation UUID_ATK_MULT = JTTWEngine.id("ruyi_jingu_bang_atk");
     private static final ResourceLocation UUID_REACH   = JTTWEngine.id("ruyi_jingu_bang_reach");
 
     public static final String TAG_QI_EMPOWERED = "jttw_qi_empowered";
@@ -85,8 +83,7 @@ public class RuyiJinguBangItem extends Item implements Charged {
             // Drop it from wherever it is. `slot` indexes the list the stack is in (the off hand
             // and armour lists start at 0 too), so clear the stack itself, not a main-inventory slot.
             ItemStack dropped = stack.copy();
-            dropped.getOrCreateTag().putBoolean(TAG_QI_EMPOWERED, false);
-            dropped.getOrCreateTag().putBoolean(TAG_LARGE_MODE, false);
+            revert(dropped);
             stack.setCount(0);
             sp.drop(dropped, false);
             sp.sendSystemMessage(Component.literal(
@@ -96,8 +93,7 @@ public class RuyiJinguBangItem extends Item implements Charged {
 
         // Non-Wukong can't use empowered/large modes — clear if somehow set
         if (isQiEmpowered(stack) || isLargeMode(stack)) {
-            stack.getOrCreateTag().putBoolean(TAG_QI_EMPOWERED, false);
-            stack.getOrCreateTag().putBoolean(TAG_LARGE_MODE, false);
+            revert(stack);
         }
     }
 
@@ -126,8 +122,10 @@ public class RuyiJinguBangItem extends Item implements Charged {
         if (isQiEmpowered(stack)) {
             if (player.isShiftKeyDown()) {
                 // Qi Empowered + sneak: switch to Large mode
-                stack.getOrCreateTag().putBoolean(TAG_QI_EMPOWERED, false);
-                stack.getOrCreateTag().putBoolean(TAG_LARGE_MODE, true);
+                StackData.update(stack, tag -> {
+                    tag.putBoolean(TAG_QI_EMPOWERED, false);
+                    tag.putBoolean(TAG_LARGE_MODE, true);
+                });
                 if (!level.isClientSide()) {
                     player.sendSystemMessage(Component.literal(
                             "§6[JTTW] §eThe Ruyi Jingu Bang grows to immense size!"));
@@ -141,7 +139,7 @@ public class RuyiJinguBangItem extends Item implements Charged {
         } else if (isLargeMode(stack)) {
             if (player.isShiftKeyDown()) {
                 // Large mode + sneak: back to normal
-                stack.getOrCreateTag().putBoolean(TAG_LARGE_MODE, false);
+                StackData.putBoolean(stack, TAG_LARGE_MODE, false);
                 if (!level.isClientSide()) {
                     player.sendSystemMessage(Component.literal(
                             "§6[JTTW] §eRuyi Jingu Bang shrinks back to normal size."));
@@ -187,7 +185,7 @@ public class RuyiJinguBangItem extends Item implements Charged {
                 }
             } else {
                 // Normal mode + right-click: enter Qi Empowered
-                stack.getOrCreateTag().putBoolean(TAG_QI_EMPOWERED, true);
+                StackData.putBoolean(stack, TAG_QI_EMPOWERED, true);
                 if (!level.isClientSide()) {
                     player.sendSystemMessage(Component.literal(
                             "§6[JTTW] §eQi surges through the Ruyi Jingu Bang!"));
@@ -206,7 +204,7 @@ public class RuyiJinguBangItem extends Item implements Charged {
     }
 
     @Override
-    public int getUseDuration(ItemStack stack) {
+    public int getUseDuration(ItemStack stack, LivingEntity entity) {
         // Max time you can hold it — 72000 is vanilla bow standard
         return 72000;
     }
@@ -222,7 +220,7 @@ public class RuyiJinguBangItem extends Item implements Charged {
         if (level.isClientSide() || !(livingEntity instanceof ServerPlayer player)) return;
         if (!isQiEmpowered(stack) || !isWukong(player)) return;
 
-        int chargeTime = getUseDuration(stack) - timeLeft;
+        int chargeTime = getUseDuration(stack, livingEntity) - timeLeft;
 
         if (chargeTime < MIN_CHARGE_TICKS) {
             // Not charged enough — fizzle
@@ -291,18 +289,15 @@ public class RuyiJinguBangItem extends Item implements Charged {
     // ── Attribute modifiers ──────────────────────────────────────────
 
     @Override
-    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
-        if (slot != EquipmentSlot.MAINHAND) {
-            return ImmutableMultimap.of();
-        }
-
-        ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
+    public ItemAttributeModifiers getDefaultAttributeModifiers(ItemStack stack) {
+        ItemAttributeModifiers.Builder builder = ItemAttributeModifiers.builder();
 
         // Both Qi Empowered and Large get 3× ATK (2.0 MULTIPLY_TOTAL = ×3)
         double atkMult = (isQiEmpowered(stack) || isLargeMode(stack)) ? 2.0 : 1.0;
-        builder.put(Attributes.ATTACK_DAMAGE,
+        builder.add(Attributes.ATTACK_DAMAGE,
                 new AttributeModifier(UUID_ATK_MULT,
-                        atkMult, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+                        atkMult, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL),
+                EquipmentSlotGroup.MAINHAND);
 
         return builder.build();
     }
@@ -310,7 +305,7 @@ public class RuyiJinguBangItem extends Item implements Charged {
     // ── Tooltip ──────────────────────────────────────────────────────
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         // The STR it needs is shown against the reader's own by WieldRules
 
         if (isQiEmpowered(stack)) {
@@ -342,11 +337,11 @@ public class RuyiJinguBangItem extends Item implements Charged {
     // ── Helpers ──────────────────────────────────────────────────────
 
     public static boolean isQiEmpowered(ItemStack stack) {
-        return stack.hasTag() && stack.getTag().getBoolean(TAG_QI_EMPOWERED);
+        return StackData.getBoolean(stack, TAG_QI_EMPOWERED);
     }
 
     public static boolean isLargeMode(ItemStack stack) {
-        return stack.hasTag() && stack.getTag().getBoolean(TAG_LARGE_MODE);
+        return StackData.getBoolean(stack, TAG_LARGE_MODE);
     }
 
     /** Returns true if the staff is in any powered-up mode (Qi Empowered or Large). */
@@ -362,7 +357,9 @@ public class RuyiJinguBangItem extends Item implements Charged {
 
     /** Puts the staff back to its normal form. */
     public static void revert(ItemStack stack) {
-        stack.getOrCreateTag().putBoolean(TAG_QI_EMPOWERED, false);
-        stack.getOrCreateTag().putBoolean(TAG_LARGE_MODE, false);
+        StackData.update(stack, tag -> {
+            tag.putBoolean(TAG_QI_EMPOWERED, false);
+            tag.putBoolean(TAG_LARGE_MODE, false);
+        });
     }
 }

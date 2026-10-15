@@ -11,7 +11,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
-import net.neoforged.neoforge.network.NetworkHooks;
 
 import java.util.function.Supplier;
 
@@ -61,7 +60,7 @@ public class ArmoryPacket implements CustomPacketPayload {
     /** Opens the player's armory to them. */
     public static void open(ServerPlayer p) {
         String who = p.getPersistentData().getString(com.jttw.engine.reincarnation.AlignmentData.KEY_REINCARNATION_OUTCOME);
-        NetworkHooks.openScreen(p, new SimpleMenuProvider((id, inventory, player) -> new ArmoryMenu(id, inventory, Armory.of(p)),
+        p.openMenu(new SimpleMenuProvider((id, inventory, player) -> new ArmoryMenu(id, inventory, Armory.of(p)),
                 Component.literal("Armory")), buf -> buf.writeUtf(who));
     }
 }

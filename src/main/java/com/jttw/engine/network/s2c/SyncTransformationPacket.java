@@ -65,8 +65,7 @@ public class SyncTransformationPacket implements CustomPacketPayload {
      * Handle packet on client
      */
     public static void handle(SyncTransformationPacket packet, IPayloadContext ctx) {
-        NetworkEvent.Context context = contextSupplier.get();
-        context.enqueueWork(() -> {
+        ctx.enqueueWork(() -> {
             // Client-side handling
             TransformationManager.handleClientSync(packet.playerId, packet.data);
         });

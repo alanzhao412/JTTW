@@ -40,7 +40,7 @@ public final class ModAttributes {
     }
 
     private static void onAttributeModify(EntityAttributeModificationEvent event) {
-        event.add(EntityType.PLAYER, PHYSICAL_RESISTANCE.get());
-        event.add(EntityType.PLAYER, MAGIC_RESISTANCE.get());
+        event.add(EntityType.PLAYER, PHYSICAL_RESISTANCE);
+        event.add(EntityType.PLAYER, MAGIC_RESISTANCE);
     }
 }

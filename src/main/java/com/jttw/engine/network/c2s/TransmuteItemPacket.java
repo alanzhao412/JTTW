@@ -3,11 +3,12 @@ package com.jttw.engine.network.c2s;
 import com.jttw.engine.transformation.transmute.TransmutationCategory;
 import com.jttw.engine.transformation.transmute.TransmutationHelper;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import com.jttw.engine.JTTWEngine;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -92,8 +93,8 @@ public class TransmuteItemPacket implements CustomPacketPayload {
             // Crops and food: simple item replacement, keep stack count
             newStack = new ItemStack(targetItem, held.getCount());
             // Preserve custom name if present
-            if (held.hasCustomHoverName()) {
-                newStack.setHoverName(held.getHoverName());
+            if (held.has(DataComponents.CUSTOM_NAME)) {
+                newStack.set(DataComponents.CUSTOM_NAME, held.get(DataComponents.CUSTOM_NAME));
             }
         }
 
@@ -113,9 +114,9 @@ public class TransmuteItemPacket implements CustomPacketPayload {
         ItemStack result = new ItemStack(targetItem, 1);
 
         // Copy enchantments
-        ListTag enchantments = source.getEnchantmentTags();
+        ItemEnchantments enchantments = source.get(DataComponents.ENCHANTMENTS);
         if (enchantments != null && !enchantments.isEmpty()) {
-            result.getOrCreateTag().put("Enchantments", enchantments.copy());
+            result.set(DataComponents.ENCHANTMENTS, enchantments);
         }
 
         // Scale durability: preserve the percentage of durability used
@@ -129,13 +130,13 @@ public class TransmuteItemPacket implements CustomPacketPayload {
         }
 
         // Copy custom name
-        if (source.hasCustomHoverName()) {
-            result.setHoverName(source.getHoverName());
+        if (source.has(DataComponents.CUSTOM_NAME)) {
+            result.set(DataComponents.CUSTOM_NAME, source.get(DataComponents.CUSTOM_NAME));
         }
 
-        // Copy repair cost via NBT (avoids mapping issues)
-        if (source.getTag() != null && source.getTag().contains("RepairCost")) {
-            result.getOrCreateTag().putInt("RepairCost", source.getTag().getInt("RepairCost"));
+        // Copy repair cost
+        if (source.has(DataComponents.REPAIR_COST)) {
+            result.set(DataComponents.REPAIR_COST, source.get(DataComponents.REPAIR_COST));
         }
 
         return result;

@@ -119,7 +119,7 @@ public final class Armory {
         for (int i = 0; i < list.size(); i++) {
             CompoundTag t = list.getCompound(i);
             int slot = t.getInt("Slot");
-            if (slot >= 0 && slot < slots.size()) kept.place(slot, ItemStack.of(t));
+            if (slot >= 0 && slot < slots.size()) kept.place(slot, ItemStack.parseOptional(p.registryAccess(), t));
         }
         return kept;
     }
@@ -129,9 +129,9 @@ public final class Armory {
         for (int i = 0; i < c.getContainerSize(); i++) {
             ItemStack s = c.getItem(i);
             if (s.isEmpty()) continue;
-            CompoundTag t = s.save(new CompoundTag());
+            CompoundTag t = new CompoundTag();
             t.putInt("Slot", i);
-            list.add(t);
+            list.add(s.save(p.registryAccess(), t));
         }
         p.getPersistentData().put(KEY, list);
     }

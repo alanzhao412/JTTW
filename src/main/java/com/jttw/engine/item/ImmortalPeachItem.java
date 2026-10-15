@@ -20,8 +20,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.Level;
 
-import java.util.UUID;
-
 /**
  * Immortality Peach — a divine consumable from the Heavenly Peach Garden.
  *
@@ -43,8 +41,8 @@ public class ImmortalPeachItem extends Item {
 
     private static final FoodProperties FOOD = new FoodProperties.Builder()
             .nutrition(6) // 3 hunger bars
-            .saturationMod(1.2F)
-            .alwaysEat()
+            .saturationModifier(1.2F)
+            .alwaysEdible()
             .build();
 
     public ImmortalPeachItem() {
@@ -110,22 +108,22 @@ public class ImmortalPeachItem extends Item {
     }
 
     private static void applyResistances(ServerPlayer player) {
-        setMod(player.getAttribute(ModAttributes.PHYSICAL_RESISTANCE.get()), MOD_ARMOR_UUID,
+        setMod(player.getAttribute(ModAttributes.PHYSICAL_RESISTANCE), MOD_ARMOR_UUID,
                 "JTTW Peach Physical Resistance", PRES_BONUS);
-        setMod(player.getAttribute(ModAttributes.MAGIC_RESISTANCE.get()), MOD_TOUGHNESS_UUID,
+        setMod(player.getAttribute(ModAttributes.MAGIC_RESISTANCE), MOD_TOUGHNESS_UUID,
                 "JTTW Peach Magic Resistance", MRES_BONUS);
         // The armor/toughness version of this bonus, on players who still carry it
         removeMod(player.getAttribute(Attributes.ARMOR), MOD_ARMOR_UUID);
         removeMod(player.getAttribute(Attributes.ARMOR_TOUGHNESS), MOD_TOUGHNESS_UUID);
     }
 
-    private static void setMod(AttributeInstance inst, UUID id, String name, double amount) {
+    private static void setMod(AttributeInstance inst, ResourceLocation id, String name, double amount) {
         if (inst == null) return;
         inst.removeModifier(id);
         inst.addPermanentModifier(new AttributeModifier(id, amount, AttributeModifier.Operation.ADD_VALUE));
     }
 
-    private static void removeMod(AttributeInstance inst, UUID id) {
+    private static void removeMod(AttributeInstance inst, ResourceLocation id) {
         if (inst != null) inst.removeModifier(id);
     }
 }

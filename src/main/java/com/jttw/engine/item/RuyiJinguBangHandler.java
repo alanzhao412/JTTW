@@ -6,8 +6,8 @@ import com.jttw.engine.progression.skilltree.SkillTreeData;
 import com.jttw.engine.reincarnation.AlignmentData;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 
@@ -31,7 +31,7 @@ public final class RuyiJinguBangHandler {
     public static void onPlayerTick(PlayerTickEvent.Pre event) {
 
         Player player = event.getEntity();
-        AttributeInstance reach = player.getAttribute(NeoForgeMod.ENTITY_REACH.get());
+        AttributeInstance reach = player.getAttribute(Attributes.ENTITY_INTERACTION_RANGE);
         if (reach == null) return;
 
         double desiredReach = 0.0;
@@ -63,7 +63,7 @@ public final class RuyiJinguBangHandler {
         }
 
         AttributeModifier existing = reach.getModifier(UUID_REACH);
-        double currentReach = (existing != null) ? existing.getAmount() : 0.0;
+        double currentReach = (existing != null) ? existing.amount() : 0.0;
 
         if (desiredReach > 0 && currentReach != desiredReach) {
             // Remove old and apply new

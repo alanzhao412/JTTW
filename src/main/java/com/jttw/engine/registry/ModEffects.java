@@ -3,13 +3,15 @@ package com.jttw.engine.registry;
 import com.jttw.engine.JTTWEngine;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.neoforged.bus.api.IEventBus;
 import net.minecraft.core.registries.Registries;
+import net.neoforged.neoforge.common.EffectCure;
+import net.neoforged.neoforge.common.EffectCures;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.DeferredHolder;
 
-import java.util.List;
+import java.util.Set;
 
 /** The mod's status effects. */
 public final class ModEffects {
@@ -42,9 +44,10 @@ public final class ModEffects {
             super(MobEffectCategory.HARMFUL, 0x4B2A6B);
         }
 
+        /** No milk; a totem still clears it, as it clears every effect. */
         @Override
-        public List<ItemStack> getCurativeItems() {
-            return List.of();
+        public void fillEffectCures(Set<EffectCure> cures, MobEffectInstance instance) {
+            cures.add(EffectCures.PROTECTED_BY_TOTEM);
         }
     }
 }

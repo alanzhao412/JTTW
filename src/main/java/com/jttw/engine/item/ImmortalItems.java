@@ -60,8 +60,8 @@ public final class ImmortalItems {
 
         private static final FoodProperties FOOD = new FoodProperties.Builder()
                 .nutrition(2)
-                .saturationMod(0.5F)
-                .alwaysEat()
+                .saturationModifier(0.5F)
+                .alwaysEdible()
                 .build();
 
         public ImmortalPillItem() {

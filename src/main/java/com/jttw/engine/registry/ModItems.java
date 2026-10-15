@@ -45,8 +45,9 @@ public final class ModItems {
     public static final DeferredHolder<Item, Item> GOLDEN_BOW = ITEMS.register("golden_bow", com.jttw.engine.item.GoldenBowItem::new);
     /** The ji of Heaven's soldiers; now and then one falls from a soldier struck down. */
     public static final DeferredHolder<Item, Item> HEAVENLY_HALBERD = ITEMS.register("heavenly_halberd",
-            () -> new net.minecraft.world.item.SwordItem(net.minecraft.world.item.Tiers.GOLD, 4, -2.8f,
-                    new Item.Properties().durability(600).rarity(net.minecraft.world.item.Rarity.UNCOMMON)));
+            () -> new net.minecraft.world.item.SwordItem(net.minecraft.world.item.Tiers.GOLD,
+                    new Item.Properties().durability(600).rarity(net.minecraft.world.item.Rarity.UNCOMMON)
+                            .attributes(net.minecraft.world.item.SwordItem.createAttributes(net.minecraft.world.item.Tiers.GOLD, 4, -2.8f))));
     /** From Bone Servants. */
     public static final DeferredHolder<Item, Item> SERVANT_BONE = ITEMS.register("servant_bone", () -> new Item(new Item.Properties()));
     /** From Wraiths. */
@@ -66,11 +67,11 @@ public final class ModItems {
 
     // ── White Bone Ridge spawn eggs ───────────────────────────────
     public static final DeferredHolder<Item, Item> BONE_SERVANT_SPAWN_EGG = ITEMS.register("bone_servant_spawn_egg",
-            () -> new net.neoforged.neoforge.common.ForgeSpawnEggItem(com.jttw.engine.registry.ModEntities.BONE_SERVANT, 0xE8E4D8, 0x6B6458, new Item.Properties()));
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.BONE_SERVANT,0xE8E4D8, 0x6B6458, new Item.Properties()));
     public static final DeferredHolder<Item, Item> WRAITH_SPAWN_EGG = ITEMS.register("wraith_spawn_egg",
-            () -> new net.neoforged.neoforge.common.ForgeSpawnEggItem(com.jttw.engine.registry.ModEntities.WRAITH, 0xF4F6FA, 0x9AA3B5, new Item.Properties()));
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.WRAITH,0xF4F6FA, 0x9AA3B5, new Item.Properties()));
     public static final DeferredHolder<Item, Item> LADY_WHITE_BONE_SPAWN_EGG = ITEMS.register("lady_white_bone_spawn_egg",
-            () -> new net.neoforged.neoforge.common.ForgeSpawnEggItem(com.jttw.engine.registry.ModEntities.LADY_WHITE_BONE, 0xF2EFE6, 0x5A2D82, new Item.Properties()));
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.LADY_WHITE_BONE,0xF2EFE6, 0x5A2D82, new Item.Properties()));
 
     public static final DeferredHolder<Item, Item> IMMORTAL_PILL =
             ITEMS.register("jttw_immortal_pill", ImmortalItems.ImmortalPillItem::new);
