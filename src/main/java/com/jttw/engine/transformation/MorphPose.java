@@ -12,6 +12,11 @@ import net.minecraft.world.entity.animal.Rabbit;
 import net.minecraft.world.entity.animal.axolotl.Axolotl;
 import net.minecraft.world.entity.animal.frog.Frog;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
+import net.minecraft.world.entity.projectile.LlamaSpit;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.windcharge.AbstractWindCharge;
 
 /**
  * How a transformed player's stand-in entity is posed each frame: which way it faces, how it
@@ -25,7 +30,8 @@ import net.minecraft.world.entity.player.Player;
  *   <li>The dummy faces where the player faces: yaw, body yaw and head yaw are copied, plus a
  *       per-model offset for models built facing backwards ({@link #yawOffset}).</li>
  *   <li>Living dummies tilt with the player's pitch; the phantom's model tilts the other way
- *       ({@link #invertsPitch}). Objects stay level. (The ender dragon's renderer ignores pitch
+ *       ({@link #invertsPitch}). A projectile is posed as if flying where the player looks
+ *       ({@link #flightYaw}); other objects stay level. (The ender dragon's renderer ignores pitch
  *       altogether: it tilts from its own climbing and diving.)</li>
  *   <li>In water the dummy swims; in the air or flying it is never on the ground; it jumps when
  *       the player jumps.</li>
@@ -56,6 +62,31 @@ public final class MorphPose {
      */
     public static boolean usesStandardLimbSwing(Entity dummy) {
         return !(dummy instanceof Rabbit) && !(dummy instanceof Frog);
+    }
+
+    /**
+     * A projectile's yaw when flying the way a player at this yaw looks. Vanilla sets it from
+     * the projectile's motion: an arrow's (and every other projectile's) is the player's yaw
+     * negated ({@code Projectile.shoot}); a fireball's, wither skull's or wind charge's is turned
+     * half round from the player's ({@code ProjectileUtil.rotateTowardsMovement}).
+     */
+    public static float flightYaw(Entity projectile, float playerYaw) {
+        return projectile instanceof AbstractHurtingProjectile ? playerYaw + 180.0F : -playerYaw;
+    }
+
+    /** A projectile's pitch when flying the way a player at this pitch looks (see {@link #flightYaw}). */
+    public static float flightPitch(Entity projectile, float playerPitch) {
+        return projectile instanceof AbstractHurtingProjectile ? playerPitch : -playerPitch;
+    }
+
+    /**
+     * How far above the player's feet the model is drawn. Arrows, tridents, llama spit and wind
+     * charges are drawn about their middle, so they are lifted to the middle of their hitbox
+     * rather than half sunk in the ground.
+     */
+    public static float renderLift(Entity dummy) {
+        return dummy instanceof AbstractArrow || dummy instanceof LlamaSpit || dummy instanceof AbstractWindCharge
+                ? dummy.getBbHeight() / 2 : 0.0F;
     }
 
     /** What the player is doing, as the dummy needs to know it. */
@@ -114,6 +145,12 @@ public final class MorphPose {
                 living.yBodyRotO = living.yHeadRotO;
                 living.yBodyRot  = living.yHeadRot;
             }
+        } else if (dummy instanceof Projectile) {
+            dummy.yRotO = flightYaw(dummy, player.yRotO);
+            dummy.setYRot(flightYaw(dummy, player.getYRot()));
+            dummy.xRotO = flightPitch(dummy, player.xRotO);
+            dummy.setXRot(flightPitch(dummy, player.getXRot()));
+            if (state.airborne()) dummy.setOnGround(false);
         } else {
             dummy.xRotO = 0f;
             dummy.setXRot(0f);

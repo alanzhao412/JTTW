@@ -164,7 +164,9 @@ public class PlayerRendererMixin {
                 jttw_prevHeuristicJump = heuristicJump;
 
                 dummy.tickCount = player.tickCount;
-                dummy.tick();
+                // A projectile's tick flies it and hits whatever is in its path (the player
+                // first); its looks need only its tick count
+                if (!(dummy instanceof net.minecraft.world.entity.projectile.Projectile)) dummy.tick();
 
                 // Stabilize after tick()
                 dummy.setPos(px, py, pz);
@@ -223,6 +225,7 @@ public class PlayerRendererMixin {
 
             float renderYaw = Mth.lerp(partialTicks, dummy.yRotO, dummy.getYRot());
             poseStack.pushPose();
+            poseStack.translate(0.0F, MorphPose.renderLift(dummy), 0.0F);
             renderer.render(dummy, renderYaw, partialTicks, poseStack, buffer, light);
             poseStack.popPose();
 

@@ -18,6 +18,9 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.animal.axolotl.Axolotl;
+import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
@@ -223,7 +226,8 @@ public class EveryFormGameTests {
     /**
      * Every form's model faces where the player faces (plus the offset for models built
      * backwards), and living models tilt with the player's pitch (or against it, for models
-     * built that way); object models stay level.
+     * built that way); a projectile is turned as vanilla turns one flying where the player
+     * looks; other object models stay level.
      */
     @GameTest(template = PLATFORM)
     public static void everyFormsModelFacesAndTiltsWithThePlayer(GameTestHelper h) {
@@ -241,6 +245,25 @@ public class EveryFormGameTests {
                 MorphPose.apply(p, dummy, MorphPose.State.of(p, false, false));
             } catch (Throwable e) {
                 broken.add(id + " threw " + e);
+                continue;
+            }
+            if (dummy instanceof Projectile) {
+                // the same projectile, set flying where the player looks by vanilla's own code
+                Entity flown = t.create(h.getLevel());
+                Vec3 look = p.getLookAngle();
+                if (flown instanceof AbstractHurtingProjectile) {
+                    flown.setDeltaMovement(look);
+                    ProjectileUtil.rotateTowardsMovement(flown, 1.0F);
+                } else {
+                    ((Projectile) flown).shoot(look.x, look.y, look.z, 1.0F, 0.0F);
+                }
+                // to within the rounding of vanilla's look vector (its sine table)
+                if (Math.abs(Mth.wrapDegrees(flown.getYRot() - dummy.getYRot())) > 0.01F
+                        || Math.abs(Mth.wrapDegrees(flown.getXRot() - dummy.getXRot())) > 0.01F) {
+                    broken.add(id + " flies " + dummy.getYRot() + "/" + dummy.getXRot()
+                            + " not " + flown.getYRot() + "/" + flown.getXRot());
+                }
+                if (!sameAngle(MorphPose.flightYaw(dummy, YAW - 5), dummy.yRotO)) broken.add(id + " last yaw " + dummy.yRotO);
                 continue;
             }
             float off = MorphPose.yawOffset(t);
