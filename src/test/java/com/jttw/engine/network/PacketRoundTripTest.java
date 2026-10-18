@@ -66,6 +66,7 @@ class PacketRoundTripTest {
                 new com.jttw.engine.network.c2s.SetSignTextPacket(List.of("Hello", "", "from a", "sign")),
                 new com.jttw.engine.network.c2s.SetSignTextPacket(List.of()),
                 new SpendSkillPointPacket("wu_ring_2"),
+                new com.jttw.engine.network.c2s.BuyClassAbilityPacket("heavenly_mobility"),
                 new StaffScalePacket(4242, -0.75f),
                 new TransmuteItemPacket(TransmutationCategory.COOKED_FOOD, 3),
                 // server -> client
@@ -96,8 +97,8 @@ class PacketRoundTripTest {
                         new long[]{new net.minecraft.core.BlockPos(4, -12, 9).asLong()}, new int[]{0xFF00BBFF}),
                 new com.jttw.engine.network.s2c.TruffleScentPacket(200, new int[0], new long[0], new int[0]),
                 new SyncRingStatePacket(PLAYER, true),
-                new SyncSkillTreePacket(PLAYER, 4, Set.of("wu_ring_1", "wu_ring_2", "wu_clone_1")),
-                new SyncSkillTreePacket(PLAYER, 0, Set.of()),
+                new SyncSkillTreePacket(PLAYER, 4, Set.of("wu_ring_1", "wu_ring_2", "wu_clone_1"), Set.of("heavenly_mobility")),
+                new SyncSkillTreePacket(PLAYER, 0, Set.of(), Set.of()),
                 new SyncTransformStatePacket(true, 2, 600, 1200, 0, 2400),
                 new SyncXtqStatsPacket(18.5f, 40f, 6f, 30f, 100f, 2.5f, 100, true, false, true));
     }

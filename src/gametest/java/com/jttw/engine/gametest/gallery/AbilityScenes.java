@@ -57,6 +57,8 @@ final class AbilityScenes {
     static volatile boolean holdUse;
     /** The scene opens the skill tree at its trigger, to be shot. */
     static volatile boolean openSkillTree;
+    /** The scene opens the character screen on its Skills tab (the class abilities) at its trigger, to be shot. */
+    static volatile boolean openClassAbilities;
     /** A scene's own camera: where it stands and what it looks at, from the stage's origin at ground level; null for the usual. */
     static volatile double[] sceneCam;
     /** Played, not posed: forward (and sprint, unless {@code liveCruise}) held from the trigger, the player moving freely. */
@@ -115,6 +117,10 @@ final class AbilityScenes {
                 new Scene("flight_f5_front_3", p -> { liveWukong(p, 3); liveF5 = true; liveFront = true; staffInHand(p); }, p -> {}, 40, false, 0f),
                 new Scene("flight_live_survival_2", p -> { liveWukong(p, 2); p.setGameMode(GameType.SURVIVAL); p.getAbilities().flying = true; p.onUpdateAbilities(); }, p -> {}, 40, false, 0f),
                 new Scene("flight_live_survival_3", p -> { liveWukong(p, 3); p.setGameMode(GameType.SURVIVAL); p.getAbilities().flying = true; p.onUpdateAbilities(); }, p -> {}, 40, false, 0f),
+                // a Heavenly (the Marshal) with Heavenly Mobility bought, sprinting through the air: on his slower cloud, no somersault
+                new Scene("flight_heavenly_cloud", p -> liveHeavenly(p, false), p -> {}, 40, false, 0f),
+                new Scene("flight_heavenly_cloud_f5", p -> { liveHeavenly(p, false); liveF5 = true; }, p -> {}, 40, false, 0f),
+                new Scene("flight_heavenly_cloud_survival", p -> liveHeavenly(p, true), p -> {}, 40, false, 0f),
                 new Scene("flight_cloud_hover", p -> fly(p, ReincarnationOutcome.CELESTIAL_PRIMATE, 0), p -> {}, 1, false, 0f),
                 new Scene("flight_cloud_under_way", p -> fly(p, ReincarnationOutcome.CELESTIAL_PRIMATE, 1), p -> {}, 1, false, 0f),
                 new Scene("flight_squall_hover", p -> fly(p, ReincarnationOutcome.EYE_OF_HEAVEN, 0), p -> {}, 1, false, 0f),
@@ -298,6 +304,19 @@ final class AbilityScenes {
                     p.setGameMode(GameType.SURVIVAL);
                     LevelManager.syncToClient(p);
                     openSkillTree = true;
+                    keepScreen = true;
+                }, p -> {}, 10, true),
+                // the Marshal's class abilities at level 40: one learned, two to buy, the rest still locked
+                new Scene("class_abilities_heavenly", p -> {
+                    p.getPersistentData().remove("jttw_abilities");
+                    AlignmentData.markReincarnated(p, ReincarnationOutcome.MARSHAL_HEAVENLY_CANOPY);
+                    LevelManager.initClass(p, ReincarnationOutcome.MARSHAL_HEAVENLY_CANOPY);
+                    p.setGameMode(GameType.SURVIVAL);
+                    com.jttw.engine.progression.level.PlayerLevel.setLevel(p, 40);
+                    SkillTreeData.setPoints(p, 2);
+                    com.jttw.engine.progression.skilltree.SkillPurchase.purchaseClassAbility(p, com.jttw.engine.flight.JTTWFlight.HEAVENLY_MOBILITY);
+                    LevelManager.syncToClient(p);
+                    openClassAbilities = true;
                     keepScreen = true;
                 }, p -> {}, 10, true),
                 // a transformation: the puff of cloud as he becomes a horse, seen from outside
@@ -682,6 +701,25 @@ final class AbilityScenes {
         live = true;
     }
 
+    /** The Marshal at level 10, Heavenly Mobility bought with his points as from the character screen, flying, to be flown live. */
+    private static void liveHeavenly(ServerPlayer p, boolean survival) {
+        p.getPersistentData().remove("jttw_skill_nodes");
+        p.getPersistentData().remove("jttw_abilities");
+        com.jttw.engine.flight.JTTWFlight.setUniversalFlight(p, false);
+        com.jttw.engine.flight.JTTWFlight.setBoost(p, 1, false);
+        AlignmentData.markReincarnated(p, ReincarnationOutcome.MARSHAL_HEAVENLY_CANOPY);
+        LevelManager.initClass(p, ReincarnationOutcome.MARSHAL_HEAVENLY_CANOPY);
+        com.jttw.engine.progression.level.PlayerLevel.setLevel(p, 10);
+        SkillTreeData.addPoints(p, 2);
+        com.jttw.engine.progression.skilltree.SkillPurchase.purchaseClassAbility(p, com.jttw.engine.flight.JTTWFlight.HEAVENLY_MOBILITY);
+        p.setGameMode(survival ? GameType.SURVIVAL : GameType.CREATIVE);
+        p.getAbilities().mayfly = true;
+        p.getAbilities().flying = true;
+        p.onUpdateAbilities();
+        p.teleportTo(p.getX(), p.getY() + 6, p.getZ());
+        live = true;
+    }
+
     private static void staffInHand(ServerPlayer p) {
         p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(com.jttw.engine.registry.ModItems.RUYI_JINGU_BANG.get()));
     }
@@ -907,6 +945,7 @@ final class AbilityScenes {
         closeUp = false;
         holdUse = false;
         openSkillTree = false;
+        openClassAbilities = false;
         sceneCam = null;
         if (p.getPersistentData().contains(com.jttw.engine.character.divinebeast.TrueForm.KEY_UNTIL)) {
             com.jttw.engine.character.divinebeast.TrueForm.end(p);

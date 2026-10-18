@@ -25,7 +25,7 @@ import java.util.List;
  *
  * Tab 1 — IDENTITY  : Player model | Class, Subclass, Level, Description
  * Tab 2 — STATS     : Stat bars showing current value vs level-100 max capacity
- * Tab 3 — SKILLS    : Vertical skill tree for the player's class
+ * Tab 3 — SKILLS    : The class's abilities by level: reached ones are bought here with skill points
  */
 public class CharacterScreen extends Screen {
 
@@ -79,6 +79,9 @@ public class CharacterScreen extends Screen {
     private static final int C_NODE_TEXT_U   = 0xFFCCFFCC;
     private static final int C_NODE_LEVEL_L  = 0xFF555555;
     private static final int C_NODE_LEVEL_U  = 0xFF88FF88;
+    private static final int C_NODE_AVAIL    = 0xFF3A3010;
+    private static final int C_NODE_BORDER_A = 0xFFDDAA33;
+    private static final int C_NODE_HOVER_A  = 0xFFFFDD66;
     private static final int C_SPINE         = 0xFF334433;
     private static final int C_SPINE_DONE    = 0xFF44AA44;
 
@@ -98,8 +101,18 @@ public class CharacterScreen extends Screen {
     // Skill scroll (pixels)
     private int skillScrollY = 0;
 
+    /** The class abilities that can be bought now, as drawn last frame: [x, y, w, h] by ability id. */
+    private final java.util.Map<String, int[]> buyable = new java.util.HashMap<>();
+
     public CharacterScreen() {
         super(Component.literal("Character"));
+    }
+
+    /** The character screen opened on its Skills tab, where class abilities are bought. */
+    public static CharacterScreen onSkillsTab() {
+        CharacterScreen screen = new CharacterScreen();
+        screen.activeTab = Tab.SKILLS;
+        return screen;
     }
 
     // -----------------------------------------------------------------------
@@ -134,6 +147,20 @@ public class CharacterScreen extends Screen {
                     activeTab = tabs[i];
                     skillScrollY = 0;
                     return true;
+                }
+            }
+            if (activeTab == Tab.SKILLS) {
+                for (var e : buyable.entrySet()) {
+                    int[] r = e.getValue();
+                    if (mx >= r[0] && mx < r[0] + r[2] && my >= r[1] && my < r[1] + r[3]) {
+                        // the server checks it again and syncs back what was bought
+                        com.jttw.engine.network.NetworkHandler.sendToServer(
+                                new com.jttw.engine.network.c2s.BuyClassAbilityPacket(e.getKey()));
+                        Minecraft.getInstance().getSoundManager().play(
+                                net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
+                                        net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK, 1.0f));
+                        return true;
+                    }
                 }
             }
         }
@@ -182,7 +209,7 @@ public class CharacterScreen extends Screen {
         switch (activeTab) {
             case IDENTITY -> renderIdentity(g, mc, player, contentX, contentY, contentW, contentH);
             case STATS    -> renderStats(g, mc, player, contentX, contentY, contentW, contentH);
-            case SKILLS   -> renderSkills(g, mc, player, contentX, contentY, contentW, contentH);
+            case SKILLS   -> renderSkills(g, mc, player, contentX, contentY, contentW, contentH, mouseX, mouseY);
         }
 
         g.disableScissor();
@@ -539,13 +566,14 @@ public class CharacterScreen extends Screen {
     // TAB 3 — SKILLS
     // -----------------------------------------------------------------------
 
-    private static final int NODE_W  = 220;
+    private static final int NODE_W  = 290;
     private static final int NODE_H  = 18;
     private static final int NODE_GAP = 8;
     private static final int SPINE_X_OFFSET = 12; // spine line x within content area
 
     private void renderSkills(GuiGraphics g, Minecraft mc, Player player,
-                               int cx, int cy, int cw, int ch) {
+                               int cx, int cy, int cw, int ch, int mouseX, int mouseY) {
+        buyable.clear();
         ProgressionClass cls = PlayerLevel.getProgressionClass(player);
         if (cls == null) {
             g.drawCenteredString(mc.font, "§7Reincarnate to unlock skill tree.",
@@ -554,13 +582,14 @@ public class CharacterScreen extends Screen {
         }
 
         int level = PlayerLevel.getLevel(player);
+        int points = com.jttw.engine.client.ClientAbilityData.getSkillPoints();
         List<AbilityUnlock> unlocks = AbilityUnlock.getAll().stream()
                 .filter(u -> u.cls() == cls)
                 .sorted(java.util.Comparator.comparingInt(AbilityUnlock::requiredLevel))
                 .toList();
 
-        // Header
-        g.drawString(mc.font, "§6" + formatClassName(cls) + " §7Skill Tree",
+        // Header: the class, and the points to spend (the same pool as the skill tree's)
+        g.drawString(mc.font, "§6" + formatClassName(cls) + " §7Abilities  §8|  §7Skill points §e" + points,
                 cx, cy, C_LABEL, false);
         g.fill(cx, cy + 10, cx + cw, cy + 11, C_SEPARATOR);
 
@@ -579,10 +608,12 @@ public class CharacterScreen extends Screen {
         int spineTop = listTop - skillScrollY;
         g.fill(spineX, spineTop, spineX + 2, spineTop + totalH, C_SPINE);
 
-        // Draw nodes
+        // Draw nodes: learned (green), reached and to be bought (gold), or not yet reached (grey)
         for (int i = 0; i < unlocks.size(); i++) {
             AbilityUnlock unlock = unlocks.get(i);
-            boolean unlocked = PlayerLevel.hasAbility(player, unlock.abilityId());
+            boolean unlocked = com.jttw.engine.client.ClientAbilityData.hasClassAbility(unlock.abilityId());
+            boolean available = !unlocked && level >= unlock.requiredLevel();
+            boolean affordable = available && points >= unlock.cost();
 
             int nodeY = listTop + i * (NODE_H + NODE_GAP) - skillScrollY;
 
@@ -590,36 +621,48 @@ public class CharacterScreen extends Screen {
             if (nodeY + NODE_H < listTop) continue;
             if (nodeY > listTop + ch - 16) break;
 
+            boolean hover = affordable && mouseX >= nodeX && mouseX < nodeX + nodeW
+                    && mouseY >= nodeY && mouseY < nodeY + NODE_H;
+            if (affordable) buyable.put(unlock.abilityId(), new int[]{nodeX, nodeY, nodeW, NODE_H});
+
             // Color spine segment above this node as done if unlocked
             if (unlocked && i > 0) {
                 int prevNodeY = listTop + (i - 1) * (NODE_H + NODE_GAP) - skillScrollY + NODE_H;
                 g.fill(spineX, prevNodeY, spineX + 2, nodeY + NODE_H / 2, C_SPINE_DONE);
             }
 
+            int border = unlocked ? C_NODE_BORDER_U
+                    : available ? (hover ? C_NODE_HOVER_A : C_NODE_BORDER_A) : C_NODE_BORDER_L;
+            int bg = unlocked ? C_NODE_UNLOCKED : available ? C_NODE_AVAIL : C_NODE_LOCKED;
+
             // Diamond connector on spine
             int dotY = nodeY + NODE_H / 2;
-            g.fill(spineX - 1, dotY - 1, spineX + 3, dotY + 2,
-                   unlocked ? C_NODE_BORDER_U : C_NODE_BORDER_L);
+            g.fill(spineX - 1, dotY - 1, spineX + 3, dotY + 2, border);
 
-            // Node background
-            g.fill(nodeX, nodeY, nodeX + nodeW, nodeY + NODE_H,
-                   unlocked ? C_NODE_UNLOCKED : C_NODE_LOCKED);
-            g.fill(nodeX - 1, nodeY - 1, nodeX + nodeW + 1, nodeY + NODE_H + 1,
-                   unlocked ? C_NODE_BORDER_U : C_NODE_BORDER_L);
-            // redraw bg on top of border (inset)
-            g.fill(nodeX, nodeY, nodeX + nodeW, nodeY + NODE_H,
-                   unlocked ? C_NODE_UNLOCKED : C_NODE_LOCKED);
+            // Node: border, then the background inset
+            g.fill(nodeX - 1, nodeY - 1, nodeX + nodeW + 1, nodeY + NODE_H + 1, border);
+            g.fill(nodeX, nodeY, nodeX + nodeW, nodeY + NODE_H, bg);
+
+            int textY = nodeY + (NODE_H - mc.font.lineHeight) / 2 + 1;
 
             // Level badge
             String lvlTag = "Lv " + unlock.requiredLevel();
-            g.drawString(mc.font, lvlTag, nodeX + 3, nodeY + (NODE_H - mc.font.lineHeight) / 2 + 1,
-                    unlocked ? C_NODE_LEVEL_U : C_NODE_LEVEL_L, false);
+            g.drawString(mc.font, lvlTag, nodeX + 3, textY,
+                    unlocked || available ? C_NODE_LEVEL_U : C_NODE_LEVEL_L, false);
 
             // Ability name
-            String nameText = (unlocked ? "§a✦ " : "§7⬡ ") + unlock.displayName();
-            int nameX = nodeX + mc.font.width(lvlTag) + 10;
-            g.drawString(mc.font, nameText, nameX, nodeY + (NODE_H - mc.font.lineHeight) / 2 + 1,
-                    unlocked ? C_NODE_TEXT_U : C_NODE_TEXT_L, false);
+            String nameText = (unlocked ? "§a✦ " : available ? "§e◆ " : "§7⬡ ") + unlock.displayName();
+            int nameX = nodeX + mc.font.width("Lv 100") + 10;
+            g.drawString(mc.font, nameText, nameX, textY,
+                    unlocked ? C_NODE_TEXT_U : available ? C_CLASS_NAME : C_NODE_TEXT_L, false);
+
+            // What it takes: learned, its price, or the level it needs
+            String pts = unlock.cost() + (unlock.cost() == 1 ? " pt" : " pts");
+            String state = unlocked ? "§aLearned"
+                    : affordable ? (hover ? "§fClick to learn · " : "§eLearn · ") + pts
+                    : available ? "§cNeeds " + pts
+                    : "§8" + pts + " at Lv " + unlock.requiredLevel();
+            g.drawString(mc.font, state, nodeX + nodeW - mc.font.width(state) - 4, textY, C_WHITE, false);
         }
 
         // Scroll hint

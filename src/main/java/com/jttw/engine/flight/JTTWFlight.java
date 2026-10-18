@@ -67,7 +67,39 @@ public final class JTTWFlight {
 
     /** Whether this player may fly now, by any means but a form's wings. */
     public static boolean canFly(ServerPlayer player) {
-        return hasUniversalFlight(player) || fliesInnately(player);
+        return hasUniversalFlight(player) || fliesInnately(player) || hasHeavenlyCloud(player);
+    }
+
+    /**
+     * A Heavenly who has bought Heavenly Mobility has a cloud: they may fly, and sprinting through
+     * the air they ride it, as Wukong does his, only far slower and with no somersault onto it,
+     * when it is faster than their own flight ({@link #onHeavenlyCloud}).
+     * Checked each tick from what they hold, like innate flight, so no one's revoking takes it.
+     */
+    public static boolean hasHeavenlyCloud(net.minecraft.world.entity.player.Player player) {
+        return com.jttw.engine.progression.level.PlayerLevel.getProgressionClass(player)
+                == com.jttw.engine.progression.stats.ProgressionClass.HEAVENLY
+                && com.jttw.engine.progression.level.PlayerLevel.hasAbility(player, HEAVENLY_MOBILITY);
+    }
+
+    /** The class ability that gives a Heavenly their cloud. */
+    public static final String HEAVENLY_MOBILITY = "heavenly_mobility";
+
+    /**
+     * Whether a Heavenly is on their cloud now: flying, sprinting, with Heavenly Mobility, and
+     * only if the cloud is faster than their own flight. One who flies faster on their own keeps
+     * their own speed and look: the cloud never makes anyone worse.
+     */
+    public static boolean onHeavenlyCloud(ServerPlayer player) {
+        return player.getAbilities().flying && player.isSprinting() && !player.isSpectator()
+                && !player.isPassenger() && !player.isFallFlying() && hasHeavenlyCloud(player)
+                && ownSpeed(player) < FlightSteering.HEAVENLY_CLOUD_SPEED;
+    }
+
+    /** How fast this player flies on their own now, without the cloud: a glider at gliding speed. */
+    private static double ownSpeed(ServerPlayer player) {
+        FlightProfile own = ownProfile(player);
+        return own.glide() ? FlightSteering.GLIDE_SPEED : own.effectiveSpeed();
     }
 
     public static void setGlideOnly(ServerPlayer player, boolean glide) {
@@ -99,8 +131,8 @@ public final class JTTWFlight {
         return Math.max(1.0, player.getPersistentData().getDouble(BOOST_TAG));
     }
 
-    /** How this player flies now. */
-    public static FlightProfile profile(ServerPlayer player) {
+    /** How this player flies on their own, without a Heavenly's cloud. */
+    private static FlightProfile ownProfile(ServerPlayer player) {
         CompoundTag tag = player.getPersistentData();
         boolean wukong = "celestial_primate".equals(
                 tag.getString(com.jttw.engine.reincarnation.AlignmentData.KEY_REINCARNATION_OUTCOME));
@@ -111,6 +143,15 @@ public final class JTTWFlight {
         boolean own = canFly(player) || (form != null && form.canFly());
         return new FlightProfile(FlightSteering.speedFor(tier, wukong),
                 isGlideOnly(player), boost(player), tag.getBoolean(THRUST_TAG), own);
+    }
+
+    /** How this player flies now: on a Heavenly's cloud (only when it is the faster), or on their own. */
+    public static FlightProfile profile(ServerPlayer player) {
+        FlightProfile own = ownProfile(player);
+        if (onHeavenlyCloud(player)) {
+            return new FlightProfile(FlightSteering.HEAVENLY_CLOUD_SPEED, false, 1.0, false, own.own());
+        }
+        return own;
     }
 
     /** Sends the client its flight profile if it has changed since it last got one. */

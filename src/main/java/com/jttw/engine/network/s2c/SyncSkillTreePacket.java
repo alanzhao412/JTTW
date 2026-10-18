@@ -17,7 +17,8 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 /**
- * Syncs a player's full skill tree state (points + all unlocked node IDs) to the client.
+ * Syncs a player's full skill tree state (points, all unlocked node IDs, and the class abilities
+ * they hold) to the client.
  *
  * <p>Sent by {@link LevelManager} on level-up and by {@link SpendSkillPointPacket}
  * after a successful unlock. The client stores the data in
@@ -36,11 +37,13 @@ public class SyncSkillTreePacket implements CustomPacketPayload {
     private final UUID playerId;
     private final int availablePoints;
     private final Set<String> unlockedNodes;
+    private final Set<String> classAbilities;
 
-    public SyncSkillTreePacket(UUID playerId, int availablePoints, Set<String> unlockedNodes) {
+    public SyncSkillTreePacket(UUID playerId, int availablePoints, Set<String> unlockedNodes, Set<String> classAbilities) {
         this.playerId       = playerId;
         this.availablePoints = availablePoints;
         this.unlockedNodes  = Set.copyOf(unlockedNodes);
+        this.classAbilities = Set.copyOf(classAbilities);
     }
 
     // -----------------------------------------------------------------------
@@ -52,6 +55,8 @@ public class SyncSkillTreePacket implements CustomPacketPayload {
         buf.writeInt(pkt.availablePoints);
         buf.writeInt(pkt.unlockedNodes.size());
         for (String id : pkt.unlockedNodes) buf.writeUtf(id);
+        buf.writeInt(pkt.classAbilities.size());
+        for (String id : pkt.classAbilities) buf.writeUtf(id);
     }
 
     public static SyncSkillTreePacket decode(FriendlyByteBuf buf) {
@@ -60,7 +65,10 @@ public class SyncSkillTreePacket implements CustomPacketPayload {
         int count   = buf.readInt();
         Set<String> nodes = new HashSet<>();
         for (int i = 0; i < count; i++) nodes.add(buf.readUtf());
-        return new SyncSkillTreePacket(id, points, nodes);
+        int held = buf.readInt();
+        Set<String> abilities = new HashSet<>();
+        for (int i = 0; i < held; i++) abilities.add(buf.readUtf());
+        return new SyncSkillTreePacket(id, points, nodes, abilities);
     }
 
     // -----------------------------------------------------------------------
@@ -77,6 +85,7 @@ public class SyncSkillTreePacket implements CustomPacketPayload {
         if (mc.player == null) return;
         if (!mc.player.getUUID().equals(pkt.playerId)) return;
         com.jttw.engine.client.ClientAbilityData.setSkillTree(pkt.availablePoints, pkt.unlockedNodes);
+        com.jttw.engine.client.ClientAbilityData.setClassAbilities(pkt.classAbilities);
     }
 
     // -----------------------------------------------------------------------
@@ -87,7 +96,8 @@ public class SyncSkillTreePacket implements CustomPacketPayload {
         return new SyncSkillTreePacket(
                 player.getUUID(),
                 SkillTreeData.getPoints(player),
-                SkillTreeData.getUnlockedNodes(player)
+                SkillTreeData.getUnlockedNodes(player),
+                com.jttw.engine.progression.level.PlayerLevel.getAbilities(player)
         );
     }
 }

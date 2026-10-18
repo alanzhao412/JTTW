@@ -35,7 +35,7 @@ import java.util.List;
  * <ul>
  *   <li>Grant XP from kills, gated by level phase (vanilla vs biome)</li>
  *   <li>Process level-up chains and apply stat changes via {@link StatBlock}</li>
- *   <li>Fire ability unlock notifications via {@link AbilityUnlock}</li>
+ *   <li>Announce class abilities that become available to buy via {@link AbilityUnlock}</li>
  *   <li>Manage Divine Beast form stage transitions via {@link FormStage}</li>
  *   <li>Re-apply stat modifiers on respawn, clone, and login</li>
  *   <li>Sync level data to client after every change via {@link SyncLevelPacket}</li>
@@ -78,7 +78,7 @@ public final class LevelManager {
      * Initialise the level system for a player who has just reincarnated.
      *
      * <p>Resets to level 1, assigns the class derived from {@code outcome},
-     * fires level-1 ability unlocks, applies base stats, and sends the first
+     * announces level-1 abilities, applies base stats, and sends the first
      * sync packet.
      *
      * <p><b>Call this from {@link com.jttw.engine.reincarnation.ReincarnationHandler}
@@ -100,7 +100,7 @@ public final class LevelManager {
             }
         }
 
-        // Grant all level-1 unlocks (e.g. lesser_form, primordial_seed)
+        // Level-1 abilities (e.g. lesser_form, primordial_seed) are available to buy from the start
         processUnlocks(player, cls, 0, 1);
 
         // Apply base stats immediately
@@ -305,9 +305,6 @@ public final class LevelManager {
             // Restore health to new max on level-up (quality of life)
             player.setHealth((float) player.getMaxHealth());
 
-            // Ability unlocks (legacy system — class-level milestones)
-            processUnlocks(player, cls, prevLevel, level);
-
             // Skill point: 1 point every 5 levels
             if (level % 5 == 0) {
                 SkillTreeData.addPoints(player, 1);
@@ -315,6 +312,9 @@ public final class LevelManager {
                         "§6[JTTW] §rSkill point earned! §e" +
                                 SkillTreeData.getPoints(player) + " §rnow available. §7(Press K to open Skill Tree)"));
             }
+
+            // Class abilities reached at this level can now be bought
+            processUnlocks(player, cls, prevLevel, level);
 
             // Divine Beast form stage transitions
             if (cls == ProgressionClass.DIVINE_BEAST) {
@@ -352,29 +352,17 @@ public final class LevelManager {
         return anyLevelUp;
     }
 
+    /** Class abilities reached at this level become available to buy with skill points. */
     private static void processUnlocks(ServerPlayer player, ProgressionClass cls,
                                        int prevLevel, int newLevel) {
         List<AbilityUnlock> unlocks = AbilityUnlock.getNewUnlocks(cls, prevLevel, newLevel);
         for (AbilityUnlock unlock : unlocks) {
-            PlayerLevel.grantAbility(player, unlock.abilityId());
+            if (PlayerLevel.hasAbility(player, unlock.abilityId())) continue; // held from an older save
+            int cost = unlock.cost();
             player.sendSystemMessage(Component.literal(
-                    "§6[Ability Unlocked] §e" + unlock.displayName()));
-
-            // ── Wire ability side-effects here ─────────────────────────────
-            // TODO: each ability ID maps to gameplay effects.  Examples:
-            //
-            // "heavenly_mobility" → grant JTTWFlight universal flight flag
-            //   JTTWFlight.setUniversalFlight(player, true);
-            //
-            // "intermediate_form" / "sovereign_form" → trigger a TransformationManager morph
-            //   to the next form entity for this player's reincarnation outcome
-            //
-            // "demon_transformation" → unlock the transformation GUI for yaoguai
-            //
-            // "domain_authority" / "mandate_of_heaven" → apply a custom attribute aura
-            //
-            // Keep effect logic in dedicated trait/ability classes and call them here
-            // to keep LevelManager focused on the progression flow only.
+                    "§6[Ability Available] §e" + unlock.displayName()
+                            + " §rcan be learned for §e" + cost + " skill point" + (cost == 1 ? "" : "s")
+                            + " §7(Press H, Skills tab)"));
         }
     }
 

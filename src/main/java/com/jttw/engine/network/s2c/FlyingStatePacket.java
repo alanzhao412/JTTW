@@ -27,7 +27,7 @@ public class FlyingStatePacket implements CustomPacketPayload {
     }
 
     private final int entityId;
-    /** {@link com.jttw.engine.flight.FlyingState#GROUNDED}, {@code FLYING}, {@code ON_CLOUD} or {@code IN_SQUALL}. */
+    /** {@link com.jttw.engine.flight.FlyingState#GROUNDED}, {@code FLYING}, {@code ON_CLOUD}, {@code IN_SQUALL} or {@code ON_HEAVENLY_CLOUD}. */
     private final int mode;
 
     public FlyingStatePacket(int entityId, int mode) {
@@ -41,7 +41,7 @@ public class FlyingStatePacket implements CustomPacketPayload {
     }
 
     public static FlyingStatePacket decode(FriendlyByteBuf buf) {
-        return new FlyingStatePacket(buf.readVarInt(), Math.max(0, Math.min(3, buf.readByte())));
+        return new FlyingStatePacket(buf.readVarInt(), Math.max(0, Math.min(com.jttw.engine.flight.FlyingState.ON_HEAVENLY_CLOUD, buf.readByte())));
     }
 
     public static void handle(FlyingStatePacket pkt, IPayloadContext ctx) {
