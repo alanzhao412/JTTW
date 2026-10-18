@@ -111,9 +111,11 @@ every entity into a category, and the menu and the server's check both ask the s
 menu only ever shows what the server will grant. A player form wears another online player's skin,
 model and cape, and shows their name.
 
+The player, not the creature's AI, drives a form.
+
 **Objects** (72, level III) are entities, such as minecarts, arrows and boats. Some entities
 aren't offered: the ones with no body to be (lightning, a fishing bobber, markers, empty display
-frames, a dropped item with no item, evoker fangs), primed TNT, and the mod's own machinery (Qi Wave, the thrown spear).
+frames, a dropped item with no item, evoker fangs, an ominous item spawner with no item), primed TNT, and the mod's own machinery (Qi Wave, the thrown spear).
 [`FormCatalog`](src/main/java/com/jttw/engine/transformation/FormCatalog.java) is the one list that
 the menus, the server and the tests share. Some objects and blocks behave like the real thing.
 Right-click with an empty hand to use them:
@@ -315,9 +317,10 @@ Then drop the built jar into `mods/` alongside NeoForge for Minecraft 1.21.1 (21
 
 ## Known limitations
 
-- Transformation grants appearance, hitbox, and eye height — not the entity's AI or native abilities.
 - Animation fidelity for vanilla entities is bounded by what their existing models support.
-- Some entities (particles, projectiles) don't render correctly when transformed into.
+- Projectiles drawn as flat sprites (snowballs, eggs, fireballs, firework rockets) always face the
+  viewer, as they do in vanilla, so they don't turn or tilt with the player. An area effect cloud
+  form is its cloud of particles.
 
 ## License
 
