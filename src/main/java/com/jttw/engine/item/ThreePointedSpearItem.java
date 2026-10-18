@@ -30,9 +30,17 @@ import java.util.UUID;
  *   <li>Triple-hit combo: every 3rd consecutive hit strikes 3 times</li>
  *   <li>Sneak + hold right-click, release: throw (Erlang Shen with Spear Mastery I). Tears
  *       through terrain in a straight line, returns after 20 s — see {@link com.jttw.engine.entity.ThrownSpearEntity}</li>
- *   <li>Right-click: sweeping slash (180° arc, 3 blocks) — TODO</li>
- *   <li>Eye of Heaven synergy: bonus magic damage while active — TODO</li>
- *   <li>Wrath synergy: faster attacks, 360° slash — TODO</li>
+ *   <li>Hold right-click {@value #MIN_CHARGE_TICKS}+ ticks, release: charged thrust (anyone)</li>
+ *   <li>Right-click, let go before the thrust is ready: sweeping slash, {@value #SLASH_DAMAGE_MULTIPLIER}×
+ *       ATK to every foe in the half circle ahead within {@value #SLASH_REACH} blocks;
+ *       {@value #SLASH_COOLDOWN_TICKS} ticks' cooldown (anyone). Whoever can throw never slashes
+ *       while sneaking.</li>
+ *   <li>Eye of Heaven synergy (Erlang Shen, Eye open): each melee hit and slash adds
+ *       {@value #EYE_MAGIC_FRACTION} of itself as magic damage, which magic resistance reduces
+ *       (the thrust keeps its own 30% magic)</li>
+ *   <li>Wrath synergy (Erlang Shen, Zhàn Shén I, below 40% health): +15/25/35% attack speed by
+ *       Zhàn Shén tier while the spear is in the main hand, and the slash sweeps all round on half
+ *       the cooldown</li>
  * </ul>
  */
 public class ThreePointedSpearItem extends Item implements Charged {
@@ -84,6 +92,11 @@ public class ThreePointedSpearItem extends Item implements Charged {
         pd.putInt(TAG_COMBO, combo);
         pd.putLong(TAG_COMBO_TICK, now);
 
+        // Eye of Heaven: a share of the blow as magic
+        if (!player.level().isClientSide() && eyeOpen(player)) {
+            eyeStrike(player, target, (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE));
+        }
+
         // Every 3rd hit: triple strike (two bonus hits at reduced damage)
         if (combo >= 3) {
             pd.putInt(TAG_COMBO, 0);
@@ -106,7 +119,7 @@ public class ThreePointedSpearItem extends Item implements Charged {
 
     private static final long THRUST_COOLDOWN_TICKS = 30L;
     private static final long THRUST_WRATH_COOLDOWN = 15L;
-    private static final int MIN_CHARGE_TICKS = 5;   // 0.25s minimum
+    public static final int MIN_CHARGE_TICKS = 5;   // 0.25s minimum
     private static final int MAX_CHARGE_TICKS = 40;  // 2s for full power
     private static final double LUNGE_BASE = 8.0;
 
@@ -146,7 +159,6 @@ public class ThreePointedSpearItem extends Item implements Charged {
         if (level.isClientSide() || !(entity instanceof net.minecraft.server.level.ServerPlayer sp)) return;
 
         int chargeTime = getUseDuration(stack, entity) - timeLeft;
-        if (chargeTime < MIN_CHARGE_TICKS) return;
 
         // Cooldown check
         if (sp.getCooldowns().isOnCooldown(this)) return;
@@ -158,9 +170,15 @@ public class ThreePointedSpearItem extends Item implements Charged {
             return;
         }
 
+        // Let go before the thrust is ready: a sweeping slash
+        if (chargeTime < MIN_CHARGE_TICKS) {
+            slash(sp, sp.getUsedItemHand());
+            sp.getCooldowns().addCooldown(this, inWrath(sp) ? SLASH_WRATH_COOLDOWN_TICKS : SLASH_COOLDOWN_TICKS);
+            return;
+        }
+
         boolean esPlayer = isErlangShen(sp);
-        boolean inWrath = esPlayer && sp.getHealth() / sp.getMaxHealth() < 0.4f
-                && com.jttw.engine.progression.skilltree.SkillTreeData.getEsWrathTier(sp) >= 1;
+        boolean inWrath = inWrath(sp);
 
         // Charge power: 0.0 → 1.0
         float chargePower = Charge.between(chargeTime, MIN_CHARGE_TICKS, MAX_CHARGE_TICKS).fraction();
@@ -241,6 +259,118 @@ public class ThreePointedSpearItem extends Item implements Charged {
         sp.getCooldowns().addCooldown(this, (int) cooldown);
     }
 
+    // ── Sweeping slash (right-click) ────────────────────────────────
+
+    /** How far the slash reaches from the wielder, in blocks. */
+    public static final double SLASH_REACH = 3.0;
+    /** What the slash deals to each foe it sweeps, as a multiple of ATK. */
+    public static final float SLASH_DAMAGE_MULTIPLIER = 1.0f;
+    public static final int SLASH_COOLDOWN_TICKS = 20;
+    public static final int SLASH_WRATH_COOLDOWN_TICKS = 10;
+    /** The open Eye of Heaven adds this share of a spear blow as magic damage. */
+    public static final float EYE_MAGIC_FRACTION = 0.3f;
+
+    /**
+     * Sweeps the foes around the wielder: the half circle ahead, or all round in Wrath.
+     * Returns how many it struck.
+     */
+    public static int slash(net.minecraft.server.level.ServerPlayer sp, net.minecraft.world.InteractionHand hand) {
+        boolean wrath = inWrath(sp);
+        boolean eye = eyeOpen(sp);
+        float damage = (float) sp.getAttributeValue(Attributes.ATTACK_DAMAGE) * SLASH_DAMAGE_MULTIPLIER;
+        // the arc lies flat, wherever he looks up or down
+        net.minecraft.world.phys.Vec3 facing = net.minecraft.world.phys.Vec3.directionFromRotation(0f, sp.getYRot());
+        net.minecraft.world.phys.AABB box = sp.getBoundingBox().inflate(SLASH_REACH + 1.0, 1.0, SLASH_REACH + 1.0);
+        int struck = 0;
+        for (LivingEntity e : sp.serverLevel().getEntitiesOfClass(LivingEntity.class, box, e -> isFoe(e, sp))) {
+            net.minecraft.world.phys.Vec3 to = new net.minecraft.world.phys.Vec3(e.getX() - sp.getX(), 0, e.getZ() - sp.getZ());
+            if (to.length() > SLASH_REACH + e.getBbWidth() / 2) continue;
+            if (!wrath && to.dot(facing) < 0) continue; // behind him: only Wrath's full circle reaches
+            int oldInvuln = e.invulnerableTime;
+            e.invulnerableTime = 0;
+            boolean hit = e.hurt(sp.damageSources().playerAttack(sp), damage);
+            e.invulnerableTime = oldInvuln;
+            if (!hit) continue;
+            if (eye) eyeStrike(sp, e, damage);
+            e.knockback(0.4, -to.x, -to.z);
+            struck++;
+        }
+
+        // the sweep's trail: a half circle of sweeps ahead, or a full ring
+        for (int deg = wrath ? -180 : -90; deg <= (wrath ? 150 : 90); deg += 30) {
+            net.minecraft.world.phys.Vec3 d = net.minecraft.world.phys.Vec3.directionFromRotation(0f, sp.getYRot() + deg);
+            sp.serverLevel().sendParticles(net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK,
+                    sp.getX() + d.x * 2.0, sp.getY() + sp.getBbHeight() * 0.5, sp.getZ() + d.z * 2.0, 1, 0, 0, 0, 0);
+        }
+        sp.swing(hand, true);
+        sp.level().playSound(null, sp.getX(), sp.getY(), sp.getZ(), net.minecraft.sounds.SoundEvents.PLAYER_ATTACK_SWEEP,
+                net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, wrath ? 0.7F : 0.9F);
+        return struck;
+    }
+
+    private static boolean isFoe(LivingEntity e, Player p) {
+        return e != p && e.isAlive() && !e.isAlliedTo(p)
+                && !(e instanceof Player other && (other.isCreative() || other.isSpectator()))
+                && !com.jttw.engine.character.erlang.XiaotianQuanManager.isAllyXtq(e, p.getUUID());
+    }
+
+    /** Erlang Shen with his Eye of Heaven open. */
+    public static boolean eyeOpen(Player p) {
+        return isErlangShen(p) && com.jttw.engine.character.erlang.ErlangShenAbilityHandler.isEyeActive(p.getUUID());
+    }
+
+    /**
+     * The Eye's share of a blow of {@code blow}, as magic from the wielder: magic resistance
+     * reduces it, and Erlang Shen's spear bonus raises it as it does the blow.
+     */
+    static void eyeStrike(Player p, LivingEntity target, float blow) {
+        if (!target.isAlive()) return;
+        int oldInvuln = target.invulnerableTime;
+        target.invulnerableTime = 0;
+        target.hurt(p.damageSources().indirectMagic(p, p), blow * EYE_MAGIC_FRACTION);
+        target.invulnerableTime = oldInvuln;
+    }
+
+    // ── Wrath (Zhàn Shén) ────────────────────────────────────────────
+
+    private static final ResourceLocation WRATH_SPEED = JTTWEngine.id("three_pointed_spear_wrath_speed");
+
+    /** Erlang Shen with Zhàn Shén I, below 40% health. */
+    public static boolean inWrath(Player p) {
+        return isErlangShen(p) && p.getHealth() / p.getMaxHealth() < 0.4f
+                && com.jttw.engine.progression.skilltree.SkillTreeData.getEsWrathTier(p) >= 1;
+    }
+
+    /** Wrath's extra attack speed with the spear: +15/25/35% by Zhàn Shén tier. */
+    public static double wrathSpeed(int tier) {
+        return tier >= 3 ? 0.35 : tier >= 2 ? 0.25 : tier >= 1 ? 0.15 : 0.0;
+    }
+
+    /** Gives or takes Wrath's attack speed, as he is in Wrath with the spear in hand or not. */
+    public static void updateWrathSpeed(Player p) {
+        var speed = p.getAttribute(Attributes.ATTACK_SPEED);
+        if (speed == null) return;
+        double want = p.getMainHandItem().getItem() instanceof ThreePointedSpearItem && inWrath(p)
+                ? wrathSpeed(com.jttw.engine.progression.skilltree.SkillTreeData.getEsWrathTier(p)) : 0.0;
+        AttributeModifier has = speed.getModifier(WRATH_SPEED);
+        if (has != null && has.amount() == want) return;
+        if (has != null) speed.removeModifier(WRATH_SPEED);
+        if (want > 0) {
+            speed.addTransientModifier(new AttributeModifier(WRATH_SPEED, want, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+        }
+    }
+
+    /** Keeps Wrath's attack speed in step, each tick on the server. */
+    @net.neoforged.fml.common.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
+    public static final class WrathSpeed {
+        private WrathSpeed() {}
+
+        @net.neoforged.bus.api.SubscribeEvent
+        public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+            if (!event.getEntity().level().isClientSide()) updateWrathSpeed(event.getEntity());
+        }
+    }
+
     /** How long the throw must be drawn, like a trident. */
     public static final int THROW_MIN_CHARGE_TICKS = 10;
     /** Hardness the throw can tear through per point of the thrower's ATK. */
@@ -272,9 +402,12 @@ public class ThreePointedSpearItem extends Item implements Charged {
         tooltip.add(Component.literal("§e+20% damage (others)"));
         tooltip.add(Component.literal("§b+5 reach (Erlang Shen)"));
         tooltip.add(Component.literal("§aEvery 3rd hit: Triple Strike"));
+        tooltip.add(Component.literal("§7Right-click: Sweeping Slash, 100% ATK to all in a half circle ahead"));
         tooltip.add(Component.literal("§7Hold right-click: Thrust, 150% to 250% ATK by charge"));
         tooltip.add(Component.literal("§7Hits everything in front of you"));
         tooltip.add(Component.literal("§7Sneak + hold, release: Throw (Erlang Shen, Spear Mastery I)"));
+        tooltip.add(Component.literal("§dEye of Heaven open: +30% of each blow as magic (Erlang Shen)"));
+        tooltip.add(Component.literal("§cWrath: faster attacks, the slash sweeps all round (Erlang Shen)"));
     }
 
     public static boolean isErlangShen(Player player) {
