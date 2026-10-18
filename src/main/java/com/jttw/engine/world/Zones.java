@@ -1,43 +1,172 @@
 package com.jttw.engine.world;
 
 import com.jttw.engine.JTTWEngine;
+import com.jttw.engine.progression.level.BiomeLevelBand;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
 import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.common.Mod;
 
+import javax.annotation.Nullable;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
- * The mod's zones: regions of the overworld where one of its biomes replaces vanilla's, each the
+ * The mod's zones: regions of the world where one of its biomes replaces vanilla's, each the
  * home of a level band's mobs and boss. No library: the biome is listed among the overworld's at
  * a climate no terrain reaches ({@link #UNREACHABLE}, so it is a known biome with its features
  * and colours, but vanilla never places it), and {@code MultiNoiseBiomeSourceMixin} puts it
- * where a zone covers ground of one of its host biomes.
+ * where a zone covers ground of one of its host biomes, at the heights it takes.
  *
  * <p>Where zones are follows from the world seed alone: the world is cut into square cells, a
  * share of which hold one zone, a rough circle somewhere inside the cell. Terrain keeps the host
- * biome's shape; the zone changes what grows and lives there.
+ * biome's shape; the zone changes what grows and lives there. Zones that share heights never
+ * share ground: a later one in {@link #ALL} gives up a region that would touch an earlier one's
+ * ({@link ZoneMap}).
+ *
+ * <p>A zone of another dimension (Hell) has no footprint: its dimension's own biome source places
+ * its biome, and the zone only gives it a level band.
+ *
+ * <p>To add a zone: see the README ("Zones").
  */
 @EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class Zones {
 
     private Zones() {}
 
-    /** One zone: its biome, the vanilla biomes it may take over, and where its regions lie. */
-    public record Zone(ResourceKey<Biome> biome, TagKey<Biome> hosts, ZoneLayout layout) {
+    /** The heights of a column a zone takes: the whole of it, or only below or above a height. */
+    public record Vertical(int minY, int maxY) {
 
-        /** Whether this zone covers the block column at (x, z) in a world of this seed. */
-        public boolean covers(long seed, int x, int z) {
-            return layout.covers(seed, x, z);
+        public static final Vertical WHOLE_COLUMN = new Vertical(Integer.MIN_VALUE, Integer.MAX_VALUE);
+
+        /** Underground: every height under {@code y}. */
+        public static Vertical below(int y) {
+            return new Vertical(Integer.MIN_VALUE, y - 1);
+        }
+
+        /** Aerial: {@code y} and every height over it. */
+        public static Vertical above(int y) {
+            return new Vertical(y, Integer.MAX_VALUE);
+        }
+
+        public boolean contains(int y) {
+            return y >= minY && y <= maxY;
+        }
+
+        public boolean overlaps(Vertical other) {
+            return minY <= other.maxY && other.minY <= maxY;
         }
     }
+
+    /**
+     * One zone: its biome; for an overworld zone, the vanilla biomes it may take over, where its
+     * regions lie, the heights it takes and the height its host is judged at; its level band; and
+     * the players its creatures are allied to (none, mostly).
+     *
+     * @param hosts        the biomes it may take over (null for a dimension's zone)
+     * @param layout       where its regions lie (null for a dimension's zone)
+     * @param hostY        the height its region's centre is checked for a host biome at
+     * @param minLevel     its level band, as {@link BiomeLevelBand}
+     * @param allies       the players its creatures never target nor fight back (see ZoneMonster)
+     */
+    public record Zone(ResourceKey<Biome> biome, @Nullable TagKey<Biome> hosts, @Nullable ZoneLayout layout,
+                       Vertical vertical, int hostY, int minLevel, int maxLevel, int baseGruntXp,
+                       Predicate<Player> allies) {
+
+        /** The height a host is judged at, unless a zone says otherwise: the ridge's. */
+        public static final int HOST_Y = 80;
+
+        /** An overworld zone, over ground of its host biomes, at the heights it takes. */
+        public static Zone overworld(ResourceKey<Biome> biome, TagKey<Biome> hosts, ZoneLayout layout, Vertical vertical,
+                                     int minLevel, int maxLevel, int baseGruntXp) {
+            return new Zone(biome, hosts, layout, vertical, HOST_Y, minLevel, maxLevel, baseGruntXp, ZoneAllies.NONE);
+        }
+
+        /** A zone of another dimension: its biome is placed there; this only gives it a level band. */
+        public static Zone dimension(ResourceKey<Biome> biome, int minLevel, int maxLevel, int baseGruntXp) {
+            return new Zone(biome, null, null, Vertical.WHOLE_COLUMN, HOST_Y, minLevel, maxLevel, baseGruntXp, ZoneAllies.NONE);
+        }
+
+        /** The same zone, its host judged at height {@code y} (an underground zone's, under its hosts' surface). */
+        public Zone hostSampledAt(int y) {
+            return new Zone(biome, hosts, layout, vertical, y, minLevel, maxLevel, baseGruntXp, allies);
+        }
+
+        /** The same zone, its creatures allied to these players (e.g. {@link ZoneAllies#PENG}). */
+        public Zone alliedTo(Predicate<Player> players) {
+            return new Zone(biome, hosts, layout, vertical, hostY, minLevel, maxLevel, baseGruntXp, players);
+        }
+
+        /** Whether it has regions in the overworld (a dimension's zone has none). */
+        public boolean hasFootprint() {
+            return layout != null;
+        }
+
+        /** Whether this zone covers the block column at (x, z) in a world of this seed (before its host is checked). */
+        public boolean covers(long seed, int x, int z) {
+            return depth(seed, x, z) > 0;
+        }
+
+        /** Whether this zone covers the block at (x, y, z): its column, and a height it takes. */
+        public boolean covers(long seed, int x, int y, int z) {
+            return vertical.contains(y) && covers(seed, x, z);
+        }
+
+        /** How far into one of its regions (x, z) lies: 0 at the edge or outside, 1 at the centre. */
+        public double depth(long seed, int x, int z) {
+            return MAP.depth(this, seed, x, z);
+        }
+
+        /** The centre of its region in the cell holding (x, z), as {x, z}; null if that cell holds none. */
+        @Nullable
+        public int[] centre(long seed, int x, int z) {
+            return MAP.centre(this, seed, x, z);
+        }
+
+        /** The centre of its region if it lies in the chunk starting at (x0, z0), else null. */
+        @Nullable
+        public int[] centreInChunk(long seed, int x0, int z0) {
+            int[] c = centre(seed, x0 + 8, z0 + 8);
+            return c == null || c[0] < x0 || c[0] >= x0 + 16 || c[1] < z0 || c[1] >= z0 + 16 ? null : c;
+        }
+
+        /** How far (x, z) is from the centre of its region; MAX_VALUE where there is none. */
+        public double distanceToCentre(long seed, int x, int z) {
+            int[] c = centre(seed, x, z);
+            return c == null ? Double.MAX_VALUE : Math.hypot(x - c[0], z - c[1]);
+        }
+
+        /** Whether the world has put this zone's biome at {@code pos} (so, host found and height taken). */
+        public boolean isAt(LevelReader level, BlockPos pos) {
+            return level.getBiome(pos).is(biome);
+        }
+
+        /** The key to its region's cell holding (x, z): its host is checked once per key. Unique across zones. */
+        public HostCell hostCell(int x, int z) {
+            return new HostCell(biome, layout.cellOf(x, z));
+        }
+
+        /** Its level band, for the kill XP. */
+        public BiomeLevelBand levelBand() {
+            return new BiomeLevelBand(biome.location(), minLevel, maxLevel, baseGruntXp);
+        }
+
+        /** Its biome's id, as the kill XP reads it off its creatures. */
+        public String id() {
+            return biome.location().toString();
+        }
+    }
+
+    /** A zone's cell: which zone, and which of its cells. */
+    public record HostCell(ResourceKey<Biome> zone, long cell) {}
 
     private static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, path);
@@ -45,11 +174,32 @@ public final class Zones {
 
     public static final ResourceKey<Biome> WHITE_BONE_RIDGE = ResourceKey.create(Registries.BIOME, id("white_bone_ridge"));
 
-    /** Levels 21-36: White Bone Ridge, over dry, hilly ground (badlands, savanna, desert). */
-    public static final Zone WHITE_BONE = new Zone(WHITE_BONE_RIDGE,
-            TagKey.create(Registries.BIOME, id("white_bone_ridge_hosts")), ZoneLayout.WHITE_BONE);
+    /** Levels 20-36: White Bone Ridge, over dry, hilly ground (badlands, savanna, desert), the whole column. */
+    public static final Zone WHITE_BONE = Zone.overworld(WHITE_BONE_RIDGE,
+            TagKey.create(Registries.BIOME, id("white_bone_ridge_hosts")), ZoneLayout.WHITE_BONE, Vertical.WHOLE_COLUMN,
+            20, 36, 80);
 
+    /** Every zone, in order: an earlier one keeps its ground from a later one sharing its heights. Append new ones. */
     public static final List<Zone> ALL = List.of(WHITE_BONE);
+
+    /** Where the overworld zones of {@link #ALL} lie. */
+    public static final ZoneMap MAP = new ZoneMap(ALL);
+
+    private static boolean bandsRegistered;
+
+    /** Registers every zone's level band (once; JTTWEngine's common setup). */
+    public static synchronized void registerLevelBands() {
+        if (bandsRegistered) return;
+        bandsRegistered = true;
+        for (Zone zone : ALL) BiomeLevelBand.register(zone.levelBand());
+    }
+
+    /** The zone whose biome this is, or null. */
+    @Nullable
+    public static Zone byBiome(ResourceKey<Biome> biome) {
+        for (Zone zone : ALL) if (zone.biome().equals(biome)) return zone;
+        return null;
+    }
 
     /** A climate no terrain reaches: listed here, a biome is known to the overworld but never chosen by it. */
     public static final Climate.ParameterPoint UNREACHABLE = Climate.parameters(10f, 10f, 10f, 10f, 10f, 10f, 0f);

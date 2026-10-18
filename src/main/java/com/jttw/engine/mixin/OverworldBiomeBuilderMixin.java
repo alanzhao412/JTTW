@@ -24,6 +24,6 @@ public class OverworldBiomeBuilderMixin {
     @Inject(method = "addBiomes", at = @At("TAIL"))
     private void jttw$listZones(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> consumer, CallbackInfo ci) {
         if (Zones.BUILDING_VANILLA_REGISTRIES.get()) return;
-        for (Zones.Zone zone : Zones.ALL) consumer.accept(Pair.of(Zones.UNREACHABLE, zone.biome()));
+        for (Zones.Zone zone : Zones.MAP.zones()) consumer.accept(Pair.of(Zones.UNREACHABLE, zone.biome()));
     }
 }

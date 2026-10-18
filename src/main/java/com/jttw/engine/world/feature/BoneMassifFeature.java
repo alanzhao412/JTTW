@@ -56,6 +56,9 @@ public class BoneMassifFeature extends Feature<NoneFeatureConfiguration> {
 
     public static final int CRAG = 0, MESA = 1, BASIN = 2;
 
+    /** The zone it raises. */
+    public static final Zones.Zone ZONE = Zones.WHITE_BONE;
+
     /** The lair floor's radius. */
     public static final int LAIR_RADIUS = 8;
     /** The lair floor's height for each region, by its centre (worked out once). */
@@ -83,7 +86,7 @@ public class BoneMassifFeature extends Feature<NoneFeatureConfiguration> {
 
     /** The massif at (x, z): how many blocks it adds (0 outside it), times 4, plus the kind of ground there. */
     private static int shape(long seed, int x, int z) {
-        double t = Zones.WHITE_BONE.layout().depth(seed, x, z);
+        double t = ZONE.depth(seed, x, z);
         if (t <= 0) return MESA;
         double s = Math.min(1, t / CLIFF);
         double cliff = s * s * (3 - 2 * s);
@@ -109,30 +112,12 @@ public class BoneMassifFeature extends Feature<NoneFeatureConfiguration> {
         return shape(seed, x, z) & 3;
     }
 
-    /** Where the terrain noise counts as solid: the threshold vanilla's own estimate of the surface uses. */
-    private static final double SOLID = 0.390625;
-
-    /**
-     * The land's surface at (x, z) by its broad shape alone, as vanilla estimates it before making the
-     * terrain (NoiseChunk's preliminary surface level): no caves, cave mouths, canyons or crags in it.
-     * Searched down in steps of 16, then of 4.
-     */
-    private static int landAt(DensityFunction shape, int x, int z, int minY, int maxY) {
-        int y = maxY;
-        while (y > minY && shape.compute(new DensityFunction.SinglePointContext(x, y, z)) <= SOLID) y -= 16;
-        for (int fine = Math.min(maxY, y + 12); fine > y; fine -= 4) {
-            if (shape.compute(new DensityFunction.SinglePointContext(x, fine, z)) > SOLID) return fine;
-        }
-        return Math.max(y, minY);
-    }
-
     /**
      * How far (x, z) is from the centre of its region, where the lair stands; MAX_VALUE where
      * there is no region.
      */
     public static double lairDistance(long seed, int x, int z) {
-        int[] c = Zones.WHITE_BONE.layout().centre(seed, x, z);
-        return c == null ? Double.MAX_VALUE : Math.hypot(x - c[0], z - c[1]);
+        return ZONE.distanceToCentre(seed, x, z);
     }
 
     /** Whether (x, z) is on an lair floor, where nothing else is put. */
@@ -143,7 +128,7 @@ public class BoneMassifFeature extends Feature<NoneFeatureConfiguration> {
     /** The top of the lair floor of the region centred at (cx, cz): the massif's own height there. */
     private static int lairFloor(long seed, DensityFunction shape, int cx, int cz, int minY, int maxY) {
         return FLOORS.computeIfAbsent(seed * 31 + (((long) cx) << 32 ^ (cz & 0xFFFFFFFFL)),
-                k -> Math.min(maxY - HEADROOM, landAt(shape, cx, cz, minY, maxY) + riseAt(seed, cx, cz)));
+                k -> Math.min(maxY - HEADROOM, ZoneTerrain.landAt(shape, cx, cz, minY, maxY) + riseAt(seed, cx, cz)));
     }
 
     /** The clear air kept over the lair floor. */
@@ -197,12 +182,12 @@ public class BoneMassifFeature extends Feature<NoneFeatureConfiguration> {
         }
         if (!inside) return false;
         // the land's broad shape every 4 blocks, between them in between
-        DensityFunction shape = level.getLevel().getChunkSource().randomState().router().initialDensityWithoutJaggedness();
+        DensityFunction shape = ZoneTerrain.broadShape(level);
         int[][] made = new int[5][5];
         for (int i = 0; i < 5; i++) for (int j = 0; j < 5; j++) {
-            made[i][j] = landAt(shape, x0 + i * 4, z0 + j * 4, level.getMinBuildHeight(), level.getMaxBuildHeight());
+            made[i][j] = ZoneTerrain.landAt(shape, x0 + i * 4, z0 + j * 4, level.getMinBuildHeight(), level.getMaxBuildHeight());
         }
-        int[] centre = Zones.WHITE_BONE.layout().centre(seed, x0 + 8, z0 + 8); // a chunk lies in one cell
+        int[] centre = ZONE.centre(seed, x0 + 8, z0 + 8); // a chunk lies in one cell
         int floor = centre != null && Math.hypot(Math.max(Math.abs(centre[0] - x0 - 8) - 8, 0), Math.max(Math.abs(centre[1] - z0 - 8) - 8, 0)) <= LAIR_RADIUS + 1
                 ? lairFloor(seed, shape, centre[0], centre[1], level.getMinBuildHeight(), level.getMaxBuildHeight()) : Integer.MIN_VALUE;
         boolean any = false;
@@ -216,7 +201,7 @@ public class BoneMassifFeature extends Feature<NoneFeatureConfiguration> {
                 double fx = (dx & 3) / 4.0, fz = (dz & 3) / 4.0;
                 int land = (int) Math.round(Mth.lerp2(fx, fz, made[i][j], made[i + 1][j], made[i][j + 1], made[i + 1][j + 1]));
                 p.set(x, surface, z);
-                if (!level.getBiome(p).is(Zones.WHITE_BONE_RIDGE)) continue;
+                if (!ZONE.isAt(level, p)) continue;
                 int here = shapes[dx + 1][dz + 1], rise = here >> 2, kind = here & 3;
                 int step = Math.max(Math.max(Math.abs((shapes[dx][dz + 1] >> 2) - rise), Math.abs((shapes[dx + 2][dz + 1] >> 2) - rise)),
                         Math.max(Math.abs((shapes[dx + 1][dz] >> 2) - rise), Math.abs((shapes[dx + 1][dz + 2] >> 2) - rise)));
