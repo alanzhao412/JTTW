@@ -85,9 +85,20 @@ public final class PlayerLevel {
         return abilities.getBoolean(abilityId);
     }
 
+    /** Every ability this player holds, by id. */
+    public static java.util.Set<String> getAbilities(Player p) {
+        CompoundTag abilities = p.getPersistentData().getCompound(LevelConstants.KEY_ABILITIES);
+        java.util.Set<String> held = new java.util.HashSet<>();
+        for (String id : abilities.getAllKeys()) {
+            if (abilities.getBoolean(id)) held.add(id);
+        }
+        return held;
+    }
+
     /**
-     * Marks an ability as unlocked for this player.  Idempotent — safe to call repeatedly.
-     * Called automatically by {@link LevelManager} at the appropriate milestone.
+     * Marks an ability as held by this player.  Idempotent — safe to call repeatedly.
+     * Called when the player buys it ({@code SkillPurchase.purchaseClassAbility}); saves from
+     * before abilities were bought had them granted at the level, and keep them.
      */
     public static void grantAbility(Player p, String abilityId) {
         CompoundTag pd = p.getPersistentData();

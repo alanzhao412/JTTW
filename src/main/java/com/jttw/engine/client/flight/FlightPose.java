@@ -90,7 +90,13 @@ public final class FlightPose {
     }
 
     private static boolean onCloud(Player p) {
-        return flying(p) && MODE.getOrDefault(p.getId(), FlyingState.GROUNDED) == FlyingState.ON_CLOUD;
+        int mode = MODE.getOrDefault(p.getId(), FlyingState.GROUNDED);
+        return flying(p) && (mode == FlyingState.ON_CLOUD || mode == FlyingState.ON_HEAVENLY_CLOUD);
+    }
+
+    /** Only Wukong somersaults onto his cloud; a Heavenly's simply gathers under them. */
+    private static boolean somersaults(Player p) {
+        return MODE.getOrDefault(p.getId(), FlyingState.GROUNDED) == FlyingState.ON_CLOUD;
     }
 
     private static float get(Player p, int i, float partialTick) {
@@ -105,7 +111,7 @@ public final class FlightPose {
         return get(p, 0, partialTick);
     }
 
-    /** How far onto Wukong's cloud, 0 to 1. */
+    /** How far onto a cloud (Wukong's, or a Heavenly's), 0 to 1. */
     public static float cloud(Player p, float partialTick) {
         return get(p, 2, partialTick);
     }
@@ -144,7 +150,7 @@ public final class FlightPose {
             float[] f = e.getValue();
             // coming onto the cloud from flight, he somersaults onto it: the cloud gathers once he is over
             long now = mc.level.getGameTime();
-            if (cloud && f[2] == 0 && f[0] > 0.5f && !FLIP.containsKey(e.getKey())) FLIP.put(e.getKey(), now);
+            if (cloud && somersaults(p) && f[2] == 0 && f[0] > 0.5f && !FLIP.containsKey(e.getKey())) FLIP.put(e.getKey(), now);
             Long flipStart = FLIP.get(e.getKey());
             boolean flipping = flipStart != null && now - flipStart < FLIP_TICKS;
             if (flipStart != null && !flipping && !cloud) FLIP.remove(e.getKey());

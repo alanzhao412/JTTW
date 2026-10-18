@@ -25,8 +25,11 @@ public final class FlyingState {
 
     private FlyingState() {}
 
-    /** How someone is flying: not at all, on their own, riding Wukong's cloud, or as Erlang, through wind and fog. */
-    public static final int GROUNDED = 0, FLYING = 1, ON_CLOUD = 2, IN_SQUALL = 3;
+    /**
+     * How someone is flying: not at all, on their own, riding Wukong's cloud, as Erlang, through
+     * wind and fog, or on a Heavenly's slower cloud (no somersault onto it).
+     */
+    public static final int GROUNDED = 0, FLYING = 1, ON_CLOUD = 2, IN_SQUALL = 3, ON_HEAVENLY_CLOUD = 4;
 
     private static final Map<UUID, Integer> LAST = new ConcurrentHashMap<>();
 
@@ -57,7 +60,12 @@ public final class FlyingState {
         return on;
     }
 
-    /** Erlang Shen flies wrapped in a dark squall (Kuangfeng Shenwu), never on a cloud. */
+    /** A Heavenly with Heavenly Mobility, sprinting through the air, rides their cloud. */
+    public static boolean ridesHeavenlyCloud(ServerPlayer p) {
+        return flies(p) && JTTWFlight.onHeavenlyCloud(p);
+    }
+
+    /** Erlang Shen flies wrapped in a dark squall (Kuangfeng Shenwu); on a cloud only Heavenly Mobility's. */
     public static boolean isErlang(Player p) {
         return com.jttw.engine.reincarnation.ReincarnationOutcome.EYE_OF_HEAVEN.id.equals(
                 p.getPersistentData().getString(com.jttw.engine.reincarnation.AlignmentData.KEY_REINCARNATION_OUTCOME));
@@ -65,6 +73,7 @@ public final class FlyingState {
 
     public static int mode(ServerPlayer p) {
         if (ridesCloud(p)) return ON_CLOUD;
+        if (ridesHeavenlyCloud(p)) return ON_HEAVENLY_CLOUD;
         if (!flies(p)) return GROUNDED;
         return isErlang(p) ? IN_SQUALL : FLYING;
     }

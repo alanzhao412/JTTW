@@ -67,7 +67,27 @@ public final class JTTWFlight {
 
     /** Whether this player may fly now, by any means but a form's wings. */
     public static boolean canFly(ServerPlayer player) {
-        return hasUniversalFlight(player) || fliesInnately(player);
+        return hasUniversalFlight(player) || fliesInnately(player) || hasHeavenlyCloud(player);
+    }
+
+    /**
+     * A Heavenly who has bought Heavenly Mobility has a cloud: they may fly, and sprinting through
+     * the air they ride it, as Wukong does his, only far slower and with no somersault onto it.
+     * Checked each tick from what they hold, like innate flight, so no one's revoking takes it.
+     */
+    public static boolean hasHeavenlyCloud(net.minecraft.world.entity.player.Player player) {
+        return com.jttw.engine.progression.level.PlayerLevel.getProgressionClass(player)
+                == com.jttw.engine.progression.stats.ProgressionClass.HEAVENLY
+                && com.jttw.engine.progression.level.PlayerLevel.hasAbility(player, HEAVENLY_MOBILITY);
+    }
+
+    /** The class ability that gives a Heavenly their cloud. */
+    public static final String HEAVENLY_MOBILITY = "heavenly_mobility";
+
+    /** Whether a Heavenly is on their cloud now: flying, sprinting, with Heavenly Mobility. */
+    public static boolean onHeavenlyCloud(ServerPlayer player) {
+        return player.getAbilities().flying && player.isSprinting() && !player.isSpectator()
+                && !player.isPassenger() && !player.isFallFlying() && hasHeavenlyCloud(player);
     }
 
     public static void setGlideOnly(ServerPlayer player, boolean glide) {
@@ -109,6 +129,10 @@ public final class JTTWFlight {
         TransformationData form = com.jttw.engine.transformation.TransformationManager.getTransformation(player);
         // by their own power: a character's flight, or a form's wings (not merely creative's)
         boolean own = canFly(player) || (form != null && form.canFly());
+        // on a Heavenly's cloud the cloud sets the pace, whatever their own flight
+        if (onHeavenlyCloud(player)) {
+            return new FlightProfile(FlightSteering.HEAVENLY_CLOUD_SPEED, false, 1.0, false, own);
+        }
         return new FlightProfile(FlightSteering.speedFor(tier, wukong),
                 isGlideOnly(player), boost(player), tag.getBoolean(THRUST_TAG), own);
     }

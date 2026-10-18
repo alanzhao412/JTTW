@@ -7,6 +7,7 @@ import com.jttw.engine.character.wukong.WukongSkillTree;
 import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.network.s2c.SyncAbilitiesPacket;
 import com.jttw.engine.network.s2c.SyncSkillTreePacket;
+import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.stats.LevelPower;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -23,7 +24,7 @@ import java.util.UUID;
 
 /**
  * Spending a skill point: validate the node, unlock it, apply what it does immediately,
- * and sync the tree and skill bar back to the client.
+ * and sync the tree and skill bar back to the client. Class abilities are bought here too.
  */
 @EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class SkillPurchase {
@@ -75,6 +76,30 @@ public final class SkillPurchase {
         // Sync updated state back to client
         NetworkHandler.sendToPlayer(player, SyncSkillTreePacket.build(player));
         NetworkHandler.sendToPlayer(player, SyncAbilitiesPacket.build(player));
+        return true;
+    }
+
+    /**
+     * Buys a class ability ({@link AbilityUnlock}) with skill points from the same pool as the
+     * trees: it must be the player's class's, its level reached, not already held, and affordable.
+     *
+     * @return true if it was bought
+     */
+    public static boolean purchaseClassAbility(ServerPlayer player, String abilityId) {
+        AbilityUnlock unlock = AbilityUnlock.byId(abilityId);
+        if (unlock == null) return false;
+        if (unlock.cls() != PlayerLevel.getProgressionClass(player)) return false;
+        if (PlayerLevel.getLevel(player) < unlock.requiredLevel()) return false;
+        if (PlayerLevel.hasAbility(player, abilityId)) return false;
+        int points = SkillTreeData.getPoints(player);
+        if (points < unlock.cost()) return false;
+
+        SkillTreeData.setPoints(player, points - unlock.cost());
+        PlayerLevel.grantAbility(player, abilityId);
+        player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                "§6[Ability Learned] §e" + unlock.displayName()));
+
+        NetworkHandler.sendToPlayer(player, SyncSkillTreePacket.build(player));
         return true;
     }
 

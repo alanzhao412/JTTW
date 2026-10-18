@@ -186,6 +186,7 @@ public final class FormGallery {
             mc.gui.getChat().clearMessages(false); // setup chatter would cover a first-person HUD
             if (AbilityScenes.holdUse) mc.options.keyUse.setDown(true);
             if (AbilityScenes.openSkillTree) mc.setScreen(new com.jttw.engine.client.gui.SkillTreeScreen());
+            if (AbilityScenes.openClassAbilities) mc.setScreen(com.jttw.engine.client.gui.CharacterScreen.onSkillsTab());
             if (AbilityScenes.live) { // played as a player plays: forward and sprint held, nothing posed
                 mc.options.keyUp.setDown(true);
                 if (!AbilityScenes.liveCruise) mc.options.keySprint.setDown(true);
@@ -211,7 +212,8 @@ public final class FormGallery {
         mc.options.keyUp.setDown(false);
         mc.options.keySprint.setDown(false);
         if (AbilityScenes.live) mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON);
-        if (mc.screen instanceof com.jttw.engine.client.gui.SkillTreeScreen) mc.setScreen(null);
+        if (mc.screen instanceof com.jttw.engine.client.gui.SkillTreeScreen
+                || mc.screen instanceof com.jttw.engine.client.gui.CharacterScreen) mc.setScreen(null);
         TransformationData data = TransformationManager.getTransformation(mc.player);
         index.add(file + "\t" + shot.form() + "\t" + shot.view()
                 + "\tclientForm=" + (data == null ? "none" : data.getFormId())

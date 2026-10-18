@@ -153,6 +153,17 @@ public final class ClientAbilityData {
 
     public static int getSkillPoints() { return skillPoints; }
 
+    /** The class abilities ({@link com.jttw.engine.progression.skilltree.AbilityUnlock}) the player holds. */
+    private static Set<String> classAbilities = new HashSet<>();
+
+    public static void setClassAbilities(Set<String> abilities) {
+        classAbilities = new HashSet<>(abilities);
+    }
+
+    public static boolean hasClassAbility(String abilityId) {
+        return classAbilities.contains(abilityId);
+    }
+
     public static Set<String> getUnlockedNodes() {
         return Collections.unmodifiableSet(unlockedNodes);
     }

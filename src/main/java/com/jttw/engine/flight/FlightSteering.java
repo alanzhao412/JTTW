@@ -29,6 +29,11 @@ public final class FlightSteering {
      * somersault momentum. 112 blocks a second.
      */
     public static final double TOP_SPEED = 5.58;
+    /**
+     * A Heavenly's cloud (Heavenly Mobility): a third of Wukong's cloud at its height, 37 blocks
+     * a second, and never building up.
+     */
+    public static final double HEAVENLY_CLOUD_SPEED = TOP_SPEED / 3;
     /** Ticks a flier holding top speed takes to build all the way to {@link #TOP_SPEED}: 10 seconds. */
     public static final int BUILD_UP_TICKS = 200;
     /** A flying form's own wings, without a flight tier. */

@@ -8,8 +8,9 @@ import java.util.List;
 /**
  * Defines every ability milestone for all four classes.
  *
- * <p>An {@code AbilityUnlock} is a gate — it stores what unlocks at what level for which class.
- * {@link LevelManager} fires these automatically during level-up.  Gameplay systems that
+ * <p>An {@code AbilityUnlock} is a gate — it stores what becomes available at what level for
+ * which class. Reaching the level only makes it available: the player buys it with skill points
+ * (see {@link #cost()} and {@link SkillPurchase#purchaseClassAbility}). Gameplay systems that
  * care about a specific ability should check:
  * <pre>{@code
  * if (PlayerLevel.hasAbility(player, "heavenly_mobility")) { ... }
@@ -22,6 +23,10 @@ import java.util.List;
  * </ol>
  * No changes to {@link LevelManager} or {@link PlayerLevel} are needed.
  *
+ * <p>Only {@code heavenly_mobility} does anything yet (the Heavenly cloud, see
+ * {@link com.jttw.engine.flight.JTTWFlight#hasHeavenlyCloud}); the rest can be bought but have no
+ * effect.
+ *
  * <p><b>Milestone overview:</b>
  * <pre>
  * ── DIVINE BEAST (form-gated, domain authority) ──────────────────────────
@@ -33,7 +38,7 @@ import java.util.List;
  *   Lv100   apex_domain         Peak domain control.
  *
  * ── HEAVENLY (ability expansion, widest toolkit) ─────────────────────────
- *   Lv 10   heavenly_mobility   Enhanced movement. (hook to grant flight/speed)
+ *   Lv 10   heavenly_mobility   A slow cloud to fly on (sprint in flight).
  *   Lv 20   divine_perception   See through concealment and illusions.
  *   Lv 30   formation_sense     Detect enemy formations and hidden traps.
  *   Lv 40   celestial_support   Unlocks support utility package.
@@ -109,16 +114,34 @@ public record AbilityUnlock(
         REGISTRY.add(new AbilityUnlock(cls, level, id, name));
     }
 
+    /**
+     * Skill points to buy it: 1 below level 50, 2 from level 50, 3 at level 100. Points come one
+     * every 5 levels (20 in all) and the skill trees want about twice that, so these stay cheap
+     * beside a tree node, while the late, big ones cost more.
+     */
+    public int cost() {
+        return 1 + requiredLevel / 50;
+    }
+
     // -----------------------------------------------------------------------
     // Queries
     // -----------------------------------------------------------------------
+
+    /** The unlock with this ability id, or null. */
+    @javax.annotation.Nullable
+    public static AbilityUnlock byId(String abilityId) {
+        for (AbilityUnlock u : REGISTRY) {
+            if (u.abilityId.equals(abilityId)) return u;
+        }
+        return null;
+    }
 
     public static List<AbilityUnlock> getAll() {
         return Collections.unmodifiableList(REGISTRY);
     }
 
     /**
-     * Returns every unlock that should fire when a player of {@code cls}
+     * Returns every unlock that becomes available when a player of {@code cls}
      * advances from {@code previousLevel} to {@code newLevel} (inclusive bounds on new).
      * Handles multi-level-up edge cases correctly.
      */

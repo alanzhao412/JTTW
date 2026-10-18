@@ -33,14 +33,14 @@ public class LevelingGameTests {
     }
 
     @GameTest(template = PLATFORM)
-    public static void initClassStartsAtLevelOneWithLevelOneUnlocks(GameTestHelper h) {
+    public static void initClassStartsAtLevelOne(GameTestHelper h) {
         ServerPlayer p = player(h);
         LevelManager.initClass(p, ReincarnationOutcome.DRAGON);
         eq(h, ProgressionClass.DIVINE_BEAST, PlayerLevel.getProgressionClass(p), "class");
         eq(h, DivineBeastLine.WATER, PlayerLevel.getBeastLine(p), "beast line");
         eq(h, 1, PlayerLevel.getLevel(p), "level");
         eq(h, 0L, PlayerLevel.getXp(p), "xp");
-        check(h, PlayerLevel.hasAbility(p, "lesser_form"), "Divine Beast level-1 unlock");
+        check(h, !PlayerLevel.hasAbility(p, "lesser_form"), "level-1 ability is to be bought, not given");
         h.succeed();
     }
 
@@ -96,8 +96,7 @@ public class LevelingGameTests {
         eq(h, 12, PlayerLevel.getLevel(p), "level");
         // one point at each multiple of 5: levels 5 and 10
         eq(h, 2, SkillTreeData.getPoints(p), "skill points");
-        check(h, PlayerLevel.hasAbility(p, "heavenly_mobility"), "level-10 Heavenly unlock");
-        check(h, !PlayerLevel.hasAbility(p, "divine_perception"), "level-20 unlock not yet");
+        check(h, !PlayerLevel.hasAbility(p, "heavenly_mobility"), "level-10 ability is to be bought, not given");
         h.succeed();
     }
 
@@ -118,7 +117,7 @@ public class LevelingGameTests {
         LevelManager.grantXp(p, xpToReach(ProgressionClass.DIVINE_BEAST, 20), "test");
         eq(h, 20, PlayerLevel.getLevel(p), "level");
         eq(h, FormStage.GUARDIAN.stageIndex, PlayerLevel.getFormStage(p), "form stage");
-        check(h, PlayerLevel.hasAbility(p, "domain_sense"), "level-20 Divine Beast unlock");
+        check(h, !PlayerLevel.hasAbility(p, "domain_sense"), "level-20 ability is to be bought, not given");
         h.succeed();
     }
 

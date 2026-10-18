@@ -56,6 +56,7 @@ public final class NetworkHandler {
         registrar.playToClient(SyncReviveCountPacket.TYPE, SyncReviveCountPacket.STREAM_CODEC, SyncReviveCountPacket::handle);
         registrar.playToClient(SyncXtqStatsPacket.TYPE, SyncXtqStatsPacket.STREAM_CODEC, SyncXtqStatsPacket::handle);
         registrar.playToServer(SpendSkillPointPacket.TYPE, SpendSkillPointPacket.STREAM_CODEC, SpendSkillPointPacket::handle);
+        registrar.playToServer(com.jttw.engine.network.c2s.BuyClassAbilityPacket.TYPE, com.jttw.engine.network.c2s.BuyClassAbilityPacket.STREAM_CODEC, com.jttw.engine.network.c2s.BuyClassAbilityPacket::handle);
         registrar.playToServer(ActivateAbilityPacket.TYPE, ActivateAbilityPacket.STREAM_CODEC, ActivateAbilityPacket::handle);
         registrar.playToServer(RequestTransformPacket.TYPE, RequestTransformPacket.STREAM_CODEC, RequestTransformPacket::handle);
         registrar.playToServer(UseFormPacket.TYPE, UseFormPacket.STREAM_CODEC, UseFormPacket::handle);
