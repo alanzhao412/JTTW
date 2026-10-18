@@ -93,8 +93,10 @@ the world to player level.
 ### The 18, 36 and 72 Transformations
 
 Three transformation arts, each with its own menu and its own forms per level. A character practises
-at most one (Wukong and Erlang Shen the 72, the Marshal the 36; the 18 is ready for a future
-character), and its level comes from that character's skill tree.
+at most one (Wukong, Erlang Shen and the Bull Demon King the 72, the Marshal the 36; the four Divine
+Beasts, the Azure Dragon, Vermilion Bird, Black Tortoise and White Tiger, and the Saurian Demon King
+the 18), and its level comes from that character's skill tree. Each art's menu is on M once its first
+node is learned; a Divine Beast's true form stays on Shift + M.
 
 | | Level 1 | Level 2 | Level 3 |
 |---|---|---|---|

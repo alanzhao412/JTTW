@@ -6,6 +6,7 @@ import com.jttw.engine.character.erlang.ErlangShenCharacter;
 import com.jttw.engine.character.phoenix.PhoenixCharacter;
 import com.jttw.engine.character.turtle.TurtleCharacter;
 import com.jttw.engine.character.wukong.WukongCharacter;
+import com.jttw.engine.progression.skilltree.AbilityType;
 import com.jttw.engine.progression.skilltree.SkillNode;
 import com.jttw.engine.progression.stats.DivineBeastLine;
 import com.jttw.engine.progression.stats.ProgressionClass;
@@ -54,7 +55,7 @@ class CharactersTest {
         assertEquals("sdk_transform", saurian.skillBar(java.util.Set.of("sdk_transform_1")).get(3).id(), "M: its 18");
     }
 
-    /** Every divine beast practises the 18 Transformations: its level by its tier, its menu on a key. */
+    /** Every divine beast practises the 18 Transformations: its level by its tier, its menu on M. */
     @TestFactory
     Stream<DynamicTest> everyDivineBeastHasTheEighteen() {
         return Stream.of(ByakkoCharacter.INSTANCE, PhoenixCharacter.INSTANCE, DragonCharacter.INSTANCE, TurtleCharacter.INSTANCE)
@@ -64,8 +65,13 @@ class CharactersTest {
                     assertEquals(0, c.transformationLevel(Set.of()));
                     Set<String> all = Set.of(p + "_1", p + "_2", p + "_3");
                     assertEquals(3, c.transformationLevel(all));
-                    var keys = Stream.concat(c.skillBar(all).stream(), c.shiftBar(all).stream()).toList();
-                    assertTrue(keys.stream().anyMatch(s -> s.id().equals(p)), "its menu is on a key");
+                    AbilitySlot m = c.skillBar(all).get(3);
+                    assertEquals(p, m.id(), "its menu is on M");
+                    assertEquals(AbilityType.MENU, m.type());
+                    assertEquals("18 Transformations", m.displayName());
+                    assertEquals(3, m.tier());
+                    assertEquals(c.skillTree().idPrefix() + "true",
+                            c.shiftBar(Set.of(c.skillTree().idPrefix() + "true_1")).get(3).id(), "its true form on Shift + M");
                     assertTrue(Stream.concat(c.skillBar(Set.of()).stream(), c.shiftBar(Set.of()).stream())
                             .noneMatch(s -> s.id().equals(p)), "not before it is learned");
                 }));

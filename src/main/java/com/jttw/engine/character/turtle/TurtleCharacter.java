@@ -70,6 +70,4 @@ public final class TurtleCharacter implements PlayableCharacter {
     public int transformationLevel(Set<String> unlocked) {
         return skillTree().highestTier(unlocked, "tu_transform");
     }
-
-    /** Shift + V: the 18 Transformations (a menu, opened client-side). */
 }
