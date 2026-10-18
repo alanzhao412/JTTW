@@ -27,12 +27,21 @@ public record ZoneLayout(int cellSize, double chance, int radius, int wobble, lo
 
     /** The centre of the region in the cell holding (x, z), as {x, z}; null if that cell holds none. */
     public int[] centre(long seed, int x, int z) {
-        int cx = Math.floorDiv(x, cellSize), cz = Math.floorDiv(z, cellSize);
+        return centreOfCell(seed, Math.floorDiv(x, cellSize), Math.floorDiv(z, cellSize));
+    }
+
+    /** The centre of the region in cell (cx, cz) (cells counted, not blocks), as {x, z}; null if it holds none. */
+    public int[] centreOfCell(long seed, int cx, int cz) {
         long h = mix(seed ^ salt, cx, cz);
         if (unit(h) >= chance) return null;
-        double margin = radius + wobble;
+        double margin = margin();
         return new int[]{(int) (cx * (double) cellSize + margin + unit(mix(h, 1, 0)) * (cellSize - 2 * margin)),
                 (int) (cz * (double) cellSize + margin + unit(mix(h, 2, 0)) * (cellSize - 2 * margin))};
+    }
+
+    /** The farthest a region reaches from its centre: its radius and all its wobble. */
+    public int margin() {
+        return radius + wobble;
     }
 
     /** How far into a region (x, z) lies: 0 at its edge or outside, rising to 1 at its centre. */
@@ -40,7 +49,7 @@ public record ZoneLayout(int cellSize, double chance, int radius, int wobble, lo
         int cx = Math.floorDiv(x, cellSize), cz = Math.floorDiv(z, cellSize);
         long h = mix(seed ^ salt, cx, cz);
         if (unit(h) >= chance) return 0;
-        double margin = radius + wobble;
+        double margin = margin();
         double centreX = (int) (cx * (double) cellSize + margin + unit(mix(h, 1, 0)) * (cellSize - 2 * margin));
         double centreZ = (int) (cz * (double) cellSize + margin + unit(mix(h, 2, 0)) * (cellSize - 2 * margin));
         double dx = x - centreX, dz = z - centreZ;

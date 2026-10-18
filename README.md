@@ -258,7 +258,8 @@ src/main/java/com/jttw/engine/
 ├── flight/          custom flight, glide, and swim physics (server side)
 ├── network/         c2s/ and s2c/ packets for client–server state sync
 ├── dimension/       Heaven and Hell dimensions with custom worldgen
-├── entity/          custom entities, projectiles, summons
+├── world/           zones (Zones, ZoneLayout, ZoneMap, ZoneAllies), zone features, Heaven, morality
+├── entity/          custom entities, projectiles, summons; zone/ holds ZoneMonster and ZoneBoss
 ├── item/            lore artifacts and weapons
 ├── client/          renderers, GUI screens, HUD overlays, client input and flight
 └── commands/        /jttw command tree
@@ -266,6 +267,36 @@ src/main/java/com/jttw/engine/
 
 Largest components: `TransformationAbilityHandler` (1,385 lines), `YuanDiAbilityHandler` (1,236),
 `WuCloneManager` (874, including custom pathfinding goals).
+
+### Zones
+
+A level zone is a biome put over the overworld in regions laid out from the seed alone
+(`world/Zones`): no biome library. Each zone has a biome, the vanilla biomes it may take over
+(a tag, checked at its region's centre), a `ZoneLayout` (cell size, share of cells, radius,
+wobble, a salt of its own), the heights it takes (`Vertical`: the whole column, `below(y)` for an
+underground zone, `above(y)` for an aerial one), its level band and the players it is allied to.
+Zones sharing heights never share ground: a later zone in `Zones.ALL` gives up a whole region
+that would touch an earlier one's (`ZoneMap`). White Bone Ridge is the first.
+
+To add a zone:
+
+1. **Biome**: `data/jttw_engine/worldgen/biome/<zone>.json` (its features) and a hosts tag in
+   `tags/worldgen/biome/`.
+2. **Definition**: a `Zone.overworld(biome, hosts, new ZoneLayout(..., uniqueSalt), vertical,
+   minLevel, maxLevel, gruntXp)` in `Zones`, appended to `Zones.ALL`; `.hostSampledAt(y)` for a
+   host judged off the surface, `.alliedTo(ZoneAllies.PENG)` for a zone that spares the Peng. A
+   zone of another dimension (Hell) is `Zone.dimension(biome, ...)`: a level band, no regions.
+   Level bands are registered from `Zones.ALL`; the biome source places the biome by itself.
+3. **Monsters**: extend `entity/zone/ZoneMonster` (`zone()`, `hitsToKill()`, `blowShare()`;
+   override levels, captain chance, escorts, captain loot, `allies()` as needed).
+4. **Boss**: extend `entity/zone/ZoneBoss` (`zone()`, `lairRadius()`; a boss bar, persistence,
+   Boss tier, phases through `phaseThresholds()` / `onPhase()`).
+5. **Worldgen**: features read `zone.depth(...)`, `zone.centre(...)`, `zone.isAt(level, pos)`
+   and `ZoneTerrain.landAt(...)`; the lair extends `world/feature/ZoneLairFeature` (`zone()`,
+   `boss()`, `build(...)`, `floorAt(...)`), which builds it at each region's centre and puts the
+   boss there once.
+6. **Tests**: add the zone to `ZoneFrameworkTest`'s checks if its layout is unusual; GameTests
+   for its monsters and boss as `RidgeGameTests` does.
 
 ---
 

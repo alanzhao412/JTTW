@@ -83,10 +83,8 @@ public class JTTWEngine {
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
-            // White Bone Ridge: where a character goes on from level 20
-            com.jttw.engine.progression.level.BiomeLevelBand.register(new com.jttw.engine.progression.level.BiomeLevelBand(
-                    com.jttw.engine.world.Zones.WHITE_BONE_RIDGE.location(), 20, 36, 80));
-            
+            // the zones' level bands: White Bone Ridge, where a character goes on from level 20, and on
+            com.jttw.engine.world.Zones.registerLevelBands();
         });
     }
 

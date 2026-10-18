@@ -20,7 +20,8 @@ import java.util.Map;
 /**
  * Puts the mod's zone biomes where their zones lie ({@link Zones}): a zone whose centre falls in
  * one of its host biomes takes its whole footprint, water and all, so it stands whole, not in
- * scraps. Only in a biome source that lists the zone
+ * scraps; but only at the heights it takes (an underground zone leaves the surface over it
+ * vanilla's, an aerial one the ground under it). Only in a biome source that lists the zone
  * biome, which the overworld's does (OverworldBiomeBuilderMixin); the Nether's and others' are
  * left alone.
  */
@@ -38,7 +39,7 @@ public abstract class MultiNoiseBiomeSourceMixin {
 
     /** For each zone's cell, whether its centre is in host country: found once, then reused. */
     @Unique
-    private final Map<Long, Boolean> jttw$hostCentres = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<Zones.HostCell, Boolean> jttw$hostCentres = new java.util.concurrent.ConcurrentHashMap<>();
 
     @Unique
     private Map<Zones.Zone, Holder<Biome>> jttw$zones() {
@@ -46,7 +47,7 @@ public abstract class MultiNoiseBiomeSourceMixin {
         if (found == null) {
             found = new LinkedHashMap<>();
             for (Pair<Climate.ParameterPoint, Holder<Biome>> entry : parameters().values()) {
-                for (Zones.Zone zone : Zones.ALL) {
+                for (Zones.Zone zone : Zones.MAP.zones()) {
                     if (entry.getSecond().is(zone.biome())) found.put(zone, entry.getSecond());
                 }
             }
@@ -62,15 +63,14 @@ public abstract class MultiNoiseBiomeSourceMixin {
         if (zones.isEmpty()) return;
         Holder<Biome> vanilla = cir.getReturnValue();
         long seed = Zones.seed();
-        int bx = QuartPos.toBlock(x), bz = QuartPos.toBlock(z);
+        int bx = QuartPos.toBlock(x), by = QuartPos.toBlock(y), bz = QuartPos.toBlock(z);
         for (Map.Entry<Zones.Zone, Holder<Biome>> e : zones.entrySet()) {
             Zones.Zone zone = e.getKey();
-            if (!zone.covers(seed, bx, bz)) continue;
-            long key = zone.layout().cellOf(bx, bz) ^ zone.layout().salt();
-            boolean hosted = jttw$hostCentres.computeIfAbsent(key, k -> {
-                int[] c = zone.layout().centre(seed, bx, bz);
+            if (!zone.covers(seed, bx, by, bz)) continue;
+            boolean hosted = jttw$hostCentres.computeIfAbsent(zone.hostCell(bx, bz), k -> {
+                int[] c = zone.centre(seed, bx, bz);
                 Holder<Biome> atCentre = ((MultiNoiseBiomeSource) (Object) this).getNoiseBiome(
-                        sampler.sample(QuartPos.fromBlock(c[0]), QuartPos.fromBlock(80), QuartPos.fromBlock(c[1])));
+                        sampler.sample(QuartPos.fromBlock(c[0]), QuartPos.fromBlock(zone.hostY()), QuartPos.fromBlock(c[1])));
                 return atCentre.is(zone.hosts());
             });
             if (hosted) {

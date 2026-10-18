@@ -1,7 +1,6 @@
 package com.jttw.engine.entity.ridge;
 
 import com.jttw.engine.entity.MobScaling;
-import com.jttw.engine.progression.level.EnemyTier;
 import com.jttw.engine.registry.ModEntities;
 import com.jttw.engine.world.CurseOfTheDead;
 import com.jttw.engine.world.Zones;
@@ -29,6 +28,9 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import com.jttw.engine.entity.zone.ZoneBoss;
+import com.jttw.engine.entity.zone.ZoneMonster;
+import net.minecraft.world.BossEvent;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
@@ -55,9 +57,10 @@ import java.util.UUID;
  * <p>There is one of her to each region of the ridge, put in her lair when the land is made
  * ({@link com.jttw.engine.world.feature.LairFeature}); she keeps to it, goes back to it when no one
  * is fighting her, and once killed she does not come back. So that is never by accident, she is
- * never despawned, not even when the world is set to Peaceful.
+ * never despawned, not even when the world is set to Peaceful. A {@link ZoneBoss}: her boss bar
+ * shows while she is herself, never while she passes for one of her dead.
  */
-public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
+public class LadyWhiteBoneEntity extends ZoneBoss implements RangedAttackMob {
 
     public static final int LEVEL = 33;
     /** Sixty of a level-33 character's ordinary hits to kill; each shard a sixth of their health, before resistance. */
@@ -96,9 +99,32 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
     public LadyWhiteBoneEntity(EntityType<? extends LadyWhiteBoneEntity> type, Level level) {
         super(type, level);
         xpReward = 200;
-        setPersistenceRequired();
-        getPersistentData().putString(RidgeMonster.KEY_TIER, EnemyTier.BOSS.name());
-        getPersistentData().putString(RidgeMonster.KEY_ZONE, Zones.WHITE_BONE_RIDGE.location().toString());
+    }
+
+    @Override
+    public Zones.Zone zone() {
+        return Zones.WHITE_BONE;
+    }
+
+    @Override
+    public int lairRadius() {
+        return HIDING_GROUND;
+    }
+
+    @Override
+    protected BossEvent.BossBarColor bossBarColor() {
+        return BossEvent.BossBarColor.WHITE;
+    }
+
+    @Override
+    public double bossBarRange() {
+        return VEIL_RANGE + 8;
+    }
+
+    /** Her bar gives her away: it shows only once she is found out. */
+    @Override
+    public boolean showsBossBar() {
+        return !disguised();
     }
 
     @Override
@@ -208,10 +234,7 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
         if (disguised()) {
             int d = disguise();
             Component kind = Component.translatable(wraith(d) ? "entity.jttw_engine.wraith" : "entity.jttw_engine.bone_servant");
-            Component name = captain(d) ? Component.translatable("entity.jttw_engine.captain", kind) : kind;
-            int level = captain(d) ? RidgeMonster.CAPTAIN_LEVEL : RidgeMonster.LEVEL;
-            return Component.empty().append(name).append(" · Lv " + level)
-                    .withStyle(s -> s.withColor(net.minecraft.network.chat.TextColor.fromRgb(captain(d) ? RidgeMonster.PURPLE : RidgeMonster.WHITE)));
+            return ZoneMonster.nameWithLevel(kind, captain(d) ? RidgeMonster.CAPTAIN_LEVEL : RidgeMonster.LEVEL, captain(d));
         }
         String lives = falseDeaths() == 0 ? "" : " " + "I".repeat(falseDeaths() + 1).replace("IIII", "IV");
         return Component.empty().append(super.getTypeName()).append(lives + " · Lv " + LEVEL);
@@ -396,32 +419,16 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
         if (by != null) vanish(by);
     }
 
-    // ── A boss ──────────────────────────────────────────────────────────
-
     /** The players who have had a hand in fighting her (for the curse when she dies). */
     public Set<UUID> slayers() {
         return slayers;
     }
 
-
-
-
-    @Override
-    public boolean removeWhenFarAway(double distance) {
-        return false;
-    }
-
-    @Override
-    protected boolean shouldDespawnInPeaceful() {
-        return false;
-    }
-
-    /** Her lair: where she keeps to. */
+    /** Her lair (ZoneBoss): where she keeps to. */
     @Override
     public net.minecraft.world.entity.SpawnGroupData finalizeSpawn(net.minecraft.world.level.ServerLevelAccessor level,
             net.minecraft.world.DifficultyInstance difficulty, net.minecraft.world.entity.MobSpawnType reason,
             @javax.annotation.Nullable net.minecraft.world.entity.SpawnGroupData data) {
-        restrictTo(blockPosition(), HIDING_GROUND);
         net.minecraft.world.entity.SpawnGroupData result = super.finalizeSpawn(level, difficulty, reason, data);
         // wherever the world puts her, she is one of her dead until someone finds her out
         if (reason == net.minecraft.world.entity.MobSpawnType.STRUCTURE || reason == net.minecraft.world.entity.MobSpawnType.NATURAL
@@ -472,7 +479,6 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
         tag.putInt("Marks", marks);
         tag.putInt("Disguise", disguise());
         tag.putInt("FalseDeaths", falseDeaths());
-        if (hasRestriction()) tag.put("Lair", NbtUtils.writeBlockPos(getRestrictCenter()));
         ListTag ids = new ListTag();
         for (UUID id : slayers) ids.add(NbtUtils.createUUID(id));
         tag.put("Slayers", ids);
@@ -484,11 +490,6 @@ public class LadyWhiteBoneEntity extends Monster implements RangedAttackMob {
         marks = tag.getInt("Marks");
         entityData.set(DEATHS, tag.getInt("FalseDeaths"));
         setDisguise(tag.getInt("Disguise"));
-        NbtUtils.readBlockPos(tag, "Lair").ifPresent(lair -> restrictTo(lair, HIDING_GROUND));
-        if (tag.contains("Lair", Tag.TAG_COMPOUND)) { // as saved before 1.21: {X, Y, Z}
-            CompoundTag lair = tag.getCompound("Lair");
-            restrictTo(new BlockPos(lair.getInt("X"), lair.getInt("Y"), lair.getInt("Z")), HIDING_GROUND);
-        }
         for (Tag id : tag.getList("Slayers", Tag.TAG_INT_ARRAY)) slayers.add(NbtUtils.loadUUID(id));
     }
 }

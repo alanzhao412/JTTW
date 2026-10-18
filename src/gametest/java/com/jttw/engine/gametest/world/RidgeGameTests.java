@@ -332,13 +332,18 @@ public class RidgeGameTests {
         LadyWhiteBoneEntity lady = lady(h, new BlockPos(4, 2, 4));
         lady.setNoAi(true);
         var husks = new java.util.ArrayList<com.jttw.engine.entity.ridge.LadyHuskEntity>();
-        onEnd(h, () -> h.getLevel().getEntitiesOfClass(com.jttw.engine.entity.ridge.LadyHuskEntity.class, new AABB(h.absolutePos(BlockPos.ZERO)).inflate(60)).forEach(Entity::discard));
+        // each body is left where she falls, and she falls back on the platform: her vanishing takes
+        // her up to 14 blocks off it, where a body could land in a chunk whose entities the count
+        // below cannot see yet, or among a neighbouring test's (which then counted 2, now and then)
+        AABB platform = new AABB(h.absolutePos(BlockPos.ZERO)).inflate(8);
+        onEnd(h, () -> h.getLevel().getEntitiesOfClass(com.jttw.engine.entity.ridge.LadyHuskEntity.class, platform).forEach(Entity::discard));
         for (int i = 0; i < LadyWhiteBoneEntity.FALSE_DEATHS; i++) {
+            lady.moveTo(h.absoluteVec(new net.minecraft.world.phys.Vec3(4.5, 2, 4.5)));
             lady.setHealth(1);
             lady.die(h.getLevel().damageSources().playerAttack(p));
             check(h, lady.isAlive() && lady.getHealth() == lady.getMaxHealth(), "she rises again, whole (" + (i + 1) + ")");
         }
-        husks.addAll(h.getLevel().getEntitiesOfClass(com.jttw.engine.entity.ridge.LadyHuskEntity.class, new AABB(h.absolutePos(BlockPos.ZERO)).inflate(60)));
+        husks.addAll(h.getLevel().getEntitiesOfClass(com.jttw.engine.entity.ridge.LadyHuskEntity.class, platform));
         eq(h, LadyWhiteBoneEntity.FALSE_DEATHS, husks.size(), "a body left each time");
         check(h, husks.stream().map(com.jttw.engine.entity.ridge.LadyHuskEntity::mortal).collect(java.util.stream.Collectors.toSet())
                 .equals(java.util.Set.of(0, 1, 2)), "the girl, the old woman, the old man");
