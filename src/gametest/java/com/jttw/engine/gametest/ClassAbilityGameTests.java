@@ -170,6 +170,52 @@ public class ClassAbilityGameTests {
         h.succeed();
     }
 
+    /** The cloud never makes anyone worse: one who flies faster on their own keeps their own speed and look. */
+    @GameTest(template = PLATFORM)
+    public static void aFasterFlierKeepsTheirOwnFlight(GameTestHelper h) {
+        // Erlang with Flight III (2.40): his own flight, in his squall
+        ServerPlayer erlang = at(h, ReincarnationOutcome.EYE_OF_HEAVEN, 10);
+        SkillTreeData.setPoints(erlang, 50);
+        for (String n : new String[]{com.jttw.engine.character.erlang.ErlangShenSkillTree.FLIGHT_1,
+                com.jttw.engine.character.erlang.ErlangShenSkillTree.FLIGHT_2,
+                com.jttw.engine.character.erlang.ErlangShenSkillTree.FLIGHT_3}) {
+            check(h, SkillPurchase.purchase(erlang, n), "buy " + n);
+        }
+        check(h, SkillPurchase.purchaseClassAbility(erlang, MOBILITY), "Heavenly Mobility bought");
+        erlang.getAbilities().flying = true;
+        erlang.setSprinting(true);
+        eq(h, FlyingState.IN_SQUALL, FlyingState.mode(erlang), "Erlang keeps his squall");
+        near(h, FlightSteering.FAST_SPEED, JTTWFlight.profile(erlang).effectiveSpeed(), "and his own speed");
+        near(h, FlightSteering.FAST_SPEED, flyForward(erlang, 60), "and flies at it");
+
+        // Nezha at the fastest tier: his own flight, stretched out along it
+        ServerPlayer nezha = at(h, ReincarnationOutcome.THIRD_LOTUS_PRINCE, 10);
+        JTTWFlight.setUniversalFlight(nezha, true);
+        JTTWFlight.setFlightSpeedTier(nezha, 3);
+        check(h, SkillPurchase.purchaseClassAbility(nezha, MOBILITY), "Heavenly Mobility bought");
+        nezha.getAbilities().flying = true;
+        nezha.setSprinting(true);
+        eq(h, FlyingState.FLYING, FlyingState.mode(nezha), "Nezha keeps his own look");
+        near(h, FlightSteering.FAST_SPEED, JTTWFlight.profile(nezha).effectiveSpeed(), "and his own speed");
+        h.succeed();
+    }
+
+    /** One whose own flight is slower than the cloud rides it. */
+    @GameTest(template = PLATFORM)
+    public static void aSlowerFlierRidesTheCloud(GameTestHelper h) {
+        ServerPlayer nezha = at(h, ReincarnationOutcome.THIRD_LOTUS_PRINCE, 10);
+        JTTWFlight.setUniversalFlight(nezha, true);
+        JTTWFlight.setFlightSpeedTier(nezha, 2); // his full flight on the wheels, 1.55
+        nezha.getAbilities().flying = true;
+        nezha.setSprinting(true);
+        eq(h, FlyingState.FLYING, FlyingState.mode(nezha), "before the ability, his own flight");
+        near(h, FlightSteering.CRUISE_SPEED, JTTWFlight.profile(nezha).effectiveSpeed(), "at his own speed");
+        check(h, SkillPurchase.purchaseClassAbility(nezha, MOBILITY), "Heavenly Mobility bought");
+        eq(h, FlyingState.ON_HEAVENLY_CLOUD, FlyingState.mode(nezha), "now on the cloud");
+        near(h, FlightSteering.HEAVENLY_CLOUD_SPEED, JTTWFlight.profile(nezha).effectiveSpeed(), "at the cloud's speed");
+        h.succeed();
+    }
+
     @GameTest(template = PLATFORM)
     public static void onlyAHeavenlyHasTheCloud(GameTestHelper h) {
         ServerPlayer p = at(h, ReincarnationOutcome.BULL_DEMON_KING, 10);
