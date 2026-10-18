@@ -10,6 +10,7 @@ import com.jttw.engine.character.erlang.ErlangShenAbilityHandler;
 import com.jttw.engine.item.ErlangAxeItem;
 import com.jttw.engine.item.ThreePointedSpearItem;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
+import com.jttw.engine.progression.stats.ResistanceHandler;
 import com.jttw.engine.registry.ModItems;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
 import net.minecraft.core.BlockPos;
@@ -32,8 +33,9 @@ import static com.jttw.engine.gametest.GT.*;
 import static com.jttw.engine.gametest.item.ItemTestSupport.*;
 
 /**
- * Erlang Shen's Three-Pointed Spear (triple strike, charged thrust) and Divine Axe (cleave on
- * hit, ground cleave), including Erlang Shen's damage bonus with each.
+ * Erlang Shen's Three-Pointed Spear (triple strike, charged thrust, sweeping slash, throw, Eye of
+ * Heaven and Wrath synergies) and Divine Axe (cleave on hit, ground cleave), including Erlang
+ * Shen's damage bonus with each.
  */
 @GameTestHolder(JTTWEngine.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -194,10 +196,7 @@ public class ErlangWeaponsGameTests {
         ItemStack s = spear();
         HurtLog log = HurtLog.on(target);
         try {
-            thrust(h, p, s, 4);
-            eq(h, 0, log.playerAttacks().size(), "4 ticks: too short");
-            check(h, !p.getCooldowns().isOnCooldown(s.getItem()), "no cooldown for a fizzle");
-            thrust(h, p, s, 5);
+            thrust(h, p, s, 5); // under 5 ticks it is a slash instead
         } finally {
             log.close();
         }
@@ -386,6 +385,202 @@ public class ErlangWeaponsGameTests {
         eq(h, 1, magic.size(), "shockwave hit");
         near(h, 1.0, magic.get(0).amount(), 1e-3, "half of 2 ATK");
         target.discard();
+        h.succeed();
+    }
+
+    // ── Three-Pointed Spear: sweeping slash ───────────────────────
+
+    /** A right-click let go before the thrust is ready. */
+    private static void slash(GameTestHelper h, ServerPlayer p, ItemStack s) {
+        thrust(h, p, s, 1);
+    }
+
+    /** Player in the middle of the platform, at (2,1,2), looking south (+z), ATK 2. */
+    private static ServerPlayer slasher(GameTestHelper h) {
+        ServerPlayer p = playerAt(h, 2, 2, 0f, 0f);
+        setBaseAtk(p, 2.0);
+        return p;
+    }
+
+    @GameTest(template = PLATFORM, batch = "spear_slash_arc")
+    public static void slashHitsEveryFoeInTheHalfCircleAheadAndNoneBehind(GameTestHelper h) {
+        ServerPlayer p = slasher(h);
+        Pig ahead = pig(h, 2, 4);
+        Pig aside = pig(h, 4, 3);
+        Pig behind = pig(h, 2, 0);
+        Pig behindAside = pig(h, 0, 1);
+        HurtLog aheadLog = HurtLog.on(ahead), asideLog = HurtLog.on(aside);
+        HurtLog behindLog = HurtLog.on(behind), behindAsideLog = HurtLog.on(behindAside);
+        ItemStack s = spear();
+        try {
+            slash(h, p, s);
+        } finally {
+            aheadLog.close();
+            asideLog.close();
+            behindLog.close();
+            behindAsideLog.close();
+        }
+        eq(h, 1, aheadLog.playerAttacks().size(), "pig ahead");
+        near(h, 2.0, aheadLog.playerAttacks().get(0).amount(), "100% of 2 ATK");
+        eq(h, 1, asideLog.playerAttacks().size(), "pig ahead and to the side");
+        eq(h, 0, behindLog.playerAttacks().size(), "pig behind");
+        eq(h, 0, behindAsideLog.playerAttacks().size(), "pig behind and to the side");
+        eq(h, 0, aheadLog.matching(src -> ResistanceHandler.isMagic(src)).size(), "no magic without the Eye");
+        check(h, p.getDeltaMovement().length() < 1e-6, "the slash does not lunge");
+        for (int i = 0; i < 19; i++) p.getCooldowns().tick();
+        check(h, p.getCooldowns().isOnCooldown(s.getItem()), "cooling after 19 ticks");
+        p.getCooldowns().tick();
+        check(h, !p.getCooldowns().isOnCooldown(s.getItem()), "ready after 20 ticks");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM, batch = "spear_slash_reach")
+    public static void slashReachesThreeBlocksAndAnyQuickReleaseSlashes(GameTestHelper h) {
+        ServerPlayer p = playerAt(h, 2, 0, 0f, 20f);
+        setBaseAtk(p, 2.0);
+        Pig near = pig(h, 2, 3);
+        Pig far = pig(h, 2, 4);
+        HurtLog nearLog = HurtLog.on(near), farLog = HurtLog.on(far);
+        ItemStack s = spear();
+        try {
+            thrust(h, p, s, 4); // the longest a slash is held
+        } finally {
+            nearLog.close();
+            farLog.close();
+        }
+        eq(h, 1, nearLog.playerAttacks().size(), "pig 3 blocks ahead");
+        near(h, 2.0, nearLog.playerAttacks().get(0).amount(), "a slash, not a 150% thrust");
+        eq(h, 0, farLog.playerAttacks().size(), "pig 4 blocks ahead");
+        check(h, p.getCooldowns().isOnCooldown(s.getItem()), "the slash's cooldown also holds back the thrust");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM, batch = "spear_slash_sneak")
+    public static void sneakingThrowerNeverSlashesButOthersDo(GameTestHelper h) {
+        Pig target = pig(h, 2, 2);
+        HurtLog log = HurtLog.on(target);
+        try {
+            ServerPlayer thrower = thrower(h);
+            slash(h, thrower, spear());
+            eq(h, 0, log.playerAttacks().size(), "a sneaking thrower's tap does nothing");
+            check(h, !thrower.getMainHandItem().isEmpty(), "and throws nothing");
+            check(h, !thrower.getCooldowns().isOnCooldown(ModItems.THREE_POINTED_SPEAR.get()), "nor cools down");
+
+            ServerPlayer other = playerAt(h, 2, 0, 0f, 0f);
+            setBaseAtk(other, 2.0);
+            other.setShiftKeyDown(true);
+            slash(h, other, spear());
+            eq(h, 1, log.playerAttacks().size(), "one who cannot throw slashes sneaking or not");
+        } finally {
+            log.close();
+        }
+        ServerPlayer thrower = thrower(h);
+        thrust(h, thrower, spear(), 20);
+        check(h, thrower.getMainHandItem().isEmpty(), "held long enough, sneaking still throws");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM, batch = "spear_slash_eye")
+    public static void eyeOfHeavenAddsThirtyPercentMagicToSlashesAndBlowsWhileOpen(GameTestHelper h) {
+        Pig target = pig(h, 2, 4);
+        target.getAttribute(Attributes.MAX_HEALTH).setBaseValue(200.0);
+        target.setHealth(200f);
+        ServerPlayer p = slasher(h);
+        setOutcome(p, ReincarnationOutcome.EYE_OF_HEAVEN);
+        SkillTreeData.grantNode(p, "es_eye_1");
+        HurtLog log = HurtLog.on(target);
+        try {
+            slash(h, p, spear());
+            eq(h, 0, log.matching(src -> ResistanceHandler.isMagic(src)).size(), "Eye shut: no magic");
+
+            ErlangShenAbilityHandler.toggleEye(p);
+            check(h, ErlangShenAbilityHandler.isEyeActive(p.getUUID()), "eye open");
+            p.getCooldowns().removeCooldown(ModItems.THREE_POINTED_SPEAR.get());
+            slash(h, p, spear());
+            ItemStack s = p.getMainHandItem();
+            s.getItem().hurtEnemy(s, target, p);
+        } finally {
+            log.close();
+            if (ErlangShenAbilityHandler.isEyeActive(p.getUUID())) ErlangShenAbilityHandler.toggleEye(p);
+        }
+        var slashes = log.playerAttacks();
+        var magic = log.matching(src -> ResistanceHandler.isMagic(src));
+        eq(h, 2, slashes.size(), "two slashes " + log.describe());
+        near(h, 2.0 * ES_BONUS, slashes.get(1).amount(), 0.01, "slash: 2 x Erlang Shen's spear bonus");
+        eq(h, 2, magic.size(), "the Eye's hits: the open-eyed slash and blow " + log.describe());
+        for (var hit : magic) {
+            check(h, hit.source().getEntity() == p, "magic from Erlang Shen");
+            near(h, 0.6 * ES_BONUS, hit.amount(), 0.01, "30% of 2, with the spear bonus");
+        }
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM, batch = "spear_slash_wrath")
+    public static void wrathSlashSweepsAllRoundOnHalfTheCooldown(GameTestHelper h) {
+        Pig behind = pig(h, 2, 0);
+        behind.getAttribute(Attributes.MAX_HEALTH).setBaseValue(200.0);
+        behind.setHealth(200f);
+        HurtLog log = HurtLog.on(behind);
+        ItemStack s = spear();
+        try {
+            ServerPlayer healthy = slasher(h);
+            setOutcome(healthy, ReincarnationOutcome.EYE_OF_HEAVEN);
+            SkillTreeData.grantNode(healthy, "es_wrath_1");
+            slash(h, healthy, spear());
+            eq(h, 0, log.playerAttacks().size(), "no Wrath above 40% health");
+
+            ServerPlayer other = slasher(h);
+            setOutcome(other, ReincarnationOutcome.YUAN_DI);
+            SkillTreeData.grantNode(other, "es_wrath_1");
+            other.setHealth(other.getMaxHealth() * 0.25f);
+            slash(h, other, spear());
+            eq(h, 0, log.playerAttacks().size(), "Wrath is Erlang Shen's alone");
+
+            ServerPlayer wrathful = slasher(h);
+            setOutcome(wrathful, ReincarnationOutcome.EYE_OF_HEAVEN);
+            SkillTreeData.grantNode(wrathful, "es_wrath_1");
+            wrathful.setHealth(wrathful.getMaxHealth() * 0.25f);
+            slash(h, wrathful, s);
+            eq(h, 1, log.playerAttacks().size(), "in Wrath the slash reaches behind");
+            for (int i = 0; i < 9; i++) wrathful.getCooldowns().tick();
+            check(h, wrathful.getCooldowns().isOnCooldown(s.getItem()), "cooling after 9 ticks");
+            wrathful.getCooldowns().tick();
+            check(h, !wrathful.getCooldowns().isOnCooldown(s.getItem()), "ready after 10 ticks");
+        } finally {
+            log.close();
+        }
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void wrathQuickensAttacksWithTheSpearByZhanShenTier(GameTestHelper h) {
+        ServerPlayer p = player(h);
+        setOutcome(p, ReincarnationOutcome.EYE_OF_HEAVEN);
+        SkillTreeData.grantNode(p, "es_wrath_1");
+        double base = p.getAttributeValue(Attributes.ATTACK_SPEED);
+        p.setItemInHand(InteractionHand.MAIN_HAND, spear());
+        ThreePointedSpearItem.updateWrathSpeed(p);
+        near(h, base, p.getAttributeValue(Attributes.ATTACK_SPEED), "healthy: no Wrath");
+
+        p.setHealth(p.getMaxHealth() * 0.25f);
+        ThreePointedSpearItem.updateWrathSpeed(p);
+        near(h, base * 1.15, p.getAttributeValue(Attributes.ATTACK_SPEED), "Zhàn Shén I: +15%");
+        SkillTreeData.grantNode(p, "es_wrath_2");
+        SkillTreeData.grantNode(p, "es_wrath_3");
+        ThreePointedSpearItem.updateWrathSpeed(p);
+        near(h, base * 1.35, p.getAttributeValue(Attributes.ATTACK_SPEED), "Zhàn Shén III: +35%");
+
+        p.setItemInHand(InteractionHand.MAIN_HAND, axe());
+        ThreePointedSpearItem.updateWrathSpeed(p);
+        near(h, base, p.getAttributeValue(Attributes.ATTACK_SPEED), "only with the spear in hand");
+
+        ServerPlayer other = player(h);
+        setOutcome(other, ReincarnationOutcome.YUAN_DI);
+        SkillTreeData.grantNode(other, "es_wrath_1");
+        other.setHealth(other.getMaxHealth() * 0.25f);
+        other.setItemInHand(InteractionHand.MAIN_HAND, spear());
+        ThreePointedSpearItem.updateWrathSpeed(other);
+        near(h, base, other.getAttributeValue(Attributes.ATTACK_SPEED), "not Erlang Shen");
         h.succeed();
     }
 

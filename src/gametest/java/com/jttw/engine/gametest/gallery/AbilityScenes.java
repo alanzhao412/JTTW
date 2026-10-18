@@ -221,6 +221,9 @@ final class AbilityScenes {
                 new Scene("armaments_nezha_front", p -> armed(p, ReincarnationOutcome.THIRD_LOTUS_PRINCE, -20f), p -> {}, 1, false),
                 new Scene("armaments_erlang_back", p -> armed(p, ReincarnationOutcome.EYE_OF_HEAVEN, 200f), p -> {}, 1, false),
                 new Scene("armaments_erlang_front", p -> armed(p, ReincarnationOutcome.EYE_OF_HEAVEN, -20f), p -> {}, 1, false),
+                // the spear's sweeping slash: the half circle ahead, and in Wrath all round
+                new Scene("spear_slash", p -> spearman(p, false), p -> spearSlash(p), 3, false),
+                new Scene("spear_slash_wrath", p -> spearman(p, true), p -> spearSlash(p), 3, false),
                 new Scene("xtq_howl", p -> {}, p -> {
                     // a howl crossing in front of the camera, from left to right
                     var howl = new com.jttw.engine.entity.HowlProjectileEntity(com.jttw.engine.registry.ModEntities.HOWL_PROJECTILE.get(), p.level());
@@ -621,6 +624,22 @@ final class AbilityScenes {
             z.setPersistenceRequired();
             p.serverLevel().addFreshEntity(z);
         }
+    }
+
+    /** Erlang Shen, spear in hand, husks about him (in Wrath if asked: Zhàn Shén I, a quarter of his health). */
+    private static void spearman(ServerPlayer p, boolean wrath) {
+        AlignmentData.markReincarnated(p, ReincarnationOutcome.EYE_OF_HEAVEN);
+        LevelManager.initClass(p, ReincarnationOutcome.EYE_OF_HEAVEN);
+        p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.THREE_POINTED_SPEAR.get()));
+        if (wrath) {
+            SkillTreeData.grantNode(p, "es_wrath_1");
+            p.setHealth(p.getMaxHealth() * 0.25f);
+        }
+        targets(p, -3, 1, 3, 1, 0, 3, 0, -2);
+    }
+
+    private static void spearSlash(ServerPlayer p) {
+        com.jttw.engine.item.ThreePointedSpearItem.slash(p, InteractionHand.MAIN_HAND);
     }
 
     /** One of the ridge's dead, standing still at (dx, dz) from the player, facing them (a captain if asked). */
