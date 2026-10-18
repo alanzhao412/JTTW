@@ -16,7 +16,7 @@ import java.util.Set;
 
 /**
  * The Saurian Demon King, the Flood-Dragon: Riptide Surge on V (hold and let go), Tidal Lash on
- * B, Whirlpool on N, Flood-Dragon's Wrath on M; and, holding Shift, the 18 Transformations on V.
+ * B, Whirlpool on N, the 18 Transformations on M; and, holding Shift, Flood-Dragon's Wrath on M.
  * See {@link SaurianAbilityHandler}.
  */
 public final class SaurianCharacter implements PlayableCharacter {
@@ -47,7 +47,7 @@ public final class SaurianCharacter implements PlayableCharacter {
                 AbilitySlot.fromBranch(tree, unlocked, "sdk_transform", "18 Transformations", AbilityType.MENU));
     }
 
-    /** Shift + V: the 18 Transformations (a menu, opened client-side). */
+    /** M: the 18 Transformations (a menu, opened client-side). */
     @Override public TransformationSchool transformationSchool() { return TransformationSchool.EIGHTEEN; }
 
     @Override
