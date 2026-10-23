@@ -283,8 +283,8 @@ wobble, a salt of its own), the heights it takes (`Vertical`: the whole column, 
 underground zone, `above(y)` for an aerial one), its level band and the players it is allied to.
 Zones sharing heights never share ground: a later zone in `Zones.ALL` gives up a whole region
 that would touch an earlier one's (`ZoneMap`). White Bone Ridge is the first, the Bottomless Cave the second, the Mystical
-Waters the third; Hell, a dimension of its own, is the fourth.
-that would touch an earlier one's (`ZoneMap`). White Bone Ridge is the first, the Bottomless Cave the second, then the Mystical Waters and the Flaming Mountains; Lion-Camel Ridge is the last.
+Waters the third; Hell, a dimension of its own, is the fourth; then the Flaming Mountains, and Mount Wuzhuang, the first
+aerial zone, in the sky; Lion-Camel Ridge, the last band, is the last.
 
 To add a zone:
 
@@ -615,6 +615,118 @@ Boy's Fire Cloud Cave on Mount Haohao (火云洞, chapters 40–42), in
   `FireMountainPlacementTest`; gallery scenes `-Pgallery.only=fire_`; the range in a real world with
   `./gradlew runWorldgenBench -Pbench.mode=fire`.
 
+#### Mount Wuzhuang (levels 78–88)
+
+Mount Longevity and the Temple of the Five Villages (万寿山五庄观, chapters 24–26), home of the
+Great Immortal Zhenyuan and his ginseng-fruit tree, in
+[`world/wuzhuang/`](src/main/java/com/jttw/engine/world/wuzhuang/) and
+[`entity/wuzhuang/`](src/main/java/com/jttw/engine/entity/wuzhuang/). The first **aerial** zone
+(`Zones.MOUNT_WUZHUANG`): `Vertical.above(192)`, over the world's own clouds, the ground under it
+left to its host.
+
+- **Where**: over serene country (plains, sunflower plains, forest, flower forest, birch and
+  old-growth birch forest, meadow, cherry grove), judged at y 256 (where a column's biome is always
+  its surface biome). 75% of 2048-block cells roll a region about 260 blocks across (never under
+  224); last in `Zones.ALL`, it gives up any region that would touch a whole-column zone's (the
+  ridge, the waters, the Flaming Mountains), and may float over the Bottomless Cave. In the 32×32 km
+  round spawn of seed 12345: 124 regions laid out, **41 over serene hosts** (about one in every
+  5×5 km), the nearest 3.1 km from spawn.
+- **The island** (`IslandShape`, pure Java, unit-tested; laid chunk by chunk by
+  `MountWuzhuangFeature` at the top-layer step, so the ground under it keeps its own trees and
+  grass): a rough disc about 150 blocks across, its edge wandering ±12; a terrace at y 236 laid dead
+  level under the temple and the road to its gate; rolling grass elsewhere, pines, flowers, moss;
+  four peaks of grey crag streaked with white calcite, the highest (42 over the terrace) behind the
+  garden; cliffs at the rim; its underside hanging some 40 blocks like the torn-out roots of a
+  mountain (never below y 196), with hanging roots and glow berries; three **waterfalls** spilling
+  off the rim (two blocks wide, falling to the ground); banks of **cloud** (celestial cloud) round
+  its flanks and wisps under it. Rock is laid only into open air: a mountain of the world below that
+  reached so high would keep its own.
+- **The way up: the cloud stair** (云梯). A helix of cloud steps out beyond the island's southern
+  rim, winding from the ground to the terrace in **half-block steps** (no jumping), 32 to a turn, a
+  turn falling 16 blocks (about ten turns from plains country), with a stele at its foot (万寿山,
+  Mount Longevity) and a cloud bridge from its top to the road of lanterns that leads to the gate.
+  The cloud bears up whoever walks it: a step on it gives Slow Falling for 20 s (`CloudStepBlock`),
+  so whoever slips off drifts down unhurt. Characters who fly (Wukong's cloud, the Heavenly cloud,
+  the Peng) simply fly up.
+- **The temple** (`Temple`, a blueprint laid column by column; the region's centre is Zhenyuan's
+  place): the mountain gate in the south wall with its plaque 五庄观 and the novel's couplet
+  (长生不老神仙府 · 与天同寿道人家); a paved front court with a smoking censer, stone lanterns, pines,
+  the bell tower and the drum tower; the disciples' wings down both flanks; the **Hall of Heaven
+  and Earth**, double-eaved, red columns within, and at its back the **altar** where, as the novel
+  says, only the words 天地 are honoured; through a moon gate the **garden**: a pond with lilies, a
+  pavilion, rockeries, flowers, and the ginseng-fruit tree.
+- **The ginseng-fruit tree** (`GinsengTree`): a broad trunk, green boughs, leaves like the
+  plantain's, and twelve **fruit** (`GinsengFruitBlock`: blossom, green, ripe; shaped like a newborn
+  child) hanging under its low boughs, half of them ripe when the land is made; each stage takes one
+  random tick in 60 (about an hour of play). The fruit **fears the five elements**:
+  - struck with **gold** (any golden tool, or the **Golden Striker** 金击子) a ripe fruit falls
+    whole; struck with anything else (iron, wood, a bare hand) it falls and withers; an unripe one
+    only withers;
+  - falling, no hand can catch it: only a **Silk-Lined Tray** (丹盘) held under it (`Wuzhuang.fruitTick`);
+  - wherever it comes to rest on the bare earth it **sinks into the ground** and is gone, unless on
+    something lined (wool, a carpet, a bed); in water it **dissolves**;
+  - **eaten**: healed whole, Regeneration II 30 s, Absorption III 2 min; and the **first** a soul
+    ever eats adds its 47,000 years: **+20% maximum health, for good** (an `ADD_MULTIPLIED_TOTAL`
+    modifier, kept through death and into a new life).
+- **Daoist disciples** (`DaoistDiscipleEntity`, level 78): 6 hits, a sword stroke of 13%; at 3–10
+  blocks a **binding talisman** (定身符: held fast 1.5 s, weakened). Righteous: they fight no one
+  unprovoked, except a thief of the fruit; strike one and those near come.
+- **Cloud cranes** (`CloudCraneEntity`, level 80): white, black-tipped wings, red crowns; they fly
+  (never fall) within 40 blocks of where they came into the world and harry any stranger (not the
+  temple's guests); from 3+ blocks above they **swoop**: a dive, the beak for its blow and a half,
+  and whoever is struck is thrown back (mind the edge). 4 hits, 11%.
+- Captains as in every zone (purple, larger, stronger, escorts of two), never past level 88.
+  Spawned on the island in any light: cranes (weight 100, in twos and threes), disciples (60).
+- **Clear Wind and Bright Moon** (清风, 明月; `TempleYouthEntity`, mini-bosses, level 84, 70 hits,
+  12%, a blow takes at most 6% of their health), by the tree, fighting as a pair (strike one and the
+  other comes): Clear Wind's **gust** hurls his foe away; Bright Moon's **moonlight** blinds and slows
+  and mends his partner by a tenth; both **curse** a thief roundly (it weakens). Each **yields** at
+  10% (see the trial): the first time, Clear Wind gives the **Golden Striker**, Bright Moon the
+  **Silk-Lined Tray**: the two things it takes to bring a fruit down whole.
+- **The Great Immortal Zhenyuan** (镇元大仙, `ZhenyuanEntity`, a `ZoneBoss`, level 88, 160 hits,
+  15%, yellow bar), before his altar. Not evil, and not to be beaten: his fight is a **trial**
+  (`TempleImmortal`). **Hard to harm**: no blow takes more than 2.5% of his health, and one blow in
+  four struck at him hand to hand he brushes aside with his whisk. **The Universe in his Sleeve**
+  (袖里乾坤, `Sleeve`): every 12 s (7 s from 30%) his sleeve is raised and the air drawn toward it for
+  a second, then whoever he fights within 12 blocks (from 30%, everyone within 8) is **swept in**:
+  out of the world (unseen, blind, held at his side wherever he goes, nothing can touch them nor they
+  anything), for 5 s, then cast out bruised (a tenth of their health), unless they **struggle free**
+  first (five blows at him from within: they burst out unhurt, and he staggers, unable to parry, for
+  2 s). At 60% **his disciples** come (four). At **10% he yields**: he stops, cannot be harmed, lets
+  go of whoever he holds, and acknowledges everyone who fought him in the last 30 s: a boss's XP,
+  his loot, the first time his **flywhisk** and a **ginseng fruit**, and **his leave**: the
+  temple's guest (its fruit theirs to take without theft, his cranes no longer harry them; kept by
+  the soul). He rests five minutes, mends, and rises whole: the trial can be had again (rewards at
+  most once a day a player). No blow kills him (only what kills outright, as /kill, does).
+- **Drops** (1.21 loot tables, rolled when they yield): Zhenyuan sigils (3–4), a block of gold,
+  crane plumes, talismans, a 25% ginseng fruit, a 12% flywhisk; the youths sigils, gold, talismans, a
+  10% striker or tray. **Zhenyuan's Flywhisk** (拂尘, `FlywhiskItem`): +35% damage; used, it sweeps
+  away what stands within 6 blocks before its bearer and brushes arrows and fireballs from the air
+  (5 s rest). Disciples leave **Daoist Talismans**, cranes **Cloud Crane's Plumes**. A Silk-Lined Tray
+  can also be made: three wool over three gold ingots.
+- **XP and karma**: band 78–88, base grunt XP 145, stepped up from the Flaming Mountains' 130 (972 a
+  grunt at the band's scale). The household is righteous: **killing a disciple −12** (captain or
+  not); bringing a ripe fruit down without Zhenyuan's leave is **theft, −40** (as Heaven's peaches)
+  and makes one the temple's thief for 5 minutes (every disciple, youth and the Great Immortal near
+  turn on them); **passing his trial +10** (it is no killing); killing Zhenyuan outright −100, a
+  youth −25; a fight with a crane is no deed either way.
+- **Art**: `WuzhuangRenderers` (a robed frame for the disciples (topknot and pin), the youths (two
+  buns of boys' hair, smaller) and Zhenyuan (wide sleeves, gold crown, white beard, his whisk; his
+  left sleeve swells as he sweeps; a bow when they yield); a box model for the crane: long neck, red
+  crown, wings spread and beating in flight, folded at rest, swept back in a swoop); skins from
+  `assets_source/wuzhuang_folk.py`, `wuzhuang_crane.py`; the fruit, the tray, the striker, the whisk,
+  plumes and talismans from `wuzhuang_items.py`.
+- **Tests and pictures**: `WuzhuangGameTests` (heights and band, the stair's half steps and slow
+  falling, the temple's blueprint, gold and the fruit, sinking, resting on wool, the tray, water,
+  eating once, theft, creatures, captains, XP, talismans, swoops, the youths' arts and yielding, the
+  sleeve held, struggled out of and cast out of, his sleeve in a live fight, his cap on blows and his
+  disciples, his yielding and leave, the whisk, karma), `WuzhuangZoneTest` (only over the clouds,
+  never on another zone's ground at its heights, the island within its region and over the clouds,
+  level temple and road, the stair continuous); gallery scenes `-Pgallery.only=wuzhuang` (creatures,
+  cranes in flight, the youths, Zhenyuan, the sleeve, his yielding, and the island laid north of the
+  stage: gate, court, hall, garden, the fruit, the road, the stair, from below and from afar); the
+  mountain in a real world with `./gradlew runWorldgenBench -Pbench.mode=wuzhuang`.
+
 #### Lion-Camel Ridge (levels 89–100)
 
 Lion-Camel Ridge (狮驼岭, chapters 74–77: eight hundred li of mountains swarming with demons, forty-seven
@@ -630,9 +742,9 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   heights and may lie in the same columns: the ridge over the labyrinth (its shaft is left alone where
   it comes up through the ridge). It gives way to every zone before it that takes the surface. 90% of
   768-block cells roll a region about 380 blocks across; in the 32x32 km round spawn of seed 12345
-  the layout rolls 1,624, 733 give way to earlier zones, 861 are not centred in mountain or highland
-  country, and **32 regions** stand (0.33% of the ground, second only to the Flaming Mountains' 38;
-  the nearest 0.9 km out; three of them over a Bottomless Cave).
+  the layout rolls 1,624, 788 give way to earlier zones (Mount Wuzhuang's sky among them), 809 are
+  not centred in mountain or highland country, and **29 regions** stand (0.29% of the ground, second
+  only to the Flaming Mountains' 38; the nearest 0.9 km out; three of them over a Bottomless Cave).
 - **The ridge** (`RidgeShape`, `LionCamelRidgeFeature`, pure and unit-tested): the mountains are broken
   into grim crags (ridged noise, up to 30 blocks more), climbing out of the land over the outer fifth;
   faces bare stone banded with tuff, andesite and deepslate; ground of coarse dirt, gravel, podzol and

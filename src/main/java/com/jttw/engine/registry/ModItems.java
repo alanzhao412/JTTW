@@ -317,6 +317,29 @@ public final class ModItems {
     public static final DeferredHolder<Item, Item> SOUL_ASH_ITEM =
             ITEMS.register("soul_ash", () -> new BlockItem(ModBlocks.SOUL_ASH.get(), new Item.Properties()));
 
+    // ── Mount Wuzhuang ────────────────────────────────────────────
+    /** A ginseng fruit (人参果): eaten, it makes whole; the first a soul eats lengthens its life for good. */
+    public static final DeferredHolder<Item, Item> GINSENG_FRUIT = ITEMS.register("ginseng_fruit", com.jttw.engine.item.GinsengFruitItem::new);
+    /** The Golden Striker (金击子): gold, the only thing a ginseng fruit falls whole to. Clear Wind's gift. */
+    public static final DeferredHolder<Item, Item> GOLDEN_STRIKER = ITEMS.register("golden_striker", com.jttw.engine.item.GoldenStrikerItem::new);
+    /** The Silk-Lined Tray (丹盘): catches a falling ginseng fruit. Bright Moon's gift; or made of gold and wool. */
+    public static final DeferredHolder<Item, Item> SILK_LINED_TRAY = ITEMS.register("silk_lined_tray", com.jttw.engine.item.SilkLinedTrayItem::new);
+    /** Zhenyuan's horsetail whisk (拂尘), given to whoever first passes his trial. */
+    public static final DeferredHolder<Item, Item> ZHENYUAN_FLYWHISK = ITEMS.register("zhenyuan_flywhisk", com.jttw.engine.item.FlywhiskItem::new);
+    /** A cloud crane's plume, and a disciple's yellow talisman: the mountain's materials. */
+    public static final DeferredHolder<Item, Item> CRANE_PLUME = ITEMS.register("crane_plume", () -> new Item(new Item.Properties()));
+    public static final DeferredHolder<Item, Item> DAOIST_TALISMAN = ITEMS.register("daoist_talisman", () -> new Item(new Item.Properties()));
+    public static final DeferredHolder<Item, Item> DAOIST_DISCIPLE_SPAWN_EGG = ITEMS.register("daoist_disciple_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.DAOIST_DISCIPLE, 0x3A5C8C, 0xE8E2D0, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> CLOUD_CRANE_SPAWN_EGG = ITEMS.register("cloud_crane_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.CLOUD_CRANE, 0xF4F4F0, 0xC02020, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> CLEAR_WIND_SPAWN_EGG = ITEMS.register("clear_wind_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.CLEAR_WIND, 0x6FB89A, 0xF0E6C8, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> BRIGHT_MOON_SPAWN_EGG = ITEMS.register("bright_moon_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.BRIGHT_MOON, 0xD8DCEC, 0x6A7AB0, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> ZHENYUAN_SPAWN_EGG = ITEMS.register("zhenyuan_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.ZHENYUAN, 0xE8D9A0, 0x6B4A2A, new Item.Properties()));
+
     public static void register(IEventBus modEventBus) {
         ITEMS.register(modEventBus);
     }

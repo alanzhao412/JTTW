@@ -65,6 +65,10 @@ import static com.jttw.engine.gametest.character.CharTest.as;
  * Lion's phases, the Little Wind-Driller's alarm, the ridge's creatures and captains, what they
  * leave (and that the Peng gets nothing of theirs), the band's XP at the levels' cap, karma, and
  * Lion-Camel City's blueprint.
+ *
+ * <p>Each test runs in a batch of its own: the ridge's creatures call others up (an alarm, a king's
+ * kin) and rouse whatever of the ridge is near, and its kings are monsters a Wukong clone goes after,
+ * so nothing of a test here may share the world with another test.
  */
 @GameTestHolder(JTTWEngine.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -149,7 +153,7 @@ public class LionCamelGameTests {
 
     // ── The Peng rule ───────────────────────────────────────────────────
 
-    @GameTest(template = PLATFORM)
+    @GameTest(batch = "lion_camel_nothingOfTheRidgeTargetsThePeng", template = PLATFORM)
     public static void nothingOfTheRidgeTargetsThePeng(GameTestHelper h) {
         openAir(h);
         ServerPlayer peng = peng(h);
@@ -205,37 +209,37 @@ public class LionCamelGameTests {
         });
     }
 
-    @GameTest(template = PLATFORM, timeoutTicks = 100)
+    @GameTest(batch = "lion_camel_struckByThePengALionDemonLetsHimBe", template = PLATFORM, timeoutTicks = 100)
     public static void struckByThePengALionDemonLetsHimBe(GameTestHelper h) {
         struck(h, ModEntities.LION_DEMON.get());
     }
 
-    @GameTest(template = PLATFORM, timeoutTicks = 100)
+    @GameTest(batch = "lion_camel_struckByThePengAnElephantDemonLetsHimBe", template = PLATFORM, timeoutTicks = 100)
     public static void struckByThePengAnElephantDemonLetsHimBe(GameTestHelper h) {
         struck(h, ModEntities.ELEPHANT_DEMON.get());
     }
 
-    @GameTest(template = PLATFORM, timeoutTicks = 100)
+    @GameTest(batch = "lion_camel_struckByThePengAPengDemonLetsHimBe", template = PLATFORM, timeoutTicks = 100)
     public static void struckByThePengAPengDemonLetsHimBe(GameTestHelper h) {
         struck(h, ModEntities.PENG_DEMON.get());
     }
 
-    @GameTest(template = PLATFORM, timeoutTicks = 100)
+    @GameTest(batch = "lion_camel_struckByThePengTheLittleWindDrillerRaisesNoAlarm", template = PLATFORM, timeoutTicks = 100)
     public static void struckByThePengTheLittleWindDrillerRaisesNoAlarm(GameTestHelper h) {
         struck(h, ModEntities.LITTLE_WIND_DRILLER.get());
     }
 
-    @GameTest(template = PLATFORM, timeoutTicks = 100)
+    @GameTest(batch = "lion_camel_struckByThePengTheAzureLionLetsHimBe", template = PLATFORM, timeoutTicks = 100)
     public static void struckByThePengTheAzureLionLetsHimBe(GameTestHelper h) {
         struck(h, ModEntities.AZURE_LION.get());
     }
 
-    @GameTest(template = PLATFORM, timeoutTicks = 100)
+    @GameTest(batch = "lion_camel_struckByThePengTheWhiteElephantLetsHimBe", template = PLATFORM, timeoutTicks = 100)
     public static void struckByThePengTheWhiteElephantLetsHimBe(GameTestHelper h) {
         struck(h, ModEntities.WHITE_ELEPHANT.get());
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(batch = "lion_camel_theKingsNeverSwallowNorGrabNorRoarAtThePeng", template = PLATFORM)
     public static void theKingsNeverSwallowNorGrabNorRoarAtThePeng(GameTestHelper h) {
         ServerPlayer peng = peng(h);
         AzureLionEntity lion = king(h, ModEntities.AZURE_LION.get(), new BlockPos(2, 2, 0));
@@ -258,7 +262,7 @@ public class LionCamelGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(batch = "lion_camel_whatThePengStrikesDownLeavesHimNothing", template = PLATFORM)
     public static void whatThePengStrikesDownLeavesHimNothing(GameTestHelper h) {
         ServerPlayer peng = peng(h);
         LevelManager.initClass(peng, ReincarnationOutcome.GOLD_WINGED_PENG);
@@ -286,7 +290,7 @@ public class LionCamelGameTests {
 
     // ── The Azure Lion ──────────────────────────────────────────────────
 
-    @GameTest(template = PLATFORM)
+    @GameTest(batch = "lion_camel_theAzureLionIsAKingAtTheCap", template = PLATFORM)
     public static void theAzureLionIsAKingAtTheCap(GameTestHelper h) {
         AzureLionEntity lion = king(h, ModEntities.AZURE_LION.get(), new BlockPos(2, 2, 2));
         check(h, lion.getDisplayName().getString().contains("Lv 100"), lion.getDisplayName().getString());
@@ -299,7 +303,7 @@ public class LionCamelGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM, timeoutTicks = 120)
+    @GameTest(batch = "lion_camel_swallowedWholeAFoeFightsHisWayOut", template = PLATFORM, timeoutTicks = 120)
     public static void swallowedWholeAFoeFightsHisWayOut(GameTestHelper h) {
         AzureLionEntity lion = king(h, ModEntities.AZURE_LION.get(), new BlockPos(2, 2, 1));
         lion.setNoAi(true);
@@ -329,7 +333,7 @@ public class LionCamelGameTests {
         });
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(batch = "lion_camel_aSwallowedPlayerCanOnlyFightHisWayOut", template = PLATFORM)
     public static void aSwallowedPlayerCanOnlyFightHisWayOut(GameTestHelper h) {
         ServerPlayer p = other(h);
         AzureLionEntity lion = king(h, ModEntities.AZURE_LION.get(), new BlockPos(2, 2, 1));
@@ -346,7 +350,7 @@ public class LionCamelGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM, timeoutTicks = 260)
+    @GameTest(batch = "lion_camel_whatTheLionCannotStomachHeSpitsOut", template = PLATFORM, timeoutTicks = 260)
     public static void whatTheLionCannotStomachHeSpitsOut(GameTestHelper h) {
         AzureLionEntity lion = king(h, ModEntities.AZURE_LION.get(), new BlockPos(2, 2, 1));
         lion.setNoAi(true);
@@ -359,7 +363,7 @@ public class LionCamelGameTests {
         });
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(batch = "lion_camel_theLionsRoarStrikesWhatIsBeforeHim", template = PLATFORM)
     public static void theLionsRoarStrikesWhatIsBeforeHim(GameTestHelper h) {
         AzureLionEntity lion = king(h, ModEntities.AZURE_LION.get(), new BlockPos(2, 2, 0));
         lion.setNoAi(true);
@@ -375,7 +379,7 @@ public class LionCamelGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM, timeoutTicks = 60)
+    @GameTest(batch = "lion_camel_atTwoThirdsTheLionCallsHisKinAndAtAThirdHeGrows", template = PLATFORM, timeoutTicks = 60)
     public static void atTwoThirdsTheLionCallsHisKinAndAtAThirdHeGrows(GameTestHelper h) {
         AzureLionEntity lion = king(h, ModEntities.AZURE_LION.get(), new BlockPos(2, 2, 2));
         lion.setNoAi(true);
@@ -399,7 +403,7 @@ public class LionCamelGameTests {
 
     // ── The White Elephant ──────────────────────────────────────────────
 
-    @GameTest(template = PLATFORM)
+    @GameTest(batch = "lion_camel_theWhiteElephantIsAKing", template = PLATFORM)
     public static void theWhiteElephantIsAKing(GameTestHelper h) {
         WhiteElephantEntity e = king(h, ModEntities.WHITE_ELEPHANT.get(), new BlockPos(2, 2, 2));
         check(h, e.getDisplayName().getString().contains("Lv 98"), e.getDisplayName().getString());
@@ -409,7 +413,7 @@ public class LionCamelGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM, timeoutTicks = 120)
+    @GameTest(batch = "lion_camel_theTrunkLiftsCrushesAndHurls", template = PLATFORM, timeoutTicks = 120)
     public static void theTrunkLiftsCrushesAndHurls(GameTestHelper h) {
         WhiteElephantEntity e = king(h, ModEntities.WHITE_ELEPHANT.get(), new BlockPos(2, 2, 1));
         e.setNoAi(true);
@@ -432,7 +436,7 @@ public class LionCamelGameTests {
                 check(h, g.getDeltaMovement().horizontalDistance() > 0.5 || g.getVehicle() == null, "hurled away: " + g.getDeltaMovement()));
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(batch = "lion_camel_blowsOnTheTrunkMakeHimDropHisCatch", template = PLATFORM)
     public static void blowsOnTheTrunkMakeHimDropHisCatch(GameTestHelper h) {
         WhiteElephantEntity e = king(h, ModEntities.WHITE_ELEPHANT.get(), new BlockPos(2, 2, 1));
         e.setNoAi(true);
@@ -445,7 +449,7 @@ public class LionCamelGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM, timeoutTicks = 60)
+    @GameTest(batch = "lion_camel_hisStampingAndHisFollowers", template = PLATFORM, timeoutTicks = 60)
     public static void hisStampingAndHisFollowers(GameTestHelper h) {
         WhiteElephantEntity e = king(h, ModEntities.WHITE_ELEPHANT.get(), new BlockPos(2, 2, 2));
         e.setNoAi(true);
@@ -465,7 +469,7 @@ public class LionCamelGameTests {
         });
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(batch = "lion_camel_hisChargeGoresWhatHeMeets", template = PLATFORM)
     public static void hisChargeGoresWhatHeMeets(GameTestHelper h) {
         WhiteElephantEntity e = king(h, ModEntities.WHITE_ELEPHANT.get(), new BlockPos(2, 2, 0));
         e.setNoAi(true);
@@ -481,7 +485,7 @@ public class LionCamelGameTests {
 
     // ── The Little Wind-Driller ─────────────────────────────────────────
 
-    @GameTest(template = PLATFORM)
+    @GameTest(batch = "lion_camel_theLittleWindDrillerRaisesTheAlarm", template = PLATFORM)
     public static void theLittleWindDrillerRaisesTheAlarm(GameTestHelper h) {
         openAir(h);
         ServerPlayer peng = peng(h);
@@ -509,7 +513,7 @@ public class LionCamelGameTests {
 
     // ── The creatures ───────────────────────────────────────────────────
 
-    @GameTest(template = PLATFORM)
+    @GameTest(batch = "lion_camel_theRidgesDemonsAndTheirTricks", template = PLATFORM)
     public static void theRidgesDemonsAndTheirTricks(GameTestHelper h) {
         LivingEntity g = golem(h, new BlockPos(2, 2, 4));
         LionDemonEntity lion = demon(h, ModEntities.LION_DEMON.get(), 89, false, new BlockPos(2, 2, 2));
@@ -540,7 +544,7 @@ public class LionCamelGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(batch = "lion_camel_aRidgeCaptainIsPurpleLargerAndBringsItsKind", template = PLATFORM)
     public static void aRidgeCaptainIsPurpleLargerAndBringsItsKind(GameTestHelper h) {
         openAir(h);
         LionDemonEntity regular = demon(h, ModEntities.LION_DEMON.get(), 89, false, new BlockPos(1, 2, 1));
@@ -568,7 +572,7 @@ public class LionCamelGameTests {
         LevelManager.onEntityKilled(new LivingDeathEvent(victim, p.level().damageSources().playerAttack(p)));
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(batch = "lion_camel_theRidgePaysTheLastBandToTheCap", template = PLATFORM)
     public static void theRidgePaysTheLastBandToTheCap(GameTestHelper h) {
         ServerPlayer p = other(h);
         LevelManager.initClass(p, ReincarnationOutcome.EYE_OF_HEAVEN);
@@ -597,7 +601,7 @@ public class LionCamelGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(batch = "lion_camel_slayingTheKingsWhoAteAKingdomIsAGoodDeed", template = PLATFORM)
     public static void slayingTheKingsWhoAteAKingdomIsAGoodDeed(GameTestHelper h) {
         ServerPlayer p = other(h);
         eq(h, Morality.SLAY_AZURE_LION, Morality.killDeed(p, king(h, ModEntities.AZURE_LION.get(), new BlockPos(1, 2, 1))), "the Azure Lion");
@@ -609,7 +613,7 @@ public class LionCamelGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(batch = "lion_camel_thePengIsHailedButNotTooOften", template = PLATFORM)
     public static void thePengIsHailedButNotTooOften(GameTestHelper h) {
         ServerPlayer peng = peng(h);
         LionDemonEntity m = demon(h, ModEntities.LION_DEMON.get(), 89, false, new BlockPos(1, 2, 1));
@@ -638,7 +642,7 @@ public class LionCamelGameTests {
         return items.stream().filter(s -> s.is(item)).mapToInt(ItemStack::getCount).sum();
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(batch = "lion_camel_theKingsLeaveTheirWeaponsAndTheirHoard", template = PLATFORM)
     public static void theKingsLeaveTheirWeaponsAndTheirHoard(GameTestHelper h) {
         ServerPlayer p = other(h);
         AzureLionEntity lion = king(h, ModEntities.AZURE_LION.get(), new BlockPos(1, 2, 1));
@@ -662,7 +666,7 @@ public class LionCamelGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(batch = "lion_camel_theRidgesCreaturesLeaveItsMaterials", template = PLATFORM)
     public static void theRidgesCreaturesLeaveItsMaterials(GameTestHelper h) {
         ServerPlayer p = other(h);
         check(h, count(loot(h, demon(h, ModEntities.LION_DEMON.get(), 89, false, new BlockPos(1, 2, 1)), p), ModItems.MANE_TUFT.get()) >= 1, "lion-demons: mane");
@@ -685,7 +689,7 @@ public class LionCamelGameTests {
         return s == null || !s.blocksMotion();
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(batch = "lion_camel_lionCamelCitysBlueprint", template = PLATFORM)
     public static void lionCamelCitysBlueprint(GameTestHelper h) {
         // the Lion's place on the terrace, the Elephant's in his court
         check(h, LionCamelCity.at(0, LionCamelCity.TERRACE_H, 0).blocksMotion(), "the terrace under the Lion");

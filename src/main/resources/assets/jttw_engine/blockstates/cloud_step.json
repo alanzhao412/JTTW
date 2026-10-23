@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "type=bottom": { "model": "jttw_engine:block/cloud_step" },
+    "type=top": { "model": "jttw_engine:block/cloud_step_top" },
+    "type=double": { "model": "jttw_engine:block/celestial_cloud" }
+  }
+}

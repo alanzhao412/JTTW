@@ -108,6 +108,14 @@ public final class ModWorldgen {
             FEATURES.register("hell_decor", () -> new com.jttw.engine.world.hell.HellDecorFeature(
                     net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
 
+    // Mount Wuzhuang: the floating island, its temple and its stair; Zhenyuan in his hall
+    public static final DeferredHolder<net.minecraft.world.level.levelgen.feature.Feature<?>, net.minecraft.world.level.levelgen.feature.Feature<?>> MOUNT_WUZHUANG =
+            FEATURES.register("mount_wuzhuang", () -> new com.jttw.engine.world.wuzhuang.MountWuzhuangFeature(
+                    net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+    public static final DeferredHolder<net.minecraft.world.level.levelgen.feature.Feature<?>, net.minecraft.world.level.levelgen.feature.Feature<?>> ZHENYUAN_LAIR =
+            FEATURES.register("zhenyuan_lair", () -> new com.jttw.engine.world.wuzhuang.ZhenyuanLairFeature(
+                    net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
     public static void register(IEventBus modEventBus) {
         DENSITY_FUNCTION_TYPES.register(modEventBus);
         FEATURES.register(modEventBus);

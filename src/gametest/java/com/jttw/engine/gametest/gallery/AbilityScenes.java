@@ -87,6 +87,10 @@ final class AbilityScenes {
             java.util.Map.entry("hell_bridge", 100), java.util.Map.entry("hell_bridge_walk", 60), java.util.Map.entry("hell_meng_po", 60),
             // the Fire Cloud Cave, laid off the stage
             java.util.Map.entry("fire_cave_gate", 100), java.util.Map.entry("fire_cave_hall", 100), java.util.Map.entry("fire_fanned", 60),
+            // the floating island, laid north of the stage, high over the flat world
+            java.util.Map.entry("wuzhuang_gate", 300), java.util.Map.entry("wuzhuang_court", 120), java.util.Map.entry("wuzhuang_hall", 120),
+            java.util.Map.entry("wuzhuang_garden", 120), java.util.Map.entry("wuzhuang_tree_fruit", 100), java.util.Map.entry("wuzhuang_road", 120),
+            java.util.Map.entry("wuzhuang_stair", 160), java.util.Map.entry("wuzhuang_below", 160), java.util.Map.entry("wuzhuang_afar", 200),
             // Lion-Camel City, laid off the stage; the demons given time to see the Peng and bow
             java.util.Map.entry("lion_city_gate", 140), java.util.Map.entry("lion_city_above", 100), java.util.Map.entry("lion_city_hall", 80),
             java.util.Map.entry("lion_city_court", 80), java.util.Map.entry("lion_city_street", 80), java.util.Map.entry("lion_peng_among_demons", 60));
@@ -99,6 +103,7 @@ final class AbilityScenes {
         all.addAll(WatersScenes.all());
         all.addAll(HellScenes.all());
         all.addAll(FireScenes.all());
+        all.addAll(WuzhuangScenes.all());
         all.addAll(LionScenes.all());
         return all;
     }
@@ -1150,6 +1155,7 @@ final class AbilityScenes {
         WatersScenes.clear(p);
         HellScenes.clear(p);
         FireScenes.clear(p);
+        WuzhuangScenes.clear(p);
         LionScenes.clear(p);
         keepScreen = false;
         topSpeed = false;

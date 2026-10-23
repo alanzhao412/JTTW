@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "age=0": { "model": "jttw_engine:block/ginseng_fruit_blossom" },
+    "age=1": { "model": "jttw_engine:block/ginseng_fruit_green" },
+    "age=2": { "model": "jttw_engine:block/ginseng_fruit_ripe" }
+  }
+}

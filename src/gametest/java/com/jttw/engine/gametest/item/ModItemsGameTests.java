@@ -43,6 +43,17 @@ import static com.jttw.engine.gametest.GT.*;
 public class ModItemsGameTests {
 
     private static final Map<String, Class<? extends Item>> EXPECTED = Map.ofEntries(
+            Map.entry("ginseng_fruit", com.jttw.engine.item.GinsengFruitItem.class),
+            Map.entry("golden_striker", com.jttw.engine.item.GoldenStrikerItem.class),
+            Map.entry("silk_lined_tray", com.jttw.engine.item.SilkLinedTrayItem.class),
+            Map.entry("zhenyuan_flywhisk", com.jttw.engine.item.FlywhiskItem.class),
+            Map.entry("crane_plume", Item.class),
+            Map.entry("daoist_talisman", Item.class),
+            Map.entry("daoist_disciple_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("cloud_crane_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("clear_wind_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("bright_moon_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("zhenyuan_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
             Map.entry("immortal_peach", ImmortalPeachItem.class),
             Map.entry("celestial_cloud", BlockItem.class),
             Map.entry("jttw_immortal_pill", ImmortalItems.ImmortalPillItem.class),

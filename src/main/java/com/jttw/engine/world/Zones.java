@@ -225,6 +225,24 @@ public final class Zones {
             TagKey.create(Registries.BIOME, id("fire_mountain_hosts")), ZoneLayout.FIRE_MOUNTAIN, Vertical.WHOLE_COLUMN,
             67, 77, 130);
 
+    public static final ResourceKey<Biome> MOUNT_WUZHUANG_BIOME = ResourceKey.create(Registries.BIOME, id("mount_wuzhuang"));
+
+    /** The height from which Mount Wuzhuang takes the column: over the world's clouds (y 192). */
+    public static final int MOUNT_WUZHUANG_FLOOR = 192;
+
+    /**
+     * Levels 78-88: Mount Wuzhuang (万寿山五庄观), Mount Longevity and the Temple of the Five
+     * Villages, home of the Great Immortal Zhenyuan and his ginseng-fruit tree: an aerial zone, a
+     * mountain floating over the clouds, from y {@value #MOUNT_WUZHUANG_FLOOR} up, over serene
+     * country (plains, forests, birch and flower forests, meadows, cherry groves). Its host is judged
+     * at y 256, where a column's biome is always its surface biome. Being aerial it may float over
+     * an underground zone (the Bottomless Cave also takes meadows and cherry groves); it gives way
+     * to every zone of the whole column before it.
+     */
+    public static final Zone MOUNT_WUZHUANG = Zone.overworld(MOUNT_WUZHUANG_BIOME,
+            TagKey.create(Registries.BIOME, id("mount_wuzhuang_hosts")), ZoneLayout.MOUNT_WUZHUANG,
+            Vertical.above(MOUNT_WUZHUANG_FLOOR), 78, 88, 145).hostSampledAt(256);
+
     public static final ResourceKey<Biome> LION_CAMEL_RIDGE_BIOME = ResourceKey.create(Registries.BIOME, id("lion_camel_ridge"));
 
     /** The height from which Lion-Camel Ridge takes the column: over the Bottomless Cave's, so the two may share mountains. */
@@ -246,7 +264,7 @@ public final class Zones {
             Vertical.above(LION_CAMEL_FLOOR), 89, 100, 160).hostSampledAt(256).alliedTo(ZoneAllies.PENG);
 
     /** Every zone, in order: an earlier one keeps its ground from a later one sharing its heights. Append new ones. */
-    public static final List<Zone> ALL = List.of(WHITE_BONE, BOTTOMLESS, MYSTICAL_WATERS, HELL, FIRE_MOUNTAIN, LION_CAMEL);
+    public static final List<Zone> ALL = List.of(WHITE_BONE, BOTTOMLESS, MYSTICAL_WATERS, HELL, FIRE_MOUNTAIN, MOUNT_WUZHUANG, LION_CAMEL);
 
     /** Where the overworld zones of {@link #ALL} lie. */
     public static final ZoneMap MAP = new ZoneMap(ALL);

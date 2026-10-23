@@ -56,6 +56,15 @@ class LionCamelPlacementTest {
     }
 
     @Test
+    void withItEveryLevelPastTheVanillaPhaseHasABand() {
+        for (int level = LevelConstants.VANILLA_CAP_LEVEL; level <= LevelConstants.MAX_LEVEL; level++) {
+            final int lv = level;
+            assertTrue(Zones.ALL.stream().anyMatch(z -> z.minLevel() <= lv && lv <= z.maxLevel()), "a band for level " + lv);
+        }
+        assertTrue(L.vertical().overlaps(Zones.MOUNT_WUZHUANG.vertical()), "it gives way to Mount Wuzhuang's sky too");
+    }
+
+    @Test
     void itSparesThePengAndTakesTheColumnFromForty() {
         assertSame(ZoneAllies.PENG, L.allies(), "allied to the Peng: the ridge is his brothers'");
         assertEquals(Zones.Vertical.above(Zones.LION_CAMEL_FLOOR), L.vertical());

@@ -1,0 +1,74 @@
+{
+  "has_precipitation": false,
+  "temperature": 0.6,
+  "downfall": 0.5,
+  "effects": {
+    "mood_sound": {
+      "sound": "minecraft:ambient.cave",
+      "tick_delay": 6000,
+      "block_search_extent": 8,
+      "offset": 2.0
+    },
+    "sky_color": 8961023,
+    "fog_color": 15660022,
+    "grass_color": 7909442,
+    "foliage_color": 5999686,
+    "water_color": 4766676,
+    "water_fog_color": 3108700,
+    "particle": {
+      "options": {
+        "type": "minecraft:white_ash"
+      },
+      "probability": 0.002
+    },
+    "music": {
+      "sound": "minecraft:music.overworld.cherry_grove",
+      "min_delay": 12000,
+      "max_delay": 24000,
+      "replace_current_music": false
+    }
+  },
+  "carvers": {
+    "air": []
+  },
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      "jttw_engine:mount_wuzhuang",
+      "jttw_engine:zhenyuan_lair"
+    ]
+  ],
+  "spawners": {
+    "ambient": [],
+    "axolotls": [],
+    "creature": [],
+    "misc": [],
+    "monster": [
+      {
+        "type": "jttw_engine:cloud_crane",
+        "weight": 100,
+        "minCount": 2,
+        "maxCount": 3
+      },
+      {
+        "type": "jttw_engine:daoist_disciple",
+        "weight": 60,
+        "minCount": 1,
+        "maxCount": 2
+      }
+    ],
+    "underground_water_creature": [],
+    "water_ambient": [],
+    "water_creature": []
+  },
+  "spawn_costs": {}
+}
