@@ -81,11 +81,11 @@ class GateRulesTest {
 
     @Test
     void soldiersRiseAtThePilgrimsLevelNeverOverHells() {
-        assertEquals(1, GateRules.soldierLevel(1), "no level asked: a beginner meets beginners' soldiers");
-        assertEquals(1, GateRules.soldierLevel(0));
-        assertEquals(30, GateRules.soldierLevel(30));
-        assertEquals(60, GateRules.soldierLevel(60));
-        assertEquals(GateRules.TOP_LEVEL, GateRules.soldierLevel(100), "never over Hell's top");
-        assertEquals(66, GateRules.TOP_LEVEL);
+        assertEquals(50, GateRules.soldierLevel(1), "no level asked, but a beginner meets no beginners' soldiers");
+        assertEquals(50, GateRules.soldierLevel(0));
+        assertEquals(53, GateRules.soldierLevel(53));
+        assertEquals(56, GateRules.soldierLevel(60), "short of Hell's own");
+        assertEquals(56, GateRules.soldierLevel(100));
+        assertTrue(GateRules.TOP_LEVEL < Zones.HELL.levelBand().minLevel(), "weaker than Hell");
     }
 }

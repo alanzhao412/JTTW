@@ -148,7 +148,7 @@ public class AncientGateGameTests {
             eq(h, GateRules.wave(WaveKind.VANGUARD, 1).size(), wave.size(), "the vanguard risen");
             for (HellMonster m : wave) {
                 check(h, m instanceof YinSoldierEntity, "Yin soldiers: " + m.getType());
-                eq(h, 12, m.mobLevel(), "at the pilgrim's level");
+                eq(h, GateRules.BOTTOM_LEVEL, m.mobLevel(), "never under the gate's least, the pilgrim only 12");
                 check(h, m.distanceToSqr(arrival.getX() + 0.5, arrival.getY(), arrival.getZ() + 0.5) <= GateRules.LEASH * GateRules.LEASH, "on the terrace, near");
                 eq(h, arrival.getY(), m.blockPosition().getY(), "standing on the terrace");
                 check(h, m.isPersistenceRequired(), "never despawning by itself");

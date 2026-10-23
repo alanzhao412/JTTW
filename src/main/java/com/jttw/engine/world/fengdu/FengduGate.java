@@ -267,7 +267,7 @@ public final class FengduGate {
 
     /** Raises a wave of the swarm round the gate; returns how many rose. */
     private static int raise(ServerLevel level, BlockPos ground, State s, WaveKind kind, List<ServerPlayer> near) {
-        int pilgrims = (int) Math.max(1, near.stream().filter(p -> trip(p) == Trip.FIGHTING).count());
+        int pilgrims = Math.max(1, near.size());
         int highest = near.stream().mapToInt(PlayerLevel::getLevel).max().orElse(com.jttw.engine.entity.hell.YinSoldierEntity.LEVEL);
         int lv = GateRules.soldierLevel(highest);
         Wave wave = GateRules.wave(kind, pilgrims);

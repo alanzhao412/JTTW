@@ -42,8 +42,12 @@ public final class ReadyGate {
 
     private ReadyGate() {}
 
-    /** Long enough for the zones' heavier terrain to generate under a busy test server. */
-    static final int MAX_WAIT_TICKS = 200;
+    /**
+     * Long enough for the zones' heavier terrain to generate under a busy test server: full runs
+     * have held a test over 160 ticks, and once the 200 this was ran out. The wait is not the
+     * test's own time (it is added to its timeout), so a generous bound costs nothing.
+     */
+    static final int MAX_WAIT_TICKS = 600;
 
     /**
      * Keeps the chunks under and round a test's platform ticking entities for ten minutes, two

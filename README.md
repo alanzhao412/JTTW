@@ -1010,9 +1010,9 @@ Wukong's dimension travel could. In
   Ancient City's frame raises a **swarm** of Hell's soldiers out of the terrace, every time: three
   waves, each rising when all but one of the last have fallen (five **Yin soldiers**; six more with
   their captain; then the gate's own guards, **Ox-Head and Horse-Face**, with three more), two more
-  soldiers a wave (one in the last) for each pilgrim on the terrace past the first, sixteen in all
-  for one; at the level of the highest of those there (no level is asked of anyone; never over
-  Hell's 66). They are kept to the terrace (one that strays 22 blocks or falls off it is brought
+  soldiers a wave (one in the last) for each player within 64 blocks of the gate past the first,
+  sixteen in all for one; at the level of the highest of those there, but never under 50 nor over
+  56 (no level is asked of anyone, yet they are strong, and still short of Hell's own 57-66). They are kept to the terrace (one that strays 22 blocks or falls off it is brought
   back), never despawn by themselves, and do not care that nothing spawns in Fengdu's country (they
   are raised, not spawned). A pilgrim who arrives while a swarm stands raises another vanguard at
   once. The swarm rises, and is beaten, only while someone is at the gate; with no one within 64
@@ -1062,7 +1062,7 @@ Wukong's dimension travel could. In
   way barred, its side doors' veils, the gate, the doors, the palace and the temples reachable on
   foot from outside the walls, room to stand where one comes back, every sign on a wall);
   `AncientGateGameTests` (soul fire lighting a built frame either way, and not a broken one, nor
-  plain fire; through the frame to Fengdu, the swarm rising wave by wave at the pilgrim's level, a
+  plain fire; through the frame to Fengdu, the swarm rising wave by wave at no less than level 50, a
   stray brought back, the gate barred until the last falls, then burning, and down to Hell; a walker
   over the land getting nowhere, even with the gate burning for another; the gate sealing again,
   and at once for a new arrival; the side doors back to the city, on the side one went in by, and

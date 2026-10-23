@@ -13,7 +13,9 @@ import java.util.List;
  * back up out of Diyu by the side doors of Hell's gate may pass again at once (they have been down
  * already; the way back must not trap them). No one else may, though the veil burns before them:
  * not the traveller who walked to Fengdu over the land, nor one who came up from the frame later
- * while the fight was won by others. Levels do not matter: the soldiers rise at the pilgrims' own.
+ * while the fight was won by others. No level is asked of anyone, but the soldiers are no
+ * beginners' foes: they rise at the highest level of those near the gate, never under
+ * {@value #BOTTOM_LEVEL} nor over {@value #TOP_LEVEL} (strong, but short of Hell's own 57-66).
  *
  * <p><b>When it seals again.</b> The gate burns while someone who may pass stands within
  * {@value #RANGE} blocks of it; once none has for {@value #SEAL_AFTER} ticks (they have all gone
@@ -24,7 +26,7 @@ import java.util.List;
  * <p><b>The swarm.</b> Three waves, each rising when all but one of the last have fallen: a
  * vanguard of Yin soldiers, the main body with a captain among them, and last the gate's own
  * guards, Ox-Head and Horse-Face, with a few more. Every wave grows by two soldiers (the last by
- * one) for each pilgrim on the terrace past the first. A pilgrim who arrives while a swarm is
+ * one) for each player within {@value #RANGE} blocks of the gate past the first. A pilgrim who arrives while a swarm is
  * already up raises another vanguard at once. The swarm rises, and is beaten, only while someone is
  * at the gate; if no one at all is within {@value #RANGE} blocks for {@value #ABANDON_AFTER}
  * ticks, it sinks back into the ground and is forgotten.
@@ -43,8 +45,10 @@ public final class GateRules {
     public static final int LEASH = 22;
     /** A wave rises when no more than this many of the last still stand. */
     public static final int NEXT_WAVE_AT = 1;
-    /** Hell's soldiers are never over Hell's highest level. */
-    public static final int TOP_LEVEL = 66;
+    /** The weakest the gate's soldiers rise: never a beginner's fight. */
+    public static final int BOTTOM_LEVEL = 50;
+    /** The strongest: still short of Hell's own, which begin at 57. */
+    public static final int TOP_LEVEL = 56;
 
     /** Where a player stands with the gate. */
     public enum Trip {
@@ -103,7 +107,7 @@ public final class GateRules {
         }
     }
 
-    /** The wave of this kind for {@code pilgrims} on the terrace (at least one counted). */
+    /** The wave of this kind for {@code pilgrims} players at the gate (at least one counted). */
     public static Wave wave(WaveKind kind, int pilgrims) {
         int more = Math.max(0, pilgrims - 1);
         return switch (kind) {
@@ -128,8 +132,8 @@ public final class GateRules {
         return waitingWaves == 0 && standing == 0;
     }
 
-    /** The level the soldiers rise at: the highest of the pilgrims', never over Hell's top (and at least 1). */
+    /** The level the soldiers rise at: the highest of those at the gate, kept within {@link #BOTTOM_LEVEL}-{@link #TOP_LEVEL}. */
     public static int soldierLevel(int highestPilgrim) {
-        return Math.max(1, Math.min(TOP_LEVEL, highestPilgrim));
+        return Math.max(BOTTOM_LEVEL, Math.min(TOP_LEVEL, highestPilgrim));
     }
 }
