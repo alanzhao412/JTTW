@@ -174,10 +174,10 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.waters.DragonKingEntity.West>> AO_RUN = king("ao_run", com.jttw.engine.entity.waters.DragonKingEntity.West::new);
     public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.waters.DragonKingEntity.North>> AO_SHUN = king("ao_shun", com.jttw.engine.entity.waters.DragonKingEntity.North::new);
 
-    /** A Dragon King: a dragon in a man's shape, a head taller than one. */
+    /** A Dragon King: a dragon in a man's shape, half again as tall as one (his antlers higher still). */
     private static <T extends com.jttw.engine.entity.waters.DragonKingEntity> DeferredHolder<EntityType<?>, EntityType<T>> king(String id, EntityType.EntityFactory<T> factory) {
         return ENTITIES.register(id, () -> EntityType.Builder.of(factory, MobCategory.MONSTER)
-                .sized(1.1F, 3.0F)
+                .sized(1.2F, 3.4F)
                 .clientTrackingRange(10)
                 .fireImmune()
                 .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, id).toString()));

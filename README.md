@@ -447,7 +447,12 @@ The Four Seas and the Dragon Kings' crystal palaces (水晶宫, novel chapter 3)
   what swims above), **Yaksha** (夜叉, the sea patrol: the fastest swimmers, hurl bolts of the tide,
   raise the alarm so every sea creature near turns on their foe).
 - **The Dragon Kings** (`DragonKingEntity`, a `ZoneBoss`, level 55, sixty ordinary hits): a dragon in
-  a man's shape, robed and crowned, swimming freely. Bolts of his sea (three, fanned, past two
+  a man's shape, robed and crowned, swimming freely; half again a man's height, a long antlered
+  dragon's head with trailing barbels, an emperor's dragon robe with its sea-and-cliff hem, wide
+  sleeves, a cloud collar and a jade belt. Each wears his own crown and carries his own regalia: Ao
+  Guang the mian crown and court tablet (drawn largest, the eldest), Ao Qin a crown of flames and the
+  flaming pearl, Ao Run the winged official's hat and a jade ruyi, Ao Shun an icicle crown, a sword
+  and the frost pearl. Bolts of his sea (three, fanned, past two
   thirds), a claw up close, and his sea's own wrath every 8 s (5 s past a third): **Ao Guang**
   (East, blue-green robes) a tidal surge that hurls all near him away; **Ao Qin** (South, red) the
   boiling sea that scalds and saps strength; **Ao Run** (West, white) a whirlpool round his foe that
