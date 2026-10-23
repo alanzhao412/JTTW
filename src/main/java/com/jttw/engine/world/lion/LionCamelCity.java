@@ -43,6 +43,12 @@ import javax.annotation.Nullable;
  *   <li><b>the elephant court</b> behind the palace, walled, ringed with great tusks of ivory, hay
  *       along its walls: the White Elephant's.</li>
  * </ul>
+ * It is built for its kings, giants two and a half times a man's height whose true forms are
+ * larger still: the hall stands {@value #HALL_H} high within, its thrones are a giant's, the gates
+ * of the palace and of the elephant court {@value #KINGS_GATE_HIGH} high and {@code 2 *}
+ * {@value #KINGS_GATE_HALF}{@code + 1} wide (a king walks from the one to the other: out of the
+ * hall, round the terrace, through the palace's north gate and into his court), and the court
+ * has room for the elephant he truly is.
  * Local y 0 is the city's ground (its paving), (0, 0) the region's centre, the main gate toward +z.
  */
 public final class LionCamelCity {
@@ -64,15 +70,17 @@ public final class LionCamelCity {
     /** The plots: their first's near edge, their width, and the pitch between them (an alley between). */
     public static final int PLOT_FROM = 5, PLOT = 9, PITCH = 11, PLOTS = 4;
 
-    /** The palace compound (its wall this far out each way), its terrace, its hall. */
-    public static final int PALACE = 24;
+    /** The palace compound (its wall this far out each way, and so high), its terrace, its hall. */
+    public static final int PALACE = 24, PALACE_WALL_H = 7;
     public static final int TERRACE_X = 17, TERRACE_N = -19, TERRACE_S = 11, TERRACE_H = 2;
     public static final int HALL_X = 14, HALL_N = -17, HALL_S = 9, HALL_H = 11;
-    /** Where the thrones stand (local z), and the three of them (local x): the Elephant's, the Lion's, the Peng's. */
-    public static final int THRONE_Z = -15;
-    public static final int[] THRONES = {-4, 0, 4};
-    /** The elephant court: its extent and its centre. */
-    public static final int COURT_X = 13, COURT_N = -47, COURT_S = -27, COURT_Z = -37;
+    /** Where the thrones stand (local z), and the three of them (local x): the Elephant's, the Lion's, the Peng's; each a giant's, its back so high. */
+    public static final int THRONE_Z = -15, THRONE_BACK = 5;
+    public static final int[] THRONES = {-6, 0, 6};
+    /** The elephant court: its extent and its centre; its wall's height. */
+    public static final int COURT_X = 16, COURT_N = -50, COURT_S = -27, COURT_Z = -38, COURT_WALL_H = 6;
+    /** The gates of the palace and of the elephant court, the kings' ways: half-width of the way through, and its height. */
+    public static final int KINGS_GATE_HALF = 3, KINGS_GATE_HIGH = 6;
 
     // ── Small helpers ───────────────────────────────────────────────────
 
@@ -416,10 +424,11 @@ public final class LionCamelCity {
         int ax = Math.abs(x), az = Math.abs(z);
         boolean rim = Math.max(ax, az) == PALACE;
         if (rim) {
-            if (ax <= GATE_HALF && az == PALACE && y >= 1 && y <= 4) return s(Blocks.AIR);       // its gates, south and north
+            if (ax <= KINGS_GATE_HALF && az == PALACE && y >= 1 && y <= KINGS_GATE_HIGH) return s(Blocks.AIR); // its gates, south and north
             if (y == 0) return s(Blocks.STONE_BRICKS);
-            if (y <= 5) return hash(x * 7 + y, z, 62) < 12 ? s(Blocks.BROWN_TERRACOTTA) : s(Blocks.RED_TERRACOTTA);
-            if (y == 6) return slab(Blocks.DEEPSLATE_TILE_SLAB, SlabType.BOTTOM);
+            if (ax == KINGS_GATE_HALF + 1 && az == PALACE && y <= KINGS_GATE_HIGH + 1) return s(Blocks.STRIPPED_MANGROVE_LOG); // their posts
+            if (y <= PALACE_WALL_H) return hash(x * 7 + y, z, 62) < 12 ? s(Blocks.BROWN_TERRACOTTA) : s(Blocks.RED_TERRACOTTA);
+            if (y == PALACE_WALL_H + 1) return slab(Blocks.DEEPSLATE_TILE_SLAB, SlabType.BOTTOM);
             return null;
         }
         boolean terrace = ax <= TERRACE_X && z >= TERRACE_N && z <= TERRACE_S;
@@ -506,8 +515,8 @@ public final class LionCamelCity {
         // within
         if (h == 1) {
             // the dais and the three thrones
-            if (z >= THRONE_Z - 1 && z <= THRONE_Z + 1 && ax <= 6) return s(Blocks.POLISHED_BLACKSTONE);
-            if (z == THRONE_Z + 2 && ax <= 6) return slab(Blocks.POLISHED_BLACKSTONE_SLAB, SlabType.BOTTOM);
+            if (z >= THRONE_Z - 1 && z <= THRONE_Z + 1 && ax <= 9) return s(Blocks.POLISHED_BLACKSTONE);
+            if (z == THRONE_Z + 2 && ax <= 9) return slab(Blocks.POLISHED_BLACKSTONE_SLAB, SlabType.BOTTOM);
             if (broken && hash(x, z, 68) < 55) return hash(x, z, 69) < 50 ? s(Blocks.DEEPSLATE_TILES) : s(Blocks.DARK_OAK_PLANKS); // the wreck of the roof
             // a carpet up the nave
             if (ax <= 1 && z > THRONE_Z + 2 && z < HALL_S) return s(Blocks.RED_CARPET);
@@ -516,15 +525,17 @@ public final class LionCamelCity {
             if (ax > 2 && r < 37) return bone(x, z);
             return s(Blocks.AIR);
         }
-        if (h == 2) {
+        // the thrones, a giant's each: a seat three wide, arms, a gilded back, a skull atop it
+        if (h >= 2 && h <= THRONE_BACK + 2) {
             for (int t : THRONES) {
-                if (x == t && z == THRONE_Z) return stair(Blocks.POLISHED_BLACKSTONE_STAIRS, Direction.NORTH);
-                if (Math.abs(x - t) == 1 && z == THRONE_Z) return slab(Blocks.POLISHED_BLACKSTONE_SLAB, SlabType.BOTTOM);
-                if (Math.abs(x - t) <= 1 && z == THRONE_Z - 1) return s(Blocks.GILDED_BLACKSTONE);
+                int d = Math.abs(x - t);
+                if (h == 2 && d <= 1 && z == THRONE_Z) return stair(Blocks.POLISHED_BLACKSTONE_STAIRS, Direction.NORTH);
+                if (d == 2 && z == THRONE_Z && h <= 3) return h == 2 ? s(Blocks.POLISHED_BLACKSTONE_BRICKS) : slab(Blocks.POLISHED_BLACKSTONE_SLAB, SlabType.BOTTOM);
+                if (z == THRONE_Z - 1 && (d <= 2 && h <= THRONE_BACK || d <= 1 && h == THRONE_BACK + 1)) return s(Blocks.GILDED_BLACKSTONE);
+                if (z == THRONE_Z - 1 && d == 0 && h == THRONE_BACK + 2) return skull(x, z);
             }
-            if (broken && hash(x, z, 68) < 20) return s(Blocks.DEEPSLATE_TILES);
         }
-        if (h == 3) for (int t : THRONES) if (x == t && z == THRONE_Z - 1) return s(Blocks.GILDED_BLACKSTONE);
+        if (h == 2 && broken && hash(x, z, 68) < 20) return s(Blocks.DEEPSLATE_TILES);
         // soul lanterns hung from the beams down the nave
         if (h == HALL_H - 1 && !broken && (ax == 4) && Math.floorMod(z - HALL_N, 6) == 3) return hanging(Blocks.SOUL_LANTERN);
         return s(Blocks.AIR);
@@ -549,22 +560,22 @@ public final class LionCamelCity {
     // ── The elephant court ──────────────────────────────────────────────
 
     /** The tusks round the court: their feet (local x, z), each curving in toward the court's middle. */
-    public static final int[][] TUSKS = {{-8, COURT_Z - 6}, {8, COURT_Z - 6}, {-9, COURT_Z}, {9, COURT_Z}, {-8, COURT_Z + 6}, {8, COURT_Z + 6}};
-    public static final int TUSK_H = 6;
+    public static final int[][] TUSKS = {{-11, COURT_Z - 7}, {11, COURT_Z - 7}, {-12, COURT_Z}, {12, COURT_Z}, {-11, COURT_Z + 7}, {11, COURT_Z + 7}};
+    public static final int TUSK_H = 8;
 
     private static BlockState court(int x, int y, int z) {
         int ax = Math.abs(x);
         boolean rim = ax == COURT_X || z == COURT_N || z == COURT_S;
         if (rim) {
-            if (ax <= GATE_HALF && (z == COURT_N || z == COURT_S) && y >= 1 && y <= 4) return s(Blocks.AIR);
+            if (ax <= KINGS_GATE_HALF && (z == COURT_N || z == COURT_S) && y >= 1 && y <= KINGS_GATE_HIGH) return s(Blocks.AIR);
             if (y == 0) return s(Blocks.STONE_BRICKS);
-            if (y <= 4) return hash(x * 3 + y, z, 71) < 30 ? s(Blocks.MOSSY_STONE_BRICKS) : s(Blocks.STONE_BRICKS);
-            if (y == 5) return Math.floorMod(x + z, 2) == 0 ? s(Blocks.STONE_BRICK_WALL) : null;
+            if (y <= COURT_WALL_H) return hash(x * 3 + y, z, 71) < 30 ? s(Blocks.MOSSY_STONE_BRICKS) : s(Blocks.STONE_BRICKS);
+            if (y == COURT_WALL_H + 1) return Math.floorMod(x + z, 2) == 0 ? s(Blocks.STONE_BRICK_WALL) : null;
             return null;
         }
         if (y == 0) {
             double d = Math.hypot(x, (z - COURT_Z) * 1.2);
-            if (d < 6) return hash(x, z, 72) < 70 ? s(Blocks.COARSE_DIRT) : s(Blocks.ROOTED_DIRT);   // trampled
+            if (d < 8) return hash(x, z, 72) < 70 ? s(Blocks.COARSE_DIRT) : s(Blocks.ROOTED_DIRT);   // trampled
             return hash(x, z, 73) < 60 ? s(Blocks.MUD_BRICKS) : s(Blocks.PACKED_MUD);
         }
         // the tusks: ivory rising and bending inward

@@ -3,16 +3,21 @@ package com.jttw.engine.entity.lion;
 import com.jttw.engine.entity.zone.ZoneBoss;
 import com.jttw.engine.world.Zones;
 import com.jttw.engine.world.lion.LionCamelRidge;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -32,18 +37,33 @@ import java.util.UUID;
  * is not the king's target: no blow of the king's falls on him but what holding him does
  * ({@link #onHoldTick}).
  *
+ * <p>At his last third he <b>reveals his true form</b>, the beast a Bodhisattva rides, loosed on earth
+ * ({@link #beginReveal}): for {@value #REVEAL} ticks he stands roaring as his demon shape falls away
+ * (no blow lands on him, nor does he strike; a captive is let go), then the beast stands in his
+ * place, in another body ({@link #trueFormDimensions()}), and his fight goes on in it. Whether he is
+ * in it is synced ({@link #inTrueForm()}: his renderer draws the one or the other), and kept.
+ *
  * <p>Like everything of the ridge, a king spares the Great Peng; and he hails a Peng player once as
  * his third brother ({@code entity.jttw_engine.<id>.brother}).
  */
 public abstract class DemonKingEntity extends ZoneBoss {
 
     private static final EntityDataAccessor<Boolean> HOLDING = SynchedEntityData.defineId(DemonKingEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> TRUE_FORM = SynchedEntityData.defineId(DemonKingEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> REVEALING = SynchedEntityData.defineId(DemonKingEntity.class, EntityDataSerializers.BOOLEAN);
+
+    /** How long his true form takes to show itself, in ticks: the pause as his demon shape falls away. */
+    public static final int REVEAL = 40;
+    /** How near the players must be to be told what he is. */
+    public static final double REVEAL_HEARD = 48;
 
     @Nullable
     private UUID captiveId;
     private int held;
     private float dealtWithin;
     private boolean lettingGo;
+    /** How far into revealing his true form he is, or -1. */
+    private int revealing = -1;
     /** The Peng players he has hailed. */
     private final Set<UUID> hailed = new HashSet<>();
 
@@ -79,15 +99,87 @@ public abstract class DemonKingEntity extends ZoneBoss {
     /** As he lets a captive go: broken free, or let go (spat out, thrown). */
     protected void onLetGo(LivingEntity captive, boolean brokeFree) {}
 
+    /** His true form's body (his demon shape's is his type's). */
+    protected abstract EntityDimensions trueFormDimensions();
+
+    /** Each tick of his reveal ({@code t} from 1 to {@value #REVEAL}): his roaring, the demon shape breaking up. */
+    protected void onRevealTick(ServerLevel level, int t) {}
+
+    /** As the beast stands in his place. */
+    protected void onRevealed(ServerLevel level) {}
+
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(HOLDING, false);
+        builder.define(TRUE_FORM, false);
+        builder.define(REVEALING, false);
     }
 
     /** Whether he holds a captive (synced: his model shows it). */
     public boolean isHolding() {
         return entityData.get(HOLDING);
+    }
+
+    // ── His true form ───────────────────────────────────────────────────
+
+    /** Whether he is in his true form (synced: his model and body show it). */
+    public boolean inTrueForm() {
+        return entityData.get(TRUE_FORM);
+    }
+
+    /** Whether his true form is showing itself (synced: his model shows it). */
+    public boolean isRevealing() {
+        return entityData.get(REVEALING);
+    }
+
+    /** How far into his reveal he is (from 0), or -1. */
+    public int revealedFor() {
+        return revealing;
+    }
+
+    /** His true form begins to show itself: {@value #REVEAL} ticks on it stands in his place. Returns whether it began. */
+    public boolean beginReveal() {
+        if (level().isClientSide || inTrueForm() || revealing >= 0) return false;
+        if (captiveId != null) letGo(false);
+        revealing = 0;
+        entityData.set(REVEALING, true);
+        getNavigation().stop();
+        return true;
+    }
+
+    /** His true form stands in his place, at once (the end of his reveal). */
+    public void revealTrueForm() {
+        if (level().isClientSide || inTrueForm()) return;
+        if (captiveId != null) letGo(false);
+        revealing = -1;
+        entityData.set(REVEALING, false);
+        entityData.set(TRUE_FORM, true);
+        refreshDimensions();
+        if (level() instanceof ServerLevel server) {
+            onRevealed(server);
+            String id = EntityType.getKey(getType()).getPath();
+            for (ServerPlayer p : server.players()) {
+                if (p.distanceTo(this) <= REVEAL_HEARD) p.sendSystemMessage(Component.translatable("entity.jttw_engine." + id + ".reveal"));
+            }
+        }
+    }
+
+    @Override
+    protected EntityDimensions getDefaultDimensions(Pose pose) {
+        return inTrueForm() ? trueFormDimensions() : super.getDefaultDimensions(pose);
+    }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+        if (TRUE_FORM.equals(key)) refreshDimensions();
+    }
+
+    /** While his true form shows itself, none of his blows lands. */
+    @Override
+    public boolean doHurtTarget(Entity target) {
+        return revealing < 0 && super.doHurtTarget(target);
     }
 
     // ── A captive ───────────────────────────────────────────────────────
@@ -162,9 +254,10 @@ public abstract class DemonKingEntity extends ZoneBoss {
         return position().add(o.x * cos - o.z * sin, o.y, o.x * sin + o.z * cos);
     }
 
+    /** His captive where he holds it: on the client too (where whom he holds is not known, but no one else rides him). */
     @Override
     protected void positionRider(Entity passenger, Entity.MoveFunction move) {
-        if (holds(passenger)) {
+        if (holds(passenger) || level().isClientSide && passenger instanceof LivingEntity) {
             Vec3 at = captivePosition();
             move.accept(passenger, at.x, at.y, at.z);
             return;
@@ -205,6 +298,7 @@ public abstract class DemonKingEntity extends ZoneBoss {
     /** A captive's blows from where he is count toward his breaking free. */
     @Override
     public boolean hurt(DamageSource source, float amount) {
+        if (revealing >= 0 && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) return false; // nor any blow on him
         boolean within = !level().isClientSide && holds(source.getEntity());
         if (within) amount *= withinMultiplier();
         float before = getHealth();
@@ -230,6 +324,12 @@ public abstract class DemonKingEntity extends ZoneBoss {
                 if (captiveId != null && held >= maxHold()) letGo(false);
             }
         }
+        if (revealing >= 0) {
+            getNavigation().stop();
+            setDeltaMovement(0, getDeltaMovement().y, 0);
+            if (level() instanceof ServerLevel server) onRevealTick(server, ++revealing);
+            if (revealing >= REVEAL) revealTrueForm();
+        }
         if (tickCount % 20 == 0) hailBrother();
     }
 
@@ -252,6 +352,21 @@ public abstract class DemonKingEntity extends ZoneBoss {
     public void remove(RemovalReason reason) {
         if (!level().isClientSide && captiveId != null) letGo(false);
         super.remove(reason);
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putBoolean("TrueForm", inTrueForm() || revealing >= 0); // a reveal begun is as good as done
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        if (tag.getBoolean("TrueForm")) {
+            entityData.set(TRUE_FORM, true);
+            refreshDimensions();
+        }
     }
 
     @Override

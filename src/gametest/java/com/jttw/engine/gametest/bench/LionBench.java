@@ -179,7 +179,7 @@ final class LionBench {
         if (ticks == 300) shot("lion_city_gate");
         if (ticks == 310) look(p, level, x0 + 0.5, floor + LionCamelCity.TERRACE_H + 4, z0 + 8.5, centre.atY(floor + LionCamelCity.TERRACE_H + 2).offset(0, 0, LionCamelCity.THRONE_Z));
         if (ticks == 420) shot("lion_city_throne_hall");
-        if (ticks == 430) look(p, level, x0 + 9.5, floor + 9, z0 + LionCamelCity.COURT_S - 1.5, centre.atY(floor + 2).offset(0, 0, LionCamelCity.COURT_Z));
+        if (ticks == 430) look(p, level, x0 + 6.5, floor + 8, z0 + LionCamelCity.COURT_S - 2.0, centre.atY(floor + 2).offset(0, 0, LionCamelCity.COURT_Z));
         if (ticks == 540) shot("lion_city_elephant_court");
         if (ticks == 550) look(p, level, x0 + 25.5, floor + 3, z0 + 50.5, centre.atY(floor + 1).offset(25, 0, 8));
         if (ticks == 660) shot("lion_city_street");

@@ -148,7 +148,9 @@ public final class ClientInit {
         event.registerLayerDefinition(com.jttw.engine.client.renderer.PengDemonRenderer.LAYER, com.jttw.engine.client.renderer.PengDemonRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.LittleWindDrillerRenderer.LAYER, com.jttw.engine.client.renderer.LittleWindDrillerRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.AzureLionRenderer.LAYER, com.jttw.engine.client.renderer.AzureLionRenderer::layer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.AzureLionRenderer.TRUE_LAYER, com.jttw.engine.client.renderer.AzureLionRenderer::trueLayer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.WhiteElephantRenderer.LAYER, com.jttw.engine.client.renderer.WhiteElephantRenderer::layer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.WhiteElephantRenderer.TRUE_LAYER, com.jttw.engine.client.renderer.WhiteElephantRenderer::trueLayer);
     }
 
     // ── Entity renderers (MOD bus) ─────────────────────────────────

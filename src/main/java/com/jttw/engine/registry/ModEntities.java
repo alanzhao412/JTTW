@@ -415,18 +415,18 @@ public final class ModEntities {
                             .clientTrackingRange(10)
                             .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "little_wind_driller").toString()));
 
-    /** The two demon kings: towering. */
+    /** The two demon kings: giants, two and a half times a man's height (their true forms' bodies are their own: see DemonKingEntity). */
     public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.lion.AzureLionEntity>> AZURE_LION =
             ENTITIES.register("azure_lion", () ->
                     EntityType.Builder.<com.jttw.engine.entity.lion.AzureLionEntity>of(com.jttw.engine.entity.lion.AzureLionEntity::new, MobCategory.MONSTER)
-                            .sized(1.4F, 3.6F)
+                            .sized(2.0F, 4.5F)
                             .clientTrackingRange(10)
                             .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "azure_lion").toString()));
 
     public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.lion.WhiteElephantEntity>> WHITE_ELEPHANT =
             ENTITIES.register("white_elephant", () ->
                     EntityType.Builder.<com.jttw.engine.entity.lion.WhiteElephantEntity>of(com.jttw.engine.entity.lion.WhiteElephantEntity::new, MobCategory.MONSTER)
-                            .sized(1.8F, 3.8F)
+                            .sized(2.2F, 4.6F)
                             .clientTrackingRange(10)
                             .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "white_elephant").toString()));
 

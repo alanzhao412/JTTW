@@ -1,15 +1,23 @@
 package com.jttw.engine.client.renderer;
 
 import com.jttw.engine.JTTWEngine;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.EyesLayer;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 
 /**
  * What Lion-Camel Ridge's renderers share: names shown only near, a glowing skin (eyes, gold)
@@ -32,6 +40,22 @@ final class LionCourt {
             @Override
             public RenderType renderType() {
                 return type;
+            }
+        };
+    }
+
+    /**
+     * The glowing parts of a skin chosen for each one drawn ({@code textures/entity/<name>_glow.png}),
+     * full-bright: for a king whose true form has its own skin.
+     */
+    static <T extends LivingEntity, M extends EntityModel<T>> RenderLayer<T, M> glow(RenderLayerParent<T, M> parent, Function<T, String> name) {
+        Map<String, RenderType> types = new HashMap<>();
+        return new RenderLayer<>(parent) {
+            @Override
+            public void render(PoseStack pose, MultiBufferSource buffers, int light, T e, float swing, float amount, float partial,
+                               float age, float yaw, float pitch) {
+                RenderType type = types.computeIfAbsent(name.apply(e), n -> RenderType.eyes(JTTWEngine.id("textures/entity/" + n + "_glow.png")));
+                getParentModel().renderToBuffer(pose, buffers.getBuffer(type), 15728640, OverlayTexture.NO_OVERLAY);
             }
         };
     }
