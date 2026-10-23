@@ -93,7 +93,10 @@ final class AbilityScenes {
             java.util.Map.entry("wuzhuang_stair", 160), java.util.Map.entry("wuzhuang_below", 160), java.util.Map.entry("wuzhuang_afar", 200),
             // Lion-Camel City, laid off the stage; the demons given time to see the Peng and bow
             java.util.Map.entry("lion_city_gate", 140), java.util.Map.entry("lion_city_above", 100), java.util.Map.entry("lion_city_hall", 80),
-            java.util.Map.entry("lion_city_court", 80), java.util.Map.entry("lion_city_street", 80), java.util.Map.entry("lion_peng_among_demons", 60));
+            java.util.Map.entry("lion_city_court", 80), java.util.Map.entry("lion_city_street", 80), java.util.Map.entry("lion_peng_among_demons", 60),
+            java.util.Map.entry("lion_city_kings_way", 80), java.util.Map.entry("lion_city_hall_true", 60), java.util.Map.entry("lion_city_court_true", 60),
+            // a king's true form showing itself, its pause run out before the picture
+            java.util.Map.entry("lion_azure_lion_revealed", 20), java.util.Map.entry("lion_white_elephant_revealed", 20));
 
         /** Set by a scene that photographs a screen (a furnace's, say), so the gallery leaves it open. */
     static volatile boolean keepScreen;

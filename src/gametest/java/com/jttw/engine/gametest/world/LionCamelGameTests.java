@@ -59,10 +59,11 @@ import static com.jttw.engine.gametest.GT.*;
 import static com.jttw.engine.gametest.character.CharTest.as;
 
 /**
- * Lion-Camel Ridge: the Peng rule (nothing of the zone, its two demon kings included, targets a
- * Peng player or fights him back, even struck; they fight others), the Azure Lion swallowing a foe
- * and the foe fighting his way out or being spat out, the White Elephant's trunk, his and the
- * Lion's phases, the Little Wind-Driller's alarm, the ridge's creatures and captains, what they
+ * Lion-Camel Ridge: the Peng rule (nothing of the zone, its two demon kings included, in either of
+ * their shapes, targets a Peng player or fights him back, even struck; they fight others), the
+ * Azure Lion swallowing a foe and the foe fighting his way out or being spat out, the White
+ * Elephant's trunk, his and the Lion's phases and their true forms (revealed at a third, another
+ * model and body, their tricks still theirs in it), the Little Wind-Driller's alarm, the ridge's creatures and captains, what they
  * leave (and that the Peng gets nothing of theirs), the band's XP at the levels' cap, karma, and
  * Lion-Camel City's blueprint.
  *
@@ -253,12 +254,17 @@ public class LionCamelGameTests {
         check(h, !lion.swallow(peng), "he will not swallow his brother");
         List<LivingEntity> roared = lion.roar(g);
         check(h, roared.contains(g) && !roared.contains(peng), "his roar passes over the Peng: " + roared);
+        lion.revealTrueForm();
+        check(h, lion.inTrueForm() && !lion.foe(peng), "nor is he the lion's foe");
+        check(h, !lion.swallow(peng) && !lion.pounce(peng), "the lion neither swallows his brother nor pounces on him");
         lion.discard();
         WhiteElephantEntity elephant = king(h, ModEntities.WHITE_ELEPHANT.get(), new BlockPos(2, 2, 0));
         elephant.setNoAi(true);
         check(h, !elephant.grab(peng), "nor will the Elephant's trunk take him");
         List<LivingEntity> stamped = elephant.stamp();
         check(h, !stamped.contains(peng), "nor his stamping touch him");
+        elephant.revealTrueForm();
+        check(h, !elephant.grab(peng) && !elephant.stamp().contains(peng), "nor, in his true form, his trunk or his trampling");
         h.succeed();
     }
 
@@ -379,27 +385,87 @@ public class LionCamelGameTests {
         h.succeed();
     }
 
-    @GameTest(batch = "lion_camel_atTwoThirdsTheLionCallsHisKinAndAtAThirdHeGrows", template = PLATFORM, timeoutTicks = 60)
-    public static void atTwoThirdsTheLionCallsHisKinAndAtAThirdHeGrows(GameTestHelper h) {
+    @GameTest(batch = "lion_camel_atTwoThirdsTheLionCallsHisKinAndAtAThirdRevealsHisTrueForm", template = PLATFORM, timeoutTicks = 100)
+    public static void atTwoThirdsTheLionCallsHisKinAndAtAThirdRevealsHisTrueForm(GameTestHelper h) {
         AzureLionEntity lion = king(h, ModEntities.AZURE_LION.get(), new BlockPos(2, 2, 2));
         lion.setNoAi(true);
         LivingEntity foe = golem(h, new BlockPos(4, 2, 4));
         lion.setTarget(foe); // his kin are set on his foe: so this test knows its own
-        float scale = lion.getScale();
         lion.setHealth(lion.getMaxHealth() * 0.6f);
         h.runAfterDelay(3, () -> {
             eq(h, 1, lion.phase(), "his second phase");
             List<LionDemonEntity> kin = h.getLevel().getEntitiesOfClass(LionDemonEntity.class, lion.getBoundingBox().inflate(12, 64, 12), m -> m.getTarget() == foe);
             discardAtEnd(h, kin);
             eq(h, AzureLionEntity.KIN, kin.size(), "lion-demons come running, set on his foe");
+            check(h, !lion.inTrueForm() && !lion.isRevealing(), "still the demon king");
             lion.setHealth(lion.getMaxHealth() * 0.3f);
         });
-        h.runAfterDelay(6, () -> {
-            eq(h, 2, lion.phase(), "his last");
-            close(h, scale * (1 + AzureLionEntity.GROW_PERCENT / 100.0), lion.getScale(), "he swells huge");
+        revealsHisTrueFormAtAThird(h, lion, 6, AzureLionEntity.TRUE_WIDTH, AzureLionEntity.TRUE_HEIGHT);
+    }
+
+    /**
+     * {@code king}, his health put at a third {@code from} ticks into the test, begins to reveal his
+     * true form: he stands, unharmed by blows, for its pause; then he is in it, in its body, as he
+     * stays (saved and loaded); his demon shape is a giant's, two and a half times a man's height.
+     */
+    private static void revealsHisTrueFormAtAThird(GameTestHelper h, DemonKingEntity king, int from, float width, float height) {
+        float kingWidth = king.getType().getWidth(), kingHeight = king.getType().getHeight();
+        check(h, kingHeight >= 2.4f * 1.8f && kingWidth >= 1.9f, "a giant, two and a half times a man's height: " + kingWidth + " by " + kingHeight);
+        check(h, width >= 2.4f && height >= 3.2f && width * height > kingWidth * kingHeight,
+                "his true form as large as the Great White Bull or larger: " + width + " by " + height);
+        h.runAfterDelay(from + 3, () -> {
+            eq(h, 2, king.phase(), "his last phase");
+            check(h, king.isRevealing() && !king.inTrueForm(), "his true form shows itself");
+            close(h, kingWidth, king.getBbWidth(), "in his demon shape still, through the pause");
+            float hp = king.getHealth();
+            king.invulnerableTime = 0;
+            check(h, !king.hurt(h.getLevel().damageSources().generic(), 50), "no blow lands on him as it does");
+            eq(h, hp, king.getHealth(), "unharmed");
+        });
+        h.runAfterDelay(from + 3 + DemonKingEntity.REVEAL + 2, () -> {
+            check(h, king.inTrueForm() && !king.isRevealing(), "the beast stands in his place");
+            close(h, width, king.getBbWidth(), "its body's width");
+            close(h, height, king.getBbHeight(), "its height");
+            var tag = new net.minecraft.nbt.CompoundTag();
+            king.saveWithoutId(tag);
+            DemonKingEntity again = (DemonKingEntity) king.getType().create(h.getLevel());
+            again.load(tag);
+            check(h, again.inTrueForm() && Math.abs(again.getBbWidth() - width) < 1e-3, "and stays so, saved and loaded");
+            again.discard();
             h.succeed();
         });
     }
+
+    @GameTest(batch = "lion_camel_inHisTrueFormTheLionStillSwallowsAndPounces", template = PLATFORM, timeoutTicks = 60)
+    public static void inHisTrueFormTheLionStillSwallowsAndPounces(GameTestHelper h) {
+        AzureLionEntity lion = king(h, ModEntities.AZURE_LION.get(), new BlockPos(2, 2, 0));
+        lion.setNoAi(true);
+        lion.setYRot(0);
+        lion.setYHeadRot(0);
+        lion.setYBodyRot(0);
+        lion.revealTrueForm();
+        check(h, lion.jawReach() > AzureLionEntity.SWALLOW_REACH, "the lion's jaws reach further");
+        LivingEntity g = golem(h, new BlockPos(2, 2, 4));
+        check(h, lion.inJaws(g) && lion.swallow(g), "he swallows a foe before him");
+        h.runAfterDelay(2, () -> {
+            check(h, lion.holds(g) && g.getVehicle() == lion, "it is inside him");
+            check(h, lion.getBoundingBox().contains(g.getBoundingBox().getCenter()), "inside his body, not before it: " + g.position() + " in " + lion.getBoundingBox());
+            lion.invulnerableTime = 0;
+            lion.hurt(h.getLevel().damageSources().indirectMagic(g, g), lion.escapeShare() * lion.getMaxHealth());
+            check(h, !lion.holds(g) && g.getVehicle() == null && lion.isReeling(), "fought out of him, as out of the demon king");
+            check(h, !lion.getBoundingBox().intersects(g.getBoundingBox().deflate(0.05)), "retched up clear of him");
+            // a foe further off he pounces on, jaws first
+            LivingEntity far = golem(h, new BlockPos(2, 2, 4));
+            far.teleportTo(lion.getX(), lion.getY(), lion.getZ() + 9);
+            check(h, lion.pounce(far) && lion.isPouncing(), "he pounces on a foe nine blocks off");
+            check(h, lion.getDeltaMovement().z > 0.5 && lion.getDeltaMovement().y > 0.3, "springing at it: " + lion.getDeltaMovement());
+            far.teleportTo(lion.getX(), lion.getY(), lion.getZ() + lion.getBbWidth() / 2 + 1.0);
+            check(h, lion.pounceTick() && lion.holds(far) && !lion.isPouncing(), "and, his jaws reaching it, swallows it as he lands");
+            h.succeed();
+        });
+    }
+
+    // ── The White Elephant ──────────────────────────────────────────────
 
     // ── The White Elephant ──────────────────────────────────────────────
 
@@ -465,6 +531,56 @@ public class LionCamelGameTests {
             List<ElephantDemonEntity> come = h.getLevel().getEntitiesOfClass(ElephantDemonEntity.class, e.getBoundingBox().inflate(12, 64, 12), m -> m.getTarget() == g);
             discardAtEnd(h, come);
             eq(h, WhiteElephantEntity.FOLLOWERS, come.size(), "his followers come at his trumpeting");
+            h.succeed();
+        });
+    }
+
+    @GameTest(batch = "lion_camel_atAThirdTheWhiteElephantRevealsHisTrueForm", template = PLATFORM, timeoutTicks = 100)
+    public static void atAThirdTheWhiteElephantRevealsHisTrueForm(GameTestHelper h) {
+        WhiteElephantEntity e = king(h, ModEntities.WHITE_ELEPHANT.get(), new BlockPos(2, 2, 2));
+        e.setNoAi(true);
+        LivingEntity foe = golem(h, new BlockPos(4, 2, 4));
+        e.setTarget(foe);
+        e.setHealth(e.getMaxHealth() * 0.6f);
+        h.runAfterDelay(3, () -> {
+            discardAtEnd(h, h.getLevel().getEntitiesOfClass(ElephantDemonEntity.class, e.getBoundingBox().inflate(12, 64, 12), m -> m.getTarget() == foe));
+            e.setHealth(e.getMaxHealth() * 0.3f);
+        });
+        revealsHisTrueFormAtAThird(h, e, 3, WhiteElephantEntity.TRUE_WIDTH, WhiteElephantEntity.TRUE_HEIGHT);
+    }
+
+    @GameTest(batch = "lion_camel_inHisTrueFormTheElephantLiftsHighTramplesAndGores", template = PLATFORM, timeoutTicks = 60)
+    public static void inHisTrueFormTheElephantLiftsHighTramplesAndGores(GameTestHelper h) {
+        WhiteElephantEntity e = king(h, ModEntities.WHITE_ELEPHANT.get(), new BlockPos(2, 2, 0));
+        e.setNoAi(true);
+        e.setYRot(0);
+        e.setYHeadRot(0);
+        e.setYBodyRot(0);
+        e.revealTrueForm();
+        LivingEntity g = golem(h, new BlockPos(2, 2, 4));
+        g.teleportTo(e.getX(), e.getY(), e.getZ() + 6.5);
+        check(h, e.trunkReach() > WhiteElephantEntity.GRAB_REACH && e.inReach(g), "his trunk reaches further: a foe six and a half blocks off");
+        check(h, e.grab(g), "and takes it");
+        h.runAfterDelay(3, () -> {
+            check(h, g.getY() > e.getY() + e.getBbHeight() * 0.8, "lifted high over his head: " + (g.getY() - e.getY()));
+            check(h, !e.getBoundingBox().contains(g.getBoundingBox().getCenter()), "held before him, not inside him");
+            e.invulnerableTime = 0;
+            e.hurt(h.getLevel().damageSources().indirectMagic(g, g), e.escapeShare() * e.getMaxHealth() * 1.05f);
+            check(h, !e.holds(g) && e.isRecoiling(), "struck from where he is held, he drops it");
+            check(h, !e.getBoundingBox().intersects(g.getBoundingBox().deflate(0.05)), "dropped clear of him");
+            // his trampling reaches further than his stamping did
+            close(h, WhiteElephantEntity.TRUE_STAMP_RANGE, e.stampRange(), "his trampling's reach");
+            LivingEntity near = golem(h, new BlockPos(2, 2, 4));
+            near.teleportTo(e.getX() + 6.2, e.getY(), e.getZ());
+            check(h, e.stamp().contains(near), "it catches a foe six blocks off, beyond a stamp's reach");
+            // and his charge gores and tramples
+            near.invulnerableTime = 0;
+            near.teleportTo(e.getX(), e.getY(), e.getZ() + e.getBbWidth() / 2 + 1);
+            near.removeAllEffects();
+            check(h, e.charge(near), "he charges");
+            List<LivingEntity> gored = List.of();
+            for (int i = 0; i < 5 && gored.isEmpty(); i++) gored = e.chargeTick();
+            check(h, gored.contains(near) && near.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "goring and trampling");
             h.succeed();
         });
     }
@@ -691,24 +807,46 @@ public class LionCamelGameTests {
 
     @GameTest(batch = "lion_camel_lionCamelCitysBlueprint", template = PLATFORM)
     public static void lionCamelCitysBlueprint(GameTestHelper h) {
-        // the Lion's place on the terrace, the Elephant's in his court
+        // the Lion's place on the terrace, the Elephant's in his court: room for giants
+        int giant = (int) Math.ceil(Math.max(ModEntities.AZURE_LION.get().getHeight(), ModEntities.WHITE_ELEPHANT.get().getHeight()));
+        int broad = (int) Math.ceil(Math.max(ModEntities.AZURE_LION.get().getWidth(), ModEntities.WHITE_ELEPHANT.get().getWidth()) / 2);
+        check(h, giant >= 5, "the kings are giants: " + giant);
         check(h, LionCamelCity.at(0, LionCamelCity.TERRACE_H, 0).blocksMotion(), "the terrace under the Lion");
-        for (int y = 1; y <= 4; y++) check(h, open(0, LionCamelCity.TERRACE_H + y, 0), "room for him at " + y);
+        for (int y = 1; y <= giant; y++) check(h, open(0, LionCamelCity.TERRACE_H + y, 0), "room for him at " + y);
         check(h, LionCamelCity.at(0, 0, LionCamelCity.COURT_Z).blocksMotion(), "the court's floor");
-        for (int y = 1; y <= 4; y++) check(h, open(0, y, LionCamelCity.COURT_Z), "room for the Elephant at " + y);
+        for (int y = 1; y <= giant; y++) check(h, open(0, y, LionCamelCity.COURT_Z), "room for the Elephant at " + y);
+        // the hall's nave clear to a giant's height and more, and the lion's
+        int lion = (int) Math.ceil(Math.max(giant, AzureLionEntity.TRUE_HEIGHT));
+        for (int x = -2; x <= 2; x++) for (int z = LionCamelCity.THRONE_Z + 3; z < LionCamelCity.HALL_S; z++) for (int y = 1; y <= lion; y++) {
+            check(h, open(x, LionCamelCity.TERRACE_H + y, z), "the nave clear at " + x + " " + y + " " + z);
+        }
+        // the kings' way: the palace's gates and the court's, a giant's height and breadth
+        for (int z : new int[]{-LionCamelCity.PALACE, LionCamelCity.PALACE, LionCamelCity.COURT_S, LionCamelCity.COURT_N}) {
+            for (int x = -broad; x <= broad; x++) for (int y = 1; y <= giant; y++) check(h, open(x, y, z), "the gate at " + z + " open at " + x + " " + y);
+        }
+        for (int z = -LionCamelCity.PALACE - 1; z > LionCamelCity.COURT_S; z--) {
+            for (int x = -broad; x <= broad; x++) for (int y = 1; y <= giant; y++) check(h, open(x, y, z), "between the gates at " + x + " " + y + " " + z);
+        }
+        // the court: room for the elephant he truly is to fight in, twice his body round the middle
+        int round = (int) Math.ceil(WhiteElephantEntity.TRUE_WIDTH * 2);
+        for (int x = -round; x <= round; x++) for (int z = LionCamelCity.COURT_Z - round; z <= LionCamelCity.COURT_Z + round; z++) {
+            if (LionCamelCity.postAt(x, 1, z)) continue;
+            for (int y = 1; y <= Math.ceil(WhiteElephantEntity.TRUE_HEIGHT); y++) check(h, open(x, y, z), "room in the court at " + x + " " + y + " " + z);
+        }
         // the main gate open, its plaque over it, the walls standing either side
         for (int y = 1; y < LionCamelCity.GATE_HIGH; y++) check(h, open(0, y, LionCamelCity.WALL_OUT), "the gate at " + y);
         check(h, LionCamelCity.at(0, 10, LionCamelCity.WALL_OUT + 2).is(Blocks.GILDED_BLACKSTONE), "the plaque: 狮驼国");
         check(h, LionCamelCity.at(30, 5, LionCamelCity.WALL_OUT).blocksMotion() || LionCamelCity.at(31, 5, LionCamelCity.WALL_OUT).blocksMotion(), "the wall");
         // the way in: down the avenue from the gate to the palace's gate and up its steps
         for (int z = LionCamelCity.WALL_IN - 1; z > LionCamelCity.PALACE; z--) check(h, open(0, 1, z) && open(0, 2, z), "the avenue at " + z);
-        for (int y = 1; y <= 3; y++) check(h, open(0, y, LionCamelCity.PALACE), "the palace gate at " + y);
-        // three thrones, the Peng's empty at the Lion's left
+        // three thrones, each a giant's, the Peng's empty at the Lion's left
         int thrones = 0;
         for (int t : LionCamelCity.THRONES) {
-            if (LionCamelCity.at(t, LionCamelCity.TERRACE_H + 2, LionCamelCity.THRONE_Z).is(Blocks.POLISHED_BLACKSTONE_STAIRS)) thrones++;
+            boolean seat = true;
+            for (int x = t - 1; x <= t + 1; x++) seat &= LionCamelCity.at(x, LionCamelCity.TERRACE_H + 2, LionCamelCity.THRONE_Z).is(Blocks.POLISHED_BLACKSTONE_STAIRS);
+            if (seat && LionCamelCity.at(t, LionCamelCity.TERRACE_H + LionCamelCity.THRONE_BACK + 1, LionCamelCity.THRONE_Z - 1).is(Blocks.GILDED_BLACKSTONE)) thrones++;
         }
-        eq(h, 3, thrones, "three thrones");
+        eq(h, 3, thrones, "three thrones, each a seat three wide under a high gilded back");
         // the court's tusks of ivory, skulls and bones in the streets
         int bone = 0, skulls = 0;
         for (int x = -LionCamelCity.WALL_IN; x <= LionCamelCity.WALL_IN; x++) for (int z = -LionCamelCity.WALL_IN; z <= LionCamelCity.WALL_IN; z++) {

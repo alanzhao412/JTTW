@@ -818,8 +818,12 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   the steamer meant for the Tang Monk stacked by it, a pen of iron bars), rubble and yards heaped
   with bones; skulls and bones in the streets. At the heart the palace in its red-walled compound:
   a terrace and on it the throne hall (red pillars, lattice walls, soul lanterns, a gold mural, its
-  tiled roof fallen in at one corner) with the **three demon kings' thrones, the third, the Great
-  Peng's, empty**; behind it the walled **elephant court**, ringed with tusks of ivory. Its court and
+  tiled roof fallen in at one corner, ten blocks clear within) with the **three demon kings' thrones,
+  each a giant's (a seat three wide under a gilded back six high, a skull atop it), the third, the
+  Great Peng's, empty**; behind it the walled **elephant court** (31 by 22 within), ringed with tusks
+  of ivory. The city is built for its giants: the palace's gates and the court's are 7 wide and 6
+  high, and a demon king walks from the hall to the court (round the terrace, through the palace's
+  north gate and into his court); the court has room for the elephant he truly is. Its court and
   garrison are put there once, each by the chunk its post lies in (`LionCamelCityFeature`), and kept
   (even on Peaceful): the Azure Lion on the terrace, the White Elephant in his court, lion-demon
   captains at the palace gate, lion- and peng-demons in the hall, elephant-demons at the main gate
@@ -837,23 +841,39 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   struck, and he **raises the alarm**: he rings his bell, every demon of the ridge within 32 blocks is
   set on the foe, three more come running (while fewer than 16 are about), and he runs off; then 30 s
   before he can raise it again. A Wind-Driller is posted at each of the city's gates.
+- **The two demon kings are giants** (`DemonKingEntity`): two and a half times a man's height (the
+  Lion 2.0 by 4.5 blocks, the Elephant 2.2 by 4.6), and at a third of their health each **reveals
+  his true form**, the beast a Bodhisattva rides: for 2 s he stands roaring as his demon shape
+  falls away (smoke, fire, the ground shaking; no blow lands on him nor does he strike; a captive is
+  let go), then the beast stands in his place, in another model and a larger body, and the players
+  near are told what he is. The true form is synced and saved; the fight goes on in it.
 - **The Azure Lion** (青狮, Manjushri's lion; `AzureLionEntity`, a `ZoneBoss`, level 100, 90 hits,
-  an azure bar, on the palace terrace): broadsword blows of 26%. Every 9 s he throws back his head
+  an azure bar, in the throne hall): a hulking demon king in dark lacquered armour, a wild green-blue
+  mane bristling about a snarling maw, clawed hands, a giant's broadsword: blows of 26%. Every 9 s he throws back his head
   and **roars**: a cone 12 blocks long, 12%, Slowness II and Weakness, thrown back. Every 13 s, a foe
   within 4.5 blocks before him, his jaws gape for a second, and he **swallows the foe whole**: inside
   him the foe is unseen and in the dark and cannot get down; his belly takes 5% of a level-100
   character's health a second, armour or none. Blows struck from inside count half again, and once
   they come to 6% of his health he retches the foe up and reels for 2 s; else after 10 s he spits him
-  out anyway. At two thirds he roars for his kin (three lion-demons); at a third he swells 35% larger,
-  as he did to swallow Heaven's hosts, and swallows twice as often.
+  out anyway. At two thirds he roars for his kin (three lion-demons); at a third he **reveals his
+  true form**: a giant green-maned lion on all fours (3.6 by 4.0 blocks, some seven long, larger than
+  the Great White Bull), who swallows twice as often and from 6 blocks, and **pounces** on a foe 5–13
+  blocks off, jaws first: if they reach the foe as he lands, it is swallowed (inside the lion as
+  inside the demon king, and fought out of him the same way).
 - **The White Elephant** (白象, Samantabhadra's six-tusked elephant; `WhiteElephantEntity`, level 98,
-  85 hits, a white bar, in the elephant court): lance thrusts of 24%. Every 10 s, a foe within 6
+  85 hits, a white bar, in the elephant court): a giant in ivory-and-gold plate, a great domed
+  elephant's head under a gold war-frontlet, ears like sails, a heavy trunk, six tusks, a giant's
+  lance held upright: thrusts of 24%. Every 10 s, a foe within 6
   blocks before him, his trunk rears and **coils round the foe, lifting him high**: it crushes him
   every 0.75 s for 8% and after 3 s **hurls him away**; blows on the trunk from where one is held,
   once they come to 4% of his health, make him drop the foe and recoil (as Wukong got free by driving
   his staff up it). From two thirds he trumpets for his followers (two elephant-demons) and **stamps**
-  (16%, thrown up, within 5 blocks); from a third he **charges** at foes 5–14 blocks off, goring for
-  22%, and his trunk comes quicker. The two kings' lairs are 37 blocks apart: each is its own fight.
+  (16%, thrown up, within 5 blocks); at a third he **reveals his true form**: a towering white war
+  elephant (3.6 by 4.6 blocks, some nine long with his tusks) in a crimson and gold saddle-cloth,
+  the Bodhisattva's empty seat on his back. He **charges** at foes 5–14 blocks off, goring for 22% and
+  trampling (Slowness III); his stamping becomes a **trampling** up on his hind legs that strikes
+  within 7 blocks; his trunk reaches 8 blocks, comes quicker and lifts its catch high over his head.
+  The two kings' lairs are 38 blocks apart: each is its own fight.
 - **The Peng rule** (`ZoneAllies.PENG`, for the whole zone, both kings included): a player who is the
   Gold-Winged Peng, the third brother, is **never targeted and never fought back**, whatever he does:
   no demon, captain, Wind-Driller, the Azure Lion nor the White Elephant sets on him, nor swallows,
@@ -879,14 +899,21 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   carry a tier but no zone, being levelled to whoever they hunt).
 - **Art**: `LionDemonRenderer`, `ElephantDemonRenderer`, `PengDemonRenderer`,
   `LittleWindDrillerRenderer`, `AzureLionRenderer`, `WhiteElephantRenderer` (box models and skins with
-  glowing eyes and gold from `assets_source/lion_camel.py`; the little demons bow, the Lion's jaw
-  gapes, the Elephant's trunk sways, rears and coils); items from `assets_source/lion_items.py`.
+  glowing eyes and gold from `assets_source/lion_camel.py`; the little demons bow; each king has two
+  models, his demon-king shape and his true form, drawn by the one renderer, their eyes smouldering
+  (amber, red) in an angled glare under a scowling brow; the Lion's jaw gapes and he pounces, the
+  Elephant's trunk sways, rears and coils, and he rears to trample); items from
+  `assets_source/lion_items.py`.
 - **Tests and pictures**: `LionCamelGameTests` (the Peng rule for every kind, both kings included,
-  struck or not; swallowing, the belly, fighting out, being spat out; the trunk's lift, crush, hurl
-  and breaking free; roar, stamp, charge, phases; the alarm; the creatures' tricks; captains; drops
-  and the Peng's empty hands; the band's XP to the cap; karma; the city's blueprint),
-  `LionCamelPlacementTest`; gallery scenes `-Pgallery.only=lion_`; the ridge and the city in a real
-  world with `./gradlew runWorldgenBench -Pbench.mode=lion` (and every zone's place with `zones`).
+  in either shape, struck or not; swallowing, the belly, fighting out, being spat out; the trunk's
+  lift, crush, hurl and breaking free; roar, stamp, charge, phases; the true forms' reveal at a third,
+  their bodies, their keeping; the lion's swallowing and pounce, the elephant's lift, trampling and
+  goring; the alarm; the creatures' tricks; captains; drops and the Peng's empty hands; the band's XP
+  to the cap; karma; the city's blueprint, built for its giants), `LionCamelPlacementTest`; gallery
+  scenes `-Pgallery.only=lion_` (the kings from the front, the side, close and beside the player, in
+  both shapes; the reveal; the swallow, the pounce, the trunk and the trampling; the hall and the
+  court with the kings in them, and the kings' way between); the ridge and the city in a real world
+  with `./gradlew runWorldgenBench -Pbench.mode=lion` (and every zone's place with `zones`).
 
 ---
 

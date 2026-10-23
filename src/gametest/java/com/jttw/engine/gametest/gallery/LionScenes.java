@@ -36,10 +36,14 @@ import java.util.List;
  * Lion-Camel Ridge in the form gallery: its creatures and the two demon kings on a patch of the
  * ridge's grim ground laid in front of the stage (coarse earth and gravel strewn with bones, a wall
  * of dark crag behind with skulls on stakes), seen from inside it; the Little Wind-Driller raising
- * the alarm; the Azure Lion's jaws gaping before a victim, and after; his roar; the White Elephant's
- * trunk holding a foe aloft; a Peng player walking among the demons, who bow to him; and Lion-Camel
- * City laid whole a way off, seen from over its main gate, inside the throne hall, in the elephant
- * court and down a street. The patch is cleared before the next shot ({@link #clear}); the city,
+ * the alarm; the two demon kings, giants, from the front, the side and close, and beside the player
+ * for their size, then in their true forms the same, and their true forms showing themselves; the
+ * Azure Lion's jaws gaping before a victim, and after, his roar, and as the lion his gape, his pounce
+ * and his swallowing; the White Elephant's trunk holding a foe aloft, in both his shapes, and his
+ * trampling; a Peng player walking among the demons, who bow to him; and Lion-Camel City laid whole
+ * a way off, seen from over its main gate, inside the throne hall, in the elephant court, along the
+ * kings' way between them, down a street, and the hall and the court again with the kings in their
+ * true forms. The patch is cleared before the next shot ({@link #clear}); the city,
  * off the stage behind the usual cameras, is laid once and left, its shots among the gallery's last.
  * The ridge itself is seen in a real world: the zone bench's lion mode.
  */
@@ -108,6 +112,32 @@ final class LionScenes {
         return m;
     }
 
+    /** A demon king, still, in his demon-king shape or his true form. */
+    private static <T extends DemonKingEntity> T king(ServerPlayer p, EntityType<T> type, double x, double z, float yaw, boolean trueForm) {
+        T k = put(p, type, x, 0, z, yaw, false);
+        if (k != null && trueForm) k.revealTrueForm();
+        return k;
+    }
+
+    /** The player himself beside a king, for his size. */
+    private static void beside(ServerPlayer p, double x, double z, float yaw) {
+        p.setGameMode(GameType.SURVIVAL);
+        p.teleportTo(p.serverLevel(), x, ground(p), z, yaw, 0f);
+        AbilityScenes.facing = yaw;
+    }
+
+    /** A king's true form showing itself, {@code before} ticks into it. */
+    private static AbilityScenes.Scene reveal(String name, EntityType<? extends DemonKingEntity> type, int before) {
+        return new AbilityScenes.Scene(name, p -> {
+            patch(p);
+            king(p, type, 0.5, 12.0, 200f, false);
+            AbilityScenes.sceneCam = new double[]{7.0, 4.0, 2.0, 0.5, 2.4, 12.0};
+        }, p -> {
+            DemonKingEntity k = nearest(p, DemonKingEntity.class);
+            if (k != null) k.beginReveal();
+        }, before, false);
+    }
+
     private static <T extends ZoneMonster> T creature(ServerPlayer p, EntityType<T> type, double x, double z, float yaw, boolean captain) {
         T m = put(p, type, x, 0, z, yaw, false);
         if (m != null) m.become(captain ? m.captainLevel() : m.regularLevel(), captain);
@@ -168,24 +198,43 @@ final class LionScenes {
                     LivingEntity v = nearest(p, net.minecraft.world.entity.npc.Villager.class);
                     if (d != null && v != null) d.raiseAlarm(v);
                 }, 12, false),
-                scene("lion_azure_lion", p -> put(p, ModEntities.AZURE_LION.get(), 0.5, 0, 10.5, 180f, false),
-                        new double[]{2.5, 3.0, 3.5, 0.5, 2.6, 10.5}),
-                scene("lion_azure_lion_side", p -> put(p, ModEntities.AZURE_LION.get(), 0.5, 0, 10.5, 90f, false),
-                        new double[]{0.5, 3.0, 3.0, 0.5, 2.4, 10.5}),
+                // ── The Azure Lion: his demon-king shape, then his true form ──
+                scene("lion_azure_lion", p -> king(p, ModEntities.AZURE_LION.get(), 0.5, 11.0, 200f, false),
+                        new double[]{5.5, 3.2, 3.0, 0.5, 2.6, 11.0}),
+                scene("lion_azure_lion_side", p -> king(p, ModEntities.AZURE_LION.get(), 0.5, 11.0, 90f, false),
+                        new double[]{0.5, 3.0, 1.5, 0.5, 2.4, 11.0}),
+                scene("lion_azure_lion_close", p -> king(p, ModEntities.AZURE_LION.get(), 0.5, 11.0, 180f, false),
+                        new double[]{2.0, 4.6, 6.2, 0.5, 4.0, 9.6}),
+                scene("lion_azure_lion_scale", p -> {
+                    king(p, ModEntities.AZURE_LION.get(), -0.5, 11.0, 210f, false);
+                    beside(p, 2.0, 10.0, 160f);
+                }, new double[]{6.0, 3.0, 2.5, 0.5, 2.2, 10.5}),
+                scene("lion_azure_lion_true", p -> king(p, ModEntities.AZURE_LION.get(), 0.5, 11.5, 200f, true),
+                        new double[]{7.0, 3.8, 2.5, 0.5, 1.8, 11.0}),
+                scene("lion_azure_lion_true_side", p -> king(p, ModEntities.AZURE_LION.get(), 0.5, 11.5, 90f, true),
+                        new double[]{0.5, 3.0, 0.5, 0.5, 2.0, 11.5}),
+                scene("lion_azure_lion_true_close", p -> king(p, ModEntities.AZURE_LION.get(), 0.5, 12.5, 180f, true),
+                        new double[]{2.6, 3.0, 5.0, 0.5, 2.5, 9.5}),
+                scene("lion_azure_lion_true_scale", p -> {
+                    king(p, ModEntities.AZURE_LION.get(), -1.0, 12.0, 210f, true);
+                    beside(p, 2.5, 8.5, 160f);
+                }, new double[]{7.5, 3.4, 2.0, 0.0, 1.8, 10.5}),
+                reveal("lion_azure_lion_reveal", ModEntities.AZURE_LION.get(), DemonKingEntity.REVEAL / 2),
+                reveal("lion_azure_lion_revealed", ModEntities.AZURE_LION.get(), DemonKingEntity.REVEAL + 15),
                 new AbilityScenes.Scene("lion_swallow_gape", p -> {
                     patch(p);
-                    put(p, ModEntities.AZURE_LION.get(), -2.0, 0, 11.0, 270f, false);
-                    victim(p, 0.6, 11.0, 90f);
-                    AbilityScenes.sceneCam = new double[]{0.0, 3.2, 4.0, -0.5, 2.4, 11.0};
+                    king(p, ModEntities.AZURE_LION.get(), -2.5, 11.0, 270f, false);
+                    victim(p, 1.5, 11.0, 90f);
+                    AbilityScenes.sceneCam = new double[]{0.0, 3.6, 3.0, -0.5, 2.6, 11.0};
                 }, p -> {
                     AzureLionEntity l = nearest(p, AzureLionEntity.class);
                     if (l != null) l.gape();
                 }, 4, false),
                 new AbilityScenes.Scene("lion_swallowed", p -> {
                     patch(p);
-                    put(p, ModEntities.AZURE_LION.get(), 0.5, 0, 10.5, 200f, false);
-                    victim(p, 0.5, 7.5, 0f);
-                    AbilityScenes.sceneCam = new double[]{3.0, 3.0, 4.0, 0.5, 2.2, 10.5};
+                    king(p, ModEntities.AZURE_LION.get(), 0.5, 11.0, 200f, false);
+                    victim(p, 0.5, 8.0, 0f);
+                    AbilityScenes.sceneCam = new double[]{5.0, 3.2, 3.5, 0.5, 2.4, 11.0};
                 }, p -> {
                     AzureLionEntity l = nearest(p, AzureLionEntity.class);
                     LivingEntity v = nearest(p, net.minecraft.world.entity.npc.Villager.class);
@@ -193,9 +242,9 @@ final class LionScenes {
                 }, 10, false),
                 new AbilityScenes.Scene("lion_roar", p -> {
                     patch(p);
-                    put(p, ModEntities.AZURE_LION.get(), -3.5, 0, 11.0, 270f, false);
+                    king(p, ModEntities.AZURE_LION.get(), -3.5, 11.0, 270f, false);
                     victim(p, 3.5, 11.0, 90f);
-                    AbilityScenes.sceneCam = new double[]{0.5, 3.5, 3.0, 0.0, 2.2, 11.0};
+                    AbilityScenes.sceneCam = new double[]{0.5, 3.8, 2.0, 0.0, 2.6, 11.0};
                 }, p -> {
                     AzureLionEntity l = nearest(p, AzureLionEntity.class);
                     LivingEntity v = nearest(p, net.minecraft.world.entity.npc.Villager.class);
@@ -204,20 +253,93 @@ final class LionScenes {
                         l.roar(v);
                     }
                 }, 3, false),
-                scene("lion_white_elephant", p -> put(p, ModEntities.WHITE_ELEPHANT.get(), 0.5, 0, 11.0, 180f, false),
-                        new double[]{2.5, 3.0, 3.5, 0.5, 2.7, 11.0}),
-                scene("lion_white_elephant_side", p -> put(p, ModEntities.WHITE_ELEPHANT.get(), 0.5, 0, 11.0, 90f, false),
-                        new double[]{0.5, 3.0, 3.0, 0.5, 2.5, 11.0}),
+                new AbilityScenes.Scene("lion_true_swallow_gape", p -> {
+                    patch(p);
+                    king(p, ModEntities.AZURE_LION.get(), -3.0, 11.0, 270f, true);
+                    victim(p, 2.5, 11.0, 90f);
+                    AbilityScenes.sceneCam = new double[]{0.5, 3.4, 3.0, 0.0, 1.8, 11.0};
+                }, p -> {
+                    AzureLionEntity l = nearest(p, AzureLionEntity.class);
+                    if (l != null) l.gape();
+                }, 4, false),
+                new AbilityScenes.Scene("lion_true_pounce", p -> {
+                    patch(p);
+                    AzureLionEntity l = king(p, ModEntities.AZURE_LION.get(), -3.5, 11.0, 270f, true);
+                    if (l != null) {
+                        l.setNoGravity(true);
+                        l.moveTo(l.getX(), l.getY() + 1.6, l.getZ(), 270f, 0f);
+                    }
+                    victim(p, 5.5, 11.0, 90f);
+                    AbilityScenes.sceneCam = new double[]{1.0, 3.2, 1.5, 0.5, 2.4, 11.0};
+                }, p -> {
+                    AzureLionEntity l = nearest(p, AzureLionEntity.class);
+                    LivingEntity v = nearest(p, net.minecraft.world.entity.npc.Villager.class);
+                    if (l != null && v != null) {
+                        l.pounce(v);
+                        l.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO); // held at the top of his leap, for the picture
+                    }
+                }, 2, false),
+                new AbilityScenes.Scene("lion_true_swallowed", p -> {
+                    patch(p);
+                    king(p, ModEntities.AZURE_LION.get(), 0.5, 11.5, 200f, true);
+                    victim(p, 0.5, 7.0, 0f);
+                    AbilityScenes.sceneCam = new double[]{6.0, 3.4, 3.0, 0.5, 1.8, 11.0};
+                }, p -> {
+                    AzureLionEntity l = nearest(p, AzureLionEntity.class);
+                    LivingEntity v = nearest(p, net.minecraft.world.entity.npc.Villager.class);
+                    if (l != null && v != null) l.swallow(v);
+                }, 10, false),
+                // ── The White Elephant ──
+                scene("lion_white_elephant", p -> king(p, ModEntities.WHITE_ELEPHANT.get(), 0.5, 11.0, 200f, false),
+                        new double[]{5.5, 3.2, 3.0, 0.5, 2.6, 11.0}),
+                scene("lion_white_elephant_side", p -> king(p, ModEntities.WHITE_ELEPHANT.get(), 0.5, 11.0, 90f, false),
+                        new double[]{0.5, 3.0, 1.5, 0.5, 2.4, 11.0}),
+                scene("lion_white_elephant_close", p -> king(p, ModEntities.WHITE_ELEPHANT.get(), 0.5, 11.0, 180f, false),
+                        new double[]{2.2, 4.4, 5.6, 0.5, 3.8, 9.4}),
+                scene("lion_white_elephant_scale", p -> {
+                    king(p, ModEntities.WHITE_ELEPHANT.get(), -0.5, 11.0, 210f, false);
+                    beside(p, 2.2, 9.5, 160f);
+                }, new double[]{6.0, 3.0, 2.5, 0.5, 2.2, 10.5}),
+                scene("lion_white_elephant_true", p -> king(p, ModEntities.WHITE_ELEPHANT.get(), 0.5, 12.0, 200f, true),
+                        new double[]{8.0, 4.4, 1.5, 0.5, 2.4, 11.0}),
+                scene("lion_white_elephant_true_side", p -> king(p, ModEntities.WHITE_ELEPHANT.get(), 0.5, 12.0, 90f, true),
+                        new double[]{0.5, 3.2, -1.0, 0.5, 2.4, 12.0}),
+                scene("lion_white_elephant_true_close", p -> king(p, ModEntities.WHITE_ELEPHANT.get(), 0.5, 13.0, 180f, true),
+                        new double[]{3.0, 3.6, 4.5, 0.5, 3.4, 9.5}),
+                scene("lion_white_elephant_true_scale", p -> {
+                    king(p, ModEntities.WHITE_ELEPHANT.get(), -1.0, 12.5, 210f, true);
+                    beside(p, 3.0, 8.0, 160f);
+                }, new double[]{8.5, 3.6, 1.0, 0.0, 2.2, 10.5}),
+                reveal("lion_white_elephant_reveal", ModEntities.WHITE_ELEPHANT.get(), DemonKingEntity.REVEAL / 2),
+                reveal("lion_white_elephant_revealed", ModEntities.WHITE_ELEPHANT.get(), DemonKingEntity.REVEAL + 15),
                 new AbilityScenes.Scene("lion_trunk_grab", p -> {
                     patch(p);
-                    put(p, ModEntities.WHITE_ELEPHANT.get(), -2.5, 0, 11.0, 270f, false);
-                    victim(p, 0.0, 11.0, 90f);
-                    AbilityScenes.sceneCam = new double[]{1.0, 3.2, 2.5, -0.5, 3.0, 11.0};
+                    king(p, ModEntities.WHITE_ELEPHANT.get(), -3.0, 11.0, 270f, false);
+                    victim(p, 0.5, 11.0, 90f);
+                    AbilityScenes.sceneCam = new double[]{1.0, 3.6, 2.0, -0.5, 3.2, 11.0};
                 }, p -> {
                     WhiteElephantEntity e = nearest(p, WhiteElephantEntity.class);
                     LivingEntity v = nearest(p, net.minecraft.world.entity.npc.Villager.class);
                     if (e != null && v != null) e.grab(v);
                 }, 10, false),
+                new AbilityScenes.Scene("lion_true_trunk_grab", p -> {
+                    patch(p);
+                    king(p, ModEntities.WHITE_ELEPHANT.get(), -4.0, 11.5, 270f, true);
+                    victim(p, 1.0, 11.5, 90f);
+                    AbilityScenes.sceneCam = new double[]{0.5, 4.0, 0.0, -1.0, 4.0, 11.5};
+                }, p -> {
+                    WhiteElephantEntity e = nearest(p, WhiteElephantEntity.class);
+                    LivingEntity v = nearest(p, net.minecraft.world.entity.npc.Villager.class);
+                    if (e != null && v != null) e.grab(v);
+                }, 10, false),
+                new AbilityScenes.Scene("lion_true_trample", p -> {
+                    patch(p);
+                    king(p, ModEntities.WHITE_ELEPHANT.get(), -2.0, 11.5, 270f, true);
+                    AbilityScenes.sceneCam = new double[]{0.5, 3.6, 0.5, -1.0, 3.0, 11.5};
+                }, p -> {
+                    WhiteElephantEntity e = nearest(p, WhiteElephantEntity.class);
+                    if (e != null) e.rearUp();
+                }, 4, false),
                 new AbilityScenes.Scene("lion_peng_among_demons", p -> {
                     patch(p);
                     AlignmentData.markReincarnated(p, ReincarnationOutcome.GOLD_WINGED_PENG);
@@ -247,15 +369,32 @@ final class LionScenes {
                 new AbilityScenes.Scene("lion_city_hall", p -> {
                     city(p);
                     int h = LionCamelCity.TERRACE_H;
-                    AbilityScenes.sceneCam = new double[]{CITY_X + 0.5, h + 4.0, CITY_Z + 8.0, CITY_X + 0.5, h + 2.0, CITY_Z + LionCamelCity.THRONE_Z};
+                    AbilityScenes.sceneCam = new double[]{CITY_X + 0.5, h + 4.5, CITY_Z + 10.0, CITY_X + 0.5, h + 2.5, CITY_Z + LionCamelCity.THRONE_Z};
                 }, p -> {}, 1, false),
                 new AbilityScenes.Scene("lion_city_court", p -> {
                     city(p);
-                    AbilityScenes.sceneCam = new double[]{CITY_X + 9.0, 8.0, CITY_Z + LionCamelCity.COURT_S - 1.0, CITY_X + 0.5, 2.0, CITY_Z + LionCamelCity.COURT_Z};
+                    AbilityScenes.sceneCam = new double[]{CITY_X + 7.0, 6.5, CITY_Z + LionCamelCity.COURT_S - 2.0, CITY_X + 0.5, 2.5, CITY_Z + LionCamelCity.COURT_Z};
+                }, p -> {}, 1, false),
+                // the kings' way: from the palace's north gate to the court's, a demon king's height and more
+                new AbilityScenes.Scene("lion_city_kings_way", p -> {
+                    city(p);
+                    AbilityScenes.sceneCam = new double[]{CITY_X + 9.5, 10.0, CITY_Z - LionCamelCity.PALACE + 4.0, CITY_X + 0.5, 3.0, CITY_Z + LionCamelCity.COURT_S - 3.0};
                 }, p -> {}, 1, false),
                 new AbilityScenes.Scene("lion_city_street", p -> {
                     city(p);
                     AbilityScenes.sceneCam = new double[]{CITY_X + 25.5, 3.2, CITY_Z + 50.5, CITY_X + 25.5, 1.5, CITY_Z + 8.0};
+                }, p -> {}, 1, false),
+                // the kings in their true forms, where they hold court
+                new AbilityScenes.Scene("lion_city_hall_true", p -> {
+                    city(p);
+                    p.serverLevel().getEntitiesOfClass(AzureLionEntity.class, new AABB(CITY_X - 30, -80, CITY_Z - 30, CITY_X + 30, 400, CITY_Z + 30)).forEach(AzureLionEntity::revealTrueForm);
+                    int h = LionCamelCity.TERRACE_H;
+                    AbilityScenes.sceneCam = new double[]{CITY_X + 0.5, h + 4.5, CITY_Z + 10.0, CITY_X + 0.5, h + 2.0, CITY_Z + LionCamelCity.THRONE_Z};
+                }, p -> {}, 1, false),
+                new AbilityScenes.Scene("lion_city_court_true", p -> {
+                    city(p);
+                    p.serverLevel().getEntitiesOfClass(WhiteElephantEntity.class, new AABB(CITY_X - 30, -80, CITY_Z - 70, CITY_X + 30, 400, CITY_Z - 10)).forEach(WhiteElephantEntity::revealTrueForm);
+                    AbilityScenes.sceneCam = new double[]{CITY_X + 7.0, 6.5, CITY_Z + LionCamelCity.COURT_S - 2.0, CITY_X + 0.5, 2.5, CITY_Z + LionCamelCity.COURT_Z};
                 }, p -> {}, 1, false));
     }
 

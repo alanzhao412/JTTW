@@ -250,6 +250,8 @@
   "entity.jttw_engine.little_wind_driller.hail": "%s rings his bell and bows: \"Third Great King! All's quiet on the ridge, sire: not a monk in sight.\"",
   "entity.jttw_engine.azure_lion.brother": "The Azure Lion: \"Third brother! You've come down to the city at last. Sit with us: the throne at my left hand has stood empty too long.\"",
   "entity.jttw_engine.white_elephant.brother": "The White Elephant: \"Brother Peng! Nothing in this city will raise a hand to you. What's ours is yours.\"",
+  "entity.jttw_engine.azure_lion.reveal": "The Azure Lion's demon shape splits and falls away. Before you crouches what he truly is: the green-maned lion Manjushri rides, loosed from the Bodhisattva's seat!",
+  "entity.jttw_engine.white_elephant.reveal": "The White Elephant's armour bursts apart. Over you towers what he truly is: Samantabhadra's six-tusked white elephant, run wild!",
   "death.attack.jttw_engine.lion_belly": "%1$s was swallowed whole",
   "death.attack.jttw_engine.lion_belly.player": "%1$s was swallowed whole by %2$s",
   "item.jttw_engine.mane_tuft": "Mane Tuft",

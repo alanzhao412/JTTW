@@ -171,8 +171,9 @@ def camel(n):
     return re.sub(r'_(\w)', lambda m: m.group(1).upper(), n)
 
 
-def emit(parts, slots, java):
-    """Writes the model's code into the renderer, between its GENERATED markers."""
+def emit(parts, slots, java, tag=''):
+    """Writes the model's code into the renderer, between its GENERATED markers (``// GENERATED <tag>:
+    begin`` and ``end``, for a renderer with more than one model)."""
     lines = ['        MeshDefinition mesh = new MeshDefinition();', '        PartDefinition root = mesh.getRoot();']
     for name, parent, (px_, py_, pz_), (rx, ry, rz), boxes, mirror in parts:
         cubes = 'CubeListBuilder.create()'
@@ -185,10 +186,11 @@ def emit(parts, slots, java):
             camel(name), 'root' if parent == 'root' else camel(parent), name, cubes, pose))
     lines.append('        return LayerDefinition.create(mesh, %d, %d);' % (UNITS, UNITS))
     s = open(java, encoding='utf-8').read()
-    start, end = '        // GENERATED: begin', '        // GENERATED: end'
+    mark = '        // GENERATED' + (' ' + tag if tag else '')
+    start, end = mark + ': begin', mark + ': end'
     a = s.index(start) + len(start)
     b = s.index(end)
-    open(java, 'w', encoding='utf-8').write(s[:a] + '\n' + '\n'.join(lines) + '\n' + s[b:])
+    open(java, 'w', encoding='utf-8', newline='\n').write(s[:a] + '\n' + '\n'.join(lines) + '\n' + s[b:])
 
 
 def segment(p, q):

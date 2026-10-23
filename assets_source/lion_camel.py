@@ -405,235 +405,845 @@ def paint_wind_driller(p, style, f, dims):
         gold(p, f)
 
 
-# ── The Azure Lion ────────────────────────────────────────────────────────────
-AZURE = (52, 104, 170)
-AZURE_DARK = (26, 58, 110)
-LION_FACE = (198, 160, 98)
-LION_FACE_DARK = (140, 104, 58)
-LACQUER = (34, 30, 40)
+# ── The two demon kings ───────────────────────────────────────────────────────
+# Each has two models. His demon-king shape: a hulking armoured giant, two and a half times a man's
+# height, all his weight in his chest and shoulders, his head carried low and forward. And his true
+# form, revealed at his last third: the beast a Bodhisattva rides, long and heavy, as large as the
+# Great White Bull or larger. Both shapes share his head. Their eyes smoulder under a heavy brow
+# that slopes down to the nose in a scowl (drawn full-bright, but dark), angled into a glare: each
+# eye two model pixels along its bottom, two tall at its outer side, one at its inner, the brow's
+# shadow cutting its inner corner.
 
+SOCKET = (12, 9, 10)
+UNDER = (26, 20, 20)
+CLAW = (40, 32, 28)
+MOUTH = (82, 16, 22)
+THROAT = (36, 8, 12)
+
+
+def cell(p, rect, i, j, c, glow=False):
+    """One model pixel (S x S texture pixels) of a face: `i` across, `j` down."""
+    for a in range(bg.S):
+        for b in range(bg.S):
+            p.px((rect[0] + i * bg.S + a, rect[1] + j * bg.S + b), c, glow=glow)
+
+
+def ember_cell(p, rect, i, j, c):
+    """A model pixel of a burning eye: the skin dark beneath, the glow drawn over it."""
+    for a in range(bg.S):
+        for b in range(bg.S):
+            x, y = rect[0] + i * bg.S + a, rect[1] + j * bg.S + b
+            p.px((x, y), [v * 0.35 for v in c])
+            p.glow.putpixel((x, y), tuple(int(v) for v in c) + (255,))
+
+
+def glare(p, f, eyes, row, ember, core):
+    """Eyes on a box's front: each (outer, inner) a pair of model-pixel columns, `row` the socket's
+    shadow under the brow. The outer column burns two tall, the inner one only at the bottom (the
+    brow's shadow over it), so the eye's top slopes down toward the nose; a glint at each side."""
+    rect = f['front']
+    for o, i in eyes:
+        cell(p, rect, o, row, SOCKET)
+        cell(p, rect, i, row, SOCKET)
+        cell(p, rect, i, row + 1, SOCKET)
+        ember_cell(p, rect, o, row + 1, ember)
+        ember_cell(p, rect, o, row + 2, ember)
+        ember_cell(p, rect, i, row + 2, core)
+        cell(p, rect, o, row + 3, UNDER)
+        cell(p, rect, i, row + 3, UNDER)
+    for side, col in (('right', f['right'][2] // bg.S - 1), ('left', 0)):
+        cell(p, f[side], col, row + 1, SOCKET)
+        ember_cell(p, f[side], col, row + 2, ember)
+
+
+def pelt(p, f, base, dark, belly=None, along=False):
+    """A short-haired hide: lit above and shadowed below, faintly mottled, a few short strokes of
+    darker hair (running down it, or `along` a beast's flanks), the belly paler."""
+    for k, r in f.items():
+        light = {'top': 1.06, 'bottom': 0.8, 'front': 1.0, 'back': 0.86}.get(k, 0.93)
+        c0 = belly if (k == 'bottom' and belly) else base
+        fx, fy, fw, fh = r
+        for j in range(fh):
+            for i in range(fw):
+                k2 = light * (1.04 - 0.24 * (j / max(1, fh - 1)) if k not in ('top', 'bottom') else light)
+                n = p.rnd.randint(-4, 4)
+                p.px((fx + i, fy + j), [v * k2 + n for v in c0])
+        if along and k in ('right', 'left', 'top'):                    # darker along the back
+            for j in range(fh if k == 'top' else fh // 3):
+                for i in range(fw):
+                    c = p.img.getpixel((fx + i, fy + j))
+                    t = 0.7 if k == 'top' else 0.7 + 0.3 * j / max(1, fh // 3)
+                    p.px((fx + i, fy + j), [v * t for v in c[:3]])
+        for _ in range(fw * fh // 40):                                 # its hair, in a few short strokes
+            x, y = fx + p.rnd.randrange(fw), fy + p.rnd.randrange(fh)
+            for d in range(2):
+                q = (x + d, y) if along and k in ('right', 'left', 'top') else (x, y + d)
+                if q[0] < fx + fw and q[1] < fy + fh:
+                    c = p.img.getpixel(q)
+                    p.px(q, [a * 0.7 + b * 0.3 for a, b in zip(c[:3], dark)])
+
+
+def mane(p, f, base, dark, tip):
+    """A wild mane in heavy locks: broad strands, darker in their partings and toward their roots,
+    lit along their ends, glinting here and there."""
+    for k, r in f.items():
+        light = {'top': 1.06, 'bottom': 0.6, 'front': 0.72, 'back': 0.84}.get(k, 0.9)
+        fx, fy, fw, fh = r
+        i = 0
+        while i < fw:
+            width = p.rnd.randint(3, 6)
+            tone = p.rnd.uniform(0.82, 1.12)
+            reach = p.rnd.uniform(0.75, 1.0)
+            for di in range(width):
+                if i + di >= fw:
+                    break
+                parting = di == width - 1
+                for j in range(fh):
+                    s = j / max(1, fh - 1)
+                    if k in ('top', 'bottom'):
+                        c = [v * tone for v in base]
+                    elif s > reach:
+                        c = dark                                       # the lock ends; the dark beneath shows
+                    else:
+                        c = [a + (b - a) * (s / reach) ** 2 for a, b in zip(dark, base)]
+                        c = [v * tone for v in c]
+                        if s / reach > 0.82:
+                            c = [a * 0.6 + b * 0.4 for a, b in zip(c, tip)]
+                    if parting:
+                        c = [v * 0.62 for v in c]
+                    n = p.rnd.randint(-4, 4)
+                    p.px((fx + i + di, fy + j), [v * light + n for v in c])
+            i += width
+
+
+def spike(p, f, base, dark, tip):
+    """A tuft of mane come to a point: dark at its root (the bottom of its faces), pale at its tip."""
+    for k, r in f.items():
+        if k in ('top', 'bottom'):
+            p.face(r, tip if k == 'top' else dark, 1.0, noise=6)
+            continue
+        fx, fy, fw, fh = r
+        for i in range(fw):
+            off = p.rnd.random() * 0.3
+            for j in range(fh):
+                t = min(1.0, j / max(1, fh - 1) + off)
+                c = [a + (b - a) * t * 2 for a, b in zip(tip, base)] if t < 0.5 else [a + (b - a) * (t - 0.5) * 2 for a, b in zip(base, dark)]
+                n = p.rnd.randint(-6, 6)
+                p.px((fx + i, fy + j), [v + n for v in c])
+
+
+def trim(p, f, colour, sides=('front', 'back', 'right', 'left'), top=True, bottom=True):
+    """A rim along a box's faces, a model pixel deep at their top and bottom."""
+    for k in sides:
+        fx, fy, fw, fh = f[k]
+        for i in range(fw):
+            for d in range(bg.S):
+                if top:
+                    p.px((fx + i, fy + d), colour if d == 0 else [v * 0.82 for v in colour])
+                if bottom:
+                    p.px((fx + i, fy + fh - 1 - d), [v * 0.72 for v in colour])
+
+
+def bands(p, f, base, shadow, edge, rivet=None, band=5):
+    """Plate armour in overlapping horizontal bands, `band` model pixels deep: each lit along its
+    upper edge, shadowed under the lip of the one above, an edge of `edge` along its foot, rivets."""
+    h = band * bg.S
+    for k, r in f.items():
+        light = {'top': 1.1, 'bottom': 0.62, 'front': 1.0, 'back': 0.84}.get(k, 0.9)
+        fx, fy, fw, fh = r
+        for j in range(fh):
+            row = j % h
+            for i in range(fw):
+                n = p.rnd.randint(-3, 3)
+                if k in ('top', 'bottom'):
+                    c = [v * light for v in base]
+                elif row == h - 1:
+                    c = edge
+                elif row < bg.S:
+                    c = [v * light * 0.78 + (s - v) * 0.3 for v, s in zip(base, shadow)]   # under the lip above
+                elif row < bg.S + 1:
+                    c = [v * light * 1.12 for v in base]                                 # its lit edge
+                else:
+                    c = [v * light * (1.04 - 0.1 * row / h) for v in base]
+                p.px((fx + i, fy + j), [v + n for v in c])
+            if rivet and k not in ('top', 'bottom') and row == bg.S + 2:
+                for i in range(bg.S * 2, fw - bg.S, bg.S * 5):
+                    for a in range(bg.S):
+                        p.px((fx + i + a, fy + j), rivet)
+
+
+def claws(p, f):
+    """A claw: dark horn at its root, pale to its point (the bottom of its faces)."""
+    for k, r in f.items():
+        p.gradient(r, CLAW, (220, 210, 186), noise=3)
+
+
+def teeth(p, f):
+    for r in f.values():
+        p.gradient(r, (236, 228, 204), (196, 184, 150), noise=3)
+
+
+def tuft(prefix, parent, at, rot, big=True):
+    """A tuft of the mane, tapering to a point (a part of two boxes)."""
+    boxes = [(-2.5, -7, -2.5, 5, 7, 5, 'manespike'), (-1.5, -12, -1.5, 3, 5, 3, 'manespike')] if big \
+        else [(-2, -5, -2, 4, 5, 4, 'manespike'), (-1, -9, -1, 2, 4, 2, 'manespike')]
+    return part(prefix, parent, at, rot, boxes)
+
+
+def brow(prefix, parent, at, width, slope, style):
+    """Half a heavy brow, sloping down from its outer end to the nose: a scowl."""
+    return part(prefix, parent, at, (0, 0, slope), [(-width, -1, -1.5, width, 2.5, 3, style)])
+
+
+# ── The Azure Lion ────────────────────────────────────────────────────────────
+TEAL = (32, 104, 98)           # 青: the green-blue of his mane, dark
+TEAL_DARK = (8, 38, 42)
+TEAL_TIP = (86, 164, 144)
+FUR = (128, 104, 74)           # his hide, an ashen tawny
+FUR_DARK = (54, 40, 28)
+FUR_PALE = (156, 132, 100)
+LACQUER = (28, 24, 32)
+LION_EMBER = (132, 72, 6)      # his eyes smoulder amber: dark, not a blaze
+LION_CORE = (168, 104, 14)
+
+
+def lion_head(parent, at, rot):
+    """The lion's head, his in both shapes: a broad skull, wide at the jowls, under a scowling brow;
+    a short heavy muzzle; the jaws open in a snarl round long fangs; behind it a ruff of mane
+    bristling into points, swept back, cheek ruffs, a beard. Its pivot is the back of the skull."""
+    return [
+        part('head', parent, at, rot, [
+            (-7.5, -7, -12, 15, 11, 12, 'lionface'),
+            (-8.5, -2, -11, 17, 5, 9, 'jowl'),                # the jowls: the face broadest under the eyes
+            (-5, -4, -17, 10, 6.5, 6, 'muzzle'),
+            (-3, -5.5, -16, 6, 2, 5, 'snout'),                 # the bridge of the nose, rising to the brow
+            (-2.5, -5.2, -17.6, 5, 2.4, 1.2, 'nose'),
+            (-4.2, 2.5, -16.4, 1.6, 5, 1.6, 'fang'), (2.6, 2.5, -16.4, 1.6, 5, 1.6, 'fang'),
+            (-12, -14, -4, 24, 24, 8, 'azuremane'),            # the ruff behind his face
+            (-7, 4.5, -9, 14, 10, 8, 'azuremane'),             # his beard
+        ]),
+        brow('right_brow', 'head', (-0.5, -6.5, -12.5), 8, 0.32, 'brow'),
+        part('jaw', 'head', (0, 2.5, -11), (0.42, 0, 0), [
+            (-4.5, 0, -6, 9, 2.5, 6, 'jaw'),
+            (-3.6, -2.4, -5.6, 1.4, 2.4, 1.4, 'fang'), (2.2, -2.4, -5.6, 1.4, 2.4, 1.4, 'fang'),
+        ]),
+        part('right_cheek', 'head', (-8, 1, -6), (0, 0.4, 0.2), [(-4, -8, -4, 4, 15, 8, 'azuremane')]),
+        tuft('top_tuft', 'head', (0, -13, 1), (-0.85, 0, 0)),
+        tuft('right_tuft_a', 'head', (-6.5, -12, 1), (-0.75, 0, -0.5)),
+        tuft('right_tuft_b', 'head', (-11, -6, 1), (-0.7, 0, -1.05)),
+        tuft('right_tuft_c', 'head', (-11.5, 2, 1), (-0.6, 0, -1.6)),
+        tuft('right_tuft_d', 'head', (-9, 9, 0), (-0.4, 0, -2.25), big=False),
+        tuft('right_flare_a', 'head', (-9, -10, -3), (0.35, 0, -0.75), big=False),
+        tuft('right_flare_b', 'head', (-11, 0, -3), (0.3, 0, -1.4), big=False),
+        tuft('flare_top', 'head', (0, -12, -3), (0.4, 0, 0), big=False),
+    ]
+
+
+# His demon-king shape: hunched forward from the waist, his head thrust out low in its ruff, arms
+# that hang to his knees and end in claws; dark lacquered armour edged in gold, a gold lion's face on
+# his breast, layered pauldrons spiked with gold; his mane falls in a mantle over his shoulders and
+# down his back. A giant's broadsword.
 AZURE_LION = mirrored([
-    part('body', 'root', (0, 4, 0), (0, 0, 0), [
-        (-8, -22, -4.5, 16, 22, 9, 'lacquer'),
-        (-6, -21, -5.1, 12, 10, 0.8, 'breastplate'),
-        (-8.6, -6, -5.1, 17.2, 3, 10.2, 'gold'),
-        (-8.4, -3, -4.9, 16.8, 8, 9.8, 'tassets'),
-        (-7.5, -23, 4.2, 15, 13, 2.5, 'azuremane'),
+    part('body', 'root', (0, 4, 0), (0.12, 0, 0), [
+        (-9.5, -11, -6, 19, 11, 12, 'lacquer'),                # the belly
+        (-13, -25, -8, 26, 15, 16, 'chest'),                   # the chest: his weight is here
+        (-8.5, -23, -8.6, 17, 11, 1, 'breastplate'),
+        (-11, -3, -6.8, 22, 3, 13.6, 'gold'),                  # the belt
+        (-3, -4, -7.6, 6, 5, 1, 'buckle'),
+        (-12, 0, -7.2, 24, 9, 14.4, 'tassets'),
+        (-14, -31, -2, 28, 9, 12, 'azuremane'),                # the mane over his shoulders
+        (-12.5, -24, 6, 25, 22, 5, 'azuremane'),               # and falling down his back
     ]),
-    part('head', 'body', (0, -22, -1), (0, 0, 0), [
-        (-6, -11, -7, 12, 11, 10, 'lionface'),
-        (-4.5, -6, -11, 9, 5, 4.5, 'muzzle'),
-        (-1.75, -7, -11.6, 3.5, 2, 1.6, 'nose'),
-        (-9, -15, -3, 18, 18, 9, 'azuremane'),
-        (-7, -16.5, -6, 14, 4, 7, 'azuremane'),
-        (-9.5, -8, -6, 3, 8, 4, 'azuremane'),
-        (6.5, -8, -6, 3, 8, 4, 'azuremane'),
+    tuft('right_shoulder_tuft', 'body', (-10, -30, 6), (0.8, 0, -0.6)),
+    tuft('back_tuft', 'body', (0, -30, 8), (1.1, 0, 0)),
+    tuft('right_back_tuft', 'body', (-6, -22, 10), (1.3, 0, -0.3), big=False),
+] + lion_head('body', (0, -27, -7), (0.18, 0, 0)) + [
+    part('right_arm', 'body', (-16.5, -21, -0.5), (0, 0, 0), [
+        (-4.5, -2, -4.5, 9, 13, 9, 'lionarm'),
+        (-7, -6, -7, 14, 7, 14, 'pauldron'),
+        (-7.5, -1, -6.5, 8, 5, 13, 'pauldron'),
     ]),
-    part('jaw', 'head', (0, -1, -5), (0.05, 0, 0), [(-4, 0, -5.5, 8, 2.5, 6, 'jaw'), (-5, 2, -4.5, 10, 4, 5, 'azuremane')]),
-    part('right_ear', 'head', (-5, -14, -2), (0, 0, -0.4), [(-1.5, -3, -1, 3, 3, 2, 'ear')]),
-    part('right_arm', 'body', (-10.5, -19, 0), (0, 0, 0), [
-        (-3, -2, -3, 6, 19, 6, 'lionarm'), (-4, -4, -4, 8, 6, 8, 'pauldron'), (-3.5, 12, -3.5, 7, 4, 7, 'gold')]),
-    part('sword', 'right_arm', (0, 16, 0), (1.5708, 0, 0), [
-        (-0.75, -3, -0.75, 1.5, 8, 1.5, 'grip'), (-2, -4, -2, 4, 1.2, 4, 'gold'),
-        (-0.5, -30, -2.8, 1, 26, 5, 'broadblade'), (-0.5, -33, -1.8, 1, 3, 3.6, 'broadblade')]),
-    part('right_leg', 'root', (-4, 4, 0), (0, 0, 0), [(-3, 0, -3, 6, 17, 6, 'greave'), (-3.4, 17, -4.6, 6.8, 3, 7.4, 'lionpaw')]),
-    part('tail', 'body', (0, -3, 4.5), (0.7, 0, 0), [(-0.8, -0.8, 0, 1.6, 1.6, 14, 'tailfur'), (-2.2, -2.2, 12.5, 4.4, 4.4, 5, 'azuremane')]),
+    part('right_pauldron_spike', 'right_arm', (-3.5, -6, -2.5), (-0.25, 0, -0.55), [(-1.5, -6, -1.5, 3, 6, 3, 'goldspike'), (-0.75, -9, -0.75, 1.5, 3, 1.5, 'goldspike')]),
+    part('right_pauldron_spike2', 'right_arm', (-3.5, -6, 3), (0.25, 0, -0.55), [(-1.25, -5, -1.25, 2.5, 5, 2.5, 'goldspike'), (-0.6, -7.5, -0.6, 1.2, 2.5, 1.2, 'goldspike')]),
+    part('right_forearm', 'right_arm', (0, 11, 0), (-0.2, 0, 0), [
+        (-5, 0, -5, 10, 9, 10, 'bracer'),
+        (-4.5, 9, -4.8, 9, 5, 9.6, 'lionhand'),
+        (-3.8, 13, -5.4, 1.5, 4.5, 1.5, 'claw'), (-0.75, 13, -5.4, 1.5, 4.5, 1.5, 'claw'), (2.3, 13, -5.4, 1.5, 4.5, 1.5, 'claw'),
+    ]),
+    part('sword', 'right_forearm', (0, 11.5, 0), (1.5708, 0, 0), [
+        (-1, -3, -1, 2, 10, 2, 'grip'),
+        (-1.6, 7, -1.6, 3.2, 2, 3.2, 'gold'),                  # the pommel
+        (-3.5, -4.5, -3.5, 7, 1.5, 7, 'gold'),                 # the guard
+        (-0.8, -38, -3, 1.6, 34, 7, 'broadblade'),
+        (-0.8, -44, -0.5, 1.6, 6, 4.5, 'broadblade'),          # the point, swept up to the back
+    ]),
+    part('right_leg', 'root', (-6.5, 5, 0.5), (0, 0, 0), [
+        (-5, 0, -5, 10, 16, 10, 'lionleg'),
+        (-5.5, 7, -5.5, 11, 9, 11, 'greave'),
+        (-5.5, 16, -8.5, 11, 3, 12.5, 'lionpaw'),
+        (-4.6, 17, -10.2, 1.7, 2, 2, 'claw'), (-0.85, 17, -10.2, 1.7, 2, 2, 'claw'), (2.9, 17, -10.2, 1.7, 2, 2, 'claw'),
+    ]),
+    part('tail', 'body', (0, -2, 7), (0.75, 0, 0), [(-1.3, -1.3, 0, 2.6, 2.6, 16, 'tailfur'), (-3, -3, 14, 6, 6, 7, 'azuremane')]),
 ])
+
+# His true form, Manjushri's lion: on all fours, long and heavy, a wedge: a towering chest and
+# shoulders under the mane, which climbs in a crest of swept-back locks to his withers; the belly
+# tucked up under a lean waist; lower haunches; the head carried low and well forward of it all,
+# jaws snarling, claws out.
+AZURE_LION_TRUE = mirrored([
+    part('body', 'root', (0, 2, 0), (0, 0, 0), [
+        (-11, -11, -22, 22, 22, 20, 'lionfur'),                # chest and shoulders
+        (-8, -6, -3, 16, 12, 17, 'flank'),                     # the waist, lean, the belly tucked up
+        (-9, -5, 13, 18, 14, 13, 'lionfur'),                   # the haunches, lower than the shoulders
+        (-12, -10, -27, 24, 21, 14, 'azuremane'),              # the mane round his neck
+        (-9.5, -16, -25, 19, 7, 16, 'azuremane'),              # its crest, climbing to the withers
+        (-11.5, -13, -12, 23, 11, 9, 'azuremane'),             # over his shoulders
+        (-8, 12, -23, 16, 5, 13, 'azuremane'),                 # the fringe under his chest
+    ]),
+    tuft('crest_tuft', 'body', (0, -16, -22), (-1.15, 0, 0)),
+    tuft('crest_tuft2', 'body', (0, -15, -14), (-1.3, 0, 0)),
+    tuft('crest_tuft3', 'body', (0, -12, -6), (-1.45, 0, 0), big=False),
+    tuft('right_crest_tuft', 'body', (-6.5, -15, -18), (-1.1, 0, -0.45)),
+    tuft('right_mane_tuft', 'body', (-12, -6, -19), (-0.9, 0, -1.2)),
+    tuft('right_mane_tuft2', 'body', (-11.5, -8, -8), (-1.2, 0, -1.0), big=False),
+    tuft('right_mane_tuft3', 'body', (-12, 5, -17), (-0.6, 0, -1.75), big=False),
+] + lion_head('body', (0, 1, -26), (0.2, 0, 0)) + [
+    part('right_foreleg', 'body', (-7.5, 8, -13), (0, 0, 0), [
+        (-5, -3, -5, 10, 13, 10, 'lionleg'),
+        (-5.5, 10, -7.5, 11, 4, 12, 'lionpaw'),
+        (-4.7, 12, -9.2, 1.7, 2, 2, 'claw'), (-0.85, 12, -9.2, 1.7, 2, 2, 'claw'), (3, 12, -9.2, 1.7, 2, 2, 'claw'),
+    ]),
+    part('right_hindleg', 'body', (-6.5, 4, 20), (0, 0, 0), [
+        (-4.5, -4, -6, 9, 12, 12, 'lionfur'),
+        (-3.5, 8, -1, 7, 8, 7, 'lionleg'),
+        (-4.5, 15, -5, 9, 3, 10, 'lionpaw'),
+        (-3.6, 16, -6.6, 1.6, 2, 2, 'claw'), (2, 16, -6.6, 1.6, 2, 2, 'claw'),
+    ]),
+    part('tail', 'body', (0, -3, 26), (0.9, 0, 0), [(-1.3, -1.3, 0, 2.6, 2.6, 14, 'tailfur')]),
+    part('tail_tip', 'tail', (0, 0, 14), (-1.2, 0, 0), [(-1.1, -1.1, 0, 2.2, 2.2, 8, 'tailfur'), (-3, -3, 6, 6, 6, 7, 'azuremane')]),
+])
+
+
+def lion_common(p, style, f):
+    """What the Lion's two shapes share: his face, mane, claws, hide. Returns whether it painted."""
+    if style == 'lionface':
+        pelt(p, f, FUR, FUR_DARK)
+        fx, fy, fw, fh = f['front']
+        # a dark mask over the brow, about the eyes and down the sides of the face; a scowl's furrows between the brows
+        for j in range(fh):
+            for i in range(fw):
+                edge = abs(i + 0.5 - fw / 2) / (fw / 2)
+                if j < 7 * bg.S and edge > 0.28 or j < 2 * bg.S:
+                    c = p.img.getpixel((fx + i, fy + j))
+                    p.px((fx + i, fy + j), [v * (0.42 if j < 2 * bg.S else 0.55) for v in c[:3]])
+        for j in range(0, 5 * bg.S):
+            for d in (-bg.S, bg.S - 1):
+                p.px((fx + fw // 2 + d, fy + j), [v * 0.45 for v in FUR_DARK])
+        w = fw // bg.S
+        glare(p, f, ((2, 3), (w - 3, w - 4)), 1, LION_EMBER, LION_CORE)
+    elif style == 'jowl':
+        pelt(p, f, [v * 0.7 for v in FUR], FUR_DARK)
+        fx, fy, fw, fh = f['front']
+        for j in range(fh):
+            for i in range(fw):
+                if abs(i + 0.5 - fw / 2) > fw * 0.3:
+                    c = p.img.getpixel((fx + i, fy + j))
+                    p.px((fx + i, fy + j), [v * 0.7 for v in c[:3]])
+    elif style == 'brow':
+        for k, r in f.items():
+            p.face(r, (24, 17, 14), {'top': 1.5, 'bottom': 0.6}.get(k, 1.0), noise=3)
+    elif style == 'snout':
+        pelt(p, f, [v * 0.8 for v in FUR], FUR_DARK)
+        for k in ('top', 'right', 'left'):                            # the snarl's wrinkles, across the bridge
+            fx, fy, fw, fh = f[k]
+            for j in range(0, fh, bg.S * 2) if k == 'top' else range(fh):
+                for i in range(fw) if k == 'top' else range(bg.S, fw, bg.S * 2):
+                    p.px((fx + i, fy + j), [v * 0.45 for v in FUR_DARK])
+    elif style == 'muzzle':
+        pelt(p, f, [v * 0.82 for v in FUR], FUR_DARK)
+        fx, fy, fw, fh = f['front']
+        for j in range(fh // 2):                                      # dark down the middle, from the nose
+            for i in range(fw // 2 - bg.S, fw // 2 + bg.S):
+                p.px((fx + i, fy + j), [v * 0.5 for v in FUR_DARK])
+        for k in ('front', 'right', 'left'):                         # the lip drawn back, black, over the gums
+            fx, fy, fw, fh = f[k]
+            for i in range(fw):
+                for j in range(fh - bg.S, fh):
+                    p.px((fx + i, fy + j), (24, 10, 10))
+                for j in range(fh - 2 * bg.S, fh - bg.S):
+                    p.px((fx + i, fy + j), MOUTH if (k == 'front' or i >= fw // 2) else (24, 10, 10))
+        fx, fy, fw, fh = f['front']                                   # whisker spots
+        for i in list(range(bg.S, bg.S * 3, bg.S)) + list(range(fw - bg.S * 3, fw - bg.S, bg.S)):
+            p.px((fx + i, fy + fh // 2), [v * 0.4 for v in FUR_DARK])
+        p.face(f['bottom'], THROAT, 1.0, noise=4)
+    elif style == 'nose':
+        plain(p, f, (22, 14, 16))
+        fx, fy, fw, fh = f['front']
+        for i in range(fw):                                           # narrowing down to its tip
+            for j in range(fh):
+                if abs(i + 0.5 - fw / 2) > fw / 2 - j * 0.9:
+                    p.px((fx + i, fy + j), [v * 0.5 for v in FUR_DARK])
+    elif style == 'fang':
+        teeth(p, f)
+    elif style == 'jaw':
+        pelt(p, f, [v * 0.9 for v in FUR_PALE], FUR)
+        fx, fy, fw, fh = f['top']                                     # the inside of the mouth: a dark tongue, the throat
+        for j in range(fh):
+            for i in range(fw):
+                c = THROAT if j > fh * 0.6 else MOUTH if abs(i + 0.5 - fw / 2) > fw * 0.25 else (104, 30, 36)
+                p.px((fx + i, fy + j), [v + p.rnd.randint(-4, 4) for v in c])
+        for k in ('front', 'right', 'left'):
+            fx, fy, fw, fh = f[k]
+            for i in range(fw):
+                for j in range(bg.S):
+                    p.px((fx + i, fy + j), (24, 10, 10))
+    elif style == 'azuremane':
+        mane(p, f, TEAL, TEAL_DARK, TEAL_TIP)
+    elif style == 'manespike':
+        spike(p, f, TEAL, TEAL_DARK, TEAL_TIP)
+    elif style == 'claw':
+        claws(p, f)
+    elif style in ('lionpaw', 'lionhand'):
+        pelt(p, f, [v * 0.9 for v in FUR], FUR_DARK)
+        p.face(f['bottom'], (40, 30, 28), 1.0, noise=4)              # dark pads
+    elif style in ('lionarm', 'lionleg', 'tailfur'):
+        pelt(p, f, FUR, FUR_DARK, FUR_PALE)
+    elif style == 'lionfur':
+        pelt(p, f, FUR, FUR_DARK, FUR_PALE, along=True)
+    elif style == 'flank':
+        pelt(p, f, [v * 0.94 for v in FUR], FUR_DARK, FUR_PALE, along=True)
+    elif style == 'gold':
+        gold(p, f)
+    else:
+        return False
+    return True
 
 
 def paint_azure_lion(p, style, f, dims):
-    if style == 'lionface':
-        lion_face(p, f, LION_FACE, LION_FACE_DARK, AZURE, (255, 214, 70))
+    if lion_common(p, style, f):
+        return
+    if style in ('lacquer', 'chest', 'bracer', 'greave'):
+        bands(p, f, LACQUER, (4, 4, 8), GOLD_DEEP, rivet=GOLD_DEEP if style == 'chest' else None, band=4 if style == 'bracer' else 5)
+        trim(p, f, GOLD, bottom=style in ('bracer', 'greave'))
+    if style == 'breastplate':                                        # a lion's face in gold, snarling
+        for r in f.values():
+            p.face(r, (40, 34, 44), 1.0, noise=4)
         fx, fy, fw, fh = f['front']
-        for i in range(2, fw - 2):                               # a band of azure over the brow
-            p.px((fx + i, fy + 1), AZURE_DARK)
-            p.px((fx + i, fy + 2), AZURE)
-    if style == 'muzzle':
-        shade_fur(p, f, [c * 1.06 for c in LION_FACE], LION_FACE_DARK, 0.05)
-        fx, fy, fw, fh = f['front']
-        for i in range(1, fw - 1):
-            p.px((fx + i, fy + fh - 2), (90, 24, 24))
-        for i in (2, 3, fw - 4, fw - 3):                          # fangs
-            p.px((fx + i, fy + fh - 1), IVORY)
-            p.px((fx + i, fy + fh - 2), IVORY)
-    if style == 'nose':
-        plain(p, f, (36, 26, 30))
-    if style == 'jaw':
-        shade_fur(p, f, LION_FACE, LION_FACE_DARK, 0.05)
-        fx, fy, fw, fh = f['top']                                # the inside of the mouth: red, teeth round it
+        cx, cy = fx + fw // 2, fy + fh // 2
         for j in range(fh):
             for i in range(fw):
-                edge = i == 0 or i == fw - 1 or j == 0
-                p.px((fx + i, fy + j), IVORY if edge and (i + j) % 2 == 0 else (150, 30, 40))
-    if style == 'azuremane':
-        shade_fur(p, f, AZURE, AZURE_DARK, streak=0.4)
-        for k, r in f.items():
-            fx, fy, fw, fh = r
-            for _ in range(fw * fh // 30):
-                p.px((fx + p.rnd.randrange(fw), fy + p.rnd.randrange(fh)), (120, 176, 230))   # glints
-    if style == 'ear':
-        plain(p, f, LION_FACE_DARK)
-    if style in ('lionarm', 'tailfur'):
-        shade_fur(p, f, LION_FACE, LION_FACE_DARK, 0.15)
-    if style == 'lionpaw':
-        shade_fur(p, f, LION_FACE, LION_FACE_DARK, 0.1)
-        fx, fy, fw, fh = f['front']
-        for i in range(1, fw, 3):
-            p.px((fx + i, fy + fh - 1), IVORY)
-            p.px((fx + i, fy + fh - 2), IVORY)
-    if style in ('lacquer', 'greave'):
-        for k, r in f.items():
-            lamellar(p, r, LACQUER, (16, 14, 20))
-        for k in ('front', 'back', 'right', 'left'):
-            fx, fy, fw, fh = f[k]
-            for i in range(fw):
-                p.px((fx + i, fy), GOLD_DEEP)
-    if style == 'breastplate':                                   # a lion's face in gold on his chest
-        for r in f.values():
-            p.face(r, (60, 54, 70), 1.0, noise=4)
-        fx, fy, fw, fh = f['front']
-        cx, cy = fx + fw / 2, fy + fh / 2
-        for j in range(fh):
-            for i in range(fw):
-                d = math.hypot(i + fx - cx + 0.5, j + fy - cy + 0.5)
-                if abs(d - fh * 0.38) < 1.1:
-                    p.px((fx + i, fy + j), GOLD, glow=True)
-        for ex in (-3, 2):
-            p.px((cx + ex, cy - 1), GOLD, glow=True)
-            p.px((cx + ex + 1, cy - 1), GOLD, glow=True)
-    if style in ('pauldron', 'tassets'):
-        for r in f.values():
-            lamellar(p, r, (40, 64, 110), (20, 34, 66))
-        for k in ('front', 'back', 'right', 'left'):
-            fx, fy, fw, fh = f[k]
-            for i in range(fw):
-                p.px((fx + i, fy + fh - 1), GOLD)
-    if style == 'gold':
+                d = math.hypot((i + 0.5 - fw / 2) / (fw / 2), (j + 0.5 - fh / 2) / (fh / 2))
+                if abs(d - 0.82) < 0.1:
+                    p.px((fx + i, fy + j), GOLD)
+        for side in (-1, 1):                                          # its eyes, slanted toward the nose
+            for i in range(3 * bg.S):
+                drop = (i if side > 0 else 3 * bg.S - 1 - i) // bg.S
+                x = cx + bg.S + i if side > 0 else cx - bg.S - 3 * bg.S + i
+                for j in range(bg.S):
+                    p.px((x, cy - 3 * bg.S + j + (2 - drop)), GOLD)
+        for i in range(-3 * bg.S, 3 * bg.S):                          # its fanged mouth
+            p.px((cx + i, cy + 2 * bg.S), GOLD)
+            if abs(i) in (2 * bg.S, 2 * bg.S + 1):
+                for j in range(bg.S * 2):
+                    p.px((cx + i, cy + 2 * bg.S + j), IVORY)
+    if style == 'buckle':
         gold(p, f)
+        fx, fy, fw, fh = f['front']
+        for i in range(bg.S, fw - bg.S):
+            p.px((fx + i, fy + fh // 2), (90, 60, 20))
+    if style in ('tassets', 'pauldron'):
+        bands(p, f, (30, 62, 66), (6, 16, 20), GOLD, band=4)          # lacquered teal-black plates, gold-edged
+        trim(p, f, GOLD)
+    if style == 'goldspike':
+        for k, r in f.items():
+            p.gradient(r, (250, 214, 110), GOLD_DEEP, noise=4)
     if style == 'grip':
-        p.shaded(f, (60, 30, 30))
+        p.shaded(f, (56, 24, 26))
+        for r in f.values():
+            fx, fy, fw, fh = r
+            for j in range(0, fh, 3):
+                for i in range(fw):
+                    p.px((fx + i, fy + j), (30, 12, 14))               # its binding
     if style == 'broadblade':
         for k, r in f.items():
-            p.gradient(r, (226, 232, 240), (140, 148, 160), horizontal=k in ('front', 'back'))
-        for k in ('right', 'left'):                               # an azure fuller down the blade
+            p.gradient(r, (214, 222, 232), (120, 128, 142), horizontal=k in ('front', 'back'))
+        for k in ('right', 'left'):                                   # a dark fuller, an edge that catches the light
             fx, fy, fw, fh = f[k]
-            for j in range(2, fh - 2):
-                p.px((fx + fw // 2, fy + j), (90, 140, 200), glow=True)
+            for j in range(bg.S, fh - bg.S):
+                p.px((fx + fw * 2 // 3, fy + j), (60, 70, 86))
+                p.px((fx + fw * 2 // 3 + 1, fy + j), (60, 70, 86))
+                p.px((fx, fy + j), (240, 244, 250))
+
+
+def paint_azure_lion_true(p, style, f, dims):
+    lion_common(p, style, f)
 
 
 # ── The White Elephant ───────────────────────────────────────────────────────
-WHITE = (232, 228, 216)
-WHITE_DARK = (196, 190, 176)
-ROBE = (40, 52, 110)
+HIDE = (210, 206, 194)         # white, a little grey in the creases
+HIDE_DARK = (150, 144, 132)
+IVORY_ARMOUR = (226, 216, 184)
+CRIMSON = (112, 18, 28)
+ELEPHANT_EMBER = (112, 16, 10)  # his eyes smoulder a deep red
+ELEPHANT_CORE = (150, 34, 14)
 
+
+def tusk_parts(prefix, parent, at, rot, k=1.0, big=True):
+    """A tusk out of the jaw, its three joints sweeping forward and up to a gold point."""
+    (w1, l1), (w2, l2), cap = ((4.5, 14), (3.6, 12), 3.6) if big else ((1.8, 6), (1.4, 5), 1.6)
+    w1, l1, w2, l2, cap = (v * k for v in (w1, l1, w2, l2, cap))
+    return [
+        part(prefix, parent, at, rot, [(-w1 / 2, 0, -w1 / 2, w1, l1, w1, 'tusk')]),
+        part(prefix + '_curve', prefix, (0, l1 - w2 / 2, 0), (-0.55, 0, 0), [(-w2 / 2, 0, -w2 / 2, w2, l2, w2, 'tusk')]),
+        part(prefix + '_tip', prefix + '_curve', (0, l2 - cap / 3, 0), (-0.65, 0, 0), [(-cap / 2, 0, -cap / 2, cap, cap * 1.4, cap, 'goldcap'),
+                                                                          (-cap / 4, cap * 1.4, -cap / 4, cap / 2, cap, cap / 2, 'goldcap')]),
+    ]
+
+
+def elephant_head(parent, at, rot, trunk, ear=1.0, tusk=1.0):
+    """The elephant's head, his in both shapes: a high double-domed skull under a gold war-frontlet
+    crested with spikes, deep-set eyes under a scowling brow, the face narrowing to a heavy trunk
+    (`trunk`: each joint's width and length), ears like ragged sails, six tusks (two great ones)."""
+    parts = [
+        part('head', parent, at, rot, [
+            (-9, -16, -12, 18, 9, 12, 'ehide'),                # the dome of his skull
+            (-8, -19, -10, 7, 3, 8, 'ehide'), (1, -19, -10, 7, 3, 8, 'ehide'),   # its two crowns
+            (-8, -7, -13, 16, 9, 12, 'eface'),
+            (-5.5, 2, -13, 11, 6, 9, 'ehide'),                 # narrowing to the trunk
+            (-3.5, 7, -10, 7, 3, 6, 'mouth'),
+            (-7, 3, -12, 3, 4, 5, 'ehide'), (4, 3, -12, 3, 4, 5, 'ehide'),        # the tusks' sheaths
+            (-4, -17.5, -13.4, 8, 17, 1.4, 'frontlet'),        # the gold war-frontlet
+            (-9.5, -13, -12.4, 19, 2, 1, 'gold'),              # its band across the brow
+        ]),
+        brow('right_ebrow', 'head', (-0.5, -7, -13.6), 8.5, 0.28, 'ebrow'),
+        part('crest', 'head', (0, -17.5, -12), (-0.35, 0, 0), [(-1.25, -5, -1.25, 2.5, 5, 2.5, 'goldspike'), (-0.6, -7.5, -0.6, 1.2, 2.5, 1.2, 'goldspike')]),
+        part('right_crest', 'head', (-3, -17, -12), (-0.35, 0, -0.35), [(-1, -4, -1, 2, 4, 2, 'goldspike'), (-0.5, -6, -0.5, 1, 2, 1, 'goldspike')]),
+        part('right_ear', 'head', (-9, -13, -6), (0, -0.7, 0.14), [
+            (-1.5, -3, 0, 1.5, 15 * ear, 20 * ear, 'bigear'),
+            (-1.5, -3 + 15 * ear, 2 * ear, 1.5, 9 * ear, 15 * ear, 'bigear'),
+            (-1.5, -3 + 24 * ear, 5 * ear, 1.5, 4 * ear, 8 * ear, 'bigear'),
+        ]),
+    ]
+    prev, y = 'head', 6
+    for i, (w, l) in enumerate(trunk):
+        name = 'trunk%d' % (i + 1)
+        boxes = [(-w / 2, 0, -w / 2, w, l, w, 'trunk')]
+        if i == 0:
+            boxes.append((-w / 2 - 0.4, 0, -w / 2 - 0.4, w + 0.8, 2.5, w + 0.8, 'gold'))
+            boxes.append((-w / 2 + 1, 2.5, -w / 2 - 0.6, w - 2, l - 2.5, 0.6, 'goldplate'))   # the frontlet's tongue down it
+        if i == len(trunk) - 1:
+            boxes.append((-w / 2 - 0.3, l - 2.5, -w / 2 - 0.3, w + 0.6, 1.5, w + 0.6, 'gold'))
+        parts.append(part(name, prev, (0, y, -11.5) if i == 0 else (0, trunk[i - 1][1], 0), (-0.05, 0, 0), boxes))
+        prev, y = name, l
+    parts += tusk_parts('right_tusk', 'head', (-5.5, 6, -11), (-1.4, 0, 0.2), k=tusk)
+    parts += tusk_parts('right_tusk_high', 'head', (-6.5, 3, -12), (-1.0, 0, 0.45), k=tusk, big=False)
+    parts += tusk_parts('right_tusk_low', 'head', (-2.5, 8.5, -10), (-0.7, 0, 0.1), k=tusk, big=False)
+    return parts
+
+
+# His demon-king shape: broader and heavier than the Lion, in ivory plate edged in gold over white
+# hide, a gold wheel on his breast, a crimson mantle, great round pauldrons; the elephant's head;
+# pillar legs; a giant's lance, held upright.
 WHITE_ELEPHANT = mirrored([
-    part('body', 'root', (0, 4, 0), (0, 0, 0), [
-        (-9, -24, -5.5, 18, 24, 11, 'robe'),
-        (-7.5, -25, -5.2, 15, 3, 10.4, 'gold'),
-        (-9.6, -7, -6, 19.2, 3, 12, 'gold'),
-        (-9.4, -4, -5.8, 18.8, 8, 11.6, 'robeskirt'),
-        (-2, -21, -6, 4, 4, 0.6, 'jewel'),
+    part('body', 'root', (0, 3, 0), (0.08, 0, 0), [
+        (-10.5, -12, -7, 21, 12, 14, 'ivoryplate'),
+        (-14, -27, -8.5, 28, 16, 17, 'ivorychest'),
+        (-9, -25, -9.1, 18, 12, 1, 'goldplate'),
+        (-12, -3, -7.6, 24, 3, 15.2, 'gold'),
+        (-12.5, 0, -7.8, 25, 10, 15.6, 'skirt'),
+        (-12, -30, -7, 24, 4, 14, 'gold'),                     # the gorget
+        (-13, -27, 8.5, 26, 28, 2, 'mantle'),
     ]),
-    part('head', 'body', (0, -25, -1), (0, 0, 0), [
-        (-6.5, -13, -7.5, 13, 13, 11, 'ivoryface'),
-        (-5, -16, -5, 10, 3, 8, 'crown'),
-        (-1, -18, -2, 2, 2, 2, 'jewel'),
-        (-5, -3, -14, 1.6, 1.6, 7, 'tusk'), (3.4, -3, -14, 1.6, 1.6, 7, 'tusk'),
-        (-6.3, -5.5, -11, 1.4, 1.4, 4, 'tusk'), (4.9, -5.5, -11, 1.4, 1.4, 4, 'tusk'),
-        (-4.2, -0.8, -11, 1.3, 1.3, 3.5, 'tusk'), (2.9, -0.8, -11, 1.3, 1.3, 3.5, 'tusk'),
+] + elephant_head('body', (0, -30, -6), (0.12, 0, 0), ((6.4, 8), (5.4, 8), (4.4, 8), (3.4, 7))) + [
+    part('right_arm', 'body', (-18, -24, -0.5), (0, 0, 0), [
+        (-5, -2, -5, 10, 13, 10, 'ehide'),
+        (-8, -7, -7.5, 15, 9, 15, 'epauldron'),
+        (-8.5, -1, -7, 8, 5, 14, 'epauldron'),
+        (-8.6, -4.5, -2.5, 1, 5, 5, 'goldboss'),
     ]),
-    part('right_ear', 'head', (-6.5, -12, -3), (0, -0.4, 0), [(-1, 0, 0, 1, 15, 13, 'bigear')]),
-    part('trunk1', 'head', (0, -5, -7.5), (0.1, 0, 0), [(-2, 0, -2, 4, 8, 4, 'trunk')]),
-    part('trunk2', 'trunk1', (0, 8, 0), (0.15, 0, 0), [(-1.75, 0, -1.75, 3.5, 8, 3.5, 'trunk')]),
-    part('trunk3', 'trunk2', (0, 8, 0), (0.2, 0, 0), [(-1.5, 0, -1.5, 3, 7, 3, 'trunk'), (-1.8, 6, -1.8, 3.6, 1.6, 3.6, 'gold')]),
-    part('right_arm', 'body', (-11.5, -21, 0), (0, 0, 0), [
-        (-3.5, -2, -3.5, 7, 21, 7, 'ivoryarm'), (-4.4, -4, -4.4, 8.8, 6, 8.8, 'gold'), (-3.9, 14, -3.9, 7.8, 3, 7.8, 'gold')]),
-    part('lance', 'right_arm', (0, 18, 0), (1.5708, 0, 0), [
-        (-0.6, -36, -0.6, 1.2, 52, 1.2, 'shaft'), (-0.7, -44, -1.6, 1.4, 8, 3.2, 'lanceblade'), (-1.3, -36.5, -1.3, 2.6, 2, 2.6, 'tassel')]),
-    part('right_leg', 'root', (-4.8, 4, 0), (0, 0, 0), [(-3.5, 0, -3.5, 7, 17, 7, 'ivoryleg'), (-4, 17, -4, 8, 3, 8, 'foot')]),
+    part('right_forearm', 'right_arm', (0, 11, 0), (-0.2, 0, 0), [
+        (-5.5, 0, -5.5, 11, 9, 11, 'bracer'),
+        (-5, 9, -5.2, 10, 5, 10.4, 'ehide'),
+    ]),
+    part('lance', 'right_forearm', (0, 11.5, 0), (0.7, 0, 0), [
+        (-1, -48, -1, 2, 66, 2, 'shaft'),
+        (-1.2, -64, -3, 2.4, 16, 6, 'lanceblade'),
+        (-0.8, -70, -1.8, 1.6, 6, 3.6, 'lanceblade'),
+        (-2, -49, -2, 4, 2, 4, 'gold'),
+        (-1.8, -47, -1.8, 3.6, 5, 3.6, 'tassel'),
+        (-1.4, 17, -1.4, 2.8, 2, 2.8, 'gold'),
+    ]),
+    part('right_leg', 'root', (-7, 5, 0.5), (0, 0, 0), [
+        (-5.5, 0, -5.5, 11, 15, 11, 'ehide'),
+        (-6, 3, -6, 12, 6, 12, 'kneeplate'),
+        (-6, 15, -6, 12, 4, 12, 'efoot'),
+    ]),
+])
+
+# His true form, Samantabhadra's white elephant: towering, a war elephant, the weight of him in a
+# great humped forequarter; a crimson saddle-cloth edged and fringed with gold, the Bodhisattva's
+# seat on his back, empty, its posts gold; a gold breast-band and bell; pillar legs ringed with
+# gold; the elephant's head, larger, its trunk to the ground and its two great tusks longer than a man.
+WHITE_ELEPHANT_TRUE = mirrored([
+    part('body', 'root', (0, -2, 2), (0, 0, 0), [
+        (-14, -16, -21, 28, 24, 48, 'barrel'),
+        (-13, -20, -18, 26, 5, 18, 'ehide'),                   # the hump of his shoulders
+        (-15, -18, -10, 30, 15, 29, 'caparison'),
+        (-15.4, -4, -10.4, 30.8, 2, 29.8, 'fringe'),
+        (-7, -21, -6, 14, 3, 14, 'seat'),                      # the Bodhisattva's seat, empty
+        (-14.6, -10, -21, 29.2, 6, 2, 'gold'),                 # the breast-band
+        (-2, -4.5, -22.5, 4, 4, 3, 'gold'),                    # its bell
+    ]),
+    part('right_seat_post', 'body', (-6.5, -21, -5.5), (0, 0, 0), [(-0.75, -7, -0.75, 1.5, 7, 1.5, 'gold')]),
+    part('right_seat_post2', 'body', (-6.5, -21, 7.5), (0, 0, 0), [(-0.75, -7, -0.75, 1.5, 7, 1.5, 'gold')]),
+    part('seat_canopy', 'body', (0, -28, 1), (0, 0, 0), [(-8, -1.5, -8, 16, 1.5, 16, 'canopy'), (-1, -4.5, -1, 2, 3, 2, 'goldspike')]),
+] + elephant_head('body', (0, -12, -20), (0.12, 0, 0), ((7.6, 9), (6.6, 8), (5.6, 8), (4.6, 7), (3.6, 6)), ear=1.15, tusk=1.15) + [
+    part('right_foreleg', 'body', (-8.5, 8, -11), (0, 0, 0), [
+        (-6, -2, -6, 12, 18, 12, 'ehide'),
+        (-6.4, 9, -6.4, 12.8, 2, 12.8, 'gold'),
+        (-6.5, 16, -6.5, 13, 2, 13, 'efoot'),
+    ]),
+    part('right_hindleg', 'body', (-8.5, 8, 20), (0, 0, 0), [
+        (-6, -2, -6, 12, 18, 12, 'ehide'),
+        (-6.4, 9, -6.4, 12.8, 2, 12.8, 'gold'),
+        (-6.5, 16, -6.5, 13, 2, 13, 'efoot'),
+    ]),
+    part('tail', 'body', (0, -12, 27), (0.35, 0, 0), [(-1, 0, -1, 2, 18, 2, 'ehide'), (-1.6, 16, -1.6, 3.2, 5, 3.2, 'tuft')]),
 ])
 
 
-def paint_white_elephant(p, style, f, dims):
-    if style in ('ivoryarm', 'ivoryleg', 'trunk'):
-        hide(p, f, WHITE)
-    if style == 'trunk':
-        for k in ('front', 'back', 'right', 'left'):
-            fx, fy, fw, fh = f[k]
-            for j in range(1, fh, 3):
-                for i in range(fw):
-                    p.px((fx + i, fy + j), WHITE_DARK)
-    if style == 'ivoryface':
-        elephant_face(p, f, WHITE, (90, 170, 255))
-        fx, fy, fw, fh = f['front']                              # a jewelled mark on his brow
-        for i in range(fw // 2 - 1, fw // 2 + 1):
-            for j in range(2, 4):
-                p.px((fx + i, fy + j), (220, 40, 60), glow=True)
-    if style == 'bigear':
-        hide(p, f, WHITE)
-        for k in ('right', 'left'):
-            fx, fy, fw, fh = f[k]
-            for j in range(fh):
-                for i in range(fw):
-                    if (i - fw / 2) ** 2 / (fw / 2) ** 2 + (j - fh / 2) ** 2 / (fh / 2) ** 2 < 0.45:
-                        p.px((fx + i, fy + j), (236, 196, 190))
-                    elif (i - fw / 2) ** 2 / (fw / 2) ** 2 + (j - fh / 2) ** 2 / (fh / 2) ** 2 > 0.9:
-                        p.px((fx + i, fy + j), GOLD_DEEP)
-    if style == 'tusk':
-        for k, r in f.items():
-            p.face(r, IVORY, 1.0, noise=3)
-        fx, fy, fw, fh = f['front']                               # gold caps
-        p.face(f['front'], GOLD, 1.0, noise=3, glow=True)
-    if style == 'crown':
-        gold(p, f)
+def elephant_common(p, style, f):
+    """What the Elephant's two shapes share: hide, face, ears, trunk, tusks, gold. Returns whether it painted."""
+    if style in ('ehide', 'barrel'):
+        hide(p, f, HIDE)
+    elif style == 'eface':
+        hide(p, f, HIDE)
         fx, fy, fw, fh = f['front']
-        for i in range(1, fw - 1, 4):
-            for j in range(1, fh - 1):
-                p.px((fx + i, fy + j), (60, 140, 220), glow=True)
-    if style == 'jewel':
-        plain(p, f, (220, 40, 60), glow=True)
-    if style == 'gold':
-        gold(p, f)
-    if style in ('robe', 'robeskirt'):
-        for k, r in f.items():
-            p.face(r, ROBE, {'top': 1.08, 'bottom': 0.72, 'front': 1.0, 'back': 0.86}.get(k, 0.94), noise=6, fall=0.2)
-        for k in ('front', 'back', 'right', 'left'):            # cloud scrolls in gold
+        # deep-set eyes in the brow's shadow either side of the frontlet; creases down to the trunk
+        w = fw // bg.S
+        for j in range(fh):
+            for i in range(fw):
+                edge = abs(i + 0.5 - fw / 2) / (fw / 2)
+                if edge > 0.3 and j < 6 * bg.S:
+                    c = p.img.getpixel((fx + i, fy + j))
+                    p.px((fx + i, fy + j), [v * (0.6 if j < 3 * bg.S else 0.8) for v in c[:3]])
+        glare(p, f, ((2, 3), (w - 3, w - 4)), 1, ELEPHANT_EMBER, ELEPHANT_CORE)
+        for j in range(5 * bg.S, fh, bg.S * 2):
+            for i in range(fw // 3, fw * 2 // 3):
+                p.px((fx + i, fy + j), [v * 0.74 for v in HIDE])
+    elif style == 'ebrow':
+        hide(p, f, [v * 0.84 for v in HIDE])
+        for k in ('front', 'bottom'):
             fx, fy, fw, fh = f[k]
             for i in range(fw):
-                for j in range(fh):
-                    if (i + 2 * j) % 11 == 0 and (j // 5) % 2 == 0:
-                        p.px((fx + i, fy + j), GOLD_DEEP)
-    if style == 'foot':
-        hide(p, f, WHITE_DARK)
+                for j in range(fh - bg.S, fh) if k == 'front' else range(fh):
+                    p.px((fx + i, fy + j), [v * 0.38 for v in HIDE_DARK])
+    elif style == 'mouth':
+        hide(p, f, HIDE_DARK)
         fx, fy, fw, fh = f['front']
-        for i in range(1, fw - 1, 4):
-            for di in range(2):
-                p.px((fx + i + di, fy + fh - 2), GOLD)
-    if style == 'shaft':
-        p.shaded(f, (120, 30, 30))
+        for i in range(fw):
+            for j in range(bg.S):
+                p.px((fx + i, fy + j), (70, 30, 34))
+    elif style == 'trunk':
+        hide(p, f, HIDE)
         for k in ('front', 'back', 'right', 'left'):
             fx, fy, fw, fh = f[k]
-            for j in range(0, fh, 12):
+            for j in range(bg.S, fh, bg.S * 2):
+                for i in range(fw):
+                    p.px((fx + i, fy + j), HIDE_DARK)                 # its rings
+    elif style == 'bigear':
+        hide(p, f, HIDE)
+        hide(p, {'left': f['left']}, (196, 172, 166))                 # within, toward his head: pinker
+        for k in ('right', 'left'):                                   # veins branching over it, its edge darker
+            fx, fy, fw, fh = f[k]
+            for i in range(fw):
+                for d in range(bg.S):
+                    p.px((fx + i, fy + fh - 1 - d), HIDE_DARK)
+            for j in range(fh):
+                for d in range(bg.S):
+                    p.px((fx + fw - 1 - d, fy + j), HIDE_DARK)
+            for v in range(3):
+                x, y = fx + p.rnd.randrange(fw // 4), fy + p.rnd.randrange(fh)
+                for _ in range(fw):
+                    if fx <= x < fx + fw and fy <= y < fy + fh:
+                        p.px((x, y), (160, 132, 128))
+                    x += 1
+                    y += p.rnd.choice((-1, 0, 0, 1))
+    elif style == 'tusk':
+        for k, r in f.items():
+            p.gradient(r, (240, 232, 208), (200, 186, 150), noise=3)
+        for k in ('front', 'back', 'right', 'left'):
+            fx, fy, fw, fh = f[k]
+            for j in range(0, fh, bg.S * 3):
+                for i in range(fw):
+                    p.px((fx + i, fy + j), (186, 170, 132))           # the grain
+    elif style in ('goldcap', 'goldspike'):
+        for k, r in f.items():
+            p.gradient(r, (250, 222, 130), GOLD_DEEP, noise=3)
+    elif style == 'frontlet':
+        gold(p, f)
+        fx, fy, fw, fh = f['front']
+        for j in range(fh):                                           # its raised edges and ribs
+            for d in range(bg.S):
+                p.px((fx + d, fy + j), GOLD_DEEP)
+                p.px((fx + fw - 1 - d, fy + j), GOLD_DEEP)
+        for j in range(bg.S * 4, fh, bg.S * 4):
+            for i in range(fw):
+                p.px((fx + i, fy + j), GOLD_DEEP)
+        cx, cy = fx + fw // 2, fy + fh // 3
+        for j in range(-bg.S, bg.S):
+            for i in range(-bg.S, bg.S):
+                p.px((cx + i, cy + j), (130, 16, 30))                 # a jewel, dark red
+    elif style == 'goldplate':
+        gold(p, f)
+    elif style == 'efoot':
+        hide(p, f, HIDE_DARK)
+        fx, fy, fw, fh = f['front']
+        for i in range(bg.S, fw - bg.S * 2, bg.S * 4):
+            for di in range(bg.S * 2):
+                for j in range(fh - bg.S * 2, fh):
+                    p.px((fx + i + di, fy + j), (232, 224, 200))      # toenails
+    elif style == 'gold':
+        gold(p, f)
+    else:
+        return False
+    return True
+
+
+def paint_white_elephant(p, style, f, dims):
+    if elephant_common(p, style, f):
+        return
+    if style in ('ivoryplate', 'ivorychest', 'skirt', 'kneeplate', 'epauldron'):
+        bands(p, f, IVORY_ARMOUR, (120, 104, 72), GOLD, rivet=GOLD_DEEP, band=4 if style in ('skirt', 'epauldron') else 5)
+        trim(p, f, GOLD)
+    if style == 'goldplate':                                          # a gold wheel of the law on his breast
+        for r in f.values():
+            p.face(r, (150, 26, 34), 1.0, noise=4)
+        fx, fy, fw, fh = f['front']
+        for j in range(fh):
+            for i in range(fw):
+                dx, dy = (i + 0.5 - fw / 2) / (fh / 2), (j + 0.5 - fh / 2) / (fh / 2)
+                d = math.hypot(dx, dy)
+                spoke = d < 0.8 and min(abs(dx), abs(dy), abs(abs(dx) - abs(dy))) < 0.09
+                if abs(d - 0.8) < 0.11 or d < 0.2 or spoke:
+                    p.px((fx + i, fy + j), GOLD)
+    if style == 'goldboss':
+        gold(p, f)
+    if style == 'bracer':
+        gold(p, f)
+        trim(p, f, GOLD_DEEP)
+    if style == 'mantle':
+        for k, r in f.items():
+            p.face(r, CRIMSON, {'back': 0.9, 'front': 0.6}.get(k, 0.8), noise=5, fall=0.25)
+        trim(p, f, GOLD, top=False)
+        fx, fy, fw, fh = f['back']
+        for j in range(bg.S * 3, fh - bg.S * 3, bg.S * 5):          # cloud scrolls in gold
+            for i in range(fw):
+                if (i // bg.S + j // bg.S) % 4 == 0:
+                    p.px((fx + i, fy + j), GOLD_DEEP)
+    if style == 'shaft':
+        p.shaded(f, (100, 22, 26))
+        for k in ('front', 'back', 'right', 'left'):
+            fx, fy, fw, fh = f[k]
+            for j in range(0, fh, bg.S * 12):
                 for i in range(fw):
                     p.px((fx + i, fy + j), GOLD)
     if style == 'lanceblade':
-        blade(p, f)
+        for k, r in f.items():
+            p.gradient(r, (220, 226, 236), (120, 128, 142), horizontal=k in ('front', 'back'))
     if style == 'tassel':
-        plain(p, f, (200, 30, 36))
+        plain(p, f, (160, 22, 30))
 
+
+def paint_white_elephant_true(p, style, f, dims):
+    if elephant_common(p, style, f):
+        return
+    if style == 'caparison':                                           # a crimson saddle-cloth, gold-bordered
+        for k, r in f.items():
+            p.face(r, CRIMSON, {'top': 1.05}.get(k, 0.92), noise=5, fall=0.15)
+        trim(p, f, GOLD)
+        for k in ('right', 'left'):                                   # a gold lattice over it, a border within the edge
+            fx, fy, fw, fh = f[k]
+            for j in range(bg.S * 3, fh - bg.S * 3):
+                for i in range(bg.S * 3, fw - bg.S * 3):
+                    inner = i < bg.S * 4 or i >= fw - bg.S * 4 or j < bg.S * 4 or j >= fh - bg.S * 4
+                    lattice = (i + j) % (bg.S * 6) == 0 or (i - j) % (bg.S * 6) == 0
+                    if inner and (i < bg.S * 3 + 2 or i >= fw - bg.S * 3 - 2 or j < bg.S * 3 + 2 or j >= fh - bg.S * 3 - 2):
+                        p.px((fx + i, fy + j), GOLD_DEEP)
+                    elif not inner and lattice:
+                        p.px((fx + i, fy + j), GOLD_DEEP)
+    if style == 'fringe':
+        for k, r in f.items():
+            fx, fy, fw, fh = r
+            for i in range(fw):
+                for j in range(fh):
+                    p.px((fx + i, fy + j), GOLD if (i // bg.S) % 2 == 0 else GOLD_DEEP)
+    if style == 'seat':                                               # the Bodhisattva's seat: crimson, gold-edged
+        for k, r in f.items():
+            p.face(r, (96, 14, 22), {'top': 1.1}.get(k, 0.9), noise=4)
+        trim(p, f, GOLD)
+    if style == 'canopy':
+        for k, r in f.items():
+            p.face(r, (96, 14, 22), {'top': 1.05, 'bottom': 0.7}.get(k, 0.95), noise=4)
+        trim(p, f, GOLD)
+    if style == 'tuft':
+        plain(p, f, (70, 64, 60))
+
+
+def extent(parts, k):
+    """How far the model reaches, drawn at `k` times its pixels, in blocks: its height, its breadth, how
+    far it runs ahead of and behind its feet's middle (the parts at rest)."""
+    def mul(a, b):
+        return [[sum(a[i][t] * b[t][j] for t in range(3)) for j in range(3)] for i in range(3)]
+
+    def apply(m, v):
+        return [sum(m[i][t] * v[t] for t in range(3)) for i in range(3)]
+
+    def rot(rx, ry, rz):
+        cx, sx, cy, sy, cz, sz = math.cos(rx), math.sin(rx), math.cos(ry), math.sin(ry), math.cos(rz), math.sin(rz)
+        x = [[1, 0, 0], [0, cx, -sx], [0, sx, cx]]
+        y = [[cy, 0, sy], [0, 1, 0], [-sy, 0, cy]]
+        z = [[cz, -sz, 0], [sz, cz, 0], [0, 0, 1]]
+        return mul(mul(z, y), x)
+
+    frames = {}
+    lo, hi = [1e9] * 3, [-1e9] * 3
+    eye = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+    for name, parent, pivot, r, boxes, _ in parts:
+        pm, pt = frames.get(parent, (eye, [0, 0, 0]))
+        m = mul(pm, rot(*r))
+        t = [a + b for a, b in zip(pt, apply(pm, pivot))]
+        frames[name] = (m, t)
+        for b in boxes:
+            for cx_ in (b[0], b[0] + b[3]):
+                for cy_ in (b[1], b[1] + b[4]):
+                    for cz_ in (b[2], b[2] + b[5]):
+                        q = [a + c for a, c in zip(t, apply(m, (cx_, cy_, cz_)))]
+                        lo = [min(a, c) for a, c in zip(lo, q)]
+                        hi = [max(a, c) for a, c in zip(hi, q)]
+    return {'height': (24 - lo[1]) * k / 16, 'width': (hi[0] - lo[0]) * k / 16,
+            'ahead': -lo[2] * k / 16, 'behind': hi[2] * k / 16}
+
+
+# How much larger than their pixels each is drawn: the renderers' SCALE and TRUE_SCALE
+KINGS = {'azure_lion': 1.15, 'azure_lion_true': 1.7, 'white_elephant': 1.08, 'white_elephant_true': 1.55}
 
 if __name__ == '__main__':
-    for name, parts, painter_fn, java, seed, units in (
-            ('lion_demon', LION_DEMON, paint_lion_demon, 'LionDemonRenderer.java', 21, 128),
-            ('elephant_demon', ELEPHANT_DEMON, paint_elephant_demon, 'ElephantDemonRenderer.java', 22, 128),
-            ('peng_demon', PENG_DEMON, paint_peng_demon, 'PengDemonRenderer.java', 23, 128),
-            ('little_wind_driller', WIND_DRILLER, paint_wind_driller, 'LittleWindDrillerRenderer.java', 24, 128),
-            ('azure_lion', AZURE_LION, paint_azure_lion, 'AzureLionRenderer.java', 25, 256),
-            ('white_elephant', WHITE_ELEPHANT, paint_white_elephant, 'WhiteElephantRenderer.java', 26, 256)):
+    for name, parts, painter_fn, java, seed, units, tag in (
+            ('lion_demon', LION_DEMON, paint_lion_demon, 'LionDemonRenderer.java', 21, 128, ''),
+            ('elephant_demon', ELEPHANT_DEMON, paint_elephant_demon, 'ElephantDemonRenderer.java', 22, 128, ''),
+            ('peng_demon', PENG_DEMON, paint_peng_demon, 'PengDemonRenderer.java', 23, 128, ''),
+            ('little_wind_driller', WIND_DRILLER, paint_wind_driller, 'LittleWindDrillerRenderer.java', 24, 128, ''),
+            ('azure_lion', AZURE_LION, paint_azure_lion, 'AzureLionRenderer.java', 25, 256, ''),
+            ('azure_lion_true', AZURE_LION_TRUE, paint_azure_lion_true, 'AzureLionRenderer.java', 27, 256, 'true form'),
+            ('white_elephant', WHITE_ELEPHANT, paint_white_elephant, 'WhiteElephantRenderer.java', 26, 256, ''),
+            ('white_elephant_true', WHITE_ELEPHANT_TRUE, paint_white_elephant_true, 'WhiteElephantRenderer.java', 28, 256, 'true form')):
         bg.UNITS = units
         bg.TEX = units * bg.S
         p = Painter(seed)
         slots = paint(parts, p, painter_fn)
         p.save(name)
-        emit(parts, slots, R + java)
+        emit(parts, slots, R + java, tag)
         print(name, len(parts), 'parts,', len(slots), 'boxes')
+        if name in KINGS:
+            print('   drawn at', KINGS[name], {k: round(v, 2) for k, v in extent(parts, KINGS[name]).items()})

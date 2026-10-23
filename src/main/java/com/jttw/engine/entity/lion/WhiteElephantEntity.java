@@ -14,6 +14,9 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -36,8 +39,9 @@ import java.util.List;
 
 /**
  * The White Elephant (白象), second of the three demon kings of Lion-Camel Ridge, who in truth is the
- * six-tusked white elephant the Bodhisattva Samantabhadra rides (chapters 74–77). A towering
- * elephant-headed demon king, white as ivory, his tusks capped in gold, a long lance in his hands;
+ * six-tusked white elephant the Bodhisattva Samantabhadra rides (chapters 74–77). A giant
+ * elephant-headed demon king, two and a half times a man's height, in ivory-and-gold armour, his
+ * great tusks capped in gold, a long heavy trunk, ears like shields, a giant's lance in his hands;
  * he keeps the elephant court behind the palace. Level 98: eighty-five ordinary hits of a level-98
  * character, a white bar. In the novel his trunk caught Zhu Bajie and the Monkey King alike, and
  * Wukong got free by driving his staff up it.
@@ -52,9 +56,13 @@ import java.util.List;
  *   <li>from two thirds (phase 1) he trumpets for his followers ({@value #FOLLOWERS} elephant-demons
  *       come) and <b>stamps</b> (every {@value #STAMP_EVERY} ticks when close): all within
  *       {@value #STAMP_RANGE} blocks struck for {@value #STAMP_PERCENT}% and thrown up;</li>
- *   <li>from a third (phase 2) he <b>charges</b>, tusks down, at a foe {@value #CHARGE_NEAR} to
- *       {@value #CHARGE_FAR} blocks off: what he meets is gored ({@value #GORE_PERCENT}%) and flung
- *       aside; and his trunk comes quicker.</li>
+ *   <li>at a third (phase 2) he <b>reveals his true form</b> ({@link DemonKingEntity#beginReveal}):
+ *       a towering white war elephant, six-tusked, the Bodhisattva's empty lotus seat on his back.
+ *       He <b>charges</b>, tusks down, at a foe {@value #CHARGE_NEAR} to {@value #CHARGE_FAR} blocks
+ *       off: what he meets is gored ({@value #GORE_PERCENT}%), trampled (slowed) and flung aside; his
+ *       stamping is a <b>trampling</b> that shakes the ground {@value #TRUE_STAMP_RANGE} blocks
+ *       round; his trunk reaches further ({@value #TRUE_GRAB_REACH} blocks), comes quicker and lifts
+ *       its catch high over his head.</li>
  * </ul>
  */
 public class WhiteElephantEntity extends DemonKingEntity {
@@ -67,6 +75,10 @@ public class WhiteElephantEntity extends DemonKingEntity {
     public static final int GRAB_EVERY = 200, GRAB_ENRAGED = 130, TRUNK_WINDUP = 15, SQUEEZE_EVERY = 15, MAX_HOLD = 60;
     public static final int STAMP_EVERY = 140, STAMP_WINDUP = 12, CHARGE_EVERY = 200, CHARGE_TICKS = 24, FOLLOWERS = 2;
     public static final double GRAB_REACH = 6, STAMP_RANGE = 5, CHARGE_NEAR = 5, CHARGE_FAR = 14;
+    /** In his true form: his trunk's reach, his trampling's. */
+    public static final double TRUE_GRAB_REACH = 8, TRUE_STAMP_RANGE = 7;
+    /** His true form's body: a towering war elephant, larger than the Great White Bull (2.4 by 3.2). */
+    public static final float TRUE_WIDTH = 3.6f, TRUE_HEIGHT = 4.6f;
     /** How long he recoils when a foe has struck his way out of his trunk. */
     public static final int RECOIL = 30;
     /** How far from his lair he keeps: his court. */
@@ -129,10 +141,15 @@ public class WhiteElephantEntity extends DemonKingEntity {
         return ESCAPE_PERCENT / 100f;
     }
 
-    /** Lifted high before him in his trunk's coil. */
+    /** Lifted high before him in his trunk's coil: over the demon king's shoulder, over the elephant's brow. */
     @Override
     protected Vec3 captiveOffset() {
-        return new Vec3(0, 2.4, 1.6);
+        return inTrueForm() ? new Vec3(0, 4.4, 3.6) : new Vec3(0, 3.2, 2.4);
+    }
+
+    @Override
+    protected EntityDimensions trueFormDimensions() {
+        return EntityDimensions.scalable(TRUE_WIDTH, TRUE_HEIGHT);
     }
 
     @Override
@@ -168,11 +185,43 @@ public class WhiteElephantEntity extends DemonKingEntity {
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, false));
     }
 
-    /** At two thirds he trumpets for his followers; at a third, his fury. */
+    /** At two thirds he trumpets for his followers; at a third his true form shows itself. */
     @Override
     protected void onPhase(int phase) {
         trumpet();
         if (phase == 1) callFollowers();
+        else beginReveal();
+    }
+
+    // ── His true form ───────────────────────────────────────────────────
+
+    /** His armour bursts and his shape swells as he trumpets: white smoke, gold sparks, the ground shaking. */
+    @Override
+    protected void onRevealTick(ServerLevel level, int t) {
+        if (t == 1 || t == REVEAL / 2) trumpet();
+        if (t % 8 == 1) playSound(SoundEvents.WARDEN_HEARTBEAT, 3f, 0.5f);
+        double h = getBbHeight();
+        for (int k = 0; k < 3; k++) {
+            double a = (t * 0.4 + k * Math.PI * 2 / 3), r = 1.8 + t * 0.03;
+            level.sendParticles(ParticleTypes.END_ROD, getX() + Math.cos(a) * r, getY() + (t % 20) * h / 20, getZ() + Math.sin(a) * r, 1, 0, 0.05, 0, 0.01);
+        }
+        level.sendParticles(ParticleTypes.CLOUD, getX(), getY() + h * 0.5, getZ(), 4, 0.9, h * 0.3, 0.9, 0.02);
+        if (t % 4 == 0) level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, level.getBlockState(blockPosition().below())),
+                getX(), getY() + 0.1, getZ(), 20, 2.0, 0.1, 2.0, 0.1);
+    }
+
+    /** The elephant stands in his place: a blast of white smoke, a flash, the trumpeting. */
+    @Override
+    protected void onRevealed(ServerLevel level) {
+        trumpet();
+        playSound(SoundEvents.RAVAGER_ROAR, 4f, 0.4f);
+        playSound(SoundEvents.GENERIC_EXPLODE.value(), 2f, 0.5f);
+        level.sendParticles(ParticleTypes.FLASH, getX(), getY() + 2.5, getZ(), 1, 0, 0, 0, 0);
+        level.sendParticles(ParticleTypes.EXPLOSION, getX(), getY() + 2, getZ(), 8, 1.8, 1.4, 1.8, 0);
+        level.sendParticles(ParticleTypes.CLOUD, getX(), getY() + 1, getZ(), 90, 2.2, 1.6, 2.2, 0.15);
+        level.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 2, getZ(), 50, 1.8, 1.8, 1.8, 0.1);
+        grab = Math.min(grab, GRAB_ENRAGED / 2);
+        charge = Math.min(charge, CHARGE_EVERY / 4);
     }
 
     private void trumpet() {
@@ -202,13 +251,18 @@ public class WhiteElephantEntity extends DemonKingEntity {
 
     // ── The trunk ───────────────────────────────────────────────────────
 
+    /** How far before him his trunk reaches. */
+    public double trunkReach() {
+        return (inTrueForm() ? TRUE_GRAB_REACH : GRAB_REACH) * getScale();
+    }
+
     /** Whether {@code target} is in his trunk's reach: before him, not too high. */
     public boolean inReach(LivingEntity target) {
-        double reach = GRAB_REACH * getScale();
+        double reach = trunkReach();
         Vec3 to = new Vec3(target.getX() - getX(), 0, target.getZ() - getZ());
         if (to.lengthSqr() > reach * reach || Math.abs(target.getY() - getY()) > 4) return false;
         Vec3 look = Vec3.directionFromRotation(0, getYHeadRot());
-        return to.lengthSqr() < 2.25 || to.normalize().dot(look) > 0.3;
+        return to.lengthSqr() < Math.pow(getBbWidth() / 2 + 0.8, 2) || to.normalize().dot(look) > 0.3;
     }
 
     /** His trunk coils round {@code target} and lifts it. Returns whether it did. */
@@ -254,7 +308,8 @@ public class WhiteElephantEntity extends DemonKingEntity {
         Vec3 look = Vec3.directionFromRotation(0, yBodyRot);
         if (brokeFree) {
             recoil = RECOIL;
-            captive.teleportTo(getX() + look.x * 2.2, getY() + 0.5, getZ() + look.z * 2.2);
+            double out = getBbWidth() / 2 + 1.2;
+            captive.teleportTo(getX() + look.x * out, getY() + 0.5, getZ() + look.z * out);
             captive.setDeltaMovement(look.x * 0.3, 0.1, look.z * 0.3);
             trumpet();
         } else {
@@ -278,9 +333,14 @@ public class WhiteElephantEntity extends DemonKingEntity {
         return (float) (STAMP * MobScaling.typicalHealth(LEVEL));
     }
 
+    /** How far round him his stamping (his trampling, in his true form) strikes. */
+    public double stampRange() {
+        return (inTrueForm() ? TRUE_STAMP_RANGE : STAMP_RANGE) * getScale();
+    }
+
     /** He brings his forefeet down: all near struck and thrown up. Returns who. */
     public List<LivingEntity> stamp() {
-        double range = STAMP_RANGE * getScale();
+        double range = stampRange();
         List<LivingEntity> caught = level().getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(range, 2, range),
                 e -> foe(e) && e.distanceToSqr(this) <= (range + 0.5) * (range + 0.5));
         for (LivingEntity e : caught) {
@@ -291,7 +351,8 @@ public class WhiteElephantEntity extends DemonKingEntity {
         playSound(SoundEvents.GENERIC_EXPLODE.value(), 1.2f, 0.5f);
         if (level() instanceof ServerLevel server) {
             var under = level().getBlockState(blockPosition().below());
-            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, under), getX(), getY() + 0.1, getZ(), 60, range / 2, 0.1, range / 2, 0.15);
+            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, under), getX(), getY() + 0.1, getZ(), inTrueForm() ? 120 : 60, range / 2, 0.1, range / 2, 0.15);
+            if (inTrueForm()) server.sendParticles(ParticleTypes.EXPLOSION, getX(), getY() + 0.5, getZ(), 4, range / 3, 0.1, range / 3, 0);
         }
         return caught;
     }
@@ -314,7 +375,8 @@ public class WhiteElephantEntity extends DemonKingEntity {
     /** One tick of his charge: on he goes, goring what he meets. Returns who he gored this tick. */
     public List<LivingEntity> chargeTick() {
         List<LivingEntity> hit = new ArrayList<>();
-        setDeltaMovement(chargeDir.x * 0.9, getDeltaMovement().y, chargeDir.z * 0.9);
+        double speed = inTrueForm() ? 1.1 : 0.9;
+        setDeltaMovement(chargeDir.x * speed, getDeltaMovement().y, chargeDir.z * speed);
         setYRot((float) Math.toDegrees(Math.atan2(-chargeDir.x, chargeDir.z)));
         setYBodyRot(getYRot());
         setYHeadRot(getYRot());
@@ -324,6 +386,7 @@ public class WhiteElephantEntity extends DemonKingEntity {
             Vec3 side = new Vec3(-chargeDir.z, 0, chargeDir.x);
             if (side.dot(e.position().subtract(position())) < 0) side = side.scale(-1);
             e.push(side.x * 1.4 + chargeDir.x * 0.8, 0.6, side.z * 1.4 + chargeDir.z * 0.8);
+            if (inTrueForm()) e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 2), this); // trampled
             e.hurtMarked = true;
             gored.add(e);
             hit.add(e);
@@ -335,6 +398,7 @@ public class WhiteElephantEntity extends DemonKingEntity {
     @Override
     protected void customServerAiStep() {
         super.customServerAiStep();
+        if (isRevealing()) return;
         if (recoil > 0) {
             recoil--;
             getNavigation().stop();
@@ -376,7 +440,7 @@ public class WhiteElephantEntity extends DemonKingEntity {
         double d = distanceTo(t);
         if (grab == 0 && inReach(t) && hasLineOfSight(t)) {
             rearTrunk();
-        } else if (phase() >= 1 && stamp == 0 && d <= STAMP_RANGE * getScale()) {
+        } else if (phase() >= 1 && stamp == 0 && d <= stampRange()) {
             rearUp();
         } else if (phase() >= 2 && charge == 0 && d >= CHARGE_NEAR && d <= CHARGE_FAR && hasLineOfSight(t)) {
             charge(t);
