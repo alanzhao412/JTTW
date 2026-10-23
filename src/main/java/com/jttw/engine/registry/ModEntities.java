@@ -390,7 +390,7 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.wuzhuang.ZhenyuanEntity>> ZHENYUAN =
             ENTITIES.register("zhenyuan", () ->
                     EntityType.Builder.<com.jttw.engine.entity.wuzhuang.ZhenyuanEntity>of(com.jttw.engine.entity.wuzhuang.ZhenyuanEntity::new, MobCategory.MONSTER)
-                            .sized(0.7F, 2.2F)
+                            .sized(0.9F, 2.9F)
                             .clientTrackingRange(10)
                             .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "zhenyuan").toString()));
     // ── Lion-Camel Ridge ──────────────────────────────────────────
