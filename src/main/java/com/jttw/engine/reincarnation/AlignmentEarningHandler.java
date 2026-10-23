@@ -147,6 +147,11 @@ public final class AlignmentEarningHandler {
             AlignmentData.addPrimordial(sp, 200);
         }
 
+        // A Dragon King, a boss of the Four Seas: +50 (all four: 200, as one Warden)
+        if (victim instanceof com.jttw.engine.entity.waters.DragonKingEntity) {
+            AlignmentData.addPrimordial(sp, 50);
+        }
+
         // -- Heavenly: killing undead --
         // ~150 undead × 2 = ~300
         // (undead is the entity-type tag now; the mod's own undead answer isInvertedHealAndHarm)

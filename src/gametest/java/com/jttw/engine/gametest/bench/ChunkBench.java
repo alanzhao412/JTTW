@@ -59,6 +59,8 @@ public final class ChunkBench {
     private static final boolean TERRAIN = "terrain".equals(System.getProperty("jttw.chunkBench.mode", ""));
     /** "zones" runs {@link ZoneBench}: where the mod's zones turn up, and what they look like. */
     private static final boolean ZONES = "zones".equals(System.getProperty("jttw.chunkBench.mode", ""));
+    /** "waters" runs {@link WatersBench}: where the Mystical Waters turn up, its trench and its palace. */
+    private static final boolean WATERS = "waters".equals(System.getProperty("jttw.chunkBench.mode", ""));
     private static final TicketType<ChunkPos> BENCH = TicketType.create("jttw_bench", Comparator.comparingLong(ChunkPos::toLong));
     private static final int GRID = 12;
     private static final int FLIGHT_TICKS = 400;
@@ -126,6 +128,15 @@ public final class ChunkBench {
         ServerPlayer p = server.getPlayerList().getPlayers().get(0);
         ServerLevel level = p.serverLevel();
         ticks++;
+        if (WATERS) {
+            if (p.tickCount < 100) return;
+            if (WatersBench.tick(p)) {
+                report.addAll(WatersBench.report());
+                write();
+                next(Step.DONE);
+            }
+            return;
+        }
         if (ZONES) {
             if (p.tickCount < 100) return;
             if (ZoneBench.tick(p)) {

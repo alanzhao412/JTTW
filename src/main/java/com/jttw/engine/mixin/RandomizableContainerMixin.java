@@ -35,6 +35,8 @@ public abstract class RandomizableContainerMixin {
         if (lootTable == null || !(player instanceof ServerPlayer sp) || sp.isCreative()) return;
         if (lootTable.equals(HeavenFeatures.PAVILION_CHEST) || lootTable.equals(HeavenFeatures.PALACE_CHEST)) {
             Morality.deed(sp, Morality.LOOT_HEAVEN, "you looted Heaven's treasury");
+        } else if (lootTable.equals(com.jttw.engine.world.waters.DragonPalace.TREASURY)) {
+            Morality.deed(sp, Morality.LOOT_DRAGON_PALACE, "you plundered a Dragon King's treasury");
         }
     }
 }

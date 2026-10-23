@@ -73,6 +73,34 @@ public final class ModItems {
     public static final DeferredHolder<Item, Item> LADY_WHITE_BONE_SPAWN_EGG = ITEMS.register("lady_white_bone_spawn_egg",
             () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.LADY_WHITE_BONE,0xF2EFE6, 0x5A2D82, new Item.Properties()));
 
+    // ── The Mystical Waters ───────────────────────────────────────
+    /** The Water-Repelling Pearl: breath under the sea. */
+    public static final DeferredHolder<Item, Item> WATER_REPELLING_PEARL = ITEMS.register("water_repelling_pearl",
+            com.jttw.engine.item.WaterRepellingPearlItem::new);
+    /** Ao Run's (West): the Phoenix-Plume Purple-Gold Cap. */
+    public static final DeferredHolder<Item, Item> PHOENIX_PLUME_CAP = ITEMS.register("phoenix_plume_cap",
+            () -> new com.jttw.engine.item.DragonRegaliaItem(net.minecraft.world.item.ArmorItem.Type.HELMET));
+    /** Ao Qin's (South): the Golden Chain Mail. */
+    public static final DeferredHolder<Item, Item> GOLDEN_CHAIN_MAIL = ITEMS.register("golden_chain_mail",
+            () -> new com.jttw.engine.item.DragonRegaliaItem(net.minecraft.world.item.ArmorItem.Type.CHESTPLATE));
+    /** Ao Shun's (North): the Lotus-Fibre Cloud-Stepping Boots. */
+    public static final DeferredHolder<Item, Item> CLOUD_STEPPING_BOOTS = ITEMS.register("cloud_stepping_boots",
+            () -> new com.jttw.engine.item.DragonRegaliaItem(net.minecraft.world.item.ArmorItem.Type.BOOTS));
+    public static final DeferredHolder<Item, Item> SHRIMP_SOLDIER_SPAWN_EGG = ITEMS.register("shrimp_soldier_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.SHRIMP_SOLDIER, 0xE0603A, 0xF2C8A0, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> CRAB_GENERAL_SPAWN_EGG = ITEMS.register("crab_general_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.CRAB_GENERAL, 0xA8322A, 0xD9A441, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> YAKSHA_SPAWN_EGG = ITEMS.register("yaksha_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.YAKSHA, 0x3A6FB0, 0xC8302A, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> AO_GUANG_SPAWN_EGG = ITEMS.register("ao_guang_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.AO_GUANG, 0x2E9C8C, 0xE0B040, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> AO_QIN_SPAWN_EGG = ITEMS.register("ao_qin_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.AO_QIN, 0xB3262A, 0xE0B040, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> AO_RUN_SPAWN_EGG = ITEMS.register("ao_run_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.AO_RUN, 0xE8E6DE, 0xE0B040, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> AO_SHUN_SPAWN_EGG = ITEMS.register("ao_shun_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.AO_SHUN, 0x1C1C24, 0xE0B040, new Item.Properties()));
+
     public static final DeferredHolder<Item, Item> IMMORTAL_PILL =
             ITEMS.register("jttw_immortal_pill", ImmortalItems.ImmortalPillItem::new);
 

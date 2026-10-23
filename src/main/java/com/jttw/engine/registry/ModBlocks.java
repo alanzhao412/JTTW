@@ -65,6 +65,12 @@ public final class ModBlocks {
                     .mapColor(MapColor.COLOR_BLACK).strength(-1.0F, 3600000.0F).noLootTable().noOcclusion().lightLevel(s -> 6)));
 
 
+    // ── The Mystical Waters ──────────────────────────────────────
+    /** The pillar that fixed the depth of the Milky Way, in the Eastern Sea's treasury: unbreakable; it becomes the Ruyi Jingu Bang. */
+    public static final DeferredHolder<Block, Block> SEA_CALMING_PILLAR =
+            BLOCKS.register("sea_calming_pillar", () -> new com.jttw.engine.world.waters.SeaCalmingPillarBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.GOLD).strength(-1.0F, 3600000.0F).noLootTable().sound(SoundType.METAL).lightLevel(s -> 12)));
+
     // ── Tough stone: the ground of White Bone Ridge, Heaven and Hell (see world.tough.Tough) ──
     public static final DeferredHolder<Block, Block> BLEACHED_STONE =
             BLOCKS.register("bleached_stone", () -> new com.jttw.engine.world.tough.Tough.Stone(BlockBehaviour.Properties.of()

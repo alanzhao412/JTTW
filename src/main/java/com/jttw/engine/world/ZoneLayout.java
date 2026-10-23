@@ -15,6 +15,12 @@ public record ZoneLayout(int cellSize, double chance, int radius, int wobble, lo
     /** White Bone Ridge: 60% of 2048-block cells hold a region about 260 blocks across. */
     public static final ZoneLayout WHITE_BONE = new ZoneLayout(2048, 0.6, 260, 70, 0x5EEDB0E1L);
 
+    /**
+     * The Mystical Waters: 90% of 1536-block cells roll a region about 440 blocks across (a trench and
+     * its palace); only those centred over deep ocean are kept, so far fewer stand.
+     */
+    public static final ZoneLayout MYSTICAL_WATERS = new ZoneLayout(1536, 0.9, 220, 45, 0x5EA5D4A6L);
+
     /** Whether a region covers the block column at (x, z) in a world of this seed. */
     public boolean covers(long seed, int x, int z) {
         return depth(seed, x, z) > 0;

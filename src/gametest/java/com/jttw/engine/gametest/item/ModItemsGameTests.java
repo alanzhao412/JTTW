@@ -79,7 +79,18 @@ public class ModItemsGameTests {
             Map.entry("bone_gravel", BlockItem.class),
             Map.entry("celestial_marble", BlockItem.class),
             Map.entry("underworld_stone", BlockItem.class),
-            Map.entry("soul_ash", BlockItem.class));
+            Map.entry("soul_ash", BlockItem.class),
+            Map.entry("water_repelling_pearl", com.jttw.engine.item.WaterRepellingPearlItem.class),
+            Map.entry("phoenix_plume_cap", com.jttw.engine.item.DragonRegaliaItem.class),
+            Map.entry("golden_chain_mail", com.jttw.engine.item.DragonRegaliaItem.class),
+            Map.entry("cloud_stepping_boots", com.jttw.engine.item.DragonRegaliaItem.class),
+            Map.entry("shrimp_soldier_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("crab_general_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("yaksha_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("ao_guang_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("ao_qin_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("ao_run_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("ao_shun_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class));
 
     @GameTest(template = PLATFORM)
     public static void everyModItemIsRegisteredUnderItsIdAsTheRightClass(GameTestHelper h) {

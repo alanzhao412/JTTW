@@ -78,12 +78,20 @@ final class AbilityScenes {
 
     /** Scenes that take longer to come right than the rest, and by how many more ticks: a fall, and its smoke clearing. */
     static final java.util.Map<String, Integer> LONG = java.util.Map.of("staff_fallen", 150, "staff_crossed", 150,
-            "staff_obsidian", 150, "staff_obsidian_mighty", 150);
+            "staff_obsidian", 150, "staff_obsidian_mighty", 150,
+            // a palace's worth of water and glass for the client to draw from a new place
+            "waters_palace", 100, "waters_palace_hall", 100, "waters_palace_treasury", 100);
 
         /** Set by a scene that photographs a screen (a furnace's, say), so the gallery leaves it open. */
     static volatile boolean keepScreen;
 
     static List<Scene> all() {
+        List<Scene> all = new java.util.ArrayList<>(base());
+        all.addAll(WatersScenes.all());
+        return all;
+    }
+
+    private static List<Scene> base() {
         return List.of(
                 // ── Blocks ──
                 new Scene("block_furnace", p -> {
@@ -938,6 +946,7 @@ final class AbilityScenes {
     }
 
     static void reset(ServerPlayer p) {
+        WatersScenes.clear(p);
         keepScreen = false;
         topSpeed = false;
         com.jttw.engine.client.renderer.GoldenEyesRenderer.setMode(p.getUUID(), 0);
