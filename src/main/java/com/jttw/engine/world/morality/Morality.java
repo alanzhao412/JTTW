@@ -53,6 +53,12 @@ public final class Morality {
     public static final int SLAY_MONSTER = 1, SLAY_CAPTAIN = 5, SLAY_LADY = 150, TRADE = 1;
     /** Lady Earth Flow, who ate the Buddha's candles and preyed on monks: as much as Lady White Bone. */
     public static final int SLAY_EARTH_FLOW = SLAY_LADY;
+    /**
+     * The Dragon Kings are Heaven's officials over the Four Seas: killing one is a crime against
+     * Heaven (Ao Guang's memorial against the Monkey King is what first brought Heaven down on
+     * him). All four put a player past {@link #OUTLAW}. Plundering their treasuries is a lesser one.
+     */
+    public static final int SLAY_DRAGON_KING = -80, LOOT_DRAGON_PALACE = -10;
     /** How recently a victim must have struck their killer for the kill to be a fight, not a murder: 10 s. */
     public static final int PROVOKED_TICKS = 200;
 
@@ -121,6 +127,7 @@ public final class Morality {
         if (victim instanceof HeavenlySoldierEntity) return KILL_SOLDIER;
         if (victim instanceof LadyWhiteBoneEntity) return SLAY_LADY;
         if (victim instanceof LadyEarthFlowEntity) return SLAY_EARTH_FLOW;
+        if (victim instanceof com.jttw.engine.entity.waters.DragonKingEntity) return SLAY_DRAGON_KING;
         if (victim instanceof ZoneMonster m && m.isCaptain()) return SLAY_CAPTAIN;
         if (victim instanceof AbstractVillager) return KILL_VILLAGER;
         if (victim instanceof IronGolem) return KILL_GOLEM;
@@ -134,8 +141,10 @@ public final class Morality {
         return 0;
     }
 
-    private static String killWhat(int deed) {
+    private static String killWhat(int deed, LivingEntity victim) {
+        if (deed == SLAY_CAPTAIN && victim instanceof com.jttw.engine.entity.waters.SeaMonster) return "you slew a captain of the sea";
         return switch (deed) {
+            case SLAY_DRAGON_KING -> "you slew a Dragon King, an official of Heaven";
             case KILL_SOLDIER -> "you struck down a soldier of Heaven";
             case KILL_VILLAGER -> "you killed a villager";
             case KILL_GOLEM -> "you killed a village's guardian";
@@ -151,7 +160,8 @@ public final class Morality {
     public static void onKill(LivingDeathEvent event) {
         if (!(event.getSource().getEntity() instanceof ServerPlayer killer) || event.getEntity() == killer) return;
         int deed = killDeed(killer, event.getEntity());
-        if (deed != 0) deed(killer, deed, event.getEntity() instanceof LadyEarthFlowEntity ? "you subdued Lady Earth Flow" : killWhat(deed));
+        if (deed != 0) deed(killer, deed, event.getEntity() instanceof LadyEarthFlowEntity ? "you subdued Lady Earth Flow"
+                : killWhat(deed, event.getEntity()));
     }
 
     @SubscribeEvent

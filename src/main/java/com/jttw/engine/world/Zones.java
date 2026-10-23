@@ -194,8 +194,19 @@ public final class Zones {
             TagKey.create(Registries.BIOME, id("bottomless_cave_hosts")), ZoneLayout.BOTTOMLESS_CAVE,
             Vertical.below(BOTTOMLESS_CAVE_TOP), 37, 46, 100).hostSampledAt(256);
 
+    public static final ResourceKey<Biome> MYSTICAL_WATERS_BIOME = ResourceKey.create(Registries.BIOME, id("mystical_waters"));
+
+    /**
+     * Levels 47-56: the Mystical Waters, the Four Seas' trenches and the Dragon Kings' crystal
+     * palaces, over deep ocean only, the whole column (the sea above the trench is theirs too). Its
+     * host is judged just under the waves.
+     */
+    public static final Zone MYSTICAL_WATERS = Zone.overworld(MYSTICAL_WATERS_BIOME,
+            TagKey.create(Registries.BIOME, id("mystical_waters_hosts")), ZoneLayout.MYSTICAL_WATERS, Vertical.WHOLE_COLUMN,
+            47, 56, 110).hostSampledAt(60);
+
     /** Every zone, in order: an earlier one keeps its ground from a later one sharing its heights. Append new ones. */
-    public static final List<Zone> ALL = List.of(WHITE_BONE, BOTTOMLESS);
+    public static final List<Zone> ALL = List.of(WHITE_BONE, BOTTOMLESS, MYSTICAL_WATERS);
 
     /** Where the overworld zones of {@link #ALL} lie. */
     public static final ZoneMap MAP = new ZoneMap(ALL);

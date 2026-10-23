@@ -138,6 +138,50 @@ public final class ModEntities {
                             .sized(0.65F, 2.0F)
                             .clientTrackingRange(10)
                             .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "earth_flow_decoy").toString()));
+    // ── The Mystical Waters ───────────────────────────────────────
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.waters.ShrimpSoldierEntity>> SHRIMP_SOLDIER =
+            ENTITIES.register("shrimp_soldier", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.waters.ShrimpSoldierEntity>of(com.jttw.engine.entity.waters.ShrimpSoldierEntity::new, MobCategory.MONSTER)
+                            .sized(0.8F, 1.9F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "shrimp_soldier").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.waters.CrabGeneralEntity>> CRAB_GENERAL =
+            ENTITIES.register("crab_general", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.waters.CrabGeneralEntity>of(com.jttw.engine.entity.waters.CrabGeneralEntity::new, MobCategory.MONSTER)
+                            .sized(1.9F, 1.3F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "crab_general").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.waters.YakshaEntity>> YAKSHA =
+            ENTITIES.register("yaksha", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.waters.YakshaEntity>of(com.jttw.engine.entity.waters.YakshaEntity::new, MobCategory.MONSTER)
+                            .sized(0.7F, 2.1F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "yaksha").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.waters.SeaBoltEntity>> SEA_BOLT =
+            ENTITIES.register("sea_bolt", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.waters.SeaBoltEntity>of(com.jttw.engine.entity.waters.SeaBoltEntity::new, MobCategory.MISC)
+                            .sized(0.5F, 0.5F)
+                            .clientTrackingRange(6)
+                            .updateInterval(2)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "sea_bolt").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.waters.DragonKingEntity.East>> AO_GUANG = king("ao_guang", com.jttw.engine.entity.waters.DragonKingEntity.East::new);
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.waters.DragonKingEntity.South>> AO_QIN = king("ao_qin", com.jttw.engine.entity.waters.DragonKingEntity.South::new);
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.waters.DragonKingEntity.West>> AO_RUN = king("ao_run", com.jttw.engine.entity.waters.DragonKingEntity.West::new);
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.waters.DragonKingEntity.North>> AO_SHUN = king("ao_shun", com.jttw.engine.entity.waters.DragonKingEntity.North::new);
+
+    /** A Dragon King: a dragon in a man's shape, a head taller than one. */
+    private static <T extends com.jttw.engine.entity.waters.DragonKingEntity> DeferredHolder<EntityType<?>, EntityType<T>> king(String id, EntityType.EntityFactory<T> factory) {
+        return ENTITIES.register(id, () -> EntityType.Builder.of(factory, MobCategory.MONSTER)
+                .sized(1.1F, 3.0F)
+                .clientTrackingRange(10)
+                .fireImmune()
+                .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, id).toString()));
+    }
 
     // ── Forms ──────────────────────────────────────────────────────
 
@@ -212,6 +256,19 @@ public final class ModEntities {
                 net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
                 net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        // the sea's creatures come in deep water, in any light
+        event.register(SHRIMP_SOLDIER.get(), net.minecraft.world.entity.SpawnPlacementTypes.IN_WATER,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                com.jttw.engine.entity.waters.SeaMonster::checkSeaSpawnRules,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(CRAB_GENERAL.get(), net.minecraft.world.entity.SpawnPlacementTypes.IN_WATER,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                com.jttw.engine.entity.waters.SeaMonster::checkSeaSpawnRules,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(YAKSHA.get(), net.minecraft.world.entity.SpawnPlacementTypes.IN_WATER,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                com.jttw.engine.entity.waters.SeaMonster::checkSeaSpawnRules,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
     }
 
     private static void onAttributeCreate(EntityAttributeCreationEvent event) {
@@ -219,6 +276,12 @@ public final class ModEntities {
         event.put(FLOWER_MAID.get(), com.jttw.engine.entity.cave.FlowerMaidEntity.createAttributes().build());
         event.put(LADY_EARTH_FLOW.get(), com.jttw.engine.entity.cave.LadyEarthFlowEntity.createAttributes().build());
         event.put(EARTH_FLOW_DECOY.get(), com.jttw.engine.entity.cave.EarthFlowDecoyEntity.createAttributes().build());
+        event.put(SHRIMP_SOLDIER.get(), com.jttw.engine.entity.waters.ShrimpSoldierEntity.createAttributes().build());
+        event.put(CRAB_GENERAL.get(), com.jttw.engine.entity.waters.CrabGeneralEntity.createAttributes().build());
+        event.put(YAKSHA.get(), com.jttw.engine.entity.waters.YakshaEntity.createAttributes().build());
+        for (var king : java.util.List.of(AO_GUANG.get(), AO_QIN.get(), AO_RUN.get(), AO_SHUN.get())) {
+            event.put(king, com.jttw.engine.entity.waters.DragonKingEntity.createAttributes().build());
+        }
         event.put(WU_CLONE.get(), WuCloneEntity.createAttributes().build());
         event.put(XIAOTIAN_QUAN.get(), XiaotianQuanEntity.createAttributes().build());
         event.put(BONE_SERVANT.get(), com.jttw.engine.entity.ridge.BoneServantEntity.createAttributes().build());

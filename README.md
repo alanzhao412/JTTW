@@ -350,6 +350,63 @@ with the band's scaling), against the ridge's 80.
   and the labyrinth laid in the gallery's flat world: palace, shrine, tunnel, stair, hub);
   `./gradlew runWorldgenBench -Pbench.mode=cave` (the nearest real region: a plan of each level as
   built, a cut through the shaft, and pictures, in `run-bench/screenshots/zones/`).
+#### The Mystical Waters (levels 47–56)
+
+The Four Seas and the Dragon Kings' crystal palaces (水晶宫, novel chapter 3), in
+[`world/waters/`](src/main/java/com/jttw/engine/world/waters/) and
+[`entity/waters/`](src/main/java/com/jttw/engine/entity/waters/).
+
+- **Where**: over deep ocean only (deep, deep cold, deep lukewarm and deep frozen ocean, judged just
+  under the waves at y 60), the whole column. 90% of 1536-block cells roll a region about 440 blocks
+  across; only those centred over deep ocean stand (27 regions in the 32x32 km round spawn of seed
+  12345, the nearest 4.3 km out). Each region is one sea's: the one that lies that way from the
+  world's origin (within 45° of +x the East's, +z the South's, and so on), and its palace's gate faces
+  that way.
+- **The trench** (`TrenchShape`, `TrenchFeature`): sunk as deep as the world goes, its floor at
+  y -58, six blocks over the world's bottom, just over the bedrock: some 120 blocks under the waves,
+  85-100 under the deep ocean's own floor. Its walls drop near-sheer a few blocks in from the
+  region's edge, their line wandering, broken by ledges every dozen blocks; its floor of sand, gravel
+  and clay rolls in low mounds and is laid level round the palace. Worked out from the region and
+  the seed alone, so every chunk agrees on it. Caves and lava under it are filled in. Kelp forests,
+  seagrass, glowing sea pickles, glow lichen up the walls, now and then a basalt vent or a deepslate
+  spire (`TrenchLifeFeature`).
+- **The palace** (`DragonPalace`): a blueprint laid column by column by each chunk of the trench, so
+  it comes out whole across the chunks it spans: a prismarine plinth, a throne hall of prismarine
+  and crystal under a stepped, gilded roof, quartz columns, sea lanterns, the king's gold throne on a
+  dais at the region's centre, a runner in his colour; behind it his treasury, four chests
+  (`chests/dragon_treasury`) and heaps of gold; coral gardens, lantern towers at the gate, a road of
+  lanterns out across the floor. Its king and a guard of six are put there once
+  (`DragonPalaceFeature`, the framework's `ZoneLairFeature`, which now lets a zone choose the boss by
+  region).
+- **Creatures** (`SeaMonster`: level 47, captains 54; they breathe water, are not pushed by the
+  current, and come in any light in water at least 24 blocks deep):
+  **Shrimp Soldiers** (虾兵: swim, spear thrust from further than a sword's reach, dart backward when
+  struck), **Crab Generals** (蟹将: walk the floor and sink, heavy pinch that holds, spring up at
+  what swims above), **Yaksha** (夜叉, the sea patrol: the fastest swimmers, hurl bolts of the tide,
+  raise the alarm so every sea creature near turns on their foe).
+- **The Dragon Kings** (`DragonKingEntity`, a `ZoneBoss`, level 55, sixty ordinary hits): a dragon in
+  a man's shape, robed and crowned, swimming freely. Bolts of his sea (three, fanned, past two
+  thirds), a claw up close, and his sea's own wrath every 8 s (5 s past a third): **Ao Guang**
+  (East, blue-green robes) a tidal surge that hurls all near him away; **Ao Qin** (South, red) the
+  boiling sea that scalds and saps strength; **Ao Run** (West, white) a whirlpool round his foe that
+  drags all near it to its grinding heart; **Ao Shun** (North, black) the frozen abyss that freezes and
+  slows. At two thirds he calls Shrimp Soldiers and a Crab General, at a third his Yaksha.
+- **What they give** (what each gave the Monkey King): Ao Run the **Phoenix-Plume Purple-Gold Cap**
+  (+20 magic resistance), Ao Qin the **Golden Chain Mail** (+24 physical resistance), Ao Shun the
+  **Lotus-Fibre Cloud-Stepping Boots** (+10 of each, +10% speed, swifter in water, softer falls); each
+  netherite's equal against blows. Worn together, they let their wearer breathe under the sea. Ao
+  Guang's treasury holds the **pillar that fixed the depth of the Milky Way** (定海神针): unbreakable,
+  it shrinks into a Ruyi Jingu Bang for whoever lays hands on it and could wield it (Sun Wukong, or
+  30 STR), and is gone: one staff per Eastern palace, once.
+- **Breathing**: the **Water-Repelling Pearl** (避水珠), crafted from a Heart of the Sea ringed with
+  prismarine crystals and gold, carried anywhere about one: its bearer breathes under the sea and
+  has Conduit Power while in water (`SeaBreath`). Characters that breathe water already need nothing.
+- **XP and karma**: band 47-56, base grunt XP 110 (a grunt pays 396 at the band's scale, about three
+  and a half kills a level at 47, the ridge's pace at 20). Killing a Dragon King, an official of
+  Heaven, is a crime against it: karma -80 (all four make an outlaw); plundering his treasury -10;
+  his soldiers are monsters as any (+1, captains +5). A king's kill is a boss kill: +50 Primordial.
+- **Tests and pictures**: `WatersGameTests`, `MysticalWatersPlacementTest`; gallery scenes
+  `-Pgallery.only=waters`; the trench in a real world with `./gradlew runWorldgenBench -Pbench.mode=waters`.
 
 ---
 

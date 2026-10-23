@@ -37,6 +37,11 @@ public abstract class ZoneLairFeature extends Feature<NoneFeatureConfiguration> 
     /** The boss put in it. */
     protected abstract EntityType<? extends Mob> boss();
 
+    /** The boss put in the lair round {@code centre}: {@link #boss()}, unless a zone's lairs differ by region. */
+    protected EntityType<? extends Mob> boss(WorldGenLevel level, BlockPos centre) {
+        return boss();
+    }
+
     /** Builds the lair round {@code centre}, the first block over its floor, where the boss will stand. */
     protected abstract void build(WorldGenLevel level, BlockPos centre, RandomSource random);
 
@@ -55,7 +60,7 @@ public abstract class ZoneLairFeature extends Feature<NoneFeatureConfiguration> 
         BlockPos centre = new BlockPos(c[0], floorAt(level, c[0], c[1]), c[1]);
         if (!zone().isAt(level, centre)) return false;
         build(level, centre, context.random());
-        placeBoss(level, boss(), centre.above(), context.random());
+        placeBoss(level, boss(level, centre), centre.above(), context.random());
         return true;
     }
 

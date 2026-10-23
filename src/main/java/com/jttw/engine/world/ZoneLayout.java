@@ -20,6 +20,10 @@ public record ZoneLayout(int cellSize, double chance, int radius, int wobble, lo
      * less than 180 (radius less all its wobble), round a labyrinth 147 blocks across.
      */
     public static final ZoneLayout BOTTOMLESS_CAVE = new ZoneLayout(1024, 0.9, 110, 20, 0xB0770C4EL);
+     * The Mystical Waters: 90% of 1536-block cells roll a region about 440 blocks across (a trench and
+     * its palace); only those centred over deep ocean are kept, so far fewer stand.
+     */
+    public static final ZoneLayout MYSTICAL_WATERS = new ZoneLayout(1536, 0.9, 220, 45, 0x5EA5D4A6L);
 
     /** Whether a region covers the block column at (x, z) in a world of this seed. */
     public boolean covers(long seed, int x, int z) {

@@ -119,6 +119,11 @@ public final class ClientInit {
         event.registerLayerDefinition(com.jttw.engine.client.renderer.CaveRenderers.MOUSE_LAYER, com.jttw.engine.client.renderer.CaveRenderers::mouseLayer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.CaveRenderers.MAID_LAYER, com.jttw.engine.client.renderer.CaveRenderers::maidLayer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.CaveRenderers.LADY_LAYER, com.jttw.engine.client.renderer.CaveRenderers::ladyLayer);
+        // the Mystical Waters
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.ShrimpSoldierRenderer.LAYER, com.jttw.engine.client.renderer.ShrimpSoldierRenderer::layer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.CrabGeneralRenderer.LAYER, com.jttw.engine.client.renderer.CrabGeneralRenderer::layer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.YakshaRenderer.LAYER, com.jttw.engine.client.renderer.YakshaRenderer::layer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.DragonKingRenderer.LAYER, com.jttw.engine.client.renderer.DragonKingRenderer::layer);
     }
 
     // ── Entity renderers (MOD bus) ─────────────────────────────────
@@ -160,6 +165,15 @@ public final class ClientInit {
         event.registerEntityRenderer(ModEntities.LADY_EARTH_FLOW.get(), com.jttw.engine.client.renderer.CaveRenderers.LadyRenderer::new);
         event.registerEntityRenderer(ModEntities.EARTH_FLOW_DECOY.get(), com.jttw.engine.client.renderer.CaveRenderers.DecoyRenderer::new);
         event.registerEntityRenderer(ModEntities.BONE_SHARD.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
+        // the Mystical Waters
+        event.registerEntityRenderer(ModEntities.SHRIMP_SOLDIER.get(), com.jttw.engine.client.renderer.ShrimpSoldierRenderer::new);
+        event.registerEntityRenderer(ModEntities.CRAB_GENERAL.get(), com.jttw.engine.client.renderer.CrabGeneralRenderer::new);
+        event.registerEntityRenderer(ModEntities.YAKSHA.get(), com.jttw.engine.client.renderer.YakshaRenderer::new);
+        event.registerEntityRenderer(ModEntities.AO_GUANG.get(), com.jttw.engine.client.renderer.DragonKingRenderer::new);
+        event.registerEntityRenderer(ModEntities.AO_QIN.get(), com.jttw.engine.client.renderer.DragonKingRenderer::new);
+        event.registerEntityRenderer(ModEntities.AO_RUN.get(), com.jttw.engine.client.renderer.DragonKingRenderer::new);
+        event.registerEntityRenderer(ModEntities.AO_SHUN.get(), com.jttw.engine.client.renderer.DragonKingRenderer::new);
+        event.registerEntityRenderer(ModEntities.SEA_BOLT.get(), ctx -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(ctx, 1.5f, true));
         event.registerEntityRenderer(ModEntities.THROWN_SPEAR.get(),
                 com.jttw.engine.client.renderer.ThrownSpearRenderer::new);
         // Qi wave is invisible — rendered via server-sent particles only

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jttw_engine:item/golden_chain_mail"
+  }
+}

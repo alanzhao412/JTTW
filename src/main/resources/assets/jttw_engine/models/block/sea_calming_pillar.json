@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "side": "jttw_engine:block/sea_calming_pillar",
+    "end": "jttw_engine:block/sea_calming_pillar_top"
+  }
+}
