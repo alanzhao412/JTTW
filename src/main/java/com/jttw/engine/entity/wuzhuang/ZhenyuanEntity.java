@@ -222,7 +222,7 @@ public class ZhenyuanEntity extends TempleImmortal {
     /**
      * Brings him into the world near {@code p}, wherever they are (any dimension, any place: on a
      * spot near them where he can stand, else where they stand), to fight them to the death: he
-     * comes out of a burst of cloud with a deep bell, keeps to no lair, and hunts them. Returns him,
+     * comes down a column of cloud ({@link #herald}) with a deep bell, keeps to no lair, and hunts them. Returns him,
      * or null if he could not be made.
      */
     @Nullable
@@ -238,11 +238,30 @@ public class ZhenyuanEntity extends TempleImmortal {
         z.quarry = p.getUUID();
         level.addFreshEntity(z);
         z.setTarget(p);
-        level.sendParticles(ParticleTypes.CLOUD, z.getX(), z.getY(0.5), z.getZ(), 60, 0.6, 1.0, 0.6, 0.06);
-        level.sendParticles(ParticleTypes.END_ROD, z.getX(), z.getY(0.5), z.getZ(), 30, 0.5, 1.0, 0.5, 0.05);
+        herald(level, z);
         level.playSound(null, z.blockPosition(), SoundEvents.BELL_RESONATE, SoundSource.HOSTILE, 3f, 0.5f);
         level.playSound(null, z.blockPosition(), SoundEvents.BELL_BLOCK, SoundSource.HOSTILE, 3f, 0.5f);
+        level.playSound(null, z.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 2f, 0.5f);
         return z;
+    }
+
+    /**
+     * The sight of his coming: a column of cloud down out of the sky onto the spot, a burst of cloud
+     * about him and a ring of it rolling out over the ground, gold motes spiralling up around him.
+     */
+    public static void herald(ServerLevel level, ZhenyuanEntity z) {
+        double x = z.getX(), y = z.getY(), zz = z.getZ();
+        for (int k = 0; k < 14; k++) level.sendParticles(ParticleTypes.CLOUD, x, y + 3 + k * 0.8, zz, 4, 0.35, 0.3, 0.35, 0.01);
+        level.sendParticles(ParticleTypes.CLOUD, x, z.getY(0.5), zz, 60, 0.6, 1.0, 0.6, 0.06);
+        for (int i = 0; i < 40; i++) {
+            double a = i * Math.PI * 2 / 40;
+            level.sendParticles(ParticleTypes.CLOUD, x + Math.cos(a) * 0.8, y + 0.15, zz + Math.sin(a) * 0.8, 0, Math.cos(a), 0.02, Math.sin(a), 0.3);
+        }
+        for (int i = 0; i < 48; i++) {
+            double a = i * 0.5;
+            level.sendParticles(ParticleTypes.END_ROD, x + Math.cos(a) * 1.3, y + i * 0.06, zz + Math.sin(a) * 1.3, 0,
+                    -Math.sin(a), 0.5, Math.cos(a), 0.1);
+        }
     }
 
     /**
@@ -391,11 +410,19 @@ public class ZhenyuanEntity extends TempleImmortal {
         }
     }
 
-    /** Those in his sleeve: kept at his side, and cast out when their time is up (every tick, whatever his mind is on). */
+    /**
+     * Wisps off his cloud (seen only); those in his sleeve: kept at his side, and cast out when their
+     * time is up (every tick, whatever his mind is on).
+     */
     @Override
     public void tick() {
         super.tick();
-        if (level().isClientSide) return;
+        if (level().isClientSide) {
+            // wisps off the cloud he stands on
+            if (random.nextInt(5) == 0) level().addParticle(ParticleTypes.CLOUD, getRandomX(0.9), getY() + 0.1, getRandomZ(0.9),
+                    (random.nextDouble() - 0.5) * 0.04, 0.005, (random.nextDouble() - 0.5) * 0.04);
+            return;
+        }
         long now = level().getGameTime();
         for (LivingEntity e : held()) {
             if (!Sleeve.isHeld(e)) continue;

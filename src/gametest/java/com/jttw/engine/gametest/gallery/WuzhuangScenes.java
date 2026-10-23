@@ -154,11 +154,19 @@ final class WuzhuangScenes {
                     creature(p, ModEntities.DAOIST_DISCIPLE.get(), -2.5, 0, 8.0, 200f, false);
                     creature(p, ModEntities.DAOIST_DISCIPLE.get(), 3.5, 0, 8.0, 160f, false);
                 }, PAIR),
-                scene("wuzhuang_zhenyuan_close", p -> put(p, ModEntities.ZHENYUAN.get(), 0.5, 0, 7.0, 170f), new double[]{0.5, 3.2, 2.0, 0.5, 2.3, 8.0}),
+                scene("wuzhuang_zhenyuan_close", p -> put(p, ModEntities.ZHENYUAN.get(), 0.5, 0, 7.0, 170f), new double[]{0.5, 3.0, 4.3, 0.5, 2.6, 7.0}),
                 scene("wuzhuang_zhenyuan_side", p -> put(p, ModEntities.ZHENYUAN.get(), 0.5, 0, 7.0, 90f), new double[]{0.5, 3.2, 2.0, 0.5, 2.3, 8.0}),
+                scene("wuzhuang_zhenyuan_back", p -> put(p, ModEntities.ZHENYUAN.get(), 0.5, 0, 7.0, 20f), new double[]{0.5, 3.2, 2.0, 0.5, 2.3, 8.0}),
+                // how he stands over a man
+                scene("wuzhuang_zhenyuan_scale", p -> {
+                    put(p, ModEntities.ZHENYUAN.get(), -0.5, 0, 9.0, 200f);
+                    p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+                    p.teleportTo(p.serverLevel(), 1.2, ground(p), 10.0, 160f, 0f);
+                    AbilityScenes.facing = 160f;
+                }, new double[]{5.0, 2.6, 3.0, 0.5, 1.8, 9.0}),
                 // the Universe in his Sleeve: flung open toward a disciple's foe (a villager), who is swept in
                 scene("wuzhuang_sleeve", p -> {
-                    put(p, ModEntities.ZHENYUAN.get(), -1.0, 0, 8.0, 135f);
+                    put(p, ModEntities.ZHENYUAN.get(), -1.0, 0, 8.0, 240f);
                     put(p, EntityType.VILLAGER, 2.5, 0, 6.0, 300f);
                 }, p -> {
                     ServerLevel level = p.serverLevel();
@@ -169,7 +177,7 @@ final class WuzhuangScenes {
                     }
                 }, new double[]{2.2, 2.4, 4.6, -0.6, 1.7, 8.0}),
                 scene("wuzhuang_sleeve_held", p -> {
-                    put(p, ModEntities.ZHENYUAN.get(), -1.0, 0, 8.0, 135f);
+                    put(p, ModEntities.ZHENYUAN.get(), -1.0, 0, 8.0, 240f);
                     put(p, EntityType.VILLAGER, 1.5, 0, 6.5, 300f);
                 }, p -> {
                     ServerLevel level = p.serverLevel();
@@ -186,10 +194,9 @@ final class WuzhuangScenes {
                 }, p -> {
                     ServerLevel level = p.serverLevel();
                     for (ZhenyuanEntity z : level.getEntitiesOfClass(ZhenyuanEntity.class, new AABB(p.blockPosition()).inflate(16))) {
-                        level.sendParticles(ParticleTypes.CLOUD, z.getX(), z.getY(0.05), z.getZ(), 24, 1.1, 0.1, 1.1, 0.01);
-                        level.sendParticles(ParticleTypes.END_ROD, z.getX(), z.getY(0.6), z.getZ(), 12, 0.7, 0.9, 0.7, 0.01);
+                        ZhenyuanEntity.herald(level, z);
                     }
-                }, new double[]{2.5, 2.3, 4.5, 0.5, 1.6, 8.5}),
+                }, new double[]{2.5, 2.6, 3.5, 0.5, 2.0, 8.5}),
                 // the island, laid north of the stage
                 islandScene("wuzhuang_gate", 7, 5, 52, 0, 7, 30),
                 islandScene("wuzhuang_court", 9, 14, 44, 0, 5, 4),

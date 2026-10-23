@@ -764,7 +764,8 @@ left to its host.
   later** (24,000 ticks of the overworld's game time from that kill; sleep does not hasten it) the
   bell sounds once more, far off, a minute before; then Zhenyuan **arrives near them, wherever they
   are** (any dimension, any place: a spot 4–8 blocks off with firm ground and room, else where they
-  stand), out of a burst of cloud, keeping to no lair, and fights them **to the death**, hunting
+  stand), down a column of cloud out of the sky, a ring of cloud rolling out over the ground and
+  gold motes spiralling up about him, keeping to no lair, and fights them **to the death**, hunting
   them within 64 blocks. If they are not in the world then, he comes when they next are. Once for
   each temple; no word is spoken. His kit: **hard to harm** (no blow takes more than 2.5% of his
   health; one blow in four struck hand to hand he brushes aside with his whisk); **the Universe in
@@ -787,12 +788,21 @@ left to its host.
   not), a youth −25, Zhenyuan −100; bringing a ripe fruit down is **theft, −40** (as Heaven's
   peaches; no one has leave now) and makes one the temple's thief for 5 minutes (every disciple and
   youth near turn on them at once); a fight with a crane is no deed either way.
-- **Art**: `WuzhuangRenderers` (a robed frame for the disciples (topknot and pin), the youths (two
-  buns of boys' hair, smaller) and Zhenyuan (wide sleeves, gold crown, white beard, his whisk; his
-  left sleeve swells as he sweeps); a box model for the crane: long neck, red
-  crown, wings spread and beating in flight, folded at rest, swept back in a swoop); skins from
+- **Art**: `WuzhuangRenderers` (a robed frame for the disciples (topknot and pin) and the youths
+  (two buns of boys' hair, smaller); a box model for the crane: long neck, red crown, wings spread
+  and beating in flight, folded at rest, swept back in a swoop); skins from
   `assets_source/wuzhuang_folk.py`, `wuzhuang_crane.py`; the fruit, the tray, the striker, the whisk,
-  plumes and talismans from `wuzhuang_items.py`.
+  plumes and talismans from `wuzhuang_items.py`. **Zhenyuan** has a frame of his own, model and skin
+  from `assets_source/zhenyuan.py` (as the Flaming Mountains' and Lion-Camel Ridge's, with a dim
+  glowing skin): a tall, unbent immortal some three blocks to the top of his crown (his hitbox
+  0.9 × 2.9), rising and falling a little on a small turning cloud that sheds wisps; layered robes of
+  deep celestial indigo over an earth-gold under-robe and apron, a violet cloud collar with gold ruyi
+  tips, gold cloud scrolls, a sea-and-cliff hem, a train behind, the bagua on his back; great
+  hanging sleeves with gold lips, their mouths dark with stars; a gold lotus crown with a jade pin on
+  his white topknot, long white hair down his back, stern long brows, a long white beard; a ribbon
+  drifting from his shoulders; a slowly turning ring of gold with the eight trigrams behind his
+  head; deep-set eyes with a faint violet gleam; his horsetail whisk held up before him. Sweeping,
+  he flings his left sleeve open at his foe and its starry mouth swells.
 - **Tests and pictures**: `WuzhuangGameTests` (heights and band, the stair's half steps and slow
   falling, the temple's blueprint and its 24 residents' spots, the fruit all ripe and never
   ripening or growing back, gold and the fruit, sinking, resting on wool, the tray, water, eating
