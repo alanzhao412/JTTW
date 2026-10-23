@@ -41,12 +41,14 @@ public final class ReadyGate {
 
     private ReadyGate() {}
 
-    static final int MAX_WAIT_TICKS = 60;
+    /** Long enough for the zones' heavier terrain to generate under a busy test server. */
+    static final int MAX_WAIT_TICKS = 200;
 
     /**
-     * Keeps the chunks under a test's platform ticking entities for ten minutes. Since 1.21 tests
-     * stand far from spawn, where only the chunks of the platform structure's own footprint are
-     * forced, and the platform reaches a block past it.
+     * Keeps the chunks under and round a test's platform ticking entities for ten minutes, two
+     * chunks out: since 1.21 tests stand far from spawn, where only the chunks of the platform
+     * structure's own footprint are forced, the platform reaches a block past it, and a boss that
+     * vanishes or flees lands well off it (a creature in a chunk that doesn't tick stands frozen).
      */
     private static final net.minecraft.server.level.TicketType<net.minecraft.world.level.ChunkPos> PLATFORM =
             net.minecraft.server.level.TicketType.create("jttw_gametest_platform",
@@ -55,8 +57,8 @@ public final class ReadyGate {
     private static void holdPlatform(GameTestHelper h) {
         for (int x = 0; x <= 5; x += 5) for (int z = 0; z <= 5; z += 5) {
             var chunk = new net.minecraft.world.level.ChunkPos(h.absolutePos(new net.minecraft.core.BlockPos(x, 1, z)));
-            // distance 2: ticket level 31, where entities tick
-            h.getLevel().getChunkSource().addRegionTicket(PLATFORM, chunk, 2, chunk, true);
+            // distance 4: ticket level 29, so entities tick (level 31 and below) two chunks round
+            h.getLevel().getChunkSource().addRegionTicket(PLATFORM, chunk, 4, chunk, true);
         }
     }
 
