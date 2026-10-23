@@ -31,7 +31,8 @@ import java.util.List;
  * four seas' too), its distance from spawn, the vanilla biome it was put on, and how long finding
  * them took; a map of the 20x20 km round spawn, the zones over vanilla's biomes, with their rings
  * ({@code screenshots/zones/unique_zones_map_<seed>.png}); then a visit to each region, once its
- * ground is made: its biome there, the bosses in it, and a picture.
+ * ground is made: its biome there, the bosses in it, and a picture (for Fengdu, three more: up its
+ * road, before its Gate of Ghosts, and over the city).
  */
 final class ZoneBench {
 
@@ -128,6 +129,31 @@ final class ZoneBench {
             case 2 -> {
                 if (ticks == 100) shoot("unique_" + id + "_" + seed);
                 if (ticks == 110) {
+                    if (zone == Zones.FENGDU) {
+                        stage = 3; // and closer
+                    } else {
+                        visit++;
+                        stage = 1;
+                    }
+                    ticks = 0;
+                }
+            }
+            case 3 -> {
+                // Fengdu close: up the road to its archway and gate; on its terrace before the Gate of Ghosts; from over the city
+                int floor = com.jttw.engine.world.feature.FengduFeature.cityFloor(level, c[0], c[1]);
+                int t = com.jttw.engine.world.fengdu.FengduCity.TERRACE_H;
+                if (ticks == 1) {
+                    BlockPos veil = new BlockPos(c[0], floor + t + 1, c[1] + com.jttw.engine.world.fengdu.FengduCity.GHOST_Z);
+                    report.add(String.format("  fengdu: its floor y %d; the Gate of Ghosts' veil at %s: %s", floor, veil.toShortString(),
+                            level.getBlockState(veil).is(com.jttw.engine.registry.ModBlocks.GHOST_GATE.get()) ? "yes" : "NO"));
+                    p.teleportTo(level, c[0] + 9.5, floor + 9, c[1] + com.jttw.engine.world.fengdu.FengduCity.ARCH_Z + 26.5, 172f, 6f);
+                }
+                if (ticks == 90) shoot("unique_fengdu_road_" + seed);
+                if (ticks == 100) p.teleportTo(level, c[0] + 4.5, floor + t + 2.6, c[1] + com.jttw.engine.world.fengdu.FengduCity.RETURN_Z + 8.5, 164f, -8f);
+                if (ticks == 180) shoot("unique_fengdu_gate_" + seed);
+                if (ticks == 190) p.teleportTo(level, c[0] + 0.5, floor + 64, c[1] + com.jttw.engine.world.fengdu.FengduCity.OUTER + 52.5, 180f, 42f);
+                if (ticks == 280) shoot("unique_fengdu_above_" + seed);
+                if (ticks == 290) {
                     visit++;
                     stage = 1;
                     ticks = 0;
@@ -195,6 +221,7 @@ final class ZoneBench {
         if (zone == Zones.FIRE_MOUNTAIN) return "Flaming Mountains";
         if (zone == Zones.MOUNT_WUZHUANG) return "Mount Wuzhuang";
         if (zone == Zones.LION_CAMEL) return "Lion-Camel Ridge";
+        if (zone == Zones.FENGDU) return "Fengdu";
         return zone.biome().location().getPath();
     }
 
@@ -205,6 +232,7 @@ final class ZoneBench {
         if (zone == Zones.FIRE_MOUNTAIN) return new Color(255, 70, 0);
         if (zone == Zones.MOUNT_WUZHUANG) return new Color(255, 215, 0);
         if (zone == Zones.LION_CAMEL) return new Color(230, 0, 130);
+        if (zone == Zones.FENGDU) return new Color(60, 200, 170);
         return Color.MAGENTA;
     }
 

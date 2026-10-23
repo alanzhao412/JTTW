@@ -44,6 +44,12 @@ public record ZoneLayout(int near, int far, int radius, int wobble, long salt, b
     /** Lion-Camel Ridge, the last band: a region about 380 blocks across (the city and the ridge round it), 7.5-9 km out. */
     public static final ZoneLayout LION_CAMEL = new ZoneLayout(7500, 9000, 190, 30, 0x11C0CA3EL, false);
 
+    /**
+     * Fengdu, the Ghost City, the gateway to Hell: no band of its own; a region about 240 blocks
+     * across (never under 208) round its hill and the city on it, past every zone, 9-10.5 km out.
+     */
+    public static final ZoneLayout FENGDU = new ZoneLayout(9000, 10500, 120, 16, 0xF3D6D0C1L, false);
+
     /** Each quarter's half-width, in degrees, a sea's region is tried in: well inside its 45, so the four lie plainly round the compass. */
     private static final double SEA_HALF_ARC = 30;
 

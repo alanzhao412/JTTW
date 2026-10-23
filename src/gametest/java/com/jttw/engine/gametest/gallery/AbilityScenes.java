@@ -96,7 +96,12 @@ final class AbilityScenes {
             java.util.Map.entry("lion_city_court", 80), java.util.Map.entry("lion_city_street", 80), java.util.Map.entry("lion_peng_among_demons", 60),
             java.util.Map.entry("lion_city_kings_way", 80), java.util.Map.entry("lion_city_hall_true", 60), java.util.Map.entry("lion_city_court_true", 60),
             // a king's true form showing itself, its pause run out before the picture
-            java.util.Map.entry("lion_azure_lion_revealed", 20), java.util.Map.entry("lion_white_elephant_revealed", 20));
+            java.util.Map.entry("lion_azure_lion_revealed", 20), java.util.Map.entry("lion_white_elephant_revealed", 20),
+            // Fengdu, laid off the stage; the Hell plaza's Gate of Ghosts and its side doors
+            java.util.Map.entry("fengdu_gate", 140), java.util.Map.entry("fengdu_above", 100), java.util.Map.entry("fengdu_ghost_gate", 80),
+            java.util.Map.entry("fengdu_ghost_gate_close", 60), java.util.Map.entry("fengdu_palace", 80), java.util.Map.entry("fengdu_palace_inside", 60),
+            java.util.Map.entry("fengdu_avenue", 80), java.util.Map.entry("fengdu_shrines", 60), java.util.Map.entry("fengdu_temple", 60),
+            java.util.Map.entry("hell_gate_doors", 100));
 
         /** Set by a scene that photographs a screen (a furnace's, say), so the gallery leaves it open. */
     static volatile boolean keepScreen;
@@ -108,6 +113,7 @@ final class AbilityScenes {
         all.addAll(FireScenes.all());
         all.addAll(WuzhuangScenes.all());
         all.addAll(LionScenes.all());
+        all.addAll(FengduScenes.all());
         return all;
     }
 

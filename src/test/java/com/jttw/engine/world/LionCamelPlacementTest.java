@@ -52,7 +52,7 @@ class LionCamelPlacementTest {
         assertSame(L, Zones.byBiome(Zones.LION_CAMEL_RIDGE_BIOME));
         assertTrue(Zones.MAP.zones().contains(L));
         assertTrue(Zones.ALL.indexOf(L) > Zones.ALL.indexOf(Zones.FIRE_MOUNTAIN), "after the Flaming Mountains");
-        assertEquals(Zones.ALL.size() - 1, Zones.ALL.indexOf(L), "the last zone");
+        assertEquals(L, Zones.ALL.stream().filter(Zones.Zone::hasLevelBand).reduce((a, b) -> b).orElseThrow(), "the last zone of a band");
     }
 
     @Test
@@ -111,7 +111,7 @@ class LionCamelPlacementTest {
             double d = Math.hypot(c[0], c[1]);
             assertTrue(d >= 7500 && d <= 9000, "7.5-9 km out: " + d);
             for (Zones.Zone other : Zones.MAP.zones()) {
-                if (other == L) continue;
+                if (other == L || !other.hasLevelBand()) continue; // Fengdu, a place of no band, lies past it
                 for (int[] o : other.centres(seed)) assertTrue(Math.hypot(o[0], o[1]) < d, other.id() + " nearer spawn");
             }
         }

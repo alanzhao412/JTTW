@@ -5,6 +5,8 @@ import com.jttw.engine.dimension.JTTWDimensions;
 import com.jttw.engine.entity.waters.DragonKingEntity;
 import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.registry.ModItems;
+import com.jttw.engine.world.hell.HellTerrain;
+import com.jttw.engine.world.hell.HellWorks;
 import com.jttw.engine.world.hell.TenCourts;
 import com.jttw.engine.world.waters.Sea;
 import net.minecraft.core.BlockPos;
@@ -44,9 +46,11 @@ import java.util.Set;
  * far its one region lies; for the Mystical Waters, the nearest of the Four Seas whose Dragon King
  * still lives ({@link FallenKings}). The luopan's needle then points there.
  *
- * <p>Hell (levels 57-66) is no Earth God's ground: in the overworld they send its band on to the
- * Flaming Mountains, the road west's next zone; in Hell itself they can only point to the Ten
- * Courts' gate. Anywhere else (the Nether, the End, Heaven) no Earth God hears.
+ * <p>Hell (levels 57-66) is no Earth God's ground: in the overworld they send its band to Fengdu,
+ * the Ghost City, whose Gate of Ghosts leads down to it ({@code world/fengdu/Fengdu}); in Hell
+ * itself they can only point to the Ten Courts' gate, or, asked sneaking, the way back up: the side
+ * doors of the Gate of Ghosts on the arrival plaza. Anywhere else (the Nether, the End, Heaven) no
+ * Earth God hears.
  *
  * <p>Every player is given a luopan once, the first time they join a world.
  */
@@ -58,10 +62,14 @@ public final class EarthGod {
     /** Where the Earth God sends the asker: a place, what he says of it, and the zone (null in Hell). */
     public record Answer(@Nullable GlobalPos target, @Nullable Zones.Zone zone, Component words) {}
 
-    /** The zone for a player of this level: the one whose band holds it; under the first, the first; past the last, the last. */
+    /**
+     * The zone for a player of this level: the one whose band holds it; under the first, the first;
+     * past the last, the last. Never a place without a band (Fengdu).
+     */
     public static Zones.Zone zoneFor(int level) {
         Zones.Zone first = null, last = null;
         for (Zones.Zone zone : Zones.ALL) {
+            if (!zone.hasLevelBand()) continue;
             if (zone.minLevel() <= level && level <= zone.maxLevel()) return zone;
             if (first == null || zone.minLevel() < first.minLevel()) first = zone;
             if (last == null || zone.maxLevel() > last.maxLevel()) last = zone;
@@ -69,10 +77,10 @@ public final class EarthGod {
         return level < first.minLevel() ? first : last;
     }
 
-    /** The overworld zone a player of this level is sent to: the zone for the level, but Hell's band goes on to the Flaming Mountains. */
+    /** Where in the overworld a player of this level is sent: the zone for the level; for Hell's band, Fengdu, the way down to it. */
     public static Zones.Zone overworldZoneFor(int level) {
         Zones.Zone zone = zoneFor(level);
-        return zone.hasFootprint() ? zone : Zones.FIRE_MOUNTAIN;
+        return zone.hasFootprint() ? zone : Zones.FENGDU;
     }
 
     /**
@@ -126,18 +134,37 @@ public final class EarthGod {
         if (zone == Zones.FIRE_MOUNTAIN) return "Past the heat of the Flaming Mountains, Red Boy keeps his Fire Cloud Cave";
         if (zone == Zones.MOUNT_WUZHUANG) return "Over the clouds floats Mount Longevity, where the Great Immortal Zhenyuan tends his ginseng tree";
         if (zone == Zones.LION_CAMEL) return "Lion-Camel Ridge: eight hundred li of demons, and the city they devoured";
+        if (zone == Zones.FENGDU) return "The way down lies through Fengdu, the Ghost City, on its hill: step through its Gate of Ghosts";
         return "There the demons of your strength dwell";
     }
 
     /** What the Earth God answers a player at their place and level ({@code fallen}: the seas whose kings are dead). */
     public static Answer answer(ResourceKey<Level> dimension, Vec3 at, int level, long seed, Set<Sea> fallen) {
+        return answer(dimension, at, level, seed, fallen, false);
+    }
+
+    /**
+     * What the Earth God answers a player at their place and level ({@code fallen}: the seas whose
+     * kings are dead); in Hell, asked for the way out ({@code wayOut}: the asker sneaking), the way
+     * back up to the living instead of on to the Ten Courts.
+     */
+    public static Answer answer(ResourceKey<Level> dimension, Vec3 at, int level, long seed, Set<Sea> fallen, boolean wayOut) {
         if (dimension.equals(JTTWDimensions.HELL)) {
+            if (wayOut) {
+                BlockPos door = wayOutOfHell(at);
+                double d = Math.hypot(door.getX() + 0.5 - at.x, door.getZ() + 0.5 - at.z);
+                return new Answer(GlobalPos.of(dimension, door), null, Component.literal(
+                        "No Earth God keeps ground in Diyu. Faintly, from above: \"The way back to the living is by the side doors of the "
+                                + "Gate of Ghosts, on the plaza where the dead come in; " + (d < 8 ? "one is before you"
+                                : "the nearer lies some " + roughly(d) + " blocks to the " + wind(at.x, at.z, door.getX(), door.getZ()))
+                                + ". Step into the mist there, and it will bring you out in Fengdu.\""));
+            }
             BlockPos gate = new BlockPos(0, 64, TenCourts.GATE_Z);
             double d = Math.hypot(gate.getX() - at.x, gate.getZ() - at.z);
             return new Answer(GlobalPos.of(dimension, gate), null, Component.literal(
                     "No Earth God keeps ground in Diyu. Faintly, from above: \"The Ten Courts' gate lies "
                             + (d < 24 ? "before you" : "some " + roughly(d) + " blocks to the " + wind(at.x, at.z, gate.getX(), gate.getZ()))
-                            + ", beyond the Naihe.\""));
+                            + ", beyond the Naihe.\" §7(Sneak as you ask, for the way back up.)"));
         }
         if (!dimension.equals(Level.OVERWORLD)) {
             return new Answer(null, null, Component.literal("You knock, but no Earth God hears you here: their ground is the mortal world's."));
@@ -147,7 +174,7 @@ public final class EarthGod {
         if (c == null) return new Answer(null, null, Component.literal("The Earth God scratches his head: he knows of no such place."));
         StringBuilder words = new StringBuilder();
         if (!zoneFor(level).hasFootprint()) {
-            words.append("\"Your trials lie in Diyu, the underworld, below any Earth God's ground. Until its gate opens to you, the road west goes on: ");
+            words.append("\"Your trials lie in Diyu, the underworld, below any Earth God's ground. ");
         } else {
             words.append('"');
         }
@@ -155,18 +182,24 @@ public final class EarthGod {
         words.append(whoDwells(zone, c));
         double d = Math.hypot(c[0] - at.x, c[1] - at.z);
         if (zone.depth(seed, (int) Math.floor(at.x), (int) Math.floor(at.z)) > 0) {
-            words.append(". You stand in that country now; its master is near.\"");
+            words.append(zone == Zones.FENGDU ? ". You stand in the Ghost City's country now; its Gate of Ghosts is on the terrace at the city's heart.\""
+                    : ". You stand in that country now; its master is near.\"");
         } else {
             words.append(". It lies some ").append(roughly(d)).append(" blocks to the ").append(wind(at.x, at.z, c[0], c[1])).append(".\"");
         }
         return new Answer(GlobalPos.of(Level.OVERWORLD, new BlockPos(c[0], 64, c[1])), zone, Component.literal(words.toString()));
     }
 
-    /** What the Earth God answers this player where they stand. */
+    /** Where the way out of Hell is for someone at {@code at}: the nearer of the Gate of Ghosts' side doors (its inner column of veil). */
+    public static BlockPos wayOutOfHell(Vec3 at) {
+        return new BlockPos(at.x < 0 ? -HellWorks.RETURN_DOOR_X : HellWorks.RETURN_DOOR_X, HellTerrain.GROUND + 1, HellWorks.RETURN_DOOR_Z);
+    }
+
+    /** What the Earth God answers this player where they stand (in Hell, sneaking: the way out). */
     public static Answer answer(ServerPlayer player) {
         ServerLevel overworld = player.server.overworld();
         return answer(player.level().dimension(), player.position(), PlayerLevel.getLevel(player), overworld.getSeed(),
-                FallenKings.of(overworld).seas());
+                FallenKings.of(overworld).seas(), player.isShiftKeyDown());
     }
 
     /** Points the luopan where the Earth God would send its holder, quietly (its needle spins where there is nowhere). */

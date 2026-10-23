@@ -147,7 +147,9 @@ and the Jade Palace. Hell (Diyu) is a dark underworld of ash plains, black stone
 crossed by the Naihe, with the arrival plaza where the Book of Life and Death is kept and, far to
 the north, the fortress of the Ten Courts: the levels 57–66 zone (see "Hell" under Zones). Sun
 Wukong is sent there at level 30 to strike his name from the Book; the Dragon's and Wukong's
-dimension abilities travel there too.
+dimension abilities travel there too; and anyone at all goes down through the Gate of Ghosts of
+Fengdu, the Ghost City, at the world's far edge, and comes back up by the side doors of Hell's own
+(see "Fengdu" under Zones).
 
 ---
 
@@ -264,7 +266,7 @@ src/main/java/com/jttw/engine/
 ├── flight/          custom flight, glide, and swim physics (server side)
 ├── network/         c2s/ and s2c/ packets for client–server state sync
 ├── dimension/       Heaven and Hell dimensions with custom worldgen
-├── world/           zones (Zones, ZoneLayout, ZoneMap, ZoneAllies), zone features, Heaven, morality
+├── world/           zones (Zones, ZoneLayout, ZoneMap, ZoneAllies), zone features, Fengdu, Heaven, morality
 ├── entity/          custom entities, projectiles, summons; zone/ holds ZoneMonster and ZoneBoss
 ├── item/            lore artifacts and weapons
 ├── client/          renderers, GUI screens, HUD overlays, client input and flight
@@ -282,7 +284,9 @@ lies in, radius, wobble, a salt of its own), the heights it takes (`Vertical`: t
 `below(y)` for an underground zone, `above(y)` for an aerial one), its level band and the players it
 is allied to. White Bone Ridge is the first, the Bottomless Cave the second, the Mystical Waters the
 third; Hell, a dimension of its own, is the fourth; then the Flaming Mountains, and Mount Wuzhuang,
-the first aerial zone, in the sky; Lion-Camel Ridge, the last band, is the last.
+the first aerial zone, in the sky; Lion-Camel Ridge, the last band, is the last. Past it all lies
+Fengdu, the Ghost City: a place, not a zone of a band, placed as the zones are, whose Gate of
+Ghosts is the way down to Hell for everyone.
 
 **One of each a world.** Every boss lives in one place: each overworld zone has a single region a
 world (`ZoneMap`), except the Mystical Waters, which have one in each of the Four Seas, east, south,
@@ -294,10 +298,11 @@ west lengthens with the pilgrim: the higher a zone's levels, the farther out its
 | White Bone Ridge | 20–36 | 1–2 km | one, ~520 blocks across |
 | Bottomless Cave (under mountains) | 37–46 | 2–3 km | one, ~220 |
 | Mystical Waters (deep ocean) | 47–56 | 3–4.5 km | four, one per sea (within 30° of east, south, west, north), ~440 |
-| Hell (a dimension) | 57–66 | — | the Ten Courts |
+| Hell (a dimension, entered through Fengdu) | 57–66 | — | the Ten Courts |
 | Flaming Mountains | 67–77 | 4.5–6 km | one, ~400 |
 | Mount Wuzhuang (over the clouds) | 78–88 | 6–7.5 km | one, ~260 |
 | Lion-Camel Ridge | 89–100 | 7.5–9 km | one, ~380 |
+| Fengdu, the Ghost City (river and hill country) | none: the way to Hell | 9–10.5 km | one, ~240 |
 
 Where in its ring follows from the world seed and its biomes: earliest zone first, the places its
 layout offers (spread evenly over the ring by the seed) are tried in turn, and it takes the first on
@@ -320,8 +325,11 @@ its master, and which way and roughly how far it lies, while a trail of incense 
 way; for the Mystical Waters, the nearest sea whose Dragon King still lives (the kings' deaths are
 remembered for the world). Held, its needle points there, as a compass's does, kept up to date as
 its holder goes and grows. Hell's band (57–66) is told that its trials lie in Diyu, past any Earth
-God's ground, and pointed on to the Flaming Mountains; in Hell itself the needle points to the Ten
-Courts' gate; in the Nether, the End or Heaven no Earth God hears, and it spins.
+God's ground, and that the way down lies through Fengdu, the Ghost City: the needle points there
+(standing in its country, they are told its Gate of Ghosts is on the terrace at the city's heart).
+In Hell itself the needle points to the Ten Courts' gate; asked sneaking (and held while sneaking)
+it shows the way back up instead, the nearer side door of the Gate of Ghosts on the arrival plaza.
+In the Nether, the End or Heaven no Earth God hears, and it spins.
 
 To add a zone:
 
@@ -330,7 +338,8 @@ To add a zone:
 2. **Definition**: a `Zone.overworld(biome, hosts, new ZoneLayout(..., uniqueSalt), vertical,
    minLevel, maxLevel, gruntXp)` in `Zones`, appended to `Zones.ALL`; `.hostSampledAt(y)` for a
    host judged off the surface, `.alliedTo(ZoneAllies.PENG)` for a zone that spares the Peng. A
-   zone of another dimension (Hell) is `Zone.dimension(biome, ...)`: a level band, no regions.
+   zone of another dimension (Hell) is `Zone.dimension(biome, ...)`: a level band, no regions; a
+   place of no band (Fengdu) is `Zone.place(biome, hosts, layout, vertical)`: a region, no band.
    Level bands are registered from `Zones.ALL`; the biome source places the biome by itself.
 3. **Monsters**: extend `entity/zone/ZoneMonster` (`zone()`, `hitsToKill()`, `blowShare()`;
    override levels, captain chance, escorts, captain loot, `allies()` as needed).
@@ -475,7 +484,9 @@ XP 125, stepped up from the Mystical Waters' 110 (575 a grunt kill at the band's
   light is up from 0.1 to 0.2.
 - **The works** (`world/hell/HellWorks`, laid chunk by chunk through `Site` from the plan alone, so
   chunks agree whichever is made first): the **arrival plaza** round 0, 0, paved in rings, lit by
-  soul lanterns, with the **Gate of Ghosts** (鬼门关) at its north edge; the **road** north, lit
+  soul lanterns, with the **Gate of Ghosts** (鬼门关) at its north edge, its arch the road's and
+  a **side door** either side of it filled with the ghost veil, the way back up to Fengdu (set up
+  as a traveller arrives in a Hell made before them, `HellWorks.ensureReturnDoors`); the **road** north, lit
   every 24 blocks; the **Bridge of Helplessness** (奈何桥), an arched bridge on piers over the Naihe,
   with **Meng Po's pavilion** (her soup in a cauldron) at its north end; and the **fortress of the
   Ten Courts** (`TenCourts`): walls 128 × 268 blocks with corner towers and a gatehouse (its plaque
@@ -493,7 +504,12 @@ XP 125, stepped up from the Mystical Waters' 110 (575 a grunt kill at the band's
   iron cage of soul fire (9), Meng Po's soup (10). Two guards (Ox-Head and Horse-Face) stand at
   each door (captains at Yama's), three clerks keep the Office of Records, the Impermanence pair
   and a clerk wait on Yama, and each king sits on his dais, all put there once as the land is made.
-- **The arrival's safety** (`HellRules`): a level-30 Wukong comes here for the Book. The fortress
+- **The way in and out**: everyone comes down through Fengdu's Gate of Ghosts (and Wukong at level 30,
+  and the Dragon's and Wukong's dimension travel, as before), all to the arrival plaza
+  (`JTTWDimensions.teleportTo`: its safe ground, the Book's dais); everyone goes back up by its
+  Gate of Ghosts' side doors, to Fengdu (see "Fengdu" below).
+- **The arrival's safety** (`HellRules`): a level-30 Wukong comes here for the Book, and anyone of any
+  level may come down through Fengdu. The fortress
   and its kings are over 300 blocks north, over the Naihe (the nearest king 363 blocks off);
   nothing of Hell spawns by itself within 160 blocks of the arrival (the server spawns within 128
   of a player, so none ever spawns round someone standing there); the officials spawn only within
@@ -914,6 +930,81 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   both shapes; the reveal; the swallow, the pounce, the trunk and the trampling; the hall and the
   court with the kings in them, and the kings' way between); the ridge and the city in a real world
   with `./gradlew runWorldgenBench -Pbench.mode=lion` (and every zone's place with `zones`).
+
+#### Fengdu, the Ghost City (the way to Hell)
+
+Fengdu (丰都鬼城), on Mount Ming over the Yangtze, is in folk belief the city of the underworld's
+officials, through which every soul passes on its way down to Diyu. Here it is how anyone, of any
+kind and any level, gets to Hell (levels 57–66): until it, only Sun Wukong (sent there at level 30)
+and the Dragon's and Wukong's dimension travel could. In
+[`world/fengdu/`](src/main/java/com/jttw/engine/world/fengdu/).
+
+- **Where** (`Zones.FENGDU = Zone.place(fengdu, fengdu_hosts, ZoneLayout.FENGDU, WHOLE_COLUMN)`):
+  a place, not a zone of a band: no level band of its own (none is registered, the Earth Gods never
+  send anyone there by level but Hell's band, it pays no XP). One a world, placed by `ZoneMap` as
+  the zones are, last of them all: in the farthest ring, **9–10.5 km out**, past Lion-Camel Ridge
+  (though Hell's levels are lower: the Ghost City lies at the end of the world), a region about 240
+  blocks across on river and hill country (plains, forests, birch, dark and flower forests, taiga,
+  swamps, rivers, windswept hills and forests; host judged at y 256), the whole column, so it never
+  shares ground with any zone. In the bench's worlds: seed 12345 at (−428, −10431), 10.4 km north,
+  on birch forest; seed 42 at (−8261, −5818), 10.1 km north-west, on old-growth birch forest.
+- **The country** (`fengdu` biome; `world/feature/FengduFeature`, laid chunk by chunk): grey-violet
+  sky, dark fog, murky water, ash drifting in the air, the soul sand valley's moods; no creature
+  spawns in it, by day or night, so it is safe to reach the gate. The land keeps its shape round the
+  hill, gone gloomy: soft patches of podzol and coarse earth in the grass, dead bushes, dead trees
+  and dark spruces, old graves with mossy headstones.
+- **The hill** (`FengduShape`, pure, unit-tested): a level top (a rounded square 49 blocks out each
+  way) at the land's height at its centre or round its foot, whichever is higher, and 14 more;
+  slopes back to the land over about 44 blocks, their foot wandering, dark spruces on them (as
+  cypresses stand round a temple hill), bare rock where steep; where it meets water it rises out
+  of it. Up its south slope runs the **Road to the Yellow Springs** (黄泉路), paved, a soul lantern on
+  a post every sixth block, by turns either side.
+- **The city** (`FengduCity`, a blueprint like Lion-Camel City's, laid column by column with its
+  signs): a square wall of dark deepslate brick (8 high, 36 out each way), crenellated, soul lanterns
+  on its merlons, a tower at each corner; one gate, south, under a gatehouse with a gate tower on it
+  (red pillars, a lattice frieze, red lanterns, a hip roof of dark tiles) and the city's name over
+  the way in (丰都); before it on the hill's top a three-bay stone **archway** (牌坊) over the road,
+  丰都鬼城 on its face and 黄泉路 on its back. Within, the **lower city**: an avenue north from the gate
+  lined with soul lanterns, a road round inside the walls, and plots of seven by seven: **shrines**
+  to the officials of the dead (red walls, an open front, a dark tiled roof, a skull-faced image on
+  the altar, candles), the **houses of the dead** (dark and shut, lattice windows, red lanterns by the
+  door, a coffin within), yards where **paper offerings** burn in a walled fire, and **graveyards**.
+  Up three flights of steps the **upper city**, a terrace across the north half: on it the **Gate of
+  Ghosts** (鬼门关), a great arch of black stone and red with a gold-ended roof, soul lanterns at its
+  eaves, a soul-fire brazier and a screen wall either side; behind it the **Palace of the Son of
+  Heaven** (天子殿), King Yama's, on its plinth (red walls and pillars, a lattice front, a hip roof
+  of dark tiles, his throne on a dais before a gilded screen, his image over it, candles, a red
+  carpet to it), an incense burner before its steps; to its west the **Temple of the City God**
+  (城隍庙), to its east the **Hall of the Judges** (判官殿), each with its god's image and candles.
+  No one lives here and nothing fights here: it is a place to pass through. (Hell's own Naihe
+  bridge and Meng Po are left to Hell.)
+- **The gates** (`Fengdu`, `GhostGateBlock`): the Gate of Ghosts' way is filled with the **ghost
+  veil**, a cold soul-fire mist (an animated, half-see-through teal block that sheds souls and soul
+  flames, glows, has no collision and cannot be broken or picked). Any player who stands in it for
+  a second (20 ticks; stepping out sooner, nothing) is taken **down** to Hell's arrival plaza,
+  through `JTTWDimensions.teleportTo`, so the plaza's safe spawn and the Book of Life and Death's
+  dais are as for every traveller. The Gate of Ghosts on Hell's arrival plaza now has a **side door**
+  either side of its arch (the arch's own way stays the road's), each filled with the veil: standing
+  in one takes anyone back **up** to Fengdu, onto its terrace just before its Gate of Ghosts, facing
+  away from it (if the city is not there, onto the ground there). One arrives out of the veils on
+  either side, so no one is sent straight back. Sun Wukong's level-30 sending and the Dragon's and
+  Wukong's dimension travel are unchanged.
+- **The Earth God's Luopan**: Hell's band is pointed to Fengdu (see the luopan, above); in Hell,
+  sneaking, to the side doors.
+- **Art**: the ghost veil's 32-frame animated texture from `assets_source/ghost_gate.py`; everything
+  else vanilla blocks.
+- **Tests and pictures**: `FengduPlacementTest` (one a world, in its ring past Lion-Camel Ridge and
+  farther than every zone, on its hosts, never on a zone's ground, the same for the same seed; a
+  place of no band; the hill, the city and the road inside the region; the hill's shape and floor);
+  `FengduGameTests` (anyone, of any kind and level, taken down to Hell's plaza, stepping out in time
+  sparing them; the side doors in Hell, the road's way open, and back up to Fengdu's terrace before
+  its gate, and down again through it; the luopan for levels 57–66 and in Hell, sneaking or not; the
+  blueprint: the veil in the gate, the gate, the palace and the temples reachable on foot from
+  outside the walls, room to stand where one comes back, every sign on a wall); gallery scenes
+  `-Pgallery.only=fengdu_` (the gate from the road, from above, the Gate of Ghosts and its veil, the
+  palace inside and out, the avenue, the shrines, the City God's temple) and `hell_gate_doors`;
+  in a real world with `./gradlew runWorldgenBench -Pbench.mode=zones` (Fengdu's place, its floor,
+  its veil, and pictures from the road, before its Gate of Ghosts and over the city).
 
 ---
 

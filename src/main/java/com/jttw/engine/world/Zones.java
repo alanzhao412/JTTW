@@ -103,6 +103,19 @@ public final class Zones {
             return new Zone(biome, null, null, Vertical.WHOLE_COLUMN, HOST_Y, minLevel, maxLevel, baseGruntXp, ZoneAllies.NONE);
         }
 
+        /**
+         * A place, not a zone of a band (Fengdu): a region and a biome of its own, placed as the zones
+         * are and kept clear of them, but no level band (no one is sent there by level, it pays no XP).
+         */
+        public static Zone place(ResourceKey<Biome> biome, TagKey<Biome> hosts, ZoneLayout layout, Vertical vertical) {
+            return new Zone(biome, hosts, layout, vertical, HOST_Y, 0, -1, 0, ZoneAllies.NONE);
+        }
+
+        /** Whether it has a level band (a place such as Fengdu has none). */
+        public boolean hasLevelBand() {
+            return minLevel <= maxLevel;
+        }
+
         /** The same zone, its host judged at height {@code y} (an underground zone's, under its hosts' surface). */
         public Zone hostSampledAt(int y) {
             return new Zone(biome, hosts, layout, vertical, y, minLevel, maxLevel, baseGruntXp, allies);
@@ -272,19 +285,32 @@ public final class Zones {
             TagKey.create(Registries.BIOME, id("lion_camel_ridge_hosts")), ZoneLayout.LION_CAMEL,
             Vertical.above(LION_CAMEL_FLOOR), 89, 100, 160).hostSampledAt(256).alliedTo(ZoneAllies.PENG);
 
+    public static final ResourceKey<Biome> FENGDU_BIOME = ResourceKey.create(Registries.BIOME, id("fengdu"));
+
+    /**
+     * Fengdu, the Ghost City (丰都鬼城), the folk gateway to the underworld: a walled city of shrines
+     * and temples to the underworld's officials on a hill in river and hill country (plains, forests,
+     * taiga, swamps, rivers, windswept hills), the whole column, host judged at y 256. Not a zone of
+     * a band but a place ({@link Zone#place}): its Gate of Ghosts takes anyone down to Hell, the
+     * band of levels 57-66 ({@code world/fengdu/Fengdu}). It lies in the farthest ring, past
+     * Lion-Camel Ridge, and keeps clear of every zone.
+     */
+    public static final Zone FENGDU = Zone.place(FENGDU_BIOME,
+            TagKey.create(Registries.BIOME, id("fengdu_hosts")), ZoneLayout.FENGDU, Vertical.WHOLE_COLUMN).hostSampledAt(256);
+
     /** Every zone, in order: a later one keeps clear of an earlier one sharing its heights. Append new ones. */
-    public static final List<Zone> ALL = List.of(WHITE_BONE, BOTTOMLESS, MYSTICAL_WATERS, HELL, FIRE_MOUNTAIN, MOUNT_WUZHUANG, LION_CAMEL);
+    public static final List<Zone> ALL = List.of(WHITE_BONE, BOTTOMLESS, MYSTICAL_WATERS, HELL, FIRE_MOUNTAIN, MOUNT_WUZHUANG, LION_CAMEL, FENGDU);
 
     /** Where the overworld zones of {@link #ALL} lie. */
     public static final ZoneMap MAP = new ZoneMap(ALL);
 
     private static boolean bandsRegistered;
 
-    /** Registers every zone's level band (once; JTTWEngine's common setup). */
+    /** Registers every zone's level band (once; JTTWEngine's common setup). A place without one (Fengdu) is left out. */
     public static synchronized void registerLevelBands() {
         if (bandsRegistered) return;
         bandsRegistered = true;
-        for (Zone zone : ALL) BiomeLevelBand.register(zone.levelBand());
+        for (Zone zone : ALL) if (zone.hasLevelBand()) BiomeLevelBand.register(zone.levelBand());
     }
 
     /** The zone whose biome this is, or null. */
