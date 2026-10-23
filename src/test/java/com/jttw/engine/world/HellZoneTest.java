@@ -22,7 +22,7 @@ class HellZoneTest {
         assertEquals(66, band.maxLevel());
         assertEquals(125, band.baseGruntXp(), "stepped up from the Mystical Waters' 110");
         assertFalse(Zones.HELL.hasFootprint(), "no overworld ground");
-        assertEquals(Zones.ALL.size() - 1, Zones.ALL.indexOf(Zones.HELL), "last, after the Mystical Waters");
+        assertEquals(Zones.ALL.indexOf(Zones.MYSTICAL_WATERS) + 1, Zones.ALL.indexOf(Zones.HELL), "next after the Mystical Waters");
         assertFalse(Zones.MAP.zones().contains(Zones.HELL));
         assertSame(Zones.HELL, Zones.byBiome(Zones.HELL_BIOME));
     }

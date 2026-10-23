@@ -27,6 +27,12 @@ public record ZoneLayout(int cellSize, double chance, int radius, int wobble, lo
      */
     public static final ZoneLayout MYSTICAL_WATERS = new ZoneLayout(1536, 0.9, 220, 45, 0x5EA5D4A6L);
 
+    /**
+     * The Flaming Mountains: 90% of 1152-block cells roll a range about 400 blocks across; only those
+     * clear of the zones before it (about two in five) and centred on hot, dry ground stand.
+     */
+    public static final ZoneLayout FIRE_MOUNTAIN = new ZoneLayout(1152, 0.9, 200, 40, 0xF1A3E5A7L);
+
     /** Whether a region covers the block column at (x, z) in a world of this seed. */
     public boolean covers(long seed, int x, int z) {
         return depth(seed, x, z) > 0;

@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "jttw_engine:samadhi_fire"
+    "jttw_engine:samadhi_fire",
+    "jttw_engine:samadhi_breath"
   ]
 }

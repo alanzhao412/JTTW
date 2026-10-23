@@ -84,7 +84,9 @@ final class AbilityScenes {
             // Hell's works, laid off the stage
             java.util.Map.entry("hell_court", 100), java.util.Map.entry("hell_court_inside", 60), java.util.Map.entry("hell_yama_hall", 100),
             java.util.Map.entry("hell_yama_hall_inside", 60), java.util.Map.entry("hell_wheel", 100), java.util.Map.entry("hell_court_ten", 60),
-            java.util.Map.entry("hell_bridge", 100), java.util.Map.entry("hell_bridge_walk", 60), java.util.Map.entry("hell_meng_po", 60));
+            java.util.Map.entry("hell_bridge", 100), java.util.Map.entry("hell_bridge_walk", 60), java.util.Map.entry("hell_meng_po", 60),
+            // the Fire Cloud Cave, laid off the stage
+            java.util.Map.entry("fire_cave_gate", 100), java.util.Map.entry("fire_cave_hall", 100), java.util.Map.entry("fire_fanned", 60));
 
         /** Set by a scene that photographs a screen (a furnace's, say), so the gallery leaves it open. */
     static volatile boolean keepScreen;
@@ -93,6 +95,7 @@ final class AbilityScenes {
         List<Scene> all = new java.util.ArrayList<>(base());
         all.addAll(WatersScenes.all());
         all.addAll(HellScenes.all());
+        all.addAll(FireScenes.all());
         return all;
     }
 
@@ -1142,6 +1145,7 @@ final class AbilityScenes {
     static void reset(ServerPlayer p) {
         WatersScenes.clear(p);
         HellScenes.clear(p);
+        FireScenes.clear(p);
         keepScreen = false;
         topSpeed = false;
         com.jttw.engine.client.renderer.GoldenEyesRenderer.setMode(p.getUUID(), 0);

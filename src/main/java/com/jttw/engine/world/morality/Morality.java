@@ -68,6 +68,11 @@ public final class Morality {
      * is a small good, as slaying any monster is.
      */
     public static final int SLAY_KING_OF_HELL = -35, SLAY_KING_YAMA = -70;
+    /**
+     * Red Boy, the Holy Child King, who wanted to eat the Tang Monk (chapters 40–42): subduing him is a
+     * good deed, as much as Lady White Bone. His Six Strong Generals are captains (+5 each).
+     */
+    public static final int SLAY_RED_BOY = SLAY_LADY;
     /** How recently a victim must have struck their killer for the kill to be a fight, not a murder: 10 s. */
     public static final int PROVOKED_TICKS = 200;
 
@@ -136,6 +141,7 @@ public final class Morality {
         if (victim instanceof HeavenlySoldierEntity) return KILL_SOLDIER;
         if (victim instanceof LadyWhiteBoneEntity) return SLAY_LADY;
         if (victim instanceof LadyEarthFlowEntity) return SLAY_EARTH_FLOW;
+        if (victim instanceof com.jttw.engine.entity.fire.RedBoyEntity) return SLAY_RED_BOY;
         if (victim instanceof com.jttw.engine.entity.waters.DragonKingEntity) return SLAY_DRAGON_KING;
         if (victim instanceof com.jttw.engine.entity.hell.KingYamaEntity) return SLAY_KING_YAMA;
         if (victim instanceof com.jttw.engine.entity.hell.KingOfHellEntity) return SLAY_KING_OF_HELL;
@@ -157,6 +163,8 @@ public final class Morality {
         if (deed == SLAY_CAPTAIN && victim instanceof com.jttw.engine.entity.waters.SeaMonster) return "you slew a captain of the sea";
         if (deed == SLAY_CAPTAIN && victim instanceof com.jttw.engine.entity.hell.HellMonster) return "you slew a captain of the underworld";
         if (deed == SLAY_MONSTER && victim instanceof com.jttw.engine.entity.hell.WanderingGhostEntity) return "you laid a wandering ghost to rest";
+        if (deed == SLAY_CAPTAIN && victim instanceof com.jttw.engine.entity.fire.StrongGeneralEntity) return "you struck down one of Red Boy's Six Strong Generals";
+        if (victim instanceof com.jttw.engine.entity.fire.RedBoyEntity) return "you subdued Red Boy, the Holy Child King";
         return switch (deed) {
             case SLAY_DRAGON_KING -> "you slew a Dragon King, an official of Heaven";
             case SLAY_KING_OF_HELL -> "you struck down a King of Hell, a judge of the dead";

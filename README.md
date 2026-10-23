@@ -284,6 +284,7 @@ underground zone, `above(y)` for an aerial one), its level band and the players 
 Zones sharing heights never share ground: a later zone in `Zones.ALL` gives up a whole region
 that would touch an earlier one's (`ZoneMap`). White Bone Ridge is the first, the Bottomless Cave the second, the Mystical
 Waters the third; Hell, a dimension of its own, is the fourth.
+that would touch an earlier one's (`ZoneMap`). White Bone Ridge is the first, the Bottomless Cave the second, then the Mystical Waters and the Flaming Mountains.
 
 To add a zone:
 
@@ -529,6 +530,90 @@ XP 125, stepped up from the Mystical Waters' 110 (575 a grunt kill at the band's
   Yama's hall, the Tenth Court and the Wheel, the bridge and Meng Po's pavilion); Hell as it is
   with `./gradlew runWorldgenBench -Pbench.mode=hell` (a map of it from the arrival to the north
   wall, what stands where, and pictures, some with night vision: it is dark).
+#### The Flaming Mountains (levels 67–77)
+
+The Flaming Mountains (火焰山, chapters 59–61: eight hundred li of fire where nothing grows, the
+bricks of Laozi's furnace that fell when the Monkey King kicked it over) and in their heart Red
+Boy's Fire Cloud Cave on Mount Haohao (火云洞, chapters 40–42), in
+[`world/fire/`](src/main/java/com/jttw/engine/world/fire/) and
+[`entity/fire/`](src/main/java/com/jttw/engine/entity/fire/).
+
+- **Where** (`Zones.FIRE_MOUNTAIN`): over hot, dry country (desert, badlands, eroded and wooded
+  badlands, savanna, savanna plateau, windswept savanna; White Bone Ridge's hosts and plain savanna),
+  the whole column. 90% of 1152-block cells roll a range about 400 blocks across; being last in
+  `Zones.ALL` it gives up any that would touch an earlier zone's, and only those centred on hot,
+  dry ground stand: in the 32x32 km round spawn of seed 12345 the layout rolls 709, 398 give way,
+  276 are not on hot ground, and **38 regions** stand (0.42% of the ground; the nearest 4.8 km out).
+- **The range** (`RangeShape`, `FlamingRangeFeature`, pure and unit-tested): from the region's edge
+  the ground climbs over the outer fifth into long chains of red mountains (ridged noise, rounded
+  summits, up to some 90 blocks over the land), valleys between them; Mount Haohao rises 45 more
+  at the heart, and a gorge is cut through it from the cave's gate to the region's edge. Faces show
+  banded flame rock, red, orange and brown terracotta with seams of magma; high ground is flame
+  rock and cinder ash; valley floors (about a quarter of it) are **burning earth**. Fire on the
+  burning earth in patches, seams of lava in level valley floors, smoking vents, charred basalt
+  spires (`FlameSeamsFeature`). Orange sky and fog, falling ash, no rain; nothing grows.
+- **The heat** (`FireMountain`, `BurningEarthBlock`): lit burning earth scorches whatever stands on
+  it once a second, **4% of its health** (magma's hot-floor damage, so armour softens it) and sets it
+  alight for 3 s; **Fire Resistance**, or being fire-proof, keeps it off entirely (as it does the
+  fire on the ground). Rock, ash and fanned earth are safe. Fire on lit earth never goes out, and
+  creeps across it (never more than five fires in a 5x5).
+- **The Banana-Leaf Fan** (芭蕉扇) puts it out: as before it throws back what is in front (the Bull
+  Demon King's blows it away), and now each wave also quenches the burning earth and ordinary fire
+  in its sweep (60° either side) out to **12 blocks** (20 in the Bull Demon King's hand) for **a
+  minute**, after which the earth kindles again by itself. It does nothing to the Samadhi fire.
+- **Creatures** (`FireMonster`: level 67, captains 74, fire-proof, any light): **Ember Imps**
+  (火焰小妖: quick and frail, 4 hits; claws 10% that set alight; fling an ember for 12% every 2.5 s
+  from 3–16 blocks, a captain three at once; strike one and the rest turn; water hurts them) and
+  **Furnace-Brick Brutes** (炉砖怪, bricks of the Eight Trigrams Furnace that stood up: 12 hits,
+  armoured, blows of 30%; when close they raise both fists for 0.8 s and slam the ground: 22%, thrown
+  up and set alight within 4 blocks).
+- **Red Boy's Six Strong Generals** (六健将, `StrongGeneralEntity`, one model, six skins): always of a
+  captain's strength (level 74, 25 hits, blows of 29%), alone, posted at the cave (the two Winds at
+  the gate, four in the hall), kept even on Peaceful. Each has his trick every 5 s: **Cloud-Soaring
+  Sprite** (云里雾) leaps high and lands in a burst of blinding cloud; **Fog-Diving Monster** (雾里云)
+  vanishes into fog and comes out behind his foe; **Mad-Hurrying Wind** (急如火) charges, fire springing
+  up in his track; **Swift-Rushing Wind** (快如风), the fastest, hurls all near him away; **Flame-Head
+  General** (兴烘掀) bursts into flame; **Eye-Spark Officer** (掀烘兴) shoots sparks from his eyes.
+- **Red Boy** (红孩儿, the Holy Child King; `RedBoyEntity`, a `ZoneBoss`, level 77, 70 hits, red bar),
+  son of the Bull Demon King and Princess Iron Fan: a child in a red stomacher with the Fire-Tipped
+  Spear (the mod's own item, held). Spear thrusts of 26% that set alight. Every 7 s he stops,
+  strikes his nose twice (1 s) and breathes the **True Samadhi Fire** (三昧真火) from mouth and nose: a
+  cone 10 blocks long, a blow of 20%, then the burning; flames are left on the ground. At two
+  thirds (phase 1) his **five fire carts** (五辆小车) are set out round his lair in the five-element
+  pentagon and lit: each belches the fire round itself every 3 s, and while any stands **every blow
+  on him is halved**; break them first (5 hits each). At a third (phase 2) the fire comes from his
+  nose and mouth both: a ring of it bursts out all round him, and from then on it is fiercer and
+  comes every 4 s. A Bull Demon player is hailed as his father, and fought all the same.
+- **The True Samadhi Fire** (`SamadhiFire`, the `samadhi_fire` effect, `SamadhiFlameBlock`): it burns
+  as a status, **3% of health a second** (4.5% at its fiercest), whatever the burning one is (the
+  fire-proof burn too; armour does not soften it). **Water does not put it out, it feeds it**: in
+  water or rain it burns half again as hard (the Dragon Kings' rain in chapter 41); milk does
+  nothing. Only **Fire Resistance** stands against it, and only **halves** it (the breath's blow and
+  the burning). On the ground it burns out after 5–8 s and only so: no water flows into it or can be
+  poured on it, a splash of water does not douse it, no hand beats it out, the fan passes over it.
+  It spares Red Boy's household. His breath lights the Eight Trigrams Furnace in its line.
+- **The Fire Cloud Cave** (`FireCloudCave`, a blueprint each chunk lays its share of): a stone gate of
+  polished blackstone with a gilded plaque, red pillars and braziers, at the head of the gorge; a
+  lantern-hung passage into the mountain; the inner hall, a domed cavern of red brick, six pillars
+  with fire-lamps, four pools of lava, a gilded dais where Red Boy stands, a red carpet to it, his
+  throne between two braziers. Red Boy and his generals are put there once (`FireCloudCaveFeature`).
+- **What they leave**: Red Boy **2–3 True Samadhi Fire** (the furnace's fuel; a real source of it at
+  last), his **Fire-Tipped Spear** one time in four (+5% a Looting level), ember cores, furnace
+  bricks, gold, sigils. Imps leave **Ember Cores**, brutes **Furnace Bricks**, generals both, a
+  captain's sigil and now and then a True Samadhi Fire. Three ember cores, two furnace bricks and a
+  captain's sigil make a True Samadhi Fire (`true_samadhi_fire_from_the_mountains`). Flame rock,
+  cinder ash and burning earth can be mined.
+- **XP and karma**: band 67–77, base grunt XP 130 (728 a grunt at the band's scale, about four kills
+  a level at 67, near the waters' pace at 47). Subduing Red Boy, who wanted to eat the Tang Monk, is
+  a good deed: **karma +150**, as Lady White Bone; the generals are captains (+5), the rest monsters
+  (+1). Red Boy's creatures are **not** allied to a Bull Demon player.
+- **Art**: `EmberImpRenderer`, `FurnaceBruteRenderer`, `StrongGeneralRenderer`, `RedBoyRenderer`,
+  `FireCartRenderer` (box models and skins with glowing parts from `assets_source/fire_court.py`);
+  blocks and items from `assets_source/fire_items.py`.
+- **Tests and pictures**: `FireGameTests` (heat, fan, Samadhi fire and water, Red Boy's breath,
+  carts and phases, creatures, generals, drops, XP, karma, the cave's blueprint),
+  `FireMountainPlacementTest`; gallery scenes `-Pgallery.only=fire_`; the range in a real world with
+  `./gradlew runWorldgenBench -Pbench.mode=fire`.
 
 ---
 

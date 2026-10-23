@@ -71,6 +71,17 @@ public final class ModWorldgen {
             FEATURES.register("dragon_palace", () -> new com.jttw.engine.world.feature.DragonPalaceFeature(
                     net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
 
+    // The Flaming Mountains
+    public static final DeferredHolder<net.minecraft.world.level.levelgen.feature.Feature<?>, net.minecraft.world.level.levelgen.feature.Feature<?>> FLAMING_RANGE =
+            FEATURES.register("flaming_range", () -> new com.jttw.engine.world.feature.FlamingRangeFeature(
+                    net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+    public static final DeferredHolder<net.minecraft.world.level.levelgen.feature.Feature<?>, net.minecraft.world.level.levelgen.feature.Feature<?>> FLAME_SEAMS =
+            FEATURES.register("flame_seams", () -> new com.jttw.engine.world.feature.FlameSeamsFeature(
+                    net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+    public static final DeferredHolder<net.minecraft.world.level.levelgen.feature.Feature<?>, net.minecraft.world.level.levelgen.feature.Feature<?>> FIRE_CLOUD_CAVE =
+            FEATURES.register("fire_cloud_cave", () -> new com.jttw.engine.world.feature.FireCloudCaveFeature(
+                    net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
     public static final DeferredHolder<net.minecraft.world.level.levelgen.feature.Feature<?>, net.minecraft.world.level.levelgen.feature.Feature<?>> HEAVEN_BUILDING =
             FEATURES.register("heaven_building", () -> new com.jttw.engine.world.heaven.HeavenFeatures.IslandBuilding(
                     net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));

@@ -71,6 +71,28 @@ public final class ModBlocks {
             BLOCKS.register("sea_calming_pillar", () -> new com.jttw.engine.world.waters.SeaCalmingPillarBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.GOLD).strength(-1.0F, 3600000.0F).noLootTable().sound(SoundType.METAL).lightLevel(s -> 12)));
 
+    // ── The Flaming Mountains ────────────────────────────────────
+    /** The mountains' red rock (tough). */
+    public static final DeferredHolder<Block, Block> FLAME_ROCK =
+            BLOCKS.register("flame_rock", () -> new com.jttw.engine.world.tough.Tough.Stone(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_RED).strength(1.5F, com.jttw.engine.world.tough.Tough.RESISTANCE).requiresCorrectToolForDrops().sound(SoundType.NETHERRACK)));
+    /** The ash of eight hundred li of fire (tough). */
+    public static final DeferredHolder<Block, Block> CINDER_ASH =
+            BLOCKS.register("cinder_ash", () -> new com.jttw.engine.world.tough.Tough.Stone(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY).strength(0.6F, com.jttw.engine.world.tough.Tough.RESISTANCE).sound(SoundType.SAND)));
+    /** The burning earth: the mountains' heat, and what the Banana-Leaf Fan puts out (see world.fire.BurningEarthBlock). */
+    public static final DeferredHolder<Block, Block> BURNING_EARTH =
+            BLOCKS.register("burning_earth", () -> new com.jttw.engine.world.fire.BurningEarthBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.FIRE).strength(1.5F, com.jttw.engine.world.tough.Tough.RESISTANCE).requiresCorrectToolForDrops()
+                    .sound(SoundType.NETHERRACK).randomTicks()
+                    .lightLevel(s -> s.getValue(com.jttw.engine.world.fire.BurningEarthBlock.LIT) ? 7 : 0)
+                    .emissiveRendering((s, g, p) -> s.getValue(com.jttw.engine.world.fire.BurningEarthBlock.LIT))));
+    /** Red Boy's True Samadhi Fire on the ground: nothing puts it out (see world.fire.SamadhiFlameBlock). */
+    public static final DeferredHolder<Block, Block> SAMADHI_FLAME =
+            BLOCKS.register("samadhi_flame", () -> new com.jttw.engine.world.fire.SamadhiFlameBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.FIRE).strength(-1.0F, 3600000.0F).noLootTable().noCollission().noOcclusion()
+                    .sound(SoundType.WOOL).lightLevel(s -> 15).pushReaction(net.minecraft.world.level.material.PushReaction.DESTROY)));
+
     // ── Tough stone: the ground of White Bone Ridge, Heaven and Hell (see world.tough.Tough) ──
     public static final DeferredHolder<Block, Block> BLEACHED_STONE =
             BLOCKS.register("bleached_stone", () -> new com.jttw.engine.world.tough.Tough.Stone(BlockBehaviour.Properties.of()

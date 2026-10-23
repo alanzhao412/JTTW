@@ -298,6 +298,56 @@ public final class ModEntities {
                             .clientTrackingRange(10)
                             .fireImmune()
                             .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "king_yama").toString()));
+    // ── The Flaming Mountains ─────────────────────────────────────
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.fire.EmberImpEntity>> EMBER_IMP =
+            ENTITIES.register("ember_imp", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.fire.EmberImpEntity>of(com.jttw.engine.entity.fire.EmberImpEntity::new, MobCategory.MONSTER)
+                            .sized(0.6F, 1.3F)
+                            .clientTrackingRange(8)
+                            .fireImmune()
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "ember_imp").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.fire.FurnaceBruteEntity>> FURNACE_BRUTE =
+            ENTITIES.register("furnace_brute", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.fire.FurnaceBruteEntity>of(com.jttw.engine.entity.fire.FurnaceBruteEntity::new, MobCategory.MONSTER)
+                            .sized(1.4F, 2.7F)
+                            .clientTrackingRange(10)
+                            .fireImmune()
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "furnace_brute").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.fire.StrongGeneralEntity>> STRONG_GENERAL =
+            ENTITIES.register("strong_general", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.fire.StrongGeneralEntity>of(com.jttw.engine.entity.fire.StrongGeneralEntity::new, MobCategory.MONSTER)
+                            .sized(0.7F, 2.2F)
+                            .clientTrackingRange(10)
+                            .fireImmune()
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "strong_general").toString()));
+
+    /** Red Boy: a child, a little over a block tall. */
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.fire.RedBoyEntity>> RED_BOY =
+            ENTITIES.register("red_boy", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.fire.RedBoyEntity>of(com.jttw.engine.entity.fire.RedBoyEntity::new, MobCategory.MONSTER)
+                            .sized(0.7F, 1.45F)
+                            .clientTrackingRange(10)
+                            .fireImmune()
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "red_boy").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.fire.FireCartEntity>> FIRE_CART =
+            ENTITIES.register("fire_cart", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.fire.FireCartEntity>of(com.jttw.engine.entity.fire.FireCartEntity::new, MobCategory.MISC)
+                            .sized(1.2F, 1.1F)
+                            .clientTrackingRange(10)
+                            .fireImmune()
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "fire_cart").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.fire.EmberBoltEntity>> EMBER_BOLT =
+            ENTITIES.register("ember_bolt", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.fire.EmberBoltEntity>of(com.jttw.engine.entity.fire.EmberBoltEntity::new, MobCategory.MISC)
+                            .sized(0.3125F, 0.3125F)
+                            .clientTrackingRange(6)
+                            .updateInterval(2)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "ember_bolt").toString()));
 
     // ── Forms ──────────────────────────────────────────────────────
 
@@ -397,6 +447,15 @@ public final class ModEntities {
                 net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
                 net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        // the mountains' fire demons, in any light
+        event.register(EMBER_IMP.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(FURNACE_BRUTE.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
         // the sea's creatures come in deep water, in any light
         event.register(SHRIMP_SOLDIER.get(), net.minecraft.world.entity.SpawnPlacementTypes.IN_WATER,
                 net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
@@ -429,6 +488,11 @@ public final class ModEntities {
         event.put(KING_DUSHI.get(), com.jttw.engine.entity.hell.KingOfHellEntity.createAttributes(8).build());
         event.put(KING_PINGDENG.get(), com.jttw.engine.entity.hell.KingOfHellEntity.createAttributes(9).build());
         event.put(KING_ZHUANLUN.get(), com.jttw.engine.entity.hell.KingOfHellEntity.createAttributes(10).build());
+        event.put(EMBER_IMP.get(), com.jttw.engine.entity.fire.EmberImpEntity.createAttributes().build());
+        event.put(FURNACE_BRUTE.get(), com.jttw.engine.entity.fire.FurnaceBruteEntity.createAttributes().build());
+        event.put(STRONG_GENERAL.get(), com.jttw.engine.entity.fire.StrongGeneralEntity.createAttributes().build());
+        event.put(RED_BOY.get(), com.jttw.engine.entity.fire.RedBoyEntity.createAttributes().build());
+        event.put(FIRE_CART.get(), com.jttw.engine.entity.fire.FireCartEntity.createAttributes().build());
         event.put(MOUSE_SPIRIT.get(), com.jttw.engine.entity.cave.MouseSpiritEntity.createAttributes().build());
         event.put(FLOWER_MAID.get(), com.jttw.engine.entity.cave.FlowerMaidEntity.createAttributes().build());
         event.put(LADY_EARTH_FLOW.get(), com.jttw.engine.entity.cave.LadyEarthFlowEntity.createAttributes().build());
