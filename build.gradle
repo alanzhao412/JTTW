@@ -53,6 +53,10 @@ neoForge {
 
         gameTestServer {
             type = 'gameTestServer'
+            // e.g. ./gradlew runGameTestServer -Pgametest.only=guardianlaser,yama -Pgametest.repeat=40
+            // (the batches of the tests whose names hold any of the words, each run 40 times over; see ReadyGate)
+            systemProperty 'jttw.gametest.only', (project.findProperty('gametest.only') ?: '').toString()
+            systemProperty 'jttw.gametest.repeat', (project.findProperty('gametest.repeat') ?: '1').toString()
         }
 
         // Photographs every transformation form in a real client (see FormGallery)

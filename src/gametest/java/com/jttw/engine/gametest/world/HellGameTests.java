@@ -71,14 +71,16 @@ public class HellGameTests {
         check(h, Math.abs(expected - actual) <= Math.abs(expected) * 1e-3 + 1e-2, what + ": expected " + expected + " but was " + actual);
     }
 
-    /** Removes, when the test ends, what this test brought and whatever of Hell's came of it near them. */
+    /**
+     * Removes, when the test ends, what this test brought, wherever it went, and whatever of
+     * Hell's came of it on its own platform (only there: tests stand ten blocks apart, and a sweep
+     * round a king at the platform's edge would take a neighbouring test's court mid-test).
+     */
     private static void sweepAround(GameTestHelper h, Entity... held) {
         onEnd(h, () -> {
-            for (Entity e : held) {
-                h.getLevel().getEntities((Entity) null, e.getBoundingBox().inflate(8),
-                        x -> x instanceof HellMonster || x instanceof KingOfHellEntity || x instanceof ItemEntity).forEach(Entity::discard);
-                e.discard();
-            }
+            h.getLevel().getEntities((Entity) null, h.getBounds().inflate(2),
+                    x -> x instanceof HellMonster || x instanceof KingOfHellEntity || x instanceof ItemEntity).forEach(Entity::discard);
+            for (Entity e : held) e.discard();
         });
     }
 

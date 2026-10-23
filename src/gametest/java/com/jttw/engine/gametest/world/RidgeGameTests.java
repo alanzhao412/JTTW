@@ -51,18 +51,17 @@ public class RidgeGameTests {
     }
 
     /**
-     * Removes, when the test ends, the ridge's dead this test brought: those it holds, and any
-     * within a few blocks of them (escorts, summons). Never a sweep of the whole area: tests run
-     * side by side, and one ending would take a neighbour's mobs mid-fight.
+     * Removes, when the test ends, the ridge's dead this test brought: those it holds, wherever
+     * they went, and any on its own platform (escorts, summons). Never a sweep of a wider area,
+     * nor round a held one: tests run side by side ten blocks apart, and one ending would take a
+     * neighbour's mobs mid-fight.
      */
     private static void sweepAround(GameTestHelper h, Entity... held) {
         onEnd(h, () -> {
-            for (Entity e : held) {
-                h.getLevel().getEntities((Entity) null, e.getBoundingBox().inflate(6),
-                        x -> x instanceof RidgeMonster || x instanceof LadyWhiteBoneEntity || x instanceof BoneShardEntity
-                                || x instanceof com.jttw.engine.entity.ridge.LadyHuskEntity).forEach(Entity::discard);
-                e.discard();
-            }
+            h.getLevel().getEntities((Entity) null, h.getBounds().inflate(2),
+                    x -> x instanceof RidgeMonster || x instanceof LadyWhiteBoneEntity || x instanceof BoneShardEntity
+                            || x instanceof com.jttw.engine.entity.ridge.LadyHuskEntity).forEach(Entity::discard);
+            for (Entity e : held) e.discard();
         });
     }
 

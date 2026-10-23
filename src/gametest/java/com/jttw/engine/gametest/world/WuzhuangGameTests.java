@@ -533,7 +533,12 @@ public class WuzhuangGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM, timeoutTicks = 120, batch = LIVE)
+    /**
+     * Its own batch: a crane hunts players as far as 32 blocks off, and the live batch's
+     * neighbours put real players in the world; let one catch its eye first and, when it is
+     * given its quarry, its hunt for the player ends and drops the quarry with it.
+     */
+    @GameTest(template = PLATFORM, timeoutTicks = 120, batch = "wuzhuang_live_crane")
     public static void aCraneSwoopsOnWhatItHuntsAndThrowsIt(GameTestHelper h) {
         openAir(h);
         CloudCraneEntity c = mob(h, ModEntities.CLOUD_CRANE.get(), 80, false, new BlockPos(1, 9, 1));
@@ -543,7 +548,7 @@ public class WuzhuangGameTests {
         h.runAfterDelay(3, () -> c.setTarget(golem));
         h.onEachTick(() -> swooped[0] |= c.isSwooping());
         h.succeedWhen(() -> {
-            check(h, swooped[0], "it swooped");
+            check(h, swooped[0], "it swooped (" + (c.getY() - golem.getY()) + " over its quarry, hunting " + c.getTarget() + ")");
             check(h, golem.getHealth() < full, "and struck");
         });
     }

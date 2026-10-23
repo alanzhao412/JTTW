@@ -29,7 +29,8 @@ import java.util.function.Consumer;
  * per-test hook in between, so this swaps each registered test's body for a gated one when the
  * test server starts, before the first test runs; the server's already-built batches are
  * pointed at the gated copies too, so they run the gated bodies. A test whose platform never
- * becomes ready within {@value #MAX_WAIT_TICKS} ticks fails, saying so.
+ * becomes ready within {@value #MAX_WAIT_TICKS} ticks fails, saying so; the ticks it waits are
+ * added to its timeout.
  *
  * <p>A held test's body runs once, however it is reached. The wait is a chain of one-tick
  * callbacks, added while the runner walks the test's table of callbacks; such a walk can come to
@@ -87,10 +88,41 @@ public final class ReadyGate {
                         infoFunction.set(info, gated.computeIfAbsent(test, ReadyGate::gate));
                     }
                 }
+                String only = System.getProperty("jttw.gametest.only", "");
+                if (!only.isBlank()) {
+                    batchesField.set(server, only(batches, only, Integer.getInteger("jttw.gametest.repeat", 1), server.overworld()));
+                }
             } catch (ReflectiveOperationException e) {
                 throw new IllegalStateException("cannot gate GameTests in the test server's batches", e);
             }
         }
+    }
+
+    /**
+     * Just the batches holding a test whose name holds one of {@code only}'s comma-separated words
+     * (any case), each run {@code repeat} times over, its other tests with it as its neighbours in
+     * a full run: for chasing a test that fails one run in many ({@code ./gradlew
+     * runGameTestServer -Pgametest.only=guardianlaser,yama -Pgametest.repeat=20}).
+     */
+    private static List<GameTestBatch> only(List<GameTestBatch> batches, String only, int repeat,
+                                            net.minecraft.server.level.ServerLevel level) {
+        List<String> words = java.util.Arrays.stream(only.toLowerCase(java.util.Locale.ROOT).split(","))
+                .map(String::trim).filter(w -> !w.isEmpty()).toList();
+        List<GameTestBatch> kept = new ArrayList<>();
+        for (GameTestBatch batch : batches) {
+            if (batch.gameTestInfos().stream().noneMatch(info -> words.stream()
+                    .anyMatch(info.getTestName().toLowerCase(java.util.Locale.ROOT)::contains))) continue;
+            for (int i = 0; i < repeat; i++) {
+                List<GameTestInfo> copies = batch.gameTestInfos().stream()
+                        .map(info -> new GameTestInfo(info.getTestFunction(), info.getRotation(), level,
+                                net.minecraft.gametest.framework.RetryOptions.noRetries()))
+                        .toList();
+                kept.add(new GameTestBatch(batch.name() + "/" + i, copies, batch.beforeBatchFunction(), batch.afterBatchFunction()));
+            }
+        }
+        JTTWEngine.LOGGER.info("ReadyGate: running only {} ({} tests in {} batches)", words,
+                kept.stream().mapToInt(b -> b.gameTestInfos().size()).sum(), kept.size());
+        return kept;
     }
 
     /** {@code test} with its body gated (unchanged if it already is). */
@@ -121,7 +153,25 @@ public final class ReadyGate {
             done.set(true);
             GT.requireEntityReady(h); // fails, naming the chunks
         } else {
+            extendTimeout(h);
             h.runAfterDelay(1, () -> runWhenReady(h, body, waited + 1, done));
+        }
+    }
+
+    /**
+     * Gives a held test one more tick before it times out: the wait for its platform is not the
+     * test's own time (a test given 60 ticks, held 40 for fresh terrain, would otherwise have 20).
+     */
+    private static void extendTimeout(GameTestHelper h) {
+        try {
+            Field infoField = GameTestHelper.class.getDeclaredField("testInfo");
+            infoField.setAccessible(true);
+            Field timeout = GameTestInfo.class.getDeclaredField("timeoutTicks");
+            timeout.setAccessible(true);
+            Object info = infoField.get(h);
+            timeout.setInt(info, timeout.getInt(info) + 1);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("cannot extend a held test's timeout", e);
         }
     }
 }
