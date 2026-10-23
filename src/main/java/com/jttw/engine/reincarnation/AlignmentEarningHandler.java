@@ -152,6 +152,11 @@ public final class AlignmentEarningHandler {
             AlignmentData.addPrimordial(sp, 50);
         }
 
+        // A King of Hell: +20; King Yama, Lord of Death: +50 (all ten: 230, a Warden's worth and more)
+        if (victim instanceof com.jttw.engine.entity.hell.KingOfHellEntity king) {
+            AlignmentData.addPrimordial(sp, king instanceof com.jttw.engine.entity.hell.KingYamaEntity ? 50 : 20);
+        }
+
         // -- Heavenly: killing undead --
         // ~150 undead × 2 = ~300
         // (undead is the entity-type tag now; the mod's own undead answer isInvertedHealAndHarm)

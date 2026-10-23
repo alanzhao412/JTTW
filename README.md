@@ -142,6 +142,12 @@ Abilities and items are drawn from the source material rather than invented:
 - **Phoenix revival** — death-and-rebirth mechanic tied to the Phoenix line
 
 Custom **Heaven** and **Hell** dimensions ship with their own worldgen, biomes, and noise settings.
+Heaven is a sky of cloud islands with the Immortals' pavilions, the Queen Mother's peach gardens
+and the Jade Palace. Hell (Diyu) is a dark underworld of ash plains, black stone hills and rivers,
+crossed by the Naihe, with the arrival plaza where the Book of Life and Death is kept and, far to
+the north, the fortress of the Ten Courts: the levels 57–66 zone (see "Hell" under Zones). Sun
+Wukong is sent there at level 30 to strike his name from the Book; the Dragon's and Wukong's
+dimension abilities travel there too.
 
 ---
 
@@ -276,7 +282,8 @@ A level zone is a biome put over the overworld in regions laid out from the seed
 wobble, a salt of its own), the heights it takes (`Vertical`: the whole column, `below(y)` for an
 underground zone, `above(y)` for an aerial one), its level band and the players it is allied to.
 Zones sharing heights never share ground: a later zone in `Zones.ALL` gives up a whole region
-that would touch an earlier one's (`ZoneMap`). White Bone Ridge is the first, the Bottomless Cave the second.
+that would touch an earlier one's (`ZoneMap`). White Bone Ridge is the first, the Bottomless Cave the second, the Mystical
+Waters the third; Hell, a dimension of its own, is the fourth.
 
 To add a zone:
 
@@ -407,6 +414,121 @@ The Four Seas and the Dragon Kings' crystal palaces (水晶宫, novel chapter 3)
   his soldiers are monsters as any (+1, captains +5). A king's kill is a boss kill: +50 Primordial.
 - **Tests and pictures**: `WatersGameTests`, `MysticalWatersPlacementTest`; gallery scenes
   `-Pgallery.only=waters`; the trench in a real world with `./gradlew runWorldgenBench -Pbench.mode=waters`.
+
+#### Hell: the Ten Courts (levels 57–66)
+
+Diyu (地狱), the underworld, and its Ten Courts (十殿), where every soul is judged by the Ten Kings
+of Hell and sent on to be reborn. A dimension's zone (`Zones.HELL = Zone.dimension(hell_biome, 57,
+66, 125)`): the biome covers all of `jttw_engine:hell`, and the zone gives it its level band. Grunt
+XP 125, stepped up from the Mystical Waters' 110 (575 a grunt kill at the band's scale).
+
+- **Terrain** (`world/hell/HellTerrain`, pure Java, the same in every world; the density function
+  `dimension/HellHeightDensity` hands it to a noise generator, `worldgen/noise_settings/hell.json`,
+  in place of the old flat world): plains of soul ash rolling a few blocks, hills of blackstone and
+  basalt where a broad noise runs high, side rivers winding through, and across all Hell from west
+  to east the **Naihe** (奈何), ten blocks either side of a wandering line through z −160, its water
+  dark as blood (`hell_biome`'s water colour). The surface rules lay ash, soul-soil patches and
+  black stone (steep banks, hilltops), soul soil under water, bedrock below. The plains carry
+  soul-fire patches, black stone spires and bone heaps (`HellDecorFeature`), never on the works nor
+  within 80 blocks of the arrival. Ash drifts in the air; the soul sand valley's sounds and music.
+  The dimension keeps its nether sky and fog (so it is dark, and the view is short); its ambient
+  light is up from 0.1 to 0.2.
+- **The works** (`world/hell/HellWorks`, laid chunk by chunk through `Site` from the plan alone, so
+  chunks agree whichever is made first): the **arrival plaza** round 0, 0, paved in rings, lit by
+  soul lanterns, with the **Gate of Ghosts** (鬼门关) at its north edge; the **road** north, lit
+  every 24 blocks; the **Bridge of Helplessness** (奈何桥), an arched bridge on piers over the Naihe,
+  with **Meng Po's pavilion** (her soup in a cauldron) at its north end; and the **fortress of the
+  Ten Courts** (`TenCourts`): walls 128 × 268 blocks with corner towers and a gatehouse (its plaque
+  地狱十殿), its gate 320 blocks north of the arrival; an avenue lit by braziers runs north through
+  it. Up the west side the Office of Records (the clerks' shelves and desks) and the First to
+  Fourth Courts; at the head of the avenue King Yama's great hall, the Fifth; back down the east
+  side the Sixth to the Tenth, King Zhuanlun's, whose yard holds the upright **Wheel of
+  Reincarnation** (六道轮回: a gold rim, six spokes for the six paths). Each hall: a plinth and
+  steps, dark walls between red pillars, barred windows, a hip roof of dark tiles, red columns
+  within, a red carpet to the judge's bench (ledgers on lecterns, candles), the throne on a two-step
+  dais before a red screen with black banners, shelves of scrolls, braziers, soul lanterns on
+  chains, its plaque over the door (court, king, what it judges), and the instruments of its court:
+  the Karma Mirror (1), ice (2), iron hooks (3), the scales (4), the register and gold seals (5),
+  the bell of the Wailing City (6), cauldrons of boiling oil (7), the crushing carts' wheels (8), an
+  iron cage of soul fire (9), Meng Po's soup (10). Two guards (Ox-Head and Horse-Face) stand at
+  each door (captains at Yama's), three clerks keep the Office of Records, the Impermanence pair
+  and a clerk wait on Yama, and each king sits on his dais, all put there once as the land is made.
+- **The arrival's safety** (`HellRules`): a level-30 Wukong comes here for the Book. The fortress
+  and its kings are over 300 blocks north, over the Naihe (the nearest king 363 blocks off);
+  nothing of Hell spawns by itself within 160 blocks of the arrival (the server spawns within 128
+  of a player, so none ever spawns round someone standing there); the officials spawn only within
+  the fortress's walls, the ghosts out on the plains; and the plaza is a **sanctuary** (48 blocks):
+  no creature or king of Hell attacks anyone in it, and one that chased someone in gives up.
+  `JTTWDimensions.findSafeSpawn` now makes a chunk before it reads its height (it used to read an
+  unmade chunk's as the world's floor, and set the Book's dais in the air at y 64).
+- **Ox-Head** (牛头, `entity/hell/OxHeadEntity`, level 58): 7 hits, a blow of 16%; kept at a
+  distance he lowers his horns and **charges**, goring (his blow and a half) and throwing what he
+  runs down. **Horse-Face** (马面, `HorseFaceEntity`, 58): 6 hits, 14%; casts his **hook on a
+  chain** at whoever keeps off (4–12 blocks) and hauls them in, slowed.
+- **Judge-Clerk** (判官, `JudgeClerkEntity`, 58): 4 hits, 9%; every 5 s he **writes his quarry's
+  name** in his ledger: marked (glowing, 10 s), and every creature of Hell near them that is idle
+  comes for them; every second writ **summons** a guard, Ox-Head and Horse-Face by turns, two of his
+  at most.
+- **Black and White Impermanence** (黑白无常, `ImpermanenceEntity`, 59): met in the world, one comes
+  with the other. The Black (6 hits, 15%) **shackles** (Slowness III 2 s); the White (4.5 hits, 12%,
+  a longer reach) **drinks** half of what his tongue takes and weakens. Near each other each takes a
+  quarter less from every blow; when one falls the other is **enraged** (Strength II, Speed II).
+- **Wandering ghosts** (游魂, `WanderingGhostEntity`, 57): 2.5 hits, 7%, in twos to fours on the
+  plains; their touch **chills** (slowed, hungry); they drift, never take falls; restless dead
+  (healing harms them).
+- Captains as in every zone (purple, larger, stronger, with escorts; the Impermanence's captain
+  brings only its partner), never past level 66.
+- **The Ten Kings** (`KingOfHellEntity`, `HellKings`, ZoneBosses on their thrones, 50 hits, a
+  tablet blow of 14%, red bars; levels 57–65 from the First to the Tenth, King Yama passed over),
+  each passing his court's **judgement** every 7 s on whoever fights him within 14 blocks:
+  1. **Qinguang** (秦广王), the **Karma Mirror**: a beam for his blow, ×0.6 for the good (karma 100+),
+     up to ×3 for the wicked (1 + |karma|/500);
+  2. **Chujiang** (楚江王), the cold hell: all within 8 **frozen** (frost, Slowness III 5 s);
+  3. **Songdi** (宋帝王), the **iron hooks**: hauls his foe from up to 14 blocks to his feet and strikes;
+  4. **Wuguan** (五官王), the **scales**: takes half the difference of their health shares from a
+     healthier foe;
+  6. **Biancheng** (卞城王), the **bell** of the Wailing City: all within 7 **kneel** (cannot move) 2 s;
+  7. **Taishan** (泰山王), **boiling oil**: all within 7 scalded and burning (he does not burn);
+  8. **Dushi** (都市王), the **crushing carts**: charges, crushing (×1.6) and flinging what he meets;
+  9. **Pingdeng** (平等王), "Equal": **equal measure**, a third of every blow struck him struck back;
+  10. **Zhuanlun** (转轮王), the **Wheel**: struck down the first time he is **born again** at half
+      health; his judgement is **Meng Po's soup** (his foe's good effects forgotten; nausea).
+- **King Yama** (阎罗王, `KingYamaEntity`, the Fifth Court, level 66, 140 hits, 17%, purple bar,
+  the climax): phase 0, his blows and **the Writ** every 10 s (marked; Hell's creatures near come);
+  at 66% **his court rises** (Ox-Head, Horse-Face, a clerk) and he passes **sentence**: a ring of
+  soul fire where his foe stands, and 1.5 s later judgement falls there (a third of the health of
+  whoever is still in it, and they burn; step out); at 33% **the wrath of Yama**: he grows (×1.35),
+  strikes and moves 30% harder and faster, sentences fall every 3.5 s, and soul fire round him
+  scorches whoever stands within 3.5 blocks.
+- **Drops** (1.21 loot tables): each king his relic, sigils (3–4), Hell Bank Notes, gold, and a 10%
+  chance of a **Page of the Book of Life and Death**: the Shard of the Karma Mirror, the Rime
+  Shackle, the Iron Soul-Hook, the Weight of the Scales, the Bell of the Wailing City, the Ember of
+  the Oil Cauldron, the Spoke of the Crushing Cart, the Rod of Equal Measure (`HellRelicItem`,
+  forging materials with their stories), and from Zhuanlun **Meng Po's Soup** (`MengPoSoupItem`:
+  drunk, every effect is forgotten; the bowl is left). King Yama leaves his **Vermilion Brush of
+  Judgement** (`JudgeBrushItem`: +40% damage, what it strikes glows and is weakened), his **Seal**,
+  one or two Pages, 5–6 sigils and netherite scrap. The creatures: Hell Bank Notes (ghosts),
+  Ox-Head's Horn, Horse-Face's Mane, Underworld Ink (clerks), the Soul-Catching Chain (the
+  Impermanence).
+- **Karma and alignment**: the Ten Kings are Heaven's judges of the dead; striking one down defies
+  Heaven's order: −35 (King Yama −70; all ten −385, past outlaw, as the Dragon Kings).
+  Hell's lesser officials are doing their work: no deed either way (captains +5 as any); a ghost
+  laid to rest +1. Each king is a boss of the reincarnation's Primordial path (+20, Yama +50);
+  ghosts are undead (+2 Heavenly).
+- **Art**: `client/renderer/HellRenderers` (guards: a big armoured frame, a beast's head, a fork or
+  a hooked spear, burning eyes; the clerk: robe, winged cap, brush and ledger; the Impermanence:
+  long robes, three-tier hats, the White's tongue; ghosts: legless, translucent, trailing; the
+  kings: robe, wide sleeves, jade belt, mian crown with bead strings, beard, ivory tablet, each his
+  colours; Yama's eyes burn); skins from `assets_source/hell_guards.py`, `hell_officials.py`,
+  `hell_kings.py` (helpers in `hell_skin.py`), icons from `hell_items.py`.
+- **Tests and pictures**: `HellGameTests` (creatures, captains, XP, each king's judgement and relic,
+  Yama's phases and sentence, karma and alignment, the arrival in the real Hell: level, the one
+  Book, nothing near, the sanctuary; the kings on their thrones), `HellZoneTest` (the land, the
+  plan, the arrival's distance and spawn rules); gallery scenes `-Pgallery.only=hell_` (creatures,
+  the kings' lineup, Yama and his wrath, and pieces of the works laid off the stage: a court hall,
+  Yama's hall, the Tenth Court and the Wheel, the bridge and Meng Po's pavilion); Hell as it is
+  with `./gradlew runWorldgenBench -Pbench.mode=hell` (a map of it from the arrival to the north
+  wall, what stands where, and pictures, some with night vision: it is dark).
 
 ---
 

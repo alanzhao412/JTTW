@@ -205,8 +205,16 @@ public final class Zones {
             TagKey.create(Registries.BIOME, id("mystical_waters_hosts")), ZoneLayout.MYSTICAL_WATERS, Vertical.WHOLE_COLUMN,
             47, 56, 110).hostSampledAt(60);
 
+    public static final ResourceKey<Biome> HELL_BIOME = ResourceKey.create(Registries.BIOME, id("hell_biome"));
+
+    /**
+     * Levels 57-66: Hell (Diyu), the Ten Courts of the underworld, a dimension of its own
+     * ({@code jttw_engine:hell}): its biome covers all of it, and this only gives it a level band.
+     */
+    public static final Zone HELL = Zone.dimension(HELL_BIOME, 57, 66, 125);
+
     /** Every zone, in order: an earlier one keeps its ground from a later one sharing its heights. Append new ones. */
-    public static final List<Zone> ALL = List.of(WHITE_BONE, BOTTOMLESS, MYSTICAL_WATERS);
+    public static final List<Zone> ALL = List.of(WHITE_BONE, BOTTOMLESS, MYSTICAL_WATERS, HELL);
 
     /** Where the overworld zones of {@link #ALL} lie. */
     public static final ZoneMap MAP = new ZoneMap(ALL);

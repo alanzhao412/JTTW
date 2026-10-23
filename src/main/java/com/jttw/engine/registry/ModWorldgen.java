@@ -22,6 +22,12 @@ public final class ModWorldgen {
             DENSITY_FUNCTION_TYPES.register("celestial_islands",
                     () -> CelestialIslandsDensityFunction.CODEC.codec());
 
+    /** Hell's land: its height at a column (see HellTerrain). */
+    @SuppressWarnings("unused")
+    public static final DeferredHolder<MapCodec<? extends DensityFunction>, MapCodec<? extends DensityFunction>> HELL_HEIGHT_DF =
+            DENSITY_FUNCTION_TYPES.register("hell_height",
+                    () -> com.jttw.engine.dimension.HellHeightDensity.CODEC.codec());
+
     /** Features of the mod's zones. */
     public static final DeferredRegister<net.minecraft.world.level.levelgen.feature.Feature<?>> FEATURES =
             DeferredRegister.create(Registries.FEATURE, JTTWEngine.MOD_ID);
@@ -70,6 +76,14 @@ public final class ModWorldgen {
                     net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
     public static final DeferredHolder<net.minecraft.world.level.levelgen.feature.Feature<?>, net.minecraft.world.level.levelgen.feature.Feature<?>> JADE_PALACE =
             FEATURES.register("jade_palace", () -> new com.jttw.engine.world.heaven.HeavenFeatures.JadePalace(
+                    net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
+    // Hell: the Ten Courts, the road, the Naihe bridge, the arrival plaza; and what stands on its plains
+    public static final DeferredHolder<net.minecraft.world.level.levelgen.feature.Feature<?>, net.minecraft.world.level.levelgen.feature.Feature<?>> HELL_WORKS =
+            FEATURES.register("hell_works", () -> new com.jttw.engine.world.hell.HellWorksFeature(
+                    net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+    public static final DeferredHolder<net.minecraft.world.level.levelgen.feature.Feature<?>, net.minecraft.world.level.levelgen.feature.Feature<?>> HELL_DECOR =
+            FEATURES.register("hell_decor", () -> new com.jttw.engine.world.hell.HellDecorFeature(
                     net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
 
     public static void register(IEventBus modEventBus) {

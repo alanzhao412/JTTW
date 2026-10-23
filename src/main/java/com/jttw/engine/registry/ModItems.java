@@ -82,6 +82,85 @@ public final class ModItems {
     public static final DeferredHolder<Item, Item> LADY_EARTH_FLOW_SPAWN_EGG = ITEMS.register("lady_earth_flow_spawn_egg",
             () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.LADY_EARTH_FLOW, 0xF4F1EC, 0xD9A93A, new Item.Properties()));
 
+    // ── Hell: the Ten Courts ──────────────────────────────────────
+    /** From wandering ghosts: the paper money burned for the dead. */
+    public static final DeferredHolder<Item, Item> HELL_BANK_NOTE = ITEMS.register("hell_bank_note", () -> new Item(new Item.Properties()));
+    /** From Ox-Head. */
+    public static final DeferredHolder<Item, Item> OX_HORN = ITEMS.register("ox_horn", () -> new Item(new Item.Properties()));
+    /** From Horse-Face. */
+    public static final DeferredHolder<Item, Item> HORSE_MANE = ITEMS.register("horse_mane", () -> new Item(new Item.Properties()));
+    /** From the Judge-Clerks. */
+    public static final DeferredHolder<Item, Item> UNDERWORLD_INK = ITEMS.register("underworld_ink", () -> new Item(new Item.Properties()));
+    /** From the Black and White Impermanence. */
+    public static final DeferredHolder<Item, Item> SOUL_CHAIN = ITEMS.register("soul_chain", () -> new Item(new Item.Properties()));
+    /** From King Qinguang (First Court). */
+    public static final DeferredHolder<Item, Item> KARMA_MIRROR_SHARD = ITEMS.register("karma_mirror_shard",
+            () -> new com.jttw.engine.item.HellRelicItem(new Item.Properties().rarity(net.minecraft.world.item.Rarity.RARE).fireResistant()));
+    /** From King Chujiang (Second Court). */
+    public static final DeferredHolder<Item, Item> RIME_SHACKLE = ITEMS.register("rime_shackle",
+            () -> new com.jttw.engine.item.HellRelicItem(new Item.Properties().rarity(net.minecraft.world.item.Rarity.RARE).fireResistant()));
+    /** From King Songdi (Third Court). */
+    public static final DeferredHolder<Item, Item> IRON_SOUL_HOOK = ITEMS.register("iron_soul_hook",
+            () -> new com.jttw.engine.item.HellRelicItem(new Item.Properties().rarity(net.minecraft.world.item.Rarity.RARE).fireResistant()));
+    /** From King Wuguan (Fourth Court). */
+    public static final DeferredHolder<Item, Item> SCALES_WEIGHT = ITEMS.register("scales_weight",
+            () -> new com.jttw.engine.item.HellRelicItem(new Item.Properties().rarity(net.minecraft.world.item.Rarity.RARE).fireResistant()));
+    /** From King Yama (Fifth Court): his seal. */
+    public static final DeferredHolder<Item, Item> YAMA_SEAL = ITEMS.register("yama_seal",
+            () -> new com.jttw.engine.item.HellRelicItem(new Item.Properties().rarity(net.minecraft.world.item.Rarity.EPIC).fireResistant()));
+    /** From King Yama, and now and then another king: a page torn from the Book of Life and Death. */
+    public static final DeferredHolder<Item, Item> BOOK_PAGE = ITEMS.register("book_page",
+            () -> new com.jttw.engine.item.HellRelicItem(new Item.Properties().rarity(net.minecraft.world.item.Rarity.EPIC).fireResistant()));
+    /** From King Biancheng (Sixth Court). */
+    public static final DeferredHolder<Item, Item> WAILING_BELL = ITEMS.register("wailing_bell",
+            () -> new com.jttw.engine.item.HellRelicItem(new Item.Properties().rarity(net.minecraft.world.item.Rarity.RARE).fireResistant()));
+    /** From King Taishan (Seventh Court). */
+    public static final DeferredHolder<Item, Item> OIL_CAULDRON_EMBER = ITEMS.register("oil_cauldron_ember",
+            () -> new com.jttw.engine.item.HellRelicItem(new Item.Properties().rarity(net.minecraft.world.item.Rarity.RARE).fireResistant()));
+    /** From King Dushi (Eighth Court). */
+    public static final DeferredHolder<Item, Item> CART_WHEEL_SPOKE = ITEMS.register("cart_wheel_spoke",
+            () -> new com.jttw.engine.item.HellRelicItem(new Item.Properties().rarity(net.minecraft.world.item.Rarity.RARE).fireResistant()));
+    /** From King Pingdeng (Ninth Court). */
+    public static final DeferredHolder<Item, Item> EQUAL_MEASURE_ROD = ITEMS.register("equal_measure_rod",
+            () -> new com.jttw.engine.item.HellRelicItem(new Item.Properties().rarity(net.minecraft.world.item.Rarity.RARE).fireResistant()));
+    /** From King Yama: his Vermilion Brush of Judgement (see JudgeBrushItem). */
+    public static final DeferredHolder<Item, Item> YAMA_BRUSH = ITEMS.register("yama_brush", com.jttw.engine.item.JudgeBrushItem::new);
+    /** From King Zhuanlun (Tenth Court): Meng Po's Soup of Forgetting (see MengPoSoupItem). */
+    public static final DeferredHolder<Item, Item> MENG_PO_SOUP = ITEMS.register("meng_po_soup",
+            () -> new com.jttw.engine.item.MengPoSoupItem(new Item.Properties().stacksTo(1).rarity(net.minecraft.world.item.Rarity.RARE)));
+    public static final DeferredHolder<Item, Item> OX_HEAD_SPAWN_EGG = ITEMS.register("ox_head_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.OX_HEAD, 0x2A2A30, 0x8B5A2B, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> HORSE_FACE_SPAWN_EGG = ITEMS.register("horse_face_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.HORSE_FACE, 0x2A2A30, 0x6B4A2A, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> JUDGE_CLERK_SPAWN_EGG = ITEMS.register("judge_clerk_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.JUDGE_CLERK, 0x8E1B1B, 0x111111, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> BLACK_IMPERMANENCE_SPAWN_EGG = ITEMS.register("black_impermanence_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.BLACK_IMPERMANENCE, 0x111114, 0xEDEDED, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> WHITE_IMPERMANENCE_SPAWN_EGG = ITEMS.register("white_impermanence_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.WHITE_IMPERMANENCE, 0xEDEDED, 0xB01818, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> WANDERING_GHOST_SPAWN_EGG = ITEMS.register("wandering_ghost_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.WANDERING_GHOST, 0xC8D4D8, 0x6F8A94, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> KING_QINGUANG_SPAWN_EGG = ITEMS.register("king_qinguang_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.KING_QINGUANG, 0x1E3A6E, 0xD4AF37, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> KING_CHUJIANG_SPAWN_EGG = ITEMS.register("king_chujiang_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.KING_CHUJIANG, 0x9CC8E8, 0xD4AF37, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> KING_SONGDI_SPAWN_EGG = ITEMS.register("king_songdi_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.KING_SONGDI, 0x4A4A52, 0xD4AF37, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> KING_WUGUAN_SPAWN_EGG = ITEMS.register("king_wuguan_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.KING_WUGUAN, 0x2E6B3A, 0xD4AF37, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> KING_YAMA_SPAWN_EGG = ITEMS.register("king_yama_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.KING_YAMA, 0x6E1010, 0xF0C040, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> KING_BIANCHENG_SPAWN_EGG = ITEMS.register("king_biancheng_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.KING_BIANCHENG, 0x5A2A6E, 0xD4AF37, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> KING_TAISHAN_SPAWN_EGG = ITEMS.register("king_taishan_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.KING_TAISHAN, 0xB8501A, 0xD4AF37, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> KING_DUSHI_SPAWN_EGG = ITEMS.register("king_dushi_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.KING_DUSHI, 0x6B5A3A, 0xD4AF37, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> KING_PINGDENG_SPAWN_EGG = ITEMS.register("king_pingdeng_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.KING_PINGDENG, 0xE0E0D0, 0xD4AF37, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> KING_ZHUANLUN_SPAWN_EGG = ITEMS.register("king_zhuanlun_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.KING_ZHUANLUN, 0x1A1A1A, 0xD4AF37, new Item.Properties()));
+
     // ── Heaven and Hell ───────────────────────────────────────────
     public static final DeferredHolder<Item, Item> JADE_BLOCK_ITEM =
             ITEMS.register("jade_block", () -> new BlockItem(ModBlocks.JADE_BLOCK.get(), new Item.Properties()));

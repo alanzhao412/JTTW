@@ -1,17 +1,11 @@
 {
   "type": "jttw_engine:hell",
   "generator": {
-    "type": "minecraft:flat",
-    "settings": {
-      "biome": "jttw_engine:hell_biome",
-      "lakes": false,
-      "features": false,
-      "structure_overrides": [],
-      "layers": [
-        { "block": "minecraft:bedrock", "height": 1 },
-        { "block": "jttw_engine:underworld_stone", "height": 20 },
-        { "block": "jttw_engine:soul_ash", "height": 3 }
-      ]
+    "type": "minecraft:noise",
+    "settings": "jttw_engine:hell",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "jttw_engine:hell_biome"
     }
   }
 }

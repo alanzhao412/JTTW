@@ -61,6 +61,8 @@ public final class ChunkBench {
     private static final boolean ZONES = "zones".equals(System.getProperty("jttw.chunkBench.mode", ""));
     /** "cave" runs {@link CaveBench}: the Bottomless Cave nearest spawn, as built. */
     private static final boolean CAVE = "cave".equals(System.getProperty("jttw.chunkBench.mode", ""));
+    /** "hell" runs {@link HellBench}: Hell as it really is, from the arrival to the Ten Courts. */
+    private static final boolean HELL = "hell".equals(System.getProperty("jttw.chunkBench.mode", ""));
     /** "waters" runs {@link WatersBench}: where the Mystical Waters turn up, its trench and its palace. */
     private static final boolean WATERS = "waters".equals(System.getProperty("jttw.chunkBench.mode", ""));
     private static final TicketType<ChunkPos> BENCH = TicketType.create("jttw_bench", Comparator.comparingLong(ChunkPos::toLong));
@@ -130,6 +132,15 @@ public final class ChunkBench {
         ServerPlayer p = server.getPlayerList().getPlayers().get(0);
         ServerLevel level = p.serverLevel();
         ticks++;
+        if (HELL) {
+            if (p.tickCount < 100) return;
+            if (HellBench.tick(p)) {
+                report.addAll(HellBench.report());
+                write();
+                next(Step.DONE);
+            }
+            return;
+        }
         if (CAVE) {
             if (p.tickCount < 100) return;
             if (CaveBench.tick(p)) {

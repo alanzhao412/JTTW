@@ -59,6 +59,15 @@ public final class Morality {
      * him). All four put a player past {@link #OUTLAW}. Plundering their treasuries is a lesser one.
      */
     public static final int SLAY_DRAGON_KING = -80, LOOT_DRAGON_PALACE = -10;
+    /**
+     * The Ten Kings of Hell are Heaven's judges of the dead: striking one down defies Heaven's
+     * order (as Sun Wukong's rampage through the underworld did), King Yama most of all. All ten put
+     * a player past {@link #OUTLAW}, as the four Dragon Kings do. Hell's lesser officials (Ox-Head,
+     * Horse-Face, the clerks, the Impermanence) are doing their work, and a fight with them is no
+     * deed either way (a captain still counts as any captain does); laying a wandering ghost to rest
+     * is a small good, as slaying any monster is.
+     */
+    public static final int SLAY_KING_OF_HELL = -35, SLAY_KING_YAMA = -70;
     /** How recently a victim must have struck their killer for the kill to be a fight, not a murder: 10 s. */
     public static final int PROVOKED_TICKS = 200;
 
@@ -128,7 +137,10 @@ public final class Morality {
         if (victim instanceof LadyWhiteBoneEntity) return SLAY_LADY;
         if (victim instanceof LadyEarthFlowEntity) return SLAY_EARTH_FLOW;
         if (victim instanceof com.jttw.engine.entity.waters.DragonKingEntity) return SLAY_DRAGON_KING;
+        if (victim instanceof com.jttw.engine.entity.hell.KingYamaEntity) return SLAY_KING_YAMA;
+        if (victim instanceof com.jttw.engine.entity.hell.KingOfHellEntity) return SLAY_KING_OF_HELL;
         if (victim instanceof ZoneMonster m && m.isCaptain()) return SLAY_CAPTAIN;
+        if (victim instanceof com.jttw.engine.entity.hell.HellMonster m && m.isOfficial()) return 0;
         if (victim instanceof AbstractVillager) return KILL_VILLAGER;
         if (victim instanceof IronGolem) return KILL_GOLEM;
         if (victim instanceof TamableAnimal pet && pet.isTame() && !killer.getUUID().equals(pet.getOwnerUUID())) return KILL_PET;
@@ -143,8 +155,12 @@ public final class Morality {
 
     private static String killWhat(int deed, LivingEntity victim) {
         if (deed == SLAY_CAPTAIN && victim instanceof com.jttw.engine.entity.waters.SeaMonster) return "you slew a captain of the sea";
+        if (deed == SLAY_CAPTAIN && victim instanceof com.jttw.engine.entity.hell.HellMonster) return "you slew a captain of the underworld";
+        if (deed == SLAY_MONSTER && victim instanceof com.jttw.engine.entity.hell.WanderingGhostEntity) return "you laid a wandering ghost to rest";
         return switch (deed) {
             case SLAY_DRAGON_KING -> "you slew a Dragon King, an official of Heaven";
+            case SLAY_KING_OF_HELL -> "you struck down a King of Hell, a judge of the dead";
+            case SLAY_KING_YAMA -> "you struck down King Yama, Lord of Death";
             case KILL_SOLDIER -> "you struck down a soldier of Heaven";
             case KILL_VILLAGER -> "you killed a villager";
             case KILL_GOLEM -> "you killed a village's guardian";

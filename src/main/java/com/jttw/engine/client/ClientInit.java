@@ -124,6 +124,13 @@ public final class ClientInit {
         event.registerLayerDefinition(com.jttw.engine.client.renderer.CrabGeneralRenderer.LAYER, com.jttw.engine.client.renderer.CrabGeneralRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.YakshaRenderer.LAYER, com.jttw.engine.client.renderer.YakshaRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.DragonKingRenderer.LAYER, com.jttw.engine.client.renderer.DragonKingRenderer::layer);
+        // Hell
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.HellRenderers.OX_LAYER, com.jttw.engine.client.renderer.HellRenderers::oxLayer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.HellRenderers.HORSE_LAYER, com.jttw.engine.client.renderer.HellRenderers::horseLayer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.HellRenderers.CLERK_LAYER, com.jttw.engine.client.renderer.HellRenderers::clerkLayer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.HellRenderers.IMPERMANENCE_LAYER, com.jttw.engine.client.renderer.HellRenderers::impermanenceLayer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.HellRenderers.GHOST_LAYER, com.jttw.engine.client.renderer.HellRenderers::ghostLayer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.HellRenderers.KING_LAYER, com.jttw.engine.client.renderer.HellRenderers::kingLayer);
     }
 
     // ── Entity renderers (MOD bus) ─────────────────────────────────
@@ -173,6 +180,23 @@ public final class ClientInit {
         event.registerEntityRenderer(ModEntities.AO_QIN.get(), com.jttw.engine.client.renderer.DragonKingRenderer::new);
         event.registerEntityRenderer(ModEntities.AO_RUN.get(), com.jttw.engine.client.renderer.DragonKingRenderer::new);
         event.registerEntityRenderer(ModEntities.AO_SHUN.get(), com.jttw.engine.client.renderer.DragonKingRenderer::new);
+        // Hell
+        event.registerEntityRenderer(ModEntities.OX_HEAD.get(), com.jttw.engine.client.renderer.HellRenderers.OxRenderer::new);
+        event.registerEntityRenderer(ModEntities.HORSE_FACE.get(), com.jttw.engine.client.renderer.HellRenderers.HorseRenderer::new);
+        event.registerEntityRenderer(ModEntities.JUDGE_CLERK.get(), com.jttw.engine.client.renderer.HellRenderers.ClerkRenderer::new);
+        event.registerEntityRenderer(ModEntities.BLACK_IMPERMANENCE.get(), com.jttw.engine.client.renderer.HellRenderers.ImpermanenceRenderer::new);
+        event.registerEntityRenderer(ModEntities.WHITE_IMPERMANENCE.get(), com.jttw.engine.client.renderer.HellRenderers.ImpermanenceRenderer::new);
+        event.registerEntityRenderer(ModEntities.WANDERING_GHOST.get(), com.jttw.engine.client.renderer.HellRenderers.GhostRenderer::new);
+        event.registerEntityRenderer(ModEntities.KING_QINGUANG.get(), com.jttw.engine.client.renderer.HellRenderers.KingRenderer.of("king_qinguang"));
+        event.registerEntityRenderer(ModEntities.KING_CHUJIANG.get(), com.jttw.engine.client.renderer.HellRenderers.KingRenderer.of("king_chujiang"));
+        event.registerEntityRenderer(ModEntities.KING_SONGDI.get(), com.jttw.engine.client.renderer.HellRenderers.KingRenderer.of("king_songdi"));
+        event.registerEntityRenderer(ModEntities.KING_WUGUAN.get(), com.jttw.engine.client.renderer.HellRenderers.KingRenderer.of("king_wuguan"));
+        event.registerEntityRenderer(ModEntities.KING_YAMA.get(), com.jttw.engine.client.renderer.HellRenderers.KingRenderer.of("king_yama"));
+        event.registerEntityRenderer(ModEntities.KING_BIANCHENG.get(), com.jttw.engine.client.renderer.HellRenderers.KingRenderer.of("king_biancheng"));
+        event.registerEntityRenderer(ModEntities.KING_TAISHAN.get(), com.jttw.engine.client.renderer.HellRenderers.KingRenderer.of("king_taishan"));
+        event.registerEntityRenderer(ModEntities.KING_DUSHI.get(), com.jttw.engine.client.renderer.HellRenderers.KingRenderer.of("king_dushi"));
+        event.registerEntityRenderer(ModEntities.KING_PINGDENG.get(), com.jttw.engine.client.renderer.HellRenderers.KingRenderer.of("king_pingdeng"));
+        event.registerEntityRenderer(ModEntities.KING_ZHUANLUN.get(), com.jttw.engine.client.renderer.HellRenderers.KingRenderer.of("king_zhuanlun"));
         event.registerEntityRenderer(ModEntities.SEA_BOLT.get(), ctx -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(ctx, 1.5f, true));
         event.registerEntityRenderer(ModEntities.THROWN_SPEAR.get(),
                 com.jttw.engine.client.renderer.ThrownSpearRenderer::new);

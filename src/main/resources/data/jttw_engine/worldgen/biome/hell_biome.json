@@ -5,17 +5,62 @@
   "effects": {
     "sky_color": 1710618,
     "fog_color": 3344392,
-    "water_color": 4159204,
-    "water_fog_color": 329011,
+    "water_color": 6560306,
+    "water_fog_color": 3346448,
+    "particle": {
+      "options": {
+        "type": "minecraft:white_ash"
+      },
+      "probability": 0.012
+    },
+    "ambient_sound": "minecraft:ambient.soul_sand_valley.loop",
+    "additions_sound": {
+      "sound": "minecraft:ambient.soul_sand_valley.additions",
+      "tick_chance": 0.0111
+    },
     "mood_sound": {
-      "sound": "minecraft:ambient.nether_wastes.mood",
+      "sound": "minecraft:ambient.soul_sand_valley.mood",
       "tick_delay": 6000,
       "block_search_extent": 8,
       "offset": 2.0
+    },
+    "music": {
+      "sound": "minecraft:music.nether.soul_sand_valley",
+      "min_delay": 12000,
+      "max_delay": 24000,
+      "replace_current_music": false
     }
   },
-  "spawners": {},
+  "spawners": {
+    "ambient": [],
+    "axolotls": [],
+    "creature": [],
+    "misc": [],
+    "monster": [
+      { "type": "jttw_engine:wandering_ghost", "weight": 100, "minCount": 2, "maxCount": 4 },
+      { "type": "jttw_engine:ox_head", "weight": 30, "minCount": 1, "maxCount": 2 },
+      { "type": "jttw_engine:horse_face", "weight": 30, "minCount": 1, "maxCount": 2 },
+      { "type": "jttw_engine:judge_clerk", "weight": 20, "minCount": 1, "maxCount": 1 },
+      { "type": "jttw_engine:black_impermanence", "weight": 8, "minCount": 1, "maxCount": 1 },
+      { "type": "jttw_engine:white_impermanence", "weight": 8, "minCount": 1, "maxCount": 1 }
+    ],
+    "underground_water_creature": [],
+    "water_ambient": [],
+    "water_creature": []
+  },
   "spawn_costs": {},
   "carvers": {},
-  "features": [[], [], [], [], [], [], [], [], [], [], []]
+  "features": [
+    [],
+    [],
+    ["jttw_engine:hell_decor"],
+    [],
+    ["jttw_engine:hell_works"],
+    [],
+    [],
+    [],
+    [],
+    [],
+    []
+  ]
 }

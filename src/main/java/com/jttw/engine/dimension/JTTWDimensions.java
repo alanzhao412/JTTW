@@ -41,7 +41,8 @@ public final class JTTWDimensions {
                 player.getYRot(), player.getXRot());
     }
 
-    private static BlockPos findSafeSpawn(ServerLevel level) {
+    /** Where travellers arrive: the first ground out from 0, 0 (in Hell, the arrival plaza: see HellTerrain). */
+    public static BlockPos findSafeSpawn(ServerLevel level) {
         // Scan from 0,0 outward to find a solid landing spot
         int startX = 0;
         int startZ = 0;
@@ -51,6 +52,8 @@ public final class JTTWDimensions {
             for (int dz = 0; dz <= 64; dz += 4) {
                 int x = startX + dx;
                 int z = startZ + dz;
+                // made first: the height of a chunk not yet loaded reads as the world's floor
+                level.getChunk(x >> 4, z >> 4);
                 int y = level.getHeight(
                         net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, x, z);
                 if (y > 0) return new BlockPos(x, y, z);

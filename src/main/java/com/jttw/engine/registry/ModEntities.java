@@ -183,6 +183,122 @@ public final class ModEntities {
                 .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, id).toString()));
     }
 
+    // ── Hell: the Ten Courts ──────────────────────────────────────
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.hell.OxHeadEntity>> OX_HEAD =
+            ENTITIES.register("ox_head", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.hell.OxHeadEntity>of(com.jttw.engine.entity.hell.OxHeadEntity::new, MobCategory.MONSTER)
+                            .sized(0.9F, 2.6F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "ox_head").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.hell.HorseFaceEntity>> HORSE_FACE =
+            ENTITIES.register("horse_face", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.hell.HorseFaceEntity>of(com.jttw.engine.entity.hell.HorseFaceEntity::new, MobCategory.MONSTER)
+                            .sized(0.8F, 2.5F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "horse_face").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.hell.JudgeClerkEntity>> JUDGE_CLERK =
+            ENTITIES.register("judge_clerk", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.hell.JudgeClerkEntity>of(com.jttw.engine.entity.hell.JudgeClerkEntity::new, MobCategory.MONSTER)
+                            .sized(0.6F, 1.95F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "judge_clerk").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.hell.ImpermanenceEntity>> BLACK_IMPERMANENCE =
+            ENTITIES.register("black_impermanence", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.hell.ImpermanenceEntity>of(com.jttw.engine.entity.hell.ImpermanenceEntity::new, MobCategory.MONSTER)
+                            .sized(0.7F, 1.9F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "black_impermanence").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.hell.ImpermanenceEntity>> WHITE_IMPERMANENCE =
+            ENTITIES.register("white_impermanence", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.hell.ImpermanenceEntity>of(com.jttw.engine.entity.hell.ImpermanenceEntity::new, MobCategory.MONSTER)
+                            .sized(0.6F, 2.4F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "white_impermanence").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.hell.WanderingGhostEntity>> WANDERING_GHOST =
+            ENTITIES.register("wandering_ghost", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.hell.WanderingGhostEntity>of(com.jttw.engine.entity.hell.WanderingGhostEntity::new, MobCategory.MONSTER)
+                            .sized(0.6F, 1.85F)
+                            .clientTrackingRange(8)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "wandering_ghost").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.hell.HellKings.Qinguang>> KING_QINGUANG =
+            ENTITIES.register("king_qinguang", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.hell.HellKings.Qinguang>of(com.jttw.engine.entity.hell.HellKings.Qinguang::new, MobCategory.MONSTER)
+                            .sized(0.8F, 2.35F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "king_qinguang").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.hell.HellKings.Chujiang>> KING_CHUJIANG =
+            ENTITIES.register("king_chujiang", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.hell.HellKings.Chujiang>of(com.jttw.engine.entity.hell.HellKings.Chujiang::new, MobCategory.MONSTER)
+                            .sized(0.8F, 2.35F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "king_chujiang").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.hell.HellKings.Songdi>> KING_SONGDI =
+            ENTITIES.register("king_songdi", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.hell.HellKings.Songdi>of(com.jttw.engine.entity.hell.HellKings.Songdi::new, MobCategory.MONSTER)
+                            .sized(0.8F, 2.35F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "king_songdi").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.hell.HellKings.Wuguan>> KING_WUGUAN =
+            ENTITIES.register("king_wuguan", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.hell.HellKings.Wuguan>of(com.jttw.engine.entity.hell.HellKings.Wuguan::new, MobCategory.MONSTER)
+                            .sized(0.8F, 2.35F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "king_wuguan").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.hell.HellKings.Biancheng>> KING_BIANCHENG =
+            ENTITIES.register("king_biancheng", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.hell.HellKings.Biancheng>of(com.jttw.engine.entity.hell.HellKings.Biancheng::new, MobCategory.MONSTER)
+                            .sized(0.8F, 2.35F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "king_biancheng").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.hell.HellKings.Taishan>> KING_TAISHAN =
+            ENTITIES.register("king_taishan", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.hell.HellKings.Taishan>of(com.jttw.engine.entity.hell.HellKings.Taishan::new, MobCategory.MONSTER)
+                            .sized(0.8F, 2.35F)
+                            .clientTrackingRange(10)
+                            .fireImmune()
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "king_taishan").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.hell.HellKings.Dushi>> KING_DUSHI =
+            ENTITIES.register("king_dushi", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.hell.HellKings.Dushi>of(com.jttw.engine.entity.hell.HellKings.Dushi::new, MobCategory.MONSTER)
+                            .sized(0.8F, 2.35F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "king_dushi").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.hell.HellKings.Pingdeng>> KING_PINGDENG =
+            ENTITIES.register("king_pingdeng", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.hell.HellKings.Pingdeng>of(com.jttw.engine.entity.hell.HellKings.Pingdeng::new, MobCategory.MONSTER)
+                            .sized(0.8F, 2.35F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "king_pingdeng").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.hell.HellKings.Zhuanlun>> KING_ZHUANLUN =
+            ENTITIES.register("king_zhuanlun", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.hell.HellKings.Zhuanlun>of(com.jttw.engine.entity.hell.HellKings.Zhuanlun::new, MobCategory.MONSTER)
+                            .sized(0.8F, 2.35F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "king_zhuanlun").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.hell.KingYamaEntity>> KING_YAMA =
+            ENTITIES.register("king_yama", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.hell.KingYamaEntity>of(com.jttw.engine.entity.hell.KingYamaEntity::new, MobCategory.MONSTER)
+                            .sized(0.9F, 2.6F)
+                            .clientTrackingRange(10)
+                            .fireImmune()
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "king_yama").toString()));
+
     // ── Forms ──────────────────────────────────────────────────────
 
     /** The other divine beasts' true forms, never spawned: only taken (see TrueForm). */
@@ -240,6 +356,31 @@ public final class ModEntities {
 
     /** The ridge's dead rise in any light (their spawn lists are the ridge's alone); so does the cave's household, lanterns or not. */
     private static void onSpawnPlacements(net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent event) {
+        // Hell's creatures: never near the arrival; its officials only within the fortress (HellRules)
+        event.register(OX_HEAD.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                com.jttw.engine.world.hell.HellRules::spawnRule,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(HORSE_FACE.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                com.jttw.engine.world.hell.HellRules::spawnRule,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(JUDGE_CLERK.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                com.jttw.engine.world.hell.HellRules::spawnRule,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(BLACK_IMPERMANENCE.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                com.jttw.engine.world.hell.HellRules::spawnRule,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(WHITE_IMPERMANENCE.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                com.jttw.engine.world.hell.HellRules::spawnRule,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(WANDERING_GHOST.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                com.jttw.engine.world.hell.HellRules::spawnRule,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
         event.register(MOUSE_SPIRIT.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
                 net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
@@ -272,6 +413,22 @@ public final class ModEntities {
     }
 
     private static void onAttributeCreate(EntityAttributeCreationEvent event) {
+        event.put(OX_HEAD.get(), com.jttw.engine.entity.hell.OxHeadEntity.createAttributes().build());
+        event.put(HORSE_FACE.get(), com.jttw.engine.entity.hell.HorseFaceEntity.createAttributes().build());
+        event.put(JUDGE_CLERK.get(), com.jttw.engine.entity.hell.JudgeClerkEntity.createAttributes().build());
+        event.put(BLACK_IMPERMANENCE.get(), com.jttw.engine.entity.hell.ImpermanenceEntity.createAttributes(false).build());
+        event.put(WHITE_IMPERMANENCE.get(), com.jttw.engine.entity.hell.ImpermanenceEntity.createAttributes(true).build());
+        event.put(WANDERING_GHOST.get(), com.jttw.engine.entity.hell.WanderingGhostEntity.createAttributes().build());
+        event.put(KING_YAMA.get(), com.jttw.engine.entity.hell.KingYamaEntity.createAttributes().build());
+        event.put(KING_QINGUANG.get(), com.jttw.engine.entity.hell.KingOfHellEntity.createAttributes(1).build());
+        event.put(KING_CHUJIANG.get(), com.jttw.engine.entity.hell.KingOfHellEntity.createAttributes(2).build());
+        event.put(KING_SONGDI.get(), com.jttw.engine.entity.hell.KingOfHellEntity.createAttributes(3).build());
+        event.put(KING_WUGUAN.get(), com.jttw.engine.entity.hell.KingOfHellEntity.createAttributes(4).build());
+        event.put(KING_BIANCHENG.get(), com.jttw.engine.entity.hell.KingOfHellEntity.createAttributes(6).build());
+        event.put(KING_TAISHAN.get(), com.jttw.engine.entity.hell.KingOfHellEntity.createAttributes(7).build());
+        event.put(KING_DUSHI.get(), com.jttw.engine.entity.hell.KingOfHellEntity.createAttributes(8).build());
+        event.put(KING_PINGDENG.get(), com.jttw.engine.entity.hell.KingOfHellEntity.createAttributes(9).build());
+        event.put(KING_ZHUANLUN.get(), com.jttw.engine.entity.hell.KingOfHellEntity.createAttributes(10).build());
         event.put(MOUSE_SPIRIT.get(), com.jttw.engine.entity.cave.MouseSpiritEntity.createAttributes().build());
         event.put(FLOWER_MAID.get(), com.jttw.engine.entity.cave.FlowerMaidEntity.createAttributes().build());
         event.put(LADY_EARTH_FLOW.get(), com.jttw.engine.entity.cave.LadyEarthFlowEntity.createAttributes().build());

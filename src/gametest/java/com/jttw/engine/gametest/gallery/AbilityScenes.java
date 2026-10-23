@@ -77,10 +77,14 @@ final class AbilityScenes {
     }
 
     /** Scenes that take longer to come right than the rest, and by how many more ticks: a fall, and its smoke clearing. */
-    static final java.util.Map<String, Integer> LONG = java.util.Map.of("staff_fallen", 150, "staff_crossed", 150,
-            "staff_obsidian", 150, "staff_obsidian_mighty", 150,
+    static final java.util.Map<String, Integer> LONG = java.util.Map.ofEntries(java.util.Map.entry("staff_fallen", 150),
+            java.util.Map.entry("staff_crossed", 150), java.util.Map.entry("staff_obsidian", 150), java.util.Map.entry("staff_obsidian_mighty", 150),
             // a palace's worth of water and glass for the client to draw from a new place
-            "waters_palace", 100, "waters_palace_hall", 100, "waters_palace_treasury", 100);
+            java.util.Map.entry("waters_palace", 100), java.util.Map.entry("waters_palace_hall", 100), java.util.Map.entry("waters_palace_treasury", 100),
+            // Hell's works, laid off the stage
+            java.util.Map.entry("hell_court", 100), java.util.Map.entry("hell_court_inside", 60), java.util.Map.entry("hell_yama_hall", 100),
+            java.util.Map.entry("hell_yama_hall_inside", 60), java.util.Map.entry("hell_wheel", 100), java.util.Map.entry("hell_court_ten", 60),
+            java.util.Map.entry("hell_bridge", 100), java.util.Map.entry("hell_bridge_walk", 60), java.util.Map.entry("hell_meng_po", 60));
 
         /** Set by a scene that photographs a screen (a furnace's, say), so the gallery leaves it open. */
     static volatile boolean keepScreen;
@@ -88,6 +92,7 @@ final class AbilityScenes {
     static List<Scene> all() {
         List<Scene> all = new java.util.ArrayList<>(base());
         all.addAll(WatersScenes.all());
+        all.addAll(HellScenes.all());
         return all;
     }
 
@@ -1136,6 +1141,7 @@ final class AbilityScenes {
 
     static void reset(ServerPlayer p) {
         WatersScenes.clear(p);
+        HellScenes.clear(p);
         keepScreen = false;
         topSpeed = false;
         com.jttw.engine.client.renderer.GoldenEyesRenderer.setMode(p.getUUID(), 0);
