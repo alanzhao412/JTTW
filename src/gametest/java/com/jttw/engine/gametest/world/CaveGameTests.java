@@ -60,15 +60,18 @@ public class CaveGameTests {
         check(h, Math.abs(expected - actual) <= Math.abs(expected) * 1e-4 + 1e-3, what + ": expected " + expected + " but was " + actual);
     }
 
-    /** Removes, when the test ends, what this test brought and whatever of the cave's came of it near them. */
+    /**
+     * Removes, when the test ends, what this test brought, wherever it went, and whatever of the
+     * cave's came of it on its own platform (only there: tests stand ten blocks apart, and a
+     * sweep round a mouse at the platform's edge, or round her where she fled to, would take a
+     * neighbouring test's household mid-test).
+     */
     private static void sweepAround(GameTestHelper h, Entity... held) {
         onEnd(h, () -> {
-            for (Entity e : held) {
-                h.getLevel().getEntities((Entity) null, e.getBoundingBox().inflate(6),
-                        x -> x instanceof CaveMonster || x instanceof LadyEarthFlowEntity || x instanceof EarthFlowDecoyEntity
-                                || x instanceof ItemEntity).forEach(Entity::discard);
-                e.discard();
-            }
+            h.getLevel().getEntities((Entity) null, h.getBounds().inflate(2),
+                    x -> x instanceof CaveMonster || x instanceof LadyEarthFlowEntity || x instanceof EarthFlowDecoyEntity
+                            || x instanceof ItemEntity).forEach(Entity::discard);
+            for (Entity e : held) e.discard();
         });
     }
 

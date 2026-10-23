@@ -335,6 +335,7 @@ public class TransformAbilityGameTests {
         aim(p, golem);
         Tf.rightClick(p);
         float max = golem.getMaxHealth();
+        List<com.jttw.engine.gametest.character.CharTest.Hit> hits = com.jttw.engine.gametest.character.CharTest.watch(golem);
         for (int i = 1; i <= 104; i++) {
             final int t = i;
             h.runAfterDelay(t, () -> {
@@ -344,7 +345,8 @@ public class TransformAbilityGameTests {
                 if (t == 104) {
                     check(h, !golem.hasEffect(MobEffects.DIG_SLOWDOWN), "beam over after 5s");
                     // hits at 10, 20, ... 90 ticks
-                    near(h, max - 9.0, golem.getHealth(), "nine hits over the channel");
+                    near(h, max - 9.0, golem.getHealth(), "nine hits over the channel (hits " + hits.stream()
+                            .map(x -> x.source().getMsgId() + " " + x.amount()).toList() + ", " + whereabouts(h, golem) + ")");
                     h.succeed();
                 }
             });

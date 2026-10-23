@@ -276,32 +276,45 @@ public final class GT {
     }
 
     /**
-     * True once every chunk under this test's platform can hold entities: entities loaded and
-     * ticking. A test's platform is placed (and its chunks force-loaded) the moment it starts,
-     * but fresh chunks load their entities a few ticks later. Until then a mob spawned there
-     * exists but is invisible to area searches (a cleave, a blast, an aura) and does not tick,
-     * so a test would miss it at random. {@link ReadyGate} holds every test until this is true.
+     * True once every chunk under and round this test's platform ({@link #READY_MARGIN}) can hold
+     * entities: entities loaded and ticking. A test's platform is placed (and its chunks
+     * force-loaded) the moment it starts, but fresh chunks load their entities a few ticks later.
+     * Until then a mob spawned there exists but is invisible to area searches (a cleave, a blast,
+     * an aura) and does not tick, so a test would miss it at random. {@link ReadyGate} holds every test until this is true.
      */
     public static boolean entityReady(GameTestHelper helper) {
         return notReadyChunks(helper).isEmpty();
     }
 
+    /**
+     * How far round the platform, in blocks, the chunks must hold entities too: what a test
+     * spawns round its platform's middle (a captain's escorts, a king's court, a household, three
+     * blocks out) lands a block past the platform's edge, at times in the next chunk, and an
+     * evoker's line of fangs runs nearly nine blocks out. An entity added to a chunk whose
+     * entities have not loaded yet is in the world, but no search finds it.
+     */
+    private static final int READY_MARGIN = 9;
+
     private static String notReadyChunks(GameTestHelper helper) {
         var level = helper.getLevel();
+        var a = helper.absolutePos(new net.minecraft.core.BlockPos(-READY_MARGIN, 2, -READY_MARGIN));
+        var b = helper.absolutePos(new net.minecraft.core.BlockPos(5 + READY_MARGIN, 2, 5 + READY_MARGIN));
+        var origin = helper.absolutePos(net.minecraft.core.BlockPos.ZERO);
         StringBuilder bad = new StringBuilder();
-        for (int x = 0; x <= 5; x += 5) for (int z = 0; z <= 5; z += 5) {
-            var pos = helper.absolutePos(new net.minecraft.core.BlockPos(x, 2, z));
-            long chunk = net.minecraft.world.level.ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4);
-            boolean loaded = level.areEntitiesLoaded(chunk);
-            boolean ticking = level.isPositionEntityTicking(pos);
-            if (!loaded || !ticking) bad.append(" (").append(x).append(",").append(z).append(") entities loaded=")
-                    .append(loaded).append(" ticking=").append(ticking);
+        for (int cx = Math.min(a.getX(), b.getX()) >> 4; cx <= Math.max(a.getX(), b.getX()) >> 4; cx++) {
+            for (int cz = Math.min(a.getZ(), b.getZ()) >> 4; cz <= Math.max(a.getZ(), b.getZ()) >> 4; cz++) {
+                var pos = new net.minecraft.core.BlockPos(cx << 4, a.getY(), cz << 4);
+                boolean loaded = level.areEntitiesLoaded(net.minecraft.world.level.ChunkPos.asLong(cx, cz));
+                boolean ticking = level.isPositionEntityTicking(pos);
+                if (!loaded || !ticking) bad.append(" chunk at (").append(pos.getX() - origin.getX()).append(",")
+                        .append(pos.getZ() - origin.getZ()).append(") entities loaded=").append(loaded).append(" ticking=").append(ticking);
+            }
         }
         return bad.toString();
     }
 
     /**
-     * Fails the test straight away, saying why, if a chunk under its platform cannot hold
+     * Fails the test straight away, saying why, if a chunk under or round its platform cannot hold
      * entities yet. {@link ReadyGate} should make this impossible; this keeps a regression loud.
      */
     public static void requireEntityReady(GameTestHelper helper) {
