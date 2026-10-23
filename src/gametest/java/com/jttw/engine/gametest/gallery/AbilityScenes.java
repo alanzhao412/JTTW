@@ -504,6 +504,31 @@ final class AbilityScenes {
                     lady.setNoAi(true);
                     p.serverLevel().addFreshEntity(lady);
                 }, p -> {}, 1, false),
+                // her true form from about her: close, her face, side, back, fighting, beside the player
+                new Scene("lady_close", p -> {
+                    sceneCam = new double[]{2.4, 3.0, 7.4, 0.5, 2.0, 3.5};
+                    whiteBone(p, 0, 3, Float.NaN, false);
+                }, p -> {}, 1, false),
+                new Scene("lady_face", p -> {
+                    sceneCam = new double[]{1.3, 3.0, 5.6, 0.5, 2.6, 3.5};
+                    whiteBone(p, 0, 3, Float.NaN, false);
+                }, p -> {}, 1, false),
+                new Scene("lady_side", p -> {
+                    sceneCam = new double[]{5.0, 2.4, 2.5, 0.5, 1.8, 3.5};
+                    whiteBone(p, 0, 3, 0f, false);
+                }, p -> {}, 1, false),
+                new Scene("lady_back", p -> {
+                    sceneCam = new double[]{2.4, 3.0, 7.4, 0.5, 2.0, 3.5};
+                    whiteBone(p, 0, 3, Float.POSITIVE_INFINITY, false);
+                }, p -> {}, 1, false),
+                new Scene("lady_fighting", p -> {
+                    sceneCam = new double[]{3.4, 2.6, 8.4, 0.5, 2.0, 3.5};
+                    whiteBone(p, 0, 3, Float.NaN, true);
+                }, p -> {}, 1, false),
+                new Scene("lady_beside", p -> {
+                    sceneCam = new double[]{1.2, 2.0, 8.5, 1.2, 1.6, 0.5};
+                    whiteBone(p, 2, 0, Float.NaN, false);
+                }, p -> {}, 1, false),
                 // ── The Bottomless Cave ──
                 new Scene("cave_mice", p -> {
                     cave(p, com.jttw.engine.registry.ModEntities.MOUSE_SPIRIT.get(), -2, 2, false, Float.NaN);
@@ -1008,6 +1033,19 @@ final class AbilityScenes {
     }
 
     /** Lady Earth Flow (or, {@code likeness}, the shoe she leaves in her shape), still, at (dx, dz), turned to {@code yaw}; swords up if {@code fighting}. */
+    /** Lady White Bone as herself at (dx, dz) from the player, turned as {@link #towardCamera} turns her. */
+    private static void whiteBone(ServerPlayer p, int dx, int dz, float yaw, boolean fighting) {
+        var lady = com.jttw.engine.registry.ModEntities.LADY_WHITE_BONE.get().create(p.serverLevel());
+        if (lady == null) return;
+        yaw = towardCamera(dx, dz, yaw);
+        lady.moveTo(p.getX() + dx, p.getY(), p.getZ() + dz, yaw, 0f);
+        lady.setYHeadRot(yaw);
+        lady.setYBodyRot(yaw);
+        lady.setNoAi(true);
+        lady.setAggressive(fighting);
+        p.serverLevel().addFreshEntity(lady);
+    }
+
     private static void earthFlow(ServerPlayer p, int dx, int dz, float yaw, boolean fighting, boolean likeness) {
         net.minecraft.world.entity.Mob m = likeness
                 ? com.jttw.engine.registry.ModEntities.EARTH_FLOW_DECOY.get().create(p.serverLevel())

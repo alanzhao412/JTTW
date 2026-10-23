@@ -114,7 +114,7 @@ public final class ClientInit {
         event.registerLayerDefinition(com.jttw.engine.client.renderer.AzureDragonRenderer.LAYER, com.jttw.engine.client.renderer.AzureDragonRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.BlackTortoiseRenderer.LAYER, com.jttw.engine.client.renderer.BlackTortoiseRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.VermilionBirdRenderer.LAYER, com.jttw.engine.client.renderer.VermilionBirdRenderer::layer);
-        event.registerLayerDefinition(com.jttw.engine.client.renderer.RidgeRenderers.VEIL_LAYER, com.jttw.engine.client.renderer.RidgeRenderers::veilLayer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.RidgeRenderers.LADY_LAYER, com.jttw.engine.client.renderer.RidgeRenderers::ladyLayer);
         // The Bottomless Cave
         event.registerLayerDefinition(com.jttw.engine.client.renderer.CaveRenderers.MOUSE_LAYER, com.jttw.engine.client.renderer.CaveRenderers::mouseLayer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.CaveRenderers.MAID_LAYER, com.jttw.engine.client.renderer.CaveRenderers::maidLayer);
