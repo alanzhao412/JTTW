@@ -147,8 +147,9 @@ and the Jade Palace. Hell (Diyu) is a dark underworld of ash plains, black stone
 crossed by the Naihe, with the arrival plaza where the Book of Life and Death is kept and, far to
 the north, the fortress of the Ten Courts: the levels 57–66 zone (see "Hell" under Zones). Sun
 Wukong is sent there at level 30 to strike his name from the Book; the Dragon's and Wukong's
-dimension abilities travel there too; and anyone at all goes down through the Gate of Ghosts of
-Fengdu, the Ghost City, at the world's far edge, and comes back up by the side doors of Hell's own
+dimension abilities travel there too; and anyone at all may go down through the Gate of Ghosts of
+Fengdu, the Ghost City, at the world's far edge, once they have come to it by an Ancient City's
+frame, lit with soul fire, and fought it open; they come back up by the side doors of Hell's own
 (see "Fengdu" under Zones).
 
 ---
@@ -211,7 +212,7 @@ Transformation, progression, and ability state has to agree between the server a
 can see the player — otherwise your model desyncs from your hitbox, or a cooldown looks ready on one
 screen and isn't on another.
 
-19 packet types in [`network/`](src/main/java/com/jttw/engine/network/) handle this, most of them
+37 packet types in [`network/`](src/main/java/com/jttw/engine/network/) handle this, most of them
 one-way server→client syncs for a specific slice of state (level, Qi, cooldowns, skill tree, ring
 state, transformation), plus client→server requests for actions the server must authorize. They are
 split into `network/s2c` and `network/c2s`; packets only encode and route, and the rules they trigger
@@ -286,7 +287,7 @@ is allied to. White Bone Ridge is the first, the Bottomless Cave the second, the
 third; Hell, a dimension of its own, is the fourth; then the Flaming Mountains, and Mount Wuzhuang,
 the first aerial zone, in the sky; Lion-Camel Ridge, the last band, is the last. Past it all lies
 Fengdu, the Ghost City: a place, not a zone of a band, placed as the zones are, whose Gate of
-Ghosts is the way down to Hell for everyone.
+Ghosts is the way down to Hell for everyone who comes to it by an Ancient City and fights it open.
 
 **One of each a world.** Every boss lives in one place: each overworld zone has a single region a
 world (`ZoneMap`), except the Mystical Waters, which have one in each of the Four Seas, east, south,
@@ -325,8 +326,13 @@ its master, and which way and roughly how far it lies, while a trail of incense 
 way; for the Mystical Waters, the nearest sea whose Dragon King still lives (the kings' deaths are
 remembered for the world). Held, its needle points there, as a compass's does, kept up to date as
 its holder goes and grows. Hell's band (57–66) is told that its trials lie in Diyu, past any Earth
-God's ground, and that the way down lies through Fengdu, the Ghost City: the needle points there
-(standing in its country, they are told its Gate of Ghosts is on the terrace at the city's heart).
+God's ground; that the way down is through Fengdu, the Ghost City, whose Gate of Ghosts is sealed to
+those who walk there; and that the way in is under the earth, by an Ancient City, whose great frame
+lit with soul fire carries one before the gate, where its guard must be fought: the needle points to
+the nearest Ancient City (looked for in the world's structures when the luopan is used, within /locate's
+reach, and kept until its holder has gone 1500 blocks; the lit frames are known too), or, if none is
+known, to Fengdu. Standing in Fengdu's country, they are told its gate is sealed and opens only for
+those who come by an Ancient City's frame and break its guard.
 In Hell itself the needle points to the Ten Courts' gate; asked sneaking (and held while sneaking)
 it shows the way back up instead, the nearer side door of the Gate of Ghosts on the arrival plaza.
 In the Nether, the End or Heaven no Earth God hears, and it spins.
@@ -504,10 +510,11 @@ XP 125, stepped up from the Mystical Waters' 110 (575 a grunt kill at the band's
   iron cage of soul fire (9), Meng Po's soup (10). Two guards (Ox-Head and Horse-Face) stand at
   each door (captains at Yama's), three clerks keep the Office of Records, the Impermanence pair
   and a clerk wait on Yama, and each king sits on his dais, all put there once as the land is made.
-- **The way in and out**: everyone comes down through Fengdu's Gate of Ghosts (and Wukong at level 30,
-  and the Dragon's and Wukong's dimension travel, as before), all to the arrival plaza
-  (`JTTWDimensions.teleportTo`: its safe ground, the Book's dais); everyone goes back up by its
-  Gate of Ghosts' side doors, to Fengdu (see "Fengdu" below).
+- **The way in and out**: everyone comes down through Fengdu's Gate of Ghosts, once they have come to
+  it by an Ancient City's frame and fought it open (and Wukong at level 30, and the Dragon's and
+  Wukong's dimension travel, as before), all to the arrival plaza (`JTTWDimensions.teleportTo`: its
+  safe ground, the Book's dais); everyone goes back up by its Gate of Ghosts' side doors, to
+  Fengdu's gate, which burns for them so they can come down again (see "Fengdu" below).
 - **The arrival's safety** (`HellRules`): a level-30 Wukong comes here for the Book, and anyone of any
   level may come down through Fengdu. The fortress
   and its kings are over 300 blocks north, over the Naihe (the nearest king 363 blocks off);
@@ -935,8 +942,11 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
 
 Fengdu (丰都鬼城), on Mount Ming over the Yangtze, is in folk belief the city of the underworld's
 officials, through which every soul passes on its way down to Diyu. Here it is how anyone, of any
-kind and any level, gets to Hell (levels 57–66): until it, only Sun Wukong (sent there at level 30)
-and the Dragon's and Wukong's dimension travel could. In
+kind and any level, gets to Hell (levels 57–66), the long way: its Gate of Ghosts is sealed to the
+living who walk there, and opens only for those who come to it through the deep dark, by the
+frame at the heart of an Ancient City lit with soul fire, and break the guard of Hell's soldiers
+that rises to bar it. Before it, only Sun Wukong (sent there at level 30) and the Dragon's and
+Wukong's dimension travel could. In
 [`world/fengdu/`](src/main/java/com/jttw/engine/world/fengdu/).
 
 - **Where** (`Zones.FENGDU = Zone.place(fengdu, fengdu_hosts, ZoneLayout.FENGDU, WHOLE_COLUMN)`):
@@ -976,35 +986,93 @@ and the Dragon's and Wukong's dimension travel could. In
   of dark tiles, his throne on a dais before a gilded screen, his image over it, candles, a red
   carpet to it), an incense burner before its steps; to its west the **Temple of the City God**
   (城隍庙), to its east the **Hall of the Judges** (判官殿), each with its god's image and candles.
-  No one lives here and nothing fights here: it is a place to pass through. (Hell's own Naihe
-  bridge and Meng Po are left to Hell.)
-- **The gates** (`Fengdu`, `GhostGateBlock`): the Gate of Ghosts' way is filled with the **ghost
-  veil**, a cold soul-fire mist (an animated, half-see-through teal block that sheds souls and soul
-  flames, glows, has no collision and cannot be broken or picked). Any player who stands in it for
-  a second (20 ticks; stepping out sooner, nothing) is taken **down** to Hell's arrival plaza,
-  through `JTTWDimensions.teleportTo`, so the plaza's safe spawn and the Book of Life and Death's
-  dais are as for every traveller. The Gate of Ghosts on Hell's arrival plaza now has a **side door**
+  No one lives here, and nothing fights here but the guard that rises before the Gate of Ghosts.
+  (Hell's own Naihe bridge and Meng Po are left to Hell.)
+- **The ghost veil** (`GhostGateBlock`): a cold soul-fire mist (an animated, half-see-through teal
+  block that sheds souls and soul flames, glows, has no collision, cannot be broken or picked, and
+  no water washes out). Any player who stands in one for a second (20 ticks; stepping out sooner,
+  nothing) is taken where it leads (its `way`): Fengdu's gate down to Hell, an Ancient City's frame
+  to Fengdu, Fengdu's side doors back to the Ancient City; in Hell every veil leads up to Fengdu.
+  One arrives out of the veils on every side, so no one is sent straight back.
+- **The way in: an Ancient City's frame** (`AncientFrame`, `AncientGate`): at the heart of every
+  Ancient City stands the great frame of reinforced deepslate (a ring 22 by 8 round a way 20 by 6,
+  one block thick, running along x or z with its piece: the same in all three of vanilla's
+  `ancient_city/city_center` pieces, read and checked by `AncientFrameTest`). Soul fire appearing in
+  its way, by any means (soul sand or soil set in the frame and lit with flint and steel, a fire
+  charge, a dispenser; caught by `BlockEvent.NeighborNotifyEvent`, so nothing is laid as the land is
+  made, and old worlds' cities work as new ones'), runs round the frame: if its ring is whole (its
+  corners not asked for) and its way open (air, water, the fire and its fuel, sculk veins), the way
+  fills with the veil, with a shriek and a burst of soul fire. Stepping into it takes anyone, of any
+  level, to Fengdu's terrace before its Gate of Ghosts (the frame, and which side of it they stood,
+  remembered for them, through death too).
+- **The Gate of Ghosts, sealed** (`FengduGate`, its rules in `GateRules`, pure, unit-tested): its way
+  is barred with iron, and the veil burns in it only for those who fought for it. Each arrival by an
+  Ancient City's frame raises a **swarm** of Hell's soldiers out of the terrace, every time: three
+  waves, each rising when all but one of the last have fallen (five **Yin soldiers**; six more with
+  their captain; then the gate's own guards, **Ox-Head and Horse-Face**, with three more), two more
+  soldiers a wave (one in the last) for each pilgrim on the terrace past the first, sixteen in all
+  for one; at the level of the highest of those there (no level is asked of anyone; never over
+  Hell's 66). They are kept to the terrace (one that strays 22 blocks or falls off it is brought
+  back), never despawn by themselves, and do not care that nothing spawns in Fengdu's country (they
+  are raised, not spawned). A pilgrim who arrives while a swarm stands raises another vanguard at
+  once. The swarm rises, and is beaten, only while someone is at the gate; with no one within 64
+  blocks for 30 seconds it sinks back into the ground and is forgotten (any of it left in an unloaded
+  chunk is turned away when the chunk loads). When the last soldier falls the gate **ignites by
+  itself** (the bars gone, the veil roaring up with soul fire), and every pilgrim on the terrace who
+  came by the frame may pass down to Hell's arrival plaza (`JTTWDimensions.teleportTo`, as every
+  traveller). No one else may, though the veil burns before them: not one who walked to Fengdu
+  over the land, nor one who watched. Leave is lost on leaving Fengdu (64 blocks from the gate, or
+  another world, or death), so every trip down from an Ancient City is fought again. **It seals
+  again** once no one who may pass has been within 64 blocks for ten seconds (they have gone down,
+  or away), and at once when a new swarm rises.
+- **Two ways, as a nether portal's**: the Gate of Ghosts on Hell's arrival plaza has a **side door**
   either side of its arch (the arch's own way stays the road's), each filled with the veil: standing
   in one takes anyone back **up** to Fengdu, onto its terrace just before its Gate of Ghosts, facing
-  away from it (if the city is not there, onto the ground there). One arrives out of the veils on
-  either side, so no one is sent straight back. Sun Wukong's level-30 sending and the Dragon's and
-  Wukong's dimension travel are unchanged.
-- **The Earth God's Luopan**: Hell's band is pointed to Fengdu (see the luopan, above); in Hell,
-  sneaking, to the side doors.
+  away from it (if the city is not there, onto the ground there), and the gate burns for them, so
+  they may step straight back down. Fengdu's gate has a **side door** of its own in each of its
+  screen walls (古城, back to the Ancient City): standing in one takes anyone back to the Ancient City
+  they came by, before its frame on the side they went in by; one who never came by a city is taken
+  to the lit frame nearest Fengdu, and if none has ever been lit, nowhere. Sun Wukong's level-30
+  sending and the Dragon's and Wukong's dimension travel are unchanged.
+- **Old worlds**: a Fengdu laid before the gate was sealed (its way open with the veil, no side
+  doors) has its gate laid again from the blueprint, sealed, with its side doors and signs, as soon
+  as anyone comes near it (as an old Hell's side doors are set up, `HellWorks.ensureReturnDoors`).
+- **Yin soldiers** (阴兵, `entity/hell/YinSoldierEntity`, Hell's, level 57 by itself): the dead who
+  served as soldiers, raised under Hell's banner: 2.5 hits, a blow of 6%, quick, a long reach of
+  sight; in dark lamellar armour with a bronze mirror plate, a helmet with a neck guard and a red
+  crest, a halberd, grey faces and soul-fire eyes; captains in violet and gold. Met only before
+  Fengdu's gate. Hell's own: killing one is no deed either way; undead (+2 Heavenly). Hell Bank
+  Notes and bones. Art: `HellRenderers.soldierLayer` (the guards' frame at a person's size), skins
+  from `assets_source/yin_soldier.py`.
+- **The Earth God's Luopan**: Hell's band is pointed to the nearest Ancient City and told the way in
+  (see the luopan, above); in Hell, sneaking, to the side doors.
 - **Art**: the ghost veil's 32-frame animated texture from `assets_source/ghost_gate.py`; everything
   else vanilla blocks.
 - **Tests and pictures**: `FengduPlacementTest` (one a world, in its ring past Lion-Camel Ridge and
   farther than every zone, on its hosts, never on a zone's ground, the same for the same seed; a
   place of no band; the hill, the city and the road inside the region; the hill's shape and floor);
-  `FengduGameTests` (anyone, of any kind and level, taken down to Hell's plaza, stepping out in time
+  `AncientFrameTest` (the frame found from every block of its way either way it runs, in each of
+  vanilla's city centres as the game's own structure files lay it; not where its ring is broken,
+  its way blocked or the shape another's); `GateRulesTest` (who may pass, when it burns and seals,
+  the swarm's waves and size, the soldiers' level); `FengduGameTests` (anyone the burning gate lets
+  pass, of any kind and level, taken down to Hell's plaza, and no one else, stepping out in time
   sparing them; the side doors in Hell, the road's way open, and back up to Fengdu's terrace before
-  its gate, and down again through it; the luopan for levels 57–66 and in Hell, sneaking or not; the
-  blueprint: the veil in the gate, the gate, the palace and the temples reachable on foot from
-  outside the walls, room to stand where one comes back, every sign on a wall); gallery scenes
-  `-Pgallery.only=fengdu_` (the gate from the road, from above, the Gate of Ghosts and its veil, the
-  palace inside and out, the avenue, the shrines, the City God's temple) and `hell_gate_doors`;
-  in a real world with `./gradlew runWorldgenBench -Pbench.mode=zones` (Fengdu's place, its floor,
-  its veil, and pictures from the road, before its Gate of Ghosts and over the city).
+  its gate, which burns for them, and down again through it; the luopan for levels 57–66, with and
+  without an Ancient City known, at Fengdu, and in Hell, sneaking or not; the blueprint: the gate's
+  way barred, its side doors' veils, the gate, the doors, the palace and the temples reachable on
+  foot from outside the walls, room to stand where one comes back, every sign on a wall);
+  `AncientGateGameTests` (soul fire lighting a built frame either way, and not a broken one, nor
+  plain fire; through the frame to Fengdu, the swarm rising wave by wave at the pilgrim's level, a
+  stray brought back, the gate barred until the last falls, then burning, and down to Hell; a walker
+  over the land getting nowhere, even with the gate burning for another; the gate sealing again,
+  and at once for a new arrival; the side doors back to the city, on the side one went in by, and
+  for a stranger to a lit frame; an old city's open gate sealed and given its doors; a stray soldier
+  of a forgotten swarm turned away); gallery scenes `-Pgallery.only=fengdu_` (the gate from the road,
+  from above, the Gate of Ghosts sealed, its guard risen, igniting and burning, a side door, the
+  palace inside and out, the avenue, the shrines, the City God's temple), `ancient_frame` (the frame
+  as vanilla lays it, lighting and lit), `hell_yin_soldier` and `hell_gate_doors`; in a real world
+  with `./gradlew runWorldgenBench -Pbench.mode=zones` (Fengdu's place, its floor, its gate sealed
+  and its side doors, and pictures from the road, before its Gate of Ghosts and over the city).
 
 ---
 

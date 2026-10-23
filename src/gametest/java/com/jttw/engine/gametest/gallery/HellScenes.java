@@ -144,6 +144,15 @@ final class HellScenes {
                     creature(p, ModEntities.WANDERING_GHOST.get(), 3.5, 8.5, 150f, true);
                 }, PAIR),
                 scene("hell_ghost_close", p -> creature(p, ModEntities.WANDERING_GHOST.get(), 0.5, 6.5, 170f, false), CLOSE),
+                // the Yin soldiers, the guard that rises before Fengdu's Gate of Ghosts: a file of them, their captain among them
+                scene("hell_yin_soldiers", p -> {
+                    creature(p, ModEntities.YIN_SOLDIER.get(), -2.5, 8.0, 190f, false);
+                    creature(p, ModEntities.YIN_SOLDIER.get(), 0.5, 9.5, 180f, true);
+                    creature(p, ModEntities.YIN_SOLDIER.get(), 3.5, 8.0, 165f, false);
+                }, PAIR),
+                scene("hell_yin_soldier_close", p -> creature(p, ModEntities.YIN_SOLDIER.get(), 0.5, 6.5, 165f, false), CLOSE),
+                scene("hell_yin_soldier_side", p -> creature(p, ModEntities.YIN_SOLDIER.get(), 0.5, 6.5, 90f, false), CLOSE),
+                scene("hell_yin_soldier_back", p -> creature(p, ModEntities.YIN_SOLDIER.get(), 0.5, 6.5, 0f, true), CLOSE),
                 // the Ten Kings, in two rows of five: the First to the Fifth behind, the Sixth to the Tenth before
                 scene("hell_kings", p -> {
                     for (int n = 1; n <= 10; n++) {

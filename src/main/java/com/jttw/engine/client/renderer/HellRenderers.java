@@ -7,6 +7,7 @@ import com.jttw.engine.entity.hell.JudgeClerkEntity;
 import com.jttw.engine.entity.hell.KingOfHellEntity;
 import com.jttw.engine.entity.hell.OxHeadEntity;
 import com.jttw.engine.entity.hell.WanderingGhostEntity;
+import com.jttw.engine.entity.hell.YinSoldierEntity;
 import com.jttw.engine.entity.zone.ZoneMonster;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -34,8 +35,10 @@ import net.minecraft.world.entity.Mob;
  * Black and White Impermanence (long robes, tall hats; the White's long red tongue), the wandering
  * ghosts (pale, legless, trailing away, half there), and the Ten Kings (a judge's robe and wide
  * sleeves, a jade belt, the flat crown with its strings of beads, the ivory tablet held before
- * him; one frame, each king his own colours). Skins painted by {@code assets_source/hell_guards.py},
- * {@code hell_officials.py} and {@code hell_kings.py}.
+ * him; one frame, each king his own colours), and the Yin soldiers (dark lamellar armour, a
+ * crested helmet, a halberd, a grey face and burning eyes). Skins painted by
+ * {@code assets_source/hell_guards.py}, {@code hell_officials.py}, {@code hell_kings.py} and
+ * {@code yin_soldier.py}.
  */
 public final class HellRenderers {
 
@@ -51,7 +54,7 @@ public final class HellRenderers {
 
     public static final ModelLayerLocation OX_LAYER = layer("ox_head"), HORSE_LAYER = layer("horse_face"),
             CLERK_LAYER = layer("judge_clerk"), IMPERMANENCE_LAYER = layer("impermanence"), GHOST_LAYER = layer("wandering_ghost"),
-            KING_LAYER = layer("king_of_hell");
+            KING_LAYER = layer("king_of_hell"), SOLDIER_LAYER = layer("yin_soldier");
 
     /** A box of steel, for the weapons' small parts (a swatch of the skin at 112, 40). */
     private static CubeListBuilder steel() {
@@ -398,6 +401,54 @@ public final class HellRenderers {
 
         @Override
         protected boolean shouldShowName(WanderingGhostEntity e) {
+            return super.shouldShowName(e) && entityRenderDispatcher.distanceToSqr(e) < 24 * 24;
+        }
+    }
+
+    // ── The Yin soldiers ────────────────────────────────────────────────
+
+    /**
+     * A soldier's frame (128x64), a person's size: the guards' cuirass, armoured skirt and pauldrons;
+     * a helmet with a neck guard and a red crest along its top; a halberd (a ji: a spike, a crescent
+     * blade to one side, a red tassel under them) upright in the right hand.
+     */
+    public static LayerDefinition soldierLayer() {
+        MeshDefinition mesh = guardMesh();
+        PartDefinition root = mesh.getRoot();
+        PartDefinition head = root.getChild("head");
+        head.addOrReplaceChild("helmet", CubeListBuilder.create().texOffs(64, 24).addBox(-4.5f, -9, -4.5f, 9, 5, 9, new CubeDeformation(0.15f)), PartPose.ZERO);
+        head.addOrReplaceChild("neck_guard", CubeListBuilder.create().texOffs(64, 40).addBox(-4.5f, -4, 2.5f, 9, 3, 2, new CubeDeformation(0.2f)), PartPose.ZERO);
+        head.addOrReplaceChild("crest", CubeListBuilder.create().texOffs(100, 24).addBox(-0.5f, -12.5f, -3, 1, 4, 6), PartPose.ZERO);
+        PartDefinition ji = root.getChild("right_arm").addOrReplaceChild("halberd", CubeListBuilder.create().texOffs(120, 0)
+                .addBox(-0.5f, -20, -0.5f, 1, 30, 1), PartPose.offset(-1, 10, 0));
+        ji.addOrReplaceChild("spike", steel().addBox(-0.5f, -26, -0.5f, 1, 6, 1), PartPose.ZERO);
+        ji.addOrReplaceChild("blade", steel().addBox(0.5f, -23, -0.5f, 3, 2, 1), PartPose.ZERO);
+        ji.addOrReplaceChild("blade_tip", steel().addBox(2.5f, -25, -0.5f, 1, 2, 1), PartPose.ZERO);
+        ji.addOrReplaceChild("tassel", CubeListBuilder.create().texOffs(100, 40).addBox(-1, -20, -1, 2, 2, 2), PartPose.ZERO);
+        return LayerDefinition.create(mesh, 128, 64);
+    }
+
+    public static final class SoldierRenderer extends HumanoidMobRenderer<YinSoldierEntity, GuardModel<YinSoldierEntity>> {
+        private static final ResourceLocation SKIN = tex("yin_soldier"), CAPTAIN = tex("yin_soldier_captain");
+        private static final RenderType EYES = RenderType.eyes(tex("yin_soldier_eyes"));
+
+        public SoldierRenderer(EntityRendererProvider.Context ctx) {
+            super(ctx, new GuardModel<>(ctx.bakeLayer(SOLDIER_LAYER)), 0.45f);
+            addLayer(new EyesLayer<>(this) {
+                @Override
+                public RenderType renderType() {
+                    return EYES;
+                }
+            });
+        }
+
+        @Override
+        public ResourceLocation getTextureLocation(YinSoldierEntity e) {
+            return e.isCaptain() ? CAPTAIN : SKIN;
+        }
+
+        @Override
+        protected boolean shouldShowName(YinSoldierEntity e) {
             return super.shouldShowName(e) && entityRenderDispatcher.distanceToSqr(e) < 24 * 24;
         }
     }

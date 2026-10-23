@@ -1,6 +1,5 @@
 package com.jttw.engine.world.fengdu;
 
-import com.jttw.engine.registry.ModBlocks;
 import com.jttw.engine.world.hell.Site;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -10,6 +9,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.CandleBlock;
+import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.LanternBlock;
 import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.SlabBlock;
@@ -41,13 +41,15 @@ import java.util.List;
  *       graveyards;</li>
  *   <li><b>the upper city</b>, a terrace {@value #TERRACE_H} blocks up across its north half, up
  *       three flights of steps: on it the <b>Gate of Ghosts</b> (鬼门关), a great arch of black
- *       stone and red, its way filled with the ghost veil ({@code GhostGateBlock}: step into it and
- *       you are taken down to Diyu), between screen walls with a brazier before each; behind it the
+ *       stone and red, its way barred, sealed (it burns open with the ghost veil only for those who
+ *       come by an Ancient City's frame and break the guard that rises: {@code FengduGate}),
+ *       between screen walls with a brazier before each, a side door in each wall filled with the
+ *       veil, the way back to the Ancient City ({@code GhostGateBlock.Way.CITY}); behind it the
  *       <b>Palace of the Son of Heaven</b> (天子殿), King Yama's, his throne on its dais, an incense
  *       burner before its steps; to its west the Temple of the City God (城隍庙) and to its east the
  *       Hall of the Judges (判官殿).</li>
  * </ul>
- * No one lives here and nothing fights here: it is a place to pass through. Local y 0 is the city's
+ * No one lives here, and nothing fights here but the guard that rises before the Gate of Ghosts. Local y 0 is the city's
  * ground (its paving), (0, 0) the region's centre, the main gate toward +z.
  */
 public final class FengduCity {
@@ -80,6 +82,8 @@ public final class FengduCity {
     public static final int GHOST_Z = -7, VEIL_HALF = 2, VEIL_H = 6, PILLAR_IN = 3, PILLAR_OUT = 4;
     /** Its screen walls reach this far either side. */
     public static final int SCREEN_TO = 9;
+    /** The side doors in the screen walls, the way back to the Ancient City: their way between these (either side), this high over the terrace. */
+    public static final int SIDE_DOOR_IN = 6, SIDE_DOOR_OUT = 7, SIDE_DOOR_H = 3;
     /** Where one comes back up out of Diyu: before the Gate of Ghosts, on the terrace (local x, z; standing on the terrace). */
     public static final int RETURN_X = 0, RETURN_Z = GHOST_Z + 4;
 
@@ -138,9 +142,19 @@ public final class FengduCity {
                 : s(Blocks.DEEPSLATE_BRICKS);
     }
 
-    /** The ghost veil, its plane along x (the Gate of Ghosts faces south). */
-    private static BlockState veil() {
-        return ModBlocks.GHOST_GATE.get().defaultBlockState().setValue(GhostGateBlock.AXIS, Direction.Axis.X);
+    /** The Gate of Ghosts' way, burning: the ghost veil down to Diyu, its plane along x (the gate faces south). */
+    public static BlockState burning() {
+        return GhostGateBlock.veil(Direction.Axis.X, GhostGateBlock.Way.HELL);
+    }
+
+    /** The Gate of Ghosts' way, sealed: iron bars across it, joined to each other and to the arch's pillars. */
+    public static BlockState sealed() {
+        return Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.EAST, true).setValue(IronBarsBlock.WEST, true);
+    }
+
+    /** A side door's veil, the way back to the Ancient City. */
+    private static BlockState backToTheCity() {
+        return GhostGateBlock.veil(Direction.Axis.X, GhostGateBlock.Way.CITY);
     }
 
     /**
@@ -229,7 +243,9 @@ public final class FengduCity {
             new Sign(0, 7, ARCH_Z + 1, Direction.SOUTH, "丰都鬼城", "Fengdu", "the Ghost City"),
             new Sign(0, 7, ARCH_Z - 1, Direction.NORTH, "黄泉路", "The Road to", "the Yellow Springs"),
             new Sign(-1, TERRACE_H + VEIL_H + 1, GHOST_Z + 2, Direction.SOUTH, "鬼门关", "The Gate", "of Ghosts"),
-            new Sign(1, TERRACE_H + VEIL_H + 1, GHOST_Z + 2, Direction.SOUTH, "Step through:", "Diyu, the", "underworld,", "lies beyond"),
+            new Sign(1, TERRACE_H + VEIL_H + 1, GHOST_Z + 2, Direction.SOUTH, "Sealed. It burns", "open for those", "who come by the", "Ancient City"),
+            new Sign(-SIDE_DOOR_IN, TERRACE_H + SIDE_DOOR_H + 1, GHOST_Z + 1, Direction.SOUTH, "古城", "Back to the", "Ancient City"),
+            new Sign(SIDE_DOOR_IN, TERRACE_H + SIDE_DOOR_H + 1, GHOST_Z + 1, Direction.SOUTH, "古城", "Back to the", "Ancient City"),
             new Sign(0, TERRACE_H + 1 + HALL_H, HALL_S + 1, Direction.SOUTH, "天子殿", "Palace of the", "Son of Heaven", "(King Yama)"),
             new Sign(-TEMPLE_IN + 1, TERRACE_H + 4, (TEMPLE_N + TEMPLE_S) / 2, Direction.EAST, "城隍庙", "Temple of", "the City God"),
             new Sign(TEMPLE_IN - 1, TERRACE_H + 4, (TEMPLE_N + TEMPLE_S) / 2, Direction.WEST, "判官殿", "Hall of", "the Judges"));
@@ -498,9 +514,15 @@ public final class FengduCity {
         return null;
     }
 
-    /** Whether local (x, y, z) is in the Gate of Ghosts' veil ({@code y} over the city's ground). */
+    /** Whether local (x, y, z) is in the Gate of Ghosts' way, where its veil burns when it is open ({@code y} over the city's ground). */
     public static boolean inVeil(int x, int y, int z) {
         return z == GHOST_Z && Math.abs(x) <= VEIL_HALF && y > TERRACE_H && y <= TERRACE_H + VEIL_H;
+    }
+
+    /** Whether local (x, y, z) is in one of the side doors' veils, the way back to the Ancient City. */
+    public static boolean inSideDoor(int x, int y, int z) {
+        int ax = Math.abs(x);
+        return z == GHOST_Z && ax >= SIDE_DOOR_IN && ax <= SIDE_DOOR_OUT && y > TERRACE_H && y <= TERRACE_H + SIDE_DOOR_H;
     }
 
     /** The Gate of Ghosts, {@code h} over the terrace: null where it is not. */
@@ -509,7 +531,7 @@ public final class FengduCity {
         // braziers of soul fire before it
         if (ax == 6 && dz == 3) return h == 1 ? s(Blocks.POLISHED_BLACKSTONE_WALL) : h == 2 ? s(Blocks.SOUL_CAMPFIRE) : null;
         if (Math.abs(dz) > 2) return null;
-        if (h >= 1 && h <= VEIL_H && dz == 0 && ax <= VEIL_HALF) return veil();
+        if (h >= 1 && h <= VEIL_H && dz == 0 && ax <= VEIL_HALF) return sealed();
         // the arch: two pillars a side, two wide and three deep, black stone on gold feet
         boolean pillar = (ax == PILLAR_IN || ax == PILLAR_OUT) && Math.abs(dz) <= 1;
         if (pillar && h <= VEIL_H) return h == 1 ? s(Blocks.GILDED_BLACKSTONE) : ax == PILLAR_IN && dz == 0 ? s(Blocks.RED_NETHER_BRICKS) : s(Blocks.POLISHED_BLACKSTONE_BRICKS);
@@ -525,9 +547,15 @@ public final class FengduCity {
             return r;
         }
         if (h == VEIL_H + 2 && ax == 5 && Math.abs(dz) == 2) return hanging(Blocks.SOUL_LANTERN);
-        // the screen walls either side: red, a cap of dark tile, black posts at their ends
+        // the screen walls either side: red, a cap of dark tile, black posts at their ends; a side
+        // door through each, between black jambs under a gilded lintel, filled with the veil
         if (dz == 0 && ax > PILLAR_OUT && ax <= SCREEN_TO) {
             if (ax == SCREEN_TO) return h <= 5 ? s(Blocks.POLISHED_BLACKSTONE_BRICKS) : h == 6 ? slab(Blocks.POLISHED_BLACKSTONE_SLAB) : null;
+            if (ax >= SIDE_DOOR_IN && ax <= SIDE_DOOR_OUT && h >= 1 && h <= SIDE_DOOR_H) return backToTheCity();
+            if (ax >= SIDE_DOOR_IN && ax <= SIDE_DOOR_OUT && h == SIDE_DOOR_H + 1) return s(Blocks.GILDED_BLACKSTONE);
+            if ((ax == SIDE_DOOR_IN - 1 || ax == SIDE_DOOR_OUT + 1) && h >= 1 && h <= SIDE_DOOR_H + 1) {
+                return h == 1 ? s(Blocks.GILDED_BLACKSTONE) : s(Blocks.POLISHED_BLACKSTONE_BRICKS);
+            }
             if (h <= 4) return h == 1 ? s(Blocks.POLISHED_BLACKSTONE_BRICKS) : s(Blocks.RED_TERRACOTTA);
             if (h == 5) return slab(Blocks.DEEPSLATE_TILE_SLAB);
         }
@@ -611,6 +639,30 @@ public final class FengduCity {
         if (h == TEMPLE_H && ax == (TEMPLE_IN + TEMPLE_OUT) / 2 && Math.floorMod(z - TEMPLE_N, 5) == 2) return hanging(Blocks.SOUL_LANTERN);
         if (h == 1 && Math.abs(z - door) == 0 && ax > TEMPLE_IN && ax < TEMPLE_OUT - 1) return s(Blocks.RED_CARPET);
         return s(Blocks.AIR);
+    }
+
+    /** The Gate of Ghosts' reach (local): x either side, z from and to, and heights over the city's ground. */
+    public static final int GATE_REACH_X = SCREEN_TO + 3, GATE_REACH_N = GHOST_Z - 2, GATE_REACH_S = GHOST_Z + 3,
+            GATE_LOW = TERRACE_H + 1, GATE_TOP = TERRACE_H + VEIL_H + 6;
+
+    /**
+     * Lays the Gate of Ghosts again round {@code ground} (the city's ground at its centre) from the
+     * blueprint, sealed, its side doors and its signs with it: a city laid before the gate was
+     * sealed (its way open with the veil, no side doors) is brought up to date so.
+     */
+    public static void layGate(WorldGenLevel level, BlockPos ground) {
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        for (int x = -GATE_REACH_X; x <= GATE_REACH_X; x++) for (int z = GATE_REACH_N; z <= GATE_REACH_S; z++) {
+            for (int y = GATE_LOW; y <= GATE_TOP; y++) {
+                BlockState s = at(x, y, z);
+                if (s != null) level.setBlock(p.set(ground.getX() + x, ground.getY() + y, ground.getZ() + z), s, Block.UPDATE_ALL);
+            }
+        }
+        for (Sign sign : SIGNS) {
+            if (Math.abs(sign.x()) <= GATE_REACH_X && sign.z() >= GATE_REACH_N && sign.z() <= GATE_REACH_S && sign.y() >= GATE_LOW) {
+                putSign(level, ground.offset(sign.x(), sign.y(), sign.z()), sign);
+            }
+        }
     }
 
     /** Lays the whole city round {@code ground} (its ground's level at the centre) at once, its signs too: the gallery's, and tests'. */

@@ -226,7 +226,7 @@ public class TransformAbilityGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(template = PLATFORM, batch = "evokerSummonsAFangLine") // its line of fangs runs past the platform, into the next test's ground
     public static void evokerSummonsAFangLine(GameTestHelper h) {
         ServerPlayer p = Tf.playerAs(h, EntityType.EVOKER);
         Tf.rightClick(p);

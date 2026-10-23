@@ -143,9 +143,11 @@ final class ZoneBench {
                 int floor = com.jttw.engine.world.feature.FengduFeature.cityFloor(level, c[0], c[1]);
                 int t = com.jttw.engine.world.fengdu.FengduCity.TERRACE_H;
                 if (ticks == 1) {
-                    BlockPos veil = new BlockPos(c[0], floor + t + 1, c[1] + com.jttw.engine.world.fengdu.FengduCity.GHOST_Z);
-                    report.add(String.format("  fengdu: its floor y %d; the Gate of Ghosts' veil at %s: %s", floor, veil.toShortString(),
-                            level.getBlockState(veil).is(com.jttw.engine.registry.ModBlocks.GHOST_GATE.get()) ? "yes" : "NO"));
+                    BlockPos way = new BlockPos(c[0], floor + t + 1, c[1] + com.jttw.engine.world.fengdu.FengduCity.GHOST_Z);
+                    BlockPos door = way.offset(com.jttw.engine.world.fengdu.FengduCity.SIDE_DOOR_IN, 0, 0);
+                    report.add(String.format("  fengdu: its floor y %d; the Gate of Ghosts at %s sealed: %s; a side door's veil: %s", floor,
+                            way.toShortString(), level.getBlockState(way).is(net.minecraft.world.level.block.Blocks.IRON_BARS) ? "yes" : "NO",
+                            level.getBlockState(door).is(com.jttw.engine.registry.ModBlocks.GHOST_GATE.get()) ? "yes" : "NO"));
                     p.teleportTo(level, c[0] + 9.5, floor + 9, c[1] + com.jttw.engine.world.fengdu.FengduCity.ARCH_Z + 26.5, 172f, 6f);
                 }
                 if (ticks == 90) shoot("unique_fengdu_road_" + seed);

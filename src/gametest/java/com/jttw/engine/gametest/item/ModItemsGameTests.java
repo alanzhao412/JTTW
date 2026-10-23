@@ -136,6 +136,7 @@ public class ModItemsGameTests {
             Map.entry("black_impermanence_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
             Map.entry("white_impermanence_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
             Map.entry("wandering_ghost_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("yin_soldier_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
             Map.entry("king_qinguang_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
             Map.entry("king_chujiang_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
             Map.entry("king_songdi_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),

@@ -101,7 +101,12 @@ final class AbilityScenes {
             java.util.Map.entry("fengdu_gate", 140), java.util.Map.entry("fengdu_above", 100), java.util.Map.entry("fengdu_ghost_gate", 80),
             java.util.Map.entry("fengdu_ghost_gate_close", 60), java.util.Map.entry("fengdu_palace", 80), java.util.Map.entry("fengdu_palace_inside", 60),
             java.util.Map.entry("fengdu_avenue", 80), java.util.Map.entry("fengdu_shrines", 60), java.util.Map.entry("fengdu_temple", 60),
-            java.util.Map.entry("hell_gate_doors", 100));
+            java.util.Map.entry("hell_gate_doors", 100),
+            // Fengdu's gate sealed, fought open and burning; the Ancient City's frame, built off the stage
+            java.util.Map.entry("fengdu_gate_sealed", 100), java.util.Map.entry("fengdu_gate_sealed_close", 60), java.util.Map.entry("fengdu_swarm", 100),
+            java.util.Map.entry("fengdu_swarm_close", 80), java.util.Map.entry("fengdu_gate_igniting", 100), java.util.Map.entry("fengdu_gate_burning", 200),
+            java.util.Map.entry("fengdu_side_door", 60), java.util.Map.entry("ancient_frame", 80), java.util.Map.entry("ancient_frame_lighting", 80),
+            java.util.Map.entry("ancient_frame_lit", 80));
 
         /** Set by a scene that photographs a screen (a furnace's, say), so the gallery leaves it open. */
     static volatile boolean keepScreen;
