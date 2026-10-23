@@ -99,7 +99,16 @@ public class ModItemsGameTests {
             Map.entry("ao_guang_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
             Map.entry("ao_qin_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
             Map.entry("ao_run_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
-            Map.entry("ao_shun_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class));
+            Map.entry("ao_shun_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("ember_core", Item.class),
+            Map.entry("furnace_brick", Item.class),
+            Map.entry("flame_rock", BlockItem.class),
+            Map.entry("cinder_ash", BlockItem.class),
+            Map.entry("burning_earth", BlockItem.class),
+            Map.entry("ember_imp_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("furnace_brute_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("strong_general_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("red_boy_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class));
 
     @GameTest(template = PLATFORM)
     public static void everyModItemIsRegisteredUnderItsIdAsTheRightClass(GameTestHelper h) {

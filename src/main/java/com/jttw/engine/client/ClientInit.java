@@ -124,6 +124,12 @@ public final class ClientInit {
         event.registerLayerDefinition(com.jttw.engine.client.renderer.CrabGeneralRenderer.LAYER, com.jttw.engine.client.renderer.CrabGeneralRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.YakshaRenderer.LAYER, com.jttw.engine.client.renderer.YakshaRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.DragonKingRenderer.LAYER, com.jttw.engine.client.renderer.DragonKingRenderer::layer);
+        // the Flaming Mountains
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.EmberImpRenderer.LAYER, com.jttw.engine.client.renderer.EmberImpRenderer::layer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.FurnaceBruteRenderer.LAYER, com.jttw.engine.client.renderer.FurnaceBruteRenderer::layer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.StrongGeneralRenderer.LAYER, com.jttw.engine.client.renderer.StrongGeneralRenderer::layer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.RedBoyRenderer.LAYER, com.jttw.engine.client.renderer.RedBoyRenderer::layer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.FireCartRenderer.LAYER, com.jttw.engine.client.renderer.FireCartRenderer::layer);
     }
 
     // ── Entity renderers (MOD bus) ─────────────────────────────────
@@ -174,6 +180,12 @@ public final class ClientInit {
         event.registerEntityRenderer(ModEntities.AO_RUN.get(), com.jttw.engine.client.renderer.DragonKingRenderer::new);
         event.registerEntityRenderer(ModEntities.AO_SHUN.get(), com.jttw.engine.client.renderer.DragonKingRenderer::new);
         event.registerEntityRenderer(ModEntities.SEA_BOLT.get(), ctx -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(ctx, 1.5f, true));
+        event.registerEntityRenderer(ModEntities.EMBER_IMP.get(), com.jttw.engine.client.renderer.EmberImpRenderer::new);
+        event.registerEntityRenderer(ModEntities.FURNACE_BRUTE.get(), com.jttw.engine.client.renderer.FurnaceBruteRenderer::new);
+        event.registerEntityRenderer(ModEntities.STRONG_GENERAL.get(), com.jttw.engine.client.renderer.StrongGeneralRenderer::new);
+        event.registerEntityRenderer(ModEntities.RED_BOY.get(), com.jttw.engine.client.renderer.RedBoyRenderer::new);
+        event.registerEntityRenderer(ModEntities.FIRE_CART.get(), com.jttw.engine.client.renderer.FireCartRenderer::new);
+        event.registerEntityRenderer(ModEntities.EMBER_BOLT.get(), ctx -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(ctx, 0.9f, true));
         event.registerEntityRenderer(ModEntities.THROWN_SPEAR.get(),
                 com.jttw.engine.client.renderer.ThrownSpearRenderer::new);
         // Qi wave is invisible — rendered via server-sent particles only

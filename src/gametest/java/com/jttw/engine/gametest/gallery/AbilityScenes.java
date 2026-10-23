@@ -80,7 +80,9 @@ final class AbilityScenes {
     static final java.util.Map<String, Integer> LONG = java.util.Map.of("staff_fallen", 150, "staff_crossed", 150,
             "staff_obsidian", 150, "staff_obsidian_mighty", 150,
             // a palace's worth of water and glass for the client to draw from a new place
-            "waters_palace", 100, "waters_palace_hall", 100, "waters_palace_treasury", 100);
+            "waters_palace", 100, "waters_palace_hall", 100, "waters_palace_treasury", 100,
+            // the Fire Cloud Cave, laid off the stage
+            "fire_cave_gate", 100, "fire_cave_hall", 100, "fire_fanned", 60);
 
         /** Set by a scene that photographs a screen (a furnace's, say), so the gallery leaves it open. */
     static volatile boolean keepScreen;
@@ -88,6 +90,7 @@ final class AbilityScenes {
     static List<Scene> all() {
         List<Scene> all = new java.util.ArrayList<>(base());
         all.addAll(WatersScenes.all());
+        all.addAll(FireScenes.all());
         return all;
     }
 
@@ -1136,6 +1139,7 @@ final class AbilityScenes {
 
     static void reset(ServerPlayer p) {
         WatersScenes.clear(p);
+        FireScenes.clear(p);
         keepScreen = false;
         topSpeed = false;
         com.jttw.engine.client.renderer.GoldenEyesRenderer.setMode(p.getUUID(), 0);

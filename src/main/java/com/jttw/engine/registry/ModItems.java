@@ -124,6 +124,23 @@ public final class ModItems {
     public static final DeferredHolder<Item, Item> AO_SHUN_SPAWN_EGG = ITEMS.register("ao_shun_spawn_egg",
             () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.AO_SHUN, 0x1C1C24, 0xE0B040, new Item.Properties()));
 
+    // ── The Flaming Mountains ────────────────────────────────────
+    /** From Ember Imps: the coal of a little fire demon's heart, still glowing. */
+    public static final DeferredHolder<Item, Item> EMBER_CORE = ITEMS.register("ember_core", () -> new Item(new Item.Properties().fireResistant()));
+    /** From Furnace-Brick Brutes: a brick of Laozi's Eight Trigrams Furnace, fallen from Heaven. */
+    public static final DeferredHolder<Item, Item> FURNACE_BRICK = ITEMS.register("furnace_brick", () -> new Item(new Item.Properties().fireResistant()));
+    public static final DeferredHolder<Item, Item> FLAME_ROCK_ITEM = ITEMS.register("flame_rock", () -> new BlockItem(ModBlocks.FLAME_ROCK.get(), new Item.Properties()));
+    public static final DeferredHolder<Item, Item> CINDER_ASH_ITEM = ITEMS.register("cinder_ash", () -> new BlockItem(ModBlocks.CINDER_ASH.get(), new Item.Properties()));
+    public static final DeferredHolder<Item, Item> BURNING_EARTH_ITEM = ITEMS.register("burning_earth", () -> new BlockItem(ModBlocks.BURNING_EARTH.get(), new Item.Properties().fireResistant()));
+    public static final DeferredHolder<Item, Item> EMBER_IMP_SPAWN_EGG = ITEMS.register("ember_imp_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.EMBER_IMP, 0xD8401C, 0xFFC040, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> FURNACE_BRUTE_SPAWN_EGG = ITEMS.register("furnace_brute_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.FURNACE_BRUTE, 0x7A3A26, 0xFF7A1E, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> STRONG_GENERAL_SPAWN_EGG = ITEMS.register("strong_general_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.STRONG_GENERAL, 0x2A2426, 0xC8302A, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> RED_BOY_SPAWN_EGG = ITEMS.register("red_boy_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.RED_BOY, 0xD02020, 0xF2C090, new Item.Properties()));
+
     public static final DeferredHolder<Item, Item> IMMORTAL_PILL =
             ITEMS.register("jttw_immortal_pill", ImmortalItems.ImmortalPillItem::new);
 

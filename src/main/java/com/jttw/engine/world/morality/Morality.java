@@ -59,6 +59,11 @@ public final class Morality {
      * him). All four put a player past {@link #OUTLAW}. Plundering their treasuries is a lesser one.
      */
     public static final int SLAY_DRAGON_KING = -80, LOOT_DRAGON_PALACE = -10;
+    /**
+     * Red Boy, the Holy Child King, who wanted to eat the Tang Monk (chapters 40–42): subduing him is a
+     * good deed, as much as Lady White Bone. His Six Strong Generals are captains (+5 each).
+     */
+    public static final int SLAY_RED_BOY = SLAY_LADY;
     /** How recently a victim must have struck their killer for the kill to be a fight, not a murder: 10 s. */
     public static final int PROVOKED_TICKS = 200;
 
@@ -127,6 +132,7 @@ public final class Morality {
         if (victim instanceof HeavenlySoldierEntity) return KILL_SOLDIER;
         if (victim instanceof LadyWhiteBoneEntity) return SLAY_LADY;
         if (victim instanceof LadyEarthFlowEntity) return SLAY_EARTH_FLOW;
+        if (victim instanceof com.jttw.engine.entity.fire.RedBoyEntity) return SLAY_RED_BOY;
         if (victim instanceof com.jttw.engine.entity.waters.DragonKingEntity) return SLAY_DRAGON_KING;
         if (victim instanceof ZoneMonster m && m.isCaptain()) return SLAY_CAPTAIN;
         if (victim instanceof AbstractVillager) return KILL_VILLAGER;
@@ -143,6 +149,8 @@ public final class Morality {
 
     private static String killWhat(int deed, LivingEntity victim) {
         if (deed == SLAY_CAPTAIN && victim instanceof com.jttw.engine.entity.waters.SeaMonster) return "you slew a captain of the sea";
+        if (deed == SLAY_CAPTAIN && victim instanceof com.jttw.engine.entity.fire.StrongGeneralEntity) return "you struck down one of Red Boy's Six Strong Generals";
+        if (victim instanceof com.jttw.engine.entity.fire.RedBoyEntity) return "you subdued Red Boy, the Holy Child King";
         return switch (deed) {
             case SLAY_DRAGON_KING -> "you slew a Dragon King, an official of Heaven";
             case KILL_SOLDIER -> "you struck down a soldier of Heaven";

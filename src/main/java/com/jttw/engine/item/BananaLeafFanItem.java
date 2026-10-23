@@ -31,6 +31,9 @@ import java.util.List;
  *   <li>Anyone: a gust that throws back everything in front, within {@value #RANGE} blocks.</li>
  *   <li>The Bull Demon King: within {@value #BULL_RANGE} blocks, and what it fans is blown away
  *       out of sight, landing as far as 1000 blocks off; the stronger he is, the further.</li>
+ *   <li>Either: the fan that puts out the Flaming Mountains: each wave quenches the burning earth and
+ *       the fire in its sweep for a minute (see {@link com.jttw.engine.world.fire.FireMountain#quench}),
+ *       out to 12 blocks, 20 in the Bull Demon King's hand. Not the True Samadhi Fire.</li>
  * </ul>
  */
 public class BananaLeafFanItem extends Item {
@@ -76,6 +79,9 @@ public class BananaLeafFanItem extends Item {
             }
         }
         ServerLevel level = p.serverLevel();
+        // and it puts out the mountain's fire
+        com.jttw.engine.world.fire.FireMountain.quench(level, eye, look,
+                bull ? com.jttw.engine.world.fire.FireMountain.BULL_QUENCH_REACH : com.jttw.engine.world.fire.FireMountain.QUENCH_REACH);
         for (int i = 1; i <= range; i++) {
             Vec3 at = eye.add(look.scale(i));
             level.sendParticles(ParticleTypes.CLOUD, at.x, at.y - 0.4, at.z, bull ? 6 : 3, i * 0.12, 0.2, i * 0.12, 0.05);
@@ -88,6 +94,8 @@ public class BananaLeafFanItem extends Item {
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.literal("A gust that throws back").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.literal("everything in front.").withStyle(ChatFormatting.GRAY));
+        tooltip.add(Component.literal("Puts out burning ground").withStyle(ChatFormatting.GRAY));
+        tooltip.add(Component.literal("and fire in its sweep a while.").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.literal("Bull Demon King:").withStyle(ChatFormatting.GOLD));
         tooltip.add(Component.literal(" blows them away, up to").withStyle(ChatFormatting.GOLD));
         tooltip.add(Component.literal(" 1000 blocks by his strength.").withStyle(ChatFormatting.GOLD));

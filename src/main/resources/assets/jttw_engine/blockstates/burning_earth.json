@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "lit=true": [
+      {
+        "model": "jttw_engine:block/burning_earth"
+      },
+      {
+        "model": "jttw_engine:block/burning_earth",
+        "y": 90
+      },
+      {
+        "model": "jttw_engine:block/burning_earth",
+        "y": 180
+      },
+      {
+        "model": "jttw_engine:block/burning_earth",
+        "y": 270
+      }
+    ],
+    "lit=false": [
+      {
+        "model": "jttw_engine:block/burning_earth_quenched"
+      },
+      {
+        "model": "jttw_engine:block/burning_earth_quenched",
+        "y": 90
+      },
+      {
+        "model": "jttw_engine:block/burning_earth_quenched",
+        "y": 180
+      },
+      {
+        "model": "jttw_engine:block/burning_earth_quenched",
+        "y": 270
+      }
+    ]
+  }
+}

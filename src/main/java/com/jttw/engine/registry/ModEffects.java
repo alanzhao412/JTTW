@@ -35,6 +35,10 @@ public final class ModEffects {
     public static final DeferredHolder<MobEffect, MobEffect> EXHAUSTED = EFFECTS.register("exhausted",
             () -> new MobEffect(MobEffectCategory.HARMFUL, 0x6B6B78) {});
 
+    /** Red Boy's True Samadhi Fire, burning (see {@link com.jttw.engine.world.fire.SamadhiFire}): no water nor milk puts it out. */
+    public static final DeferredHolder<MobEffect, MobEffect> SAMADHI_FIRE = EFFECTS.register("samadhi_fire",
+            com.jttw.engine.world.fire.SamadhiFire.Burning::new);
+
     public static void register(IEventBus modEventBus) {
         EFFECTS.register(modEventBus);
     }

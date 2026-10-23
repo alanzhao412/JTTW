@@ -205,8 +205,20 @@ public final class Zones {
             TagKey.create(Registries.BIOME, id("mystical_waters_hosts")), ZoneLayout.MYSTICAL_WATERS, Vertical.WHOLE_COLUMN,
             47, 56, 110).hostSampledAt(60);
 
+    public static final ResourceKey<Biome> FIRE_MOUNTAIN_BIOME = ResourceKey.create(Registries.BIOME, id("fire_mountain"));
+
+    /**
+     * Levels 67-77: the Flaming Mountains (火焰山), a range of red, burning mountains eight hundred li
+     * long where nothing grows, and in their heart Red Boy's Fire Cloud Cave on Mount Haohao; over
+     * hot, dry country (desert, badlands, savanna), the whole column. It shares the ridge's hosts and
+     * gives way to it, and to every zone before it.
+     */
+    public static final Zone FIRE_MOUNTAIN = Zone.overworld(FIRE_MOUNTAIN_BIOME,
+            TagKey.create(Registries.BIOME, id("fire_mountain_hosts")), ZoneLayout.FIRE_MOUNTAIN, Vertical.WHOLE_COLUMN,
+            67, 77, 130);
+
     /** Every zone, in order: an earlier one keeps its ground from a later one sharing its heights. Append new ones. */
-    public static final List<Zone> ALL = List.of(WHITE_BONE, BOTTOMLESS, MYSTICAL_WATERS);
+    public static final List<Zone> ALL = List.of(WHITE_BONE, BOTTOMLESS, MYSTICAL_WATERS, FIRE_MOUNTAIN);
 
     /** Where the overworld zones of {@link #ALL} lie. */
     public static final ZoneMap MAP = new ZoneMap(ALL);

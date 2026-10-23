@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "jttw_engine:ember_core"
+    },
+    {
+      "item": "jttw_engine:ember_core"
+    },
+    {
+      "item": "jttw_engine:ember_core"
+    },
+    {
+      "item": "jttw_engine:furnace_brick"
+    },
+    {
+      "item": "jttw_engine:furnace_brick"
+    },
+    {
+      "item": "jttw_engine:captains_sigil"
+    }
+  ],
+  "result": {
+    "id": "jttw_engine:true_samadhi_fire"
+  }
+}
