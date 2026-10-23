@@ -93,6 +93,11 @@ public final class ModWorldgen {
             FEATURES.register("ridge_bones", () -> new com.jttw.engine.world.feature.RidgeBonesFeature(
                     net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
 
+    // Fengdu, the Ghost City: its hill, the city on it, its country
+    public static final DeferredHolder<net.minecraft.world.level.levelgen.feature.Feature<?>, net.minecraft.world.level.levelgen.feature.Feature<?>> FENGDU =
+            FEATURES.register("fengdu", () -> new com.jttw.engine.world.feature.FengduFeature(
+                    net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
     public static final DeferredHolder<net.minecraft.world.level.levelgen.feature.Feature<?>, net.minecraft.world.level.levelgen.feature.Feature<?>> HEAVEN_BUILDING =
             FEATURES.register("heaven_building", () -> new com.jttw.engine.world.heaven.HeavenFeatures.IslandBuilding(
                     net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));

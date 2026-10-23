@@ -130,6 +130,14 @@ public final class ModBlocks {
             BLOCKS.register("cloud_step", () -> new com.jttw.engine.world.wuzhuang.CloudStepBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.SNOW).strength(0.5F, com.jttw.engine.world.tough.Tough.RESISTANCE).sound(SoundType.WOOL).noLootTable()));
 
+    // ── Fengdu, the Ghost City ───────────────────────────────────
+    /** The ghost veil in a Gate of Ghosts' way: stood in, it takes a player down to Diyu or back up to Fengdu (see world.fengdu.Fengdu). */
+    public static final DeferredHolder<Block, Block> GHOST_GATE =
+            BLOCKS.register("ghost_gate", () -> new com.jttw.engine.world.fengdu.GhostGateBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_CYAN).strength(-1.0F, 3600000.0F).noLootTable().noCollission().noOcclusion()
+                    .sound(SoundType.SOUL_SAND).lightLevel(s -> 11).emissiveRendering((s, g, p) -> true)
+                    .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
+
     public static void register(IEventBus modEventBus) {
         BLOCKS.register(modEventBus);
     }

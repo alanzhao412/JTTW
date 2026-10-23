@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "jttw_engine:block/ghost_gate_ns"
+    },
+    "axis=z": {
+      "model": "jttw_engine:block/ghost_gate_ew"
+    }
+  }
+}

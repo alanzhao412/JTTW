@@ -72,11 +72,12 @@ public class EarthGodGameTests {
         eq(h, Zones.BOTTOMLESS, EarthGod.zoneFor(37), "37");
         eq(h, Zones.MYSTICAL_WATERS, EarthGod.zoneFor(50), "50");
         eq(h, Zones.HELL, EarthGod.zoneFor(60), "60");
-        eq(h, Zones.FIRE_MOUNTAIN, EarthGod.overworldZoneFor(60), "Hell's band is sent on to the Flaming Mountains");
+        eq(h, Zones.FENGDU, EarthGod.overworldZoneFor(60), "Hell's band is sent to Fengdu, the way down");
         eq(h, Zones.FIRE_MOUNTAIN, EarthGod.zoneFor(70), "70");
         eq(h, Zones.MOUNT_WUZHUANG, EarthGod.zoneFor(80), "80");
         eq(h, Zones.LION_CAMEL, EarthGod.zoneFor(100), "100");
         eq(h, Zones.LION_CAMEL, EarthGod.zoneFor(150), "past the last band, the last zone");
+        for (int lv = 1; lv <= 150; lv++) check(h, EarthGod.zoneFor(lv) != Zones.FENGDU, "Fengdu is no zone of a band: " + lv);
         eq(h, "east", EarthGod.wind(0, 0, 100, 3), "east");
         eq(h, "north-west", EarthGod.wind(0, 0, -100, -100), "north-west");
         eq(h, "south", EarthGod.wind(0, 0, 0, 100), "+z is south");
@@ -152,8 +153,8 @@ public class EarthGodGameTests {
         var nether = EarthGod.answer(Level.NETHER, new Vec3(0, 64, 0), 40, seed, Set.of());
         check(h, nether.target() == null, "in the Nether: nowhere (the needle spins)");
         var diyu = EarthGod.answer(Level.OVERWORLD, Vec3.ZERO, 60, seed, Set.of());
-        eq(h, Zones.FIRE_MOUNTAIN, diyu.zone(), "Hell's band in the overworld: the Flaming Mountains");
-        check(h, diyu.words().getString().contains("Diyu"), "told of Diyu");
+        eq(h, Zones.FENGDU, diyu.zone(), "Hell's band in the overworld: Fengdu, the way down");
+        check(h, diyu.words().getString().contains("Diyu") && diyu.words().getString().contains("Fengdu"), "told of Diyu, and of Fengdu");
         h.succeed();
     }
 }

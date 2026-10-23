@@ -31,8 +31,9 @@ import java.util.function.Consumer;
  * Hell in the form gallery: its creatures and its kings on a patch of ash and black stone before
  * the stage; and pieces of its works laid a little way off the stage from their own plan, shifted
  * there ({@link Site}'s offsets): the First Court's hall with its king, King Yama's great hall,
- * the Tenth Court with the Wheel of Reincarnation, and the Bridge of Helplessness over a stretch of
- * the Naihe (its land laid from {@link HellTerrain}). The pieces are laid once and left. Hell as it
+ * the Tenth Court with the Wheel of Reincarnation, the Bridge of Helplessness over a stretch of
+ * the Naihe (its land laid from {@link HellTerrain}), and the arrival plaza's Gate of Ghosts with its side
+ * doors, the way back up to Fengdu. The pieces are laid once and left. Hell as it
  * really is (the plaza, the road, the fortress) is seen by the zone bench's hell mode.
  */
 final class HellScenes {
@@ -42,7 +43,7 @@ final class HellScenes {
     /** The patch: x -8..8, z 1..16. */
     private static final int X0 = -8, X1 = 8, Z0 = 1, Z1 = 16;
 
-    private static boolean patch, court, yama, wheel, bridge;
+    private static boolean patch, court, yama, wheel, bridge, gate;
 
     private static int ground(ServerPlayer p) {
         return p.serverLevel().getMinBuildHeight() + 4;
@@ -201,6 +202,11 @@ final class HellScenes {
                     int[] b = HellTerrain.bridgeEnds();
                     AbilityScenes.sceneCam = cam(0, b[1] + 6, HellTerrain.GROUND + 3, BRIDGE_O, 0, b[0], HellTerrain.GROUND + 3);
                 }, p -> {}, 1, false),
+                // the Gate of Ghosts on the arrival plaza: its arch the road's, its side doors filled with the ghost veil, the way back up to Fengdu
+                new AbilityScenes.Scene("hell_gate_doors", p -> {
+                    gate(p);
+                    AbilityScenes.sceneCam = cam(5, -5, HellTerrain.GROUND + 4, GATE_O, 0, HellWorks.RETURN_DOOR_Z, HellTerrain.GROUND + 3);
+                }, p -> {}, 1, false),
                 new AbilityScenes.Scene("hell_meng_po", p -> {
                     bridge(p);
                     int[] b = HellTerrain.bridgeEnds();
@@ -212,7 +218,8 @@ final class HellScenes {
 
     /** Where each piece is laid: {ox, oz, plan height laid on the gallery's ground}. */
     private static final int[] COURT_O = {38, 470, HellTerrain.GROUND + 1}, YAMA_O = {100, 631, HellTerrain.GROUND + 1},
-            WHEEL_O = {-138, 285, HellTerrain.GROUND + 1}, BRIDGE_O = {-90, 240, HellTerrain.SEA_LEVEL - 6};
+            WHEEL_O = {-138, 285, HellTerrain.GROUND + 1}, BRIDGE_O = {-90, 240, HellTerrain.SEA_LEVEL - 6},
+            GATE_O = {-40, 150, HellTerrain.GROUND + 1};
 
     /** A camera at plan (x, y, z) looking at plan (tx, ty, tz), for a piece laid at offset {@code o}: as sceneCam (heights over the ground). */
     private static double[] cam(double x, double z, double y, int[] o, double tx, double tz, double ty) {
@@ -243,6 +250,12 @@ final class HellScenes {
                     m.setNoAi(true);
                     m.setPersistenceRequired();
                 });
+    }
+
+    private static void gate(ServerPlayer p) {
+        if (gate) return;
+        lay(p, -24, HellWorks.RETURN_DOOR_Z - 6, 24, 4, GATE_O);
+        gate = true;
     }
 
     private static void court(ServerPlayer p) {

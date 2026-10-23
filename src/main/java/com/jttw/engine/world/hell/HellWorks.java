@@ -132,6 +132,50 @@ public final class HellWorks {
                 "鬼门关", "The Gate", "of Ghosts");
         s.sign(ax + 1, G + 7, gz + 1, Blocks.DARK_OAK_WALL_SIGN.defaultBlockState().setValue(WallSignBlock.FACING, Direction.SOUTH),
                 "The Ten Courts", "lie north,", "over the Naihe.");
+        returnDoors(s);
+    }
+
+    /** The inner column of the way through each of the Gate of Ghosts' side doors, either side of its arch (x; the way is two wide, outward), and their line (z, the gate's). */
+    public static final int RETURN_DOOR_X = 8, RETURN_DOOR_Z = HellTerrain.ARRIVAL_Z - PLAZA_RADIUS + 1;
+    /** How high their ways are. */
+    public static final int RETURN_DOOR_H = 4;
+
+    /**
+     * The Gate of Ghosts' side doors, either side of its arch: each a way two wide between black posts
+     * under a gilded lintel, filled with the ghost veil, the way back up to the living (to Fengdu's
+     * own Gate of Ghosts: see {@code world/fengdu/Fengdu}); the arch's middle way stays the road's.
+     */
+    static void returnDoors(Site s) {
+        int gz = RETURN_DOOR_Z;
+        BlockState veil = com.jttw.engine.registry.ModBlocks.GHOST_GATE.get().defaultBlockState();
+        for (int side : new int[]{-1, 1}) {
+            int in = side * (RETURN_DOOR_X - 1), out = side * (RETURN_DOOR_X + 2);
+            for (int x = Math.min(in, out); x <= Math.max(in, out); x++) {
+                boolean post = x == in || x == out;
+                for (int dz = -1; dz <= 1; dz++) {
+                    s.set(x, G, gz + dz, dz == 0 && !post ? CHISELED : POLISHED);
+                    for (int y = G + 1; y <= G + RETURN_DOOR_H + 2; y++) if (dz != 0) s.set(x, y, gz + dz, AIR);
+                }
+                for (int y = G + 1; y <= G + RETURN_DOOR_H; y++) s.set(x, y, gz, post ? (y == G + 1 ? GILDED : BRICK) : veil);
+                s.set(x, G + RETURN_DOOR_H + 1, gz, post ? BRICK : GILDED);
+                s.set(x, G + RETURN_DOOR_H + 2, gz, post ? GILDED : slab(Blocks.DEEPSLATE_TILE_SLAB, SlabType.BOTTOM));
+            }
+            s.sign(side * RETURN_DOOR_X, G + RETURN_DOOR_H + 1, gz + 1,
+                    Blocks.DARK_OAK_WALL_SIGN.defaultBlockState().setValue(WallSignBlock.FACING, Direction.SOUTH),
+                    "阳间", "Back to the", "living: Fengdu,", "the Ghost City");
+        }
+    }
+
+    /**
+     * Sets up the side doors in a Hell made before there were any (its plaza laid by an older
+     * version): as a traveller arrives ({@code JTTWDimensions.teleportTo}).
+     */
+    public static void ensureReturnDoors(net.minecraft.server.level.ServerLevel hell) {
+        var veil = com.jttw.engine.registry.ModBlocks.GHOST_GATE.get();
+        if (hell.getBlockState(new net.minecraft.core.BlockPos(RETURN_DOOR_X, G + 1, RETURN_DOOR_Z)).is(veil)
+                && hell.getBlockState(new net.minecraft.core.BlockPos(-RETURN_DOOR_X, G + 1, RETURN_DOOR_Z)).is(veil)) return;
+        int reach = RETURN_DOOR_X + 3;
+        returnDoors(new Site(hell, -reach, RETURN_DOOR_Z - 1, reach, RETURN_DOOR_Z + 1, 0, 0, 0));
     }
 
     // ── The road ─────────────────────────────────────────────────────────
