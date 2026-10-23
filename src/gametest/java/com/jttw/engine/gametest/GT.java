@@ -44,6 +44,14 @@ public final class GT {
     private static final AtomicInteger PLAYERS = new AtomicInteger();
 
     /**
+     * Gives {@code p} (a {@link #player}) ears: every chat or action-bar message sent to it from now
+     * on is added to {@code heard}, its text. For tests of who says what (and who says nothing).
+     */
+    public static void listen(ServerPlayer p, java.util.List<String> heard) {
+        if (p.connection instanceof Silent s) s.heard = heard;
+    }
+
+    /**
      * The fake player the tests were written against, Forge 1.20.1's: its packets go nowhere,
      * it ignores teleport packets, it does not tick by itself and cannot be hurt, but it opens
      * menus, rides, and keeps its advancements (in memory). NeoForge 1.21.1's FakePlayer refuses
@@ -109,11 +117,28 @@ public final class GT {
                     net.minecraft.server.network.CommonListenerCookie.createInitial(player.getGameProfile(), false));
         }
 
-        @Override
-        public void send(net.minecraft.network.protocol.Packet<?> packet) {}
+        /** What it has heard, if it listens ({@link #listen}). */
+        java.util.List<String> heard;
 
         @Override
-        public void send(net.minecraft.network.protocol.Packet<?> packet, @org.jetbrains.annotations.Nullable net.minecraft.network.PacketSendListener listener) {}
+        public void send(net.minecraft.network.protocol.Packet<?> packet) {
+            hear(packet);
+        }
+
+        @Override
+        public void send(net.minecraft.network.protocol.Packet<?> packet, @org.jetbrains.annotations.Nullable net.minecraft.network.PacketSendListener listener) {
+            hear(packet);
+        }
+
+        private void hear(net.minecraft.network.protocol.Packet<?> packet) {
+            if (heard == null) return;
+            if (packet instanceof net.minecraft.network.protocol.game.ClientboundSystemChatPacket chat) heard.add(chat.content().getString());
+            else if (packet instanceof net.minecraft.network.protocol.game.ClientboundPlayerChatPacket chat) heard.add(chat.body().content());
+            else if (packet instanceof net.minecraft.network.protocol.game.ClientboundDisguisedChatPacket chat) heard.add(chat.message().getString());
+            else if (packet instanceof net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket bar) heard.add(bar.text().getString());
+            else if (packet instanceof net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket title) heard.add(title.text().getString());
+            else if (packet instanceof net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket title) heard.add(title.text().getString());
+        }
 
         @Override
         public void teleport(double x, double y, double z, float yaw, float pitch) {}

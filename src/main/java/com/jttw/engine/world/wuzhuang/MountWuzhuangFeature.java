@@ -39,7 +39,8 @@ import javax.annotation.Nullable;
  * road of lanterns from the temple gate to the rim, the cloud bridge and the cloud stair winding
  * down to the ground (a stele at its foot), and the temple, its tree and its fruit; and puts the
  * temple's household in their places (the youths by the tree, disciples about the courts), once,
- * as the chunk holding each is made.
+ * as the chunk holding each is made, each marked as the temple's ({@link TempleRecord}): they are
+ * all it will ever have. (The Great Immortal is not among them: he is away.)
  *
  * <p>It runs last of all (top-layer modification), so the ground under the island has its own
  * trees and grass first, and nothing laid later grows on the island. It lays its rock only where
@@ -289,6 +290,7 @@ public class MountWuzhuangFeature extends Feature<NoneFeatureConfiguration> {
             m.finalizeSpawn(level, level.getCurrentDifficultyAt(at), MobSpawnType.STRUCTURE, null);
             if (m instanceof ZoneMonster zm) zm.become(zm.rollRegularLevel(level.getRandom()), false);
             m.setPersistenceRequired();
+            TempleRecord.belongs(m, is.cx, is.cz);
             level.addFreshEntityWithPassengers(m);
         }
     }

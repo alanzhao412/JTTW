@@ -9,7 +9,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -29,10 +28,11 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import javax.annotation.Nullable;
 
 /**
- * A ginseng fruit (人参果) hanging on its tree: a blossom (age 0), a green fruit (1), then ripe (2),
- * a fruit shaped like a newborn child. It ripens slowly (the novel's tree fruits once in nine
- * thousand years; here each stage is one random tick in {@value #RIPEN_ONE_IN}, about an hour of
- * play). It "fears the five elements", and so:
+ * A ginseng fruit (人参果) hanging on its tree, ripe (age 2), a fruit shaped like a newborn child.
+ * The novel's tree fruits once in nine thousand years, and so here <b>never again</b>: each tree is
+ * made with its fruit ripe ({@link GinsengTree}), nothing ripens or grows back, and a fruit lost is
+ * lost for good; a world has only so many. (Ages 0 and 1, a blossom and a green fruit, are kept for
+ * worlds made before: they stay as they are.) It "fears the five elements", and so:
  * <ul>
  *   <li>struck with <b>gold</b> (a golden tool, or the temple's Golden Striker, 金击子) a ripe fruit
  *       falls whole: it must be <b>caught</b> in something lined (a Silk-Lined Tray held under it),
@@ -41,12 +41,12 @@ import javax.annotation.Nullable;
  *   <li>struck with anything else (iron, wood, a bare hand) it falls and <b>withers</b> at once;</li>
  *   <li>an unripe one only withers.</li>
  * </ul>
- * Bringing a ripe fruit down without Zhenyuan's leave is theft ({@link Wuzhuang#isGuest}).
+ * Bringing a ripe fruit down is theft ({@link Wuzhuang#stole}).
  */
 public class GinsengFruitBlock extends Block {
 
     public static final IntegerProperty AGE = BlockStateProperties.AGE_2;
-    public static final int RIPE = 2, RIPEN_ONE_IN = 60;
+    public static final int RIPE = 2;
     private static final VoxelShape SHAPE = Block.box(5, 2, 5, 11, 16, 11);
 
     /** What became of a fruit struck down. */
@@ -54,7 +54,7 @@ public class GinsengFruitBlock extends Block {
 
     public GinsengFruitBlock(Properties p) {
         super(p);
-        registerDefaultState(stateDefinition.any().setValue(AGE, 0));
+        registerDefaultState(stateDefinition.any().setValue(AGE, RIPE));
     }
 
     @Override
@@ -67,14 +67,10 @@ public class GinsengFruitBlock extends Block {
         return SHAPE;
     }
 
+    /** It never ripens, nor grows, nor changes: no random ticks. */
     @Override
     protected boolean isRandomlyTicking(BlockState state) {
-        return state.getValue(AGE) < RIPE;
-    }
-
-    @Override
-    protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-        if (random.nextInt(RIPEN_ONE_IN) == 0) level.setBlock(pos, state.setValue(AGE, state.getValue(AGE) + 1), Block.UPDATE_CLIENTS);
+        return false;
     }
 
     /** Whether a tool is gold: a golden tool or weapon, or the Golden Striker. */
@@ -96,7 +92,7 @@ public class GinsengFruitBlock extends Block {
             wither(level, pos);
             return Outcome.UNRIPE_WITHERED;
         }
-        if (by instanceof ServerPlayer sp && !sp.isCreative() && !Wuzhuang.isGuest(sp)) Wuzhuang.stole(sp);
+        if (by instanceof ServerPlayer sp && !sp.isCreative()) Wuzhuang.stole(sp);
         if (!isGold(tool)) {
             wither(level, pos);
             if (by != null) by.displayClientMessage(Component.translatable("block.jttw_engine.hanging_ginseng_fruit.withered"), true);

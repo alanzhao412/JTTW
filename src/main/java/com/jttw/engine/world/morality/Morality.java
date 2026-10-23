@@ -75,13 +75,12 @@ public final class Morality {
     public static final int SLAY_RED_BOY = SLAY_LADY;
     /**
      * Mount Wuzhuang's household is righteous: the Great Immortal Zhenyuan and his disciples.
-     * Killing a disciple is a bad deed, captain or not; his trial is no killing (he yields, and
-     * acknowledging whoever passed it is a good deed); only what kills outright could kill him or
-     * his youths, and that is a grave wrong. Bringing a ripe ginseng fruit down without his leave is
-     * theft, as picking Heaven's peaches is. The mountain's cloud cranes are no one's: a fight with
-     * one is no deed either way.
+     * Killing a disciple is a bad deed, captain or not; one of his youths a worse one; and Zhenyuan
+     * himself (who comes only for whoever killed the last of his disciples) a grave wrong. Bringing a
+     * ripe ginseng fruit down is theft, as picking Heaven's peaches is. The mountain's cloud cranes
+     * are no one's: a fight with one is no deed either way.
      */
-    public static final int KILL_DISCIPLE = -12, STEAL_GINSENG = -40, PASS_THE_TRIAL = 10, SLAY_TEMPLE_YOUTH = -25, SLAY_ZHENYUAN = -100;
+    public static final int KILL_DISCIPLE = -12, STEAL_GINSENG = -40, SLAY_TEMPLE_YOUTH = -25, SLAY_ZHENYUAN = -100;
     /**
      * The Azure Lion and the White Elephant of Lion-Camel Ridge, who with the Great Peng ate a whole
      * kingdom, its king, his court and all his people, and meant to steam the Tang Monk (chapters

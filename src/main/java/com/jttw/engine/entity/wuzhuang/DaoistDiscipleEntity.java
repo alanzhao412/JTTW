@@ -32,6 +32,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
 
@@ -39,9 +40,12 @@ import javax.annotation.Nullable;
 
 /**
  * One of the Great Immortal Zhenyuan's disciples (the novel gives him forty-eight), in a blue Daoist
- * robe, his hair in a topknot, a sword at hand. Righteous: he fights no one unprovoked, except a
- * thief of the temple's fruit; strike one and those near him come to his side. Kept at a distance he
- * throws a <b>binding talisman</b> (定身符): its mark cannot move for a moment, and is weakened.
+ * robe, his hair in a topknot, a sword at hand. Righteous: he fights no one unprovoked, except the
+ * temple's enemies (a thief of its fruit, and, for good, whoever has eaten one:
+ * {@link Wuzhuang#isTempleEnemy}); strike one and those near him come to his side. Kept at a
+ * distance he throws a <b>binding talisman</b> (定身符): its mark cannot move for a moment, and is
+ * weakened. A temple has only so many: they are put there as the land is made, never spawn of
+ * themselves, and are kept even on Peaceful ({@link com.jttw.engine.world.wuzhuang.TempleRecord}).
  * Killing one is a bad deed (karma {@link com.jttw.engine.world.morality.Morality#KILL_DISCIPLE}).
  */
 public class DaoistDiscipleEntity extends WuzhuangMonster implements TempleFolk {
@@ -97,7 +101,19 @@ public class DaoistDiscipleEntity extends WuzhuangMonster implements TempleFolk 
         goalSelector.addGoal(6, new RandomLookAroundGoal(this));
         targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false,
-                p -> p instanceof Player pl && Wuzhuang.isThief(pl)));
+                p -> p instanceof Player pl && Wuzhuang.isTempleEnemy(pl)));
+    }
+
+    /** None comes into the world of itself: a temple's disciples are those put there as it was made. */
+    @Override
+    public boolean checkSpawnRules(LevelAccessor level, MobSpawnType reason) {
+        return reason != MobSpawnType.NATURAL && reason != MobSpawnType.CHUNK_GENERATION && super.checkSpawnRules(level, reason);
+    }
+
+    /** Kept, even on Peaceful: one lost is gone for good. */
+    @Override
+    protected boolean shouldDespawnInPeaceful() {
+        return false;
     }
 
     @Override
@@ -141,7 +157,7 @@ public class DaoistDiscipleEntity extends WuzhuangMonster implements TempleFolk 
         }
     }
 
-    /** Spoken to, a disciple bows and points the way to his master. */
+    /** Spoken to, a disciple bows: his master is away. */
     @Override
     protected InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (!level().isClientSide && getTarget() == null) {

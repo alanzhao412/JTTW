@@ -1,18 +1,11 @@
 package com.jttw.engine.entity.wuzhuang;
 
 import com.jttw.engine.entity.MobScaling;
-import com.jttw.engine.entity.zone.ZoneMonster;
-import com.jttw.engine.progression.level.EnemyTier;
 import com.jttw.engine.registry.ModEntities;
-import com.jttw.engine.registry.ModItems;
-import com.jttw.engine.world.morality.Morality;
-import com.jttw.engine.world.wuzhuang.Wuzhuang;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -21,6 +14,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -28,6 +23,8 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -38,10 +35,10 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -49,8 +46,10 @@ import java.util.UUID;
 /**
  * The Great Immortal Zhenyuan (镇元大仙, 镇元子), Master of the Earth Immortals (地仙之祖), lord of
  * Mount Longevity: no demon, but a righteous immortal whom the Monkey King himself could not best.
- * His fight is a <b>trial</b> ({@link TempleImmortal}): level {@value #LEVEL}, the zone's climax,
- * in his Hall of Heaven and Earth.
+ * He is not at his temple (in the novel he is away, hearing the Primordial Lord lecture): he comes
+ * back only for whoever has killed the last of a temple's disciples, a full day after, wherever
+ * they are ({@link com.jttw.engine.world.wuzhuang.TempleRecord}, {@link #arrive}), and fights them to
+ * the death. Level {@value #LEVEL}, the zone's climax ({@link TempleImmortal}).
  * <ul>
  *   <li><b>Hard to harm</b>: no blow takes more than {@value #HIT_CAP_PERMILLE}‰ of his health, and
  *       one blow in four struck at him hand to hand he brushes aside with his whisk;</li>
@@ -59,11 +58,10 @@ import java.util.UUID;
  *       warning (his sleeve raised, the air drawn toward it), then whoever he fights, if within
  *       {@value #SLEEVE_REACH} blocks, is swept in, and from 30% everyone within
  *       {@value #SLEEVE_ALL} blocks of him;</li>
- *   <li>at 60%, <b>his disciples</b> come at his call ({@value #DISCIPLES} of them);</li>
- *   <li>at 10% he <b>yields</b>: he acknowledges whoever fought him (the trial's XP, a boss's;
- *       his loot; the first time, his flywhisk and a ginseng fruit; and his <b>leave</b>: the
- *       temple's guest, its fruit theirs to take, karma {@link Morality#PASS_THE_TRIAL}), rests,
- *       and rises again.</li>
+ *   <li>at 60%, he <b>calls his disciples</b>: any of his household still living within
+ *       {@value #CALL_REACH} blocks come to his side (he makes none: a temple's disciples are only
+ *       so many, and when he comes for their killer there are none left);</li>
+ *   <li>struck down, he leaves his loot, his flywhisk always among it.</li>
  * </ul>
  */
 public class ZhenyuanEntity extends TempleImmortal {
@@ -74,8 +72,10 @@ public class ZhenyuanEntity extends TempleImmortal {
     public static final int HIT_CAP_PERMILLE = 25;
     public static final float PARRY = 0.25f;
     public static final int HALL = 18;
-    public static final int SLEEVE_EVERY = 240, SLEEVE_EVERY_LATE = 140, SLEEVE_WIND_UP = 20, DISCIPLES = 4;
-    public static final double SLEEVE_REACH = 12, SLEEVE_ALL = 8;
+    public static final int SLEEVE_EVERY = 240, SLEEVE_EVERY_LATE = 140, SLEEVE_WIND_UP = 20;
+    public static final double SLEEVE_REACH = 12, SLEEVE_ALL = 8, CALL_REACH = 48;
+    /** How far from the one he comes for he arrives (at least, at most), and how far he will go on hunting them. */
+    public static final int ARRIVE_NEAR = 4, ARRIVE_FAR = 8, HUNT = 64;
     public static final float DISCIPLES_AT = 0.6f, ALL_AT = 0.3f;
 
     private static final EntityDataAccessor<Integer> SLEEVE_RAISED = SynchedEntityData.defineId(ZhenyuanEntity.class, EntityDataSerializers.INT);
@@ -83,9 +83,13 @@ public class ZhenyuanEntity extends TempleImmortal {
     private int sleeve = SLEEVE_EVERY / 2, windUp;
     private final List<LivingEntity> held = new ArrayList<>();
     private int staggered;
+    /** The one he came for, if he came for someone: he hunts them. */
+    @Nullable
+    private UUID quarry;
 
     public ZhenyuanEntity(EntityType<? extends ZhenyuanEntity> type, Level level) {
         super(type, level);
+        xpReward = 300;
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -102,11 +106,6 @@ public class ZhenyuanEntity extends TempleImmortal {
     @Override
     public int immortalLevel() {
         return LEVEL;
-    }
-
-    @Override
-    protected EnemyTier trialTier() {
-        return EnemyTier.BOSS;
     }
 
     @Override
@@ -162,7 +161,7 @@ public class ZhenyuanEntity extends TempleImmortal {
         goalSelector.addGoal(5, new MoveTowardsRestrictionGoal(this, 1.0));
         goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 16f));
         goalSelector.addGoal(7, new RandomLookAroundGoal(this));
-        addTrialTargets();
+        addTempleTargets();
     }
 
     // ── Hard to harm ────────────────────────────────────────────────────
@@ -175,7 +174,7 @@ public class ZhenyuanEntity extends TempleImmortal {
 
     @Override
     public boolean hurt(DamageSource source, float amount) {
-        if (!level().isClientSide && !isYielded() && handToHand(source) && staggered == 0 && random.nextFloat() < PARRY
+        if (!level().isClientSide && handToHand(source) && staggered == 0 && random.nextFloat() < PARRY
                 && !(source.getEntity() instanceof Player p && Sleeve.isHeld(p))) {
             parry();
             return false;
@@ -198,25 +197,93 @@ public class ZhenyuanEntity extends TempleImmortal {
 
     // ── His disciples ───────────────────────────────────────────────────
 
-    public static final String KEY_CALLED = "jttw_zhenyuan_called";
-
-    /** His disciples come at his call, round him. Returns them. */
-    public List<DaoistDiscipleEntity> callDisciples() {
-        List<DaoistDiscipleEntity> out = new ArrayList<>();
+    /** His household still living near him come to his side, against his foe. Returns them. */
+    public List<Mob> callDisciples() {
+        List<Mob> out = new ArrayList<>();
         if (!(level() instanceof ServerLevel server)) return out;
-        for (int i = 0; i < DISCIPLES; i++) {
-            double a = i * Math.PI * 2 / DISCIPLES + 0.3;
-            DaoistDiscipleEntity d = ZoneMonster.summon(server, ModEntities.DAOIST_DISCIPLE.get(),
-                    BlockPos.containing(getX() + Math.cos(a) * 3, getY(), getZ() + Math.sin(a) * 3), false);
-            if (d == null) continue;
-            d.getPersistentData().putBoolean(KEY_CALLED, true);
-            if (getTarget() != null) d.setTarget(getTarget());
-            server.sendParticles(ParticleTypes.CLOUD, d.getX(), d.getY(0.5), d.getZ(), 20, 0.3, 0.6, 0.3, 0.03);
-            out.add(d);
+        for (Mob m : server.getEntitiesOfClass(Mob.class, getBoundingBox().inflate(CALL_REACH),
+                m -> m != this && m instanceof TempleFolk && !(m instanceof ZhenyuanEntity) && m.isAlive())) {
+            if (getTarget() != null) m.setTarget(getTarget());
+            server.sendParticles(ParticleTypes.CLOUD, m.getX(), m.getY(0.5), m.getZ(), 10, 0.3, 0.6, 0.3, 0.03);
+            out.add(m);
         }
         playSound(SoundEvents.BELL_BLOCK, 2f, 0.8f);
-        for (ServerPlayer p : challengers()) p.sendSystemMessage(Component.translatable("entity.jttw_engine.zhenyuan.disciples"));
         return out;
+    }
+
+    // ── His coming ──────────────────────────────────────────────────────
+
+    /** The one he came for, if anyone. */
+    @Nullable
+    public UUID quarry() {
+        return quarry;
+    }
+
+    /**
+     * Brings him into the world near {@code p}, wherever they are (any dimension, any place: on a
+     * spot near them where he can stand, else where they stand), to fight them to the death: he
+     * comes out of a burst of cloud with a deep bell, keeps to no lair, and hunts them. Returns him,
+     * or null if he could not be made.
+     */
+    @Nullable
+    public static ZhenyuanEntity arrive(ServerPlayer p) {
+        ServerLevel level = p.serverLevel();
+        ZhenyuanEntity z = ModEntities.ZHENYUAN.get().create(level);
+        if (z == null) return null;
+        BlockPos at = arrivalSpot(level, z, p);
+        z.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0f, 0f);
+        z.lookAt(p, 360f, 360f);
+        z.finalizeSpawn(level, level.getCurrentDifficultyAt(at), MobSpawnType.EVENT, null);
+        z.clearRestriction(); // he keeps to no lair: he came for someone
+        z.quarry = p.getUUID();
+        level.addFreshEntity(z);
+        z.setTarget(p);
+        level.sendParticles(ParticleTypes.CLOUD, z.getX(), z.getY(0.5), z.getZ(), 60, 0.6, 1.0, 0.6, 0.06);
+        level.sendParticles(ParticleTypes.END_ROD, z.getX(), z.getY(0.5), z.getZ(), 30, 0.5, 1.0, 0.5, 0.05);
+        level.playSound(null, z.blockPosition(), SoundEvents.BELL_RESONATE, SoundSource.HOSTILE, 3f, 0.5f);
+        level.playSound(null, z.blockPosition(), SoundEvents.BELL_BLOCK, SoundSource.HOSTILE, 3f, 0.5f);
+        return z;
+    }
+
+    /**
+     * Where he arrives near {@code p}: a spot {@value #ARRIVE_NEAR}–{@value #ARRIVE_FAR} blocks from
+     * them (tried round about, nearest their own height first) with firm ground under it, room for
+     * him, no liquid, within the world's border; else where they stand.
+     */
+    public static BlockPos arrivalSpot(ServerLevel level, Entity him, ServerPlayer p) {
+        BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
+        int py = p.getBlockY();
+        double turn = level.random.nextDouble() * Math.PI * 2;
+        for (int r = ARRIVE_NEAR; r <= ARRIVE_FAR; r++) {
+            for (int i = 0; i < 12; i++) {
+                double a = turn + i * Math.PI * 2 / 12;
+                int x = Mth.floor(p.getX() + Math.cos(a) * r), z = Mth.floor(p.getZ() + Math.sin(a) * r);
+                for (int k = 0; k <= 12; k++) {
+                    int y = py + (k + 1) / 2 * (k % 2 == 0 ? 1 : -1); // the player's height, then a block under, over, two under...
+                    if (y <= level.getMinBuildHeight() || y >= level.getMaxBuildHeight() - 3) continue;
+                    if (standable(level, him, at.set(x, y, z))) return at.immutable();
+                }
+            }
+        }
+        return p.blockPosition();
+    }
+
+    /** Whether he could stand at {@code at}: firm ground under it, room for him, no liquid, within the border. */
+    public static boolean standable(ServerLevel level, Entity him, BlockPos at) {
+        if (!level.getWorldBorder().isWithinBounds(at) || !level.isLoaded(at)) return false;
+        BlockPos below = at.below();
+        if (!level.getBlockState(below).isFaceSturdy(level, below, Direction.UP)) return false;
+        var box = him.getType().getDimensions().makeBoundingBox(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
+        return level.noCollision(box) && !level.containsAnyLiquid(box);
+    }
+
+    /** He hunts the one he came for: whenever he has no foe and they are near (in his world, alive), them. */
+    private void hunt() {
+        if (quarry == null || getTarget() != null || !(level() instanceof ServerLevel server)) return;
+        if (server.getPlayerByUUID(quarry) instanceof ServerPlayer p && p.isAlive() && !p.isSpectator() && !p.isCreative()
+                && p.distanceTo(this) <= HUNT) {
+            setTarget(p);
+        }
     }
 
     // ── The Universe in his Sleeve ──────────────────────────────────────
@@ -270,30 +337,17 @@ public class ZhenyuanEntity extends TempleImmortal {
         return out;
     }
 
-    /** Casts out everyone in his sleeve (as he yields, or goes). */
+    /** Casts out everyone in his sleeve (as he dies, or goes). */
     public void releaseAll(boolean struggledFree) {
         for (LivingEntity e : held()) Sleeve.release(e, this, struggledFree);
         held.clear();
     }
 
+    /** Struck down, he lets go of whoever he held. */
     @Override
-    protected void onYield() {
-        releaseAll(true);
-        sleeve = SLEEVE_EVERY;
-        windUp = 0;
-    }
-
-    @Override
-    protected void firstGift(ServerPlayer p) {
-        give(p, new ItemStack(ModItems.ZHENYUAN_FLYWHISK.get()));
-        give(p, new ItemStack(ModItems.GINSENG_FRUIT.get()));
-    }
-
-    /** His leave: the temple's guest; and passing the trial is a good deed. */
-    @Override
-    protected void onPassed(ServerPlayer p, boolean first) {
-        Wuzhuang.makeGuest(p);
-        Morality.deed(p, Morality.PASS_THE_TRIAL, "the Great Immortal Zhenyuan acknowledged you");
+    public void die(DamageSource source) {
+        if (!level().isClientSide) releaseAll(true);
+        super.die(source);
     }
 
     @Override
@@ -308,7 +362,7 @@ public class ZhenyuanEntity extends TempleImmortal {
         if (staggered > 0) staggered--;
         int raised = entityData.get(SLEEVE_RAISED);
         if (raised > 0) entityData.set(SLEEVE_RAISED, raised - 1);
-        if (isYielded()) return;
+        hunt();
         if (sleeve > 0) sleeve--;
         LivingEntity t = getTarget();
         if (windUp > 0) {
@@ -366,4 +420,15 @@ public class ZhenyuanEntity extends TempleImmortal {
         return true;
     }
 
+    @Override
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        if (quarry != null) tag.putUUID("Quarry", quarry);
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        quarry = tag.hasUUID("Quarry") ? tag.getUUID("Quarry") : null;
+    }
 }

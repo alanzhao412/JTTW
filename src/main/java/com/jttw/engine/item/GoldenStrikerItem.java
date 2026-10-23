@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * The Golden Striker (金击子), a rod of gold two feet long with a knob at its end, kept in Zhenyuan's
  * temple to knock down the ginseng fruit, which falls whole only to gold. A gold weapon of a sort
- * (it counts as gold for the fruit, as any golden tool does). Clear Wind gives it.
+ * (it counts as gold for the fruit, as any golden tool does). Clear Wind leaves it when struck down.
  */
 public class GoldenStrikerItem extends SwordItem {
 

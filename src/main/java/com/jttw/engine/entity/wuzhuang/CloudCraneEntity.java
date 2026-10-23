@@ -1,7 +1,6 @@
 package com.jttw.engine.entity.wuzhuang;
 
 import com.jttw.engine.entity.MobScaling;
-import com.jttw.engine.world.wuzhuang.Wuzhuang;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -41,8 +40,8 @@ import java.util.EnumSet;
 
 /**
  * A cloud crane (云鹤), the immortals' bird, white with black-tipped wings and a red crown, that
- * keeps the skies of Mount Longevity: it flies, never falls, and harries any stranger who comes up
- * to the mountain (not the temple's guests). From above it <b>swoops</b>: a dive at its quarry, a
+ * keeps the skies of Mount Longevity: it flies, never falls, and harries anyone who comes up to the
+ * mountain. From above it <b>swoops</b>: a dive at its quarry, a
  * stab of its beak and its blow and a half, and whoever it strikes is thrown back (beware the
  * island's edge). It keeps within {@value #RANGE} blocks of where it came into the world. A fight
  * with one is no deed either way.
@@ -128,8 +127,7 @@ public class CloudCraneEntity extends WuzhuangMonster {
         goalSelector.addGoal(5, new WaterAvoidingRandomFlyingGoal(this, 0.8));
         goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 12f));
         targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
-        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false,
-                p -> p instanceof Player pl && !Wuzhuang.isGuest(pl)));
+        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
     }
 
     @Override

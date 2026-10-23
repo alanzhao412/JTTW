@@ -537,11 +537,7 @@ public final class ModEntities {
                 net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
                 net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
-        // Mount Wuzhuang's disciples and cranes, on the island, in any light
-        event.register(DAOIST_DISCIPLE.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
-                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
-                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        // Mount Wuzhuang's cranes, on the island, in any light (its disciples never spawn of themselves)
         event.register(CLOUD_CRANE.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
                 net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,

@@ -120,7 +120,7 @@ public final class ModBlocks {
                     .mapColor(MapColor.COLOR_BROWN).strength(0.5F, com.jttw.engine.world.tough.Tough.RESISTANCE).sound(SoundType.SOUL_SAND)));
 
     // ── Mount Wuzhuang ───────────────────────────────────────────
-    /** A ginseng fruit on its tree: blossom, green, ripe (see GinsengFruitBlock). */
+    /** A ginseng fruit on its tree, ripe; it never grows back (see GinsengFruitBlock). */
     public static final DeferredHolder<Block, Block> HANGING_GINSENG_FRUIT =
             BLOCKS.register("hanging_ginseng_fruit", () -> new com.jttw.engine.world.wuzhuang.GinsengFruitBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.COLOR_LIGHT_GREEN).strength(0.1F).noCollission().noLootTable().randomTicks().sound(SoundType.CHERRY_LEAVES)

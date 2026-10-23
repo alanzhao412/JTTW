@@ -30,7 +30,7 @@ import java.util.List;
  * the Monkey King's blows aside. Wielded, it strikes for +{@value #DAMAGE_PERCENT}% damage. Used, it
  * <b>sweeps</b>: whatever stands within {@value #REACH} blocks before its bearer is swept away, and
  * whatever flies at them (arrows, bolts, fireballs) is brushed out of the air; then it rests
- * {@value #REST} ticks. Zhenyuan gives it to whoever first passes his trial.
+ * {@value #REST} ticks. Zhenyuan leaves it when he is struck down.
  */
 public class FlywhiskItem extends Item {
 

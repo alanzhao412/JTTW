@@ -30,17 +30,18 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 /**
- * Mount Wuzhuang's rules: who is the temple's guest and who its thief, what the ginseng fruit does
- * once off its tree and once eaten.
+ * Mount Wuzhuang's rules: who is the temple's enemy, what the ginseng fruit does once off its tree
+ * and once eaten.
  *
  * <ul>
- *   <li><b>Guests</b>: whoever has passed Zhenyuan's trial (he yielded to them) has his leave: the
- *       fruit is theirs to knock down, and his cranes no longer harry them. Kept by the soul (through
- *       death and into a new life), as karma is;</li>
- *   <li><b>thieves</b>: whoever brings a ripe fruit down without leave has stolen it (karma
- *       {@link Morality#STEAL_GINSENG}) and is the temple's enemy for {@value #THIEF_TICKS} ticks:
- *       every disciple, both youths and the Great Immortal near them turn on them, as Clear Wind and
- *       Bright Moon turned on the pilgrims;</li>
+ *   <li><b>thieves</b>: whoever brings a ripe fruit down has stolen it (no one has leave to: the
+ *       Great Immortal is away; karma {@link Morality#STEAL_GINSENG}) and is the temple's enemy for
+ *       {@value #THIEF_TICKS} ticks: every disciple and both youths near them turn on them at once,
+ *       as Clear Wind and Bright Moon turned on the pilgrims;</li>
+ *   <li><b>eaters</b>: whoever has eaten a ginseng fruit is the temple's enemy <b>for good</b> (kept
+ *       by the soul, through death and into a new life, as karma is): every disciple, and Clear Wind
+ *       and Bright Moon, fight them on sight ({@link #isTempleEnemy}). Before that the household
+ *       fights no one unprovoked;</li>
  *   <li><b>the fallen fruit</b> ({@link #fruitTick}): it dissolves in water; it sinks into the earth
  *       wherever it comes to rest, unless on something lined (wool, a carpet, a bed); falling from its
  *       tree it cannot be caught by hand, only in a Silk-Lined Tray held under it;</li>
@@ -54,8 +55,7 @@ public final class Wuzhuang {
 
     private Wuzhuang() {}
 
-    public static final String KEY_GUEST = "jttw_wuzhuang_guest", KEY_THIEF = "jttw_wuzhuang_thief_until",
-            KEY_EATEN = "jttw_ginseng_eaten", KEY_KNOCKED = "jttw_ginseng_knocked";
+    public static final String KEY_THIEF = "jttw_wuzhuang_thief_until", KEY_EATEN = "jttw_ginseng_eaten", KEY_KNOCKED = "jttw_ginseng_knocked";
     /** How long a thief is the temple's enemy. */
     public static final int THIEF_TICKS = 6000;
     /** How far the alarm carries. */
@@ -63,16 +63,16 @@ public final class Wuzhuang {
     public static final int LONGEVITY_PERCENT = 20;
     public static final ResourceLocation LONGEVITY = JTTWEngine.id("ginseng_longevity");
 
-    // ── Guests and thieves ──────────────────────────────────────────────
+    // ── The temple's enemies ────────────────────────────────────────────
 
-    public static boolean isGuest(Player p) {
-        return p.getPersistentData().getBoolean(KEY_GUEST);
+    /** Whether {@code p} has ever eaten a ginseng fruit (their soul, in any life). */
+    public static boolean ateFruit(Player p) {
+        return p.getPersistentData().getBoolean(KEY_EATEN);
     }
 
-    /** Zhenyuan's leave: the fruit is theirs to take, his cranes leave them be. */
-    public static void makeGuest(Player p) {
-        p.getPersistentData().putBoolean(KEY_GUEST, true);
-        p.getPersistentData().remove(KEY_THIEF);
+    /** Whether the temple's household fights {@code p} on sight: a thief of late, or whoever has eaten a fruit. */
+    public static boolean isTempleEnemy(Player p) {
+        return isThief(p) || ateFruit(p);
     }
 
     public static boolean isThief(Player p) {
@@ -155,7 +155,10 @@ public final class Wuzhuang {
 
     // ── Eating it ───────────────────────────────────────────────────────
 
-    /** {@code p} eats a ginseng fruit. Returns whether it was the first their soul ever ate (and so lengthened their life). */
+    /**
+     * {@code p} eats a ginseng fruit. Returns whether it was the first their soul ever ate (and so
+     * lengthened their life). Either way they are marked: the temple's enemy for good ({@link #ateFruit}).
+     */
     public static boolean eat(ServerPlayer p) {
         boolean first = !p.getPersistentData().getBoolean(KEY_EATEN);
         if (first) {
@@ -182,12 +185,12 @@ public final class Wuzhuang {
         }
     }
 
-    /** The soul keeps its leave and its long life through death. */
+    /** The soul keeps its long life, and its mark as one who ate the fruit, through death. */
     @SubscribeEvent
     public static void onClone(PlayerEvent.Clone event) {
         var from = event.getOriginal().getPersistentData();
         var to = event.getEntity().getPersistentData();
-        for (String key : new String[]{KEY_GUEST, KEY_EATEN}) if (from.getBoolean(key)) to.putBoolean(key, true);
+        if (from.getBoolean(KEY_EATEN)) to.putBoolean(KEY_EATEN, true);
         applyLongevity(event.getEntity());
     }
 
