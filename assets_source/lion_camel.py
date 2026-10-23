@@ -409,7 +409,8 @@ def paint_wind_driller(p, style, f, dims):
 # Each has two models. His demon-king shape: a hulking armoured giant, two and a half times a man's
 # height, all his weight in his chest and shoulders, his head carried low and forward. And his true
 # form, revealed at his last third: the beast a Bodhisattva rides, long and heavy, as large as the
-# Great White Bull or larger. Both shapes share his head. Their eyes smoulder under a heavy brow
+# Great White Bull or larger. The Elephant's two shapes share his head; the Lion's true form has a
+# head of its own, the guardian lion's. Their eyes smoulder under a heavy brow
 # that slopes down to the nose in a scowl (drawn full-bright, but dark), angled into a glare: each
 # eye two model pixels along its bottom, two tall at its outer side, one at its inner, the brow's
 # shadow cutting its inner corner.
@@ -608,7 +609,7 @@ LION_CORE = (168, 104, 14)
 
 
 def lion_head(parent, at, rot):
-    """The lion's head, his in both shapes: a broad skull, wide at the jowls, under a scowling brow;
+    """The lion's head in his demon-king shape: a broad skull, wide at the jowls, under a scowling brow;
     a short heavy muzzle; the jaws open in a snarl round long fangs; behind it a ruff of mane
     bristling into points, swept back, cheek ruffs, a beard. Its pivot is the back of the skull."""
     return [
@@ -686,41 +687,127 @@ AZURE_LION = mirrored([
     part('tail', 'body', (0, -2, 7), (0.75, 0, 0), [(-1.3, -1.3, 0, 2.6, 2.6, 16, 'tailfur'), (-3, -3, 14, 6, 6, 7, 'azuremane')]),
 ])
 
-# His true form, Manjushri's lion: on all fours, long and heavy, a wedge: a towering chest and
-# shoulders under the mane, which climbs in a crest of swept-back locks to his withers; the belly
-# tucked up under a lean waist; lower haunches; the head carried low and well forward of it all,
-# jaws snarling, claws out.
+# His true form, Manjushri's lion (狻猊) turned demon: a beast of reach and spring, not of bulk. A deep
+# chest, the waist drawn in under it, long legs (the hind ones bent like a cat's), great clawed paws;
+# his hide a dark azure. The mane is everything: a ring of spiral curls (the stone lions' curls)
+# framing a broad, flat face, and behind them locks like tongues of flame, swept back in tiers off his
+# head, down his neck and over his shoulders, a crest of them along his spine and a fringe down his
+# breast. The face: a heavy scowling brow over deep-set eyes, a short wide snout wrinkled in a snarl,
+# flared nostrils, the jaws open on long fangs and a lolling tongue (they gape wide enough to swallow
+# a man). A gold collar hung with bells: he is a Bodhisattva's mount. A long tail, curling up into a
+# flame. Its pivots are set so the body turns about its middle, the legs about shoulder and hip.
+AZ = (62, 102, 112)            # his hide: a dark azure, slate in its shadows
+AZ_DARK = (20, 36, 46)
+AZ_PALE = (124, 150, 150)
+MANE_TEAL = (26, 104, 100)     # his mane, deeper and greener than his hide, its locks lit at their ends
+MANE_DEEP = (6, 28, 36)
+MANE_TIP = (118, 196, 170)
+TONGUE = (150, 50, 62)
+AZ_EMBER = (108, 52, 6)        # his eyes smoulder deeper in this shape: a banked fire
+AZ_CORE = (142, 80, 10)
+
+
+def lock(prefix, parent, at, rot, k=1.0, fin=False):
+    """A lock of the mane like a tongue of flame: broad at its root, tapering in two steps to a point
+    that bends over. It points up (-y) from its pivot; `rot` sweeps it back and fans it out. Flat across
+    x, or (a `fin`) across z, so that swept back without a roll it still shows its breadth from the side."""
+    w, d = (2.6 * k, 6.5 * k) if fin else (6.5 * k, 2.6 * k)
+    l1, l2, l3 = 7 * k, 5 * k, 4 * k
+    return part(prefix, parent, at, rot, [
+        (-w / 2, -l1, -d / 2, w, l1, d, 'azlock'),
+        (-w * 0.32, -l1 - l2, -d / 2 + 0.7 * k, w * 0.64, l2, d * 0.7, 'azlockmid'),
+        (-w * 0.15, -l1 - l2 - l3, -d / 2 + 1.5 * k, w * 0.3, l3, d * 0.45, 'azlocktip'),
+    ])
+
+
+def curl(x, y, z, s=5.0, d=3):
+    """A spiral curl (a box, seen end on), centred at x, y, its face at z."""
+    return (x - s / 2, y - s / 2, z, s, s, d, 'azcurl')
+
+
+# the curls framing his face, round its edge from the brow to the jowls
+FACE_CURLS = [(x * side, y, s) for x, y, s in ((3, -12.1, 5.2), (8.1, -9.3, 4.4), (11.1, -4.4, 5.2), (11.1, 1.4, 4.4),
+                                                (8.1, 6.3, 5.2), (3, 9.1, 4.4)) for side in (-1, 1)]
+
+
+def true_lion_head(parent, at, rot):
+    """The lion's head in his true form: a broad, flat face, a skull wide at the jowls under a heavy
+    brow, the short wide snout wrinkled up to it in a snarl, flared nostrils; long fangs, a lolling
+    tongue; a ring of curls about the face and a beard of them, and locks of mane swept back off it
+    all in two tiers. Its pivot is the back of the skull."""
+    return [
+        part('head', parent, at, rot, [
+            (-7, -6, -11, 14, 11, 11, 'azface'),
+            (-6, -9, -10, 12, 4, 9, 'azcrown'),                # the crown of his skull, flat and broad
+            (-8.5, -1, -10, 17, 6, 8, 'azjowl'),               # the face broadest under the eyes
+            (-3, -4.2, -16, 6, 3.6, 5.5, 'azsnout'),           # the bridge of the nose, wrinkled
+            (-5.8, -0.8, -16.5, 5.6, 4.8, 6, 'azmuzzle'), (0.2, -0.8, -16.5, 5.6, 4.8, 6, 'azmuzzle'),   # the whisker pads, the lip drawn back
+            (-1, -0.8, -16, 2, 4.4, 5, 'azsnout'),             # the cleft between them
+            (-2.8, -3.4, -17, 5.6, 2.8, 1.4, 'aznose'),
+            (-5.6, 3.2, -16, 1.7, 3.6, 1.7, 'fang'), (3.9, 3.2, -16, 1.7, 3.6, 1.7, 'fang'),   # fangs outside the jaw,
+            (-5.3, 6.6, -15.8, 1.1, 3, 1.1, 'fang'), (4.2, 6.6, -15.8, 1.1, 3, 1.1, 'fang'),   # tapering to points
+            (-3.7, 3.6, -16.3, 7.4, 1.4, 0.8, 'azteeth'),      # the teeth between
+            (-3.6, 1, -11, 7.2, 6, 4, 'azthroat'),
+            (-11, -9, -4, 22, 14, 7, 'azruff'),                # the mane behind his face, round it
+            (-7.5, -13, -4, 15, 22, 7, 'azruff'),
+        ] + [curl(x, y, -6.5 if s > 5 else -5.8, s) for x, y, s in FACE_CURLS]),
+        brow('right_brow', 'head', (-0.5, -5.5, -11.5), 7.5, 0.35, 'azbrow'),
+        part('jaw', 'head', (0, 3.5, -10), (0.25, 0, 0), [
+            (-3.8, 0, -6.5, 7.6, 2.5, 6.5, 'azjaw'),
+            (-3.6, -2.6, -6.2, 1.5, 2.6, 1.5, 'fang'), (2.1, -2.6, -6.2, 1.5, 2.6, 1.5, 'fang'),
+            curl(-5, 4.5, -7), curl(0, 5, -7.5), curl(5, 4.5, -7),   # his beard
+        ]),
+        part('tongue', 'jaw', (0, 0.3, -3), (0.35, 0, 0), [(-2, -0.5, -5.8, 4, 1, 6.8, 'aztongue')]),
+        lock('top_lock', 'head', (0, -12, 1), (-1.3, 0, 0), 1.15, fin=True),
+        lock('right_lock_a', 'head', (-6, -11, 0), (-1.1, 0, -0.5), 1.15, fin=True),
+        lock('right_lock_b', 'head', (-10, -5, 0), (-0.9, 0, -1.05), 1.2),
+        lock('right_lock_c', 'head', (-11, 2, 0), (-0.8, 0, -1.6), 1.2),
+        lock('right_lock_d', 'head', (-8, 8, 0), (-0.7, 0, -2.2), 1.05),
+    ]
+
+
 AZURE_LION_TRUE = mirrored([
-    part('body', 'root', (0, 2, 0), (0, 0, 0), [
-        (-11, -11, -22, 22, 22, 20, 'lionfur'),                # chest and shoulders
-        (-8, -6, -3, 16, 12, 17, 'flank'),                     # the waist, lean, the belly tucked up
-        (-9, -5, 13, 18, 14, 13, 'lionfur'),                   # the haunches, lower than the shoulders
-        (-12, -10, -27, 24, 21, 14, 'azuremane'),              # the mane round his neck
-        (-9.5, -16, -25, 19, 7, 16, 'azuremane'),              # its crest, climbing to the withers
-        (-11.5, -13, -12, 23, 11, 9, 'azuremane'),             # over his shoulders
-        (-8, 12, -23, 16, 5, 13, 'azuremane'),                 # the fringe under his chest
+    part('body', 'root', (0, 0, 0), (0, 0, 0), [
+        (-9, -7, -21, 18, 17, 17, 'azfur'),                    # chest and shoulders, deep
+        (-7, 0, -23, 14, 11, 8, 'azchest'),                    # the breast
+        (-6.5, -6, -5, 13, 10, 16, 'azflank'),                 # the waist, drawn in, the belly tucked up
+        (-8, -5, 9, 16, 11, 11, 'azfur'),                      # the haunches
+        (-10.5, -11, -22, 21, 19, 9, 'azmane'),                # the mane about his neck
+        (-10, -12, -15, 20, 9, 8, 'azmane'),                   # and over his shoulders
+        (-9.6, 3, -23.6, 19.2, 2.5, 9, 'azcollar'),            # the Bodhisattva's collar, and its bells
+        (-2, 5, -25.4, 4, 4.5, 4, 'azbell'),
+        (-6.6, 5, -24.4, 2.6, 3, 2.6, 'azbell'), (4, 5, -24.4, 2.6, 3, 2.6, 'azbell'),
+        (-0.8, 9.5, -24.2, 1.6, 4, 1.6, 'aztassel'),
     ]),
-    tuft('crest_tuft', 'body', (0, -16, -22), (-1.15, 0, 0)),
-    tuft('crest_tuft2', 'body', (0, -15, -14), (-1.3, 0, 0)),
-    tuft('crest_tuft3', 'body', (0, -12, -6), (-1.45, 0, 0), big=False),
-    tuft('right_crest_tuft', 'body', (-6.5, -15, -18), (-1.1, 0, -0.45)),
-    tuft('right_mane_tuft', 'body', (-12, -6, -19), (-0.9, 0, -1.2)),
-    tuft('right_mane_tuft2', 'body', (-11.5, -8, -8), (-1.2, 0, -1.0), big=False),
-    tuft('right_mane_tuft3', 'body', (-12, 5, -17), (-0.6, 0, -1.75), big=False),
-] + lion_head('body', (0, 1, -26), (0.2, 0, 0)) + [
-    part('right_foreleg', 'body', (-7.5, 8, -13), (0, 0, 0), [
-        (-5, -3, -5, 10, 13, 10, 'lionleg'),
-        (-5.5, 10, -7.5, 11, 4, 12, 'lionpaw'),
-        (-4.7, 12, -9.2, 1.7, 2, 2, 'claw'), (-0.85, 12, -9.2, 1.7, 2, 2, 'claw'), (3, 12, -9.2, 1.7, 2, 2, 'claw'),
-    ]),
-    part('right_hindleg', 'body', (-6.5, 4, 20), (0, 0, 0), [
-        (-4.5, -4, -6, 9, 12, 12, 'lionfur'),
-        (-3.5, 8, -1, 7, 8, 7, 'lionleg'),
-        (-4.5, 15, -5, 9, 3, 10, 'lionpaw'),
-        (-3.6, 16, -6.6, 1.6, 2, 2, 'claw'), (2, 16, -6.6, 1.6, 2, 2, 'claw'),
-    ]),
-    part('tail', 'body', (0, -3, 26), (0.9, 0, 0), [(-1.3, -1.3, 0, 2.6, 2.6, 14, 'tailfur')]),
-    part('tail_tip', 'tail', (0, 0, 14), (-1.2, 0, 0), [(-1.1, -1.1, 0, 2.2, 2.2, 8, 'tailfur'), (-3, -3, 6, 6, 6, 7, 'azuremane')]),
+    part('rump', 'body', (0, -7, 10), (-0.4, 0, 0), [(-7.5, 0, 0, 15, 7, 12, 'azfur')]),     # sloping down to his tail
+    lock('crest_a', 'body', (0, -12, -15), (-1.35, 0, 0), 1.1, fin=True),
+    lock('crest_b', 'body', (0, -11.5, -8), (-1.35, 0, 0), fin=True),
+    lock('crest_c', 'body', (0, -8.5, -1), (-1.45, 0, 0), 0.8, fin=True),
+    lock('crest_d', 'body', (0, -8, 7), (-1.5, 0, 0), 0.6, fin=True),
+    lock('right_neck_a', 'body', (-7.5, -10, -18), (-1.4, 0, -0.55), 1.3, fin=True),
+    lock('right_neck_b', 'body', (-10, -4, -18), (-1.4, 0, -1.2), 1.3),
+    lock('right_neck_c', 'body', (-9.5, 3, -19), (-1.3, 0, -1.9), 1.15),
+    lock('right_neck_d', 'body', (-9.5, -5, -9), (-1.5, 0, -1.05), 0.95),
+    lock('apron', 'body', (0, 7, -22), (-2.75, 0, 0), 0.8),
+    lock('right_apron', 'body', (-4.5, 6, -21.5), (-2.8, 0, 0.3), 0.8),
+] + true_lion_head('body', (0, -6, -21), (0.1, 0, 0)) + [
+    part('right_foreleg', 'body', (-6.5, -1, -14), (0, 0, 0), [
+        (-4, -4, -5, 8, 12, 10, 'azfur'),                      # the shoulder's muscle
+        (-3, 8, -3.5, 6, 13, 6.5, 'azleg'),                    # the forearm, long
+        curl(0, 11.5, 3),                                      # a curl at the elbow
+        (-4, 20.5, -7.5, 8, 4.5, 9, 'azpaw'),
+    ] + [(-3.7 + i * 2.05, 22, -9.3, 1.4, 2.5, 2.2, 'claw') for i in range(4)]),
+    part('right_hindleg', 'body', (-5.5, -2, 15), (0, 0, 0), []),
+    part('right_thigh', 'right_hindleg', (0, 0, 0), (-0.5, 0, 0), [(-4, -3, -5.5, 8, 15, 10, 'azfur')]),
+    part('right_shin', 'right_thigh', (0, 11, -1), (1.4, 0, 0), [(-2.75, -1.5, -2.5, 5.5, 11, 5, 'azleg')]),
+    part('right_hock', 'right_shin', (0, 9.5, 0), (-1.2, 0, 0), [(-2.5, -1, -2.25, 5, 9, 4.5, 'azleg')]),
+    part('right_hindpaw', 'right_hock', (0, 8, 0), (0.3, 0, 0), [
+        (-3.5, -0.7, -6.5, 7, 4, 8, 'azpaw'),
+    ] + [(-3 + i * 2.1, 1, -8.2, 1.3, 2.2, 2, 'claw') for i in range(3)]),
+    part('tail', 'body', (0, -3, 20.5), (-0.5, 0, 0), [(-1.3, -1.3, 0, 2.6, 2.6, 11, 'aztail')]),
+    part('tail_mid', 'tail', (0, 0, 10.5), (0.9, 0, 0), [(-1.1, -1.1, 0, 2.2, 2.2, 10, 'aztail')]),
+    part('tail_tip', 'tail_mid', (0, 0, 9.5), (0.8, 0, 0), [(-1, -1, 0, 2, 2, 5, 'aztail'), (-2.2, -2.2, 3.5, 4.4, 4.4, 4, 'azmane')]),
+    lock('tail_flame', 'tail_tip', (0, -0.5, 6), (-1.1, 0, 0), 0.95, fin=True),
 ])
 
 
@@ -875,8 +962,261 @@ def paint_azure_lion(p, style, f, dims):
                 p.px((fx, fy + j), (240, 244, 250))
 
 
+def blend(a, b, t):
+    t = max(0.0, min(1.0, t))
+    return [x + (y - x) * t for x, y in zip(a, b)]
+
+
+def rosette(p, rect, cx, cy, radius, base, dark, tip, turns=1.6):
+    """A spiral curl seen end on, centred at cx, cy (texture pixels within `rect`): a groove winding
+    in to its heart, the coil lit on its crest and from above, dark about its rim."""
+    fx, fy, fw, fh = rect
+    for j in range(int(cy - radius) - 1, int(cy + radius) + 2):
+        for i in range(int(cx - radius) - 1, int(cx + radius) + 2):
+            if not (0 <= i < fw and 0 <= j < fh):
+                continue
+            dx, dy = i + 0.5 - cx, j + 0.5 - cy
+            r = math.hypot(dx, dy) / radius
+            if r > 1.05:
+                continue
+            a = (math.atan2(dy, dx) / (2 * math.pi)) % 1.0
+            ridge = 1 - abs((r * turns - a) % 1.0 - 0.5) * 2          # 1 on the coil's crest, 0 in its groove
+            c = blend(base, dark, 0.75) if ridge < 0.28 else blend(base, tip, 0.5) if ridge > 0.78 else base
+            if r > 0.9:
+                c = [v * 0.72 for v in c]                             # its rim, rolling into shadow
+            lit = 1.12 - 0.3 * (dy / radius + 1) / 2
+            n = p.rnd.randint(-4, 4)
+            p.px((fx + i, fy + j), [v * lit + n for v in c])
+
+
+def strands(p, f, base, dark, tip, start, end):
+    """A lock's faces in strands running along it, its end (the top of its faces) at tone `start` and
+    its root at `end` along the scale tip (0) - base (0.5) - dark (1); its end lit, its root dark."""
+    for k, r in f.items():
+        fx, fy, fw, fh = r
+        if k in ('top', 'bottom'):
+            p.face(r, blend(tip, base, start * 2) if k == 'top' else dark, 1.0, noise=5)
+            continue
+        light = {'front': 0.95, 'back': 0.78}.get(k, 1.0)
+        for i in range(fw):
+            groove = fw > 7 and i % 6 == 5
+            round_ = 0.72 + 0.36 * math.sin(math.pi * (i + 0.5) / fw)     # the lock rounded, dark at its edges
+            off = p.rnd.uniform(-0.12, 0.12)
+            for j in range(fh):
+                t = max(0.0, min(1.0, start + (end - start) * j / max(1, fh - 1) + off))
+                c = blend(tip, base, t * 2) if t < 0.5 else blend(base, dark, (t - 0.5) * 2)
+                if groove:
+                    c = [v * 0.78 for v in c]
+                n = p.rnd.randint(-4, 4)
+                p.px((fx + i, fy + j), [v * light * round_ + n for v in c])
+
+
+def flame_marks(p, rect, dark, n=3):
+    """The flame-curls of a guardian lion's hide: a few dark strokes that sweep along a face and curl up."""
+    fx, fy, fw, fh = rect
+    for _ in range(n):
+        x, y = p.rnd.uniform(0, fw * 0.6), p.rnd.uniform(fh * 0.3, fh * 0.85)
+        a, length = p.rnd.uniform(-0.4, -0.1), p.rnd.uniform(fw * 0.25, fw * 0.45)
+        s = 0
+        while s < length:
+            for d in range(3 if s < length * 0.4 else 2 if s < length * 0.75 else 1):
+                q = (int(x), int(y) + d)
+                if 0 <= q[0] < fw and 0 <= q[1] < fh:
+                    c = p.img.getpixel((fx + q[0], fy + q[1]))
+                    p.px((fx + q[0], fy + q[1]), blend(c[:3], dark, 0.6))
+            q = (int(x), int(y) - 1)                                    # lit along its upper edge
+            if 0 <= q[0] < fw and 0 <= q[1] < fh:
+                c = p.img.getpixel((fx + q[0], fy + q[1]))
+                p.px((fx + q[0], fy + q[1]), [v * 1.18 for v in c[:3]])
+            x += math.cos(a)
+            y += math.sin(a)
+            a -= 0.12 if s > length * 0.5 else 0.02                    # curling up at its end
+            s += 1
+
+
 def paint_azure_lion_true(p, style, f, dims):
-    lion_common(p, style, f)
+    S = bg.S
+    if style in ('azfur', 'azflank', 'aztail', 'azchest', 'azleg'):
+        base = {'azflank': [v * 0.94 for v in AZ], 'azchest': blend(AZ, AZ_PALE, 0.35)}.get(style, AZ)
+        pelt(p, f, base, AZ_DARK, AZ_PALE, along=style != 'azleg')
+        if style in ('azfur', 'azflank', 'azleg'):
+            for k in ('right', 'left'):
+                flame_marks(p, f[k], AZ_DARK, n=max(1, f[k][2] * f[k][3] // 300))
+    elif style == 'azface':
+        pelt(p, f, AZ, AZ_DARK)
+        fx, fy, fw, fh = f['front']
+        # a dark mask about the eyes and down the sides of the face; the brow's furrows between them
+        for j in range(fh):
+            for i in range(fw):
+                edge = abs(i + 0.5 - fw / 2) / (fw / 2)
+                if j < 6 * S and edge > 0.25 or j < 2 * S:
+                    c = p.img.getpixel((fx + i, fy + j))
+                    p.px((fx + i, fy + j), [v * (0.5 if j < 2 * S else 0.66) for v in c[:3]])
+        for j in range(0, 4 * S):
+            for d in (-S, S - 1):
+                p.px((fx + fw // 2 + d, fy + j), [v * 0.4 for v in AZ_DARK])
+        w = fw // S
+        glare(p, f, ((2, 3), (w - 3, w - 4)), 1, AZ_EMBER, AZ_CORE)
+    elif style == 'azcrown':
+        pelt(p, f, [v * 0.9 for v in AZ], AZ_DARK)
+        for k in ('top', 'front'):                                    # the furrows of his scowl
+            fx, fy, fw, fh = f[k]
+            for j in range(fh):
+                for d in (-S - 1, S):
+                    p.px((fx + fw // 2 + d, fy + j), [v * 0.45 for v in AZ_DARK])
+    elif style == 'azjowl':
+        pelt(p, f, [v * 0.8 for v in AZ], AZ_DARK)
+        fx, fy, fw, fh = f['front']
+        for j in range(fh):
+            for i in range(fw):
+                if abs(i + 0.5 - fw / 2) > fw * 0.3:
+                    c = p.img.getpixel((fx + i, fy + j))
+                    p.px((fx + i, fy + j), [v * 0.72 for v in c[:3]])
+    elif style == 'azbrow':
+        for k, r in f.items():
+            p.face(r, (24, 42, 48), {'top': 1.8, 'bottom': 0.45, 'front': 1.1}.get(k, 1.0), noise=3)
+        fx, fy, fw, fh = f['top']
+        for i in range(fw):
+            p.px((fx + i, fy + fh - 1), [v * 0.7 for v in AZ_PALE])         # the light along its ridge
+    elif style == 'azsnout':
+        pelt(p, f, [v * 0.85 for v in AZ], AZ_DARK)
+        for k in ('top', 'right', 'left'):                            # the snarl's wrinkles, deep, across the bridge
+            fx, fy, fw, fh = f[k]
+            if k == 'top':
+                for j in range(S, fh, S * 2):
+                    for i in range(fw):
+                        p.px((fx + i, fy + j), [v * 0.35 for v in AZ_DARK])
+                        if j + 1 < fh:
+                            p.px((fx + i, fy + j + 1), [v * 1.15 for v in AZ])
+            else:
+                for i in range(S, fw, S * 2):
+                    for j in range(fh):
+                        p.px((fx + i, fy + j), [v * 0.35 for v in AZ_DARK])
+    elif style == 'azmuzzle':
+        pelt(p, f, blend(AZ, AZ_PALE, 0.4), AZ_DARK)
+        fx, fy, fw, fh = f['front']                                   # (one pad of two: the same both sides)
+        for row in (fh // 4, fh // 2 - 1):                            # whisker spots, in rows
+            for i in range(S, fw - S, S + 1):
+                p.px((fx + i, fy + row), [v * 0.4 for v in AZ_DARK])
+        for k in ('front', 'right', 'left'):                          # the lip drawn back, black, over red gums
+            fx, fy, fw, fh = f[k]
+            for i in range(fw):
+                gum = k == 'front' and S <= i < fw - S or k != 'front' and i < fw // 2
+                for j in range(fh - S, fh):
+                    p.px((fx + i, fy + j), (98, 24, 30) if gum else (16, 10, 12))
+                for j in range(fh - 2 * S, fh - S):
+                    p.px((fx + i, fy + j), (16, 10, 12))
+        fx, fy, fw, fh = f['bottom']                                  # the roof of his mouth, ridged
+        for j in range(fh):
+            for i in range(fw):
+                c = THROAT if j % 3 == 0 else MOUTH
+                p.px((fx + i, fy + j), [v + p.rnd.randint(-4, 4) for v in c])
+    elif style == 'aznose':
+        plain(p, f, (38, 42, 50))
+        p.face(f['top'], (84, 92, 102), 1.0, noise=3)                 # lit along its top
+        fx, fy, fw, fh = f['front']
+        for i in range(fw):
+            p.px((fx + i, fy), (84, 92, 102))
+        for j in range(fh // 2, fh):                                  # narrowing to its foot
+            for i in range(fw):
+                if abs(i + 0.5 - fw / 2) > fw / 2 - (j - fh // 2 + 1):
+                    p.px((fx + i, fy + j), blend(AZ, AZ_PALE, 0.3))
+        for side in (-1, 1):                                          # the nostrils, flared
+            cx = fx + fw // 2 + side * (fw // 4)
+            for j in range(fh // 2, fh):
+                for i in range(-S, S):
+                    p.px((cx + i, fy + j), (4, 2, 4))
+            p.px((cx + side * S, fy + fh // 2 - 1), (4, 2, 4))
+    elif style == 'azjaw':
+        pelt(p, f, blend(AZ, AZ_PALE, 0.5), AZ)
+        fx, fy, fw, fh = f['top']                                     # the bed of the tongue, the throat
+        for j in range(fh):
+            for i in range(fw):
+                c = THROAT if j > fh * 0.7 else MOUTH
+                p.px((fx + i, fy + j), [v + p.rnd.randint(-4, 4) for v in c])
+        for k in ('front', 'right', 'left'):
+            fx, fy, fw, fh = f[k]
+            for i in range(fw):
+                for j in range(S):
+                    p.px((fx + i, fy + j), (16, 10, 12))
+    elif style == 'aztongue':
+        for k, r in f.items():
+            p.face(r, TONGUE, {'top': 1.1, 'bottom': 0.6}.get(k, 0.85), noise=5)
+        fx, fy, fw, fh = f['top']
+        for j in range(fh):                                           # its groove
+            p.px((fx + fw // 2, fy + j), [v * 0.6 for v in TONGUE])
+            p.px((fx + fw // 2 - 1, fy + j), [v * 0.7 for v in TONGUE])
+    elif style == 'azteeth':                                        # a row of teeth, parted
+        teeth(p, f)
+        fx, fy, fw, fh = f['front']
+        for i in range(0, fw, S + 1):
+            for j in range(fh):
+                p.px((fx + i, fy + j), (60, 20, 24))
+    elif style == 'azthroat':
+        plain(p, f, THROAT)
+    elif style == 'azmane':
+        mane(p, f, MANE_TEAL, MANE_DEEP, MANE_TIP)
+        for k in ('right', 'left', 'front', 'back'):                  # curls among the locks
+            fx, fy, fw, fh = f[k]
+            rad = 2.6 * S
+            for cy in range(int(rad), fh - int(rad) + 1, int(rad * 2.2)):
+                for cx in range(int(rad) + (int(rad) if (cy // int(rad * 2.2)) % 2 else 0), fw - int(rad) + 1, int(rad * 2.4)):
+                    if p.rnd.random() < 0.55:
+                        rosette(p, f[k], cx, cy, rad, MANE_TEAL, MANE_DEEP, MANE_TIP)
+    elif style == 'azruff':
+        mane(p, f, MANE_TEAL, MANE_DEEP, MANE_TIP)
+        fx, fy, fw, fh = f['front']                                   # curl on curl behind the face
+        rad = 2.4 * S
+        for row, cy in enumerate(range(int(rad), fh, int(rad * 1.9))):
+            for cx in range(int(rad) + (int(rad) if row % 2 else 0), fw, int(rad * 2)):
+                rosette(p, f['front'], cx, cy, rad, MANE_TEAL, MANE_DEEP, MANE_TIP)
+    elif style == 'azcurl':
+        strands(p, f, MANE_TEAL, MANE_DEEP, MANE_TIP, 0.35, 0.8)
+        fx, fy, fw, fh = f['front']
+        p.face(f['front'], blend(MANE_DEEP, MANE_TEAL, 0.3), 1.0, noise=2)
+        rosette(p, f['front'], fw / 2, fh / 2, fw / 2, MANE_TEAL, MANE_DEEP, MANE_TIP, turns=1.5)
+    elif style == 'azlock':
+        strands(p, f, MANE_TEAL, MANE_DEEP, MANE_TIP, 0.4, 1.0)
+    elif style == 'azlockmid':
+        strands(p, f, MANE_TEAL, MANE_DEEP, MANE_TIP, 0.2, 0.5)
+    elif style == 'azlocktip':
+        strands(p, f, MANE_TEAL, MANE_DEEP, MANE_TIP, 0.0, 0.25)
+    elif style == 'azpaw':
+        pelt(p, f, [v * 0.9 for v in AZ], AZ_DARK)
+        p.face(f['bottom'], (24, 22, 26), 1.0, noise=4)              # dark pads
+        for k in ('front', 'top'):                                   # the toes, parted
+            fx, fy, fw, fh = f[k]
+            for i in range(fw // 4, fw, fw // 4):
+                for j in range(fh if k == 'front' else fh // 3):
+                    jj = j if k == 'front' else fh - 1 - j
+                    p.px((fx + i, fy + jj), [v * 0.45 for v in AZ_DARK])
+    elif style == 'azcollar':
+        gold(p, f)
+        for k in ('front', 'right', 'left'):                         # its edges, and jewels set along it
+            fx, fy, fw, fh = f[k]
+            for i in range(fw):
+                p.px((fx + i, fy + fh - 1), GOLD_DEEP)
+            for i in range(S * 2, fw - S, S * 5):
+                for a in range(S):
+                    for b in range(S):
+                        p.px((fx + i + a, fy + fh // 2 - S // 2 + b), (150, 20, 34) if (i // (S * 5)) % 2 else (24, 86, 150))
+    elif style == 'azbell':
+        for k, r in f.items():
+            p.gradient(r, (250, 214, 110), GOLD_DEEP, noise=3)
+        for k in ('front', 'right', 'left', 'back'):                 # a band round it, its mouth dark
+            fx, fy, fw, fh = f[k]
+            for i in range(fw):
+                p.px((fx + i, fy + fh // 3), GOLD_DEEP)
+                p.px((fx + i, fy + fh - 1), (40, 26, 10))
+        fx, fy, fw, fh = f['front']
+        for j in range(fh * 2 // 3, fh - 1):
+            p.px((fx + fw // 2, fy + j), (40, 26, 10))
+        p.face(f['bottom'], (30, 20, 10), 1.0, noise=2)
+    elif style == 'aztassel':
+        for k, r in f.items():
+            p.gradient(r, (160, 26, 34), (96, 12, 20), noise=4)
+    else:
+        lion_common(p, style, f)
 
 
 # ── The White Elephant ───────────────────────────────────────────────────────
