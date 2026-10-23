@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * The silk-lined tray (丹盘, its cinnabar lacquer lined with a silk cloth) in which the youths caught
  * the ginseng fruit they struck down with the Golden Striker. Held under a falling fruit, it catches
- * it before it touches the earth. Bright Moon gives one; one can be made of gold and wool.
+ * it before it touches the earth. Bright Moon leaves one when struck down; one can be made of gold and wool.
  */
 public class SilkLinedTrayItem extends Item {
 

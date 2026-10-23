@@ -25,7 +25,8 @@ import java.util.function.Consumer;
 /**
  * Mount Wuzhuang in the form gallery: its disciples and cranes (on the ground, in flight, swooping),
  * Clear Wind and Bright Moon, the Great Immortal Zhenyuan (his sleeve flung open, someone swept into
- * it, yielding) on a patch of mountain grass before the stage; and the island laid whole a little way
+ * it) on a patch of mountain grass before the stage; Zhenyuan come back for the one who killed the
+ * last of his disciples, out of a burst of cloud in an ordinary farmyard; and the island laid whole a little way
  * north of the stage, high over the flat world as it floats over the clouds in a real one, from its
  * own shape and the temple's blueprint ({@link MountWuzhuangFeature#build}): the gate, the court, the
  * hall within, the garden and its tree, a fruit close, the cloud stair, the island from below and from
@@ -178,10 +179,17 @@ final class WuzhuangScenes {
                         z.showSleeve(80);
                     }
                 }, new double[]{2.2, 2.4, 4.6, -0.6, 1.7, 8.0}),
-                scene("wuzhuang_zhenyuan_yields", p -> {
-                    ZhenyuanEntity z = put(p, ModEntities.ZHENYUAN.get(), 0.5, 0, 7.5, 180f);
-                    if (z != null) z.yieldTrial();
-                }, new double[]{0.5, 3.2, 2.0, 0.5, 2.3, 8.0}),
+                // he comes back, a day after the last disciple fell, wherever their killer is: a farmyard
+                scene("wuzhuang_zhenyuan_arrives", p -> {
+                    farmyard(p);
+                    put(p, ModEntities.ZHENYUAN.get(), 0.5, 0, 8.5, 160f);
+                }, p -> {
+                    ServerLevel level = p.serverLevel();
+                    for (ZhenyuanEntity z : level.getEntitiesOfClass(ZhenyuanEntity.class, new AABB(p.blockPosition()).inflate(16))) {
+                        level.sendParticles(ParticleTypes.CLOUD, z.getX(), z.getY(0.05), z.getZ(), 24, 1.1, 0.1, 1.1, 0.01);
+                        level.sendParticles(ParticleTypes.END_ROD, z.getX(), z.getY(0.6), z.getZ(), 12, 0.7, 0.9, 0.7, 0.01);
+                    }
+                }, new double[]{2.5, 2.3, 4.5, 0.5, 1.6, 8.5}),
                 // the island, laid north of the stage
                 islandScene("wuzhuang_gate", 7, 5, 52, 0, 7, 30),
                 islandScene("wuzhuang_court", 9, 14, 44, 0, 5, 4),
@@ -216,7 +224,7 @@ final class WuzhuangScenes {
         for (int cx = (ICX - reach) >> 4; cx <= (ICX + reach) >> 4; cx++)
             for (int cz = (ICZ - reach) >> 4; cz <= (ICZ + reach) >> 4; cz++) MountWuzhuangFeature.build(level, is, cx << 4, cz << 4, false);
         int t = IslandShape.TERRACE;
-        put(p, ModEntities.ZHENYUAN.get(), ICX + 0.5, t + Temple.ZHENYUAN_Y - ground(p), ICZ + 0.5, 180f);
+        // the Great Immortal is away: his household only
         put(p, ModEntities.CLEAR_WIND.get(), ICX + Temple.CLEAR_WIND[0] + 0.5, t + Temple.CLEAR_WIND[1] - ground(p), ICZ + Temple.CLEAR_WIND[2] + 0.5, 0f);
         put(p, ModEntities.BRIGHT_MOON.get(), ICX + Temple.BRIGHT_MOON[0] + 0.5, t + Temple.BRIGHT_MOON[1] - ground(p), ICZ + Temple.BRIGHT_MOON[2] + 0.5, 0f);
         for (Temple.Resident r : Temple.RESIDENTS) {
@@ -231,6 +239,26 @@ final class WuzhuangScenes {
         island = true;
     }
 
+    /** An ordinary farmyard on the patch: a field of wheat, a fence, hay, a cart's barrel, a lantern on a post. */
+    private static void farmyard(ServerPlayer p) {
+        ServerLevel level = p.serverLevel();
+        int g = ground(p);
+        BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
+        for (int x = X0; x <= X1; x++) for (int z = 12; z <= Z1; z++) {
+            boolean water = x == 0;
+            level.setBlock(at.set(x, g - 1, z), (water ? Blocks.WATER : Blocks.FARMLAND).defaultBlockState(), Block.UPDATE_CLIENTS);
+            if (!water) level.setBlock(at.set(x, g, z), Blocks.WHEAT.defaultBlockState().setValue(net.minecraft.world.level.block.CropBlock.AGE, 7), Block.UPDATE_CLIENTS);
+        }
+        for (int x = X0; x <= X1; x++) level.setBlock(at.set(x, g, 11), Blocks.OAK_FENCE.defaultBlockState(), Block.UPDATE_CLIENTS);
+        level.setBlock(at.set(-4, g, 7), Blocks.HAY_BLOCK.defaultBlockState(), Block.UPDATE_CLIENTS);
+        level.setBlock(at.set(-4, g + 1, 7), Blocks.HAY_BLOCK.defaultBlockState(), Block.UPDATE_CLIENTS);
+        level.setBlock(at.set(-5, g, 7), Blocks.HAY_BLOCK.defaultBlockState(), Block.UPDATE_CLIENTS);
+        level.setBlock(at.set(5, g, 6), Blocks.BARREL.defaultBlockState(), Block.UPDATE_CLIENTS);
+        level.setBlock(at.set(4, g, 9), Blocks.OAK_FENCE.defaultBlockState(), Block.UPDATE_CLIENTS);
+        level.setBlock(at.set(4, g + 1, 9), Blocks.LANTERN.defaultBlockState(), Block.UPDATE_CLIENTS);
+        for (int z = Z0; z <= 10; z++) level.setBlock(at.set(1, g - 1, z), Blocks.DIRT_PATH.defaultBlockState(), Block.UPDATE_CLIENTS);
+    }
+
     /** Clears the patch's creatures before the next shot (the island stays). */
     static void clear(ServerPlayer p) {
         ServerLevel level = p.serverLevel();
@@ -238,13 +266,16 @@ final class WuzhuangScenes {
         if (patch) {
             BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
             for (int x = X0; x <= X1; x++) for (int z = Z0; z <= Z1; z++) {
-                level.setBlock(at.set(x, g - 1, z), Blocks.GRASS_BLOCK.defaultBlockState(), Block.UPDATE_CLIENTS);
+                // from the top down, so nothing is left without its footing to break and drop
+                level.setBlock(at.set(x, g + 1, z), Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
                 level.setBlock(at.set(x, g, z), Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+                level.setBlock(at.set(x, g - 1, z), Blocks.GRASS_BLOCK.defaultBlockState(), Block.UPDATE_CLIENTS);
             }
             patch = false;
         }
         level.getEntities((Entity) null, new AABB(X0 - 4, g - 3, Z0 - 4, X1 + 4, g + 10, Z1 + 4),
-                e -> e instanceof WuzhuangMonster || e instanceof TempleImmortal || e instanceof net.minecraft.world.entity.npc.Villager).forEach(e -> {
+                e -> e instanceof WuzhuangMonster || e instanceof TempleImmortal || e instanceof net.minecraft.world.entity.npc.Villager
+                        || e instanceof net.minecraft.world.entity.item.ItemEntity).forEach(e -> {
                     if (e instanceof ZhenyuanEntity z) z.releaseAll(true);
                     e.discard();
                 });

@@ -14,7 +14,6 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
@@ -45,15 +44,12 @@ import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 
 /**
  * Red Boy (红孩儿), the Holy Child King (圣婴大王) of the Fire Cloud Cave on Mount Haohao, son of the
  * Bull Demon King and Princess Iron Fan (chapters 40–42): a child in a red stomacher, his hair in
- * two tufts, a Fire-Tipped Spear in his hands, who three hundred years in the Flaming Mountains made
+ * two tufts, his own fire-tipped spear in his hands ({@link com.jttw.engine.item.RedBoySpearItem}), who three hundred years in the Flaming Mountains made
  * master of the True Samadhi Fire. He wanted to eat the Tang Monk. Level 77, seventy ordinary hits,
  * a red bar; a {@link ZoneBoss} in the cave's inner hall.
  * <ul>
@@ -69,8 +65,8 @@ import java.util.UUID;
  *   <li><b>fire from his nose and mouth both</b> (phase 2, at a third): a ring of the fire bursts
  *       out all round him, and from then on it is fiercer (amplifier 1) and comes faster.</li>
  * </ul>
- * The Bull Demon King's son knows his father: a Bull Demon player is hailed (and, as Sun Wukong in
- * his father's shape learned, not trusted): he fights him all the same.
+ * He says nothing to anyone, a Bull Demon player included (he fights his father's kind all the same):
+ * his fire speaks for him.
  */
 public class RedBoyEntity extends ZoneBoss {
 
@@ -96,8 +92,6 @@ public class RedBoyEntity extends ZoneBoss {
     private int breath = BREATH_EVERY / 2, windup = -1;
     /** How far round him his fight spreads: his carts' ring, his ring of fire, his breath's reach (see {@link #confine}). */
     private double arena = CART_RADIUS;
-    /** The Bull Demon players he has hailed. */
-    private final Set<UUID> hailed = new HashSet<>();
 
     public RedBoyEntity(EntityType<? extends RedBoyEntity> type, Level level) {
         super(type, level);
@@ -166,7 +160,7 @@ public class RedBoyEntity extends ZoneBoss {
 
     @Override
     protected void populateDefaultEquipmentSlots(RandomSource random, DifficultyInstance difficulty) {
-        setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(ModItems.FIRE_TIP_SPEAR.get())); // his own fire-tipped spear (火尖枪)
+        setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(ModItems.RED_BOY_SPEAR.get())); // his own fire-tipped spear (火尖枪), not Nezha's
         setDropChance(EquipmentSlot.MAINHAND, 0f); // his loot table says when it falls
     }
 
@@ -295,14 +289,6 @@ public class RedBoyEntity extends ZoneBoss {
         boolean hit = super.doHurtTarget(target);
         if (hit) target.igniteForSeconds(4);
         return hit;
-    }
-
-    @Override
-    public void setTarget(@Nullable LivingEntity target) {
-        super.setTarget(target);
-        if (target instanceof ServerPlayer p && getTarget() == p && com.jttw.engine.character.bulldemon.BullDemonCharacter.is(p) && hailed.add(p.getUUID())) {
-            p.sendSystemMessage(Component.translatable("entity.jttw_engine.red_boy.father"));
-        }
     }
 
     @Override

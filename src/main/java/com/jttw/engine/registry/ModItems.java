@@ -295,6 +295,10 @@ public final class ModItems {
     public static final DeferredHolder<Item, Item> MIXED_IRON_CUDGEL =
             ITEMS.register("mixed_iron_cudgel", com.jttw.engine.item.MixedIronCudgelItem::new);
 
+    /** Red Boy's own fire-tipped spear (火尖枪): his weapon and his drop, a spear and no more (not Nezha's). */
+    public static final DeferredHolder<Item, Item> RED_BOY_SPEAR =
+            ITEMS.register("red_boy_spear", com.jttw.engine.item.RedBoySpearItem::new);
+
     public static final DeferredHolder<Item, Item> BANANA_LEAF_FAN =
             ITEMS.register("banana_leaf_fan", com.jttw.engine.item.BananaLeafFanItem::new);
 
@@ -320,11 +324,11 @@ public final class ModItems {
     // ── Mount Wuzhuang ────────────────────────────────────────────
     /** A ginseng fruit (人参果): eaten, it makes whole; the first a soul eats lengthens its life for good. */
     public static final DeferredHolder<Item, Item> GINSENG_FRUIT = ITEMS.register("ginseng_fruit", com.jttw.engine.item.GinsengFruitItem::new);
-    /** The Golden Striker (金击子): gold, the only thing a ginseng fruit falls whole to. Clear Wind's gift. */
+    /** The Golden Striker (金击子): gold, the only thing a ginseng fruit falls whole to. Clear Wind leaves it. */
     public static final DeferredHolder<Item, Item> GOLDEN_STRIKER = ITEMS.register("golden_striker", com.jttw.engine.item.GoldenStrikerItem::new);
-    /** The Silk-Lined Tray (丹盘): catches a falling ginseng fruit. Bright Moon's gift; or made of gold and wool. */
+    /** The Silk-Lined Tray (丹盘): catches a falling ginseng fruit. Bright Moon leaves it; or made of gold and wool. */
     public static final DeferredHolder<Item, Item> SILK_LINED_TRAY = ITEMS.register("silk_lined_tray", com.jttw.engine.item.SilkLinedTrayItem::new);
-    /** Zhenyuan's horsetail whisk (拂尘), given to whoever first passes his trial. */
+    /** Zhenyuan's horsetail whisk (拂尘), which he leaves when struck down. */
     public static final DeferredHolder<Item, Item> ZHENYUAN_FLYWHISK = ITEMS.register("zhenyuan_flywhisk", com.jttw.engine.item.FlywhiskItem::new);
     /** A cloud crane's plume, and a disciple's yellow talisman: the mountain's materials. */
     public static final DeferredHolder<Item, Item> CRANE_PLUME = ITEMS.register("crane_plume", () -> new Item(new Item.Properties()));

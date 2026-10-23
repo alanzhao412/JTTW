@@ -1,13 +1,12 @@
 package com.jttw.engine.entity.wuzhuang;
 
 import com.jttw.engine.entity.MobScaling;
+import com.jttw.engine.entity.zone.ZoneMonster;
 import com.jttw.engine.progression.level.EnemyTier;
-import com.jttw.engine.registry.ModItems;
 import com.jttw.engine.world.wuzhuang.Wuzhuang;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.BossEvent;
@@ -25,7 +24,6 @@ import net.minecraft.world.entity.ai.goal.MoveTowardsRestrictionGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
@@ -35,7 +33,9 @@ import javax.annotation.Nullable;
  * Clear Wind (清风) and Bright Moon (明月), the Great Immortal Zhenyuan's two senior disciples, the
  * youths he left to keep the temple and its tree (the novel makes them 1,320 and 1,200 years old,
  * and still boys). The garden's mini-bosses: {@link TempleImmortal}s at level {@value #LEVEL}, who
- * keep by the ginseng-fruit tree and fight as a pair, each coming to the other's side.
+ * keep by the ginseng-fruit tree and fight as a pair, each coming to the other's side. They are of
+ * the temple's disciples (they count among its household, {@link com.jttw.engine.world.wuzhuang.TempleRecord}),
+ * and like the rest fight whoever has eaten of the tree, to the death.
  * <ul>
  *   <li><b>Clear Wind</b>: a <b>gust</b> every few seconds that hurls his foe away (on an island in
  *       the sky, mind the edge);</li>
@@ -43,8 +43,8 @@ import javax.annotation.Nullable;
  *       partner;</li>
  *   <li>both <b>curse</b> a thief roundly (as they cursed the pilgrims for hours): it weakens.</li>
  * </ul>
- * Each yields at the end; the first time, Clear Wind gives the Golden Striker and Bright Moon the
- * Silk-Lined Tray, the two things it takes to bring down a ginseng fruit whole.
+ * Struck down, Clear Wind leaves the Golden Striker and Bright Moon the Silk-Lined Tray (their loot
+ * tables), the two things it takes to bring down a ginseng fruit whole. Each pays as a General.
  */
 public abstract class TempleYouthEntity extends TempleImmortal {
 
@@ -59,6 +59,8 @@ public abstract class TempleYouthEntity extends TempleImmortal {
 
     protected TempleYouthEntity(EntityType<? extends TempleYouthEntity> type, Level level) {
         super(type, level);
+        getPersistentData().putString(ZoneMonster.KEY_TIER, EnemyTier.GENERAL.name());
+        xpReward = 100;
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -90,11 +92,6 @@ public abstract class TempleYouthEntity extends TempleImmortal {
     }
 
     @Override
-    protected EnemyTier trialTier() {
-        return EnemyTier.GENERAL;
-    }
-
-    @Override
     public int lairRadius() {
         return GARDEN;
     }
@@ -111,16 +108,16 @@ public abstract class TempleYouthEntity extends TempleImmortal {
         goalSelector.addGoal(5, new MoveTowardsRestrictionGoal(this, 1.0));
         goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 12f));
         goalSelector.addGoal(7, new RandomLookAroundGoal(this));
-        addTrialTargets();
+        addTempleTargets();
     }
 
     @Override
     public boolean hurt(DamageSource source, float amount) {
         boolean hurt = super.hurt(source, amount);
         // the other comes to his side
-        if (hurt && !level().isClientSide && source.getEntity() instanceof LivingEntity foe && !isYielded()) {
+        if (hurt && !level().isClientSide && source.getEntity() instanceof LivingEntity foe) {
             TempleYouthEntity other = partner();
-            if (other != null && !other.isYielded() && other.getTarget() == null) other.setTarget(foe);
+            if (other != null && other.getTarget() == null) other.setTarget(foe);
         }
         return hurt;
     }
@@ -135,7 +132,6 @@ public abstract class TempleYouthEntity extends TempleImmortal {
     @Override
     protected void customServerAiStep() {
         super.customServerAiStep();
-        if (isYielded()) return;
         if (art > 0) art--;
         if (curse > 0) curse--;
         LivingEntity t = getTarget();
@@ -200,11 +196,6 @@ public abstract class TempleYouthEntity extends TempleImmortal {
             playSound(SoundEvents.BREEZE_WIND_CHARGE_BURST.value(), 1.5f, 1.1f);
             return true;
         }
-
-        @Override
-        protected void firstGift(ServerPlayer p) {
-            give(p, new ItemStack(ModItems.GOLDEN_STRIKER.get()));
-        }
     }
 
     // ── Bright Moon ─────────────────────────────────────────────────────
@@ -251,16 +242,11 @@ public abstract class TempleYouthEntity extends TempleImmortal {
         /** Mends his partner, if wounded and near. Returns how much. */
         public float mendPartner() {
             TempleYouthEntity other = partner();
-            if (other == null || other.isYielded() || other.getHealth() >= other.getMaxHealth()) return 0;
+            if (other == null || other.getHealth() >= other.getMaxHealth()) return 0;
             float before = other.getHealth();
             other.heal((float) (other.getMaxHealth() * MENDS));
             if (level() instanceof ServerLevel server) server.sendParticles(ParticleTypes.END_ROD, other.getX(), other.getY(1), other.getZ(), 12, 0.3, 0.4, 0.3, 0.02);
             return other.getHealth() - before;
-        }
-
-        @Override
-        protected void firstGift(ServerPlayer p) {
-            give(p, new ItemStack(ModItems.SILK_LINED_TRAY.get()));
         }
     }
 }

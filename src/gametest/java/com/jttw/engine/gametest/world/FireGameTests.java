@@ -285,7 +285,8 @@ public class FireGameTests {
         eq(h, BossEvent.BossBarColor.RED, boy.bossBar().getColor(), "a red bar");
         check(h, boy.fireImmune(), "fire is nothing to him");
         boy.finalizeSpawn(h.getLevel(), h.getLevel().getCurrentDifficultyAt(boy.blockPosition()), net.minecraft.world.entity.MobSpawnType.STRUCTURE, null);
-        check(h, boy.getMainHandItem().is(ModItems.FIRE_TIP_SPEAR.get()), "his fire-tipped spear in his hand");
+        check(h, boy.getMainHandItem().is(ModItems.RED_BOY_SPEAR.get()), "his own fire-tipped spear in his hand");
+        check(h, !boy.getMainHandItem().is(ModItems.FIRE_TIP_SPEAR.get()), "not Nezha's");
         check(h, boy.hasRestriction(), "he keeps to his lair");
         h.succeed();
     }
@@ -373,6 +374,78 @@ public class FireGameTests {
             var burning = g.getEffect(ModEffects.SAMADHI_FIRE);
             check(h, burning != null && burning.getAmplifier() == 1, "fiercely");
         });
+    }
+
+    // ── Red Boy says nothing; his spear ─────────────────────────────────
+
+    /**
+     * Through a whole fight (his spear, his breath, his carts, his ring of fire, both his phases) Red
+     * Boy sends no word to anyone near him: not to an ordinary player, not to a Bull Demon (once
+     * hailed as his father).
+     */
+    @GameTest(template = PLATFORM, timeoutTicks = 200, batch = "fire_live")
+    public static void redBoySaysNothingThroughAWholeFight(GameTestHelper h) {
+        ServerPlayer plain = player(h);
+        ServerPlayer bull = com.jttw.engine.gametest.character.CharTest.as(h, ReincarnationOutcome.BULL_DEMON_KING);
+        check(h, com.jttw.engine.character.bulldemon.BullDemonCharacter.is(bull), "a Bull Demon");
+        List<String> heard = new java.util.ArrayList<>();
+        for (ServerPlayer p : List.of(plain, bull)) {
+            listen(p, heard);
+            h.getLevel().addNewPlayer(p);
+            onEnd(h, () -> p.serverLevel().removePlayerImmediately(p, Entity.RemovalReason.DISCARDED));
+        }
+        plain.moveTo(h.absoluteVec(new Vec3(0.5, 2, 4.5)));
+        bull.moveTo(h.absoluteVec(new Vec3(4.5, 2, 4.5)));
+        RedBoyEntity boy = boy(h, new BlockPos(2, 2, 1));
+        int[] t = {0};
+        h.onEachTick(() -> {
+            t[0]++;
+            ServerPlayer foe = (t[0] / 20) % 2 == 0 ? bull : plain;
+            if (boy.getTarget() != foe) boy.setTarget(foe);
+            if (t[0] == 10) boy.breathe(bull);
+            if (t[0] == 30) boy.breathe(plain);
+            if (t[0] == 40) boy.setHealth(boy.getMaxHealth() * 0.6f); // his carts
+            if (t[0] == 70) boy.setHealth(boy.getMaxHealth() * 0.3f); // his ring of fire
+            if (t[0] == 90) boy.doHurtTarget(bull);
+            if (t[0] == 100) {
+                boy.invulnerableTime = 0;
+                boy.hurt(h.getLevel().damageSources().playerAttack(bull), 5f);
+            }
+        });
+        h.runAfterDelay(150, () -> {
+            check(h, boy.isAlive() && boy.phase() == 2, "the fight went through both his phases");
+            check(h, heard.isEmpty(), "and he said nothing to anyone: " + heard);
+            h.succeed();
+        });
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void hisOwnSpearIsASpearAndNoMore(GameTestHelper h) {
+        ItemStack spear = new ItemStack(ModItems.RED_BOY_SPEAR.get());
+        check(h, spear.getItem() instanceof com.jttw.engine.item.RedBoySpearItem && !(spear.getItem() instanceof com.jttw.engine.item.FireTipSpearItem),
+                "his own, not Nezha's");
+        // its stats: damage and pace, and nothing else
+        var mods = spear.getItem().getDefaultAttributeModifiers(spear).modifiers();
+        eq(h, 2, mods.size(), "two modifiers");
+        for (var m : mods) {
+            check(h, m.attribute().is(Attributes.ATTACK_DAMAGE) || m.attribute().is(Attributes.ATTACK_SPEED), "only damage and speed: " + m.attribute());
+            check(h, m.slot() == net.minecraft.world.entity.EquipmentSlotGroup.MAINHAND, "in the hand");
+        }
+        close(h, com.jttw.engine.item.RedBoySpearItem.DAMAGE_PERCENT / 100.0, mods.stream().filter(m -> m.attribute().is(Attributes.ATTACK_DAMAGE))
+                .findFirst().orElseThrow().modifier().amount(), "+45% damage");
+        // the item does nothing of its own: no use, nothing on a hit, nothing as it is carried
+        for (var method : com.jttw.engine.item.RedBoySpearItem.class.getDeclaredMethods()) {
+            check(h, java.util.Set.of("getDefaultAttributeModifiers", "appendHoverText").contains(method.getName()) || method.isSynthetic(),
+                    "no ability of its own: " + method.getName());
+        }
+        ServerPlayer p = player(h);
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, spear);
+        eq(h, net.minecraft.world.InteractionResult.PASS, spear.use(h.getLevel(), p, net.minecraft.world.InteractionHand.MAIN_HAND).getResult(), "used: nothing");
+        LivingEntity g = golem(h, new BlockPos(3, 2, 3));
+        spear.getItem().hurtEnemy(spear, g, p);
+        spear.getItem().postHurtEnemy(spear, g, p);
+        check(h, g.getRemainingFireTicks() <= 0 && g.getActiveEffects().isEmpty() && !SamadhiFire.burning(g), "a hit sets nothing alight");
+        h.succeed();
     }
 
     // ── The creatures ───────────────────────────────────────────────────
@@ -572,16 +645,18 @@ public class FireGameTests {
     public static void redBoyLeavesTheTrueSamadhiFire(GameTestHelper h) {
         ServerPlayer p = player(h);
         RedBoyEntity boy = boy(h, new BlockPos(2, 2, 2));
-        int spears = 0, rolls = 40;
+        int spears = 0, rolls = 60;
         for (int i = 0; i < rolls; i++) {
             List<ItemStack> items = loot(h, boy, p);
             int fire = count(items, ModItems.TRUE_SAMADHI_FIRE.get());
             check(h, fire >= 2 && fire <= 4, "two or three True Samadhi Fire (four with Looting): " + items);
             check(h, count(items, ModItems.EMBER_CORE.get()) >= 3, "embers");
-            spears += count(items, ModItems.FIRE_TIP_SPEAR.get());
+            check(h, count(items, ModItems.FIRE_TIP_SPEAR.get()) == 0, "never Nezha's spear: " + items);
+            check(h, count(items, ModItems.RED_BOY_SPEAR.get()) <= 1, "his own spear, one at most: " + items);
+            spears += count(items, ModItems.RED_BOY_SPEAR.get());
         }
-        // a quarter of the time: in forty kills, between one and twenty-four (a miss at either end is one in a hundred thousand)
-        check(h, spears >= 1 && spears <= 24, "his spear, now and then: " + spears + " in " + rolls);
+        // half the time: in sixty kills, between twelve and forty-eight (a miss at either end is about one in a million)
+        check(h, spears >= 12 && spears <= 48, "his own spear, every other time: " + spears + " in " + rolls);
         h.succeed();
     }
 

@@ -64,7 +64,12 @@ public final class Temple {
     /** A sign laid with the temple: where, which way it faces, its lines. */
     public record Sign(int x, int y, int z, Direction facing, String... lines) {}
 
-    /** Someone who lives here, put in place as the land is made: who, where (local), facing. */
+    /**
+     * Someone who lives here, put in place as the land is made: who, where (local), facing. These are
+     * the temple's whole household, and never any more ({@link TempleRecord}): twenty-two disciples
+     * (the novel's forty-eight, half of them away with their master) and the youths Clear Wind and
+     * Bright Moon, twenty-four in all.
+     */
     public record Resident(String who, int x, int y, int z, float yaw) {}
 
     /** One block of the blueprint in a column. */
@@ -78,10 +83,22 @@ public final class Temple {
     public static final List<Resident> RESIDENTS = List.of(
             new Resident("clear_wind", CLEAR_WIND[0], CLEAR_WIND[1], CLEAR_WIND[2], 0f),
             new Resident("bright_moon", BRIGHT_MOON[0], BRIGHT_MOON[1], BRIGHT_MOON[2], 0f),
+            // in the hall, before the altar and down its aisles
             new Resident("disciple", -5, 2, 2, 90f), new Resident("disciple", 5, 2, 2, 270f),
+            new Resident("disciple", -8, 2, -3, 90f), new Resident("disciple", 8, 2, -3, 270f),
+            new Resident("disciple", -8, 2, 4, 90f), new Resident("disciple", 8, 2, 4, 270f),
+            // the front court
             new Resident("disciple", -8, 1, 21, 200f), new Resident("disciple", 8, 1, 17, 160f),
+            new Resident("disciple", -6, 1, 14, 120f), new Resident("disciple", 6, 1, 23, 240f),
+            // the wings
             new Resident("disciple", -16, 2, 4, 270f), new Resident("disciple", 16, 2, 9, 90f),
-            new Resident("disciple", 0, 1, -36, 180f));
+            new Resident("disciple", -16, 2, -3, 270f), new Resident("disciple", 16, 2, -2, 90f),
+            new Resident("disciple", -17, 2, 12, 270f), new Resident("disciple", 17, 2, 14, 90f),
+            // the gate
+            new Resident("disciple", -4, 2, 30, 0f), new Resident("disciple", 4, 2, 30, 0f),
+            // the garden and the pavilion
+            new Resident("disciple", 0, 1, -36, 180f), new Resident("disciple", -13, 2, -31, 200f),
+            new Resident("disciple", 10, 1, -24, 120f), new Resident("disciple", -9, 1, -22, 240f));
 
     // ── Building it ─────────────────────────────────────────────────────
 

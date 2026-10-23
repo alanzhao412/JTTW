@@ -23,9 +23,11 @@ import com.jttw.engine.world.Zones;
 import com.jttw.engine.world.morality.Morality;
 import com.jttw.engine.world.wuzhuang.CloudStepBlock;
 import com.jttw.engine.world.wuzhuang.GinsengFruitBlock;
+import com.jttw.engine.world.wuzhuang.GinsengTree;
 import com.jttw.engine.world.wuzhuang.IslandShape;
 import com.jttw.engine.world.wuzhuang.MountWuzhuangFeature;
 import com.jttw.engine.world.wuzhuang.Temple;
+import com.jttw.engine.world.wuzhuang.TempleRecord;
 import com.jttw.engine.world.wuzhuang.Wuzhuang;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
@@ -62,10 +64,13 @@ import static com.jttw.engine.gametest.GT.*;
 
 /**
  * Mount Wuzhuang: its band and heights, the cloud stair, the temple's blueprint, the ginseng fruit
- * (gold to knock it down; it sinks into the earth, rests on wool, is caught in a tray, dissolves in
- * water; eaten, it lengthens a soul's life once), the disciples and cranes and their captains, the
- * youths Clear Wind and Bright Moon, Zhenyuan's sleeve (held, struggled out of, cast out of), his
- * trial (he yields, never dies, and rewards), and the karma of it all.
+ * (all ripe, never ripening or growing back; gold to knock it down; it sinks into the earth, rests
+ * on wool, is caught in a tray, dissolves in water; eaten, it lengthens a soul's life once and turns
+ * the household against the eater for good), the disciples (finite, never spawning of themselves)
+ * and cranes and their captains, the youths Clear Wind and Bright Moon (fought to the death, leaving
+ * the striker and the tray), the temple's record (the last disciple's killer marked, Zhenyuan sent
+ * after a day wherever they are, once; kept through saving), Zhenyuan's sleeve (held, struggled out
+ * of, cast out of), his death and loot, no trial anywhere, and the karma of it all.
  */
 @GameTestHolder(JTTWEngine.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -246,7 +251,20 @@ public class WuzhuangGameTests {
             check(h, f[1] >= 4 && f[1] <= 8, "within reach from the ground (with a rod): " + f[1]);
             if (f[3] == GinsengFruitBlock.RIPE) ripe++;
         }
-        check(h, Temple.FRUIT.size() >= 10 && ripe >= 5, "a dozen fruit, half ripe: " + Temple.FRUIT.size() + ", " + ripe);
+        eq(h, GinsengTree.FRUIT, Temple.FRUIT.size(), "a dozen fruit");
+        eq(h, Temple.FRUIT.size(), ripe, "every one ripe as the land is made");
+        // the household: twenty-four, all told, each with room to stand and ground under them
+        eq(h, 24, Temple.RESIDENTS.size(), "twenty-four of them");
+        eq(h, 24, TempleRecord.household(), "the record's household");
+        eq(h, 22L, Temple.RESIDENTS.stream().filter(r -> r.who().equals("disciple")).count(), "twenty-two disciples and the two youths");
+        java.util.Set<Long> spots = new java.util.HashSet<>();
+        for (Temple.Resident r : Temple.RESIDENTS) {
+            String at = r.who() + " at " + r.x() + "," + r.y() + "," + r.z();
+            check(h, spots.add(BlockPos.asLong(r.x(), r.y(), r.z())), "one to a spot: " + at);
+            check(h, open(Temple.at(r.x(), r.y(), r.z())) && open(Temple.at(r.x(), r.y() + 1, r.z())), "room to stand: " + at);
+            BlockState under = Temple.at(r.x(), r.y() - 1, r.z());
+            check(h, under != null ? under.blocksMotion() : r.y() == 1, "ground under: " + at);
+        }
         h.succeed();
     }
 
@@ -271,7 +289,6 @@ public class WuzhuangGameTests {
     public static void goldKnocksARipeFruitDownWholeAndAnythingElseWithersIt(GameTestHelper h) {
         openAir(h);
         ServerPlayer p = player(h);
-        Wuzhuang.makeGuest(p);
         BlockPos a = fruit(h, new BlockPos(1, 5, 1), GinsengFruitBlock.RIPE);
         eq(h, GinsengFruitBlock.Outcome.KNOCKED_DOWN, GinsengFruitBlock.knock(h.getLevel(), a, h.getLevel().getBlockState(a), p,
                 new ItemStack(Items.GOLDEN_SWORD)), "a golden sword knocks it down");
@@ -359,23 +376,96 @@ public class WuzhuangGameTests {
     }
 
     @GameTest(template = PLATFORM)
-    public static void takingTheFruitWithoutLeaveIsTheft(GameTestHelper h) {
+    public static void takingTheFruitIsTheft(GameTestHelper h) {
         openAir(h);
-        ServerPlayer thief = player(h), guest = player(h);
-        Wuzhuang.makeGuest(guest);
+        ServerPlayer thief = player(h);
         DaoistDiscipleEntity d = mob(h, ModEntities.DAOIST_DISCIPLE.get(), 78, false, new BlockPos(4, 2, 4));
         d.setNoAi(true);
         BlockPos a = fruit(h, new BlockPos(1, 5, 1), GinsengFruitBlock.RIPE);
         GinsengFruitBlock.knock(h.getLevel(), a, h.getLevel().getBlockState(a), thief, new ItemStack(Items.GOLDEN_SWORD));
-        eq(h, Morality.STEAL_GINSENG, Morality.karma(thief), "a theft: -40");
-        check(h, Wuzhuang.isThief(thief), "the temple's thief now");
+        eq(h, Morality.STEAL_GINSENG, Morality.karma(thief), "a theft: -40 (no one has leave: the Master is away)");
+        check(h, Wuzhuang.isThief(thief) && Wuzhuang.isTempleEnemy(thief), "the temple's thief now");
         eq(h, thief, d.getTarget(), "its disciples turn on him");
-        BlockPos b = fruit(h, new BlockPos(2, 5, 1), GinsengFruitBlock.RIPE);
-        GinsengFruitBlock.knock(h.getLevel(), b, h.getLevel().getBlockState(b), guest, new ItemStack(Items.GOLDEN_SWORD));
-        eq(h, 0, Morality.karma(guest), "with Zhenyuan's leave it is no theft");
-        check(h, !Wuzhuang.isThief(guest), "nor is the guest a thief");
         h.getLevel().getEntitiesOfClass(ItemEntity.class, new net.minecraft.world.phys.AABB(a).inflate(4)).forEach(Entity::discard);
         h.succeed();
+    }
+
+    // ── The fruit never comes again ─────────────────────────────────────
+
+    @GameTest(template = PLATFORM)
+    public static void aFruitNeverRipensAndNothingGrowsBack(GameTestHelper h) {
+        BlockState fresh = ModBlocks.HANGING_GINSENG_FRUIT.get().defaultBlockState();
+        eq(h, GinsengFruitBlock.RIPE, fresh.getValue(GinsengFruitBlock.AGE), "a fruit is made ripe");
+        net.minecraft.util.RandomSource random = net.minecraft.util.RandomSource.create(7);
+        for (int age = 0; age <= GinsengFruitBlock.RIPE; age++) {
+            BlockPos at = fruit(h, new BlockPos(1 + age, 5, 2), age);
+            BlockState s = h.getLevel().getBlockState(at);
+            check(h, !s.isRandomlyTicking(), "no random ticks at age " + age);
+            for (int i = 0; i < 2000; i++) s.randomTick(h.getLevel(), at, random);
+            eq(h, age, h.getLevel().getBlockState(at).getValue(GinsengFruitBlock.AGE), "still age " + age + " after two thousand ticks");
+        }
+        // knocked down, the place it hung stays empty: nothing grows back
+        ServerPlayer p = player(h);
+        BlockPos at = fruit(h, new BlockPos(3, 5, 3), GinsengFruitBlock.RIPE);
+        GinsengFruitBlock.knock(h.getLevel(), at, h.getLevel().getBlockState(at), p, new ItemStack(Items.IRON_SWORD));
+        for (int i = 0; i < 200; i++) {
+            BlockState s = h.getLevel().getBlockState(at);
+            if (s.isRandomlyTicking()) s.randomTick(h.getLevel(), at, random);
+        }
+        check(h, h.getLevel().getBlockState(at).isAir(), "gone for good");
+        h.succeed();
+    }
+
+    // ── Eating it turns the household ───────────────────────────────────
+
+    @GameTest(template = PLATFORM)
+    public static void eatingAFruitMakesOneTheTemplesEnemyForGood(GameTestHelper h) {
+        ServerPlayer p = leveled(h, 80);
+        check(h, !Wuzhuang.isTempleEnemy(p) && !Wuzhuang.ateFruit(p), "not before");
+        ItemStack fruit = new ItemStack(ModItems.GINSENG_FRUIT.get());
+        fruit.getItem().finishUsingItem(fruit, h.getLevel(), p);
+        check(h, Wuzhuang.ateFruit(p) && Wuzhuang.isTempleEnemy(p), "marked once eaten");
+        // through death into a new body, and through being saved and loaded (a relog)
+        ServerPlayer reborn = player(h);
+        Wuzhuang.onClone(new net.neoforged.neoforge.event.entity.player.PlayerEvent.Clone(reborn, p, true));
+        check(h, Wuzhuang.isTempleEnemy(reborn), "still, after death");
+        net.minecraft.nbt.CompoundTag saved = new net.minecraft.nbt.CompoundTag();
+        p.saveWithoutId(saved);
+        ServerPlayer again = player(h);
+        again.load(saved);
+        check(h, Wuzhuang.isTempleEnemy(again), "still, after a relog");
+        // long after any thief's mark would have worn off
+        p.getPersistentData().remove(Wuzhuang.KEY_THIEF);
+        check(h, !Wuzhuang.isThief(p) && Wuzhuang.isTempleEnemy(p), "for good, not for a while");
+        h.succeed();
+    }
+
+    /** A disciple and a youth, left to themselves, leave a player be; once the player has eaten a fruit, they come for them. */
+    @GameTest(template = PLATFORM, timeoutTicks = 200, batch = LIVE)
+    public static void theHouseholdTurnsOnWhoeverAteTheFruitAndNotBefore(GameTestHelper h) {
+        ServerPlayer p = leveled(h, 80);
+        p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+        h.getLevel().addNewPlayer(p);
+        onEnd(h, () -> p.serverLevel().removePlayerImmediately(p, Entity.RemovalReason.DISCARDED));
+        p.moveTo(h.absoluteVec(new Vec3(4.5, 2, 4.5)));
+        DaoistDiscipleEntity d = mob(h, ModEntities.DAOIST_DISCIPLE.get(), 78, false, new BlockPos(0, 2, 0));
+        var wind = immortal(h, ModEntities.CLEAR_WIND.get(), new BlockPos(0, 2, 4), true);
+        boolean[] ate = {false};
+        h.onEachTick(() -> {
+            if (!ate[0]) {
+                check(h, d.getTarget() == null && wind.getTarget() == null, "they leave one who has not eaten be");
+            }
+        });
+        h.runAfterDelay(60, () -> {
+            ItemStack fruit = new ItemStack(ModItems.GINSENG_FRUIT.get());
+            fruit.getItem().finishUsingItem(fruit, h.getLevel(), p);
+            ate[0] = true;
+        });
+        h.succeedWhen(() -> {
+            check(h, ate[0], "eaten");
+            eq(h, p, d.getTarget(), "the disciple comes for the eater");
+            eq(h, p, wind.getTarget(), "and so does Clear Wind");
+        });
     }
 
     // ── Disciples and cranes ────────────────────────────────────────────
@@ -405,6 +495,27 @@ public class WuzhuangGameTests {
         LevelManager.onEntityKilled(new LivingDeathEvent(mob(h, ModEntities.DAOIST_DISCIPLE.get(), 85, true, new BlockPos(4, 2, 4)),
                 p.level().damageSources().playerAttack(p)));
         eq(h, band.xpForTier(EnemyTier.GRUNT) + band.xpForTier(EnemyTier.GENERAL), PlayerLevel.getXp(p), "plus a captain, a General");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void disciplesNeverSpawnOfThemselves(GameTestHelper h) {
+        var biome = h.getLevel().registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.BIOME).get(Zones.MOUNT_WUZHUANG_BIOME);
+        check(h, biome != null, "the biome");
+        var monsters = biome.getMobSettings().getMobs(net.minecraft.world.entity.MobCategory.MONSTER).unwrap();
+        check(h, monsters.stream().noneMatch(m -> m.type == ModEntities.DAOIST_DISCIPLE.get()), "no disciple among the biome's spawns");
+        check(h, monsters.stream().anyMatch(m -> m.type == ModEntities.CLOUD_CRANE.get()), "the cranes still come");
+        for (var category : net.minecraft.world.entity.MobCategory.values()) {
+            check(h, biome.getMobSettings().getMobs(category).unwrap().stream().noneMatch(m -> m.type == ModEntities.DAOIST_DISCIPLE.get()), "nor in " + category);
+        }
+        DaoistDiscipleEntity d = mob(h, ModEntities.DAOIST_DISCIPLE.get(), 78, false, new BlockPos(2, 2, 2));
+        check(h, !d.checkSpawnRules(h.getLevel(), net.minecraft.world.entity.MobSpawnType.NATURAL), "a natural spawn is refused");
+        check(h, !d.checkSpawnRules(h.getLevel(), net.minecraft.world.entity.MobSpawnType.CHUNK_GENERATION), "and a chunk's");
+        // Zhenyuan is put nowhere as the land is made
+        var placed = h.getLevel().registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.PLACED_FEATURE);
+        check(h, !placed.containsKey(JTTWEngine.id("zhenyuan_lair")), "no lair for Zhenyuan");
+        check(h, biome.getGenerationSettings().features().stream().flatMap(set -> set.stream())
+                .noneMatch(f -> f.unwrapKey().map(k -> k.location().getPath().contains("zhenyuan")).orElse(false)), "nor in the biome's features");
         h.succeed();
     }
 
@@ -477,33 +588,43 @@ public class WuzhuangGameTests {
     }
 
     @GameTest(template = PLATFORM)
-    public static void theYouthsYieldAndGiveWhatItTakesToBringDownTheFruit(GameTestHelper h) {
+    public static void theYouthsFightToTheDeathAndLeaveWhatItTakesToBringDownTheFruit(GameTestHelper h) {
         ServerPlayer p = leveled(h, 84);
         var wind = immortal(h, ModEntities.CLEAR_WIND.get(), new BlockPos(1, 2, 1), false);
         var moon = immortal(h, ModEntities.BRIGHT_MOON.get(), new BlockPos(4, 2, 4), false);
-        for (TempleImmortal y : List.of(wind, moon)) {
-            y.setHealth(y.getMaxHealth() * 0.12f);
-            for (int i = 0; i < 4 && !y.isYielded(); i++) {
+        eq(h, EnemyTier.GENERAL.name(), wind.getPersistentData().getString(ZoneMonster.KEY_TIER), "each pays as a General");
+        for (TempleYouthEntity y : List.of(wind, moon)) {
+            y.setHealth(y.getMaxHealth() * 0.03f);
+            for (int i = 0; i < 4 && y.isAlive(); i++) {
                 y.invulnerableTime = 0;
                 y.hurt(h.getLevel().damageSources().playerAttack(p), 1e9f);
             }
-            check(h, y.isYielded() && y.isAlive() && y.getHealth() > 0, "it yields, and lives");
-            check(h, y.getHealth() <= y.getMaxHealth() * TempleImmortal.YIELD_PERCENT / 100f, "at a tenth of its health");
-            float h0 = y.getHealth();
-            y.invulnerableTime = 0;
-            check(h, !y.hurt(h.getLevel().damageSources().playerAttack(p), 100), "no blow after it has yielded");
-            eq(h, h0, y.getHealth(), "untouched");
-            check(h, !y.showsBossBar(), "its bar gone");
+            check(h, y.isDeadOrDying(), "struck down at the end: no yielding");
         }
-        check(h, has(p, ModItems.GOLDEN_STRIKER.get()), "Clear Wind gives the Golden Striker");
-        check(h, has(p, ModItems.SILK_LINED_TRAY.get()), "Bright Moon gives the Silk-Lined Tray");
-        long xp = PlayerLevel.getXp(p);
-        check(h, xp >= 2 * Zones.MOUNT_WUZHUANG.levelBand().xpForTier(EnemyTier.GENERAL) || PlayerLevel.getLevel(p) > 84, "each trial paid a General's XP: " + xp);
-        // rested and risen, the same day: no second reward
-        wind.rise();
-        check(h, !wind.isYielded() && wind.getHealth() == wind.getMaxHealth(), "risen whole");
-        check(h, !wind.mayReward(p), "once a day");
+        for (int i = 0; i < 5; i++) {
+            check(h, count(loot(h, wind, p), ModItems.GOLDEN_STRIKER.get()) == 1, "Clear Wind leaves the Golden Striker, always");
+            check(h, count(loot(h, moon, p), ModItems.SILK_LINED_TRAY.get()) == 1, "Bright Moon leaves the Silk-Lined Tray, always");
+        }
+        var tray = h.getLevel().getRecipeManager().getRecipes().stream().anyMatch(r -> r.value().getResultItem(h.getLevel().registryAccess()).is(ModItems.SILK_LINED_TRAY.get()));
+        check(h, tray, "the tray can still be made");
         h.succeed();
+    }
+
+    private static List<ItemStack> loot(GameTestHelper h, net.minecraft.world.entity.Mob mob, ServerPlayer p) {
+        var source = h.getLevel().damageSources().playerAttack(p);
+        var params = new net.minecraft.world.level.storage.loot.LootParams.Builder(h.getLevel())
+                .withParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.THIS_ENTITY, mob)
+                .withParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.ORIGIN, mob.position())
+                .withParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.DAMAGE_SOURCE, source)
+                .withParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.ATTACKING_ENTITY, p)
+                .withParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.DIRECT_ATTACKING_ENTITY, p)
+                .withParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.LAST_DAMAGE_PLAYER, p)
+                .create(net.minecraft.world.level.storage.loot.parameters.LootContextParamSets.ENTITY);
+        return h.getLevel().getServer().reloadableRegistries().getLootTable(mob.getLootTable()).getRandomItems(params);
+    }
+
+    private static int count(List<ItemStack> items, net.minecraft.world.item.Item item) {
+        return items.stream().filter(s -> s.is(item)).mapToInt(ItemStack::getCount).sum();
     }
 
     // ── Zhenyuan: the sleeve ────────────────────────────────────────────
@@ -564,10 +685,10 @@ public class WuzhuangGameTests {
         });
     }
 
-    // ── Zhenyuan: the trial ─────────────────────────────────────────────
+    // ── Zhenyuan: a fight to the death ──────────────────────────────────
 
     @GameTest(template = PLATFORM)
-    public static void heIsHardToHarmAndCallsHisDisciples(GameTestHelper h) {
+    public static void heIsHardToHarmAndCallsWhatDisciplesRemain(GameTestHelper h) {
         openAir(h);
         ServerPlayer p = player(h);
         ZhenyuanEntity zh = immortal(h, ModEntities.ZHENYUAN.get(), new BlockPos(2, 2, 2), false);
@@ -578,42 +699,157 @@ public class WuzhuangGameTests {
         float full = zh.getHealth();
         zh.hurt(h.getLevel().damageSources().playerAttack(p), 1e9f);
         check(h, full - zh.getHealth() <= zh.getMaxHealth() * ZhenyuanEntity.HIT_CAP_PERMILLE / 1000.0 + 1e-3, "no blow takes more than 2.5%");
-        check(h, zh.isAlive() && !zh.isYielded(), "and he stands");
+        check(h, zh.isAlive(), "and he stands");
+        // at 60% his household near him come to his side; he makes none
+        DaoistDiscipleEntity d = mob(h, ModEntities.DAOIST_DISCIPLE.get(), 78, false, new BlockPos(0, 2, 4));
+        d.setNoAi(true);
+        int before = h.getLevel().getEntitiesOfClass(DaoistDiscipleEntity.class, zh.getBoundingBox().inflate(16)).size();
+        zh.setTarget(p);
         zh.setHealth(zh.getMaxHealth() * 0.59f);
         zh.tick();
-        List<DaoistDiscipleEntity> called = h.getLevel().getEntitiesOfClass(DaoistDiscipleEntity.class, zh.getBoundingBox().inflate(8),
-                d -> d.getPersistentData().getBoolean(ZhenyuanEntity.KEY_CALLED));
-        eq(h, ZhenyuanEntity.DISCIPLES, called.size(), "his disciples came at 60%");
+        eq(h, before, h.getLevel().getEntitiesOfClass(DaoistDiscipleEntity.class, zh.getBoundingBox().inflate(16)).size(), "no disciple made out of nothing");
+        eq(h, p, d.getTarget(), "the one near came to his side");
         h.succeed();
     }
 
     @GameTest(template = PLATFORM)
-    public static void zhenyuanYieldsNeverDiesAndGrantsHisLeave(GameTestHelper h) {
+    public static void zhenyuanFightsToTheDeathAndLeavesHisFlywhisk(GameTestHelper h) {
         ServerPlayer p = leveled(h, 86);
         ZhenyuanEntity zh = immortal(h, ModEntities.ZHENYUAN.get(), new BlockPos(2, 2, 2), false);
-        ZhenyuanEntity heldIn = zh;
         IronGolem golem = dummy(h, new BlockPos(4, 2, 4));
-        heldIn.sweep(List.of(golem));
-        int karma = Morality.karma(p);
-        zh.setHealth(zh.getMaxHealth() * 0.105f);
-        for (int i = 0; i < 20 && !zh.isYielded(); i++) {
+        zh.sweep(List.of(golem));
+        zh.setHealth(zh.getMaxHealth() * 0.02f);
+        for (int i = 0; i < 20 && zh.isAlive(); i++) {
             zh.stagger();
             zh.invulnerableTime = 0;
             zh.hurt(h.getLevel().damageSources().playerAttack(p), 1e9f);
         }
-        check(h, zh.isYielded(), "he yields");
-        check(h, zh.isAlive() && !zh.isDeadOrDying() && zh.getHealth() > 0, "he does not die");
+        check(h, zh.isDeadOrDying(), "struck down: he dies, he does not yield");
         check(h, !Sleeve.isHeld(golem), "and lets go of whoever he held");
-        check(h, has(p, ModItems.ZHENYUAN_FLYWHISK.get()) && has(p, ModItems.GINSENG_FRUIT.get()), "his flywhisk and a ginseng fruit, the first time");
-        check(h, Wuzhuang.isGuest(p), "the temple's guest now");
-        eq(h, karma + Morality.PASS_THE_TRIAL, Morality.karma(p), "a good deed, not a killing");
-        check(h, PlayerLevel.getXp(p) > 0 || PlayerLevel.getLevel(p) > 86, "a boss's XP");
-        zh.invulnerableTime = 0;
-        check(h, !zh.hurt(h.getLevel().damageSources().playerAttack(p), 100), "untouchable while he rests");
-        check(h, zh.restUntil() > h.getLevel().getGameTime(), "he rests");
-        zh.rise();
-        check(h, !zh.isYielded() && zh.getHealth() == zh.getMaxHealth() && zh.phase() == 0, "and rises whole, his trial to be had again");
-        check(h, !zh.mayReward(p), "though not rewarded twice in a day");
+        for (int i = 0; i < 5; i++) {
+            List<ItemStack> items = loot(h, zh, p);
+            eq(h, 1, count(items, ModItems.ZHENYUAN_FLYWHISK.get()), "his flywhisk, always: " + items);
+            eq(h, 0, count(items, ModItems.GINSENG_FRUIT.get()), "and no fruit: the world has only what its trees bore");
+        }
+        h.succeed();
+    }
+
+    /** Nothing of the trial is left: no yielding, no rest, no reward, no guest, no trial karma. */
+    @GameTest(template = PLATFORM)
+    public static void noTrialRemains(GameTestHelper h) {
+        java.util.Set<String> gone = java.util.Set.of("yieldTrial", "isYielded", "rise", "reward", "mayReward", "passedBy", "restUntil",
+                "firstGift", "onPassed", "trialTier", "challengers", "addTrialTargets");
+        for (Class<?> c : List.of(TempleImmortal.class, TempleYouthEntity.class, ZhenyuanEntity.class, TempleYouthEntity.ClearWind.class, TempleYouthEntity.BrightMoon.class)) {
+            for (var m : c.getDeclaredMethods()) check(h, !gone.contains(m.getName()), c.getSimpleName() + "." + m.getName() + " is the trial's");
+        }
+        for (String name : List.of("isGuest", "makeGuest")) {
+            check(h, java.util.Arrays.stream(Wuzhuang.class.getDeclaredMethods()).noneMatch(m -> m.getName().equals(name)), "no guests: " + name);
+        }
+        check(h, java.util.Arrays.stream(Morality.class.getDeclaredFields()).noneMatch(f -> f.getName().equals("PASS_THE_TRIAL")), "no trial karma");
+        var lang = net.minecraft.locale.Language.getInstance();
+        for (String key : List.of("entity.jttw_engine.zhenyuan.yields", "entity.jttw_engine.clear_wind.yields", "entity.jttw_engine.temple_immortal.already")) {
+            check(h, !lang.has(key), "no line for it: " + key);
+        }
+        h.succeed();
+    }
+
+    // ── The temple's record: the last disciple, and Zhenyuan's coming ───
+
+    /** A temple far from any real one, for a test's own record. */
+    private static long testTemple(GameTestHelper h) {
+        long key = TempleRecord.key(29_000_000 - h.getLevel().random.nextInt(1_000_000), 29_000_000 - h.getLevel().random.nextInt(1_000_000));
+        onEnd(h, () -> TempleRecord.get(h.getLevel().getServer()).forget(key));
+        return key;
+    }
+
+    @GameTest(template = PLATFORM, timeoutTicks = 100)
+    public static void theLastDisciplesKillerIsSoughtOutADayLaterWhereverTheyAre(GameTestHelper h) {
+        openAir(h);
+        var server = h.getLevel().getServer();
+        TempleRecord record = TempleRecord.get(server);
+        long temple = testTemple(h);
+        int n = TempleRecord.household();
+        eq(h, n, record.living(temple), "the whole household lives");
+        // all but one fall, none of it at a player's hand that matters yet
+        for (int i = 0; i < n - 1; i++) check(h, !record.fall(temple, java.util.UUID.randomUUID(), null, TempleRecord.now(server)), "not yet the last");
+        eq(h, 1, record.living(temple), "one left");
+        check(h, record.marked(temple) == null, "no one marked yet");
+        // the last, a real disciple of that temple, struck down by a player
+        ServerPlayer p = leveled(h, 85);
+        DaoistDiscipleEntity last = mob(h, ModEntities.DAOIST_DISCIPLE.get(), 78, false, new BlockPos(1, 2, 1));
+        last.setNoAi(true);
+        last.getPersistentData().putLong(TempleRecord.KEY_TEMPLE, temple);
+        long killedAt = TempleRecord.now(server);
+        for (int i = 0; i < 4 && last.isAlive(); i++) {
+            last.invulnerableTime = 0;
+            last.hurt(h.getLevel().damageSources().playerAttack(p), 1e9f);
+        }
+        check(h, last.isDeadOrDying(), "the last disciple falls");
+        eq(h, 0, record.living(temple), "none left");
+        eq(h, p.getUUID(), record.marked(temple), "his killer is marked");
+        eq(h, killedAt + TempleRecord.DAY, record.due(temple), "a full day from the kill");
+        // they have gone elsewhere since: he will come to them there
+        p.moveTo(h.absoluteVec(new Vec3(3.5, 2, 3.5)));
+        java.util.function.Function<java.util.UUID, ServerPlayer> here = u -> u.equals(p.getUUID()) ? p : null;
+        long due = record.due(temple);
+        check(h, record.sendDue(due - 1, here).isEmpty() && !record.sent(temple), "not a tick before the day is up");
+        // not in the world when the time comes: he waits
+        check(h, record.sendDue(due + 5, u -> null).isEmpty() && !record.sent(temple), "not while they are away");
+        // they come back (log in): he comes
+        List<ZhenyuanEntity> sent = record.sendDue(due + 600, here);
+        eq(h, 1, sent.size(), "he comes when they are here");
+        ZhenyuanEntity zh = sent.get(0);
+        onEnd(h, zh::discard);
+        check(h, zh.isAlive() && zh.level() == p.level(), "in their world");
+        double d = zh.distanceTo(p);
+        check(h, d <= ZhenyuanEntity.ARRIVE_FAR + 2, "near them: " + d);
+        eq(h, p, zh.getTarget(), "and comes at them");
+        eq(h, p.getUUID(), zh.quarry(), "hunting them");
+        check(h, !zh.hasRestriction(), "keeping to no lair");
+        check(h, record.sent(temple), "sent");
+        check(h, record.sendDue(due + 50_000, here).isEmpty(), "only once");
+        check(h, !record.fall(temple, java.util.UUID.randomUUID(), p, due + 60_000), "nothing more comes of more deaths");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void heArrivesOnFirmGroundNearAnOrdinaryPlace(GameTestHelper h) {
+        openAir(h);
+        ServerPlayer p = player(h);
+        p.moveTo(h.absoluteVec(new Vec3(2.5, 2, 2.5)));
+        ZhenyuanEntity zh = ZhenyuanEntity.arrive(p);
+        check(h, zh != null, "he comes");
+        onEnd(h, zh::discard);
+        BlockPos at = zh.blockPosition();
+        check(h, h.getLevel().getBlockState(at.below()).isFaceSturdy(h.getLevel(), at.below(), net.minecraft.core.Direction.UP), "on firm ground: " + at);
+        check(h, h.getLevel().noCollision(zh), "with room for him");
+        check(h, zh.distanceTo(p) <= ZhenyuanEntity.ARRIVE_FAR + 2, "near them");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void theTemplesRecordIsKeptThroughSavingAndLoading(GameTestHelper h) {
+        var registries = h.getLevel().registryAccess();
+        TempleRecord record = new TempleRecord();
+        long a = TempleRecord.key(-4096, 8192), b = TempleRecord.key(12_000, -300);
+        java.util.UUID killer = java.util.UUID.randomUUID();
+        ServerPlayer p = player(h);
+        for (int i = 0; i < 5; i++) record.fall(a, java.util.UUID.randomUUID(), null, 100);
+        for (int i = 0; i < TempleRecord.household() - 1; i++) record.fall(b, java.util.UUID.randomUUID(), null, 100);
+        check(h, record.fall(b, killer, p, 1000), "the last of b's household");
+        TempleRecord loaded = TempleRecord.load(record.save(new net.minecraft.nbt.CompoundTag(), registries), registries);
+        eq(h, TempleRecord.household() - 5, loaded.living(a), "a's household, still five short");
+        eq(h, 0, loaded.living(b), "b's, none");
+        eq(h, p.getUUID(), loaded.marked(b), "b's last killer");
+        eq(h, 1000L + TempleRecord.DAY, loaded.due(b), "and when he comes");
+        check(h, !loaded.sent(b) && loaded.marked(a) == null, "and nothing else");
+        // the same one falling twice counts once
+        loaded.fall(a, killer, null, 2000);
+        loaded.fall(a, killer, null, 2000);
+        eq(h, TempleRecord.household() - 6, loaded.living(a), "counted once");
+        // and the world keeps it where it keeps its saved data
+        TempleRecord world = TempleRecord.get(h.getLevel().getServer());
+        check(h, world == TempleRecord.get(h.getLevel().getServer()), "one record to a world");
         h.succeed();
     }
 
@@ -637,9 +873,10 @@ public class WuzhuangGameTests {
         eq(h, Morality.KILL_DISCIPLE, Morality.killDeed(p, mob(h, ModEntities.DAOIST_DISCIPLE.get(), 85, true, new BlockPos(4, 2, 1))), "even a senior one");
         eq(h, 0, Morality.killDeed(p, mob(h, ModEntities.CLOUD_CRANE.get(), 80, false, new BlockPos(1, 2, 4))), "a crane: no deed");
         eq(h, 0, Morality.killDeed(p, mob(h, ModEntities.CLOUD_CRANE.get(), 87, true, new BlockPos(2, 2, 2))), "nor its captain");
-        eq(h, Morality.SLAY_TEMPLE_YOUTH, Morality.killDeed(p, immortal(h, ModEntities.BRIGHT_MOON.get(), new BlockPos(4, 2, 4), false)), "a youth, killed outright");
-        eq(h, Morality.SLAY_ZHENYUAN, Morality.killDeed(p, immortal(h, ModEntities.ZHENYUAN.get(), new BlockPos(3, 2, 3), false)), "the Great Immortal, killed outright");
-        check(h, Morality.PASS_THE_TRIAL > 0 && Morality.STEAL_GINSENG == Morality.STEAL_PEACH, "the trial a good deed; the fruit's theft as the peaches'");
+        eq(h, Morality.SLAY_TEMPLE_YOUTH, Morality.killDeed(p, immortal(h, ModEntities.BRIGHT_MOON.get(), new BlockPos(4, 2, 4), false)), "a youth");
+        eq(h, Morality.SLAY_ZHENYUAN, Morality.killDeed(p, immortal(h, ModEntities.ZHENYUAN.get(), new BlockPos(3, 2, 3), false)), "the Great Immortal");
+        eq(h, -12, Morality.KILL_DISCIPLE, "a disciple, -12");
+        check(h, Morality.STEAL_GINSENG == Morality.STEAL_PEACH, "the fruit's theft as the peaches'");
         h.succeed();
     }
 }

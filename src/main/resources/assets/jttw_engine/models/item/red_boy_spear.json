@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "jttw_engine:item/red_boy_spear"
+  }
+}

@@ -575,15 +575,16 @@ Boy's Fire Cloud Cave on Mount Haohao (火云洞, chapters 40–42), in
   up in his track; **Swift-Rushing Wind** (快如风), the fastest, hurls all near him away; **Flame-Head
   General** (兴烘掀) bursts into flame; **Eye-Spark Officer** (掀烘兴) shoots sparks from his eyes.
 - **Red Boy** (红孩儿, the Holy Child King; `RedBoyEntity`, a `ZoneBoss`, level 77, 70 hits, red bar),
-  son of the Bull Demon King and Princess Iron Fan: a child in a red stomacher with the Fire-Tipped
-  Spear (the mod's own item, held). Spear thrusts of 26% that set alight. Every 7 s he stops,
+  son of the Bull Demon King and Princess Iron Fan: a child in a red stomacher with **his own
+  fire-tipped spear** (`RedBoySpearItem`, not Nezha's). Spear thrusts of 26% that set alight. Every 7 s he stops,
   strikes his nose twice (1 s) and breathes the **True Samadhi Fire** (三昧真火) from mouth and nose: a
   cone 10 blocks long, a blow of 20%, then the burning; flames are left on the ground. At two
   thirds (phase 1) his **five fire carts** (五辆小车) are set out round his lair in the five-element
   pentagon and lit: each belches the fire round itself every 3 s, and while any stands **every blow
   on him is halved**; break them first (5 hits each). At a third (phase 2) the fire comes from his
   nose and mouth both: a ring of it bursts out all round him, and from then on it is fiercer and
-  comes every 4 s. A Bull Demon player is hailed as his father, and fought all the same.
+  comes every 4 s. He says nothing, to anyone (a Bull Demon player too, whom he fights all the
+  same): no chat line, no taunt, no phase call.
 - **The True Samadhi Fire** (`SamadhiFire`, the `samadhi_fire` effect, `SamadhiFlameBlock`): it burns
   as a status, **3% of health a second** (4.5% at its fiercest), whatever the burning one is (the
   fire-proof burn too; armour does not soften it). **Water does not put it out, it feeds it**: in
@@ -598,8 +599,11 @@ Boy's Fire Cloud Cave on Mount Haohao (火云洞, chapters 40–42), in
   with fire-lamps, four pools of lava, a gilded dais where Red Boy stands, a red carpet to it, his
   throne between two braziers. Red Boy and his generals are put there once (`FireCloudCaveFeature`).
 - **What they leave**: Red Boy **2–3 True Samadhi Fire** (the furnace's fuel; a real source of it at
-  last), his **Fire-Tipped Spear** one time in four (+5% a Looting level), ember cores, furnace
-  bricks, gold, sigils. Imps leave **Ember Cores**, brutes **Furnace Bricks**, generals both, a
+  last), **his own spear** one time in two (55% with Looting I, +5% a level after), ember cores,
+  furnace bricks, gold, sigils. **Red Boy's Fire-Tipped Spear** (火尖枪, `RedBoySpearItem`): a slim
+  red-lacquered shaft ringed with gold, a red tassel, a gilded head; **+45% damage**, attack speed
+  −2.6 (1.4 a second), fire-proof as an item, and nothing more: no use, nothing on a hit. Nezha's
+  Fire-Tipped Spear no longer falls from him. Imps leave **Ember Cores**, brutes **Furnace Bricks**, generals both, a
   captain's sigil and now and then a True Samadhi Fire. Three ember cores, two furnace bricks and a
   captain's sigil make a True Samadhi Fire (`true_samadhi_fire_from_the_mountains`). Flame rock,
   cinder ash and burning earth can be mined.
@@ -609,16 +613,17 @@ Boy's Fire Cloud Cave on Mount Haohao (火云洞, chapters 40–42), in
   (+1). Red Boy's creatures are **not** allied to a Bull Demon player.
 - **Art**: `EmberImpRenderer`, `FurnaceBruteRenderer`, `StrongGeneralRenderer`, `RedBoyRenderer`,
   `FireCartRenderer` (box models and skins with glowing parts from `assets_source/fire_court.py`);
-  blocks and items from `assets_source/fire_items.py`.
+  blocks and items (Red Boy's spear among them) from `assets_source/fire_items.py`.
 - **Tests and pictures**: `FireGameTests` (heat, fan, Samadhi fire and water, Red Boy's breath,
-  carts and phases, creatures, generals, drops, XP, karma, the cave's blueprint),
+  carts and phases, that he says nothing through a whole fight (to a Bull Demon too), his spear's
+  bare stats, creatures, generals, drops, XP, karma, the cave's blueprint),
   `FireMountainPlacementTest`; gallery scenes `-Pgallery.only=fire_`; the range in a real world with
   `./gradlew runWorldgenBench -Pbench.mode=fire`.
 
 #### Mount Wuzhuang (levels 78–88)
 
 Mount Longevity and the Temple of the Five Villages (万寿山五庄观, chapters 24–26), home of the
-Great Immortal Zhenyuan and his ginseng-fruit tree, in
+Great Immortal Zhenyuan (away, until his disciples are all killed) and his ginseng-fruit tree, in
 [`world/wuzhuang/`](src/main/java/com/jttw/engine/world/wuzhuang/) and
 [`entity/wuzhuang/`](src/main/java/com/jttw/engine/entity/wuzhuang/). The first **aerial** zone
 (`Zones.MOUNT_WUZHUANG`): `Vertical.above(192)`, over the world's own clouds, the ground under it
@@ -648,17 +653,18 @@ left to its host.
   The cloud bears up whoever walks it: a step on it gives Slow Falling for 20 s (`CloudStepBlock`),
   so whoever slips off drifts down unhurt. Characters who fly (Wukong's cloud, the Heavenly cloud,
   the Peng) simply fly up.
-- **The temple** (`Temple`, a blueprint laid column by column; the region's centre is Zhenyuan's
-  place): the mountain gate in the south wall with its plaque 五庄观 and the novel's couplet
+- **The temple** (`Temple`, a blueprint laid column by column; the region's centre is before
+  Zhenyuan's altar, his place, though he is away): the mountain gate in the south wall with its plaque 五庄观 and the novel's couplet
   (长生不老神仙府 · 与天同寿道人家); a paved front court with a smoking censer, stone lanterns, pines,
   the bell tower and the drum tower; the disciples' wings down both flanks; the **Hall of Heaven
   and Earth**, double-eaved, red columns within, and at its back the **altar** where, as the novel
   says, only the words 天地 are honoured; through a moon gate the **garden**: a pond with lilies, a
   pavilion, rockeries, flowers, and the ginseng-fruit tree.
 - **The ginseng-fruit tree** (`GinsengTree`): a broad trunk, green boughs, leaves like the
-  plantain's, and twelve **fruit** (`GinsengFruitBlock`: blossom, green, ripe; shaped like a newborn
-  child) hanging under its low boughs, half of them ripe when the land is made; each stage takes one
-  random tick in 60 (about an hour of play). The fruit **fears the five elements**:
+  plantain's, and **twelve fruit** (`GinsengFruitBlock`, shaped like a newborn child) hanging under
+  its low boughs, **all ripe** when the land is made. The tree fruits once in nine thousand years,
+  and so here **never again**: nothing ripens or grows back, and a fruit lost (withered, sunk,
+  dissolved, eaten) is gone for good; a world has only so many. The fruit **fears the five elements**:
   - struck with **gold** (any golden tool, or the **Golden Striker** 金击子) a ripe fruit falls
     whole; struck with anything else (iron, wood, a bare hand) it falls and withers; an unripe one
     only withers;
@@ -667,64 +673,82 @@ left to its host.
     something lined (wool, a carpet, a bed); in water it **dissolves**;
   - **eaten**: healed whole, Regeneration II 30 s, Absorption III 2 min; and the **first** a soul
     ever eats adds its 47,000 years: **+20% maximum health, for good** (an `ADD_MULTIPLIED_TOTAL`
-    modifier, kept through death and into a new life).
+    modifier, kept through death and into a new life). And whoever has eaten one is **the temple's
+    enemy for good** (`Wuzhuang.isTempleEnemy`, kept by the soul through death, relogs and new lives):
+    every disciple, Clear Wind and Bright Moon fight them on sight.
 - **Daoist disciples** (`DaoistDiscipleEntity`, level 78): 6 hits, a sword stroke of 13%; at 3–10
   blocks a **binding talisman** (定身符: held fast 1.5 s, weakened). Righteous: they fight no one
-  unprovoked, except a thief of the fruit; strike one and those near come.
+  unprovoked, except a thief of the fruit and whoever has eaten one; strike one and those near come.
+  **Finite**: each temple's household is the **24** put there as the land is made (22 disciples
+  about the hall, court, wings, gate and garden, and the two youths; the novel's forty-eight, half
+  away with their master). They never spawn of themselves (not in the biome's spawners, natural
+  spawns refused), are kept even on Peaceful, and never come back.
 - **Cloud cranes** (`CloudCraneEntity`, level 80): white, black-tipped wings, red crowns; they fly
-  (never fall) within 40 blocks of where they came into the world and harry any stranger (not the
-  temple's guests); from 3+ blocks above they **swoop**: a dive, the beak for its blow and a half,
+  (never fall) within 40 blocks of where they came into the world and harry anyone who comes up;
+  from 3+ blocks above they **swoop**: a dive, the beak for its blow and a half,
   and whoever is struck is thrown back (mind the edge). 4 hits, 11%.
 - Captains as in every zone (purple, larger, stronger, escorts of two), never past level 88.
-  Spawned on the island in any light: cranes (weight 100, in twos and threes), disciples (60).
+  Spawned on the island in any light: cranes only (weight 100, in twos and threes).
 - **Clear Wind and Bright Moon** (清风, 明月; `TempleYouthEntity`, mini-bosses, level 84, 70 hits,
   12%, a blow takes at most 6% of their health), by the tree, fighting as a pair (strike one and the
   other comes): Clear Wind's **gust** hurls his foe away; Bright Moon's **moonlight** blinds and slows
-  and mends his partner by a tenth; both **curse** a thief roundly (it weakens). Each **yields** at
-  10% (see the trial): the first time, Clear Wind gives the **Golden Striker**, Bright Moon the
-  **Silk-Lined Tray**: the two things it takes to bring a fruit down whole.
+  and mends his partner by a tenth; both **curse** a thief roundly (it weakens). They count among the
+  temple's disciples and fight to the death; struck down, Clear Wind always leaves the **Golden
+  Striker**, Bright Moon the **Silk-Lined Tray**: the two things it takes to bring a fruit down whole.
+  Each pays as a General.
 - **The Great Immortal Zhenyuan** (镇元大仙, `ZhenyuanEntity`, a `ZoneBoss`, level 88, 160 hits,
-  15%, yellow bar), before his altar. Not evil, and not to be beaten: his fight is a **trial**
-  (`TempleImmortal`). **Hard to harm**: no blow takes more than 2.5% of his health, and one blow in
-  four struck at him hand to hand he brushes aside with his whisk. **The Universe in his Sleeve**
-  (袖里乾坤, `Sleeve`): every 12 s (7 s from 30%) his sleeve is raised and the air drawn toward it for
-  a second, then whoever he fights within 12 blocks (from 30%, everyone within 8) is **swept in**:
-  out of the world (unseen, blind, held at his side wherever he goes, nothing can touch them nor they
-  anything), for 5 s, then cast out bruised (a tenth of their health), unless they **struggle free**
-  first (five blows at him from within: they burst out unhurt, and he staggers, unable to parry, for
-  2 s). At 60% **his disciples** come (four). At **10% he yields**: he stops, cannot be harmed, lets
-  go of whoever he holds, and acknowledges everyone who fought him in the last 30 s: a boss's XP,
-  his loot, the first time his **flywhisk** and a **ginseng fruit**, and **his leave**: the
-  temple's guest (its fruit theirs to take without theft, his cranes no longer harry them; kept by
-  the soul). He rests five minutes, mends, and rises whole: the trial can be had again (rewards at
-  most once a day a player). No blow kills him (only what kills outright, as /kill, does).
-- **Drops** (1.21 loot tables, rolled when they yield): Zhenyuan sigils (3–4), a block of gold,
-  crane plumes, talismans, a 25% ginseng fruit, a 12% flywhisk; the youths sigils, gold, talismans, a
-  10% striker or tray. **Zhenyuan's Flywhisk** (拂尘, `FlywhiskItem`): +35% damage; used, it sweeps
-  away what stands within 6 blocks before its bearer and brushes arrows and fireballs from the air
-  (5 s rest). Disciples leave **Daoist Talismans**, cranes **Cloud Crane's Plumes**. A Silk-Lined Tray
-  can also be made: three wool over three gold ingots.
+  15%, yellow bar). **Not at his temple**: as in the novel, he is away (hearing the Primordial Lord
+  lecture), and no lair puts him there. **He comes back for whoever kills the last of his
+  disciples** (`TempleRecord`, saved data of the overworld keyed by the temple's region centre, so it
+  holds with the temple's chunks unloaded and through restarts): each of the 24 is marked as its
+  temple's; each death is written down; when the last falls at a player's hand (their blow, or the
+  last a player struck it), that player is marked and **a deep bell tolls** for them. **A full day
+  later** (24,000 ticks of the overworld's game time from that kill; sleep does not hasten it) the
+  bell sounds once more, far off, a minute before; then Zhenyuan **arrives near them, wherever they
+  are** (any dimension, any place: a spot 4–8 blocks off with firm ground and room, else where they
+  stand), out of a burst of cloud, keeping to no lair, and fights them **to the death**, hunting
+  them within 64 blocks. If they are not in the world then, he comes when they next are. Once for
+  each temple; no word is spoken. His kit: **hard to harm** (no blow takes more than 2.5% of his
+  health; one blow in four struck hand to hand he brushes aside with his whisk); **the Universe in
+  his Sleeve** (袖里乾坤, `Sleeve`): every 12 s (7 s from 30%) his sleeve is raised and the air drawn
+  toward it for a second, then whoever he fights within 12 blocks (from 30%, everyone within 8) is
+  **swept in**: out of the world (unseen, blind, held at his side wherever he goes, nothing can
+  touch them nor they anything), for 5 s, then cast out bruised (a tenth of their health), unless
+  they **struggle free** first (five blows at him from within: they burst out unhurt, and he
+  staggers, unable to parry, for 2 s). At 60% he **calls his disciples**: any of his household still
+  living within 48 blocks come to his side (he makes none, and when he comes for their killer there
+  are none). There is no trial: no yielding, no rest, no guest's leave.
+- **Drops**: Zhenyuan sigils (3–4), a block of gold, crane plumes, talismans and **always his
+  flywhisk** (no ginseng fruit: the world has only what its trees bore); the youths sigils, gold,
+  talismans and their striker or tray. **Zhenyuan's Flywhisk** (拂尘, `FlywhiskItem`): +35% damage;
+  used, it sweeps away what stands within 6 blocks before its bearer and brushes arrows and
+  fireballs from the air (5 s rest). Disciples leave **Daoist Talismans**, cranes **Cloud Crane's
+  Plumes**. A Silk-Lined Tray can also be made: three wool over three gold ingots.
 - **XP and karma**: band 78–88, base grunt XP 145, stepped up from the Flaming Mountains' 130 (972 a
   grunt at the band's scale). The household is righteous: **killing a disciple −12** (captain or
-  not); bringing a ripe fruit down without Zhenyuan's leave is **theft, −40** (as Heaven's peaches)
-  and makes one the temple's thief for 5 minutes (every disciple, youth and the Great Immortal near
-  turn on them); **passing his trial +10** (it is no killing); killing Zhenyuan outright −100, a
-  youth −25; a fight with a crane is no deed either way.
+  not), a youth −25, Zhenyuan −100; bringing a ripe fruit down is **theft, −40** (as Heaven's
+  peaches; no one has leave now) and makes one the temple's thief for 5 minutes (every disciple and
+  youth near turn on them at once); a fight with a crane is no deed either way.
 - **Art**: `WuzhuangRenderers` (a robed frame for the disciples (topknot and pin), the youths (two
   buns of boys' hair, smaller) and Zhenyuan (wide sleeves, gold crown, white beard, his whisk; his
-  left sleeve swells as he sweeps; a bow when they yield); a box model for the crane: long neck, red
+  left sleeve swells as he sweeps); a box model for the crane: long neck, red
   crown, wings spread and beating in flight, folded at rest, swept back in a swoop); skins from
   `assets_source/wuzhuang_folk.py`, `wuzhuang_crane.py`; the fruit, the tray, the striker, the whisk,
   plumes and talismans from `wuzhuang_items.py`.
 - **Tests and pictures**: `WuzhuangGameTests` (heights and band, the stair's half steps and slow
-  falling, the temple's blueprint, gold and the fruit, sinking, resting on wool, the tray, water,
-  eating once, theft, creatures, captains, XP, talismans, swoops, the youths' arts and yielding, the
-  sleeve held, struggled out of and cast out of, his sleeve in a live fight, his cap on blows and his
-  disciples, his yielding and leave, the whisk, karma), `WuzhuangZoneTest` (only over the clouds,
+  falling, the temple's blueprint and its 24 residents' spots, the fruit all ripe and never
+  ripening or growing back, gold and the fruit, sinking, resting on wool, the tray, water, eating
+  once, eating turning the household (live, and not before; through death and a relog), theft,
+  disciples never spawning of themselves and no lair for Zhenyuan, creatures, captains, XP,
+  talismans, swoops, the youths' arts, deaths and drops, the record: the last disciple's killer
+  marked, Zhenyuan sent after 24,000 ticks to where they are, not while they are away, once only,
+  and kept through saving and loading; his arrival spot, the sleeve held, struggled out of and cast
+  out of, his sleeve in a live fight, his cap on blows and his call, his death and his flywhisk, no
+  trial left anywhere, the whisk, karma), `WuzhuangZoneTest` (only over the clouds,
   never on another zone's ground at its heights, the island within its region and over the clouds,
   level temple and road, the stair continuous); gallery scenes `-Pgallery.only=wuzhuang` (creatures,
-  cranes in flight, the youths, Zhenyuan, the sleeve, his yielding, and the island laid north of the
-  stage: gate, court, hall, garden, the fruit, the road, the stair, from below and from afar); the
+  cranes in flight, the youths, Zhenyuan, the sleeve, Zhenyuan arriving out of cloud in an ordinary
+  farmyard, and the island laid north of the stage: gate, court, hall, garden, the fruit, the road, the stair, from below and from afar); the
   mountain in a real world with `./gradlew runWorldgenBench -Pbench.mode=wuzhuang`.
 
 #### Lion-Camel Ridge (levels 89–100)

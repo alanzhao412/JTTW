@@ -29,7 +29,8 @@ import java.util.List;
  * The Flaming Mountains in the form gallery: its creatures, the Six Strong Generals and Red Boy on a
  * patch of burning earth laid in front of the stage (fire on it, a seam of lava, a smoking vent, a
  * wall of the mountains' banded rock behind), seen from inside it; Red Boy breathing the Samadhi
- * fire, and among his five carts; a fanned stretch of the earth; and the Fire Cloud Cave laid whole
+ * fire, and among his five carts; his own spear beside Nezha's, framed on the rock (his is the slim
+ * one); a fanned stretch of the earth; and the Fire Cloud Cave laid whole
  * a little way off, from before its gate and inside its hall. The patch is cleared before the next
  * shot ({@link #clear}); the cave, off the stage behind the usual cameras, is laid once and left,
  * its shots among the gallery's last. The range itself is seen in a real world: the zone bench's
@@ -111,8 +112,15 @@ final class FireScenes {
 
     private static RedBoyEntity boy(ServerPlayer p, double x, double z, float yaw) {
         RedBoyEntity b = put(p, ModEntities.RED_BOY.get(), x, 0, z, yaw);
-        if (b != null) b.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(com.jttw.engine.registry.ModItems.FIRE_TIP_SPEAR.get()));
+        if (b != null) b.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(com.jttw.engine.registry.ModItems.RED_BOY_SPEAR.get()));
         return b;
+    }
+
+    /** An item in a frame on the rock wall behind the patch, at (x, ground + y). */
+    private static void frame(ServerPlayer p, int x, int y, net.minecraft.world.item.Item item) {
+        var f = new net.minecraft.world.entity.decoration.ItemFrame(p.serverLevel(), new BlockPos(x, ground(p) + y, Z1), net.minecraft.core.Direction.NORTH);
+        f.setItem(new net.minecraft.world.item.ItemStack(item), false);
+        p.serverLevel().addFreshEntity(f);
     }
 
     private static AbilityScenes.Scene scene(String name, java.util.function.Consumer<ServerPlayer> cast, double[] cam) {
@@ -145,6 +153,12 @@ final class FireScenes {
                 }, new double[]{0.5, 2.6, 4.0, 0.5, 2.0, 8.5}),
                 scene("fire_red_boy", p -> boy(p, 0.5, 8.5, 180f), new double[]{1.8, 1.6, 5.5, 0.5, 0.9, 8.5}),
                 scene("fire_red_boy_side", p -> boy(p, 0.5, 8.5, 90f), new double[]{0.5, 1.5, 5.0, 0.5, 0.9, 8.5}),
+                // his own spear (left, held and framed) and Nezha's (right, framed): not the same spear
+                scene("fire_red_boy_spear", p -> {
+                    boy(p, 2.3, 14.8, 200f);
+                    frame(p, 1, 1, com.jttw.engine.registry.ModItems.RED_BOY_SPEAR.get());
+                    frame(p, -1, 1, com.jttw.engine.registry.ModItems.FIRE_TIP_SPEAR.get());
+                }, new double[]{0.3, 1.9, 12.2, 0.9, 1.3, 17.0}),
                 new AbilityScenes.Scene("fire_samadhi_breath", p -> {
                     patch(p, false);
                     RedBoyEntity b = boy(p, -3.5, 9.5, 270f);
@@ -222,7 +236,7 @@ final class FireScenes {
         }
         level.getEntities((Entity) null, new AABB(X0 - 3, g - 5, Z0 - 3, X1 + 3, g + 12, Z1 + 4),
                 e -> e instanceof FireMonster || e instanceof RedBoyEntity || e instanceof FireCartEntity
-                        || e instanceof net.minecraft.world.entity.animal.IronGolem).forEach(Entity::discard);
+                        || e instanceof net.minecraft.world.entity.animal.IronGolem || e instanceof net.minecraft.world.entity.decoration.ItemFrame).forEach(Entity::discard);
         patch = false;
     }
 }

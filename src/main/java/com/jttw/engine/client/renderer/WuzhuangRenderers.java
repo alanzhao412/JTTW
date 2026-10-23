@@ -3,7 +3,6 @@ package com.jttw.engine.client.renderer;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.entity.wuzhuang.CloudCraneEntity;
 import com.jttw.engine.entity.wuzhuang.DaoistDiscipleEntity;
-import com.jttw.engine.entity.wuzhuang.TempleImmortal;
 import com.jttw.engine.entity.wuzhuang.TempleYouthEntity;
 import com.jttw.engine.entity.wuzhuang.ZhenyuanEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -95,7 +94,7 @@ public final class WuzhuangRenderers {
         return LayerDefinition.create(mesh, 128, 64);
     }
 
-    /** The robed frame's pose: legs under the robe; a bow when they have yielded. */
+    /** The robed frame's pose: legs under the robe. */
     public static class RobedModel<T extends Mob> extends HumanoidModel<T> {
         public RobedModel(ModelPart root) {
             super(root);
@@ -106,15 +105,6 @@ public final class WuzhuangRenderers {
         @Override
         public void setupAnim(T e, float swing, float amount, float age, float yaw, float pitch) {
             super.setupAnim(e, swing * 0.5f, amount, age, yaw, pitch);
-            if (e instanceof TempleImmortal t && t.isYielded()) {
-                // hands joined before him, head bowed: he acknowledges you
-                head.xRot = 0.45f;
-                hat.xRot = 0.45f;
-                rightArm.xRot = -1.1f;
-                leftArm.xRot = -1.1f;
-                rightArm.yRot = -0.55f;
-                leftArm.yRot = 0.55f;
-            }
         }
     }
 
@@ -133,8 +123,6 @@ public final class WuzhuangRenderers {
             super.setupAnim(e, swing, amount, age, yaw, pitch);
             leftSleeve.xScale = leftSleeve.yScale = leftSleeve.zScale = 1f;
             // the horsetail hangs from the top of the handle, swaying
-            tail.xRot = -(rightArm.xRot + whisk.xRot) + 0.15f + Mth.sin(age * 0.08f) * 0.06f;
-            if (e.isYielded()) return;
             // the whisk held up before him
             if (attackTime <= 0) {
                 rightArm.xRot = -0.6f + Mth.cos(age * 0.07f) * 0.05f;

@@ -29,8 +29,8 @@ public final class GinsengTree {
     /** How tall the trunk rises, and the crown's heart over the root. */
     public static final int TRUNK = 10, CROWN_Y = 16;
 
-    /** The ages the twelve fruit are laid at: half of them ripe. */
-    private static final int[] AGES = {2, 2, 1, 2, 0, 2, 1, 2, 0, 2, 1, 0};
+    /** How many fruit a tree is made with: all of them ripe, and never any more. */
+    public static final int FRUIT = 12;
 
     private static BlockState log(Direction.Axis axis) {
         return Blocks.JUNGLE_LOG.defaultBlockState().setValue(RotatedPillarBlock.AXIS, axis);
@@ -66,7 +66,7 @@ public final class GinsengTree {
         for (int[] d : new int[][]{{1, 1}, {1, -1}, {-1, 1}, {-1, -1}}) blob(set, wood, bx + d[0] * 5, 12, bz + d[1] * 5, 3.8, 2.8, leaves);
         int[][] skirts = {{6, 0}, {-6, 0}, {0, 6}, {0, -6}};
         for (int[] d : skirts) blob(set, wood, bx + d[0], 8, bz + d[1], 3.6, 1.9, leaves);
-        // the fruit: three under each low bough's leaves, hanging from the lowest of them
+        // the fruit: three under each low bough's leaves, hanging from the lowest of them, all ripe
         int n = 0;
         for (int[] d : skirts) for (int o = -1; o <= 1; o++) {
             int radial = o == 0 ? 1 : 0, across = 2 * o;
@@ -74,9 +74,9 @@ public final class GinsengTree {
             int z = bz + (d[1] != 0 ? d[1] + Integer.signum(d[1]) * radial : across);
             int low = lowestLeaf(x, z, bx, bz);
             if (low < 0 || wood.contains(key(x, low - 1, z))) continue;
-            fruit.add(new int[]{x, low - 1, z, AGES[n % AGES.length]});
-            set.set(x, low - 1, z, ModBlocks.HANGING_GINSENG_FRUIT.get().defaultBlockState()
-                    .setValue(com.jttw.engine.world.wuzhuang.GinsengFruitBlock.AGE, AGES[n % AGES.length]));
+            if (n == FRUIT) continue;
+            fruit.add(new int[]{x, low - 1, z, GinsengFruitBlock.RIPE});
+            set.set(x, low - 1, z, ModBlocks.HANGING_GINSENG_FRUIT.get().defaultBlockState().setValue(GinsengFruitBlock.AGE, GinsengFruitBlock.RIPE));
             n++;
         }
     }

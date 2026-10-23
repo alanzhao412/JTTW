@@ -176,4 +176,30 @@ for y in range(5, 12):
     img.putpixel((13, y), rgba((255, 220, 120)))
 outline(img)
 img.save(T + 'item/furnace_brick.png')
+# ── Red Boy's own fire-tipped spear: a slender shaft of red lacquer ringed with gold, a red tassel
+#    under a gilded collar, a long gold leaf of a head whose point burns; slimmer and darker than
+#    Nezha's, which is a thick red shaft under a broad golden flame ──
+img = icon()
+LACQUER, SHADE, GOLD, GOLD_DARK = (150, 22, 26), (96, 12, 18), (232, 184, 64), (170, 116, 30)
+for i, (x, y) in enumerate([(1 + k, 14 - k) for k in range(10)]):     # the shaft, (1,14) to (10,5)
+    ring = i % 3 == 1
+    img.putpixel((x, y), rgba(GOLD if ring else LACQUER, 1.1))
+    img.putpixel((x + 1, y), rgba(GOLD_DARK if ring else SHADE))     # its shadowed side
+img.putpixel((0, 15), rgba(GOLD))                                     # the butt cap
+img.putpixel((1, 15), rgba(GOLD_DARK))
+for x, y in ((10, 4), (11, 5), (11, 4), (12, 5), (10, 3)):            # the gilded collar
+    img.putpixel((x, y), rgba(GOLD, 1.05))
+for x, y, k in ((12, 6, 1.0), (13, 6, 0.85), (12, 7, 1.1), (13, 7, 0.8), (11, 7, 0.9), (12, 8, 0.95), (13, 8, 0.7), (11, 8, 0.75), (12, 9, 0.85)):
+    img.putpixel((x, y), rgba((226, 36, 30), k))                       # the red tassel, hanging from the collar
+head = [(12, 3), (13, 2), (14, 1), (15, 0)]
+for i, (x, y) in enumerate(head):                                     # the head: a gold leaf, widest low
+    img.putpixel((x, y), rgba((255, 222, 110)))
+    if i < 2:
+        img.putpixel((x - 1, y), rgba((250, 236, 170)))               # its bright edge
+        img.putpixel((x, y + 1), rgba(GOLD_DARK, 1.1))                # its dark edge
+img.putpixel((12, 3), rgba((214, 52, 30)))                            # a red fire-mark at the head's heart
+img.putpixel((14, 1), rgba((255, 150, 40)))                           # the burning point
+img.putpixel((15, 0), rgba((255, 236, 150)))
+outline(img)
+img.save(T + 'item/red_boy_spear.png')
 print('fire blocks and items written')
