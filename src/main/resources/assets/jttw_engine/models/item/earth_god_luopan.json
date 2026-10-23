@@ -1,0 +1,104 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jttw_engine:item/earth_god_luopan_00"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "angle": 0.03125
+      },
+      "model": "jttw_engine:item/earth_god_luopan_01"
+    },
+    {
+      "predicate": {
+        "angle": 0.09375
+      },
+      "model": "jttw_engine:item/earth_god_luopan_02"
+    },
+    {
+      "predicate": {
+        "angle": 0.15625
+      },
+      "model": "jttw_engine:item/earth_god_luopan_03"
+    },
+    {
+      "predicate": {
+        "angle": 0.21875
+      },
+      "model": "jttw_engine:item/earth_god_luopan_04"
+    },
+    {
+      "predicate": {
+        "angle": 0.28125
+      },
+      "model": "jttw_engine:item/earth_god_luopan_05"
+    },
+    {
+      "predicate": {
+        "angle": 0.34375
+      },
+      "model": "jttw_engine:item/earth_god_luopan_06"
+    },
+    {
+      "predicate": {
+        "angle": 0.40625
+      },
+      "model": "jttw_engine:item/earth_god_luopan_07"
+    },
+    {
+      "predicate": {
+        "angle": 0.46875
+      },
+      "model": "jttw_engine:item/earth_god_luopan_08"
+    },
+    {
+      "predicate": {
+        "angle": 0.53125
+      },
+      "model": "jttw_engine:item/earth_god_luopan_09"
+    },
+    {
+      "predicate": {
+        "angle": 0.59375
+      },
+      "model": "jttw_engine:item/earth_god_luopan_10"
+    },
+    {
+      "predicate": {
+        "angle": 0.65625
+      },
+      "model": "jttw_engine:item/earth_god_luopan_11"
+    },
+    {
+      "predicate": {
+        "angle": 0.71875
+      },
+      "model": "jttw_engine:item/earth_god_luopan_12"
+    },
+    {
+      "predicate": {
+        "angle": 0.78125
+      },
+      "model": "jttw_engine:item/earth_god_luopan_13"
+    },
+    {
+      "predicate": {
+        "angle": 0.84375
+      },
+      "model": "jttw_engine:item/earth_god_luopan_14"
+    },
+    {
+      "predicate": {
+        "angle": 0.90625
+      },
+      "model": "jttw_engine:item/earth_god_luopan_15"
+    },
+    {
+      "predicate": {
+        "angle": 0.96875
+      },
+      "model": "jttw_engine:item/earth_god_luopan"
+    }
+  ]
+}

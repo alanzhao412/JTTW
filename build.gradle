@@ -73,6 +73,8 @@ neoForge {
             systemProperty 'jttw.chunkBench.view', (project.findProperty('bench.view') ?: '0').toString()
             // -Pbench.mode=terrain measures the abilities that break terrain instead (see TerrainBench)
             systemProperty 'jttw.chunkBench.mode', (project.findProperty('bench.mode') ?: '').toString()
+            // -Pbench.seed=42 makes the bench's world of another seed (12345 by default)
+            systemProperty 'jttw.chunkBench.seed', (project.findProperty('bench.seed') ?: '12345').toString()
         }
 
         // An automated play-test in a real client (see ClientPass)

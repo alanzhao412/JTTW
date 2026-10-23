@@ -13,8 +13,8 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Where Mount Wuzhuang lies: over the clouds only, over its serene hosts, never on another zone's
- * ground at its heights (though it may float over the Bottomless Cave); and its island's shape:
+ * Where Mount Wuzhuang lies: once a world, 6-7.5 km out, over the clouds only, never on another
+ * zone's ground at its heights; and its island's shape:
  * within its region, wholly over the clouds, its temple on level ground, its cloud stair a continuous
  * walk of half steps from the ground to the terrace, joined to the island by its bridge.
  */
@@ -45,69 +45,54 @@ class WuzhuangZoneTest {
     }
 
     @Test
-    void itTakesOnlyTheSkyOverItsRegions() {
+    void itTakesOnlyTheSkyOverItsRegion() {
         int found = 0;
         for (long seed : SEEDS) {
-            for (int x = -30000; x < 30000; x += 47) for (int z = -30000; z < 30000; z += 53) {
+            int[] c = W.centres(seed)[0];
+            double d = Math.hypot(c[0], c[1]);
+            assertTrue(d >= 6000 && d <= 7500, "one mountain a world, 6-7.5 km out: " + d);
+            for (int x = c[0] - 150; x <= c[0] + 150; x += 3) for (int z = c[1] - 150; z <= c[1] + 150; z += 3) {
                 if (!W.covers(seed, x, z)) continue;
                 found++;
                 assertEquals(W, Zones.MAP.zoneAt(seed, x, 192, z), "at 192, the mountain");
                 assertEquals(W, Zones.MAP.zoneAt(seed, x, IslandShape.TERRACE, z), "at its terrace");
                 assertNotEquals(W, Zones.MAP.zoneAt(seed, x, 191, z), "under the clouds, not");
                 assertNotEquals(W, Zones.MAP.zoneAt(seed, x, 70, z), "on the ground, not");
-            }
-        }
-        assertTrue(found > 1000, "it has regions: " + found);
-    }
-
-    @Test
-    void itNeverSharesGroundAtItsHeightsButMayFloatOverTheCave() {
-        int mine = 0, overCave = 0;
-        for (long seed : SEEDS) {
-            for (int x = -40000; x < 40000; x += 37) for (int z = -40000; z < 40000; z += 41) {
-                if (!W.covers(seed, x, z)) continue;
-                mine++;
                 for (Zones.Zone other : Zones.MAP.zones()) {
-                    if (other == W) continue;
-                    if (other.vertical().overlaps(W.vertical())) assertFalse(other.covers(seed, x, z), other.id() + " under it at " + x + "," + z);
-                    else if (other.covers(seed, x, z)) overCave++;
+                    if (other != W && other.vertical().overlaps(W.vertical())) assertFalse(other.covers(seed, x, z), other.id() + " under it at " + x + "," + z);
                 }
             }
         }
-        assertTrue(mine > 0, "it has ground");
-        assertTrue(overCave > 0, "it floats over the cave here and there");
+        assertTrue(found > 1000, "it has ground: " + found);
     }
 
     @Test
     void theIslandStandsWhollyWithinItsRegionAndOverTheClouds() {
         int regions = 0;
-        for (long seed : SEEDS) {
-            for (int x = -30000; x < 30000; x += 1531) for (int z = -30000; z < 30000; z += 1543) {
-                int[] c = W.centre(seed, x, z);
-                if (c == null) continue;
-                regions++;
-                IslandShape is = IslandShape.of(seed, c[0], c[1]);
-                for (int a = 0; a < 72; a++) {
-                    double t = a * Math.PI / 36;
-                    double r = is.radius(t) * 1.25; // the clouds round its flanks reach a little past its rim
-                    assertTrue(W.covers(seed, c[0] + (int) Math.round(Math.cos(t) * r), c[1] + (int) Math.round(Math.sin(t) * r)), "its reach within the region");
-                    assertTrue(is.radius(t) >= IslandShape.RADIUS - IslandShape.WANDER && is.radius(t) <= IslandShape.RADIUS + IslandShape.WANDER);
-                }
-                int[] s = is.stairAxis();
-                for (int a = 0; a < 16; a++) {
-                    double t = a * Math.PI / 8;
-                    assertTrue(W.covers(seed, s[0] + (int) Math.round(Math.cos(t) * (IslandShape.STAIR_OUTER + 1)),
-                            s[1] + (int) Math.round(Math.sin(t) * (IslandShape.STAIR_OUTER + 1))), "the stair within the region");
-                }
-                for (int dx = -90; dx <= 90; dx += 3) for (int dz = -90; dz <= 90; dz += 3) {
-                    int x0 = c[0] + dx, z0 = c[1] + dz;
-                    if (!is.inIsland(x0, z0)) continue;
-                    int top = is.top(x0, z0), bottom = is.bottom(x0, z0);
-                    assertTrue(bottom >= IslandShape.FLOOR && bottom > Zones.MOUNT_WUZHUANG_FLOOR, "over the clouds: " + bottom);
-                    assertTrue(top >= bottom && top <= 300, "its top: " + top);
-                    for (int y = IslandShape.CLOUD_LOW; y <= IslandShape.CLOUD_HIGH; y += 2) {
-                        if (is.cloud(x0, y, z0)) assertTrue(y >= Zones.MOUNT_WUZHUANG_FLOOR, "its clouds are its own heights");
-                    }
+        for (long seed = -16; seed <= 16; seed++) {
+            int[] c = W.centres(seed)[0];
+            regions++;
+            IslandShape is = IslandShape.of(seed, c[0], c[1]);
+            for (int a = 0; a < 72; a++) {
+                double t = a * Math.PI / 36;
+                double r = is.radius(t) * 1.25; // the clouds round its flanks reach a little past its rim
+                assertTrue(W.covers(seed, c[0] + (int) Math.round(Math.cos(t) * r), c[1] + (int) Math.round(Math.sin(t) * r)), "its reach within the region");
+                assertTrue(is.radius(t) >= IslandShape.RADIUS - IslandShape.WANDER && is.radius(t) <= IslandShape.RADIUS + IslandShape.WANDER);
+            }
+            int[] s = is.stairAxis();
+            for (int a = 0; a < 16; a++) {
+                double t = a * Math.PI / 8;
+                assertTrue(W.covers(seed, s[0] + (int) Math.round(Math.cos(t) * (IslandShape.STAIR_OUTER + 1)),
+                        s[1] + (int) Math.round(Math.sin(t) * (IslandShape.STAIR_OUTER + 1))), "the stair within the region");
+            }
+            for (int dx = -90; dx <= 90; dx += 3) for (int dz = -90; dz <= 90; dz += 3) {
+                int x0 = c[0] + dx, z0 = c[1] + dz;
+                if (!is.inIsland(x0, z0)) continue;
+                int top = is.top(x0, z0), bottom = is.bottom(x0, z0);
+                assertTrue(bottom >= IslandShape.FLOOR && bottom > Zones.MOUNT_WUZHUANG_FLOOR, "over the clouds: " + bottom);
+                assertTrue(top >= bottom && top <= 300, "its top: " + top);
+                for (int y = IslandShape.CLOUD_LOW; y <= IslandShape.CLOUD_HIGH; y += 2) {
+                    if (is.cloud(x0, y, z0)) assertTrue(y >= Zones.MOUNT_WUZHUANG_FLOOR, "its clouds are its own heights");
                 }
             }
         }
@@ -118,7 +103,6 @@ class WuzhuangZoneTest {
     void theTempleAndItsRoadStandOnLevelGround() {
         for (long seed : SEEDS) {
             int[] c = W.centre(seed, 0, 0);
-            if (c == null) c = new int[]{1000, 1000};
             IslandShape is = IslandShape.of(seed, c[0], c[1]);
             for (int lx = -IslandShape.TEMPLE_X; lx <= IslandShape.TEMPLE_X; lx++)
                 for (int lz = IslandShape.TEMPLE_NORTH; lz <= IslandShape.TEMPLE_SOUTH; lz++) {

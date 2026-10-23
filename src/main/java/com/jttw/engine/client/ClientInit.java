@@ -252,6 +252,13 @@ public final class ClientInit {
             net.minecraft.client.renderer.item.ItemProperties.register(com.jttw.engine.registry.ModItems.GOLDEN_BOW.get(),
                     net.minecraft.resources.ResourceLocation.withDefaultNamespace("pulling"), (stack, level, e, seed) ->
                             e != null && e.isUsingItem() && e.getUseItem() == stack ? 1f : 0f);
+            // the Earth God's Luopan points as a compass does, where the Earth God last said (its lodestone mark)
+            net.minecraft.client.renderer.item.ItemProperties.register(com.jttw.engine.registry.ModItems.EARTH_GOD_LUOPAN.get(),
+                    net.minecraft.resources.ResourceLocation.withDefaultNamespace("angle"),
+                    new net.minecraft.client.renderer.item.CompassItemPropertyFunction((level, stack, e) -> {
+                        var tracker = stack.get(net.minecraft.core.component.DataComponents.LODESTONE_TRACKER);
+                        return tracker == null ? null : tracker.target().orElse(null);
+                    }));
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.CELESTIAL_CLOUD.get(), RenderType.translucent());
             // Zhu Bajie's Keen Ears hear what the sound engine plays
             Minecraft.getInstance().getSoundManager().addListener(KeenEarsOverlay.INSTANCE);

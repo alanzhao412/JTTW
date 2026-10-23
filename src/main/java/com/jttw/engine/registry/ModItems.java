@@ -35,6 +35,10 @@ public final class ModItems {
             ITEMS.register("celestial_cloud", () -> new BlockItem(
                     ModBlocks.CELESTIAL_CLOUD.get(), new Item.Properties()));
 
+    /** The Earth God's Luopan: the Earth Gods tell where the zone for its holder's level lies, and its needle points there. */
+    public static final DeferredHolder<Item, Item> EARTH_GOD_LUOPAN = ITEMS.register("earth_god_luopan",
+            com.jttw.engine.item.EarthGodLuopanItem::new);
+
     // ── Forging: the furnace, and the zones' materials ─────────────
     public static final DeferredHolder<Item, Item> EIGHT_TRIGRAMS_FURNACE_ITEM =
             ITEMS.register("eight_trigrams_furnace", () -> new com.jttw.engine.world.furnace.TrigramsFurnaceItem(ModBlocks.EIGHT_TRIGRAMS_FURNACE.get(), new Item.Properties()));

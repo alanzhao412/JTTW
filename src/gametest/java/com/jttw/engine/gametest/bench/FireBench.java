@@ -82,22 +82,13 @@ final class FireBench {
                     double d = Math.hypot(x, z);
                     if (d < best) { best = d; nearest = new BlockPos(x, 0, z); }
                 }
-                // the regions its layout rolled here, and what became of them
-                int rolled = 0, yielded = 0, unhosted = 0;
-                int cs = ZONE.layout().cellSize();
-                for (int cx = Math.floorDiv(-HALF, cs); cx <= Math.floorDiv(HALF - 1, cs); cx++) {
-                    for (int cz = Math.floorDiv(-HALF, cs); cz <= Math.floorDiv(HALF - 1, cs); cz++) {
-                        int[] c = ZONE.layout().centreOfCell(seed, cx, cz);
-                        if (c == null || Math.abs(c[0]) >= HALF || Math.abs(c[1]) >= HALF) continue;
-                        rolled++;
-                        if (ZONE.centre(seed, c[0], c[1]) == null) yielded++;
-                        else if (!fire(level, c[0], c[1])) unhosted++;
-                    }
-                }
+                // its one region, where the world's placement put it
+                int[] placed = ZONE.centres(seed)[0];
                 report.add(String.format("map of %dx%d blocks, every %d (%.1f s): the Flaming Mountains on %.2f%% of it, in %d regions; "
-                                + "its layout rolled %d regions here: %d gave way to earlier zones, %d were not centred on hot, dry ground; nearest %.0f blocks from spawn, at %s",
+                                + "its one region placed at %d %d, %.0f blocks from spawn, %s; nearest seen %.0f blocks from spawn, at %s",
                         HALF * 2, HALF * 2, STEP, (System.nanoTime() - start) / 1e9, 100.0 * count / (n * n), cells.size(),
-                        rolled, yielded, unhosted, best, nearest));
+                        placed[0], placed[1], Math.hypot(placed[0], placed[1]), fire(level, placed[0], placed[1]) ? "its biome there" : "NOT its biome there",
+                        best, nearest));
                 if (nearest == null) return true;
                 int[] c = ZONE.centre(seed, nearest.getX(), nearest.getZ());
                 centre = new BlockPos(c[0], 0, c[1]);

@@ -101,6 +101,7 @@ public class ModItemsGameTests {
             Map.entry("flower_maid_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
             Map.entry("lady_earth_flow_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
             Map.entry("water_repelling_pearl", com.jttw.engine.item.WaterRepellingPearlItem.class),
+            Map.entry("earth_god_luopan", com.jttw.engine.item.EarthGodLuopanItem.class),
             Map.entry("phoenix_plume_cap", com.jttw.engine.item.DragonRegaliaItem.class),
             Map.entry("golden_chain_mail", com.jttw.engine.item.DragonRegaliaItem.class),
             Map.entry("cloud_stepping_boots", com.jttw.engine.item.DragonRegaliaItem.class),

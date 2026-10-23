@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jttw_engine:item/earth_god_luopan_15"
+  }
+}

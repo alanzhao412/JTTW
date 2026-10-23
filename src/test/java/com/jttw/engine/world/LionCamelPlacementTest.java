@@ -61,7 +61,7 @@ class LionCamelPlacementTest {
             final int lv = level;
             assertTrue(Zones.ALL.stream().anyMatch(z -> z.minLevel() <= lv && lv <= z.maxLevel()), "a band for level " + lv);
         }
-        assertTrue(L.vertical().overlaps(Zones.MOUNT_WUZHUANG.vertical()), "it gives way to Mount Wuzhuang's sky too");
+        assertTrue(L.vertical().overlaps(Zones.MOUNT_WUZHUANG.vertical()), "it keeps clear of Mount Wuzhuang's sky too");
     }
 
     @Test
@@ -76,58 +76,54 @@ class LionCamelPlacementTest {
     }
 
     @Test
-    void itNeverSharesGroundWithASurfaceZoneButMayLieOverTheCave() {
-        int ridge = 0, overCave = 0;
+    void itNeverSharesGroundWithASurfaceZone() {
+        int ridge = 0;
         for (long seed : new long[]{1L, 42L, 12345L, -7L}) {
-            for (int x = -40000; x < 40000; x += 31) for (int z = -40000; z < 40000; z += 47) {
+            int[] c = L.centres(seed)[0];
+            for (int x = c[0] - 230; x <= c[0] + 230; x += 3) for (int z = c[1] - 230; z <= c[1] + 230; z += 3) {
                 if (!L.covers(seed, x, z)) continue;
                 ridge++;
                 for (Zones.Zone other : Zones.MAP.zones()) {
-                    if (other == L) continue;
-                    if (other.vertical().overlaps(L.vertical())) {
+                    if (other != L && other.vertical().overlaps(L.vertical())) {
                         assertFalse(other.covers(seed, x, z), "seed " + seed + " at " + x + " " + z + " is " + other.id() + "'s too");
-                    } else if (other.covers(seed, x, z)) {
-                        overCave++;
                     }
                 }
             }
         }
-        assertTrue(ridge > 1000, "it has regions: " + ridge);
-        assertTrue(overCave > 0, "here and there over the Bottomless Cave: " + overCave);
+        assertTrue(ridge > 1000, "it has ground: " + ridge);
     }
 
-    /** Some regions' centres in a world of this seed. */
-    private static List<int[]> centres(long seed, int many) {
-        List<int[]> found = new ArrayList<>();
-        Set<Long> cells = new HashSet<>();
-        for (int x = -30000; x < 30000 && found.size() < many; x += 256) for (int z = -30000; z < 30000 && found.size() < many; z += 256) {
-            int[] c = L.centre(seed, x, z);
-            if (c != null && L.depth(seed, c[0], c[1]) > 0 && cells.add(L.layout().cellOf(x, z))) found.add(c);
+    /** The regions of worlds of the first {@code many} seeds, from 1: each {seed, x, z}. */
+    private static List<long[]> regions(int many) {
+        List<long[]> found = new ArrayList<>();
+        for (long seed = 1; seed <= many; seed++) {
+            int[] c = L.centres(seed)[0];
+            found.add(new long[]{seed, c[0], c[1]});
         }
         return found;
     }
 
     @Test
-    void howOftenItsLayoutLetsARegionStand() {
-        // in the 32x32 km round spawn of seed 12345: the regions its layout rolls, and those not given up (before the host)
-        long seed = 12345L;
-        int cs = L.layout().cellSize(), rolled = 0, stand = 0;
-        for (int cx = Math.floorDiv(-16384, cs); cx <= Math.floorDiv(16383, cs); cx++) for (int cz = Math.floorDiv(-16384, cs); cz <= Math.floorDiv(16383, cs); cz++) {
-            int[] c = L.layout().centreOfCell(seed, cx, cz);
-            if (c == null || Math.abs(c[0]) >= 16384 || Math.abs(c[1]) >= 16384) continue;
-            rolled++;
-            if (L.centre(seed, c[0], c[1]) != null) stand++;
+    void itLiesOnceAWorldFarthestOut() {
+        for (long seed : new long[]{1L, 42L, 12345L, -7L}) {
+            assertEquals(1, L.centres(seed).length, "one ridge a world");
+            int[] c = L.centres(seed)[0];
+            double d = Math.hypot(c[0], c[1]);
+            assertTrue(d >= 7500 && d <= 9000, "7.5-9 km out: " + d);
+            for (Zones.Zone other : Zones.MAP.zones()) {
+                if (other == L) continue;
+                for (int[] o : other.centres(seed)) assertTrue(Math.hypot(o[0], o[1]) < d, other.id() + " nearer spawn");
+            }
         }
-        System.out.println("Lion-Camel Ridge, seed 12345, 32x32 km: rolled " + rolled + ", clear of the surface zones " + stand);
-        assertTrue(stand > rolled / 4, "most are not given up: " + stand + " of " + rolled);
     }
 
     @Test
     void theCityFitsInsideItsRegionWithItsApronAndSlope() {
-        long seed = 12345L;
         int reach = RidgeShape.APRON + RidgeShape.BLEND;
         assertTrue(LionCamelCity.OUTER < RidgeShape.APRON, "the apron is wider than the city");
-        for (int[] c : centres(seed, 8)) {
+        for (long[] r : regions(8)) {
+            long seed = r[0];
+            int[] c = {(int) r[1], (int) r[2]};
             for (int d = -reach; d <= reach; d += 4) {
                 for (int[] at : new int[][]{{d, -reach}, {d, reach}, {-reach, d}, {reach, d}}) {
                     assertTrue(L.depth(seed, c[0] + at[0], c[1] + at[1]) > 0, "the city's ground lies within its region at " + at[0] + " " + at[1]);
@@ -138,8 +134,9 @@ class LionCamelPlacementTest {
 
     @Test
     void theRidgesCragsAndTheCitysGround() {
-        long seed = 12345L;
-        for (int[] c : centres(seed, 6)) {
+        for (long[] r : regions(6)) {
+            long seed = r[0];
+            int[] c = {(int) r[1], (int) r[2]};
             int highest = 0;
             for (int dx = -260; dx <= 260; dx += 4) for (int dz = -260; dz <= 260; dz += 4) {
                 int x = c[0] + dx, z = c[1] + dz;

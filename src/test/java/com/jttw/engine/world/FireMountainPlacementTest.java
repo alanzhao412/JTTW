@@ -40,7 +40,7 @@ class FireMountainPlacementTest {
         assertEquals(77, band.maxLevel());
         assertEquals(130, band.baseGruntXp(), "stepped up from the waters' 110");
         assertEquals(Zones.Vertical.WHOLE_COLUMN, F.vertical());
-        assertTrue(Zones.ALL.indexOf(F) > Zones.ALL.indexOf(Zones.MYSTICAL_WATERS), "after the waters: it gives way to every zone before it");
+        assertTrue(Zones.ALL.indexOf(F) > Zones.ALL.indexOf(Zones.MYSTICAL_WATERS), "after the waters: it keeps clear of every zone before it");
         assertTrue(Zones.MAP.zones().contains(F));
         assertSame(F, Zones.byBiome(Zones.FIRE_MOUNTAIN_BIOME));
     }
@@ -49,7 +49,10 @@ class FireMountainPlacementTest {
     void itNeverSharesGroundWithAnotherZone() {
         int fire = 0;
         for (long seed : new long[]{1L, 42L, 12345L, -7L}) {
-            for (int x = -40000; x < 40000; x += 31) for (int z = -40000; z < 40000; z += 47) {
+            int[] c = F.centres(seed)[0];
+            double d = Math.hypot(c[0], c[1]);
+            assertTrue(d >= 4500 && d <= 6000, "one range a world, 4.5-6 km out: " + d);
+            for (int x = c[0] - 250; x <= c[0] + 250; x += 3) for (int z = c[1] - 250; z <= c[1] + 250; z += 3) {
                 if (!F.covers(seed, x, z)) continue;
                 fire++;
                 for (Zones.Zone other : Zones.MAP.zones()) {
@@ -59,26 +62,24 @@ class FireMountainPlacementTest {
                 }
             }
         }
-        assertTrue(fire > 1000, "it has regions: " + fire);
+        assertTrue(fire > 1000, "it has ground: " + fire);
     }
 
-    /** Some regions' centres in a world of this seed. */
-    private static List<int[]> centres(long seed, int many) {
-        List<int[]> found = new ArrayList<>();
-        Set<Long> cells = new HashSet<>();
-        for (int x = -30000; x < 30000 && found.size() < many; x += 256) for (int z = -30000; z < 30000 && found.size() < many; z += 256) {
-            int[] c = F.centre(seed, x, z);
-            if (c != null && F.depth(seed, c[0], c[1]) > 0 && cells.add(F.layout().cellOf(x, z))) found.add(c);
+    /** The regions of worlds of the first {@code many} seeds, from 1: each {seed, x, z}. */
+    private static List<long[]> regions(int many) {
+        List<long[]> found = new ArrayList<>();
+        for (long seed = 1; seed <= many; seed++) {
+            int[] c = F.centres(seed)[0];
+            found.add(new long[]{seed, c[0], c[1]});
         }
         return found;
     }
 
     @Test
     void theRangeClimbsFromItsEdgeToMountHaohao() {
-        long seed = 12345L;
-        List<int[]> cs = centres(seed, 6);
-        assertFalse(cs.isEmpty(), "found regions");
-        for (int[] c : cs) {
+        for (long[] r : regions(6)) {
+            long seed = r[0];
+            int[] c = {(int) r[1], (int) r[2]};
             int peak = RangeShape.riseAt(seed, c[0], c[1]);
             assertTrue(peak >= RangeShape.BASE + RangeShape.HAOHAO * 0.8, "Mount Haohao over the hall: " + peak);
             int highest = 0, valleys = 0, all = 0;
@@ -106,8 +107,9 @@ class FireMountainPlacementTest {
 
     @Test
     void theGorgeRunsFromTheGateOutLevelWithTheHall() {
-        long seed = 12345L;
-        for (int[] c : centres(seed, 4)) {
+        for (long[] r : regions(4)) {
+            long seed = r[0];
+            int[] c = {(int) r[1], (int) r[2]};
             // in the gorge's floor, nothing is raised, all the way out
             for (int dz = RangeShape.GORGE_FROM; F.depth(seed, c[0], c[1] + dz) > 0; dz++) {
                 assertEquals(0, RangeShape.riseAt(seed, c[0], c[1] + dz), "the gorge's floor at " + dz);
@@ -131,8 +133,9 @@ class FireMountainPlacementTest {
 
     @Test
     void theCaveFitsUnderTheMountainAndInsideTheRegion() {
-        long seed = 12345L;
-        for (int[] c : centres(seed, 6)) {
+        for (long[] r : regions(6)) {
+            long seed = r[0];
+            int[] c = {(int) r[1], (int) r[2]};
             for (int x = FireCloudCave.MIN_X; x <= FireCloudCave.MAX_X; x++) for (int z = FireCloudCave.MIN_Z; z <= FireCloudCave.MAX_Z; z++) {
                 assertTrue(F.depth(seed, c[0] + x, c[1] + z) > 0, "the cave lies within its region");
             }

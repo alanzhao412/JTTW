@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Where the Bottomless Cave lies: under its regions only, below its height only, never where the ridge is. */
+/** Where the Bottomless Cave lies: once a world, 2-3 km out, below its height only, never where the ridge is. */
 class BottomlessCaveZoneTest {
 
     private static final Zones.Zone CAVE = Zones.BOTTOMLESS;
@@ -28,7 +28,8 @@ class BottomlessCaveZoneTest {
     void itsBiomeIsOnlyBelowItsHeight() {
         int found = 0;
         for (long seed : SEEDS) {
-            for (int x = -30000; x < 30000; x += 47) for (int z = -30000; z < 30000; z += 53) {
+            int[] c = CAVE.centres(seed)[0];
+            for (int x = c[0] - 140; x <= c[0] + 140; x += 3) for (int z = c[1] - 140; z <= c[1] + 140; z += 3) {
                 if (!CAVE.covers(seed, x, z)) continue;
                 found++;
                 assertEquals(CAVE, Zones.MAP.zoneAt(seed, x, Zones.BOTTOMLESS_CAVE_TOP - 1, z), "just under its top, the cave");
@@ -38,31 +39,23 @@ class BottomlessCaveZoneTest {
                 assertFalse(CAVE.covers(seed, x, Zones.BOTTOMLESS_CAVE_TOP, z));
             }
         }
-        assertTrue(found > 1000, "it has regions: " + found);
+        assertTrue(found > 1000, "it has ground: " + found);
     }
 
     @Test
-    void itNeverLiesUnderTheRidge() {
-        int ridge = 0, cave = 0;
+    void itLiesOnceAWorldBeyondTheRidge() {
         for (long seed : SEEDS) {
-            for (int x = -40000; x < 40000; x += 41) for (int z = -40000; z < 40000; z += 43) {
-                boolean r = Zones.WHITE_BONE.covers(seed, x, z), c = CAVE.covers(seed, x, z);
-                if (r) ridge++;
-                if (c) cave++;
-                assertFalse(r && c, "seed " + seed + " at " + x + "," + z + ": both");
-            }
-        }
-        assertTrue(ridge > 0 && cave > 0, "both have ground: ridge " + ridge + ", cave " + cave);
-        // and its regions keep clear of the ridge's by their reaches, as the map has them give way
-        for (long seed : SEEDS) {
-            for (int x = -40000; x < 40000; x += 997) for (int z = -40000; z < 40000; z += 1009) {
-                int[] c = CAVE.centre(seed, x, z);
-                if (c == null) continue;
-                for (int a = 0; a < 32; a++) {
-                    double t = a * Math.PI / 16;
-                    int px = c[0] + (int) (Math.cos(t) * CAVE.layout().margin()), pz = c[1] + (int) (Math.sin(t) * CAVE.layout().margin());
-                    assertFalse(Zones.WHITE_BONE.covers(seed, px, pz), "the ridge within the cave's reach");
-                }
+            assertEquals(1, CAVE.centres(seed).length, "one cave a world");
+            int[] c = CAVE.centres(seed)[0], r = Zones.WHITE_BONE.centres(seed)[0];
+            double d = Math.hypot(c[0], c[1]);
+            assertTrue(d >= 2000 && d <= 3000, "2-3 km out: " + d);
+            assertTrue(d > Math.hypot(r[0], r[1]), "farther out than the ridge");
+            // its region keeps clear of the ridge's by both their reaches
+            assertTrue(Math.hypot(c[0] - r[0], c[1] - r[1]) >= CAVE.layout().margin() + Zones.WHITE_BONE.layout().margin(), "clear of the ridge");
+            for (int a = 0; a < 32; a++) {
+                double t = a * Math.PI / 16;
+                int px = c[0] + (int) (Math.cos(t) * CAVE.layout().margin()), pz = c[1] + (int) (Math.sin(t) * CAVE.layout().margin());
+                assertFalse(Zones.WHITE_BONE.covers(seed, px, pz), "the ridge within the cave's reach");
             }
         }
     }
@@ -72,16 +65,13 @@ class BottomlessCaveZoneTest {
         // every open block of the labyrinth is at most this far from the centre
         double reach = Labyrinth.REACH + Labyrinth.PITCH;
         int regions = 0;
-        for (long seed : SEEDS) {
-            for (int x = -30000; x < 30000; x += 769) for (int z = -30000; z < 30000; z += 773) {
-                int[] c = CAVE.centre(seed, x, z);
-                if (c == null) continue;
-                regions++;
-                for (int a = 0; a < 64; a++) {
-                    double t = a * Math.PI / 32;
-                    assertTrue(CAVE.covers(seed, c[0] + (int) Math.round(Math.cos(t) * reach), c[1] + (int) Math.round(Math.sin(t) * reach)),
-                            "the labyrinth's rim is in the region");
-                }
+        for (long seed = -20; seed <= 20; seed++) {
+            int[] c = CAVE.centres(seed)[0];
+            regions++;
+            for (int a = 0; a < 64; a++) {
+                double t = a * Math.PI / 32;
+                assertTrue(CAVE.covers(seed, c[0] + (int) Math.round(Math.cos(t) * reach), c[1] + (int) Math.round(Math.sin(t) * reach)),
+                        "the labyrinth's rim is in the region");
             }
         }
         assertTrue(regions > 20, "regions: " + regions);

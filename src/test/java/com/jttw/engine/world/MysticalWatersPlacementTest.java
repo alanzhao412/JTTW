@@ -15,7 +15,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Where the Mystical Waters lie: over deep ocean only, never on another zone's ground; its band; its trench's shape. */
+/** Where the Mystical Waters lie: one region in each of the Four Seas, never on another zone's ground; its band; its trench's shape. */
 class MysticalWatersPlacementTest {
 
     private static final Zones.Zone W = Zones.MYSTICAL_WATERS;
@@ -50,18 +50,33 @@ class MysticalWatersPlacementTest {
     void itNeverSharesGroundWithAnotherZone() {
         int waters = 0;
         for (long seed : new long[]{1L, 42L, 12345L, -7L}) {
-            for (int x = -40000; x < 40000; x += 31) for (int z = -40000; z < 40000; z += 47) {
-                boolean in = W.covers(seed, x, z);
-                if (!in) continue;
-                waters++;
-                for (Zones.Zone other : Zones.MAP.zones()) {
-                    if (other != W && other.vertical().overlaps(W.vertical())) {
-                        assertFalse(other.covers(seed, x, z), "seed " + seed + " at " + x + " " + z + " is " + other.id() + "'s too");
+            for (int[] c : W.centres(seed)) {
+                for (int x = c[0] - 270; x <= c[0] + 270; x += 5) for (int z = c[1] - 270; z <= c[1] + 270; z += 5) {
+                    if (!W.covers(seed, x, z)) continue;
+                    waters++;
+                    for (Zones.Zone other : Zones.MAP.zones()) {
+                        if (other != W && other.vertical().overlaps(W.vertical())) {
+                            assertFalse(other.covers(seed, x, z), "seed " + seed + " at " + x + " " + z + " is " + other.id() + "'s too");
+                        }
                     }
                 }
             }
         }
         assertTrue(waters > 1000, "it has regions: " + waters);
+    }
+
+    @Test
+    void oneSeaEachWayEachItsOwnKings() {
+        for (long seed : new long[]{1L, 42L, 12345L, -7L, 99L}) {
+            int[][] cs = W.centres(seed);
+            assertEquals(4, cs.length, "four seas");
+            for (Sea sea : Sea.values()) {
+                int[] c = cs[sea.ordinal()];
+                assertEquals(sea, Sea.of(c[0], c[1]), "seed " + seed + ": the " + sea + " sea's palace is " + sea + "'s king's");
+                double d = Math.hypot(c[0], c[1]);
+                assertTrue(d >= 3000 && d <= 4500, "3-4.5 km out: " + d);
+            }
+        }
     }
 
     @Test
@@ -86,9 +101,7 @@ class MysticalWatersPlacementTest {
     void theTrenchSinksToJustOverTheBedrock() {
         long seed = 12345L;
         int checked = 0;
-        for (int x = -30000; x < 30000 && checked < 6; x += 64) for (int z = -30000; z < 30000 && checked < 6; z += 64) {
-            int[] c = W.centre(seed, x, z);
-            if (c == null || W.depth(seed, x, z) <= 0) continue;
+        for (int[] c : W.centres(seed)) {
             checked++;
             int floor = TrenchShape.floorY(MIN_Y);
             assertEquals(-58, floor, "six over the bottom: just over the bedrock");

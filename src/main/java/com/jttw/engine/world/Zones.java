@@ -3,14 +3,19 @@ package com.jttw.engine.world;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.progression.level.BiomeLevelBand;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.QuartPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
+import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -26,11 +31,14 @@ import java.util.function.Predicate;
  * and colours, but vanilla never places it), and {@code MultiNoiseBiomeSourceMixin} puts it
  * where a zone covers ground of one of its host biomes, at the heights it takes.
  *
- * <p>Where zones are follows from the world seed alone: the world is cut into square cells, a
- * share of which hold one zone, a rough circle somewhere inside the cell. Terrain keeps the host
- * biome's shape; the zone changes what grows and lives there. Zones that share heights never
- * share ground: a later one in {@link #ALL} gives up a region that would touch an earlier one's
- * ({@link ZoneMap}).
+ * <p>There is one of each zone a world (one in each of the Four Seas for the Mystical Waters), a
+ * rough circle in a ring round spawn: the higher its levels, the farther out (the journey west
+ * lengthens), on ground of its hosts. Where follows from the world seed and its biomes: the first
+ * place of host ground in its ring the seed offers, found once as the overworld loads
+ * ({@link #settle}). Terrain keeps the host biome's shape; the zone changes what grows and lives
+ * there. Zones that share heights never share ground: each keeps clear of the regions placed
+ * before it in {@link #ALL} ({@link ZoneMap}). The Earth God's Talisman points players the way
+ * ({@code EarthGod}).
  *
  * <p>A zone of another dimension (Hell) has no footprint: its dimension's own biome source places
  * its biome, and the zone only gives it a level band.
@@ -72,8 +80,8 @@ public final class Zones {
      * the players its creatures are allied to (none, mostly).
      *
      * @param hosts        the biomes it may take over (null for a dimension's zone)
-     * @param layout       where its regions lie (null for a dimension's zone)
-     * @param hostY        the height its region's centre is checked for a host biome at
+     * @param layout       where its region lies (null for a dimension's zone)
+     * @param hostY        the height its region's place is checked for a host biome at
      * @param minLevel     its level band, as {@link BiomeLevelBand}
      * @param allies       the players its creatures never target nor fight back (see ZoneMonster)
      */
@@ -125,7 +133,10 @@ public final class Zones {
             return MAP.depth(this, seed, x, z);
         }
 
-        /** The centre of its region in the cell holding (x, z), as {x, z}; null if that cell holds none. */
+        /**
+         * The centre of its region nearest (x, z), as {x, z}: its one region (for the seas, the nearest
+         * of the four), however far; null only for a dimension's zone, which has none.
+         */
         @Nullable
         public int[] centre(long seed, int x, int z) {
             return MAP.centre(this, seed, x, z);
@@ -138,7 +149,7 @@ public final class Zones {
             return c == null || c[0] < x0 || c[0] >= x0 + 16 || c[1] < z0 || c[1] >= z0 + 16 ? null : c;
         }
 
-        /** How far (x, z) is from the centre of its region; MAX_VALUE where there is none. */
+        /** How far (x, z) is from the centre of its nearest region; MAX_VALUE where there is none. */
         public double distanceToCentre(long seed, int x, int z) {
             int[] c = centre(seed, x, z);
             return c == null ? Double.MAX_VALUE : Math.hypot(x - c[0], z - c[1]);
@@ -149,9 +160,9 @@ public final class Zones {
             return level.getBiome(pos).is(biome);
         }
 
-        /** The key to its region's cell holding (x, z): its host is checked once per key. Unique across zones. */
-        public HostCell hostCell(int x, int z) {
-            return new HostCell(biome, layout.cellOf(x, z));
+        /** The centres of its regions, as {x, z}: one, or the four seas' (east, south, west, north); none for a dimension's zone. */
+        public int[][] centres(long seed) {
+            return MAP.centres(this, seed);
         }
 
         /** Its level band, for the kill XP. */
@@ -164,9 +175,6 @@ public final class Zones {
             return biome.location().toString();
         }
     }
-
-    /** A zone's cell: which zone, and which of its cells. */
-    public record HostCell(ResourceKey<Biome> zone, long cell) {}
 
     private static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, path);
@@ -198,8 +206,9 @@ public final class Zones {
 
     /**
      * Levels 47-56: the Mystical Waters, the Four Seas' trenches and the Dragon Kings' crystal
-     * palaces, over deep ocean only, the whole column (the sea above the trench is theirs too). Its
-     * host is judged just under the waves.
+     * palaces, over deep ocean only, the whole column (the sea above the trench is theirs too): four
+     * regions, one in each sea, east, south, west and north of spawn, each its own sea's Dragon
+     * King's ({@code Sea.of}). Its host is judged just under the waves.
      */
     public static final Zone MYSTICAL_WATERS = Zone.overworld(MYSTICAL_WATERS_BIOME,
             TagKey.create(Registries.BIOME, id("mystical_waters_hosts")), ZoneLayout.MYSTICAL_WATERS, Vertical.WHOLE_COLUMN,
@@ -219,7 +228,7 @@ public final class Zones {
      * Levels 67-77: the Flaming Mountains (火焰山), a range of red, burning mountains eight hundred li
      * long where nothing grows, and in their heart Red Boy's Fire Cloud Cave on Mount Haohao; over
      * hot, dry country (desert, badlands, savanna), the whole column. It shares the ridge's hosts and
-     * gives way to it, and to every zone before it.
+     * keeps clear of it, and of every zone before it.
      */
     public static final Zone FIRE_MOUNTAIN = Zone.overworld(FIRE_MOUNTAIN_BIOME,
             TagKey.create(Registries.BIOME, id("fire_mountain_hosts")), ZoneLayout.FIRE_MOUNTAIN, Vertical.WHOLE_COLUMN,
@@ -236,8 +245,8 @@ public final class Zones {
      * mountain floating over the clouds, from y {@value #MOUNT_WUZHUANG_FLOOR} up, over serene
      * country (plains, forests, birch and flower forests, meadows, cherry groves). Its host is judged
      * at y 256, where a column's biome is always its surface biome. Being aerial it may float over
-     * an underground zone (the Bottomless Cave also takes meadows and cherry groves); it gives way
-     * to every zone of the whole column before it.
+     * an underground zone (the Bottomless Cave also takes meadows and cherry groves); it keeps clear
+     * of every zone of the whole column before it.
      */
     public static final Zone MOUNT_WUZHUANG = Zone.overworld(MOUNT_WUZHUANG_BIOME,
             TagKey.create(Registries.BIOME, id("mount_wuzhuang_hosts")), ZoneLayout.MOUNT_WUZHUANG,
@@ -254,8 +263,8 @@ public final class Zones {
      * eating all its people, where the Azure Lion and the White Elephant hold court. Over mountain
      * country (the Bottomless Cave's hosts) and the rugged savanna highlands (plateaus, windswept
      * savanna), from y {@value #LION_CAMEL_FLOOR} up: it shares no heights with the cave under the
-     * same mountains, so the two may lie in the same columns, the ridge over the labyrinth; it gives
-     * way to every zone before it that takes the surface. Its host is judged at y 256, as the
+     * same mountains, so the two may lie in the same columns, the ridge over the labyrinth; it keeps
+     * clear of every zone before it that takes the surface. Its host is judged at y 256, as the
      * cave's is. Its creatures are the Great Peng's kin and
      * followers: they spare a Peng player ({@link ZoneAllies#PENG}), the two demon kings too.
      */
@@ -263,7 +272,7 @@ public final class Zones {
             TagKey.create(Registries.BIOME, id("lion_camel_ridge_hosts")), ZoneLayout.LION_CAMEL,
             Vertical.above(LION_CAMEL_FLOOR), 89, 100, 160).hostSampledAt(256).alliedTo(ZoneAllies.PENG);
 
-    /** Every zone, in order: an earlier one keeps its ground from a later one sharing its heights. Append new ones. */
+    /** Every zone, in order: a later one keeps clear of an earlier one sharing its heights. Append new ones. */
     public static final List<Zone> ALL = List.of(WHITE_BONE, BOTTOMLESS, MYSTICAL_WATERS, HELL, FIRE_MOUNTAIN, MOUNT_WUZHUANG, LION_CAMEL);
 
     /** Where the overworld zones of {@link #ALL} lie. */
@@ -309,5 +318,43 @@ public final class Zones {
     @SubscribeEvent
     public static void onServerAboutToStart(ServerAboutToStartEvent event) {
         seed = event.getServer().getWorldData().worldGenOptions().seed();
+    }
+
+    /**
+     * Where the zones lie, found with the overworld's biome source as it loads, before any of its
+     * ground is made (and before the spawn is chosen): found again each time a world loads.
+     */
+    @SubscribeEvent
+    public static void onLevelLoad(LevelEvent.Load event) {
+        if (!(event.getLevel() instanceof ServerLevel level) || !level.dimension().equals(Level.OVERWORLD)) return;
+        if (!(level.getChunkSource().getGenerator().getBiomeSource() instanceof MultiNoiseBiomeSource source)) return;
+        seed = level.getSeed();
+        settle(seed, source, level.getChunkSource().randomState().sampler(), true);
+    }
+
+    /**
+     * Finds where the zones lie in a world of this seed with its biome source, judging each zone's
+     * host ground at its host height, and keeps it ({@link ZoneMap#settle}); again only if
+     * {@code force} or the kept one is another seed's. Thread-safe; once found, quick.
+     */
+    public static ZoneMap.Placement settle(long worldSeed, MultiNoiseBiomeSource source, Climate.Sampler sampler, boolean force) {
+        if (!force && MAP.settled(worldSeed)) return MAP.placement(worldSeed);
+        long start = System.nanoTime();
+        int[] samples = new int[1];
+        ZoneMap.Placement p = MAP.settle(worldSeed, (zone, x, z) -> {
+            samples[0]++;
+            return source.getNoiseBiome(sampler.sample(QuartPos.fromBlock(x), QuartPos.fromBlock(zone.hostY()), QuartPos.fromBlock(z)))
+                    .is(zone.hosts());
+        }, force);
+        if (samples[0] == 0) return p; // found meanwhile, by another thread
+        StringBuilder where = new StringBuilder();
+        for (Zone zone : MAP.zones()) {
+            for (int[] c : p.of(zone)) {
+                where.append(String.format("%s %d %d (%.0f out); ", zone.biome().location().getPath(), c[0], c[1], Math.hypot(c[0], c[1])));
+            }
+        }
+        JTTWEngine.LOGGER.info("Zones placed for seed {} in {} ms ({} biome samples): {}{}", worldSeed,
+                (System.nanoTime() - start) / 1_000_000, samples[0], where, p.notes());
+        return p;
     }
 }

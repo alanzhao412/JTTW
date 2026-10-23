@@ -18,12 +18,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Puts the mod's zone biomes where their zones lie ({@link Zones}): a zone whose centre falls in
- * one of its host biomes takes its whole footprint, water and all, so it stands whole, not in
- * scraps; but only at the heights it takes (an underground zone leaves the surface over it
- * vanilla's, an aerial one the ground under it). Only in a biome source that lists the zone
- * biome, which the overworld's does (OverworldBiomeBuilderMixin); the Nether's and others' are
- * left alone.
+ * Puts the mod's zone biomes where their zones lie ({@link Zones}): a zone's region (placed on its
+ * host ground) takes its whole footprint, water and all, so it stands whole, not in scraps; but
+ * only at the heights it takes (an underground zone leaves the surface over it vanilla's, an
+ * aerial one the ground under it). Only in a biome source that lists the zone biome, which the
+ * overworld's does (OverworldBiomeBuilderMixin); the Nether's and others' are left alone. Where
+ * the zones lie is found with this source the first time it is needed, if the overworld's loading
+ * has not found it already.
  */
 @Mixin(MultiNoiseBiomeSource.class)
 public abstract class MultiNoiseBiomeSourceMixin {
@@ -36,10 +37,6 @@ public abstract class MultiNoiseBiomeSourceMixin {
     /** This source's zone biomes, found once: empty when it lists none. */
     @Unique
     private volatile Map<Zones.Zone, Holder<Biome>> jttw$zones;
-
-    /** For each zone's cell, whether its centre is in host country: found once, then reused. */
-    @Unique
-    private final Map<Zones.HostCell, Boolean> jttw$hostCentres = new java.util.concurrent.ConcurrentHashMap<>();
 
     @Unique
     private Map<Zones.Zone, Holder<Biome>> jttw$zones() {
@@ -61,19 +58,11 @@ public abstract class MultiNoiseBiomeSourceMixin {
     private void jttw$placeZones(int x, int y, int z, Climate.Sampler sampler, CallbackInfoReturnable<Holder<Biome>> cir) {
         Map<Zones.Zone, Holder<Biome>> zones = jttw$zones();
         if (zones.isEmpty()) return;
-        Holder<Biome> vanilla = cir.getReturnValue();
         long seed = Zones.seed();
+        if (!Zones.MAP.settled(seed)) Zones.settle(seed, (MultiNoiseBiomeSource) (Object) this, sampler, false);
         int bx = QuartPos.toBlock(x), by = QuartPos.toBlock(y), bz = QuartPos.toBlock(z);
         for (Map.Entry<Zones.Zone, Holder<Biome>> e : zones.entrySet()) {
-            Zones.Zone zone = e.getKey();
-            if (!zone.covers(seed, bx, by, bz)) continue;
-            boolean hosted = jttw$hostCentres.computeIfAbsent(zone.hostCell(bx, bz), k -> {
-                int[] c = zone.centre(seed, bx, bz);
-                Holder<Biome> atCentre = ((MultiNoiseBiomeSource) (Object) this).getNoiseBiome(
-                        sampler.sample(QuartPos.fromBlock(c[0]), QuartPos.fromBlock(zone.hostY()), QuartPos.fromBlock(c[1])));
-                return atCentre.is(zone.hosts());
-            });
-            if (hosted) {
+            if (e.getKey().covers(seed, bx, by, bz)) {
                 cir.setReturnValue(e.getValue());
                 return;
             }

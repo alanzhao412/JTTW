@@ -1,7 +1,7 @@
 package com.jttw.engine.gametest.bench;
 
+import com.jttw.engine.entity.zone.ZoneBoss;
 import com.jttw.engine.world.Zones;
-import com.jttw.engine.world.feature.BoneMassifFeature;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.core.BlockPos;
@@ -10,198 +10,223 @@ import net.minecraft.core.QuartPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.phys.AABB;
 
+import javax.imageio.ImageIO;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
- * Whether the zones turn up in a real world, and how ({@code -Pbench.mode=zones}): a biome map of
- * the 32x32 km around spawn, straight from the biome source (no terrain made), counting the ridge's
- * share, its regions and the nearest to spawn; then a visit to that nearest one, once its ground is
- * made, to read the surface and take a picture from above and one on the ground.
+ * Where the zones were placed in a real world, and whether each stands whole
+ * ({@code -Pbench.mode=zones}, {@code -Pbench.seed=N} for another world): each zone's region (the
+ * four seas' too), its distance from spawn, the vanilla biome it was put on, and how long finding
+ * them took; a map of the 20x20 km round spawn, the zones over vanilla's biomes, with their rings
+ * ({@code screenshots/zones/unique_zones_map_<seed>.png}); then a visit to each region, once its
+ * ground is made: its biome there, the bosses in it, and a picture.
  */
 final class ZoneBench {
 
     private ZoneBench() {}
 
-    private static final int HALF = 16384, STEP = 64;
+    private static final int HALF = 10240, STEP = 40, LOAD = 5;
     private static final List<String> report = new ArrayList<>();
-    private static int stage, ticks;
-    private static BlockPos nearest;
-    private static BlockPos centre, highest, lowest;
+    private static final List<Zones.Zone> visitZones = new ArrayList<>();
+    private static final List<int[]> visits = new ArrayList<>();
+    private static int stage, ticks, visit;
 
     static List<String> report() {
         return report;
     }
 
-    private static Holder<Biome> biomeAt(ServerLevel level, int x, int z) {
-        var source = level.getChunkSource().getGenerator().getBiomeSource();
-        var sampler = level.getChunkSource().randomState().sampler();
-        return source.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(64), QuartPos.fromBlock(z), sampler);
+    /** Vanilla's biome at (x, y, z), the zones left out (the source asked by climate alone). */
+    private static Holder<Biome> vanilla(MultiNoiseBiomeSource source, Climate.Sampler sampler, int x, int y, int z) {
+        return source.getNoiseBiome(sampler.sample(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)));
     }
 
-    /** The ground's height at (x, z), its chunk made first if it is not yet (a read of unmade ground says the world's floor). */
-    private static int groundAt(ServerLevel level, int x, int z) {
-        level.getChunk(x >> 4, z >> 4);
-        return level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
+    private static String name(Holder<Biome> biome) {
+        return biome.unwrapKey().map(k -> k.location().getPath()).orElse("?");
+    }
+
+    /** A height the zone takes, to read its biome at. */
+    private static int heightOf(Zones.Zone zone) {
+        if (zone.vertical().contains(64)) return 64;
+        return zone.vertical().maxY() < 64 ? 0 : Math.max(zone.vertical().minY() + 16, 100);
     }
 
     /** One server tick of the bench. Returns true when done. */
     static boolean tick(ServerPlayer p) {
         ServerLevel level = p.serverLevel();
+        long seed = Zones.seed();
         ticks++;
-        switch (stage) {
-            case 0 -> {
-                int n = HALF * 2 / STEP;
-                boolean[][] ridge = new boolean[n][n];
-                int count = 0;
-                double best = Double.MAX_VALUE;
-                long start = System.nanoTime();
-                for (int i = 0; i < n; i++) for (int j = 0; j < n; j++) {
-                    int x = -HALF + i * STEP, z = -HALF + j * STEP;
-                    if (biomeAt(level, x, z).is(Zones.WHITE_BONE_RIDGE)) {
-                        ridge[i][j] = true;
-                        count++;
-                        double d = Math.hypot(x, z);
-                        if (d < best) { best = d; nearest = new BlockPos(x, 0, z); }
-                    }
-                }
-                int regions = 0;
-                List<Integer> sizes = new ArrayList<>();
-                boolean[][] seen = new boolean[n][n];
-                for (int i = 0; i < n; i++) for (int j = 0; j < n; j++) {
-                    if (!ridge[i][j] || seen[i][j]) continue;
-                    regions++;
-                    int size = 0;
-                    java.util.ArrayDeque<int[]> open = new java.util.ArrayDeque<>();
-                    open.add(new int[]{i, j});
-                    seen[i][j] = true;
-                    while (!open.isEmpty()) {
-                        int[] c = open.poll();
-                        size++;
-                        for (int[] d : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
-                            int a = c[0] + d[0], b = c[1] + d[1];
-                            if (a >= 0 && b >= 0 && a < n && b < n && ridge[a][b] && !seen[a][b]) {
-                                seen[a][b] = true;
-                                open.add(new int[]{a, b});
-                            }
-                        }
-                    }
-                    sizes.add(size);
-                }
-                sizes.sort(null);
-                report.add(String.format("map of %dx%d blocks, every %d (%.1f s): White Bone Ridge on %.2f%% of it, in %d regions; "
-                                + "region sizes in samples (each %dx%d blocks): smallest %s, median %s, largest %s; nearest to spawn %.0f blocks, at %s",
-                        HALF * 2, HALF * 2, STEP, (System.nanoTime() - start) / 1e9, 100.0 * count / (n * n), regions, STEP, STEP,
-                        sizes.isEmpty() ? "-" : sizes.get(0), sizes.isEmpty() ? "-" : sizes.get(sizes.size() / 2),
-                        sizes.isEmpty() ? "-" : sizes.get(sizes.size() - 1), best, nearest));
-                // every overworld zone's share of the same map, and its regions, each judged at a height it takes
-                var source = level.getChunkSource().getGenerator().getBiomeSource();
-                var sampler = level.getChunkSource().randomState().sampler();
-                for (Zones.Zone zone : Zones.MAP.zones()) {
-                    int y = zone.vertical().contains(64) ? 64 : zone.vertical().maxY() < 64 ? 0 : zone.vertical().minY();
-                    int hits = 0;
-                    java.util.Set<Long> cells = new java.util.HashSet<>();
-                    for (int i = 0; i < n; i++) for (int j = 0; j < n; j++) {
-                        int x = -HALF + i * STEP, z = -HALF + j * STEP;
-                        if (!source.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z), sampler).is(zone.biome())) continue;
-                        hits++;
-                        cells.add(zone.layout().cellOf(x, z));
-                    }
-                    report.add(String.format("  %s (judged at y %d): %.2f%% of the map, %d regions", zone.id(), y, 100.0 * hits / (n * n), cells.size()));
-                }
-                if (nearest == null) return true;
-                p.getAbilities().flying = true;
-                p.onUpdateAbilities();
-                stage = 1;
-                ticks = 0;
+        if (stage == 0) {
+            if (!(level.getChunkSource().getGenerator().getBiomeSource() instanceof MultiNoiseBiomeSource source)) {
+                report.add("the overworld's biome source is not multi-noise: no zones");
+                return true;
             }
+            Climate.Sampler sampler = level.getChunkSource().randomState().sampler();
+            long start = System.nanoTime();
+            Zones.settle(seed, source, sampler, true); // found again, to time it (the same places: it is deterministic)
+            double ms = (System.nanoTime() - start) / 1e6;
+            report.add(String.format("seed %d: the zones placed in %.0f ms; spawn at %s", seed, ms, level.getSharedSpawnPos()));
+            for (Zones.Zone zone : Zones.MAP.zones()) {
+                for (int[] c : zone.centres(seed)) {
+                    Holder<Biome> under = vanilla(source, sampler, c[0], zone.hostY(), c[1]);
+                    Holder<Biome> placed = source.getNoiseBiome(QuartPos.fromBlock(c[0]), QuartPos.fromBlock(heightOf(zone)), QuartPos.fromBlock(c[1]), sampler);
+                    report.add(String.format("  %-18s at %6d %6d, %5.0f blocks from spawn (its ring %d-%d), %s; on %s (host: %s); the source places %s there",
+                            zone.biome().location().getPath(), c[0], c[1], Math.hypot(c[0], c[1]), zone.layout().near(), zone.layout().far(),
+                            com.jttw.engine.world.EarthGod.wind(0, 0, c[0], c[1]), name(under), under.is(zone.hosts()) ? "yes" : "NO", name(placed)));
+                    visitZones.add(zone);
+                    visits.add(c);
+                }
+            }
+            String notes = Zones.MAP.placement(seed).notes();
+            report.add("  widenings: " + (notes.isEmpty() ? "none" : notes));
+            map(seed, source, sampler);
+            p.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
+            stage = 1;
+            ticks = 0;
+            return false;
+        }
+        if (visit >= visits.size()) return true;
+        Zones.Zone zone = visitZones.get(visit);
+        int[] c = visits.get(visit);
+        String id = zone.biome().location().getPath()
+                + (zone.layout().perSea() ? "_" + com.jttw.engine.world.waters.Sea.of(c[0], c[1]).name().toLowerCase() : "");
+        switch (stage) {
             case 1 -> {
-                // the region's centre, and the ground around it once made
-                int[] c = Zones.WHITE_BONE.layout().centre(Zones.seed(), nearest.getX(), nearest.getZ());
-                centre = new BlockPos(c[0], 0, c[1]);
+                if (ticks == 1) p.teleportTo(level, c[0] + 0.5, 250, c[1] + 0.5, 0f, 60f);
                 int cx = c[0] >> 4, cz = c[1] >> 4;
                 boolean loaded = true;
-                for (int x = cx - 12; x <= cx + 12 && loaded; x++) for (int z = cz - 12; z <= cz + 12; z++) {
+                for (int x = cx - LOAD; x <= cx + LOAD && loaded; x++) for (int z = cz - LOAD; z <= cz + LOAD; z++) {
                     if (level.getChunkSource().getChunkNow(x, z) == null) { loaded = false; break; }
                 }
-                if (ticks == 1) p.teleportTo(level, c[0] + 0.5, 250, c[1] + 0.5, 0f, 60f);
-                if (!loaded && ticks < 20 * 240) return false;
-                Map<String, Integer> tops = new TreeMap<>();
-                int[] kinds = new int[3];
-                int columns = 0, water = 0, peak = 0;
-                long sumIn = 0;
-                for (int dx = -160; dx <= 160; dx += 4) for (int dz = -160; dz <= 160; dz += 4) {
-                    int x = c[0] + dx, z = c[1] + dz;
-                    int y = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1;
-                    BlockPos top = new BlockPos(x, y, z);
-                    if (!level.getBiome(top).is(Zones.WHITE_BONE_RIDGE)) continue;
-                    columns++;
-                    sumIn += y;
-                    peak = Math.max(peak, y);
-                    int kind = BoneMassifFeature.kindAt(Zones.seed(), x, z);
-                    kinds[kind]++;
-                    // the views: the highest terrace (a crag's top is a spike's side), the deepest basin floor
-                    if (kind == BoneMassifFeature.MESA && (highest == null || y > highest.getY())) highest = top;
-                    if (kind == BoneMassifFeature.BASIN && BoneMassifFeature.riseAt(Zones.seed(), x, z) > 0
-                            && (lowest == null || y < lowest.getY())) lowest = top;
-                    if (!level.getFluidState(top).isEmpty()) water++;
-                    tops.merge(level.getBlockState(top).getBlock().getName().getString(), 1, Integer::sum);
-                }
-                long sumOut = 0;
-                int outside = 0;
-                for (int k = 0; k < 64; k++) {
-                    double a = k * Math.PI / 32;
-                    int x = c[0] + (int) (Math.cos(a) * 420), z = c[1] + (int) (Math.sin(a) * 420);
-                    sumOut += groundAt(level, x, z);
-                    outside++;
-                }
-                report.add(String.format("the region at %d %d: %d columns of it sampled; ground there averages y %.0f (highest %d) "
-                                + "against y %.0f around it; highest terrace %d, deepest basin %d; ground: crags %d, mesas %d, basins %d; water on top in %d of them; top blocks %s",
-                        c[0], c[1], columns, (double) sumIn / Math.max(1, columns), peak, (double) sumOut / outside,
-                        highest.getY(), lowest.getY(), kinds[0], kinds[1], kinds[2], water, tops));
-                int far = groundAt(level, c[0], c[1] + 360);
-                p.setGameMode(net.minecraft.world.level.GameType.SPECTATOR); // a camera: no falling between the move and the picture
-                p.teleportTo(level, c[0] + 0.5, far + 45, c[1] + 360.5, 180f, 8f); // from afar, to the south
+                if (!loaded && ticks < 20 * 180) return false;
+                if (ticks < 60) return false; // its entities joining
+                List<ZoneBoss> bosses = level.getEntitiesOfClass(ZoneBoss.class,
+                        new AABB(c[0] - 128, level.getMinBuildHeight(), c[1] - 128, c[0] + 128, level.getMaxBuildHeight(), c[1] + 128));
+                StringBuilder who = new StringBuilder();
+                for (ZoneBoss b : bosses) who.append(b.getName().getString()).append(" at ").append(b.blockPosition().toShortString()).append("; ");
+                boolean biome = level.getBiome(new BlockPos(c[0], heightOf(zone), c[1])).is(zone.biome());
+                report.add(String.format("visit %s at %d %d (%s in %.0f s): its biome at the centre: %s; bosses: %s",
+                        id, c[0], c[1], loaded ? "made" : "NOT all made", ticks / 20.0, biome ? "yes" : "NO",
+                        bosses.isEmpty() ? "NONE" : who.toString()));
+                int top = level.getHeight(Heightmap.Types.WORLD_SURFACE, c[0], c[1]);
+                int eye = Math.min(level.getMaxBuildHeight() - 10, Math.max(top, zone.vertical().minY() > 100 ? 240 : top) + 55);
+                p.teleportTo(level, c[0] + 0.5, eye, c[1] + 170.5, 180f, 22f);
                 stage = 2;
                 ticks = 0;
             }
             case 2 -> {
-                if (ticks == 160) shoot("white_bone_ridge_from_afar");
-                if (ticks == 170) {
-                    // well outside the massif, under the clouds (y 192), looking down on it
-                    p.teleportTo(level, centre.getX() + 0.5, 180, centre.getZ() + 420.5, 180f, 14f);
+                if (ticks == 100) shoot("unique_" + id + "_" + seed);
+                if (ticks == 110) {
+                    visit++;
+                    stage = 1;
+                    ticks = 0;
                 }
-                if (ticks == 260) shoot("white_bone_ridge_from_above");
-                if (ticks == 270) p.teleportTo(level, highest.getX() + 0.5, highest.getY() + 3, highest.getZ() + 0.5, towards(highest, centre), 18f);
-                if (ticks == 350) shoot("white_bone_ridge_from_the_crest");
-                if (ticks == 360) p.teleportTo(level, lowest.getX() + 0.5, lowest.getY() + 2.7, lowest.getZ() + 0.5, towards(lowest, centre), 0f);
-                if (ticks == 440) shoot("white_bone_ridge_in_the_low_ground");
-                if (ticks == 450) {
-                    // the lair at the centre, and whoever is in it
-                    int y = groundAt(level, centre.getX(), centre.getZ());
-                    var ladies = level.getEntitiesOfClass(com.jttw.engine.entity.ridge.LadyWhiteBoneEntity.class,
-                            new net.minecraft.world.phys.AABB(centre.atY(y)).inflate(24, 32, 24));
-                    report.add(String.format("the lair at %d %d %d: Lady White Bone %s", centre.getX(), y, centre.getZ(),
-                            ladies.isEmpty() ? "NOT there" : ladies.size() + " of her, at " + ladies.get(0).blockPosition()));
-                    p.teleportTo(level, centre.getX() + 0.5, y + 7, centre.getZ() + 15.5, 180f, 20f);
-                }
-                if (ticks == 530) shoot("white_bone_ridge_lair");
-                if (ticks == 540) return true;
             }
             default -> { return true; }
         }
         return false;
     }
 
-    /** The yaw that looks from one place to another. */
-    private static float towards(BlockPos from, BlockPos to) {
-        return (float) Math.toDegrees(Math.atan2(to.getZ() - from.getZ(), to.getX() - from.getX())) - 90f;
+    /** The map: vanilla's biomes, the zones over them, their rings, spawn; written as a PNG. */
+    private static void map(long seed, MultiNoiseBiomeSource source, Climate.Sampler sampler) {
+        int n = HALF * 2 / STEP;
+        BufferedImage img = new BufferedImage(n, n, BufferedImage.TYPE_INT_RGB);
+        long start = System.nanoTime();
+        for (int i = 0; i < n; i++) for (int j = 0; j < n; j++) {
+            int x = -HALF + i * STEP, z = -HALF + j * STEP;
+            Color base = colour(name(vanilla(source, sampler, x, 64, z)));
+            for (Zones.Zone zone : Zones.MAP.zones()) {
+                if (zone.depth(seed, x, z) > 0) base = zoneColour(zone);
+            }
+            img.setRGB(i, j, base.getRGB());
+        }
+        Graphics2D g = img.createGraphics();
+        g.setStroke(new BasicStroke(1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1f, new float[]{4f, 4f}, 0f));
+        g.setColor(new Color(255, 255, 255, 120));
+        for (Zones.Zone zone : Zones.MAP.zones()) {
+            for (int r : new int[]{zone.layout().near(), zone.layout().far()}) {
+                int rr = r / STEP;
+                g.drawOval(n / 2 - rr, n / 2 - rr, rr * 2, rr * 2);
+            }
+        }
+        g.setColor(Color.WHITE);
+        g.fillRect(n / 2 - 3, n / 2 - 1, 7, 3);
+        g.fillRect(n / 2 - 1, n / 2 - 3, 3, 7);
+        g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
+        for (Zones.Zone zone : Zones.MAP.zones()) {
+            for (int[] c : zone.centres(seed)) {
+                int px = (c[0] + HALF) / STEP, pz = (c[1] + HALF) / STEP;
+                g.setColor(Color.BLACK);
+                g.drawString(label(zone), px + 7, pz + 5);
+                g.setColor(zoneColour(zone).brighter());
+                g.drawString(label(zone), px + 6, pz + 4);
+            }
+        }
+        g.setColor(Color.WHITE);
+        g.drawString("seed " + seed + "  (" + HALF * 2 / 1000 + " km square; rings every zone's band)", 6, 14);
+        g.dispose();
+        File dir = new File(Minecraft.getInstance().gameDirectory, "screenshots/zones");
+        dir.mkdirs();
+        File out = new File(dir, "unique_zones_map_" + seed + ".png");
+        try {
+            ImageIO.write(img, "png", out);
+            report.add(String.format("  map (%d x %d blocks, a pixel each %d, in %.1f s): %s", HALF * 2, HALF * 2, STEP,
+                    (System.nanoTime() - start) / 1e9, "screenshots/zones/" + out.getName()));
+        } catch (java.io.IOException e) {
+            report.add("  map NOT written: " + e);
+        }
+    }
+
+    private static String label(Zones.Zone zone) {
+        if (zone == Zones.WHITE_BONE) return "White Bone Ridge";
+        if (zone == Zones.BOTTOMLESS) return "Bottomless Cave";
+        if (zone == Zones.MYSTICAL_WATERS) return "Dragon King";
+        if (zone == Zones.FIRE_MOUNTAIN) return "Flaming Mountains";
+        if (zone == Zones.MOUNT_WUZHUANG) return "Mount Wuzhuang";
+        if (zone == Zones.LION_CAMEL) return "Lion-Camel Ridge";
+        return zone.biome().location().getPath();
+    }
+
+    private static Color zoneColour(Zones.Zone zone) {
+        if (zone == Zones.WHITE_BONE) return new Color(250, 246, 225);
+        if (zone == Zones.BOTTOMLESS) return new Color(170, 90, 230);
+        if (zone == Zones.MYSTICAL_WATERS) return new Color(0, 230, 230);
+        if (zone == Zones.FIRE_MOUNTAIN) return new Color(255, 70, 0);
+        if (zone == Zones.MOUNT_WUZHUANG) return new Color(255, 215, 0);
+        if (zone == Zones.LION_CAMEL) return new Color(230, 0, 130);
+        return Color.MAGENTA;
+    }
+
+    /** A vanilla biome's colour on the map, by its name. */
+    private static Color colour(String b) {
+        if (b.contains("deep") && b.contains("ocean")) return new Color(18, 36, 100);
+        if (b.contains("ocean")) return new Color(40, 80, 160);
+        if (b.contains("river")) return new Color(60, 110, 200);
+        if (b.contains("beach") || b.contains("shore")) return new Color(220, 210, 150);
+        if (b.contains("desert")) return new Color(225, 205, 130);
+        if (b.contains("badlands")) return new Color(200, 110, 60);
+        if (b.contains("savanna")) return new Color(175, 165, 85);
+        if (b.contains("snowy") || b.contains("frozen") || b.contains("ice")) return new Color(225, 235, 240);
+        if (b.contains("peaks") || b.contains("slopes") || b.contains("stony") || b.contains("windswept") || b.contains("grove")) return new Color(140, 140, 140);
+        if (b.contains("cherry")) return new Color(230, 170, 200);
+        if (b.contains("meadow")) return new Color(130, 190, 90);
+        if (b.contains("jungle")) return new Color(40, 130, 40);
+        if (b.contains("swamp") || b.contains("mangrove")) return new Color(70, 100, 60);
+        if (b.contains("taiga")) return new Color(60, 110, 80);
+        if (b.contains("mushroom")) return new Color(150, 100, 150);
+        if (b.contains("forest")) return new Color(50, 120, 50);
+        return new Color(90, 160, 70);
     }
 
     private static void shoot(String name) {

@@ -276,15 +276,52 @@ Largest components: `TransformationAbilityHandler` (1,385 lines), `YuanDiAbility
 
 ### Zones
 
-A level zone is a biome put over the overworld in regions laid out from the seed alone
-(`world/Zones`): no biome library. Each zone has a biome, the vanilla biomes it may take over
-(a tag, checked at its region's centre), a `ZoneLayout` (cell size, share of cells, radius,
-wobble, a salt of its own), the heights it takes (`Vertical`: the whole column, `below(y)` for an
-underground zone, `above(y)` for an aerial one), its level band and the players it is allied to.
-Zones sharing heights never share ground: a later zone in `Zones.ALL` gives up a whole region
-that would touch an earlier one's (`ZoneMap`). White Bone Ridge is the first, the Bottomless Cave the second, the Mystical
-Waters the third; Hell, a dimension of its own, is the fourth; then the Flaming Mountains, and Mount Wuzhuang, the first
-aerial zone, in the sky; Lion-Camel Ridge, the last band, is the last.
+A level zone is a biome put over the overworld (`world/Zones`): no biome library. Each zone has a
+biome, the vanilla biomes it may take over (a tag), a `ZoneLayout` (the ring round spawn its region
+lies in, radius, wobble, a salt of its own), the heights it takes (`Vertical`: the whole column,
+`below(y)` for an underground zone, `above(y)` for an aerial one), its level band and the players it
+is allied to. White Bone Ridge is the first, the Bottomless Cave the second, the Mystical Waters the
+third; Hell, a dimension of its own, is the fourth; then the Flaming Mountains, and Mount Wuzhuang,
+the first aerial zone, in the sky; Lion-Camel Ridge, the last band, is the last.
+
+**One of each a world.** Every boss lives in one place: each overworld zone has a single region a
+world (`ZoneMap`), except the Mystical Waters, which have one in each of the Four Seas, east, south,
+west and north of spawn, each its own Dragon King's (Ao Guang, Ao Qin, Ao Run, Ao Shun). The journey
+west lengthens with the pilgrim: the higher a zone's levels, the farther out its ring.
+
+| Zone | Levels | Distance from spawn (centre) | Regions |
+|---|---|---|---|
+| White Bone Ridge | 20–36 | 1–2 km | one, ~520 blocks across |
+| Bottomless Cave (under mountains) | 37–46 | 2–3 km | one, ~220 |
+| Mystical Waters (deep ocean) | 47–56 | 3–4.5 km | four, one per sea (within 30° of east, south, west, north), ~440 |
+| Hell (a dimension) | 57–66 | — | the Ten Courts |
+| Flaming Mountains | 67–77 | 4.5–6 km | one, ~400 |
+| Mount Wuzhuang (over the clouds) | 78–88 | 6–7.5 km | one, ~260 |
+| Lion-Camel Ridge | 89–100 | 7.5–9 km | one, ~380 |
+
+Where in its ring follows from the world seed and its biomes: earliest zone first, the places its
+layout offers (spread evenly over the ring by the seed) are tried in turn, and it takes the first on
+host ground (the vanilla biome at its host height, from the overworld's own biome source and
+sampler, at the centre and at six of eight points round it) and clear, by both reaches and 48
+blocks, of every region already placed at heights it shares. If no place in the ring will do, the
+search widens outward a ring at a time (and says so in the log); failing all, it is put down in its
+ring off its hosts. It is found once, as the overworld loads, before any ground is made or the spawn
+chosen (the log says where each zone went and how long it took), and kept: chunk generation's worker
+threads only read it. The same seed gives the same places. The biome source then gives a region's
+whole footprint the zone's biome, at the heights it takes (`MultiNoiseBiomeSourceMixin`).
+
+**The Earth God's Luopan** (`EarthGodLuopanItem`, `world/EarthGod`): in the novel, wherever Sun
+Wukong came to a mountain whose demon he did not know, he struck the ground and the place's Earth
+God (土地公) came up out of it, bowing, to tell him who lived there. Every player is given a luopan
+(a geomancer's compass) the first time they join a world, and more are crafted from any planks, a
+copper ingot and red dye. Used, the Earth God rises in a puff of earth and names the zone for its
+holder's level (the one whose band holds it; under 20 White Bone Ridge, past 100 Lion-Camel Ridge),
+its master, and which way and roughly how far it lies, while a trail of incense smoke drifts off that
+way; for the Mystical Waters, the nearest sea whose Dragon King still lives (the kings' deaths are
+remembered for the world). Held, its needle points there, as a compass's does, kept up to date as
+its holder goes and grows. Hell's band (57–66) is told that its trials lie in Diyu, past any Earth
+God's ground, and pointed on to the Flaming Mountains; in Hell itself the needle points to the Ten
+Courts' gate; in the Nether, the End or Heaven no Earth God hears, and it spins.
 
 To add a zone:
 
@@ -299,22 +336,25 @@ To add a zone:
    override levels, captain chance, escorts, captain loot, `allies()` as needed).
 4. **Boss**: extend `entity/zone/ZoneBoss` (`zone()`, `lairRadius()`; a boss bar, persistence,
    Boss tier, phases through `phaseThresholds()` / `onPhase()`).
-5. **Worldgen**: features read `zone.depth(...)`, `zone.centre(...)`, `zone.isAt(level, pos)`
-   and `ZoneTerrain.landAt(...)`; the lair extends `world/feature/ZoneLairFeature` (`zone()`,
-   `boss()`, `build(...)`, `floorAt(...)`), which builds it at each region's centre and puts the
-   boss there once.
-6. **Tests**: add the zone to `ZoneFrameworkTest`'s checks if its layout is unusual; GameTests
-   for its monsters and boss as `RidgeGameTests` does.
+5. **Worldgen**: features read `zone.depth(...)`, `zone.centre(...)` (its nearest region's),
+   `zone.centres(seed)`, `zone.isAt(level, pos)` and `ZoneTerrain.landAt(...)`; the lair extends
+   `world/feature/ZoneLairFeature` (`zone()`, `boss()`, `build(...)`, `floorAt(...)`), which builds
+   it at its region's centre and puts the boss there once.
+6. **Tests**: `ZonesTest` checks every zone of `Zones.ALL` (one region, in its ring, on its hosts,
+   clear of the others); GameTests for its monsters and boss as `RidgeGameTests` does; a line for it
+   in the Earth Gods' words (`EarthGod`). See where it lands with `./gradlew runWorldgenBench
+   -Pbench.mode=zones -Pbench.seed=<seed>` (`ZoneBench`: each zone's place, distance and host, a
+   map of the 20 km square round spawn, and a visit to each region: its biome, its bosses, a picture).
 
 #### The Bottomless Cave (levels 37–46)
 
 Mount Xiankong's Bottomless Cave (无底洞, chapters 80–83), home of Lady Earth Flow, the
 Golden-Nosed, White-Furred Mouse Spirit. An underground zone (`Zones.BOTTOMLESS`):
 `Vertical.below(40)` under mountain country (peaks, slopes, groves, meadows, cherry groves,
-windswept hills), in 90% of 1024-block cells (only those whose centre is in mountain country hold it: about one in thirty), regions about 220 blocks across. Its host is judged
+windswept hills), one region a world 2–3 km from spawn, about 220 blocks across. Its host is judged
 at y 256, above any mountain's top, where a column's biome is always its surface biome (judged lower,
 under a tall peak, it can be a cave biome). Being after White Bone Ridge in `Zones.ALL` and sharing
-its heights, it gives up any region that would touch the ridge's. Grunt XP 100 (260 a kill there,
+its heights, it keeps clear of the ridge's region. Grunt XP 100 (260 a kill there,
 with the band's scaling), against the ridge's 80.
 
 - **Terrain** (`world/feature/Labyrinth`, `BottomlessCaveFeature`): at the region's centre a
@@ -356,7 +396,7 @@ with the band's scaling), against the ridge's 80.
   `flower_maid.py`, `lady_earth_flow.py`, item icons from `cave_items.py` (helpers in `cave_skin.py`).
 - **Seeing it**: `./gradlew runFormGallery -Pgallery.only=cave_` (creatures, her, her likeness,
   and the labyrinth laid in the gallery's flat world: palace, shrine, tunnel, stair, hub);
-  `./gradlew runWorldgenBench -Pbench.mode=cave` (the nearest real region: a plan of each level as
+  `./gradlew runWorldgenBench -Pbench.mode=cave` (its region: a plan of each level as
   built, a cut through the shaft, and pictures, in `run-bench/screenshots/zones/`).
 #### The Mystical Waters (levels 47–56)
 
@@ -365,11 +405,10 @@ The Four Seas and the Dragon Kings' crystal palaces (水晶宫, novel chapter 3)
 [`entity/waters/`](src/main/java/com/jttw/engine/entity/waters/).
 
 - **Where**: over deep ocean only (deep, deep cold, deep lukewarm and deep frozen ocean, judged just
-  under the waves at y 60), the whole column. 90% of 1536-block cells roll a region about 440 blocks
-  across; only those centred over deep ocean stand (27 regions in the 32x32 km round spawn of seed
-  12345, the nearest 4.3 km out). Each region is one sea's: the one that lies that way from the
-  world's origin (within 45° of +x the East's, +z the South's, and so on), and its palace's gate faces
-  that way.
+  under the waves at y 60), the whole column. Four regions a world, about 440 blocks across, 3–4.5
+  km from spawn: one in each sea, each sought within 30° of its own compass point. Each region is
+  one sea's: the one that lies that way from the world's origin (within 45° of +x the East's, +z the
+  South's, and so on), and its palace's gate faces that way.
 - **The trench** (`TrenchShape`, `TrenchFeature`): sunk as deep as the world goes, its floor at
   y -58, six blocks over the world's bottom, just over the bedrock: some 120 blocks under the waves,
   85-100 under the deep ocean's own floor. Its walls drop near-sheer a few blocks in from the
@@ -540,10 +579,8 @@ Boy's Fire Cloud Cave on Mount Haohao (火云洞, chapters 40–42), in
 
 - **Where** (`Zones.FIRE_MOUNTAIN`): over hot, dry country (desert, badlands, eroded and wooded
   badlands, savanna, savanna plateau, windswept savanna; White Bone Ridge's hosts and plain savanna),
-  the whole column. 90% of 1152-block cells roll a range about 400 blocks across; being last in
-  `Zones.ALL` it gives up any that would touch an earlier zone's, and only those centred on hot,
-  dry ground stand: in the 32x32 km round spawn of seed 12345 the layout rolls 709, 398 give way,
-  276 are not on hot ground, and **38 regions** stand (0.42% of the ground; the nearest 4.8 km out).
+  the whole column. One range a world, about 400 blocks across, 4.5–6 km from spawn, on hot, dry
+  ground and clear of every zone before it.
 - **The range** (`RangeShape`, `FlamingRangeFeature`, pure and unit-tested): from the region's edge
   the ground climbs over the outer fifth into long chains of red mountains (ridged noise, rounded
   summits, up to some 90 blocks over the land), valleys between them; Mount Haohao rises 45 more
@@ -626,11 +663,9 @@ left to its host.
 
 - **Where**: over serene country (plains, sunflower plains, forest, flower forest, birch and
   old-growth birch forest, meadow, cherry grove), judged at y 256 (where a column's biome is always
-  its surface biome). 75% of 2048-block cells roll a region about 260 blocks across (never under
-  224); last in `Zones.ALL`, it gives up any region that would touch a whole-column zone's (the
-  ridge, the waters, the Flaming Mountains), and may float over the Bottomless Cave. In the 32×32 km
-  round spawn of seed 12345: 124 regions laid out, **41 over serene hosts** (about one in every
-  5×5 km), the nearest 3.1 km from spawn.
+  its surface biome). One region a world, about 260 blocks across (never under 224), 6–7.5 km from
+  spawn, clear of every whole-column zone's (being aerial, it could float over the Bottomless Cave,
+  but their rings are kilometres apart).
 - **The island** (`IslandShape`, pure Java, unit-tested; laid chunk by chunk by
   `MountWuzhuangFeature` at the top-layer step, so the ground under it keeps its own trees and
   grass): a rough disc about 150 blocks across, its edge wandering ±12; a terrace at y 236 laid dead
@@ -740,11 +775,9 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   windswept savanna), host judged at y 256, **from y 40 up**
   (`Vertical.above(40)`). The Bottomless Cave takes the same mountains below y 40, so the two share no
   heights and may lie in the same columns: the ridge over the labyrinth (its shaft is left alone where
-  it comes up through the ridge). It gives way to every zone before it that takes the surface. 90% of
-  768-block cells roll a region about 380 blocks across; in the 32x32 km round spawn of seed 12345
-  the layout rolls 1,624, 788 give way to earlier zones (Mount Wuzhuang's sky among them), 809 are
-  not centred in mountain or highland country, and **29 regions** stand (0.29% of the ground, second
-  only to the Flaming Mountains' 38; the nearest 0.9 km out; three of them over a Bottomless Cave).
+  it comes up through the ridge). It keeps clear of every zone before it that takes the surface. One
+  region a world, about 380 blocks across, the farthest out: 7.5–9 km from spawn, the end of the
+  road west.
 - **The ridge** (`RidgeShape`, `LionCamelRidgeFeature`, pure and unit-tested): the mountains are broken
   into grim crags (ridged noise, up to 30 blocks more), climbing out of the land over the outer fifth;
   faces bare stone banded with tuff, andesite and deepslate; ground of coarse dirt, gravel, podzol and
@@ -829,7 +862,7 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   and breaking free; roar, stamp, charge, phases; the alarm; the creatures' tricks; captains; drops
   and the Peng's empty hands; the band's XP to the cap; karma; the city's blueprint),
   `LionCamelPlacementTest`; gallery scenes `-Pgallery.only=lion_`; the ridge and the city in a real
-  world with `./gradlew runWorldgenBench -Pbench.mode=lion` (and every zone's share with `zones`).
+  world with `./gradlew runWorldgenBench -Pbench.mode=lion` (and every zone's place with `zones`).
 
 ---
 

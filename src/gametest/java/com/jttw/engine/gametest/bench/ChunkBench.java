@@ -57,7 +57,7 @@ public final class ChunkBench {
     private static final boolean ENABLED = Boolean.getBoolean("jttw.chunkBench");
     /** "terrain" runs {@link TerrainBench} instead of the generation and flight measurements. */
     private static final boolean TERRAIN = "terrain".equals(System.getProperty("jttw.chunkBench.mode", ""));
-    /** "zones" runs {@link ZoneBench}: where the mod's zones turn up, and what they look like. */
+    /** "zones" runs {@link ZoneBench}: where the mod's zones were placed, a map of them, and each as built. */
     private static final boolean ZONES = "zones".equals(System.getProperty("jttw.chunkBench.mode", ""));
     /** "cave" runs {@link CaveBench}: the Bottomless Cave nearest spawn, as built. */
     private static final boolean CAVE = "cave".equals(System.getProperty("jttw.chunkBench.mode", ""));
@@ -110,7 +110,7 @@ public final class ChunkBench {
             mc.options.onboardAccessibility = false;
             LevelSettings settings = new LevelSettings("jttw_bench_" + System.currentTimeMillis(), GameType.CREATIVE,
                     false, Difficulty.PEACEFUL, true, new GameRules(), WorldDataConfiguration.DEFAULT);
-            mc.createWorldOpenFlows().createFreshLevel(settings.levelName(), settings, new WorldOptions(12345L, true, false),
+            mc.createWorldOpenFlows().createFreshLevel(settings.levelName(), settings, new WorldOptions(Long.getLong("jttw.chunkBench.seed", 12345L), true, false),
                     access -> access.registryOrThrow(Registries.WORLD_PRESET).getHolderOrThrow(WorldPresets.NORMAL)
                             .value().createWorldDimensions(), new net.minecraft.client.gui.screens.TitleScreen());
         }

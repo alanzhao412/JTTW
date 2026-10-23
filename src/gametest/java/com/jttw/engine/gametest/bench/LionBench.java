@@ -91,22 +91,13 @@ final class LionBench {
                     double d = Math.hypot(x, z);
                     if (d < best) { best = d; nearest = new BlockPos(x, 0, z); }
                 }
-                int rolled = 0, yielded = 0, unhosted = 0;
-                int cs = ZONE.layout().cellSize();
-                for (int cx = Math.floorDiv(-HALF, cs); cx <= Math.floorDiv(HALF - 1, cs); cx++) {
-                    for (int cz = Math.floorDiv(-HALF, cs); cz <= Math.floorDiv(HALF - 1, cs); cz++) {
-                        int[] c = ZONE.layout().centreOfCell(seed, cx, cz);
-                        if (c == null || Math.abs(c[0]) >= HALF || Math.abs(c[1]) >= HALF) continue;
-                        rolled++;
-                        if (ZONE.centre(seed, c[0], c[1]) == null) yielded++;
-                        else if (!lion(level, c[0], c[1])) unhosted++;
-                    }
-                }
+                int[] placed = ZONE.centres(seed)[0];
                 report.add(String.format("map of %dx%d blocks, every %d (%.1f s): Lion-Camel Ridge on %.2f%% of it, in %d regions; "
-                                + "its layout rolled %d regions here: %d gave way to earlier surface zones, %d were not centred in mountain or highland country; "
-                                + "%d of its regions lie (in part) over a Bottomless Cave (%d samples stacked); nearest %.0f blocks from spawn, at %s",
+                                + "its one region placed at %d %d, %.0f blocks from spawn, %s; "
+                                + "%d of its regions lie (in part) over a Bottomless Cave (%d samples stacked); nearest seen %.0f blocks from spawn, at %s",
                         HALF * 2, HALF * 2, STEP, (System.nanoTime() - start) / 1e9, 100.0 * count / (n * n), cells.size(),
-                        rolled, yielded, unhosted, overCave.size(), stacked, best, nearest));
+                        placed[0], placed[1], Math.hypot(placed[0], placed[1]), lion(level, placed[0], placed[1]) ? "its biome there" : "NOT its biome there",
+                        overCave.size(), stacked, best, nearest));
                 if (nearest == null) return true;
                 int[] c = ZONE.centre(seed, nearest.getX(), nearest.getZ());
                 centre = new BlockPos(c[0], 0, c[1]);
