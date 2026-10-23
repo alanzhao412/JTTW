@@ -67,6 +67,8 @@ public final class ChunkBench {
     private static final boolean WATERS = "waters".equals(System.getProperty("jttw.chunkBench.mode", ""));
     /** "fire" runs {@link FireBench}: where the Flaming Mountains turn up, the range and the Fire Cloud Cave. */
     private static final boolean FIRE = "fire".equals(System.getProperty("jttw.chunkBench.mode", ""));
+    /** "lion" runs {@link LionBench}: where Lion-Camel Ridge turns up, the ridge and Lion-Camel City. */
+    private static final boolean LION = "lion".equals(System.getProperty("jttw.chunkBench.mode", ""));
     private static final TicketType<ChunkPos> BENCH = TicketType.create("jttw_bench", Comparator.comparingLong(ChunkPos::toLong));
     private static final int GRID = 12;
     private static final int FLIGHT_TICKS = 400;
@@ -147,6 +149,15 @@ public final class ChunkBench {
             if (p.tickCount < 100) return;
             if (CaveBench.tick(p)) {
                 report.addAll(CaveBench.report());
+                write();
+                next(Step.DONE);
+            }
+            return;
+        }
+        if (LION) {
+            if (p.tickCount < 100) return;
+            if (LionBench.tick(p)) {
+                report.addAll(LionBench.report());
                 write();
                 next(Step.DONE);
             }

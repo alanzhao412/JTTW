@@ -220,6 +220,39 @@ public final class ModItems {
     public static final DeferredHolder<Item, Item> RED_BOY_SPAWN_EGG = ITEMS.register("red_boy_spawn_egg",
             () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.RED_BOY, 0xD02020, 0xF2C090, new Item.Properties()));
 
+    // ── Lion-Camel Ridge ─────────────────────────────────────────
+    /** From Lion-Demons: a hank of a lion-demon's mane. */
+    public static final DeferredHolder<Item, Item> MANE_TUFT = ITEMS.register("mane_tuft", () -> new Item(new Item.Properties()));
+    /** From Elephant-Demons: a shard of tusk. */
+    public static final DeferredHolder<Item, Item> IVORY_SHARD = ITEMS.register("ivory_shard", () -> new Item(new Item.Properties()));
+    /** From Peng-Demons: a dark pinion of the Great Peng's kin, stiff as a blade. */
+    public static final DeferredHolder<Item, Item> STORM_FEATHER = ITEMS.register("storm_feather", () -> new Item(new Item.Properties()));
+    /** From the Little Wind-Driller: his patrol token (the one Sun Wukong took to pass for him). */
+    public static final DeferredHolder<Item, Item> PATROL_TOKEN = ITEMS.register("patrol_token",
+            () -> new Item(new Item.Properties().stacksTo(16).rarity(net.minecraft.world.item.Rarity.UNCOMMON)));
+    /** From the Azure Lion: a lock of his azure mane, Manjushri's lion's. */
+    public static final DeferredHolder<Item, Item> AZURE_LION_MANE = ITEMS.register("azure_lion_mane",
+            () -> new Item(new Item.Properties().rarity(net.minecraft.world.item.Rarity.EPIC).fireResistant()));
+    /** From the White Elephant: one of his white tusks, Samantabhadra's elephant's. */
+    public static final DeferredHolder<Item, Item> WHITE_TUSK = ITEMS.register("white_tusk",
+            () -> new Item(new Item.Properties().rarity(net.minecraft.world.item.Rarity.EPIC).fireResistant()));
+    /** The Azure Lion's broadsword (see AzureLionSabreItem). */
+    public static final DeferredHolder<Item, Item> AZURE_LION_SABRE = ITEMS.register("azure_lion_sabre", com.jttw.engine.item.AzureLionSabreItem::new);
+    /** The White Elephant's lance (see WhiteElephantLanceItem). */
+    public static final DeferredHolder<Item, Item> WHITE_ELEPHANT_LANCE = ITEMS.register("white_elephant_lance", com.jttw.engine.item.WhiteElephantLanceItem::new);
+    public static final DeferredHolder<Item, Item> LION_DEMON_SPAWN_EGG = ITEMS.register("lion_demon_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.LION_DEMON, 0xB07A30, 0x3A2E2A, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> ELEPHANT_DEMON_SPAWN_EGG = ITEMS.register("elephant_demon_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.ELEPHANT_DEMON, 0x8A8C90, 0xE8E0C8, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> PENG_DEMON_SPAWN_EGG = ITEMS.register("peng_demon_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.PENG_DEMON, 0x2C2A36, 0xD8A838, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> LITTLE_WIND_DRILLER_SPAWN_EGG = ITEMS.register("little_wind_driller_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.LITTLE_WIND_DRILLER, 0x6A8A4A, 0xC8A050, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> AZURE_LION_SPAWN_EGG = ITEMS.register("azure_lion_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.AZURE_LION, 0x2E6C9E, 0x1C1C24, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> WHITE_ELEPHANT_SPAWN_EGG = ITEMS.register("white_elephant_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.WHITE_ELEPHANT, 0xEEEAE0, 0xD8A838, new Item.Properties()));
+
     public static final DeferredHolder<Item, Item> IMMORTAL_PILL =
             ITEMS.register("jttw_immortal_pill", ImmortalItems.ImmortalPillItem::new);
 

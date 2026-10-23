@@ -349,6 +349,51 @@ public final class ModEntities {
                             .updateInterval(2)
                             .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "ember_bolt").toString()));
 
+    // ── Lion-Camel Ridge ──────────────────────────────────────────
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.lion.LionDemonEntity>> LION_DEMON =
+            ENTITIES.register("lion_demon", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.lion.LionDemonEntity>of(com.jttw.engine.entity.lion.LionDemonEntity::new, MobCategory.MONSTER)
+                            .sized(0.8F, 2.3F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "lion_demon").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.lion.ElephantDemonEntity>> ELEPHANT_DEMON =
+            ENTITIES.register("elephant_demon", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.lion.ElephantDemonEntity>of(com.jttw.engine.entity.lion.ElephantDemonEntity::new, MobCategory.MONSTER)
+                            .sized(1.3F, 2.8F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "elephant_demon").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.lion.PengDemonEntity>> PENG_DEMON =
+            ENTITIES.register("peng_demon", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.lion.PengDemonEntity>of(com.jttw.engine.entity.lion.PengDemonEntity::new, MobCategory.MONSTER)
+                            .sized(0.7F, 2.1F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "peng_demon").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.lion.LittleWindDrillerEntity>> LITTLE_WIND_DRILLER =
+            ENTITIES.register("little_wind_driller", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.lion.LittleWindDrillerEntity>of(com.jttw.engine.entity.lion.LittleWindDrillerEntity::new, MobCategory.MONSTER)
+                            .sized(0.6F, 1.5F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "little_wind_driller").toString()));
+
+    /** The two demon kings: towering. */
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.lion.AzureLionEntity>> AZURE_LION =
+            ENTITIES.register("azure_lion", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.lion.AzureLionEntity>of(com.jttw.engine.entity.lion.AzureLionEntity::new, MobCategory.MONSTER)
+                            .sized(1.4F, 3.6F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "azure_lion").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.lion.WhiteElephantEntity>> WHITE_ELEPHANT =
+            ENTITIES.register("white_elephant", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.lion.WhiteElephantEntity>of(com.jttw.engine.entity.lion.WhiteElephantEntity::new, MobCategory.MONSTER)
+                            .sized(1.8F, 3.8F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "white_elephant").toString()));
+
     // ── Forms ──────────────────────────────────────────────────────
 
     /** The other divine beasts' true forms, never spawned: only taken (see TrueForm). */
@@ -456,6 +501,23 @@ public final class ModEntities {
                 net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
                 net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        // the ridge's demon host, in any light: it swarms
+        event.register(LION_DEMON.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(ELEPHANT_DEMON.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(PENG_DEMON.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(LITTLE_WIND_DRILLER.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
         // the sea's creatures come in deep water, in any light
         event.register(SHRIMP_SOLDIER.get(), net.minecraft.world.entity.SpawnPlacementTypes.IN_WATER,
                 net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
@@ -488,6 +550,12 @@ public final class ModEntities {
         event.put(KING_DUSHI.get(), com.jttw.engine.entity.hell.KingOfHellEntity.createAttributes(8).build());
         event.put(KING_PINGDENG.get(), com.jttw.engine.entity.hell.KingOfHellEntity.createAttributes(9).build());
         event.put(KING_ZHUANLUN.get(), com.jttw.engine.entity.hell.KingOfHellEntity.createAttributes(10).build());
+        event.put(LION_DEMON.get(), com.jttw.engine.entity.lion.LionDemonEntity.createAttributes().build());
+        event.put(ELEPHANT_DEMON.get(), com.jttw.engine.entity.lion.ElephantDemonEntity.createAttributes().build());
+        event.put(PENG_DEMON.get(), com.jttw.engine.entity.lion.PengDemonEntity.createAttributes().build());
+        event.put(LITTLE_WIND_DRILLER.get(), com.jttw.engine.entity.lion.LittleWindDrillerEntity.createAttributes().build());
+        event.put(AZURE_LION.get(), com.jttw.engine.entity.lion.AzureLionEntity.createAttributes().build());
+        event.put(WHITE_ELEPHANT.get(), com.jttw.engine.entity.lion.WhiteElephantEntity.createAttributes().build());
         event.put(EMBER_IMP.get(), com.jttw.engine.entity.fire.EmberImpEntity.createAttributes().build());
         event.put(FURNACE_BRUTE.get(), com.jttw.engine.entity.fire.FurnaceBruteEntity.createAttributes().build());
         event.put(STRONG_GENERAL.get(), com.jttw.engine.entity.fire.StrongGeneralEntity.createAttributes().build());

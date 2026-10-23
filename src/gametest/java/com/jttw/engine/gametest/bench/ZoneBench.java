@@ -100,6 +100,21 @@ final class ZoneBench {
                         HALF * 2, HALF * 2, STEP, (System.nanoTime() - start) / 1e9, 100.0 * count / (n * n), regions, STEP, STEP,
                         sizes.isEmpty() ? "-" : sizes.get(0), sizes.isEmpty() ? "-" : sizes.get(sizes.size() / 2),
                         sizes.isEmpty() ? "-" : sizes.get(sizes.size() - 1), best, nearest));
+                // every overworld zone's share of the same map, and its regions, each judged at a height it takes
+                var source = level.getChunkSource().getGenerator().getBiomeSource();
+                var sampler = level.getChunkSource().randomState().sampler();
+                for (Zones.Zone zone : Zones.MAP.zones()) {
+                    int y = zone.vertical().contains(64) ? 64 : zone.vertical().maxY() < 64 ? 0 : zone.vertical().minY();
+                    int hits = 0;
+                    java.util.Set<Long> cells = new java.util.HashSet<>();
+                    for (int i = 0; i < n; i++) for (int j = 0; j < n; j++) {
+                        int x = -HALF + i * STEP, z = -HALF + j * STEP;
+                        if (!source.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z), sampler).is(zone.biome())) continue;
+                        hits++;
+                        cells.add(zone.layout().cellOf(x, z));
+                    }
+                    report.add(String.format("  %s (judged at y %d): %.2f%% of the map, %d regions", zone.id(), y, 100.0 * hits / (n * n), cells.size()));
+                }
                 if (nearest == null) return true;
                 p.getAbilities().flying = true;
                 p.onUpdateAbilities();

@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "jttw_engine:mane_tuft"
+    },
+    {
+      "item": "jttw_engine:mane_tuft"
+    },
+    {
+      "item": "jttw_engine:ivory_shard"
+    },
+    {
+      "item": "jttw_engine:storm_feather"
+    },
+    {
+      "item": "jttw_engine:captains_sigil"
+    }
+  ],
+  "result": {
+    "id": "jttw_engine:true_samadhi_fire"
+  }
+}

@@ -202,10 +202,15 @@ public final class LevelManager {
         BiomeLevelBand band = zone.isEmpty() ? BiomeLevelBand.forPlayer(killer)
                 : BiomeLevelBand.forBiome(net.minecraft.resources.ResourceLocation.parse(zone));
 
+        // A zone's creature struck down by one it is allied to (the Peng among his brothers' demons)
+        // never fought him: it pays nothing.
+        if (event.getEntity().isAlliedTo(killer) && !zone.isEmpty()) return;
+
         if (band == null) {
-            // Mob was tagged but player isn't in a registered biome band.
-            // Still award XP using a flat fallback so kills are never wasted.
-            // TODO: remove this fallback once all biome bands are registered.
+            // A tiered enemy of no zone, killed outside every band: Heaven's soldiers, who carry a
+            // tier but no zone (they are levelled to whoever they hunt, wherever that is), and any
+            // mob tagged by hand. Every zone's creature carries its zone, and every level from 21 to
+            // 100 now has a band, but these still need paying: a flat sum, so no kill is wasted.
             long fallbackXp = (long) (VANILLA_BASE_XP * tier.xpMultiplier * 3);
             grantXp(killer, fallbackXp, "biome_fallback:" + tierStr);
             return;

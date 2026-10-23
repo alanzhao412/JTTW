@@ -33,6 +33,13 @@ public record ZoneLayout(int cellSize, double chance, int radius, int wobble, lo
      */
     public static final ZoneLayout FIRE_MOUNTAIN = new ZoneLayout(1152, 0.9, 200, 40, 0xF1A3E5A7L);
 
+    /**
+     * Lion-Camel Ridge: 90% of 768-block cells roll a region about 380 blocks across (Lion-Camel City
+     * and the ridge round it); only those clear of the surface zones before it and centred in
+     * mountain or highland country stand.
+     */
+    public static final ZoneLayout LION_CAMEL = new ZoneLayout(768, 0.9, 190, 30, 0x11C0CA3EL);
+
     /** Whether a region covers the block column at (x, z) in a world of this seed. */
     public boolean covers(long seed, int x, int z) {
         return depth(seed, x, z) > 0;

@@ -39,7 +39,8 @@ import java.util.function.Predicate;
  * the ones a zone sends after a player pay the same as the ones met in it.
  *
  * <p>A zone may be allied to some players ({@link Zones.Zone#allies()}): its monsters never target
- * them, never fight back against them, and are passed over by their area attacks.
+ * them, never fight back against them, and are passed over by their area attacks; and one such a
+ * player strikes down leaves him nothing (no loot, XP or karma: it never fought him).
  *
  * <p>A subclass names its {@link #zone()}, its {@link #hitsToKill()} and {@link #blowShare()}, and
  * may change its levels, captains, escorts and drops by overriding the methods here.
@@ -271,6 +272,17 @@ public abstract class ZoneMonster extends Monster {
     public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
         if (CAPTAIN.equals(key)) refreshDimensions();
+    }
+
+    /**
+     * Struck down by one it is allied to (who never had to fight it: it never fought back), it
+     * leaves nothing: no loot, no experience. The kill XP and karma say the same (LevelManager,
+     * Morality).
+     */
+    @Override
+    protected void dropAllDeathLoot(ServerLevel level, DamageSource source) {
+        if (ZoneAllies.allied(allies(), source.getEntity())) return;
+        super.dropAllDeathLoot(level, source);
     }
 
     @Override

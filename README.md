@@ -284,7 +284,7 @@ underground zone, `above(y)` for an aerial one), its level band and the players 
 Zones sharing heights never share ground: a later zone in `Zones.ALL` gives up a whole region
 that would touch an earlier one's (`ZoneMap`). White Bone Ridge is the first, the Bottomless Cave the second, the Mystical
 Waters the third; Hell, a dimension of its own, is the fourth.
-that would touch an earlier one's (`ZoneMap`). White Bone Ridge is the first, the Bottomless Cave the second, then the Mystical Waters and the Flaming Mountains.
+that would touch an earlier one's (`ZoneMap`). White Bone Ridge is the first, the Bottomless Cave the second, then the Mystical Waters and the Flaming Mountains; Lion-Camel Ridge is the last.
 
 To add a zone:
 
@@ -614,6 +614,110 @@ Boy's Fire Cloud Cave on Mount Haohao (火云洞, chapters 40–42), in
   carts and phases, creatures, generals, drops, XP, karma, the cave's blueprint),
   `FireMountainPlacementTest`; gallery scenes `-Pgallery.only=fire_`; the range in a real world with
   `./gradlew runWorldgenBench -Pbench.mode=fire`.
+
+#### Lion-Camel Ridge (levels 89–100)
+
+Lion-Camel Ridge (狮驼岭, chapters 74–77: eight hundred li of mountains swarming with demons, forty-seven
+thousand little demons on the ridge alone) and Lion-Camel City (狮驼国), the walled kingdom the demons
+took after eating its king, his court and all its people, where the Azure Lion and the White Elephant
+hold court. The last band, to the levels' cap. In [`world/lion/`](src/main/java/com/jttw/engine/world/lion/)
+and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
+
+- **Where** (`Zones.LION_CAMEL`): over mountain country (the Bottomless Cave's hosts: peaks, slopes,
+  groves, meadows, cherry groves, windswept hills) and the rugged savanna highlands (plateaus,
+  windswept savanna), host judged at y 256, **from y 40 up**
+  (`Vertical.above(40)`). The Bottomless Cave takes the same mountains below y 40, so the two share no
+  heights and may lie in the same columns: the ridge over the labyrinth (its shaft is left alone where
+  it comes up through the ridge). It gives way to every zone before it that takes the surface. 90% of
+  768-block cells roll a region about 380 blocks across; in the 32x32 km round spawn of seed 12345
+  the layout rolls 1,624, 733 give way to earlier zones, 861 are not centred in mountain or highland
+  country, and **32 regions** stand (0.33% of the ground, second only to the Flaming Mountains' 38;
+  the nearest 0.9 km out; three of them over a Bottomless Cave).
+- **The ridge** (`RidgeShape`, `LionCamelRidgeFeature`, pure and unit-tested): the mountains are broken
+  into grim crags (ridged noise, up to 30 blocks more), climbing out of the land over the outer fifth;
+  faces bare stone banded with tuff, andesite and deepslate; ground of coarse dirt, gravel, podzol and
+  stone, a little yellowed grass, snow over y 196; skulls on stakes and bones about, great ribcages
+  (`RidgeBonesFeature`, never on the city's ground) and dead shrubs. A grey sky and haze, a little ash
+  in the air. Nothing under y 40 is touched.
+- **Lion-Camel City** (`LionCamelCity`, a blueprint each chunk lays its share of): on a level apron cut
+  into (or built up on) the mountain round the centre, the ground climbing back to the ridge's over
+  40 blocks. Walls of grim deepslate brick 11 high and three thick, 113 blocks square, crenellated,
+  skulls on the battlements, breached here and there; a tower at each corner with a smoking beacon; a
+  gate in each side, the main one to the south under a gatehouse with its gilded plaque (狮驼国).
+  Two paved avenues cross at the palace, a road runs round inside the walls, alleys between plots of
+  ruined houses (broken walls, fallen roofs, cobwebs), the demons' kitchens (a cauldron on a fire,
+  the steamer meant for the Tang Monk stacked by it, a pen of iron bars), rubble and yards heaped
+  with bones; skulls and bones in the streets. At the heart the palace in its red-walled compound:
+  a terrace and on it the throne hall (red pillars, lattice walls, soul lanterns, a gold mural, its
+  tiled roof fallen in at one corner) with the **three demon kings' thrones, the third, the Great
+  Peng's, empty**; behind it the walled **elephant court**, ringed with tusks of ivory. Its court and
+  garrison are put there once, each by the chunk its post lies in (`LionCamelCityFeature`), and kept
+  (even on Peaceful): the Azure Lion on the terrace, the White Elephant in his court, lion-demon
+  captains at the palace gate, lion- and peng-demons in the hall, elephant-demons at the main gate
+  and in the court, a Little Wind-Driller at each gate.
+- **Creatures** (`LionCamelMonster`: level 89, captains 96, any light, in numbers): **Lion-Demons**
+  (狮子精, the Azure Lion's kin: 9 hits, sabre cuts of 22%; they pounce from 4–11 blocks for 26% and
+  a stagger; strike one and the pride turns), **Elephant-Demons** (象精, the White Elephant's
+  followers: 14 hits, armoured, blows of 30%; they charge, tusks down, goring for 26% and flinging
+  aside), **Peng-Demons** (鹏精, the Great Peng's followers: 6 hits, spear thrusts of 16%; they beat
+  up into the air and swoop for 24%, glide rather than fall). Captains as everywhere (8%, purple,
+  2.5x health, with escorts: three, two, four).
+- **The Little Wind-Driller** (小钻风, `LittleWindDrillerEntity`): the ridge's patrol demon in his
+  pointed cap with the patrol token at his sash (the one Sun Wukong took to pass for him) and a
+  clapper-bell. No fighter (3 hits, never a captain); but let him see a foe within 16 blocks, or be
+  struck, and he **raises the alarm**: he rings his bell, every demon of the ridge within 32 blocks is
+  set on the foe, three more come running (while fewer than 16 are about), and he runs off; then 30 s
+  before he can raise it again. A Wind-Driller is posted at each of the city's gates.
+- **The Azure Lion** (青狮, Manjushri's lion; `AzureLionEntity`, a `ZoneBoss`, level 100, 90 hits,
+  an azure bar, on the palace terrace): broadsword blows of 26%. Every 9 s he throws back his head
+  and **roars**: a cone 12 blocks long, 12%, Slowness II and Weakness, thrown back. Every 13 s, a foe
+  within 4.5 blocks before him, his jaws gape for a second, and he **swallows the foe whole**: inside
+  him the foe is unseen and in the dark and cannot get down; his belly takes 5% of a level-100
+  character's health a second, armour or none. Blows struck from inside count half again, and once
+  they come to 6% of his health he retches the foe up and reels for 2 s; else after 10 s he spits him
+  out anyway. At two thirds he roars for his kin (three lion-demons); at a third he swells 35% larger,
+  as he did to swallow Heaven's hosts, and swallows twice as often.
+- **The White Elephant** (白象, Samantabhadra's six-tusked elephant; `WhiteElephantEntity`, level 98,
+  85 hits, a white bar, in the elephant court): lance thrusts of 24%. Every 10 s, a foe within 6
+  blocks before him, his trunk rears and **coils round the foe, lifting him high**: it crushes him
+  every 0.75 s for 8% and after 3 s **hurls him away**; blows on the trunk from where one is held,
+  once they come to 4% of his health, make him drop the foe and recoil (as Wukong got free by driving
+  his staff up it). From two thirds he trumpets for his followers (two elephant-demons) and **stamps**
+  (16%, thrown up, within 5 blocks); from a third he **charges** at foes 5–14 blocks off, goring for
+  22%, and his trunk comes quicker. The two kings' lairs are 37 blocks apart: each is its own fight.
+- **The Peng rule** (`ZoneAllies.PENG`, for the whole zone, both kings included): a player who is the
+  Gold-Winged Peng, the third brother, is **never targeted and never fought back**, whatever he does:
+  no demon, captain, Wind-Driller, the Azure Lion nor the White Elephant sets on him, nor swallows,
+  grabs, roars at, stamps on or gores him, nor rings the alarm against him; his own area attacks pass
+  them over. What he strikes down of theirs, unresisting, leaves him **nothing** (no loot, no XP, no
+  karma: this is the framework's now, for any zone's allies), so the kings' rewards are not his to
+  earn there. The little demons bow when he comes near and hail their Third Great King (once a
+  minute); the Azure Lion and the White Elephant call him their third brother; his throne stands
+  empty beside theirs.
+- **What they leave**: the Azure Lion **2–3 locks of his azure mane**, his **broadsword** one time in
+  four (+60% damage, slow; its swing cleaves what stands beyond its mark for 45%), the demons' hoard
+  (2–3 gold blocks, 3–5 diamonds, 4–8 emeralds, 1–2 netherite scrap), 1–2 True Samadhi Fire, mane
+  tufts, sigils; the White Elephant **2–3 white tusks**, his **lance** one time in four (+50% damage,
+  1.5 blocks more reach, throws back), the hoard, ivory, sigils. Lion-demons leave **Mane Tufts**,
+  elephant-demons **Ivory Shards**, peng-demons **Storm Feathers**, the Wind-Driller his **Patrol
+  Token** half the time. Two mane tufts, an ivory shard, a storm feather and a captain's sigil make
+  a True Samadhi Fire (`true_samadhi_fire_from_the_ridge`).
+- **XP and karma**: band 89–100, the cap, base grunt XP 160 (1,248 a grunt at the band's scale, up
+  from the Flaming Mountains' 130 and Mount Wuzhuang's 145). Striking down the Azure Lion or the White
+  Elephant, who ate a kingdom, is a good deed: **karma +150** each, as Lady White Bone; captains +5,
+  the rest +1. With this band and Mount Wuzhuang's (78–88) every level from 21 to 100 has one; the
+  kill XP's flat fallback for a tiered enemy outside every band stays, for Heaven's soldiers (they
+  carry a tier but no zone, being levelled to whoever they hunt).
+- **Art**: `LionDemonRenderer`, `ElephantDemonRenderer`, `PengDemonRenderer`,
+  `LittleWindDrillerRenderer`, `AzureLionRenderer`, `WhiteElephantRenderer` (box models and skins with
+  glowing eyes and gold from `assets_source/lion_camel.py`; the little demons bow, the Lion's jaw
+  gapes, the Elephant's trunk sways, rears and coils); items from `assets_source/lion_items.py`.
+- **Tests and pictures**: `LionCamelGameTests` (the Peng rule for every kind, both kings included,
+  struck or not; swallowing, the belly, fighting out, being spat out; the trunk's lift, crush, hurl
+  and breaking free; roar, stamp, charge, phases; the alarm; the creatures' tricks; captains; drops
+  and the Peng's empty hands; the band's XP to the cap; karma; the city's blueprint),
+  `LionCamelPlacementTest`; gallery scenes `-Pgallery.only=lion_`; the ridge and the city in a real
+  world with `./gradlew runWorldgenBench -Pbench.mode=lion` (and every zone's share with `zones`).
 
 ---
 

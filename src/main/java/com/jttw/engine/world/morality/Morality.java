@@ -73,6 +73,13 @@ public final class Morality {
      * good deed, as much as Lady White Bone. His Six Strong Generals are captains (+5 each).
      */
     public static final int SLAY_RED_BOY = SLAY_LADY;
+    /**
+     * The Azure Lion and the White Elephant of Lion-Camel Ridge, who with the Great Peng ate a whole
+     * kingdom, its king, his court and all his people, and meant to steam the Tang Monk (chapters
+     * 74–77): striking either down is a good deed, as much as Lady White Bone. Their kin's captains
+     * are captains (+5), the rest monsters (+1). (Their brother the Peng, a player, they never fight.)
+     */
+    public static final int SLAY_AZURE_LION = SLAY_LADY, SLAY_WHITE_ELEPHANT = SLAY_LADY;
     /** How recently a victim must have struck their killer for the kill to be a fight, not a murder: 10 s. */
     public static final int PROVOKED_TICKS = 200;
 
@@ -138,10 +145,14 @@ public final class Morality {
 
     /** What a kill says of the killer, or 0 for a kill that says nothing (livestock, game). */
     public static int killDeed(ServerPlayer killer, LivingEntity victim) {
+        // a zone's creature its ally struck down never fought him: no deed either way
+        if ((victim instanceof ZoneMonster || victim instanceof com.jttw.engine.entity.zone.ZoneBoss) && victim.isAlliedTo(killer)) return 0;
         if (victim instanceof HeavenlySoldierEntity) return KILL_SOLDIER;
         if (victim instanceof LadyWhiteBoneEntity) return SLAY_LADY;
         if (victim instanceof LadyEarthFlowEntity) return SLAY_EARTH_FLOW;
         if (victim instanceof com.jttw.engine.entity.fire.RedBoyEntity) return SLAY_RED_BOY;
+        if (victim instanceof com.jttw.engine.entity.lion.AzureLionEntity) return SLAY_AZURE_LION;
+        if (victim instanceof com.jttw.engine.entity.lion.WhiteElephantEntity) return SLAY_WHITE_ELEPHANT;
         if (victim instanceof com.jttw.engine.entity.waters.DragonKingEntity) return SLAY_DRAGON_KING;
         if (victim instanceof com.jttw.engine.entity.hell.KingYamaEntity) return SLAY_KING_YAMA;
         if (victim instanceof com.jttw.engine.entity.hell.KingOfHellEntity) return SLAY_KING_OF_HELL;
@@ -165,6 +176,9 @@ public final class Morality {
         if (deed == SLAY_MONSTER && victim instanceof com.jttw.engine.entity.hell.WanderingGhostEntity) return "you laid a wandering ghost to rest";
         if (deed == SLAY_CAPTAIN && victim instanceof com.jttw.engine.entity.fire.StrongGeneralEntity) return "you struck down one of Red Boy's Six Strong Generals";
         if (victim instanceof com.jttw.engine.entity.fire.RedBoyEntity) return "you subdued Red Boy, the Holy Child King";
+        if (victim instanceof com.jttw.engine.entity.lion.AzureLionEntity) return "you struck down the Azure Lion, who ate a kingdom";
+        if (victim instanceof com.jttw.engine.entity.lion.WhiteElephantEntity) return "you struck down the White Elephant, who ate a kingdom";
+        if (deed == SLAY_CAPTAIN && victim instanceof com.jttw.engine.entity.lion.LionCamelMonster) return "you slew a captain of Lion-Camel Ridge";
         return switch (deed) {
             case SLAY_DRAGON_KING -> "you slew a Dragon King, an official of Heaven";
             case SLAY_KING_OF_HELL -> "you struck down a King of Hell, a judge of the dead";

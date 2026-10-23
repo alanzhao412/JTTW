@@ -86,7 +86,10 @@ final class AbilityScenes {
             java.util.Map.entry("hell_yama_hall_inside", 60), java.util.Map.entry("hell_wheel", 100), java.util.Map.entry("hell_court_ten", 60),
             java.util.Map.entry("hell_bridge", 100), java.util.Map.entry("hell_bridge_walk", 60), java.util.Map.entry("hell_meng_po", 60),
             // the Fire Cloud Cave, laid off the stage
-            java.util.Map.entry("fire_cave_gate", 100), java.util.Map.entry("fire_cave_hall", 100), java.util.Map.entry("fire_fanned", 60));
+            java.util.Map.entry("fire_cave_gate", 100), java.util.Map.entry("fire_cave_hall", 100), java.util.Map.entry("fire_fanned", 60),
+            // Lion-Camel City, laid off the stage; the demons given time to see the Peng and bow
+            java.util.Map.entry("lion_city_gate", 140), java.util.Map.entry("lion_city_above", 100), java.util.Map.entry("lion_city_hall", 80),
+            java.util.Map.entry("lion_city_court", 80), java.util.Map.entry("lion_city_street", 80), java.util.Map.entry("lion_peng_among_demons", 60));
 
         /** Set by a scene that photographs a screen (a furnace's, say), so the gallery leaves it open. */
     static volatile boolean keepScreen;
@@ -96,6 +99,7 @@ final class AbilityScenes {
         all.addAll(WatersScenes.all());
         all.addAll(HellScenes.all());
         all.addAll(FireScenes.all());
+        all.addAll(LionScenes.all());
         return all;
     }
 
@@ -1146,6 +1150,7 @@ final class AbilityScenes {
         WatersScenes.clear(p);
         HellScenes.clear(p);
         FireScenes.clear(p);
+        LionScenes.clear(p);
         keepScreen = false;
         topSpeed = false;
         com.jttw.engine.client.renderer.GoldenEyesRenderer.setMode(p.getUUID(), 0);

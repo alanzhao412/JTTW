@@ -137,6 +137,13 @@ public final class ClientInit {
         event.registerLayerDefinition(com.jttw.engine.client.renderer.StrongGeneralRenderer.LAYER, com.jttw.engine.client.renderer.StrongGeneralRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.RedBoyRenderer.LAYER, com.jttw.engine.client.renderer.RedBoyRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.FireCartRenderer.LAYER, com.jttw.engine.client.renderer.FireCartRenderer::layer);
+        // Lion-Camel Ridge
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.LionDemonRenderer.LAYER, com.jttw.engine.client.renderer.LionDemonRenderer::layer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.ElephantDemonRenderer.LAYER, com.jttw.engine.client.renderer.ElephantDemonRenderer::layer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.PengDemonRenderer.LAYER, com.jttw.engine.client.renderer.PengDemonRenderer::layer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.LittleWindDrillerRenderer.LAYER, com.jttw.engine.client.renderer.LittleWindDrillerRenderer::layer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.AzureLionRenderer.LAYER, com.jttw.engine.client.renderer.AzureLionRenderer::layer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.WhiteElephantRenderer.LAYER, com.jttw.engine.client.renderer.WhiteElephantRenderer::layer);
     }
 
     // ── Entity renderers (MOD bus) ─────────────────────────────────
@@ -210,6 +217,12 @@ public final class ClientInit {
         event.registerEntityRenderer(ModEntities.RED_BOY.get(), com.jttw.engine.client.renderer.RedBoyRenderer::new);
         event.registerEntityRenderer(ModEntities.FIRE_CART.get(), com.jttw.engine.client.renderer.FireCartRenderer::new);
         event.registerEntityRenderer(ModEntities.EMBER_BOLT.get(), ctx -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(ctx, 0.9f, true));
+        event.registerEntityRenderer(ModEntities.LION_DEMON.get(), com.jttw.engine.client.renderer.LionDemonRenderer::new);
+        event.registerEntityRenderer(ModEntities.ELEPHANT_DEMON.get(), com.jttw.engine.client.renderer.ElephantDemonRenderer::new);
+        event.registerEntityRenderer(ModEntities.PENG_DEMON.get(), com.jttw.engine.client.renderer.PengDemonRenderer::new);
+        event.registerEntityRenderer(ModEntities.LITTLE_WIND_DRILLER.get(), com.jttw.engine.client.renderer.LittleWindDrillerRenderer::new);
+        event.registerEntityRenderer(ModEntities.AZURE_LION.get(), com.jttw.engine.client.renderer.AzureLionRenderer::new);
+        event.registerEntityRenderer(ModEntities.WHITE_ELEPHANT.get(), com.jttw.engine.client.renderer.WhiteElephantRenderer::new);
         event.registerEntityRenderer(ModEntities.THROWN_SPEAR.get(),
                 com.jttw.engine.client.renderer.ThrownSpearRenderer::new);
         // Qi wave is invisible — rendered via server-sent particles only

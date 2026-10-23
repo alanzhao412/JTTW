@@ -42,7 +42,8 @@ import java.util.function.Predicate;
  *   <li>it keeps to its lair: where it was first put, within {@link #lairRadius()} (its walking goals
  *       should include a {@code MoveTowardsRestrictionGoal} to go back);</li>
  *   <li>its fight may come in <b>phases</b>: {@link #phaseThresholds()} and {@link #onPhase(int)};</li>
- *   <li>like the zone's monsters, it spares its zone's allies ({@link Zones.Zone#allies()}).</li>
+ *   <li>like the zone's monsters, it spares its zone's allies ({@link Zones.Zone#allies()}), and
+ *       leaves them nothing if they strike it down.</li>
  * </ul>
  */
 public abstract class ZoneBoss extends Monster {
@@ -180,6 +181,13 @@ public abstract class ZoneBoss extends Monster {
     public void die(DamageSource source) {
         super.die(source);
         if (dead) bossBar.removeAllPlayers();
+    }
+
+    /** Struck down by one it is allied to, who never had to fight it, it leaves nothing (as a ZoneMonster). */
+    @Override
+    protected void dropAllDeathLoot(ServerLevel level, DamageSource source) {
+        if (ZoneAllies.allied(allies(), source.getEntity())) return;
+        super.dropAllDeathLoot(level, source);
     }
 
     @Override

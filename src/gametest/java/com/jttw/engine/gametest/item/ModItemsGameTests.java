@@ -141,7 +141,21 @@ public class ModItemsGameTests {
             Map.entry("ember_imp_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
             Map.entry("furnace_brute_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
             Map.entry("strong_general_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
-            Map.entry("red_boy_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class));
+            Map.entry("red_boy_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("mane_tuft", Item.class),
+            Map.entry("ivory_shard", Item.class),
+            Map.entry("storm_feather", Item.class),
+            Map.entry("patrol_token", Item.class),
+            Map.entry("azure_lion_mane", Item.class),
+            Map.entry("white_tusk", Item.class),
+            Map.entry("azure_lion_sabre", com.jttw.engine.item.AzureLionSabreItem.class),
+            Map.entry("white_elephant_lance", com.jttw.engine.item.WhiteElephantLanceItem.class),
+            Map.entry("lion_demon_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("elephant_demon_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("peng_demon_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("little_wind_driller_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("azure_lion_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("white_elephant_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class));
 
     @GameTest(template = PLATFORM)
     public static void everyModItemIsRegisteredUnderItsIdAsTheRightClass(GameTestHelper h) {

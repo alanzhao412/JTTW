@@ -225,8 +225,28 @@ public final class Zones {
             TagKey.create(Registries.BIOME, id("fire_mountain_hosts")), ZoneLayout.FIRE_MOUNTAIN, Vertical.WHOLE_COLUMN,
             67, 77, 130);
 
+    public static final ResourceKey<Biome> LION_CAMEL_RIDGE_BIOME = ResourceKey.create(Registries.BIOME, id("lion_camel_ridge"));
+
+    /** The height from which Lion-Camel Ridge takes the column: over the Bottomless Cave's, so the two may share mountains. */
+    public static final int LION_CAMEL_FLOOR = BOTTOMLESS_CAVE_TOP;
+
+    /**
+     * Levels 89-100, the last band: Lion-Camel Ridge (狮驼岭, chapters 74-77), eight hundred li of
+     * mountains swarming with demons, and Lion-Camel City (狮驼国), the walled city they took after
+     * eating all its people, where the Azure Lion and the White Elephant hold court. Over mountain
+     * country (the Bottomless Cave's hosts) and the rugged savanna highlands (plateaus, windswept
+     * savanna), from y {@value #LION_CAMEL_FLOOR} up: it shares no heights with the cave under the
+     * same mountains, so the two may lie in the same columns, the ridge over the labyrinth; it gives
+     * way to every zone before it that takes the surface. Its host is judged at y 256, as the
+     * cave's is. Its creatures are the Great Peng's kin and
+     * followers: they spare a Peng player ({@link ZoneAllies#PENG}), the two demon kings too.
+     */
+    public static final Zone LION_CAMEL = Zone.overworld(LION_CAMEL_RIDGE_BIOME,
+            TagKey.create(Registries.BIOME, id("lion_camel_ridge_hosts")), ZoneLayout.LION_CAMEL,
+            Vertical.above(LION_CAMEL_FLOOR), 89, 100, 160).hostSampledAt(256).alliedTo(ZoneAllies.PENG);
+
     /** Every zone, in order: an earlier one keeps its ground from a later one sharing its heights. Append new ones. */
-    public static final List<Zone> ALL = List.of(WHITE_BONE, BOTTOMLESS, MYSTICAL_WATERS, HELL, FIRE_MOUNTAIN);
+    public static final List<Zone> ALL = List.of(WHITE_BONE, BOTTOMLESS, MYSTICAL_WATERS, HELL, FIRE_MOUNTAIN, LION_CAMEL);
 
     /** Where the overworld zones of {@link #ALL} lie. */
     public static final ZoneMap MAP = new ZoneMap(ALL);

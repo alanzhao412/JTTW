@@ -82,6 +82,17 @@ public final class ModWorldgen {
             FEATURES.register("fire_cloud_cave", () -> new com.jttw.engine.world.feature.FireCloudCaveFeature(
                     net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
 
+    // Lion-Camel Ridge
+    public static final DeferredHolder<net.minecraft.world.level.levelgen.feature.Feature<?>, net.minecraft.world.level.levelgen.feature.Feature<?>> LION_CAMEL_RIDGE =
+            FEATURES.register("lion_camel_ridge", () -> new com.jttw.engine.world.feature.LionCamelRidgeFeature(
+                    net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+    public static final DeferredHolder<net.minecraft.world.level.levelgen.feature.Feature<?>, net.minecraft.world.level.levelgen.feature.Feature<?>> LION_CAMEL_CITY =
+            FEATURES.register("lion_camel_city", () -> new com.jttw.engine.world.feature.LionCamelCityFeature(
+                    net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+    public static final DeferredHolder<net.minecraft.world.level.levelgen.feature.Feature<?>, net.minecraft.world.level.levelgen.feature.Feature<?>> RIDGE_BONES =
+            FEATURES.register("ridge_bones", () -> new com.jttw.engine.world.feature.RidgeBonesFeature(
+                    net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
+
     public static final DeferredHolder<net.minecraft.world.level.levelgen.feature.Feature<?>, net.minecraft.world.level.levelgen.feature.Feature<?>> HEAVEN_BUILDING =
             FEATURES.register("heaven_building", () -> new com.jttw.engine.world.heaven.HeavenFeatures.IslandBuilding(
                     net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
