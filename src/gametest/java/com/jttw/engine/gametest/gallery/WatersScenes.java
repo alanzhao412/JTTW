@@ -86,8 +86,20 @@ final class WatersScenes {
     }
 
     private static AbilityScenes.Scene king(Sea sea) {
-        return creature("waters_king_" + sea.name().toLowerCase(), p -> put(p, DragonKingEntity.typeOf(sea), 0.5, 1.5, 9.5, 160f),
-                new double[]{3.0, 3.6, 4.2, 0.5, 2.8, 9.5});
+        return creature("waters_king_" + sea.name().toLowerCase(), p -> put(p, DragonKingEntity.typeOf(sea), 0.5, 1.0, 10.5, 160f),
+                new double[]{3.0, 3.6, 4.0, 0.5, 2.9, 10.5});
+    }
+
+    /** A king close: his head and his hands, from a little to one side. */
+    private static AbilityScenes.Scene kingClose(Sea sea) {
+        return creature("waters_king_" + sea.name().toLowerCase() + "_close", p -> put(p, DragonKingEntity.typeOf(sea), 0.5, 1.0, 10.5, 165f),
+                new double[]{2.2, 4.4, 7.0, 0.5, 3.6, 10.5});
+    }
+
+    /** A king in profile, his snout, antlers, sleeves and tail. */
+    private static AbilityScenes.Scene kingSide(Sea sea) {
+        return creature("waters_king_" + sea.name().toLowerCase() + "_side", p -> put(p, DragonKingEntity.typeOf(sea), 0.5, 1.0, 11.5, 90f),
+                new double[]{0.5, 3.0, 4.5, 0.5, 2.6, 11.5});
     }
 
     static List<AbilityScenes.Scene> all() {
@@ -107,6 +119,13 @@ final class WatersScenes {
                     sea(p, ModEntities.YAKSHA.get(), 2.0, 3.0, 12.5, 160f, true);
                 }, new double[]{0.5, 3.2, 4.0, 0.5, 3.0, 11.0}),
                 king(Sea.EAST), king(Sea.SOUTH), king(Sea.WEST), king(Sea.NORTH),
+                kingClose(Sea.EAST), kingClose(Sea.SOUTH), kingClose(Sea.WEST), kingClose(Sea.NORTH),
+                kingSide(Sea.EAST), kingSide(Sea.NORTH),
+                // a king beside a man, for his size
+                creature("waters_king_scale", p -> {
+                    put(p, DragonKingEntity.typeOf(Sea.EAST), -0.5, 0, 11.5, 200f);
+                    put(p, EntityType.VILLAGER, 1.8, 0, 10.5, 160f);
+                }, new double[]{4.5, 2.6, 3.5, 0.3, 2.0, 11.0}),
                 // the regalia worn: the cap, the mail, the boots
                 new AbilityScenes.Scene("waters_regalia", p -> {
                     p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, new net.minecraft.world.item.ItemStack(com.jttw.engine.registry.ModItems.PHOENIX_PLUME_CAP.get()));
@@ -116,8 +135,8 @@ final class WatersScenes {
                 }, p -> {}, 1, false),
                 creature("waters_kings", p -> {
                     int i = 0;
-                    for (Sea sea : Sea.values()) put(p, DragonKingEntity.typeOf(sea), -4.5 + 3 * i++, 1.0, 12.5, 180f);
-                }, new double[]{0.5, 3.0, 4.0, 0.5, 2.6, 12.5}),
+                    for (Sea sea : Sea.values()) put(p, DragonKingEntity.typeOf(sea), -4.8 + 3.2 * i++, 0.5, 13.5, 180f);
+                }, new double[]{0.5, 3.2, 3.5, 0.5, 2.6, 13.5}),
                 new AbilityScenes.Scene("waters_palace", p -> {
                     palace(p);
                     AbilityScenes.sceneCam = new double[]{18.0, 13.0, PALACE_Z + 32.0, 0.5, 5.0, PALACE_Z + 2.0};
