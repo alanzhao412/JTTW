@@ -137,6 +137,11 @@ public final class ClientInit {
         event.registerLayerDefinition(com.jttw.engine.client.renderer.StrongGeneralRenderer.LAYER, com.jttw.engine.client.renderer.StrongGeneralRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.RedBoyRenderer.LAYER, com.jttw.engine.client.renderer.RedBoyRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.FireCartRenderer.LAYER, com.jttw.engine.client.renderer.FireCartRenderer::layer);
+        // Mount Wuzhuang
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.WuzhuangRenderers.DISCIPLE_LAYER, com.jttw.engine.client.renderer.WuzhuangRenderers::discipleLayer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.WuzhuangRenderers.YOUTH_LAYER, com.jttw.engine.client.renderer.WuzhuangRenderers::youthLayer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.WuzhuangRenderers.ZHENYUAN_LAYER, com.jttw.engine.client.renderer.WuzhuangRenderers::zhenyuanLayer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.WuzhuangRenderers.CRANE_LAYER, com.jttw.engine.client.renderer.WuzhuangRenderers::craneLayer);
     }
 
     // ── Entity renderers (MOD bus) ─────────────────────────────────
@@ -209,6 +214,12 @@ public final class ClientInit {
         event.registerEntityRenderer(ModEntities.STRONG_GENERAL.get(), com.jttw.engine.client.renderer.StrongGeneralRenderer::new);
         event.registerEntityRenderer(ModEntities.RED_BOY.get(), com.jttw.engine.client.renderer.RedBoyRenderer::new);
         event.registerEntityRenderer(ModEntities.FIRE_CART.get(), com.jttw.engine.client.renderer.FireCartRenderer::new);
+        // Mount Wuzhuang
+        event.registerEntityRenderer(ModEntities.DAOIST_DISCIPLE.get(), com.jttw.engine.client.renderer.WuzhuangRenderers.DiscipleRenderer::new);
+        event.registerEntityRenderer(ModEntities.CLOUD_CRANE.get(), com.jttw.engine.client.renderer.WuzhuangRenderers.CraneRenderer::new);
+        event.registerEntityRenderer(ModEntities.CLEAR_WIND.get(), com.jttw.engine.client.renderer.WuzhuangRenderers.YouthRenderer.of("clear_wind"));
+        event.registerEntityRenderer(ModEntities.BRIGHT_MOON.get(), com.jttw.engine.client.renderer.WuzhuangRenderers.YouthRenderer.of("bright_moon"));
+        event.registerEntityRenderer(ModEntities.ZHENYUAN.get(), com.jttw.engine.client.renderer.WuzhuangRenderers.ZhenyuanRenderer::new);
         event.registerEntityRenderer(ModEntities.EMBER_BOLT.get(), ctx -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(ctx, 0.9f, true));
         event.registerEntityRenderer(ModEntities.THROWN_SPEAR.get(),
                 com.jttw.engine.client.renderer.ThrownSpearRenderer::new);

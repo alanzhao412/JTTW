@@ -119,6 +119,17 @@ public final class ModBlocks {
             BLOCKS.register("soul_ash", () -> new com.jttw.engine.world.tough.Tough.Stone(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.COLOR_BROWN).strength(0.5F, com.jttw.engine.world.tough.Tough.RESISTANCE).sound(SoundType.SOUL_SAND)));
 
+    // ── Mount Wuzhuang ───────────────────────────────────────────
+    /** A ginseng fruit on its tree: blossom, green, ripe (see GinsengFruitBlock). */
+    public static final DeferredHolder<Block, Block> HANGING_GINSENG_FRUIT =
+            BLOCKS.register("hanging_ginseng_fruit", () -> new com.jttw.engine.world.wuzhuang.GinsengFruitBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_GREEN).strength(0.1F).noCollission().noLootTable().randomTicks().sound(SoundType.CHERRY_LEAVES)
+                    .lightLevel(s -> s.getValue(com.jttw.engine.world.wuzhuang.GinsengFruitBlock.AGE) == 2 ? 5 : 0)));
+    /** A step of the cloud stair: a half or whole block of cloud that bears up whoever walks it. */
+    public static final DeferredHolder<Block, Block> CLOUD_STEP =
+            BLOCKS.register("cloud_step", () -> new com.jttw.engine.world.wuzhuang.CloudStepBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.SNOW).strength(0.5F, com.jttw.engine.world.tough.Tough.RESISTANCE).sound(SoundType.WOOL).noLootTable()));
+
     public static void register(IEventBus modEventBus) {
         BLOCKS.register(modEventBus);
     }

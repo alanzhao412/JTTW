@@ -86,7 +86,11 @@ final class AbilityScenes {
             java.util.Map.entry("hell_yama_hall_inside", 60), java.util.Map.entry("hell_wheel", 100), java.util.Map.entry("hell_court_ten", 60),
             java.util.Map.entry("hell_bridge", 100), java.util.Map.entry("hell_bridge_walk", 60), java.util.Map.entry("hell_meng_po", 60),
             // the Fire Cloud Cave, laid off the stage
-            java.util.Map.entry("fire_cave_gate", 100), java.util.Map.entry("fire_cave_hall", 100), java.util.Map.entry("fire_fanned", 60));
+            java.util.Map.entry("fire_cave_gate", 100), java.util.Map.entry("fire_cave_hall", 100), java.util.Map.entry("fire_fanned", 60),
+            // the floating island, laid north of the stage, high over the flat world
+            java.util.Map.entry("wuzhuang_gate", 300), java.util.Map.entry("wuzhuang_court", 120), java.util.Map.entry("wuzhuang_hall", 120),
+            java.util.Map.entry("wuzhuang_garden", 120), java.util.Map.entry("wuzhuang_tree_fruit", 100), java.util.Map.entry("wuzhuang_road", 120),
+            java.util.Map.entry("wuzhuang_stair", 160), java.util.Map.entry("wuzhuang_below", 160), java.util.Map.entry("wuzhuang_afar", 200));
 
         /** Set by a scene that photographs a screen (a furnace's, say), so the gallery leaves it open. */
     static volatile boolean keepScreen;
@@ -96,6 +100,7 @@ final class AbilityScenes {
         all.addAll(WatersScenes.all());
         all.addAll(HellScenes.all());
         all.addAll(FireScenes.all());
+        all.addAll(WuzhuangScenes.all());
         return all;
     }
 
@@ -1146,6 +1151,7 @@ final class AbilityScenes {
         WatersScenes.clear(p);
         HellScenes.clear(p);
         FireScenes.clear(p);
+        WuzhuangScenes.clear(p);
         keepScreen = false;
         topSpeed = false;
         com.jttw.engine.client.renderer.GoldenEyesRenderer.setMode(p.getUUID(), 0);

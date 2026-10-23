@@ -33,6 +33,13 @@ public record ZoneLayout(int cellSize, double chance, int radius, int wobble, lo
      */
     public static final ZoneLayout FIRE_MOUNTAIN = new ZoneLayout(1152, 0.9, 200, 40, 0xF1A3E5A7L);
 
+    /**
+     * Mount Wuzhuang: 75% of 2048-block cells roll a region about 260 blocks across (never under 224),
+     * round a floating island about 150 blocks across and the cloud stair beyond its rim; only those
+     * centred over serene country are kept.
+     */
+    public static final ZoneLayout MOUNT_WUZHUANG = new ZoneLayout(2048, 0.75, 128, 16, 0x3A1FC10DL);
+
     /** Whether a region covers the block column at (x, z) in a world of this seed. */
     public boolean covers(long seed, int x, int z) {
         return depth(seed, x, z) > 0;

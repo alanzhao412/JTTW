@@ -73,6 +73,15 @@ public final class Morality {
      * good deed, as much as Lady White Bone. His Six Strong Generals are captains (+5 each).
      */
     public static final int SLAY_RED_BOY = SLAY_LADY;
+    /**
+     * Mount Wuzhuang's household is righteous: the Great Immortal Zhenyuan and his disciples.
+     * Killing a disciple is a bad deed, captain or not; his trial is no killing (he yields, and
+     * acknowledging whoever passed it is a good deed); only what kills outright could kill him or
+     * his youths, and that is a grave wrong. Bringing a ripe ginseng fruit down without his leave is
+     * theft, as picking Heaven's peaches is. The mountain's cloud cranes are no one's: a fight with
+     * one is no deed either way.
+     */
+    public static final int KILL_DISCIPLE = -12, STEAL_GINSENG = -40, PASS_THE_TRIAL = 10, SLAY_TEMPLE_YOUTH = -25, SLAY_ZHENYUAN = -100;
     /** How recently a victim must have struck their killer for the kill to be a fight, not a murder: 10 s. */
     public static final int PROVOKED_TICKS = 200;
 
@@ -145,6 +154,10 @@ public final class Morality {
         if (victim instanceof com.jttw.engine.entity.waters.DragonKingEntity) return SLAY_DRAGON_KING;
         if (victim instanceof com.jttw.engine.entity.hell.KingYamaEntity) return SLAY_KING_YAMA;
         if (victim instanceof com.jttw.engine.entity.hell.KingOfHellEntity) return SLAY_KING_OF_HELL;
+        if (victim instanceof com.jttw.engine.entity.wuzhuang.ZhenyuanEntity) return SLAY_ZHENYUAN;
+        if (victim instanceof com.jttw.engine.entity.wuzhuang.TempleYouthEntity) return SLAY_TEMPLE_YOUTH;
+        if (victim instanceof com.jttw.engine.entity.wuzhuang.DaoistDiscipleEntity) return KILL_DISCIPLE;
+        if (victim instanceof com.jttw.engine.entity.wuzhuang.CloudCraneEntity) return 0;
         if (victim instanceof ZoneMonster m && m.isCaptain()) return SLAY_CAPTAIN;
         if (victim instanceof com.jttw.engine.entity.hell.HellMonster m && m.isOfficial()) return 0;
         if (victim instanceof AbstractVillager) return KILL_VILLAGER;
@@ -169,6 +182,9 @@ public final class Morality {
             case SLAY_DRAGON_KING -> "you slew a Dragon King, an official of Heaven";
             case SLAY_KING_OF_HELL -> "you struck down a King of Hell, a judge of the dead";
             case SLAY_KING_YAMA -> "you struck down King Yama, Lord of Death";
+            case KILL_DISCIPLE -> "you killed a disciple of the Temple of the Five Villages";
+            case SLAY_TEMPLE_YOUTH -> "you killed one of Zhenyuan's youths";
+            case SLAY_ZHENYUAN -> "you killed the Great Immortal Zhenyuan, Master of the Earth Immortals";
             case KILL_SOLDIER -> "you struck down a soldier of Heaven";
             case KILL_VILLAGER -> "you killed a villager";
             case KILL_GOLEM -> "you killed a village's guardian";

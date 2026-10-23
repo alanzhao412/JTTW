@@ -349,6 +349,43 @@ public final class ModEntities {
                             .updateInterval(2)
                             .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "ember_bolt").toString()));
 
+    // ── Mount Wuzhuang ─────────────────────────────────────────────
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.wuzhuang.DaoistDiscipleEntity>> DAOIST_DISCIPLE =
+            ENTITIES.register("daoist_disciple", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.wuzhuang.DaoistDiscipleEntity>of(com.jttw.engine.entity.wuzhuang.DaoistDiscipleEntity::new, MobCategory.MONSTER)
+                            .sized(0.6F, 1.95F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "daoist_disciple").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.wuzhuang.CloudCraneEntity>> CLOUD_CRANE =
+            ENTITIES.register("cloud_crane", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.wuzhuang.CloudCraneEntity>of(com.jttw.engine.entity.wuzhuang.CloudCraneEntity::new, MobCategory.MONSTER)
+                            .sized(0.9F, 1.7F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "cloud_crane").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.wuzhuang.TempleYouthEntity.ClearWind>> CLEAR_WIND =
+            ENTITIES.register("clear_wind", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.wuzhuang.TempleYouthEntity.ClearWind>of(com.jttw.engine.entity.wuzhuang.TempleYouthEntity.ClearWind::new, MobCategory.MONSTER)
+                            .sized(0.55F, 1.6F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "clear_wind").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.wuzhuang.TempleYouthEntity.BrightMoon>> BRIGHT_MOON =
+            ENTITIES.register("bright_moon", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.wuzhuang.TempleYouthEntity.BrightMoon>of(com.jttw.engine.entity.wuzhuang.TempleYouthEntity.BrightMoon::new, MobCategory.MONSTER)
+                            .sized(0.55F, 1.6F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "bright_moon").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.wuzhuang.ZhenyuanEntity>> ZHENYUAN =
+            ENTITIES.register("zhenyuan", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.wuzhuang.ZhenyuanEntity>of(com.jttw.engine.entity.wuzhuang.ZhenyuanEntity::new, MobCategory.MONSTER)
+                            .sized(0.7F, 2.2F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "zhenyuan").toString()));
+
     // ── Forms ──────────────────────────────────────────────────────
 
     /** The other divine beasts' true forms, never spawned: only taken (see TrueForm). */
@@ -456,6 +493,15 @@ public final class ModEntities {
                 net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
                 net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        // Mount Wuzhuang's disciples and cranes, on the island, in any light
+        event.register(DAOIST_DISCIPLE.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(CLOUD_CRANE.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
         // the sea's creatures come in deep water, in any light
         event.register(SHRIMP_SOLDIER.get(), net.minecraft.world.entity.SpawnPlacementTypes.IN_WATER,
                 net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
@@ -488,6 +534,11 @@ public final class ModEntities {
         event.put(KING_DUSHI.get(), com.jttw.engine.entity.hell.KingOfHellEntity.createAttributes(8).build());
         event.put(KING_PINGDENG.get(), com.jttw.engine.entity.hell.KingOfHellEntity.createAttributes(9).build());
         event.put(KING_ZHUANLUN.get(), com.jttw.engine.entity.hell.KingOfHellEntity.createAttributes(10).build());
+        event.put(DAOIST_DISCIPLE.get(), com.jttw.engine.entity.wuzhuang.DaoistDiscipleEntity.createAttributes().build());
+        event.put(CLOUD_CRANE.get(), com.jttw.engine.entity.wuzhuang.CloudCraneEntity.createAttributes().build());
+        event.put(CLEAR_WIND.get(), com.jttw.engine.entity.wuzhuang.TempleYouthEntity.createAttributes().build());
+        event.put(BRIGHT_MOON.get(), com.jttw.engine.entity.wuzhuang.TempleYouthEntity.createAttributes().build());
+        event.put(ZHENYUAN.get(), com.jttw.engine.entity.wuzhuang.ZhenyuanEntity.createAttributes().build());
         event.put(EMBER_IMP.get(), com.jttw.engine.entity.fire.EmberImpEntity.createAttributes().build());
         event.put(FURNACE_BRUTE.get(), com.jttw.engine.entity.fire.FurnaceBruteEntity.createAttributes().build());
         event.put(STRONG_GENERAL.get(), com.jttw.engine.entity.fire.StrongGeneralEntity.createAttributes().build());

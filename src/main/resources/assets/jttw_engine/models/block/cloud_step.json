@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "jttw_engine:block/celestial_cloud",
+    "top": "jttw_engine:block/celestial_cloud",
+    "side": "jttw_engine:block/celestial_cloud"
+  }
+}
