@@ -20,7 +20,8 @@ import java.util.List;
  * The Earth God's Luopan (土地罗盘), the geomancer's compass of wood and bronze that reads the ground:
  * used, it calls up the place's Earth God, who tells its holder where the demons of their strength
  * dwell (the zone for their level), which way and how far ({@link EarthGod}); held, its needle points
- * there, as a compass's does, updated every few seconds as its holder goes (in Hell, while its holder
+ * there, as a compass's does, updated every few seconds as its holder goes (for Hell's band, to the
+ * nearest Ancient City, the way in, looked for only when it is used; in Hell, while its holder
  * sneaks, to the way back up instead of the Ten Courts). Each player is given one
  * on first joining a world; more are crafted from planks, a copper ingot and red dye.
  */

@@ -227,6 +227,14 @@ public final class ModEntities {
                             .clientTrackingRange(8)
                             .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "wandering_ghost").toString()));
 
+    /** The Yin soldiers, the guard that rises before Fengdu's Gate of Ghosts (never spawned by the world: see world.fengdu.FengduGate). */
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.hell.YinSoldierEntity>> YIN_SOLDIER =
+            ENTITIES.register("yin_soldier", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.hell.YinSoldierEntity>of(com.jttw.engine.entity.hell.YinSoldierEntity::new, MobCategory.MONSTER)
+                            .sized(0.6F, 1.95F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "yin_soldier").toString()));
+
     public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.hell.HellKings.Qinguang>> KING_QINGUANG =
             ENTITIES.register("king_qinguang", () ->
                     EntityType.Builder.<com.jttw.engine.entity.hell.HellKings.Qinguang>of(com.jttw.engine.entity.hell.HellKings.Qinguang::new, MobCategory.MONSTER)
@@ -581,6 +589,7 @@ public final class ModEntities {
         event.put(BLACK_IMPERMANENCE.get(), com.jttw.engine.entity.hell.ImpermanenceEntity.createAttributes(false).build());
         event.put(WHITE_IMPERMANENCE.get(), com.jttw.engine.entity.hell.ImpermanenceEntity.createAttributes(true).build());
         event.put(WANDERING_GHOST.get(), com.jttw.engine.entity.hell.WanderingGhostEntity.createAttributes().build());
+        event.put(YIN_SOLDIER.get(), com.jttw.engine.entity.hell.YinSoldierEntity.createAttributes().build());
         event.put(KING_YAMA.get(), com.jttw.engine.entity.hell.KingYamaEntity.createAttributes().build());
         event.put(KING_QINGUANG.get(), com.jttw.engine.entity.hell.KingOfHellEntity.createAttributes(1).build());
         event.put(KING_CHUJIANG.get(), com.jttw.engine.entity.hell.KingOfHellEntity.createAttributes(2).build());

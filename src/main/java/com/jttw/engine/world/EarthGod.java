@@ -46,11 +46,14 @@ import java.util.Set;
  * far its one region lies; for the Mystical Waters, the nearest of the Four Seas whose Dragon King
  * still lives ({@link FallenKings}). The luopan's needle then points there.
  *
- * <p>Hell (levels 57-66) is no Earth God's ground: in the overworld they send its band to Fengdu,
- * the Ghost City, whose Gate of Ghosts leads down to it ({@code world/fengdu/Fengdu}); in Hell
- * itself they can only point to the Ten Courts' gate, or, asked sneaking, the way back up: the side
- * doors of the Gate of Ghosts on the arrival plaza. Anywhere else (the Nether, the End, Heaven) no
- * Earth God hears.
+ * <p>Hell (levels 57-66) is no Earth God's ground: in the overworld they tell its band that the way
+ * down is through Fengdu, the Ghost City, whose Gate of Ghosts is sealed to those who walk there,
+ * and send them the way in: to the nearest Ancient City, whose great frame, lit with soul fire,
+ * takes them before the gate, where its guard must be fought ({@code world/fengdu/}); the needle
+ * points to the city (found as the luopan is used, {@link #cityFor}; to Fengdu if none is known). In
+ * Hell itself they can only point to the Ten Courts' gate, or, asked sneaking, the way back up: the
+ * side doors of the Gate of Ghosts on the arrival plaza. Anywhere else (the Nether, the End,
+ * Heaven) no Earth God hears.
  *
  * <p>Every player is given a luopan once, the first time they join a world.
  */
@@ -134,7 +137,6 @@ public final class EarthGod {
         if (zone == Zones.FIRE_MOUNTAIN) return "Past the heat of the Flaming Mountains, Red Boy keeps his Fire Cloud Cave";
         if (zone == Zones.MOUNT_WUZHUANG) return "Over the clouds floats Mount Longevity, where the Great Immortal Zhenyuan tends his ginseng tree";
         if (zone == Zones.LION_CAMEL) return "Lion-Camel Ridge: eight hundred li of demons, and the city they devoured";
-        if (zone == Zones.FENGDU) return "The way down lies through Fengdu, the Ghost City, on its hill: step through its Gate of Ghosts";
         return "There the demons of your strength dwell";
     }
 
@@ -149,6 +151,15 @@ public final class EarthGod {
      * back up to the living instead of on to the Ten Courts.
      */
     public static Answer answer(ResourceKey<Level> dimension, Vec3 at, int level, long seed, Set<Sea> fallen, boolean wayOut) {
+        return answer(dimension, at, level, seed, fallen, wayOut, null);
+    }
+
+    /**
+     * What the Earth God answers, as above; for Hell's band in the world of the living, {@code city}
+     * the nearest Ancient City known (its centre), or null if none is.
+     */
+    public static Answer answer(ResourceKey<Level> dimension, Vec3 at, int level, long seed, Set<Sea> fallen, boolean wayOut,
+                                @Nullable BlockPos city) {
         if (dimension.equals(JTTWDimensions.HELL)) {
             if (wayOut) {
                 BlockPos door = wayOutOfHell(at);
@@ -171,6 +182,7 @@ public final class EarthGod {
         }
         Zones.Zone zone = overworldZoneFor(level);
         int[] c = regionFor(zone, seed, (int) Math.floor(at.x), (int) Math.floor(at.z), fallen);
+        if (zone == Zones.FENGDU && c != null) return wayIn(at, seed, c, city);
         if (c == null) return new Answer(null, null, Component.literal("The Earth God scratches his head: he knows of no such place."));
         StringBuilder words = new StringBuilder();
         if (!zoneFor(level).hasFootprint()) {
@@ -190,16 +202,100 @@ public final class EarthGod {
         return new Answer(GlobalPos.of(Level.OVERWORLD, new BlockPos(c[0], 64, c[1])), zone, Component.literal(words.toString()));
     }
 
+    /**
+     * The way down to Diyu, for Hell's band in the world of the living: through Fengdu's Gate of
+     * Ghosts, sealed to those who walk there; by way of an Ancient City's frame, lit with soul fire,
+     * and the guard that rises. The needle to the city ({@code city}), or to Fengdu if none is known.
+     */
+    private static Answer wayIn(Vec3 at, long seed, int[] fengdu, @Nullable BlockPos city) {
+        StringBuilder words = new StringBuilder("\"Your trials lie in Diyu, the underworld, below any Earth God's ground. ");
+        boolean there = Zones.FENGDU.depth(seed, (int) Math.floor(at.x), (int) Math.floor(at.z)) > 0;
+        if (there) {
+            words.append("You stand in the Ghost City's country now, but its Gate of Ghosts, on the terrace at the city's heart, is sealed: "
+                    + "it opens only for those who come to it through an Ancient City's frame, and break the guard of Hell's soldiers that rises there. ");
+        } else {
+            words.append("The way down is through Fengdu, the Ghost City, but its Gate of Ghosts is sealed: walk there over the land and it will not "
+                    + "open. Go under the earth instead, to an Ancient City of the deep dark, and light soul fire in the great frame at its heart "
+                    + "(soul sand or soil, and flint); it will carry you before the gate, and Hell's soldiers will rise to bar it. "
+                    + "Only when the last of them falls does the gate burn open. ");
+        }
+        if (city != null) {
+            double d = Math.hypot(city.getX() + 0.5 - at.x, city.getZ() + 0.5 - at.z);
+            words.append(d < 64 ? "An Ancient City lies beneath you, deep down.\""
+                    : "The nearest Ancient City lies some " + roughly(d) + " blocks to the " + wind(at.x, at.z, city.getX(), city.getZ()) + ", deep down.\"");
+            return new Answer(GlobalPos.of(Level.OVERWORLD, city), Zones.FENGDU, Component.literal(words.toString()));
+        }
+        double d = Math.hypot(fengdu[0] - at.x, fengdu[1] - at.z);
+        words.append("I know of no such city near; seek the deep dark far below. ");
+        words.append(there ? "\"" : "Fengdu itself lies some " + roughly(d) + " blocks to the " + wind(at.x, at.z, fengdu[0], fengdu[1]) + ".\"");
+        return new Answer(GlobalPos.of(Level.OVERWORLD, new BlockPos(fengdu[0], 64, fengdu[1])), Zones.FENGDU, Component.literal(words.toString()));
+    }
+
+    /** Kept on a player: the Ancient City last found for them, and where they stood when it was looked for. */
+    public static final String KEY_CITY = JTTWEngine.MOD_ID + ":luopan_city", KEY_CITY_FROM = JTTWEngine.MOD_ID + ":luopan_city_from";
+    /** A city looked for this far from where the last was looked for is looked for again. */
+    public static final int LOOK_AGAIN = 1500;
+    /** How far the Earth God looks for an Ancient City (in the structure's placement cells, as /locate's 100). */
+    public static final int LOOK_RADIUS = 50;
+
+    /**
+     * The nearest Ancient City for {@code p} (its centre): looked for in the world's structures only
+     * when {@code look} (the luopan used, not merely held), and then kept, until its holder is far
+     * from where it was looked for; the lit frames are known too. Null if none is known.
+     */
+    @Nullable
+    public static BlockPos cityFor(ServerPlayer p, boolean look) {
+        CompoundTag data = p.getPersistentData();
+        ServerLevel overworld = p.server.overworld();
+        BlockPos here = p.blockPosition();
+        boolean fresh = data.contains(KEY_CITY_FROM) && BlockPos.of(data.getLong(KEY_CITY_FROM)).distSqr(here) < (double) LOOK_AGAIN * LOOK_AGAIN;
+        if (look && !fresh && p.level().dimension().equals(Level.OVERWORLD)) {
+            BlockPos found = locateCity(overworld, here);
+            data.putLong(KEY_CITY_FROM, here.asLong());
+            if (found != null) data.putLong(KEY_CITY, found.asLong());
+            else data.remove(KEY_CITY);
+        }
+        BlockPos best = data.contains(KEY_CITY) ? BlockPos.of(data.getLong(KEY_CITY)) : null;
+        var lit = com.jttw.engine.world.fengdu.AncientGate.Lit.of(overworld).nearest(here.getX(), here.getZ());
+        if (lit != null) {
+            int[] f = lit.foot();
+            BlockPos frame = new BlockPos(f[0], f[1], f[2]);
+            if (best == null || frame.distSqr(here) < best.distSqr(here)) best = frame;
+        }
+        return best;
+    }
+
+    /** The nearest Ancient City to {@code from} in the world's structures, or null (none within {@link #LOOK_RADIUS}). */
+    @Nullable
+    public static BlockPos locateCity(ServerLevel overworld, BlockPos from) {
+        var structures = overworld.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.STRUCTURE);
+        var city = structures.getHolder(net.minecraft.world.level.levelgen.structure.BuiltinStructures.ANCIENT_CITY);
+        if (city.isEmpty()) return null;
+        long t0 = System.nanoTime();
+        var found = overworld.getChunkSource().getGenerator().findNearestMapStructure(overworld,
+                net.minecraft.core.HolderSet.direct(city.get()), from, LOOK_RADIUS, false);
+        JTTWEngine.LOGGER.debug("Earth God: an Ancient City looked for from {} in {} ms: {}", from.toShortString(),
+                (System.nanoTime() - t0) / 1_000_000, found == null ? "none" : found.getFirst().toShortString());
+        return found == null ? null : found.getFirst();
+    }
+
     /** Where the way out of Hell is for someone at {@code at}: the nearer of the Gate of Ghosts' side doors (its inner column of veil). */
     public static BlockPos wayOutOfHell(Vec3 at) {
         return new BlockPos(at.x < 0 ? -HellWorks.RETURN_DOOR_X : HellWorks.RETURN_DOOR_X, HellTerrain.GROUND + 1, HellWorks.RETURN_DOOR_Z);
     }
 
-    /** What the Earth God answers this player where they stand (in Hell, sneaking: the way out). */
+    /** What the Earth God answers this player where they stand (in Hell, sneaking: the way out), the Ancient Cities known to them. */
     public static Answer answer(ServerPlayer player) {
+        return answer(player, false);
+    }
+
+    /** As {@link #answer(ServerPlayer)}; {@code look}: the luopan used, so an Ancient City may be looked for. */
+    public static Answer answer(ServerPlayer player, boolean look) {
         ServerLevel overworld = player.server.overworld();
-        return answer(player.level().dimension(), player.position(), PlayerLevel.getLevel(player), overworld.getSeed(),
-                FallenKings.of(overworld).seas(), player.isShiftKeyDown());
+        int lv = PlayerLevel.getLevel(player);
+        boolean hellsBand = player.level().dimension().equals(Level.OVERWORLD) && overworldZoneFor(lv) == Zones.FENGDU;
+        return answer(player.level().dimension(), player.position(), lv, overworld.getSeed(),
+                FallenKings.of(overworld).seas(), player.isShiftKeyDown(), hellsBand ? cityFor(player, look) : null);
     }
 
     /** Points the luopan where the Earth God would send its holder, quietly (its needle spins where there is nowhere). */
@@ -216,7 +312,7 @@ public final class EarthGod {
      * off the way he means; the luopan points there.
      */
     public static void consult(ServerPlayer player, ItemStack luopan) {
-        Answer a = answer(player);
+        Answer a = answer(player, true);
         aim(luopan, a.target());
         ServerLevel level = player.serverLevel();
         Vec3 at = player.position();

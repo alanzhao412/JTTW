@@ -130,6 +130,7 @@ public final class ClientInit {
         event.registerLayerDefinition(com.jttw.engine.client.renderer.HellRenderers.CLERK_LAYER, com.jttw.engine.client.renderer.HellRenderers::clerkLayer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.HellRenderers.IMPERMANENCE_LAYER, com.jttw.engine.client.renderer.HellRenderers::impermanenceLayer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.HellRenderers.GHOST_LAYER, com.jttw.engine.client.renderer.HellRenderers::ghostLayer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.HellRenderers.SOLDIER_LAYER, com.jttw.engine.client.renderer.HellRenderers::soldierLayer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.HellRenderers.KING_LAYER, com.jttw.engine.client.renderer.HellRenderers::kingLayer);
         // the Flaming Mountains
         event.registerLayerDefinition(com.jttw.engine.client.renderer.EmberImpRenderer.LAYER, com.jttw.engine.client.renderer.EmberImpRenderer::layer);
@@ -207,6 +208,7 @@ public final class ClientInit {
         event.registerEntityRenderer(ModEntities.BLACK_IMPERMANENCE.get(), com.jttw.engine.client.renderer.HellRenderers.ImpermanenceRenderer::new);
         event.registerEntityRenderer(ModEntities.WHITE_IMPERMANENCE.get(), com.jttw.engine.client.renderer.HellRenderers.ImpermanenceRenderer::new);
         event.registerEntityRenderer(ModEntities.WANDERING_GHOST.get(), com.jttw.engine.client.renderer.HellRenderers.GhostRenderer::new);
+        event.registerEntityRenderer(ModEntities.YIN_SOLDIER.get(), com.jttw.engine.client.renderer.HellRenderers.SoldierRenderer::new);
         event.registerEntityRenderer(ModEntities.KING_QINGUANG.get(), com.jttw.engine.client.renderer.HellRenderers.KingRenderer.of("king_qinguang"));
         event.registerEntityRenderer(ModEntities.KING_CHUJIANG.get(), com.jttw.engine.client.renderer.HellRenderers.KingRenderer.of("king_chujiang"));
         event.registerEntityRenderer(ModEntities.KING_SONGDI.get(), com.jttw.engine.client.renderer.HellRenderers.KingRenderer.of("king_songdi"));

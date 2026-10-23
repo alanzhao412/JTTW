@@ -10,9 +10,11 @@ import com.jttw.engine.reincarnation.AlignmentData;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
 import com.jttw.engine.world.EarthGod;
 import com.jttw.engine.world.Zones;
-import com.jttw.engine.world.feature.FengduFeature;
 import com.jttw.engine.world.fengdu.Fengdu;
 import com.jttw.engine.world.fengdu.FengduCity;
+import com.jttw.engine.world.fengdu.FengduGate;
+import com.jttw.engine.world.fengdu.GateRules;
+import com.jttw.engine.world.fengdu.GhostGateBlock;
 import com.jttw.engine.world.hell.HellRules;
 import com.jttw.engine.world.hell.HellTerrain;
 import com.jttw.engine.world.hell.HellWorks;
@@ -41,12 +43,13 @@ import java.util.Set;
 import static com.jttw.engine.gametest.GT.*;
 
 /**
- * Fengdu, the Ghost City: its Gate of Ghosts takes anyone (any character, any level) down to Hell's
- * arrival plaza, and the side doors of Hell's Gate of Ghosts take them back up to it, before its
- * gate (the city laid at its place in the test world); the Earth Gods send Hell's band there, and
- * in Hell show the way back up; and the city's blueprint: the veil in the gate's way, the gate
+ * Fengdu, the Ghost City: its Gate of Ghosts, burning, takes anyone it lets pass (any character,
+ * any level) down to Hell's arrival plaza, and no one else; the side doors of Hell's Gate of Ghosts
+ * take them back up to it, before its gate, which burns for them (the city laid at its place in
+ * the test world); the Earth Gods tell Hell's band the way in, by an Ancient City, and in Hell show
+ * the way back up; and the city's blueprint: the gate's way barred, its side doors' veils, the gate
  * reachable from outside the walls, room to stand where one comes back, the palace and the temples
- * open, every sign on a wall.
+ * open, every sign on a wall. The way in by an Ancient City's frame and the swarm: AncientGateGameTests.
  */
 @GameTestHolder(JTTWEngine.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -78,27 +81,20 @@ public class FengduGameTests {
         check(h, !Fengdu.inVeil(p), who + ": out of the veils, so not sent straight back");
     }
 
-    /** Fengdu's city, laid at its place in this world (a flat one: no land of its own is made there) at the floor the gates look for. */
-    private static BlockPos layFengdu(ServerLevel overworld) {
-        int[] c = Fengdu.centre(overworld.getSeed());
-        BlockPos ground = new BlockPos(c[0], FengduFeature.cityFloor(overworld, c[0], c[1]), c[1]);
-        if (!overworld.getBlockState(ground.offset(0, FengduCity.TERRACE_H + 1, FengduCity.GHOST_Z)).is(ModBlocks.GHOST_GATE.get())) {
-            FengduCity.layWhole(overworld, ground);
-        }
-        return ground;
-    }
-
-    @GameTest(template = PLATFORM, timeoutTicks = 400)
-    public static void anyoneIsTakenDownThroughTheGateOfGhostsToHellsPlaza(GameTestHelper h) {
-        ServerLevel level = h.getLevel();
-        BlockPos veil = h.absolutePos(new BlockPos(4, 2, 4));
-        BlockState gate = ModBlocks.GHOST_GATE.get().defaultBlockState();
-        level.setBlockAndUpdate(veil, gate);
-        level.setBlockAndUpdate(veil.above(), gate);
-        onEnd(h, () -> {
-            level.setBlockAndUpdate(veil, Blocks.AIR.defaultBlockState());
-            level.setBlockAndUpdate(veil.above(), Blocks.AIR.defaultBlockState());
-        });
+    @GameTest(template = PLATFORM, timeoutTicks = 400, batch = "fengdu_gate_anyone")
+    public static void anyoneTheBurningGateLetsPassIsTakenDownToHellsPlazaAndNoOneElse(GameTestHelper h) {
+        ServerLevel level = h.getLevel().getServer().overworld();
+        BlockPos ground = GateSites.freshFengdu(h);
+        BlockPos arrival = FengduGate.arrival(ground);
+        BlockPos veil = ground.offset(0, FengduCity.TERRACE_H + 1, FengduCity.GHOST_Z);
+        // one who walked there, the gate burning for another: the mist will not take them
+        ServerPlayer opener = player(h);
+        FengduGate.arriveFromHell(opener, ground);
+        check(h, level.getBlockState(veil).is(ModBlocks.GHOST_GATE.get()), "the gate burns");
+        ServerPlayer walker = player(h);
+        walker.moveTo(veil.getX() + 0.5, veil.getY(), veil.getZ() + 0.5);
+        for (int t = 0; t < Fengdu.CROSS_TICKS + 10; t++) check(h, !Fengdu.tick(walker), "not taken, one who never broke the guard");
+        eq(h, Level.OVERWORLD, walker.level().dimension(), "still in the world of the living");
         // one not yet reborn as anything, at level 1; a Peng, a dragon, a tortoise, the Bull Demon King, of every band
         ReincarnationOutcome[] kinds = {null, ReincarnationOutcome.GOLD_WINGED_PENG, ReincarnationOutcome.DRAGON,
                 ReincarnationOutcome.TURTLE, ReincarnationOutcome.BULL_DEMON_KING};
@@ -111,11 +107,13 @@ public class FengduGameTests {
                 LevelManager.initClass(p, kinds[i]);
             }
             PlayerLevel.setLevel(p, levels[i]);
+            p.moveTo(arrival.getX() + 0.5, arrival.getY(), arrival.getZ() + 0.5);
+            FengduGate.setTrip(p, GateRules.Trip.ADMITTED); // they broke the guard (AncientGateGameTests fights it)
             if (i == 0) {
                 // stepping out of the veil before it takes them, it lets them go: the count starts again
                 p.moveTo(veil.getX() + 0.5, veil.getY(), veil.getZ() + 0.5);
                 for (int t = 0; t < Fengdu.CROSS_TICKS - 2; t++) Fengdu.tick(p);
-                p.moveTo(veil.getX() + 3.5, veil.getY(), veil.getZ() + 0.5);
+                p.moveTo(veil.getX() + 0.5, veil.getY(), veil.getZ() + 2.5);
                 check(h, !Fengdu.inVeil(p) && !Fengdu.tick(p), "out of it, nothing");
                 eq(h, Level.OVERWORLD, p.level().dimension(), "still in the world of the living");
             }
@@ -128,10 +126,10 @@ public class FengduGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM, timeoutTicks = 600)
-    public static void theSideDoorsOfHellsGateLeadBackUpToFengduAndItsGateDownAgain(GameTestHelper h) {
+    @GameTest(template = PLATFORM, timeoutTicks = 600, batch = "fengdu_gate_hell")
+    public static void theSideDoorsOfHellsGateLeadBackUpToFengduWhoseGateBurnsForThemAndDownAgain(GameTestHelper h) {
         ServerLevel overworld = h.getLevel().getServer().overworld();
-        BlockPos ground = layFengdu(overworld);
+        BlockPos ground = GateSites.freshFengdu(h);
         ServerPlayer p = player(h);
         AlignmentData.markReincarnated(p, ReincarnationOutcome.WHITE_TIGER);
         LevelManager.initClass(p, ReincarnationOutcome.WHITE_TIGER);
@@ -161,7 +159,8 @@ public class FengduGameTests {
         eq(h, ground.offset(FengduCity.RETURN_X, FengduCity.TERRACE_H + 1, FengduCity.RETURN_Z), back, "before Fengdu's Gate of Ghosts, on its terrace");
         check(h, Fengdu.standable(overworld, back), "on firm ground, with room to stand");
         check(h, !Fengdu.inVeil(p), "out of the veil");
-        check(h, overworld.getBlockState(back.offset(0, 0, FengduCity.GHOST_Z - FengduCity.RETURN_Z)).is(ModBlocks.GHOST_GATE.get()), "the gate's veil just north");
+        eq(h, GateRules.Trip.ADMITTED, FengduGate.trip(p), "come back up: free to go down again");
+        check(h, overworld.getBlockState(back.offset(0, 0, FengduCity.GHOST_Z - FengduCity.RETURN_Z)).is(ModBlocks.GHOST_GATE.get()), "the gate burning just north");
         // and down again through Fengdu's own gate
         standAlmost(h, p, back.offset(0, 0, FengduCity.GHOST_Z - FengduCity.RETURN_Z));
         check(h, Fengdu.tick(p), "taken through again");
@@ -177,21 +176,32 @@ public class FengduGameTests {
         for (int lv : new int[]{57, 60, 66}) {
             var a = EarthGod.answer(Level.OVERWORLD, Vec3.ZERO, lv, seed, Set.of());
             eq(h, Zones.FENGDU, a.zone(), "level " + lv + ": Fengdu");
-            eq(h, new BlockPos(f[0], 64, f[1]), a.target().pos(), "level " + lv + ": its needle to Fengdu");
+            eq(h, new BlockPos(f[0], 64, f[1]), a.target().pos(), "level " + lv + ", no Ancient City known: its needle to Fengdu");
             String words = a.words().getString();
-            check(h, words.contains("Diyu") && words.contains("Fengdu") && words.contains("Gate of Ghosts"), "told the way down: " + words);
+            check(h, words.contains("Diyu") && words.contains("Fengdu") && words.contains("Gate of Ghosts") && words.contains("sealed")
+                    && words.contains("Ancient City") && words.contains("soul fire") && words.contains("no such city"), "told the way in: " + words);
         }
+        // an Ancient City known: the needle to it, its way told
+        BlockPos city = new BlockPos(1200, -27, -40);
+        var toCity = EarthGod.answer(Level.OVERWORLD, Vec3.ZERO, 60, seed, Set.of(), false, city);
+        eq(h, city, toCity.target().pos(), "the needle to the Ancient City");
+        check(h, toCity.words().getString().contains("nearest Ancient City lies some 1200 blocks to the east"), "its way told: " + toCity.words().getString());
+        eq(h, Zones.LION_CAMEL, EarthGod.answer(Level.OVERWORLD, Vec3.ZERO, 95, seed, Set.of(), false, city).zone(), "other levels: their zones, as before");
         eq(h, Zones.MYSTICAL_WATERS, EarthGod.answer(Level.OVERWORLD, Vec3.ZERO, 56, seed, Set.of()).zone(), "56: the seas still");
         eq(h, Zones.FIRE_MOUNTAIN, EarthGod.answer(Level.OVERWORLD, Vec3.ZERO, 67, seed, Set.of()).zone(), "67: the Flaming Mountains");
         var there = EarthGod.answer(Level.OVERWORLD, new Vec3(f[0] + 0.5, 70, f[1] + 0.5), 60, seed, Set.of());
-        check(h, there.words().getString().contains("Ghost City's country"), "standing there, told so: " + there.words().getString());
+        String atFengdu = there.words().getString();
+        check(h, atFengdu.contains("Ghost City's country") && atFengdu.contains("sealed") && atFengdu.contains("Ancient City's frame"),
+                "standing there, told the gate is sealed and how it opens: " + atFengdu);
         // the luopan itself, in the overworld at 60
         ServerPlayer p = player(h);
         ItemStack luopan = new ItemStack(ModItems.EARTH_GOD_LUOPAN.get());
         p.setItemInHand(InteractionHand.MAIN_HAND, luopan);
         PlayerLevel.setLevel(p, 60);
         luopan.getItem().use(h.getLevel(), p, InteractionHand.MAIN_HAND);
-        eq(h, new BlockPos(f[0], 64, f[1]), luopan.get(DataComponents.LODESTONE_TRACKER).target().get().pos(), "the needle to Fengdu at 60");
+        BlockPos needle = luopan.get(DataComponents.LODESTONE_TRACKER).target().get().pos();
+        check(h, needle.equals(new BlockPos(f[0], 64, f[1])) || needle.equals(EarthGod.cityFor(p, false)),
+                "the needle at 60: to an Ancient City known, else Fengdu: " + needle.toShortString());
         // in Hell: on to the Ten Courts; sneaking, the way out, a side door of the Gate of Ghosts
         JTTWDimensions.teleportTo(p, JTTWDimensions.HELL);
         ServerLevel hell = p.serverLevel();
@@ -238,11 +248,22 @@ public class FengduGameTests {
     @GameTest(template = PLATFORM)
     public static void theCitysBlueprintKeepsItsGateReachableAndRoomToStand(GameTestHelper h) {
         int t = FengduCity.TERRACE_H;
-        // the veil fills the Gate of Ghosts' way
+        // the Gate of Ghosts' way barred (it burns only when fought open); its side doors' veils lead back to the Ancient City
         for (int x = -FengduCity.VEIL_HALF; x <= FengduCity.VEIL_HALF; x++) for (int y = t + 1; y <= t + FengduCity.VEIL_H; y++) {
-            check(h, FengduCity.at(x, y, FengduCity.GHOST_Z).is(ModBlocks.GHOST_GATE.get()), "the veil at " + x + " " + y);
-            check(h, FengduCity.inVeil(x, y, FengduCity.GHOST_Z), "known as the veil");
+            eq(h, FengduCity.sealed(), FengduCity.at(x, y, FengduCity.GHOST_Z), "barred at " + x + " " + y);
+            check(h, FengduCity.inVeil(x, y, FengduCity.GHOST_Z), "known as the gate's way");
         }
+        int doors = 0;
+        for (int x = -FengduCity.SCREEN_TO; x <= FengduCity.SCREEN_TO; x++) for (int y = t + 1; y <= t + FengduCity.VEIL_H; y++) {
+            BlockState s = FengduCity.at(x, y, FengduCity.GHOST_Z);
+            boolean door = s != null && s.is(ModBlocks.GHOST_GATE.get());
+            eq(h, FengduCity.inSideDoor(x, y, FengduCity.GHOST_Z), door, "a side door's veil at " + x + " " + y);
+            if (door) {
+                eq(h, GhostGateBlock.Way.CITY, s.getValue(GhostGateBlock.WAY), "leading back to the Ancient City");
+                doors++;
+            }
+        }
+        eq(h, 2 * 2 * FengduCity.SIDE_DOOR_H, doors, "two side doors, two wide");
         check(h, standable(FengduCity.RETURN_X, t + 1, FengduCity.RETURN_Z), "room to stand where one comes back up");
         // walking in from the hill's top outside the main gate: everywhere one can stand, reached
         int lo = -FengduCity.OUTER - 2, hi = FengduCity.ARCH_Z + 3;
@@ -265,7 +286,10 @@ public class FengduGameTests {
                 }
             }
         }
-        check(h, seen.contains(BlockPos.asLong(0, t + 1, FengduCity.GHOST_Z + 1)), "the Gate of Ghosts reached: one can walk up to its veil");
+        check(h, seen.contains(BlockPos.asLong(0, t + 1, FengduCity.GHOST_Z + 1)), "the Gate of Ghosts reached: one can walk up to its way");
+        for (int side : new int[]{-1, 1}) {
+            check(h, seen.contains(BlockPos.asLong(side * FengduCity.SIDE_DOOR_OUT, t + 1, FengduCity.GHOST_Z + 1)), "and up to a side door");
+        }
         check(h, seen.contains(BlockPos.asLong(FengduCity.RETURN_X, t + 1, FengduCity.RETURN_Z)), "and from where one comes back, out to the city");
         check(h, seen.contains(BlockPos.asLong(0, t + 2, FengduCity.THRONE_Z + 2)), "the palace open, up to King Yama's dais");
         for (int side : new int[]{-1, 1}) {

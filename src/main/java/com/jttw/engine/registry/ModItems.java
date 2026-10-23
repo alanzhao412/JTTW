@@ -144,6 +144,8 @@ public final class ModItems {
             () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.WHITE_IMPERMANENCE, 0xEDEDED, 0xB01818, new Item.Properties()));
     public static final DeferredHolder<Item, Item> WANDERING_GHOST_SPAWN_EGG = ITEMS.register("wandering_ghost_spawn_egg",
             () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.WANDERING_GHOST, 0xC8D4D8, 0x6F8A94, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> YIN_SOLDIER_SPAWN_EGG = ITEMS.register("yin_soldier_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.YIN_SOLDIER, 0x2B3036, 0x5FD6D0, new Item.Properties()));
     public static final DeferredHolder<Item, Item> KING_QINGUANG_SPAWN_EGG = ITEMS.register("king_qinguang_spawn_egg",
             () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.KING_QINGUANG, 0x1E3A6E, 0xD4AF37, new Item.Properties()));
     public static final DeferredHolder<Item, Item> KING_CHUJIANG_SPAWN_EGG = ITEMS.register("king_chujiang_spawn_egg",
