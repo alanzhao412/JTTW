@@ -879,10 +879,12 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   character's health a second, armour or none. Blows struck from inside count half again, and once
   they come to 6% of his health he retches the foe up and reels for 2 s; else after 10 s he spits him
   out anyway. At two thirds he roars for his kin (three lion-demons); at a third he **reveals his
-  true form**: a giant green-maned lion on all fours (3.6 by 4.0 blocks, some seven long, larger than
-  the Great White Bull), who swallows twice as often and from 6 blocks, and **pounces** on a foe 5–13
-  blocks off, jaws first: if they reach the foe as he lands, it is swallowed (inside the lion as
-  inside the demon king, and fought out of him the same way).
+  true form**: a giant guardian lion of dark azure on all fours (3.6 by 4.0 blocks, some seven long,
+  larger than the Great White Bull), lean and long-legged, his face ringed in spiral curls and his
+  mane swept back in locks like flames, fanged, a gold collar of bells at his throat, who swallows
+  twice as often and from 6 blocks, and **pounces** on a foe 5–13 blocks off, jaws first: if they
+  reach the foe as he lands, it is swallowed (inside the lion as inside the demon king, and fought
+  out of him the same way).
 - **The White Elephant** (白象, Samantabhadra's six-tusked elephant; `WhiteElephantEntity`, level 98,
   85 hits, a white bar, in the elephant court): a giant in ivory-and-gold plate, a great domed
   elephant's head under a gold war-frontlet, ears like sails, a heavy trunk, six tusks, a giant's
