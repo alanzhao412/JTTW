@@ -15,6 +15,12 @@ public record ZoneLayout(int cellSize, double chance, int radius, int wobble, lo
     /** White Bone Ridge: 60% of 2048-block cells hold a region about 260 blocks across. */
     public static final ZoneLayout WHITE_BONE = new ZoneLayout(2048, 0.6, 260, 70, 0x5EEDB0E1L);
 
+    /**
+     * The Bottomless Cave: 90% of 1024-block cells hold a region about 220 blocks across, never
+     * less than 180 (radius less all its wobble), round a labyrinth 147 blocks across.
+     */
+    public static final ZoneLayout BOTTOMLESS_CAVE = new ZoneLayout(1024, 0.9, 110, 20, 0xB0770C4EL);
+
     /** Whether a region covers the block column at (x, z) in a world of this seed. */
     public boolean covers(long seed, int x, int z) {
         return depth(seed, x, z) > 0;

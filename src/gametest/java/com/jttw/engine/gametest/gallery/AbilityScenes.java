@@ -465,6 +465,52 @@ final class AbilityScenes {
                     lady.setNoAi(true);
                     p.serverLevel().addFreshEntity(lady);
                 }, p -> {}, 1, false),
+                // ── The Bottomless Cave ──
+                new Scene("cave_mice", p -> {
+                    cave(p, com.jttw.engine.registry.ModEntities.MOUSE_SPIRIT.get(), -2, 2, false, Float.NaN);
+                    cave(p, com.jttw.engine.registry.ModEntities.MOUSE_SPIRIT.get(), 0, 3, false, Float.NaN);
+                    cave(p, com.jttw.engine.registry.ModEntities.MOUSE_SPIRIT.get(), -4, 5, true, Float.NaN);
+                }, p -> {}, 1, false),
+                new Scene("cave_mouse_close", p -> {
+                    sceneCam = new double[]{2.2, 1.6, 4.6, 0.5, 0.6, 2.5};
+                    cave(p, com.jttw.engine.registry.ModEntities.MOUSE_SPIRIT.get(), 0, 2, false, Float.NaN);
+                }, p -> {}, 1, false),
+                new Scene("cave_maids", p -> {
+                    cave(p, com.jttw.engine.registry.ModEntities.FLOWER_MAID.get(), -2, 3, false, Float.NaN);
+                    var captain = cave(p, com.jttw.engine.registry.ModEntities.FLOWER_MAID.get(), -5, 5, true, Float.NaN);
+                    if (captain instanceof com.jttw.engine.entity.cave.FlowerMaidEntity m) m.breatheOut(java.util.List.of());
+                }, p -> {}, 1, false),
+                new Scene("cave_maid_close", p -> {
+                    sceneCam = new double[]{1.8, 1.9, 5.2, 0.5, 1.2, 2.5};
+                    cave(p, com.jttw.engine.registry.ModEntities.FLOWER_MAID.get(), 0, 2, false, Float.NaN);
+                }, p -> {}, 1, false),
+                new Scene("cave_lady", p -> earthFlow(p, 1, 4, Float.NaN, false, false), p -> {}, 1, false),
+                new Scene("cave_lady_close", p -> {
+                    sceneCam = new double[]{1.6, 2.2, 5.0, 0.5, 1.5, 2.5};
+                    earthFlow(p, 0, 2, Float.NaN, false, false);
+                }, p -> {}, 1, false),
+                new Scene("cave_lady_fighting", p -> earthFlow(p, 1, 4, Float.NaN, true, false), p -> {}, 1, false),
+                new Scene("cave_lady_back", p -> {
+                    sceneCam = new double[]{1.6, 2.2, 5.0, 0.5, 1.4, 2.5};
+                    earthFlow(p, 0, 2, Float.POSITIVE_INFINITY, false, false); // her back to us
+                }, p -> {}, 1, false),
+                // her likeness (left) beside her (right), and the shoe it falls back into
+                new Scene("cave_decoy", p -> {
+                    earthFlow(p, -2, 4, Float.NaN, false, true);
+                    earthFlow(p, 2, 4, Float.NaN, false, false);
+                    var shoe = new net.minecraft.world.entity.item.ItemEntity(p.serverLevel(), p.getX(), p.getY() + 0.2, p.getZ() + 2.5,
+                            new net.minecraft.world.item.ItemStack(com.jttw.engine.registry.ModItems.EMBROIDERED_SHOE.get()), 0, 0, 0);
+                    shoe.setNeverPickUp();
+                    shoe.setNoGravity(true);
+                    p.serverLevel().addFreshEntity(shoe);
+                }, p -> {}, 1, false),
+                new Scene("cave_palace", p -> palace(p, 0), p -> {}, 1, false),
+                new Scene("cave_palace_dais", p -> palace(p, 1), p -> {}, 1, false),
+                new Scene("cave_palace_beds", p -> palace(p, 2), p -> {}, 1, false),
+                new Scene("cave_shrine", p -> palace(p, 3), p -> {}, 1, false),
+                new Scene("cave_tunnel", p -> palace(p, 4), p -> {}, 1, false),
+                new Scene("cave_stair", p -> palace(p, 5), p -> {}, 1, false),
+                new Scene("cave_hub", p -> palace(p, 6), p -> {}, 1, false),
                 // ── Grand Saint of Nine Spirits ──
                 new Scene("ns_fire_head", p -> saint(p, NineSpiritsAbilityHandler.FIRE, "ns_heads_1"),
                         NineSpiritsAbilityHandler::fireHead, 4, false),
@@ -905,6 +951,149 @@ final class AbilityScenes {
         m.setYHeadRot(180f);
         m.setYBodyRot(180f);
         m.setPersistenceRequired();
+    }
+
+    /** One of the cave's household, standing still at (dx, dz) from the player, turned to {@code yaw} (a captain if asked). */
+    private static com.jttw.engine.entity.cave.CaveMonster cave(ServerPlayer p,
+            net.minecraft.world.entity.EntityType<? extends com.jttw.engine.entity.cave.CaveMonster> type, int dx, int dz, boolean captain, float yaw) {
+        var m = com.jttw.engine.entity.zone.ZoneMonster.summon(p.serverLevel(), type,
+                net.minecraft.core.BlockPos.containing(p.getX() + dx, p.getY(), p.getZ() + dz), captain);
+        if (m == null) return null;
+        m.setNoAi(true);
+        yaw = towardCamera(dx, dz, yaw);
+        m.moveTo(p.getX() + dx, p.getY(), p.getZ() + dz, yaw, 0f);
+        m.setYHeadRot(yaw);
+        m.setYBodyRot(yaw);
+        m.setPersistenceRequired();
+        return m;
+    }
+
+    /** Lady Earth Flow (or, {@code likeness}, the shoe she leaves in her shape), still, at (dx, dz), turned to {@code yaw}; swords up if {@code fighting}. */
+    private static void earthFlow(ServerPlayer p, int dx, int dz, float yaw, boolean fighting, boolean likeness) {
+        net.minecraft.world.entity.Mob m = likeness
+                ? com.jttw.engine.registry.ModEntities.EARTH_FLOW_DECOY.get().create(p.serverLevel())
+                : com.jttw.engine.registry.ModEntities.LADY_EARTH_FLOW.get().create(p.serverLevel());
+        if (m == null) return;
+        yaw = towardCamera(dx, dz, yaw);
+        m.moveTo(p.getX() + dx, p.getY(), p.getZ() + dz, yaw, 0f);
+        m.setYHeadRot(yaw);
+        m.setYBodyRot(yaw);
+        m.setNoAi(true);
+        m.setAggressive(fighting);
+        p.serverLevel().addFreshEntity(m);
+    }
+
+    /**
+     * A yaw for something standing at (dx, dz) from the player: as given, or (NaN) turned to the
+     * scene's camera, or the usual three-quarter one; (infinite) turned away from it.
+     */
+    private static float towardCamera(double dx, double dz, float yaw) {
+        if (!Float.isNaN(yaw) && !Float.isInfinite(yaw)) return yaw;
+        double cx = sceneCam != null ? sceneCam[0] - 0.5 : 6.5, cz = sceneCam != null ? sceneCam[2] - 0.5 : 7.5;
+        float to = (float) Math.toDegrees(Math.atan2(-(cx - dx), cz - dz));
+        return Float.isInfinite(yaw) ? to + 180f : to;
+    }
+
+    /** The labyrinth the gallery lays in its flat world: its palace due south of the stage. */
+    private static com.jttw.engine.world.feature.Labyrinth galleryLabyrinth() {
+        return com.jttw.engine.world.feature.Labyrinth.of(7L, 0, 90);
+    }
+
+    /**
+     * Inside the labyrinth, laid in the gallery's flat world (its heights are its own, high over the
+     * flat ground, so all of it hangs in the air, rock outside, open within): 0 the palace from its
+     * south gate, 1 her dais close, 2 a flower bed, 3 her shrine, 4 a lit tunnel on the top level,
+     * 5 a spiral stair, 6 the hub under the shaft.
+     */
+    private static void palace(ServerPlayer p, int view) {
+        var level = p.serverLevel();
+        var lab = galleryLabyrinth();
+        int ground = level.getMinBuildHeight() + 4;
+        // lay it, the whole of it, once
+        if (level.getBlockState(new net.minecraft.core.BlockPos(lab.cx, com.jttw.engine.world.feature.Labyrinth.FLOOR[2] - 1, lab.cz)).isAir()) {
+            for (int x = lab.cx - 80; x <= lab.cx + 80; x += 16) for (int z = lab.cz - 80; z <= lab.cz + 80; z += 16) {
+                com.jttw.engine.world.feature.BottomlessCaveFeature.build(level, lab, x & ~15, z & ~15);
+            }
+        }
+        level.getEntities((net.minecraft.world.entity.Entity) null, new net.minecraft.world.phys.AABB(lab.cx, -10, lab.cz, lab.cx, 50, lab.cz).inflate(90),
+                e -> !(e instanceof net.minecraft.world.entity.player.Player)).forEach(net.minecraft.world.entity.Entity::discard);
+        int f = com.jttw.engine.world.feature.Labyrinth.FLOOR[2];
+        double cx = lab.cx + 0.5, cz = lab.cz + 0.5;
+        switch (view) {
+            case 0, 1, 2 -> {
+                var boss = com.jttw.engine.registry.ModEntities.LADY_EARTH_FLOW.get().create(level);
+                boss.moveTo(cx, f + 1, cz, 0f, 0f);
+                boss.setYHeadRot(0f);
+                boss.setYBodyRot(0f);
+                boss.setNoAi(true);
+                level.addFreshEntity(boss);
+                for (int[] m : com.jttw.engine.world.feature.EarthFlowLairFeature.MAIDS) {
+                    var maid = com.jttw.engine.registry.ModEntities.FLOWER_MAID.get().create(level);
+                    maid.moveTo(cx + m[0], f, cz + m[1], 0f, 0f);
+                    maid.become(37, false);
+                    maid.setYHeadRot(0f);
+                    maid.setYBodyRot(0f);
+                    maid.setNoAi(true);
+                    level.addFreshEntity(maid);
+                }
+                if (view == 0) sceneCam = new double[]{cx, f + 6.5 - ground, cz + 14.5, cx, f + 1.5 - ground, cz - 2};
+                else if (view == 1) sceneCam = new double[]{cx + 3.5, f + 3.2 - ground, cz + 6.5, cx, f + 1.8 - ground, cz};
+                else sceneCam = new double[]{cx - 6.5, f + 3.0 - ground, cz + 9.5, cx - 13.5, f + 0.8 - ground, cz + 2};
+            }
+            case 3 -> {
+                int[] r = lab.refuge();
+                int g = lab.shrineGateDir();
+                int[] d = com.jttw.engine.world.feature.Labyrinth.DIRS[g];
+                var boss = com.jttw.engine.registry.ModEntities.LADY_EARTH_FLOW.get().create(level);
+                float yaw = (float) Math.toDegrees(Math.atan2(-d[0], d[1]));
+                boss.moveTo(r[0] + 0.5, r[1], r[2] + 0.5, yaw, 0f);
+                boss.setYHeadRot(yaw);
+                boss.setYBodyRot(yaw);
+                boss.setNoAi(true);
+                level.addFreshEntity(boss);
+                sceneCam = new double[]{r[0] + 0.5 + d[0] * 4.2, r[1] + 3.2 - ground, r[2] + 0.5 + d[1] * 4.2,
+                        r[0] + 0.5 - d[0] * 4.5, r[1] + 1.0 - ground, r[2] + 0.5 - d[1] * 4.5};
+            }
+            case 4 -> {
+                // a lit tunnel cell on the top level with a way out of it: looked at from the next cell
+                var l = lab.level(0);
+                int f0 = com.jttw.engine.world.feature.Labyrinth.FLOOR[0];
+                for (int i = 0; i < com.jttw.engine.world.feature.Labyrinth.GRID; i++) for (int j = 0; j < com.jttw.engine.world.feature.Labyrinth.GRID; j++) {
+                    if (sceneCam != null || !l.lit(i, j)) continue;
+                    for (int dir = 0; dir < 4 && sceneCam == null; dir++) {
+                        if (!l.passage(i, j, dir)) continue;
+                        int[] a = lab.cellMiddle(i, j), b = lab.cellMiddle(i + com.jttw.engine.world.feature.Labyrinth.DIRS[dir][0], j + com.jttw.engine.world.feature.Labyrinth.DIRS[dir][1]);
+                        int[] dd = com.jttw.engine.world.feature.Labyrinth.DIRS[dir];
+                        sceneCam = new double[]{b[0] + 0.5 + dd[0] * 1.4, f0 + 1.6 - ground, b[1] + 0.5 + dd[1] * 1.4, a[0] + 0.5, f0 + 1.3 - ground, a[1] + 0.5};
+                        for (int k = 0; k < 3; k++) {
+                            var m = com.jttw.engine.registry.ModEntities.MOUSE_SPIRIT.get().create(level);
+                            m.become(37, k == 2);
+                            float yaw = (float) Math.toDegrees(Math.atan2(-dd[0], dd[1]));
+                            m.moveTo(a[0] + 0.5 + (k - 1) * 0.9 * dd[1], f0, a[1] + 0.5 + (k - 1) * 0.9 * dd[0], yaw, 0f);
+                            m.setYHeadRot(yaw);
+                            m.setYBodyRot(yaw);
+                            m.setNoAi(true);
+                            level.addFreshEntity(m);
+                        }
+                    }
+                }
+            }
+            case 5 -> {
+                var s = lab.stairs().get(0);
+                int[] mid = lab.cellMiddle(s.i(), s.j());
+                int lower = com.jttw.engine.world.feature.Labyrinth.FLOOR[s.upper() + 1];
+                // from the lower level's tunnel, looking in and up the stair
+                int back = -1;
+                for (int dir = 0; dir < 4; dir++) if (lab.level(s.upper() + 1).passage(s.i(), s.j(), dir)) back = dir;
+                int[] d = com.jttw.engine.world.feature.Labyrinth.DIRS[Math.max(0, back)];
+                sceneCam = new double[]{mid[0] + 0.5 + d[0] * 4.5, lower + 1.6 - ground, mid[1] + 0.5 + d[1] * 4.5,
+                        mid[0] + 0.5, lower + 4.5 - ground, mid[1] + 0.5};
+            }
+            default -> {
+                int f0 = com.jttw.engine.world.feature.Labyrinth.FLOOR[0];
+                sceneCam = new double[]{cx + 7.5, f0 + 2.5 - ground, cz + 5.5, cx, f0 + 3.5 - ground, cz};
+            }
+        }
     }
 
     /** Puts a player back to an ordinary state between scenes. */

@@ -29,7 +29,13 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-public class YinYangSwordItem extends Item {
+public class YinYangSwordItem extends Item implements PairedBlade {
+
+    /** The Yin sword's partner is the Yang, and the other way round. */
+    @Override
+    public boolean pairsWith(ItemStack self, ItemStack other) {
+        return other.getItem() instanceof YinYangSwordItem && isYang(other) != isYang(self);
+    }
 
     private static final ResourceLocation UUID_ATK = JTTWEngine.id("yin_yang_sword_atk");
     /** The off-hand sword needs its own id, or the two hands overwrite each other's bonus. */

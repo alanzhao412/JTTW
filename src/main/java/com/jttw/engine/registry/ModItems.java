@@ -59,6 +59,29 @@ public final class ModItems {
     public static final DeferredHolder<Item, Item> HEART_BONE = ITEMS.register("heart_bone",
             () -> new Item(new Item.Properties().rarity(net.minecraft.world.item.Rarity.EPIC).fireResistant()));
 
+    // ── The Bottomless Cave ───────────────────────────────────────
+    /** From Mouse Spirits. */
+    public static final DeferredHolder<Item, Item> SPIRIT_WHISKER = ITEMS.register("spirit_whisker", () -> new Item(new Item.Properties()));
+    /** From Flower Maids. */
+    public static final DeferredHolder<Item, Item> NIGHT_PETAL = ITEMS.register("night_petal", () -> new Item(new Item.Properties()));
+    /** From Lady Earth Flow: one of the candles she stole from the Buddha's altar on Spirit Mountain. */
+    public static final DeferredHolder<Item, Item> SPIRIT_MOUNTAIN_CANDLE = ITEMS.register("spirit_mountain_candle",
+            () -> new Item(new Item.Properties().rarity(net.minecraft.world.item.Rarity.EPIC).fireResistant()));
+    /** What her likeness falls back into: her embroidered shoe. */
+    public static final DeferredHolder<Item, Item> EMBROIDERED_SHOE = ITEMS.register("embroidered_shoe",
+            () -> new Item(new Item.Properties().stacksTo(1).rarity(net.minecraft.world.item.Rarity.UNCOMMON)));
+    /** Her twin swords, the male blade and the female (a pair: see EarthFlowSwordItem). */
+    public static final DeferredHolder<Item, Item> EARTH_FLOW_SWORD_MALE = ITEMS.register("earth_flow_sword_male",
+            () -> new com.jttw.engine.item.EarthFlowSwordItem(true));
+    public static final DeferredHolder<Item, Item> EARTH_FLOW_SWORD_FEMALE = ITEMS.register("earth_flow_sword_female",
+            () -> new com.jttw.engine.item.EarthFlowSwordItem(false));
+    public static final DeferredHolder<Item, Item> MOUSE_SPIRIT_SPAWN_EGG = ITEMS.register("mouse_spirit_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.MOUSE_SPIRIT, 0xB8B0A4, 0xE8A0A8, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> FLOWER_MAID_SPAWN_EGG = ITEMS.register("flower_maid_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.FLOWER_MAID, 0xF2B8CC, 0x6FA05A, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> LADY_EARTH_FLOW_SPAWN_EGG = ITEMS.register("lady_earth_flow_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(com.jttw.engine.registry.ModEntities.LADY_EARTH_FLOW, 0xF4F1EC, 0xD9A93A, new Item.Properties()));
+
     // ── Heaven and Hell ───────────────────────────────────────────
     public static final DeferredHolder<Item, Item> JADE_BLOCK_ITEM =
             ITEMS.register("jade_block", () -> new BlockItem(ModBlocks.JADE_BLOCK.get(), new Item.Properties()));

@@ -179,8 +179,23 @@ public final class Zones {
             TagKey.create(Registries.BIOME, id("white_bone_ridge_hosts")), ZoneLayout.WHITE_BONE, Vertical.WHOLE_COLUMN,
             20, 36, 80);
 
+    public static final ResourceKey<Biome> BOTTOMLESS_CAVE_BIOME = ResourceKey.create(Registries.BIOME, id("bottomless_cave"));
+
+    /** The height under which the Bottomless Cave takes the column: its labyrinth, deep in the mountain's roots. */
+    public static final int BOTTOMLESS_CAVE_TOP = 40;
+
+    /**
+     * Levels 37-46: the Bottomless Cave, a labyrinth under mountain country (peaks, slopes, meadows,
+     * groves, windswept hills, cherry groves), from y {@value #BOTTOMLESS_CAVE_TOP} down. Its host is
+     * judged at y 256, over any mountain's top: there a column's biome is always its surface biome
+     * (judged lower, under a tall peak, it may be a cave biome, and the mountain goes unrecognised).
+     */
+    public static final Zone BOTTOMLESS = Zone.overworld(BOTTOMLESS_CAVE_BIOME,
+            TagKey.create(Registries.BIOME, id("bottomless_cave_hosts")), ZoneLayout.BOTTOMLESS_CAVE,
+            Vertical.below(BOTTOMLESS_CAVE_TOP), 37, 46, 100).hostSampledAt(256);
+
     /** Every zone, in order: an earlier one keeps its ground from a later one sharing its heights. Append new ones. */
-    public static final List<Zone> ALL = List.of(WHITE_BONE);
+    public static final List<Zone> ALL = List.of(WHITE_BONE, BOTTOMLESS);
 
     /** Where the overworld zones of {@link #ALL} lie. */
     public static final ZoneMap MAP = new ZoneMap(ALL);

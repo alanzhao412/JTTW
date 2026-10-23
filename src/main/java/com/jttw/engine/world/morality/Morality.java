@@ -3,7 +3,8 @@ package com.jttw.engine.world.morality;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.entity.heaven.HeavenlySoldierEntity;
 import com.jttw.engine.entity.ridge.LadyWhiteBoneEntity;
-import com.jttw.engine.entity.ridge.RidgeMonster;
+import com.jttw.engine.entity.zone.ZoneMonster;
+import com.jttw.engine.entity.cave.LadyEarthFlowEntity;
 import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.network.s2c.SyncKarmaPacket;
 import com.jttw.engine.registry.ModBlocks;
@@ -50,6 +51,8 @@ public final class Morality {
     public static final int STEAL_PEACH = -40, STEAL_WINE = -40, LOOT_HEAVEN = -30, STRIKE_THE_BOOK = -200;
     public static final int KILL_VILLAGER = -50, KILL_PET = -30, KILL_GOLEM = -10, KILL_PLAYER = -60, KILL_SOLDIER = -15;
     public static final int SLAY_MONSTER = 1, SLAY_CAPTAIN = 5, SLAY_LADY = 150, TRADE = 1;
+    /** Lady Earth Flow, who ate the Buddha's candles and preyed on monks: as much as Lady White Bone. */
+    public static final int SLAY_EARTH_FLOW = SLAY_LADY;
     /** How recently a victim must have struck their killer for the kill to be a fight, not a murder: 10 s. */
     public static final int PROVOKED_TICKS = 200;
 
@@ -117,7 +120,8 @@ public final class Morality {
     public static int killDeed(ServerPlayer killer, LivingEntity victim) {
         if (victim instanceof HeavenlySoldierEntity) return KILL_SOLDIER;
         if (victim instanceof LadyWhiteBoneEntity) return SLAY_LADY;
-        if (victim instanceof RidgeMonster m && m.isCaptain()) return SLAY_CAPTAIN;
+        if (victim instanceof LadyEarthFlowEntity) return SLAY_EARTH_FLOW;
+        if (victim instanceof ZoneMonster m && m.isCaptain()) return SLAY_CAPTAIN;
         if (victim instanceof AbstractVillager) return KILL_VILLAGER;
         if (victim instanceof IronGolem) return KILL_GOLEM;
         if (victim instanceof TamableAnimal pet && pet.isTame() && !killer.getUUID().equals(pet.getOwnerUUID())) return KILL_PET;
@@ -138,7 +142,7 @@ public final class Morality {
             case KILL_PET -> "you killed someone's companion";
             case KILL_PLAYER -> "you murdered a player";
             case SLAY_LADY -> "you destroyed Lady White Bone";
-            case SLAY_CAPTAIN -> "you slew a captain of the dead";
+            case SLAY_CAPTAIN -> "you slew a demon captain";
             default -> "you slew a monster";
         };
     }
@@ -147,7 +151,7 @@ public final class Morality {
     public static void onKill(LivingDeathEvent event) {
         if (!(event.getSource().getEntity() instanceof ServerPlayer killer) || event.getEntity() == killer) return;
         int deed = killDeed(killer, event.getEntity());
-        if (deed != 0) deed(killer, deed, killWhat(deed));
+        if (deed != 0) deed(killer, deed, event.getEntity() instanceof LadyEarthFlowEntity ? "you subdued Lady Earth Flow" : killWhat(deed));
     }
 
     @SubscribeEvent

@@ -109,6 +109,36 @@ public final class ModEntities {
                             .updateInterval(5)
                             .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "bone_shard").toString()));
 
+    // ── The Bottomless Cave ───────────────────────────────────────
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.cave.MouseSpiritEntity>> MOUSE_SPIRIT =
+            ENTITIES.register("mouse_spirit", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.cave.MouseSpiritEntity>of(com.jttw.engine.entity.cave.MouseSpiritEntity::new, MobCategory.MONSTER)
+                            .sized(0.6F, 1.1F)
+                            .clientTrackingRange(8)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "mouse_spirit").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.cave.FlowerMaidEntity>> FLOWER_MAID =
+            ENTITIES.register("flower_maid", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.cave.FlowerMaidEntity>of(com.jttw.engine.entity.cave.FlowerMaidEntity::new, MobCategory.MONSTER)
+                            .sized(0.6F, 1.9F)
+                            .clientTrackingRange(8)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "flower_maid").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.cave.LadyEarthFlowEntity>> LADY_EARTH_FLOW =
+            ENTITIES.register("lady_earth_flow", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.cave.LadyEarthFlowEntity>of(com.jttw.engine.entity.cave.LadyEarthFlowEntity::new, MobCategory.MONSTER)
+                            .sized(0.65F, 2.0F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "lady_earth_flow").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.cave.EarthFlowDecoyEntity>> EARTH_FLOW_DECOY =
+            ENTITIES.register("earth_flow_decoy", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.cave.EarthFlowDecoyEntity>of(com.jttw.engine.entity.cave.EarthFlowDecoyEntity::new, MobCategory.MISC)
+                            .sized(0.65F, 2.0F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "earth_flow_decoy").toString()));
+
     // ── Forms ──────────────────────────────────────────────────────
 
     /** The other divine beasts' true forms, never spawned: only taken (see TrueForm). */
@@ -164,8 +194,16 @@ public final class ModEntities {
         modEventBus.addListener(ModEntities::onSpawnPlacements);
     }
 
-    /** The ridge's dead rise in any light (their spawn lists are the ridge's alone). */
+    /** The ridge's dead rise in any light (their spawn lists are the ridge's alone); so does the cave's household, lanterns or not. */
     private static void onSpawnPlacements(net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent event) {
+        event.register(MOUSE_SPIRIT.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(FLOWER_MAID.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
         event.register(BONE_SERVANT.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
                 net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
@@ -177,6 +215,10 @@ public final class ModEntities {
     }
 
     private static void onAttributeCreate(EntityAttributeCreationEvent event) {
+        event.put(MOUSE_SPIRIT.get(), com.jttw.engine.entity.cave.MouseSpiritEntity.createAttributes().build());
+        event.put(FLOWER_MAID.get(), com.jttw.engine.entity.cave.FlowerMaidEntity.createAttributes().build());
+        event.put(LADY_EARTH_FLOW.get(), com.jttw.engine.entity.cave.LadyEarthFlowEntity.createAttributes().build());
+        event.put(EARTH_FLOW_DECOY.get(), com.jttw.engine.entity.cave.EarthFlowDecoyEntity.createAttributes().build());
         event.put(WU_CLONE.get(), WuCloneEntity.createAttributes().build());
         event.put(XIAOTIAN_QUAN.get(), XiaotianQuanEntity.createAttributes().build());
         event.put(BONE_SERVANT.get(), com.jttw.engine.entity.ridge.BoneServantEntity.createAttributes().build());

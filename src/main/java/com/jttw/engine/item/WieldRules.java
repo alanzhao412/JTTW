@@ -38,6 +38,7 @@ import javax.annotation.Nullable;
  *       who holds it.</li>
  *   <li><b>Yin-Yang Swords:</b> a pair: holding one draws the other into the off hand. Unless
  *       Nezha, whoever holds them is frostbitten and on fire at once.</li>
+ *   <li><b>Lady Earth Flow's twin swords:</b> a pair too, drawn the same way; anyone may wield them.</li>
  *   <li><b>Huntian Cloth:</b> binds and wounds whoever wears it, unless Nezha.</li>
  * </ul>
  * STR is the strength the player's class and level give them, as the character screen shows it.
@@ -208,20 +209,19 @@ public final class WieldRules {
     }
 
     /**
-     * The swords are a pair: one in the main hand draws the other from the inventory into the off
-     * hand; put away, the drawn one goes back.
+     * Paired blades ({@link PairedBlade}: the Yin-Yang Swords, Lady Earth Flow's twin swords): one in
+     * the main hand draws its partner from the inventory into the off hand; put away, the drawn one goes back.
      */
     public static void pairSwords(ServerPlayer p) {
         Inventory inv = p.getInventory();
         ItemStack main = p.getMainHandItem();
         ItemStack off = p.getOffhandItem();
-        if (main.getItem() instanceof YinYangSwordItem) {
-            boolean mainYang = YinYangSwordItem.isYang(main);
-            if (off.getItem() instanceof YinYangSwordItem && YinYangSwordItem.isYang(off) != mainYang) return; // paired
+        if (main.getItem() instanceof PairedBlade blade) {
+            if (blade.pairsWith(main, off)) return; // paired
             for (int i = 0; i < inv.items.size(); i++) {
                 if (i == inv.selected) continue;
                 ItemStack s = inv.items.get(i);
-                if (s.getItem() instanceof YinYangSwordItem && YinYangSwordItem.isYang(s) != mainYang) {
+                if (blade.pairsWith(main, s)) {
                     ItemStack partner = s.copy();
                     StackData.putBoolean(partner, TAG_DRAWN, true);
                     inv.items.set(i, off.copy()); // what was in the off hand takes the partner's place
@@ -231,8 +231,8 @@ public final class WieldRules {
             }
             return;
         }
-        // The pair put away: the drawn sword goes back into the inventory
-        if (off.getItem() instanceof YinYangSwordItem && StackData.getBoolean(off, TAG_DRAWN)) {
+        // The pair put away: the drawn blade goes back into the inventory
+        if (off.getItem() instanceof PairedBlade && StackData.getBoolean(off, TAG_DRAWN)) {
             ItemStack back = off.copy();
             StackData.remove(back, TAG_DRAWN);
             int free = inv.getFreeSlot();

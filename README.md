@@ -276,7 +276,7 @@ A level zone is a biome put over the overworld in regions laid out from the seed
 wobble, a salt of its own), the heights it takes (`Vertical`: the whole column, `below(y)` for an
 underground zone, `above(y)` for an aerial one), its level band and the players it is allied to.
 Zones sharing heights never share ground: a later zone in `Zones.ALL` gives up a whole region
-that would touch an earlier one's (`ZoneMap`). White Bone Ridge is the first.
+that would touch an earlier one's (`ZoneMap`). White Bone Ridge is the first, the Bottomless Cave the second.
 
 To add a zone:
 
@@ -297,6 +297,59 @@ To add a zone:
    boss there once.
 6. **Tests**: add the zone to `ZoneFrameworkTest`'s checks if its layout is unusual; GameTests
    for its monsters and boss as `RidgeGameTests` does.
+
+#### The Bottomless Cave (levels 37–46)
+
+Mount Xiankong's Bottomless Cave (无底洞, chapters 80–83), home of Lady Earth Flow, the
+Golden-Nosed, White-Furred Mouse Spirit. An underground zone (`Zones.BOTTOMLESS`):
+`Vertical.below(40)` under mountain country (peaks, slopes, groves, meadows, cherry groves,
+windswept hills), in 90% of 1024-block cells (only those whose centre is in mountain country hold it: about one in thirty), regions about 220 blocks across. Its host is judged
+at y 256, above any mountain's top, where a column's biome is always its surface biome (judged lower,
+under a tall peak, it can be a cave biome). Being after White Bone Ridge in `Zones.ALL` and sharing
+its heights, it gives up any region that would touch the ridge's. Grunt XP 100 (260 a kill there,
+with the band's scaling), against the ridge's 80.
+
+- **Terrain** (`world/feature/Labyrinth`, `BottomlessCaveFeature`): at the region's centre a
+  sinkhole and a mouth about ten feet across, then a shaft down from the surface to y 32, open in
+  the middle (a pool at the bottom to fall into) with a spiral mud-brick stair round it, laid in
+  half blocks, a lantern each turn. Below, three levels of labyrinth (walked at y 32, 16 and 0), each
+  a maze on a 21x21 grid within 70 blocks of the centre: a Kruskal spanning tree (it branches and
+  dead-ends often) with a few loops, six chambers a level (nests, larders, bone heaps, flowered
+  grottoes), and three spiral stairs down from each level, out toward the rim and never under one
+  another, so every level must be crossed. The top level's hub takes the shaft. At the bottom, her
+  palace: a 31-block hall of blackstone and gold, red pillars, a carpet from gate to gate up to her
+  dais, flower beds down both sides, smoking censers, candles, lanterns on chains, spore blossoms
+  and shroomlight lamps; and out toward the rim, her shrine, with tablets to her adoptive father and
+  brother (Li Jing and Nezha). The labyrinth is worked out from the seed and the region's centre
+  alone (`Labyrinth.of`, pure Java, unit-tested): each chunk lays its own part, palace included, so
+  nothing laid later undoes it. Its slabs of height are its own (rock where not open), so vanilla
+  caves, water and lava never break in. Tunnels are lit here and there (lanterns, pale soul
+  lanterns), stairs by a light in their pillar, chambers by a lantern, the palace well.
+- **Mouse Spirit** (`entity/cave/MouseSpiritEntity`): 2 hits, a bite of 7% of health; quick
+  (0.36), in packs of 3–5 (a captain brings 4). Strike one and the pack turns on you; each darts in,
+  bites and scurries back, so a pack circles.
+- **Flower Maid** (`FlowerMaidEntity`): 5 hits, a stab of 15%; every 5 s she mends the most
+  wounded of the household near her (a fifth of its health; 3% of her mistress's), and pressed
+  close she breathes out pollen (Slowness II and Weakness for 4 s).
+- **Lady Earth Flow** (`LadyEarthFlowEntity`, a `ZoneBoss`, level 43, 80 hits, pink bar): her
+  twin swords cut twice a stroke (12.5% each; the female blade slows). At 60% (phase 1) she calls
+  4 mice and 2 maids and starts to burrow, rising behind whoever she fights. At 30% (phase 2),
+  once, she leaves her embroidered shoe in her likeness (`EarthFlowDecoyEntity`: weak, no XP or
+  karma, a shoe again when struck down or after a minute) and flees to her shrine, strewing petals
+  on the floor along the way; no blow kills her before that. Alone there she mends, up to half her
+  health; found, she fights to the end. Karma +150, captains +5.
+- **Drops**: her twin swords (`EarthFlowSwordItem`, male and female: +35% damage, a quick sword;
+  held as a pair, drawn into both hands like Nezha's Yin-Yang Swords through `PairedBlade`, every cut
+  is followed by a second for 40%), the Stolen Candle of Spirit Mountain, sigils, gold; Spirit
+  Whiskers from mice, Night-Blooming Petals from maids (and a second True Samadhi Fire recipe from
+  them), the Embroidered Shoe from her likeness.
+- **Art**: `CaveRenderers` (a box model for the mice; a person's frame with skirt, collar, hair,
+  ears, gold nose and tail for the maids and her); skins from `assets_source/mouse_spirit.py`,
+  `flower_maid.py`, `lady_earth_flow.py`, item icons from `cave_items.py` (helpers in `cave_skin.py`).
+- **Seeing it**: `./gradlew runFormGallery -Pgallery.only=cave_` (creatures, her, her likeness,
+  and the labyrinth laid in the gallery's flat world: palace, shrine, tunnel, stair, hub);
+  `./gradlew runWorldgenBench -Pbench.mode=cave` (the nearest real region: a plan of each level as
+  built, a cut through the shaft, and pictures, in `run-bench/screenshots/zones/`).
 
 ---
 

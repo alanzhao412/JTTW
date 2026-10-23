@@ -79,7 +79,16 @@ public class ModItemsGameTests {
             Map.entry("bone_gravel", BlockItem.class),
             Map.entry("celestial_marble", BlockItem.class),
             Map.entry("underworld_stone", BlockItem.class),
-            Map.entry("soul_ash", BlockItem.class));
+            Map.entry("soul_ash", BlockItem.class),
+            Map.entry("spirit_whisker", Item.class),
+            Map.entry("night_petal", Item.class),
+            Map.entry("spirit_mountain_candle", Item.class),
+            Map.entry("embroidered_shoe", Item.class),
+            Map.entry("earth_flow_sword_male", com.jttw.engine.item.EarthFlowSwordItem.class),
+            Map.entry("earth_flow_sword_female", com.jttw.engine.item.EarthFlowSwordItem.class),
+            Map.entry("mouse_spirit_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("flower_maid_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("lady_earth_flow_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class));
 
     @GameTest(template = PLATFORM)
     public static void everyModItemIsRegisteredUnderItsIdAsTheRightClass(GameTestHelper h) {

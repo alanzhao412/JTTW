@@ -115,6 +115,10 @@ public final class ClientInit {
         event.registerLayerDefinition(com.jttw.engine.client.renderer.BlackTortoiseRenderer.LAYER, com.jttw.engine.client.renderer.BlackTortoiseRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.VermilionBirdRenderer.LAYER, com.jttw.engine.client.renderer.VermilionBirdRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.RidgeRenderers.VEIL_LAYER, com.jttw.engine.client.renderer.RidgeRenderers::veilLayer);
+        // The Bottomless Cave
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.CaveRenderers.MOUSE_LAYER, com.jttw.engine.client.renderer.CaveRenderers::mouseLayer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.CaveRenderers.MAID_LAYER, com.jttw.engine.client.renderer.CaveRenderers::maidLayer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.CaveRenderers.LADY_LAYER, com.jttw.engine.client.renderer.CaveRenderers::ladyLayer);
     }
 
     // ── Entity renderers (MOD bus) ─────────────────────────────────
@@ -150,6 +154,11 @@ public final class ClientInit {
         event.registerEntityRenderer(ModEntities.VERMILION_BIRD.get(), com.jttw.engine.client.renderer.VermilionBirdRenderer::new);
         event.registerEntityRenderer(ModEntities.LADY_WHITE_BONE.get(), com.jttw.engine.client.renderer.RidgeRenderers.LadyWhiteBoneRenderer::new);
         event.registerEntityRenderer(ModEntities.LADY_HUSK.get(), com.jttw.engine.client.renderer.RidgeRenderers.HuskRenderer::new);
+        // The Bottomless Cave
+        event.registerEntityRenderer(ModEntities.MOUSE_SPIRIT.get(), com.jttw.engine.client.renderer.CaveRenderers.MouseRenderer::new);
+        event.registerEntityRenderer(ModEntities.FLOWER_MAID.get(), com.jttw.engine.client.renderer.CaveRenderers.MaidRenderer::new);
+        event.registerEntityRenderer(ModEntities.LADY_EARTH_FLOW.get(), com.jttw.engine.client.renderer.CaveRenderers.LadyRenderer::new);
+        event.registerEntityRenderer(ModEntities.EARTH_FLOW_DECOY.get(), com.jttw.engine.client.renderer.CaveRenderers.DecoyRenderer::new);
         event.registerEntityRenderer(ModEntities.BONE_SHARD.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         event.registerEntityRenderer(ModEntities.THROWN_SPEAR.get(),
                 com.jttw.engine.client.renderer.ThrownSpearRenderer::new);

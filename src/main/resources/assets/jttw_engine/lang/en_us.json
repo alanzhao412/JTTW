@@ -62,5 +62,21 @@
   "effect.jttw_engine.exhausted": "Exhausted",
   "entity.jttw_engine.azure_dragon": "Azure Dragon",
   "entity.jttw_engine.black_tortoise": "Black Tortoise",
-  "entity.jttw_engine.vermilion_bird": "Vermilion Bird"
+  "entity.jttw_engine.vermilion_bird": "Vermilion Bird",
+  "biome.jttw_engine.bottomless_cave": "The Bottomless Cave",
+  "entity.jttw_engine.mouse_spirit": "Mouse Spirit",
+  "entity.jttw_engine.flower_maid": "Flower Maid",
+  "entity.jttw_engine.lady_earth_flow": "Lady Earth Flow",
+  "entity.jttw_engine.earth_flow_decoy": "Lady Earth Flow",
+  "entity.jttw_engine.earth_flow_decoy.unmasked": "It was only her embroidered shoe! Lady Earth Flow has fled deeper into the cave. Follow the petals.",
+  "item.jttw_engine.spirit_whisker": "Spirit Whisker",
+  "item.jttw_engine.night_petal": "Night-Blooming Petal",
+  "item.jttw_engine.spirit_mountain_candle": "Stolen Candle of Spirit Mountain",
+  "item.jttw_engine.embroidered_shoe": "Embroidered Shoe",
+  "item.jttw_engine.earth_flow_sword_male": "Earth Flow Twin Sword (Male)",
+  "item.jttw_engine.earth_flow_sword_female": "Earth Flow Twin Sword (Female)",
+  "item.jttw_engine.earth_flow_sword.desc": "One of Lady Earth Flow's twin swords",
+  "item.jttw_engine.mouse_spirit_spawn_egg": "Mouse Spirit Spawn Egg",
+  "item.jttw_engine.flower_maid_spawn_egg": "Flower Maid Spawn Egg",
+  "item.jttw_engine.lady_earth_flow_spawn_egg": "Lady Earth Flow Spawn Egg"
 }
