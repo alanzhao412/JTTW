@@ -97,6 +97,8 @@ final class AbilityScenes {
             java.util.Map.entry("lion_city_kings_way", 80), java.util.Map.entry("lion_city_hall_true", 60), java.util.Map.entry("lion_city_court_true", 60),
             // a king's true form showing itself, its pause run out before the picture
             java.util.Map.entry("lion_azure_lion_revealed", 20), java.util.Map.entry("lion_white_elephant_revealed", 20),
+            // the Great White Bull close, its transformation's cloud blown away before the picture
+            java.util.Map.entry("bull_side", 70), java.util.Map.entry("bull_front", 70), java.util.Map.entry("bull_face", 70), java.util.Map.entry("bull_rear", 70),
             // Fengdu, laid off the stage; the Hell plaza's Gate of Ghosts and its side doors
             java.util.Map.entry("fengdu_gate", 140), java.util.Map.entry("fengdu_above", 100), java.util.Map.entry("fengdu_ghost_gate", 80),
             java.util.Map.entry("fengdu_ghost_gate_close", 60), java.util.Map.entry("fengdu_palace", 80), java.util.Map.entry("fengdu_palace_inside", 60),
@@ -669,14 +671,14 @@ final class AbilityScenes {
                     BullDemonAbilityHandler.toggleGreatBull(p);
                 }, p -> {}, 1, false),
                 // the Great White Bull close: its shape from the side, its head, its horns
-                new Scene("bull_side", p -> { bull(p, "bdk_bull_1", "bdk_bull_2", "bdk_bull_3"); facing = -90f; sceneCam = new double[]{0.5, 2.0, 10.0, 0.5, 1.6, 0.5}; },
-                        BullDemonAbilityHandler::toggleGreatBull, 45, false),
-                new Scene("bull_front", p -> { bull(p, "bdk_bull_1", "bdk_bull_2", "bdk_bull_3"); facing = -50f; sceneCam = new double[]{7.5, 2.0, 8.0, 0.5, 1.6, 0.5}; },
-                        BullDemonAbilityHandler::toggleGreatBull, 45, false),
+                new Scene("bull_side", p -> { bull(p, "bdk_bull_1", "bdk_bull_2", "bdk_bull_3"); facing = -90f; sceneCam = new double[]{0.5, 2.2, 7.5, 0.5, 1.6, 0.5}; },
+                        BullDemonAbilityHandler::toggleGreatBull, 110, false),
+                new Scene("bull_front", p -> { bull(p, "bdk_bull_1", "bdk_bull_2", "bdk_bull_3"); facing = -50f; sceneCam = new double[]{5.5, 2.2, 6.0, 0.5, 1.6, 0.5}; },
+                        BullDemonAbilityHandler::toggleGreatBull, 110, false),
                 new Scene("bull_face", p -> { bull(p, "bdk_bull_1", "bdk_bull_2", "bdk_bull_3"); facing = -90f; sceneCam = new double[]{5.5, 2.0, 1.6, 2.0, 1.5, 0.5}; },
-                        BullDemonAbilityHandler::toggleGreatBull, 45, false),
-                new Scene("bull_rear", p -> { bull(p, "bdk_bull_1", "bdk_bull_2", "bdk_bull_3"); facing = -90f; sceneCam = new double[]{-6.0, 2.6, 6.5, 0.5, 1.4, 0.5}; },
-                        BullDemonAbilityHandler::toggleGreatBull, 45, false),
+                        BullDemonAbilityHandler::toggleGreatBull, 110, false),
+                new Scene("bull_rear", p -> { bull(p, "bdk_bull_1", "bdk_bull_2", "bdk_bull_3"); facing = -90f; sceneCam = new double[]{-4.5, 2.6, 5.0, 0.5, 1.4, 0.5}; },
+                        BullDemonAbilityHandler::toggleGreatBull, 110, false),
                 new Scene("bdk_cudgel_shockwave", p -> {
                     bull(p);
                     p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.MIXED_IRON_CUDGEL.get()));
