@@ -406,8 +406,8 @@ KING = mirrored([
         (-5.5, -4, -3, 11, 4, 6, 'cheek'),
         (-4, -8.5, 1.5, 8, 9, 4, 'mane'),
         (-1.5, -8.8, -5.2, 3, 1, 5, 'ridge'),
-        (-4.8, -7.2, -5.8, 2, 2, 1, 'eye'),
-        (2.8, -7.2, -5.8, 2, 2, 1, 'eye'),
+        (-5.9, -7.6, -5.8, 2.4, 1.8, 2.6, 'eye_r'),     # the eyes high and wide, clear of the snout
+        (3.5, -7.6, -5.8, 2.4, 1.8, 2.6, 'eye_l'),
     ]),
     part('right_brow', 'head', (-0.6, -7.7, -5.6), (0, 0, 0.3), [(-4.8, -1.3, -0.5, 4.8, 1.8, 4.5, 'brow')]),
     part('right_browflame', 'right_brow', (-4.2, -0.6, 0.5), (0.45, -0.45, 0), [(-0.1, -3.5, 0, 0.2, 4.5, 7, 'browflame')]),
@@ -519,20 +519,21 @@ KING = mirrored([
 ])
 
 # Per king: robe, its shadow, the gold of his embroidery, the coloured thread beside it, his scales,
-# his belly-plates, his mane and beard, his horns, his eyes (they smoulder: dark, not a blaze), a gem.
+# his belly-plates, his mane and beard, his horns, his eyes (the iris and its hot core, a colour set
+# against his skin, glowing out of a dark socket), a gem.
 KINGS = {
     'ao_guang': dict(robe=(30, 116, 126), deep=(10, 46, 58), gold=(232, 190, 84), thread=(130, 214, 200),
                      scale=(44, 128, 140), belly=(216, 204, 150), hair=(240, 240, 232), horn=(230, 212, 164),
-                     eye=(110, 66, 10), core=(150, 98, 18), gem=(90, 200, 180)),
+                     eye=(176, 104, 10), core=(232, 172, 34), gem=(90, 200, 180)),
     'ao_qin': dict(robe=(166, 28, 30), deep=(70, 8, 14), gold=(236, 184, 70), thread=(252, 160, 60),
                    scale=(178, 70, 34), belly=(240, 200, 136), hair=(236, 128, 44), horn=(226, 198, 150),
-                   eye=(120, 44, 8), core=(160, 74, 14), gem=(236, 60, 30)),
+                   eye=(176, 38, 6), core=(236, 104, 16), gem=(236, 60, 30)),
     'ao_run': dict(robe=(226, 226, 220), deep=(126, 132, 148), gold=(210, 184, 112), thread=(140, 176, 210),
                    scale=(184, 198, 210), belly=(242, 238, 222), hair=(250, 250, 252), horn=(200, 198, 186),
-                   eye=(104, 88, 34), core=(140, 122, 56), gem=(160, 214, 190)),
+                   eye=(176, 148, 50), core=(244, 226, 124), gem=(160, 214, 190)),
     'ao_shun': dict(robe=(30, 32, 44), deep=(6, 6, 12), gold=(176, 186, 206), thread=(84, 128, 184),
                     scale=(40, 54, 84), belly=(132, 144, 170), hair=(150, 158, 176), horn=(160, 160, 150),
-                    eye=(40, 88, 112), core=(64, 126, 150), gem=(120, 196, 240)),
+                    eye=(28, 98, 160), core=(110, 198, 240), gem=(120, 196, 240)),
 }
 LIGHT = {'top': 1.08, 'bottom': 0.62, 'front': 1.0, 'back': 0.86, 'right': 0.93, 'left': 0.93}
 
@@ -785,21 +786,45 @@ def sea_cliff(p, rect, c, peaks=(0.5,), wave_top=0.34, stripe_top=0.64):
                     p.px((fx + i, fy + j), cc)
 
 
-def king_eye_box(p, f, c):
-    """The eye: a dark socket, the iris smouldering about a slit pupil on its front and outer side."""
-    for k, r in f.items():
-        p.face(r, (18, 12, 10), 1.0, noise=2)
-    for k in ('front', 'right', 'left'):
-        fx, fy, fw, fh = f[k]
-        for i in range(fw):
-            for j in range(1, fh):
-                col = c['eye'] if j == 1 else c['core']
-                p.px((fx + i, fy + j), mul(col, 0.4))
-                p.glow.putpixel((fx + i, fy + j), tuple(int(v) for v in col) + (255,))
-        for j in range(1, fh):                             # the pupil, a slit
-            x = fx + fw // 2
-            p.px((x, fy + j), (10, 6, 4))
-            p.glow.putpixel((x, fy + j), (0, 0, 0, 0))
+# The eye's shape, outer corner first: the rows lit in each column. The top falls toward the nose, a
+# slanted glare under the scowling brow (tall at the outer corner, a sliver at the inner).
+EYE_ROWS = ((0, 2), (0, 3), (0, 3), (1, 3), (1, 3), (2, 3))
+EYE_SLIT = 3                                               # the pupil: a dark slit, nearer the nose
+
+
+def king_eye_box(p, f, c, side):
+    """The eye: a dark socket; in it the iris, burning about a slit pupil, hottest beside the slit,
+    dimmer under the lid and at the corners; drawn on the skin dark and again full-bright."""
+    socket = (14, 9, 8)
+    for k, r in f.items():                                 # the bony rim seating it in the skull
+        p.scales(r, mul(c['scale'], 0.5), cell=4, light=LIGHT[k])
+    p.face(f['front'], socket, 1.0, noise=2)
+
+    def lit(x, y, col):
+        p.px((x, y), mul(col, 0.3))                        # the skin dark beneath: the glow is drawn over it
+        p.glow.putpixel((x, y), tuple(int(v) for v in col) + (255,))
+
+    fx, fy, fw, fh = f['front']
+    for o, (top, bottom) in enumerate(EYE_ROWS):
+        x = fx + (o if side == 'right' else fw - 1 - o)
+        for j in range(top, bottom + 1):
+            if o == EYE_SLIT:
+                p.px((x, fy + j), (6, 4, 4))
+                continue
+            if abs(o - EYE_SLIT) == 1 and j > top or o == EYE_SLIT - 2 and j == top + 1:
+                col = c['core']                            # hottest beside the slit
+            elif j == top or o in (0, len(EYE_ROWS) - 1):
+                col = mul(c['eye'], 0.8)                   # under the lid, and at the corners
+            else:
+                col = c['eye']
+            lit(x, fy + j, col)
+    fx, fy, fw, fh = f[side]                               # round the outer corner, seen from aside
+    for i in range(3):
+        x = fx + fw - 1 - i if side == 'right' else fx + i
+        for j in range(fh):
+            p.px((x, fy + j), socket)
+        for j in range(i // 2, 3):
+            lit(x, fy + j, mul(c['eye'], (0.85, 0.7, 0.55)[i]))
 
 
 def king_painter(c):
@@ -1012,6 +1037,17 @@ def king_painter(c):
                     for j in range(4, 8):
                         q = p.img.getpixel((fx + i, fy + j))
                         p.px((fx + i, fy + j), mul(q[:3], 0.6))
+                for i in list(range(7)) + list(range(fw - 7, fw)):   # and darker still about the eyes
+                    for j in range(0, 7):
+                        q = p.img.getpixel((fx + i, fy + j))
+                        p.px((fx + i, fy + j), mul(q[:3], 0.35 if 1 <= j <= 5 and (i < 6 or i >= fw - 6) else 0.6))
+                for k in ('right', 'left'):
+                    fx, fy, fw, fh = f[k]
+                    x0 = fx + fw - 3 if k == 'right' else fx
+                    for i in range(3):
+                        for j in range(1, 6):
+                            q = p.img.getpixel((x0 + i, fy + j))
+                            p.px((x0 + i, fy + j), mul(q[:3], 0.4))
             if style == 'cheek':
                 for k in ('front',):
                     fx, fy, fw, fh = f[k]
@@ -1056,8 +1092,8 @@ def king_painter(c):
             fx, fy, fw, fh = f['front']
             for i in range(fw):
                 p.px((fx + i, fy + fh - 1), (24, 14, 12))
-        if style == 'eye':
-            king_eye_box(p, f, c)
+        if style in ('eye_r', 'eye_l'):
+            king_eye_box(p, f, c, 'right' if style == 'eye_r' else 'left')
         if style in ('jaw', 'jaw2'):
             for k, r in f.items():
                 if k == 'top':
