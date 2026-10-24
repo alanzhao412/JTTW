@@ -13,6 +13,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -270,9 +271,20 @@ public class KingYamaEntity extends KingOfHellEntity {
     @Override
     public void tick() {
         super.tick();
-        // in his wrath soul fire wreathes him
-        if (level().isClientSide && inWrath()) {
-            for (int i = 0; i < 2; i++) level().addParticle(ParticleTypes.SOUL_FIRE_FLAME, getRandomX(1.2), getRandomY(), getRandomZ(1.2), 0, 0.03, 0);
+        if (level().isClientSide) {
+            // embers drift up from the ring of hellfire behind his head; in his wrath soul fire wreathes him, and flames lick at his hem
+            if (random.nextInt(inWrath() ? 2 : 5) == 0) {
+                double a = random.nextDouble() * Math.PI * 2, r = 0.8 * getScale(), back = 0.45 * getScale();
+                float yaw = yBodyRot * Mth.DEG_TO_RAD;
+                double sx = Math.cos(a) * r, sy = Math.sin(a) * r;
+                level().addParticle(random.nextInt(3) == 0 ? ParticleTypes.SMOKE : ParticleTypes.SMALL_FLAME,
+                        getX() + Math.cos(yaw) * sx + Math.sin(yaw) * back, getY() + 2.85 * getScale() + sy, getZ() + Math.sin(yaw) * sx - Math.cos(yaw) * back,
+                        0, 0.02, 0);
+            }
+            if (inWrath()) {
+                for (int i = 0; i < 2; i++) level().addParticle(ParticleTypes.SOUL_FIRE_FLAME, getRandomX(1.2), getRandomY(), getRandomZ(1.2), 0, 0.03, 0);
+                level().addParticle(ParticleTypes.FLAME, getRandomX(1.6), getY() + 0.1, getRandomZ(1.6), 0, 0.04, 0);
+            }
         }
     }
 
