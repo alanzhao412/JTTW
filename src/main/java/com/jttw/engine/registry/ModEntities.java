@@ -302,7 +302,7 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.hell.KingYamaEntity>> KING_YAMA =
             ENTITIES.register("king_yama", () ->
                     EntityType.Builder.<com.jttw.engine.entity.hell.KingYamaEntity>of(com.jttw.engine.entity.hell.KingYamaEntity::new, MobCategory.MONSTER)
-                            .sized(0.9F, 2.6F)
+                            .sized(1.2F, 3.3F) // he towers: some 3.3 blocks to his crown (HellRenderers.YamaRenderer)
                             .clientTrackingRange(10)
                             .fireImmune()
                             .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "king_yama").toString()));

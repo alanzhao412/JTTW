@@ -170,11 +170,31 @@ final class HellScenes {
                     creature(p, ModEntities.OX_HEAD.get(), -3.0, 8.0, 190f, false);
                     creature(p, ModEntities.HORSE_FACE.get(), 4.0, 8.0, 170f, false);
                 }, PAIR),
-                scene("hell_yama_close", p -> put(p, ModEntities.KING_YAMA.get(), 0.5, 7.5, 175f), new double[]{0.5, 3.4, 2.0, 0.5, 2.6, 8.0}),
+                scene("hell_yama_close", p -> put(p, ModEntities.KING_YAMA.get(), 0.5, 7.5, 175f), new double[]{0.5, 3.0, 4.4, 0.5, 2.55, 7.5}),
+                scene("hell_yama_face", p -> put(p, ModEntities.KING_YAMA.get(), 0.5, 7.5, 180f), new double[]{0.5, 2.85, 5.5, 0.5, 2.75, 7.5}),
                 scene("hell_yama_wrath", p -> {
                     KingYamaEntity y = put(p, ModEntities.KING_YAMA.get(), 0.5, 8.5, 175f);
                     if (y != null) y.wrath();
                 }, new double[]{0.5, 3.8, 1.0, 0.5, 2.8, 8.5}),
+                scene("hell_yama_wrath_face", p -> {
+                    KingYamaEntity y = put(p, ModEntities.KING_YAMA.get(), 0.5, 7.5, 180f);
+                    if (y != null) y.wrath();
+                }, new double[]{0.5, 3.6, 4.0, 0.5, 3.5, 7.5}),
+                scene("hell_yama_side", p -> put(p, ModEntities.KING_YAMA.get(), 0.5, 7.5, 90f), new double[]{0.5, 3.4, 1.0, 0.5, 2.4, 8.0}),
+                scene("hell_yama_back", p -> put(p, ModEntities.KING_YAMA.get(), 0.5, 7.5, 20f), new double[]{0.5, 3.4, 1.0, 0.5, 2.4, 8.0}),
+                // how he towers over a man
+                scene("hell_yama_scale", p -> {
+                    put(p, ModEntities.KING_YAMA.get(), -0.5, 9.0, 200f);
+                    p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+                    p.teleportTo(p.serverLevel(), 1.2, ground(p), 10.0, 160f, 0f);
+                    AbilityScenes.facing = 160f;
+                }, new double[]{5.0, 2.6, 3.0, 0.5, 1.8, 9.0}),
+                // beside one of the other kings
+                scene("hell_yama_kings", p -> {
+                    put(p, ModEntities.KING_YAMA.get(), 0.5, 9.5, 180f);
+                    put(p, ModEntities.KING_QINGUANG.get(), -2.5, 8.5, 190f);
+                    put(p, ModEntities.KING_BIANCHENG.get(), 3.5, 8.5, 170f);
+                }, new double[]{0.5, 3.8, -0.5, 0.5, 2.4, 9.0}),
                 // the works, laid off the stage
                 new AbilityScenes.Scene("hell_court", p -> {
                     court(p);
@@ -188,6 +208,10 @@ final class HellScenes {
                 new AbilityScenes.Scene("hell_yama_hall", p -> {
                     yama(p);
                     AbilityScenes.sceneCam = cam(16, -522, HellTerrain.GROUND + 14, YAMA_O, 0, -556, HellTerrain.GROUND + 6);
+                }, p -> {}, 1, false),
+                new AbilityScenes.Scene("hell_yama_throne", p -> {
+                    yama(p);
+                    AbilityScenes.sceneCam = cam(0, -559, HellTerrain.GROUND + 5, YAMA_O, 0, -569, HellTerrain.GROUND + 6.2);
                 }, p -> {}, 1, false),
                 new AbilityScenes.Scene("hell_yama_hall_inside", p -> {
                     yama(p);

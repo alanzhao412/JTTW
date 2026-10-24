@@ -1,8 +1,8 @@
 """Paints the Ten Kings of Hell (textures/entity/king_*.png, 128x64) to the layout of
 HellRenderers.kingLayer(): a judge's robe and wide sleeves in his court's colour, bordered and
 embroidered in gold, a jade belt, the mian crown (a black board edged in red and gold, strings of
-beads hanging before and behind), a beard, and the ivory tablet. King Yama is in deep crimson, his
-face dark, his beard black and fierce, his eyes burning (king_yama_eyes.png, drawn full-bright).
+beads hanging before and behind), a beard, and the ivory tablet. King Yama, the Fifth, has a frame
+and skins of his own (king_yama.py).
 
 Run from the repository root: python assets_source/hell_kings.py"""
 from cave_skin import Skin, faces, shade, mix
@@ -16,7 +16,6 @@ KINGS = {
     2: ('chujiang', (140, 178, 210), (214, 200, 196), (40, 40, 50), (220, 240, 250)),
     3: ('songdi', (76, 76, 88), (214, 184, 156), (120, 120, 124), (200, 40, 40)),
     4: ('wuguan', (38, 100, 56), (220, 188, 156), (24, 20, 20), GOLD),
-    5: ('yama', (132, 18, 24), (110, 72, 60), (14, 12, 12), GOLD),
     6: ('biancheng', (88, 40, 112), (216, 186, 160), (30, 24, 24), (200, 40, 40)),
     7: ('taishan', (176, 78, 24), (220, 180, 150), (120, 40, 20), GOLD),
     8: ('dushi', (108, 84, 54), (210, 176, 146), (40, 30, 24), (200, 40, 40)),
@@ -37,11 +36,9 @@ def embroider(s, box, colour, every=7):
 
 def king(court, name, robe, face, beard, beads):
     s = Skin(128, 64, seed=court * 13)
-    yama = court == 5
     trim = GOLD if court != 10 else (240, 200, 80)
-    face_box(s, face, (20, 18, 20), eyes=(250, 200, 60) if yama else (30, 20, 20),
-             eye_white=(250, 240, 200) if yama else (236, 230, 220), brows=beard if court not in (9,) else (200, 200, 200),
-             fierce=yama or court in (7, 8), beard=beard, mouth=(120, 50, 50))
+    face_box(s, face, (20, 18, 20), eyes=(30, 20, 20), eye_white=(236, 230, 220), brows=beard if court not in (9,) else (200, 200, 200),
+             fierce=court in (7, 8), beard=beard, mouth=(120, 50, 50))
     robe_body(s, robe, trim, collar=(230, 226, 214), belt=JADE)
     sleeves(s, robe, trim, face)
     skirt(s, 64, 0, 10, 14, 7, robe, trim, hem=2, panel=shade(robe, 0.75))
@@ -80,14 +77,6 @@ def king(court, name, robe, face, beard, beads):
             for i in range(w):
                 s.put(x + i, y, GOLD)
                 s.put(x + i, y + h - 1, GOLD)
-    if yama:
-        # Yama's board bears the character 王 in gold
-        x, y, w, h = f['top']
-        for i in range(3, 7):
-            for j in (3, 6, 9):
-                s.put(x + i, y + j, GOLD)
-        for j in range(3, 10):
-            s.put(x + 5, y + j, GOLD)
     # the beads, strung alternately
     for j in range(5):
         for i in range(4):
@@ -106,10 +95,3 @@ def king(court, name, robe, face, beard, beads):
 for court, (name, robe, face, beard, beads) in KINGS.items():
     king(court, name, robe, face, beard, beads)
 
-# King Yama's burning eyes
-s = Skin(128, 64)
-x, y, w, h = faces(*HEAD)['front']
-for ex, inner in ((1, 2), (6, 5)):
-    s.put(x + ex, y + 3, (255, 236, 150))
-    s.put(x + inner, y + 3, (255, 140, 40))
-s.save('entity', 'king_yama_eyes.png')

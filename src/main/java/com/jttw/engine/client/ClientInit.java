@@ -132,6 +132,7 @@ public final class ClientInit {
         event.registerLayerDefinition(com.jttw.engine.client.renderer.HellRenderers.GHOST_LAYER, com.jttw.engine.client.renderer.HellRenderers::ghostLayer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.HellRenderers.SOLDIER_LAYER, com.jttw.engine.client.renderer.HellRenderers::soldierLayer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.HellRenderers.KING_LAYER, com.jttw.engine.client.renderer.HellRenderers::kingLayer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.HellRenderers.YAMA_LAYER, com.jttw.engine.client.renderer.HellRenderers::yamaLayer);
         // the Flaming Mountains
         event.registerLayerDefinition(com.jttw.engine.client.renderer.EmberImpRenderer.LAYER, com.jttw.engine.client.renderer.EmberImpRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.FurnaceBruteRenderer.LAYER, com.jttw.engine.client.renderer.FurnaceBruteRenderer::layer);
@@ -213,7 +214,7 @@ public final class ClientInit {
         event.registerEntityRenderer(ModEntities.KING_CHUJIANG.get(), com.jttw.engine.client.renderer.HellRenderers.KingRenderer.of("king_chujiang"));
         event.registerEntityRenderer(ModEntities.KING_SONGDI.get(), com.jttw.engine.client.renderer.HellRenderers.KingRenderer.of("king_songdi"));
         event.registerEntityRenderer(ModEntities.KING_WUGUAN.get(), com.jttw.engine.client.renderer.HellRenderers.KingRenderer.of("king_wuguan"));
-        event.registerEntityRenderer(ModEntities.KING_YAMA.get(), com.jttw.engine.client.renderer.HellRenderers.KingRenderer.of("king_yama"));
+        event.registerEntityRenderer(ModEntities.KING_YAMA.get(), com.jttw.engine.client.renderer.HellRenderers.YamaRenderer::new);
         event.registerEntityRenderer(ModEntities.KING_BIANCHENG.get(), com.jttw.engine.client.renderer.HellRenderers.KingRenderer.of("king_biancheng"));
         event.registerEntityRenderer(ModEntities.KING_TAISHAN.get(), com.jttw.engine.client.renderer.HellRenderers.KingRenderer.of("king_taishan"));
         event.registerEntityRenderer(ModEntities.KING_DUSHI.get(), com.jttw.engine.client.renderer.HellRenderers.KingRenderer.of("king_dushi"));
