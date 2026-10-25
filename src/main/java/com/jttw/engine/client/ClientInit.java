@@ -241,9 +241,8 @@ public final class ClientInit {
         event.registerEntityRenderer(ModEntities.WHITE_ELEPHANT.get(), com.jttw.engine.client.renderer.WhiteElephantRenderer::new);
         event.registerEntityRenderer(ModEntities.THROWN_SPEAR.get(),
                 com.jttw.engine.client.renderer.ThrownSpearRenderer::new);
-        // Qi wave is invisible — rendered via server-sent particles only
-        event.registerEntityRenderer(ModEntities.QI_WAVE.get(),
-                net.minecraft.client.renderer.entity.NoopRenderer::new);
+        // the qi wave: a translucent golden crescent as wide as what it strikes
+        event.registerEntityRenderer(ModEntities.QI_WAVE.get(), com.jttw.engine.client.renderer.QiWaveRenderer::new);
     }
 
     @SuppressWarnings("removal")

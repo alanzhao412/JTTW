@@ -279,6 +279,18 @@ final class AbilityScenes {
                     howl.setNoGravity(true);
                     p.level().addFreshEntity(howl);
                 }, 6, false),
+                // the staff's qi wave in flight, high enough over the stage to carve only air as it grows:
+                // crossing the view by day and by night, from over the wielder's shoulder, and as it spends itself
+                new Scene("qi_wave_side", p -> sceneCam = new double[]{0.5, 22.0, 34.0, 0.5, 22.0, 6.0},
+                        p -> qiWave(p, -35, 24, 6, new net.minecraft.world.phys.Vec3(1, 0, 0)), 7, false),
+                new Scene("qi_wave_night", p -> { p.serverLevel().setDayTime(18000); sceneCam = new double[]{0.5, 22.0, 34.0, 0.5, 22.0, 6.0}; },
+                        p -> qiWave(p, -35, 24, 6, new net.minecraft.world.phys.Vec3(1, 0, 0)), 7, false),
+                new Scene("qi_wave_behind", p -> sceneCam = new double[]{2.5, 4.0, -6.0, 0.5, 6.0, 20.0},
+                        p -> qiWave(p, 0.5, 6, 4.5, new net.minecraft.world.phys.Vec3(0, 0.17, 1)), 2, false),
+                new Scene("qi_wave_oncoming", p -> sceneCam = new double[]{26.0, 32.0, 24.0, 0.0, 24.0, 6.0},
+                        p -> qiWave(p, -35, 24, 6, new net.minecraft.world.phys.Vec3(1, 0, 0)), 7, false),
+                new Scene("qi_wave_end", p -> sceneCam = new double[]{0.5, 22.0, 34.0, 0.5, 22.0, 6.0},
+                        p -> qiWave(p, -54, 24, 6, new net.minecraft.world.phys.Vec3(1, 0, 0)), 9, false),
                 // the Ruyi Jingu Bang grows smoothly: caught three ticks into growing from 1 to 6, and once grown
                 new Scene("staff_growing", AbilityScenes::staff, p -> grow(p), 3, false),
                 new Scene("staff_grown", AbilityScenes::staff, p -> grow(p), 40, false),
@@ -782,6 +794,16 @@ final class AbilityScenes {
             p.setHealth(p.getMaxHealth() * 0.25f);
         }
         targets(p, -3, 1, 3, 1, 0, 3, 0, -2);
+    }
+
+    /**
+     * A qi wave of the staff's at 30 attack and full charge, set going from (x, ground + y, z) along
+     * {@code dir}: fired by the player, but from wherever the scene wants it.
+     */
+    private static void qiWave(ServerPlayer p, double x, double y, double z, net.minecraft.world.phys.Vec3 dir) {
+        var wave = new com.jttw.engine.entity.QiWaveEntity(p.level(), p, dir, 30f);
+        wave.setPos(x, p.getY() + y, z);
+        p.level().addFreshEntity(wave);
     }
 
     private static void spearSlash(ServerPlayer p) {
