@@ -35,6 +35,11 @@ public abstract class TempleImmortal extends ZoneBoss implements TempleFolk {
     /** Its level. */
     public abstract int immortalLevel();
 
+    @Override
+    public int mobLevel() {
+        return immortalLevel();
+    }
+
     /** The largest share of its health one blow can take. */
     protected double hitCap() {
         return 1.0;

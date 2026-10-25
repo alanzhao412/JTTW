@@ -46,7 +46,7 @@ import java.util.UUID;
  * <p>It hunts only the wanted: its quarry first, and any other outlaw it finds, and whoever
  * strikes it. With no one left to fight it rides back up to Heaven.
  */
-public class HeavenlySoldierEntity extends Monster {
+public class HeavenlySoldierEntity extends Monster implements com.jttw.engine.entity.zone.MobLevel {
 
     /** Four of a same-level character's ordinary hits to kill; a blow of 12% of their health, before resistance. */
     public static final double HITS = 4, BLOW = 0.12;
@@ -94,6 +94,7 @@ public class HeavenlySoldierEntity extends Monster {
         return entityData.get(GENERAL);
     }
 
+    @Override
     public int mobLevel() {
         return entityData.get(MOB_LEVEL);
     }

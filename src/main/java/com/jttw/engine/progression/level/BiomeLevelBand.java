@@ -11,39 +11,20 @@ import java.util.List;
 /**
  * Associates biomes with a level band and base XP for post-20 grinding progression.
  *
- * <p><b>Registration:</b> Call {@link #register(BiomeLevelBand)} during mod setup
- * (e.g. in {@link com.jttw.engine.JTTWEngine} common setup, after Forge registries are ready).
+ * <p><b>Registration:</b> each zone's band is registered from its level range in
+ * {@link com.jttw.engine.world.Zones} ({@link com.jttw.engine.world.Zones#registerLevelBands}, from
+ * {@link com.jttw.engine.JTTWEngine}'s common setup); a place without a band (Fengdu) is left out.
+ * Another can be added the same way:
  *
  * <pre>{@code
- * // Phase 1: early biome band (levels 21–40)
  * BiomeLevelBand.register(new BiomeLevelBand(
  *     ResourceLocation.fromNamespaceAndPath("minecraft", "jungle"),
  *     21, 40,
  *     80   // grunt gives 80 XP, general 400, boss 1600
  * ));
- *
- * // Phase 2: mid biome band (levels 41–65)
- * BiomeLevelBand.register(new BiomeLevelBand(
- *     ResourceLocation.fromNamespaceAndPath("minecraft", "deep_dark"),
- *     41, 65,
- *     200
- * ));
  * }</pre>
  *
  * <p>Bands may overlap; the first registered match wins (register more specific first).
- *
- * <p><b>TODO:</b> Populate with your actual biome → band mappings.  These are intentionally
- * left empty so you can define the world's biome layout independently.  Consider loading
- * from a JSON datapack so server admins can tune the level landscape without recompiling.
- *
- * <p><b>Suggested band structure (5 phases × 16 levels each):</b>
- * <pre>
- *   Phase 1 (21–36)  — introductory biome,  base grunt XP  ~80
- *   Phase 2 (37–52)  — mid tier biome,      base grunt XP  ~200
- *   Phase 3 (53–68)  — dangerous biome,     base grunt XP  ~400
- *   Phase 4 (69–84)  — extreme biome,       base grunt XP  ~700
- *   Phase 5 (85–100) — endgame biome,       base grunt XP  ~1100
- * </pre>
  */
 public record BiomeLevelBand(
         ResourceLocation biome,

@@ -22,7 +22,7 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 import static com.jttw.engine.gametest.GT.*;
 import static com.jttw.engine.gametest.character.CharTest.as;
 
-/** Class abilities bought with skill points once their level is reached, and the Heavenly cloud. */
+/** Class passives and abilities bought with skill points once their level is reached, and the Heavenly cloud. */
 @GameTestHolder(JTTWEngine.MOD_ID)
 @PrefixGameTestTemplate(false)
 public class ClassAbilityGameTests {
@@ -62,24 +62,25 @@ public class ClassAbilityGameTests {
         SkillTreeData.setPoints(p, 0);
         check(h, !SkillPurchase.purchaseClassAbility(p, MOBILITY), "no points, no ability");
         check(h, !PlayerLevel.hasAbility(p, MOBILITY), "not held");
-        // a level-100 ability costs 3: two points are not enough
-        PlayerLevel.setLevel(p, 100);
-        SkillTreeData.setPoints(p, 2);
-        eq(h, 3, AbilityUnlock.byId("mandate_of_heaven").cost(), "level-100 cost");
-        check(h, !SkillPurchase.purchaseClassAbility(p, "mandate_of_heaven"), "2 of 3 points");
-        eq(h, 2, SkillTreeData.getPoints(p), "no points spent");
+        // a level-100 passive costs 3: two points are not enough
+        ServerPlayer beast = at(h, ReincarnationOutcome.DRAGON, 100);
+        PlayerLevel.grantAbility(beast, AbilityUnlock.DOMAIN_AUTHORITY); // what it needs, held
+        SkillTreeData.setPoints(beast, 2);
+        eq(h, 3, AbilityUnlock.byId(AbilityUnlock.APEX_DOMAIN).cost(), "level-100 cost");
+        check(h, !SkillPurchase.purchaseClassAbility(beast, AbilityUnlock.APEX_DOMAIN), "2 of 3 points");
+        eq(h, 2, SkillTreeData.getPoints(beast), "no points spent");
         h.succeed();
     }
 
     @GameTest(template = PLATFORM)
     public static void anotherClassCannotBuyIt(GameTestHelper h) {
-        ServerPlayer p = at(h, ReincarnationOutcome.TURTLE, 10); // a Divine Beast
+        ServerPlayer p = at(h, ReincarnationOutcome.TURTLE, 20); // a Divine Beast
         SkillTreeData.setPoints(p, 10);
         check(h, !SkillPurchase.purchaseClassAbility(p, MOBILITY), "a Heavenly ability");
         check(h, !SkillPurchase.purchaseClassAbility(p, "no_such_ability"), "an unknown id");
         check(h, !PlayerLevel.hasAbility(p, MOBILITY), "not held");
         eq(h, 10, SkillTreeData.getPoints(p), "no points spent");
-        check(h, SkillPurchase.purchaseClassAbility(p, "lesser_form"), "but its own class's, yes");
+        check(h, SkillPurchase.purchaseClassAbility(p, AbilityUnlock.DOMAIN_SENSE), "but its own class's, yes");
         h.succeed();
     }
 

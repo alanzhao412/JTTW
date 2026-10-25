@@ -45,7 +45,7 @@ import java.util.function.Predicate;
  * <p>A subclass names its {@link #zone()}, its {@link #hitsToKill()} and {@link #blowShare()}, and
  * may change its levels, captains, escorts and drops by overriding the methods here.
  */
-public abstract class ZoneMonster extends Monster {
+public abstract class ZoneMonster extends Monster implements MobLevel {
 
     /** The chance a naturally spawned one is a captain, unless it says otherwise. */
     public static final float CAPTAIN_CHANCE = 0.08f;
@@ -125,6 +125,7 @@ public abstract class ZoneMonster extends Monster {
         return entityData.get(CAPTAIN);
     }
 
+    @Override
     public int mobLevel() {
         return entityData.get(MOB_LEVEL);
     }

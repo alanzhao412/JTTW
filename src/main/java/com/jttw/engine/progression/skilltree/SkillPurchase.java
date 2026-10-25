@@ -80,16 +80,19 @@ public final class SkillPurchase {
     }
 
     /**
-     * Buys a class ability ({@link AbilityUnlock}) with skill points from the same pool as the
-     * trees: it must be the player's class's, its level reached, not already held, and affordable.
+     * Buys a class passive or ability ({@link AbilityUnlock}) with skill points from the same pool
+     * as the trees: it must be the player's class's, bought and not a milestone (those come with
+     * the level, for nothing), its level reached, what it needs already held, not held itself,
+     * and affordable.
      *
      * @return true if it was bought
      */
     public static boolean purchaseClassAbility(ServerPlayer player, String abilityId) {
         AbilityUnlock unlock = AbilityUnlock.byId(abilityId);
-        if (unlock == null) return false;
+        if (unlock == null || !unlock.purchasable()) return false;
         if (unlock.cls() != PlayerLevel.getProgressionClass(player)) return false;
         if (PlayerLevel.getLevel(player) < unlock.requiredLevel()) return false;
+        if (unlock.requires() != null && !PlayerLevel.hasAbility(player, unlock.requires())) return false;
         if (PlayerLevel.hasAbility(player, abilityId)) return false;
         int points = SkillTreeData.getPoints(player);
         if (points < unlock.cost()) return false;
@@ -97,7 +100,7 @@ public final class SkillPurchase {
         SkillTreeData.setPoints(player, points - unlock.cost());
         PlayerLevel.grantAbility(player, abilityId);
         player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                "§6[Ability Learned] §e" + unlock.displayName()));
+                unlock.isPassive() ? "§6[Passive Learned] §e" : "§6[Ability Learned] §e").append(unlock.name()));
 
         NetworkHandler.sendToPlayer(player, SyncSkillTreePacket.build(player));
         return true;

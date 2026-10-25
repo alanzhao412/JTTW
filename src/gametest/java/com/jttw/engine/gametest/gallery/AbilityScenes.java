@@ -347,7 +347,7 @@ final class AbilityScenes {
                     openSkillTree = true;
                     keepScreen = true;
                 }, p -> {}, 10, true),
-                // the Marshal's class abilities at level 40: one learned, two to buy, the rest still locked
+                // the Marshal's class layer at level 40: the Heavenly cloud, his one class ability, learned
                 new Scene("class_abilities_heavenly", p -> {
                     p.getPersistentData().remove("jttw_abilities");
                     AlignmentData.markReincarnated(p, ReincarnationOutcome.MARSHAL_HEAVENLY_CANOPY);
@@ -356,6 +356,21 @@ final class AbilityScenes {
                     com.jttw.engine.progression.level.PlayerLevel.setLevel(p, 40);
                     SkillTreeData.setPoints(p, 2);
                     com.jttw.engine.progression.skilltree.SkillPurchase.purchaseClassAbility(p, com.jttw.engine.flight.JTTWFlight.HEAVENLY_MOBILITY);
+                    LevelManager.syncToClient(p);
+                    openClassAbilities = true;
+                    keepScreen = true;
+                }, p -> {}, 10, true),
+                // the Dragon's class passives at level 60: two forms reached, one passive learned,
+                // two to buy, the last form and Apex Domain still to come
+                new Scene("class_abilities_beast", p -> {
+                    p.getPersistentData().remove("jttw_abilities");
+                    AlignmentData.markReincarnated(p, ReincarnationOutcome.DRAGON);
+                    LevelManager.initClass(p, ReincarnationOutcome.DRAGON);
+                    p.setGameMode(GameType.SURVIVAL);
+                    com.jttw.engine.progression.level.PlayerLevel.setLevel(p, 60);
+                    SkillTreeData.setPoints(p, 4);
+                    com.jttw.engine.progression.skilltree.SkillPurchase.purchaseClassAbility(p,
+                            com.jttw.engine.progression.skilltree.AbilityUnlock.DOMAIN_SENSE);
                     LevelManager.syncToClient(p);
                     openClassAbilities = true;
                     keepScreen = true;

@@ -79,6 +79,11 @@ public abstract class DemonKingEntity extends ZoneBoss {
     /** His level. */
     public abstract int kingLevel();
 
+    @Override
+    public int mobLevel() {
+        return kingLevel();
+    }
+
     /** How long he holds a captive at most, in ticks. */
     public abstract int maxHold();
 

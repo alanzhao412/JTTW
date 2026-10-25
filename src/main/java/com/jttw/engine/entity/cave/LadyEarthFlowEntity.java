@@ -96,6 +96,12 @@ public class LadyEarthFlowEntity extends ZoneBoss {
     @Nullable
     private BlockPos refuge;
 
+    /** Its level, as its name shows it. */
+    @Override
+    public int mobLevel() {
+        return LEVEL;
+    }
+
     public LadyEarthFlowEntity(EntityType<? extends LadyEarthFlowEntity> type, Level level) {
         super(type, level);
         xpReward = 300;

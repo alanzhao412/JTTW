@@ -112,6 +112,13 @@ public final class PlayerLevel {
         abilities.putBoolean(abilityId, true);
     }
 
+    /** Takes an ability id out of the player's saved abilities, if it is there (see {@code RetiredUnlocks}). */
+    public static void revokeAbility(Player p, String abilityId) {
+        CompoundTag pd = p.getPersistentData();
+        if (!pd.contains(LevelConstants.KEY_ABILITIES)) return;
+        pd.getCompound(LevelConstants.KEY_ABILITIES).remove(abilityId);
+    }
+
     // -----------------------------------------------------------------------
     // Form stage tracking (primarily for Divine Beast evolution)
     // -----------------------------------------------------------------------

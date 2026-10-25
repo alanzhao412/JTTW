@@ -46,7 +46,7 @@ import java.util.function.Predicate;
  *       leaves them nothing if they strike it down.</li>
  * </ul>
  */
-public abstract class ZoneBoss extends Monster {
+public abstract class ZoneBoss extends Monster implements MobLevel {
 
     /** How long a player who struck it keeps seeing its bar, wherever they are, in ticks. */
     public static final int FIGHTER_MEMORY = 600;

@@ -69,6 +69,11 @@ public abstract class KingOfHellEntity extends ZoneBoss {
         return levelOf(court());
     }
 
+    @Override
+    public int mobLevel() {
+        return kingLevel();
+    }
+
     /** The level of a king of this court: 57 to 65 from the First to the Tenth, King Yama passed over: he is 66, the strongest. */
     public static int levelOf(int court) {
         return court == 5 ? KingYamaEntity.LEVEL : court < 5 ? 56 + court : 55 + court;

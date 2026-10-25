@@ -273,5 +273,21 @@
   "item.jttw_engine.peng_demon_spawn_egg": "Peng-Demon Spawn Egg",
   "item.jttw_engine.little_wind_driller_spawn_egg": "Little Wind-Driller Spawn Egg",
   "item.jttw_engine.azure_lion_spawn_egg": "Azure Lion Spawn Egg",
-  "item.jttw_engine.white_elephant_spawn_egg": "White Elephant Spawn Egg"
+  "item.jttw_engine.white_elephant_spawn_egg": "White Elephant Spawn Egg",
+  "class_unlock.jttw_engine.lesser_form": "Lesser Form",
+  "class_unlock.jttw_engine.lesser_form.desc": "Free milestone. The beast's first shape, worn from the day you awaken.",
+  "class_unlock.jttw_engine.domain_sense": "Domain Sense",
+  "class_unlock.jttw_engine.domain_sense.desc": "Hostile creatures that set their sights on you within 24 blocks glow for you alone.",
+  "class_unlock.jttw_engine.guardians_hide": "Guardian's Hide",
+  "class_unlock.jttw_engine.guardians_hide.desc": "+10% physical and magic resistance.",
+  "class_unlock.jttw_engine.intermediate_form": "Intermediate Form",
+  "class_unlock.jttw_engine.intermediate_form.desc": "Free milestone. The lesser shell is shed: your true beast form.",
+  "class_unlock.jttw_engine.domain_authority": "Domain Authority",
+  "class_unlock.jttw_engine.domain_authority.desc": "Hostile creatures below your level within 8 blocks are slowed and weakened.",
+  "class_unlock.jttw_engine.sovereign_form": "Sovereign Form",
+  "class_unlock.jttw_engine.sovereign_form.desc": "Free milestone. Heaven has written your name: the sovereign beast.",
+  "class_unlock.jttw_engine.apex_domain": "Apex Domain",
+  "class_unlock.jttw_engine.apex_domain.desc": "Your domain reaches 16 blocks, and the creatures it holds deal 20% less damage.",
+  "class_unlock.jttw_engine.heavenly_mobility": "Heavenly Mobility",
+  "class_unlock.jttw_engine.heavenly_mobility.desc": "A slow cloud to fly on: sprint while flying to ride it."
 }
