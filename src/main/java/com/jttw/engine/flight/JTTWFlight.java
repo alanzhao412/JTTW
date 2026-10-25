@@ -23,7 +23,7 @@ import java.util.WeakHashMap;
  * steer with the same {@link FlightSteering}.
  *
  * <p>Tiers: 1 glide only, 2 full flight, 3 fastest. A flying form with no tier of its own flies
- * slower than either.
+ * slower than either; a flying form always flies, never glides, whatever its taker's own tier.
  */
 public final class JTTWFlight {
 
@@ -140,8 +140,9 @@ public final class JTTWFlight {
         int tier = tag.getInt(FLIGHT_SPEED_TIER_TAG);
         if (tier == 0 && fliesInnately(player)) tier = 2; // innate flight is full flight
         TransformationData form = com.jttw.engine.transformation.TransformationManager.getTransformation(player);
+        boolean formWings = form != null && form.canFly();
         // by their own power: a character's flight, or a form's wings (not merely creative's)
-        boolean own = canFly(player) || (form != null && form.canFly());
+        boolean own = canFly(player) || formWings;
         // Erlang Shen's Wind and Fog is flight from its first tier, never a glide: slower than
         // cruising at I, then cruising (Divine Wind) and the fastest (Celestial Gale)
         boolean erlang = "eye_of_heaven".equals(tag.getString(com.jttw.engine.reincarnation.AlignmentData.KEY_REINCARNATION_OUTCOME))
@@ -153,8 +154,10 @@ public final class JTTWFlight {
                 tag.getString(com.jttw.engine.reincarnation.AlignmentData.KEY_REINCARNATION_OUTCOME))
                 && SkillTreeData.getPhEmberTier(player) >= 1;
         boolean fliesFromFirst = erlang || cloudStep || ember;
+        // a form with wings (the Azure Dragon, a flying form of the 18 Transformations) flies on
+        // them: a glide-only flight (the Dragon's Elytra Glide) glides only in the character's own shape
         double speed = fliesFromFirst && tier <= 1 ? FlightSteering.FIRST_FLIGHT_SPEED : FlightSteering.speedFor(tier, wukong);
-        return new FlightProfile(speed, isGlideOnly(player) && !fliesFromFirst, boost(player), tag.getBoolean(THRUST_TAG), own);
+        return new FlightProfile(speed, isGlideOnly(player) && !fliesFromFirst && !formWings, boost(player), tag.getBoolean(THRUST_TAG), own);
     }
 
     /** How this player flies now: on a Heavenly's cloud (only when it is the faster), or on their own. */

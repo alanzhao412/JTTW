@@ -158,7 +158,7 @@ public class XiaotianQuanEntity extends PathfinderMob {
                 this.getHealth(), this.getMaxHealth(), str,
                 qi, maxQi, will,
                 growthTier,
-                XiaotianQuanManager.biteSlowness(sp) != null,
+                true,                // every bite slows (XiaotianQuanManager.biteSlowness)
                 true,                // the hound howls from the first (only Xiaotian Quan III hastens it)
                 XiaotianQuanManager.trackCount(SkillTreeData.getXtqTier(sp), growthTier) > 0
         ));

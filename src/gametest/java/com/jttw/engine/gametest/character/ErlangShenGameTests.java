@@ -232,34 +232,41 @@ public class ErlangShenGameTests {
         h.succeed();
     }
 
-    /** A bite of {@code p}'s hound on a fresh pig at (x, z): the Slowness amplifier it leaves (-1 none). */
-    private static int bite(GameTestHelper h, ServerPlayer p, int x, int z) {
+    /** A bite of {@code p}'s hound on a fresh pig at (x, z): the Slowness it leaves, {amplifier, ticks} ({-1, 0} none). */
+    private static int[] bite(GameTestHelper h, ServerPlayer p, int x, int z) {
         XiaotianQuanEntity hound = XiaotianQuanManager.houndOf(p);
         Pig pig = mob(h, EntityType.PIG, x, z);
         XiaotianQuanManager.onXtqAttacks(incoming(pig, h.getLevel().damageSources().mobAttack(hound), 2f));
         int amp = amp(pig, MobEffects.MOVEMENT_SLOWDOWN);
-        if (amp >= 0) eq(h, 60, duration(pig, MobEffects.MOVEMENT_SLOWDOWN), "for 3 s");
-        return amp;
+        return new int[]{amp, amp >= 0 ? duration(pig, MobEffects.MOVEMENT_SLOWDOWN) : 0};
     }
 
-    @GameTest(template = PLATFORM, batch = "houndBitesSlowFromXiaotianQuanThreeAndHoundTrainingThree")
-    public static void houndBitesSlowFromXiaotianQuanThreeAndHoundTrainingThree(GameTestHelper h) {
+    @GameTest(template = PLATFORM, batch = "houndBitesSlowAlwaysAndHarderByTier")
+    public static void houndBitesSlowAlwaysAndHarderByTier(GameTestHelper h) {
         ServerPlayer p = erlang(h);
         online(h, p);
         grant(p, "es_xtq_1", "es_xtq_growth_1", "es_xtq_growth_2");
         XiaotianQuanManager.toggle(p);
-        eq(h, -1, bite(h, p, 0, 0), "no slowing below either III");
+        int[] base = bite(h, p, 0, 0);
+        eq(h, 0, base[0], "every bite: Slowness I");
+        eq(h, 40, base[1], "for 2 s");
         grant(p, "es_xtq_2", "es_xtq_3");
-        eq(h, 0, bite(h, p, 1, 0), "Xiaotian Quan III: Slowness I");
+        int[] three = bite(h, p, 1, 0);
+        eq(h, 0, three[0], "Xiaotian Quan III: Slowness I");
+        eq(h, 60, three[1], "for 3 s");
         grant(p, "es_xtq_growth_3");
-        eq(h, 1, bite(h, p, 0, 1), "with Hound Training III: Slowness II, not III");
+        int[] both = bite(h, p, 0, 1);
+        eq(h, 1, both[0], "with Hound Training III: Slowness II, not III");
+        eq(h, 60, both[1], "for 3 s");
         XiaotianQuanManager.dismiss(p);
 
         ServerPlayer trained = erlang(h);
         online(h, trained);
         grant(trained, "es_xtq_1", "es_xtq_growth_1", "es_xtq_growth_2", "es_xtq_growth_3");
         XiaotianQuanManager.toggle(trained);
-        eq(h, 1, bite(h, trained, 1, 1), "Hound Training III alone: Slowness II");
+        int[] alone = bite(h, trained, 1, 1);
+        eq(h, 1, alone[0], "Hound Training III alone: Slowness II");
+        eq(h, 60, alone[1], "for 3 s");
         XiaotianQuanManager.dismiss(trained);
         h.succeed();
     }

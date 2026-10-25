@@ -1,12 +1,16 @@
 package com.jttw.engine.gametest.flight;
 
 import com.jttw.engine.JTTWEngine;
+import com.jttw.engine.character.divinebeast.TrueForm;
 import com.jttw.engine.flight.FlightSteering;
 import com.jttw.engine.flight.JTTWFlight;
+import com.jttw.engine.registry.ModEntities;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
+import com.jttw.engine.transformation.TransformationManager;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EntityType;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
@@ -44,6 +48,49 @@ public class FlightProfileGameTests {
         ServerPlayer p = flier(h, ReincarnationOutcome.DRAGON, 1);
         JTTWFlight.setGlideOnly(p, true);
         check(h, JTTWFlight.profile(p).glide(), "glide only");
+        h.succeed();
+    }
+
+    /** Flying a few ticks looking up and pressing forward: how fast it climbs (a glider never does). */
+    private static double climb(ServerPlayer p) {
+        p.setXRot(-45f);
+        JTTWFlight.onServerPlayerTick(p, TransformationManager.getTransformation(p)); // may fly
+        p.getAbilities().flying = true;
+        p.zza = 1f;
+        for (int i = 0; i < 10; i++) JTTWFlight.onServerPlayerTick(p, TransformationManager.getTransformation(p));
+        double y = p.getDeltaMovement().y;
+        p.getAbilities().flying = false;
+        p.zza = 0f;
+        p.setXRot(0f);
+        return y;
+    }
+
+    /** The Azure Dragon, the Dragon's true form, flies in it even when the Dragon only has Elytra Glide. */
+    @GameTest(template = PLATFORM, batch = "theAzureDragonFliesWithOnlyElytraGlide")
+    public static void theAzureDragonFliesWithOnlyElytraGlide(GameTestHelper h) {
+        ServerPlayer p = flier(h, ReincarnationOutcome.DRAGON, 1);
+        JTTWFlight.setGlideOnly(p, true);
+        qi(p, 100f, 100f);
+        check(h, climb(p) <= 0, "in its own shape, Elytra Glide only glides");
+        check(h, TrueForm.toggle(p, ModEntities.AZURE_DRAGON.get(), 1, "dr_true"), "the Azure Dragon");
+        check(h, !JTTWFlight.profile(p).glide(), "the Azure Dragon flies, never glides");
+        check(h, climb(p) > 0, "and climbs");
+        TrueForm.end(p);
+        check(h, JTTWFlight.profile(p).glide(), "itself again, it glides");
+        h.succeed();
+    }
+
+    /** A flying form of the 18 Transformations flies on its own wings, whatever its taker's glide. */
+    @GameTest(template = PLATFORM, batch = "aFlyingFormFliesForAGlideOnlyDragon")
+    public static void aFlyingFormFliesForAGlideOnlyDragon(GameTestHelper h) {
+        ServerPlayer p = flier(h, ReincarnationOutcome.DRAGON, 1);
+        JTTWFlight.setGlideOnly(p, true);
+        TransformationManager.transform(p, EntityType.PARROT);
+        check(h, TransformationManager.getTransformation(p).canFly(), "a parrot has wings");
+        check(h, !JTTWFlight.profile(p).glide(), "a parrot flies, never glides");
+        check(h, climb(p) > 0, "and climbs");
+        TransformationManager.demorph(p);
+        check(h, JTTWFlight.profile(p).glide(), "itself again, it glides");
         h.succeed();
     }
 

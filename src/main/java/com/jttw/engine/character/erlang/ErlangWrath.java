@@ -39,7 +39,7 @@ import java.util.UUID;
  *       ({@link XiaotianQuanManager}): crimson markings, +30% bite damage, +25% speed, bites twice
  *       as often, and hunts the nearest hostile when it has nothing to fight.</li>
  *   <li>III: +35%; he heals 10% of the damage he deals; the berserk hound's bites give
- *       Slowness II for 5 s (rather than whatever its own nodes give: none, I or II, for 3 s; see
+ *       Slowness II for 5 s (rather than whatever its own nodes give: I for 2 or 3 s, or II for 3 s; see
  *       {@link XiaotianQuanManager#biteSlowness(int, int, boolean)}).</li>
  * </ul>
  *

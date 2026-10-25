@@ -10,7 +10,8 @@ class XiaotianQuanTiersTest {
 
     @Test
     void biteSlownessIsTheStrongestSourceNeverStacked() {
-        assertNull(XiaotianQuanManager.biteSlowness(1, 2, false), "no slowing below either III");
+        assertArrayEquals(new int[]{0, 40}, XiaotianQuanManager.biteSlowness(1, 0, false), "every bite: I, 2 s");
+        assertArrayEquals(new int[]{0, 40}, XiaotianQuanManager.biteSlowness(2, 2, false), "below either III: still I, 2 s");
         assertArrayEquals(new int[]{0, 60}, XiaotianQuanManager.biteSlowness(3, 0, false), "Xiaotian Quan III: I, 3 s");
         assertArrayEquals(new int[]{1, 60}, XiaotianQuanManager.biteSlowness(0, 3, false), "Hound Training III: II, 3 s");
         assertArrayEquals(new int[]{1, 60}, XiaotianQuanManager.biteSlowness(3, 3, false), "both: still II, 3 s");
