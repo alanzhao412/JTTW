@@ -236,7 +236,7 @@ public class ErlangWrathGameTests {
     }
 
     @GameTest(template = PLATFORM, batch = "atThreeTheBerserkHoundsBitesSlowWithSlownessTwo")
-    public static void atThreeTheBerserkHoundsBitesSlowWithSlownessTwo(GameTestHelper h) {
+    public static void atThreeTheBerserkHoundsBitesSlowWithSlownessTwoForFiveSeconds(GameTestHelper h) {
         ServerPlayer p = erlang(h, "es_xtq_1", "es_wrath_1", "es_wrath_2");
         online(h, p);
         XiaotianQuanEntity hound = summon(h, p);
@@ -245,18 +245,30 @@ public class ErlangWrathGameTests {
         health(p, 0.3f);
         Pig two = mob(h, EntityType.PIG, 0, 0);
         XiaotianQuanManager.onXtqAttacks(incoming(two, bite, 2f));
-        eq(h, 0, amp(two, MobEffects.MOVEMENT_SLOWDOWN), "Zhàn Shén II: Slowness I");
+        eq(h, -1, amp(two, MobEffects.MOVEMENT_SLOWDOWN), "Zhàn Shén II, no hound III: no slowing");
 
         grant(p, "es_wrath_3");
         Pig three = mob(h, EntityType.PIG, 1, 0);
         XiaotianQuanManager.onXtqAttacks(incoming(three, bite, 2f));
         eq(h, 1, amp(three, MobEffects.MOVEMENT_SLOWDOWN), "Zhàn Shén III in Wrath: Slowness II");
-        eq(h, 60, duration(three, MobEffects.MOVEMENT_SLOWDOWN), "for 3 s");
+        eq(h, 100, duration(three, MobEffects.MOVEMENT_SLOWDOWN), "for 5 s");
 
         health(p, 0.9f);
         Pig calm = mob(h, EntityType.PIG, 0, 1);
         XiaotianQuanManager.onXtqAttacks(incoming(calm, bite, 2f));
-        eq(h, 0, amp(calm, MobEffects.MOVEMENT_SLOWDOWN), "out of Wrath: Slowness I");
+        eq(h, -1, amp(calm, MobEffects.MOVEMENT_SLOWDOWN), "out of Wrath: the hound's own (none)");
+
+        // on top of Hound Training III's Slowness II, Zhàn Shén III lengthens it
+        grant(p, "es_xtq_growth_1", "es_xtq_growth_2", "es_xtq_growth_3");
+        Pig trained = mob(h, EntityType.PIG, 1, 1);
+        XiaotianQuanManager.onXtqAttacks(incoming(trained, bite, 2f));
+        eq(h, 1, amp(trained, MobEffects.MOVEMENT_SLOWDOWN), "Hound Training III: Slowness II");
+        eq(h, 60, duration(trained, MobEffects.MOVEMENT_SLOWDOWN), "for 3 s");
+        health(p, 0.3f);
+        Pig both = mob(h, EntityType.PIG, 2, 1);
+        XiaotianQuanManager.onXtqAttacks(incoming(both, bite, 2f));
+        eq(h, 1, amp(both, MobEffects.MOVEMENT_SLOWDOWN), "both: still Slowness II");
+        eq(h, 100, duration(both, MobEffects.MOVEMENT_SLOWDOWN), "but for 5 s");
         h.succeed();
     }
 }

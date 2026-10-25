@@ -38,8 +38,9 @@ import java.util.UUID;
  *   <li>II: +25%; he cannot be knocked back; and Xiaotian Quan, if out, goes berserk
  *       ({@link XiaotianQuanManager}): crimson markings, +30% bite damage, +25% speed, bites twice
  *       as often, and hunts the nearest hostile when it has nothing to fight.</li>
- *   <li>III: +35%; he heals 10% of the damage he deals; the berserk hound's bites slow with
- *       Slowness II rather than I.</li>
+ *   <li>III: +35%; he heals 10% of the damage he deals; the berserk hound's bites give
+ *       Slowness II for 5 s (rather than whatever its own nodes give: none, I or II, for 3 s; see
+ *       {@link XiaotianQuanManager#biteSlowness(int, int, boolean)}).</li>
  * </ul>
  *
  * <p>Wrath is read from his health each time (no stored state, no hysteresis): healed back to
@@ -90,11 +91,6 @@ public final class ErlangWrath {
     /** Whether his hound goes berserk while he is in Wrath. */
     public static boolean houndBerserks(int tier) {
         return tier >= 2;
-    }
-
-    /** The amplifier of the Slowness his hound's bites give: II in Wrath at Zhàn Shén III, else I. */
-    public static int biteSlownessAmplifier(int tier, boolean inWrath) {
-        return inWrath && tier >= 3 ? 1 : 0;
     }
 
     public static boolean isErlangShen(Player p) {

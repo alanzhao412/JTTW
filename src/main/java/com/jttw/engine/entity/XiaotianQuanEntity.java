@@ -54,6 +54,8 @@ public class XiaotianQuanEntity extends PathfinderMob {
     private static final float QI_REGEN_TICK  = 0.05f; // per tick
     private static final float HOWL_QI_COST   = 15f;
     public  static final int   HOWL_COOLDOWN  = 100; // 5 seconds
+    /** The hidden name hounds were once given; dropped on sight. */
+    public  static final String LEGACY_NAME_PREFIX = "jttw_xtq:";
 
     private static final EntityDataAccessor<Boolean> BERSERK =
             SynchedEntityData.defineId(XiaotianQuanEntity.class, EntityDataSerializers.BOOLEAN);
@@ -106,6 +108,12 @@ public class XiaotianQuanEntity extends PathfinderMob {
             return;
         }
 
+        // Hounds once carried their owner in a hidden name ("jttw_xtq:<uuid>"), which death
+        // messages showed; the owner is in the persistent data, so drop any such name
+        if (this.getCustomName() != null && this.getCustomName().getString().startsWith(LEGACY_NAME_PREFIX)) {
+            this.setCustomName(null);
+        }
+
         // Server-side: regen Qi, tick howl cooldown
         CompoundTag pd = this.getPersistentData();
         float qi = pd.getFloat(KEY_QI);
@@ -150,9 +158,9 @@ public class XiaotianQuanEntity extends PathfinderMob {
                 this.getHealth(), this.getMaxHealth(), str,
                 qi, maxQi, will,
                 growthTier,
-                true,                // slow is always active
+                XiaotianQuanManager.biteSlowness(sp) != null,
                 growthTier >= 1,     // howl unlocked at tier 1+
-                growthTier >= 2      // tracking at tier 2+
+                XiaotianQuanManager.trackCount(SkillTreeData.getXtqTier(sp), growthTier) > 0
         ));
         return InteractionResult.SUCCESS;
     }
@@ -163,11 +171,12 @@ public class XiaotianQuanEntity extends PathfinderMob {
         return pd.getInt(KEY_HOWL_CD) <= 0 && pd.getFloat(KEY_QI) >= HOWL_QI_COST;
     }
 
-    public void spendHowlQi() {
+    /** Spends a howl's Qi; it can howl again in {@code recharge} ticks. */
+    public void spendHowlQi(int recharge) {
         CompoundTag pd = this.getPersistentData();
         float qi = pd.getFloat(KEY_QI);
         pd.putFloat(KEY_QI, Math.max(0, qi - HOWL_QI_COST));
-        pd.putInt(KEY_HOWL_CD, HOWL_COOLDOWN);
+        pd.putInt(KEY_HOWL_CD, recharge);
     }
 
     // ── Init stats (called by manager at summon time) ─────────────────

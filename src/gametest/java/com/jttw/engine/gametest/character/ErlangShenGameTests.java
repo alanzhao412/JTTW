@@ -163,7 +163,14 @@ public class ErlangShenGameTests {
         near(h, 5.0, trained.getAttributeBaseValue(Attributes.ARMOR), "tier 1 armor");
         XiaotianQuanManager.toggle(p);
 
-        grant(p, "es_xtq_growth_2", "es_xtq_growth_3");
+        grant(p, "es_xtq_growth_2");
+        XiaotianQuanManager.toggle(p);
+        XiaotianQuanEntity second = hounds(p).get(0);
+        near(h, 70.0, second.getMaxHealth(), "tier 2 hp: +20 over tier 1");
+        near(h, 7.0, second.getAttributeBaseValue(Attributes.ATTACK_DAMAGE), "tier 2 attack as tier 1");
+        XiaotianQuanManager.toggle(p);
+
+        grant(p, "es_xtq_growth_3");
         XiaotianQuanManager.toggle(p);
         XiaotianQuanEntity peak = hounds(p).get(0);
         near(h, 80.0, peak.getMaxHealth(), "tier 3 hp");
@@ -225,18 +232,133 @@ public class ErlangShenGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM, batch = "houndBitesSlowTheTarget")
-    public static void houndBitesSlowTheTarget(GameTestHelper h) {
+    /** A bite of {@code p}'s hound on a fresh pig at (x, z): the Slowness amplifier it leaves (-1 none). */
+    private static int bite(GameTestHelper h, ServerPlayer p, int x, int z) {
+        XiaotianQuanEntity hound = XiaotianQuanManager.houndOf(p);
+        Pig pig = mob(h, EntityType.PIG, x, z);
+        XiaotianQuanManager.onXtqAttacks(incoming(pig, h.getLevel().damageSources().mobAttack(hound), 2f));
+        int amp = amp(pig, MobEffects.MOVEMENT_SLOWDOWN);
+        if (amp >= 0) eq(h, 60, duration(pig, MobEffects.MOVEMENT_SLOWDOWN), "for 3 s");
+        return amp;
+    }
+
+    @GameTest(template = PLATFORM, batch = "houndBitesSlowFromXiaotianQuanThreeAndHoundTrainingThree")
+    public static void houndBitesSlowFromXiaotianQuanThreeAndHoundTrainingThree(GameTestHelper h) {
         ServerPlayer p = erlang(h);
         online(h, p);
+        grant(p, "es_xtq_1", "es_xtq_growth_1", "es_xtq_growth_2");
+        XiaotianQuanManager.toggle(p);
+        eq(h, -1, bite(h, p, 0, 0), "no slowing below either III");
+        grant(p, "es_xtq_2", "es_xtq_3");
+        eq(h, 0, bite(h, p, 1, 0), "Xiaotian Quan III: Slowness I");
+        grant(p, "es_xtq_growth_3");
+        eq(h, 1, bite(h, p, 0, 1), "with Hound Training III: Slowness II, not III");
+        XiaotianQuanManager.dismiss(p);
+
+        ServerPlayer trained = erlang(h);
+        online(h, trained);
+        grant(trained, "es_xtq_1", "es_xtq_growth_1", "es_xtq_growth_2", "es_xtq_growth_3");
+        XiaotianQuanManager.toggle(trained);
+        eq(h, 1, bite(h, trained, 1, 1), "Hound Training III alone: Slowness II");
+        XiaotianQuanManager.dismiss(trained);
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM, batch = "xiaotianQuanTwoAndThreeStrengthenTheHound")
+    public static void xiaotianQuanTwoAndThreeStrengthenTheHound(GameTestHelper h) {
+        ServerPlayer p = erlang(h);
+        grant(p, "es_xtq_1", "es_xtq_2");
+        XiaotianQuanManager.toggle(p);
+        XiaotianQuanEntity two = hounds(p).get(0);
+        near(h, 30.0 * 1.25, two.getMaxHealth(), "II: +25% hp");
+        near(h, 4.0 * 1.25, two.getAttributeBaseValue(Attributes.ATTACK_DAMAGE), "II: +25% attack");
+        grant(p, "es_xtq_3");
+        XiaotianQuanManager.refreshStats(p, two);
+        near(h, 30.0 * 1.5, two.getMaxHealth(), "III: +50% hp, kept current while out");
+        near(h, 4.0 * 1.5, two.getAttributeBaseValue(Attributes.ATTACK_DAMAGE), "III: +50% attack");
+        near(h, 0.35, two.getAttributeBaseValue(Attributes.MOVEMENT_SPEED), "speed is Hound Training's");
+        grant(p, "es_xtq_growth_1", "es_xtq_growth_2", "es_xtq_growth_3");
+        XiaotianQuanManager.refreshStats(p, two);
+        near(h, 80.0 * 1.5, two.getMaxHealth(), "on top of Hound Training III");
+        XiaotianQuanManager.dismiss(p);
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM, batch = "houndKillsReadSlainByXiaotianQuan")
+    public static void houndKillsReadSlainByXiaotianQuan(GameTestHelper h) {
+        ServerPlayer p = erlang(h);
         grant(p, "es_xtq_1");
         XiaotianQuanManager.toggle(p);
         XiaotianQuanEntity hound = hounds(p).get(0);
+        check(h, !hound.hasCustomName(), "no hidden name: " + hound.getCustomName());
         Pig pig = mob(h, EntityType.PIG, 0, 0);
-        XiaotianQuanManager.onXtqAttacks(incoming(pig, h.getLevel().damageSources().mobAttack(hound), 2f));
-        eq(h, 0, amp(pig, MobEffects.MOVEMENT_SLOWDOWN), "Slowness I");
-        eq(h, 60, duration(pig, MobEffects.MOVEMENT_SLOWDOWN), "for 3 s");
-        XiaotianQuanManager.dismiss(p);
+        var message = h.getLevel().damageSources().mobAttack(hound).getLocalizedDeathMessage(pig);
+        String text = message.getString();
+        check(h, !text.contains("jttw_xtq"), "no owner tag in: " + text);
+        var args = ((net.minecraft.network.chat.contents.TranslatableContents) message.getContents()).getArgs();
+        var killer = (net.minecraft.network.chat.Component) args[1];
+        check(h, killer.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t
+                && t.getKey().equals("entity.jttw_engine.xiaotian_quan"), "killer named by its type: " + killer);
+        check(h, text.endsWith("was slain by Xiaotian Quan") || text.endsWith("entity.jttw_engine.xiaotian_quan"),
+                "reads as slain by Xiaotian Quan: " + text);
+
+        // a hound of the old kind, its owner in a hidden name, loses the name and keeps its owner
+        hound.setCustomName(net.minecraft.network.chat.Component.literal("jttw_xtq:" + p.getUUID()));
+        h.succeedWhen(() -> {
+            check(h, !hound.hasCustomName(), "old hidden name dropped");
+            check(h, XiaotianQuanManager.resolveOwner(hound) == null || XiaotianQuanManager.isAllyXtq(hound, p.getUUID()),
+                    "still his");
+            XiaotianQuanManager.dismiss(p);
+        });
+    }
+
+    @GameTest(template = PLATFORM, batch = "xiaotianQuanTwoGivesTrackingSense")
+    public static void xiaotianQuanTwoGivesTrackingSense(GameTestHelper h) {
+        ServerPlayer p = erlang(h);
+        online(h, p);
+        grant(p, "es_xtq_1", "es_xtq_2");
+        Husk husk = mob(h, EntityType.HUSK, 0, 0);
+        XiaotianQuanManager.toggle(p);
+        h.succeedWhen(() -> {
+            check(h, com.jttw.engine.world.PrivateGlow.glowsFor(p, husk), "husk tracked by Xiaotian Quan II");
+            XiaotianQuanManager.dismiss(p);
+        });
+    }
+
+    @GameTest(template = PLATFORM, batch = "houndTrainingTwoTracksTheThreeNearest")
+    public static void houndTrainingTwoTracksTheThreeNearest(GameTestHelper h) {
+        ServerPlayer p = erlang(h);
+        online(h, p);
+        grant(p, "es_xtq_1", "es_xtq_growth_1", "es_xtq_growth_2");
+        // the hound comes out at the player's (2, 2) + (2, 2): husks at 1, 2, 3 and 5 blocks from it
+        Husk a = mob(h, EntityType.HUSK, 4, 3);
+        Husk b = mob(h, EntityType.HUSK, 4, 2);
+        Husk c = mob(h, EntityType.HUSK, 4, 1);
+        Husk far = mob(h, EntityType.HUSK, 0, 0);
+        XiaotianQuanManager.toggle(p);
+        XiaotianQuanEntity hound = XiaotianQuanManager.houndOf(p);
+        hound.setNoAi(true);
+        hound.moveTo(h.absoluteVec(new net.minecraft.world.phys.Vec3(4.5, 2, 4.5)));
+        h.succeedWhen(() -> {
+            for (Husk near : List.of(a, b, c)) check(h, com.jttw.engine.world.PrivateGlow.glowsFor(p, near), "a near husk tracked");
+            check(h, !com.jttw.engine.world.PrivateGlow.glowsFor(p, far), "the fourth is not");
+            XiaotianQuanManager.dismiss(p);
+        });
+    }
+
+    @GameTest(template = PLATFORM, batch = "erlangsWindAndFogIsTrueFlightFromTheFirstTier")
+    public static void erlangsWindAndFogIsTrueFlightFromTheFirstTier(GameTestHelper h) {
+        ServerPlayer p = erlang(h);
+        com.jttw.engine.progression.skilltree.SkillTreeData.setPoints(p, 50);
+        check(h, com.jttw.engine.progression.skilltree.SkillPurchase.purchase(p, "es_flight_1"), "buy Wind and Fog");
+        var flight = com.jttw.engine.flight.JTTWFlight.profile(p);
+        check(h, com.jttw.engine.flight.JTTWFlight.hasUniversalFlight(p), "he flies");
+        check(h, !flight.glide(), "not a glide: he can climb");
+        near(h, com.jttw.engine.flight.FlightSteering.ERLANG_SQUALL_SPEED, flight.speed(), "Wind and Fog's speed");
+        check(h, com.jttw.engine.progression.skilltree.SkillPurchase.purchase(p, "es_flight_2"), "buy Divine Wind");
+        near(h, com.jttw.engine.flight.FlightSteering.CRUISE_SPEED, com.jttw.engine.flight.JTTWFlight.profile(p).speed(), "Divine Wind: faster");
+        check(h, com.jttw.engine.progression.skilltree.SkillPurchase.purchase(p, "es_flight_3"), "buy Celestial Gale");
+        near(h, com.jttw.engine.flight.FlightSteering.FAST_SPEED, com.jttw.engine.flight.JTTWFlight.profile(p).speed(), "Celestial Gale: fastest");
         h.succeed();
     }
 

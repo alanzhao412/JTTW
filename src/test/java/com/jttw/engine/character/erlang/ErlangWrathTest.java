@@ -35,11 +35,8 @@ class ErlangWrathTest {
     }
 
     @Test
-    void lifestealAndSlownessTwoAtTierThree() {
+    void lifestealAtTierThree() {
         assertEquals(0f, ErlangWrath.lifesteal(2));
         assertEquals(0.10f, ErlangWrath.lifesteal(3));
-        assertEquals(0, ErlangWrath.biteSlownessAmplifier(2, true));
-        assertEquals(1, ErlangWrath.biteSlownessAmplifier(3, true));
-        assertEquals(0, ErlangWrath.biteSlownessAmplifier(3, false), "only in Wrath");
     }
 }

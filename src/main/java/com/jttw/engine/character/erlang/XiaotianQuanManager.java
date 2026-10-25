@@ -49,11 +49,18 @@ import java.util.*;
  * Manages Erlang Shen's Xiaotian Quan companion.
  *
  * <p>Only one companion per player at a time (unlike Wukong's 1-9 clones).
- * Stats scale with the player's Hound Growth skill tree tier, not player stats; its health and
- * attack also grow with its owner's level power, kept current while it is out.
+ * Stats scale with the player's Hound Training tier (the stat table), not player stats; its health
+ * and attack also grow with its owner's level power, kept current while it is out.
  *
- * <p>Tier 2+ grants tracking (Glowing effect on nearest hostile).
- * Every bite applies Slowness I for 3 seconds.
+ * <p>The Xiaotian Quan branch: I summons it. II: +25% health and attack, and tracking sense (the
+ * nearest hostile within {@value #TRACKING_RANGE} blocks glows for its owner). III: +50% health and
+ * attack, its bites give Slowness I, and its howl recharges twice as fast.
+ *
+ * <p>Hound Training: I +20 health, +3 attack. II +20 health more, and its tracking reaches the
+ * three nearest hostiles. III peak stats, and its bites give Slowness II.
+ *
+ * <p>Bites slow for 3 s at the strongest Slowness any of these give (none without either III);
+ * Zhàn Shén III, in Wrath, makes it Slowness II for 5 s ({@link #biteSlowness}).
  *
  * <p>Berserk (its owner in Wrath at Zhàn Shén II, see {@link ErlangWrath}): +30% attack damage,
  * +25% movement speed, a bite every half second rather than every second, and with nothing to
@@ -75,6 +82,9 @@ public final class XiaotianQuanManager {
     private static final double FOLLOW_SPREAD        = 2.0;
     private static final double TRACKING_RANGE       = 32.0;
 
+    /** Slowness from a bite: 3 s, or 5 s under Zhàn Shén III in Wrath. */
+    public static final int BITE_SLOW_TICKS = 60, WRATH_BITE_SLOW_TICKS = 100;
+
     public static final double BERSERK_DAMAGE      = 0.30;
     public static final double BERSERK_SPEED       = 0.25;
     public static final int    BERSERK_BITE_TICKS  = 10;
@@ -86,7 +96,7 @@ public final class XiaotianQuanManager {
     private static final double[][] TIER_STATS = {
         { 30.0,  4.0, 0.35, 2.0 },   // Tier 0 (base, no growth nodes)
         { 50.0,  7.0, 0.38, 5.0 },   // Tier 1 (Hound Training I)
-        { 50.0,  7.0, 0.38, 5.0 },   // Tier 2 (Hound Training II — tracking unlock, same stats)
+        { 70.0,  7.0, 0.38, 5.0 },   // Tier 2 (Hound Training II — +20 HP, wider tracking)
         { 80.0, 12.0, 0.42, 8.0 },   // Tier 3 (Hound Training III — peak stats)
     };
 
@@ -204,9 +214,9 @@ public final class XiaotianQuanManager {
             updateBerserk(xtq, ErlangWrath.houndBerserk(player));
 
             // Tracking: Tier 2+ applies Glowing to nearest hostile every 20 ticks
-            int growthTier = SkillTreeData.getXtqGrowthTier(player);
-            if (growthTier >= 2 && server.getTickCount() % 20 == 0) {
-                applyTracking(xtq, player);
+            int tracked = trackCount(SkillTreeData.getXtqTier(player), SkillTreeData.getXtqGrowthTier(player));
+            if (tracked > 0 && server.getTickCount() % 20 == 0) {
+                applyTracking(xtq, player, tracked);
             }
 
             // Its health and attack keep pace with its owner's level
@@ -237,14 +247,49 @@ public final class XiaotianQuanManager {
         }
     }
 
-    /** XTQ attacks apply Slowness for 3 seconds: I, or II while its owner is in Wrath at Zhàn Shén III. */
+    /**
+     * The Slowness a bite gives, as {amplifier, ticks}, or null for none: Slowness I at Xiaotian
+     * Quan III, II at Hound Training III (the stronger wins, they do not stack), for 3 s; Zhàn Shén
+     * III in Wrath makes it Slowness II for 5 s.
+     */
+    @javax.annotation.Nullable
+    public static int[] biteSlowness(int xtqTier, int growthTier, boolean zhanShenThreeInWrath) {
+        if (zhanShenThreeInWrath) return new int[]{1, WRATH_BITE_SLOW_TICKS};
+        if (growthTier >= 3) return new int[]{1, BITE_SLOW_TICKS};
+        if (xtqTier >= 3) return new int[]{0, BITE_SLOW_TICKS};
+        return null;
+    }
+
+    /** The Slowness this owner's hound's bites give now (see {@link #biteSlowness(int, int, boolean)}). */
+    @javax.annotation.Nullable
+    public static int[] biteSlowness(ServerPlayer owner) {
+        return biteSlowness(SkillTreeData.getXtqTier(owner), SkillTreeData.getXtqGrowthTier(owner),
+                ErlangWrath.inWrath(owner) && ErlangWrath.tier(owner) >= 3);
+    }
+
+    /** How many hostiles its tracking makes glow: 1 with Xiaotian Quan II, 3 with Hound Training II. */
+    public static int trackCount(int xtqTier, int growthTier) {
+        return growthTier >= 2 ? 3 : xtqTier >= 2 ? 1 : 0;
+    }
+
+    /** Its health and attack, times this, by Xiaotian Quan tier: +25% at II, +50% at III. */
+    public static double xtqStatMultiplier(int xtqTier) {
+        return xtqTier >= 3 ? 1.5 : xtqTier == 2 ? 1.25 : 1.0;
+    }
+
+    /** Ticks its howl takes to recharge: halved at Xiaotian Quan III. */
+    public static int howlRecharge(int xtqTier) {
+        return xtqTier >= 3 ? XiaotianQuanEntity.HOWL_COOLDOWN / 2 : XiaotianQuanEntity.HOWL_COOLDOWN;
+    }
+
+    /** XTQ bites slow what they hit, by its owner's skills ({@link #biteSlowness(int, int, boolean)}). */
     @SubscribeEvent
     public static void onXtqAttacks(LivingIncomingDamageEvent e) {
         if (!(e.getSource().getEntity() instanceof XiaotianQuanEntity xtq)) return;
         ServerPlayer owner = resolveOwner(xtq);
         if (owner == null) return;
-        int amp = ErlangWrath.biteSlownessAmplifier(ErlangWrath.tier(owner), ErlangWrath.inWrath(owner));
-        e.getEntity().addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, amp));
+        int[] slow = biteSlowness(owner);
+        if (slow != null) e.getEntity().addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slow[1], slow[0]));
     }
 
     @SubscribeEvent
@@ -269,9 +314,8 @@ public final class XiaotianQuanManager {
         ServerLevel level = player.serverLevel();
         XiaotianQuanEntity xtq = new XiaotianQuanEntity(ModEntities.XIAOTIAN_QUAN.get(), level);
 
-        // Encode owner UUID in custom name for client-side identification
-        xtq.setCustomName(Component.literal("jttw_xtq:" + player.getUUID()));
-        xtq.setCustomNameVisible(false);
+        // its owner is kept in its persistent data (below), not its name: it is named
+        // "Xiaotian Quan" by its type, so a kill reads "... was slain by Xiaotian Quan"
 
         double spawnX = player.getX() + FOLLOW_SPREAD;
         double spawnZ = player.getZ() + FOLLOW_SPREAD;
@@ -283,7 +327,7 @@ public final class XiaotianQuanManager {
 
         // Apply tier-based stats + init XTQ's own Qi/Will pools
         int growthTier = SkillTreeData.getXtqGrowthTier(player);
-        applyTierStats(xtq, growthTier, LevelPower.of(player));
+        applyTierStats(xtq, growthTier, SkillTreeData.getXtqTier(player), LevelPower.of(player));
         xtq.setHealth(xtq.getMaxHealth());
         xtq.initXtqStats(growthTier);
 
@@ -300,16 +344,17 @@ public final class XiaotianQuanManager {
 
     /** Brings an out hound's stats up to its owner's current level and growth tier. Public for tests. */
     public static void refreshStats(ServerPlayer owner, XiaotianQuanEntity xtq) {
-        applyTierStats(xtq, SkillTreeData.getXtqGrowthTier(owner), LevelPower.of(owner));
+        applyTierStats(xtq, SkillTreeData.getXtqGrowthTier(owner), SkillTreeData.getXtqTier(owner), LevelPower.of(owner));
     }
 
     /**
-     * Sets the hound's stats for a growth tier, its health and attack at {@code power}. A change
-     * of max health keeps the hound at the same share of it.
+     * Sets the hound's stats for a growth tier, its health and attack at {@code power} and its
+     * Xiaotian Quan tier's multiplier. A change of max health keeps the hound at the same share of it.
      */
-    private static void applyTierStats(XiaotianQuanEntity xtq, int growthTier, double power) {
+    private static void applyTierStats(XiaotianQuanEntity xtq, int growthTier, int xtqTier, double power) {
         int idx = Math.max(0, Math.min(TIER_STATS.length - 1, growthTier));
         double[] stats = TIER_STATS[idx];
+        power *= xtqStatMultiplier(xtqTier);
 
         var maxHp = xtq.getAttribute(Attributes.MAX_HEALTH);
         double hp = stats[0] * power;
@@ -348,25 +393,15 @@ public final class XiaotianQuanManager {
                 berserk ? BERSERK_SPEED : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
     }
 
-    /** The nearest hostile mob within tracking range glows, for its owner alone. */
-    private static void applyTracking(XiaotianQuanEntity xtq, ServerPlayer owner) {
+    /** The {@code count} nearest hostile mobs within tracking range glow, for its owner alone. */
+    private static void applyTracking(XiaotianQuanEntity xtq, ServerPlayer owner, int count) {
         AABB box = xtq.getBoundingBox().inflate(TRACKING_RANGE);
-        List<LivingEntity> nearby = xtq.level().getEntitiesOfClass(LivingEntity.class, box,
-                e -> e instanceof Enemy && e.isAlive() && e != xtq);
-
-        LivingEntity closest = null;
-        double closestDist = Double.MAX_VALUE;
-        for (LivingEntity ent : nearby) {
-            double d = ent.distanceToSqr(xtq);
-            if (d < closestDist) {
-                closestDist = d;
-                closest = ent;
-            }
-        }
-
-        if (closest != null) {
-            com.jttw.engine.world.PrivateGlow.show(owner, closest, 40);
-        }
+        xtq.level().getEntitiesOfClass(LivingEntity.class, box,
+                        e -> e instanceof Enemy && e.isAlive() && e != xtq)
+                .stream()
+                .sorted(Comparator.comparingDouble(e -> e.distanceToSqr(xtq)))
+                .limit(count)
+                .forEach(e -> com.jttw.engine.world.PrivateGlow.show(owner, e, 40));
     }
 
     // =========================================================================
@@ -605,7 +640,8 @@ public final class XiaotianQuanManager {
             xtq.level().addFreshEntity(howl);
 
             xtq.playSound(SoundEvents.WOLF_HOWL, 1.5F, 0.8F);
-            x.spendHowlQi();
+            ServerPlayer owner = resolveOwner(xtq);
+            x.spendHowlQi(howlRecharge(owner == null ? 0 : SkillTreeData.getXtqTier(owner)));
         }
     }
 

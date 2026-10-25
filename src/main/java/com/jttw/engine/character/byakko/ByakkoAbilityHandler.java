@@ -590,6 +590,7 @@ public final class ByakkoAbilityHandler {
         // Filter out entities the player owns (companion mobs like Xiaotian Quan)
         String ownerPrefix = "jttw_";
         affected.removeIf(e -> {
+            if (com.jttw.engine.character.erlang.XiaotianQuanManager.isAllyXtq(e, player.getUUID())) return true;
             if (e.getCustomName() != null) {
                 String name = e.getCustomName().getString();
                 if (name.startsWith(ownerPrefix) && name.contains(player.getUUID().toString())) {
