@@ -215,7 +215,7 @@ public final class YuanDiSkillTree {
         // ── PRIMORDIAL STEP (col 8, USE mobility) ───────────────────────
         TREE.add(new SkillNode(
                 STEP_1, "Primordial Step I",
-                new String[]{ "Sprint + sneak: blink 8", "blocks where you look.", "10s cooldown. Costs 5 Qi." },
+                new String[]{ "Shift+V: blink 8 blocks", "where you look.", "10s cooldown. Costs 5 Qi." },
                 2, 8, 0, List.of(), AbilityType.TOGGLE, 1, "Primordial Step"
         ));
         TREE.add(new SkillNode(

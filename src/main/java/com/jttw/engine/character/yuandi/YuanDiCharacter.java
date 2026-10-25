@@ -38,6 +38,13 @@ public final class YuanDiCharacter implements PlayableCharacter {
                 AbilitySlot.fromBranch(tree, unlocked, "yd_transform", "Primordial Form", AbilityType.TOGGLE, 2));
     }
 
+    /** Shift + V: Primordial Step, his fourth (see PlayableCharacter#activate for the layout). */
+    @Override
+    public List<AbilitySlot> shiftBar(Set<String> unlocked) {
+        return PlayableCharacter.shiftPage(AbilitySlot.fromBranch(skillTree(), unlocked, "yd_step", "Primordial Step", AbilityType.TOGGLE),
+                AbilitySlot.EMPTY, AbilitySlot.EMPTY, AbilitySlot.EMPTY);
+    }
+
     @Override
     public void use(ServerPlayer player, String abilityId, AbilityAction action) {
         switch (abilityId) {
@@ -51,6 +58,7 @@ public final class YuanDiCharacter implements PlayableCharacter {
             }
             case "yd_smite" -> { if (action == AbilityAction.USE) YuanDiAbilityHandler.usePrimordialSmite(player); }
             case "yd_gravity" -> { if (action == AbilityAction.USE) YuanDiAbilityHandler.useAbyssalGravity(player); }
+            case "yd_step" -> { if (action == AbilityAction.USE) YuanDiAbilityHandler.usePrimordialStep(player); }
             default -> {}
         }
     }

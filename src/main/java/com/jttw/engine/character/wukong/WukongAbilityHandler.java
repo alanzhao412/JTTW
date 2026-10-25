@@ -186,16 +186,6 @@ public final class WukongAbilityHandler {
     // Dimension cycling (Flight Tier 3)
     // -----------------------------------------------------------------------
 
-    @SuppressWarnings("unchecked")
-    private static final ResourceKey<Level>[] DIMENSION_CYCLE =
-            new ResourceKey[]{
-                    Level.OVERWORLD,
-                    Level.NETHER,
-                    Level.END,
-                    com.jttw.engine.dimension.JTTWDimensions.HELL,   // the Book of Life and Death
-                    com.jttw.engine.dimension.JTTWDimensions.HEAVEN  // the peaches, the pills, the wine
-            };
-
     /** Realm leap: 20 Qi a somersault. */
     public static final float REALM_LEAP_QI = 20f;
 
@@ -204,15 +194,13 @@ public final class WukongAbilityHandler {
      * Heaven and round again. From anywhere off that wheel, home to the Overworld.
      */
     public static ResourceKey<Level> nextRealm(ResourceKey<Level> current) {
-        for (int i = 0; i < DIMENSION_CYCLE.length; i++) {
-            if (DIMENSION_CYCLE[i].equals(current)) return DIMENSION_CYCLE[(i + 1) % DIMENSION_CYCLE.length];
-        }
-        return Level.OVERWORLD;
+        return com.jttw.engine.dimension.RealmArrival.next(current);
     }
 
     /**
      * Shift + V with Somersault Cloud (Cloud Step III): one somersault to the next realm
-     * ({@link #nextRealm}), for {@link #REALM_LEAP_QI} Qi, landing on the ground above where he was.
+     * ({@link #nextRealm}), for {@link #REALM_LEAP_QI} Qi, landing at that realm's arrival
+     * ({@link com.jttw.engine.dimension.RealmArrival}).
      */
     public static void cycleDimension(ServerPlayer player) {
         if (SkillTreeData.getFlightTier(player) < 3) return;
@@ -232,18 +220,7 @@ public final class WukongAbilityHandler {
         }
         QiManager.syncNow(player);
 
-        BlockPos targetPos = targetLevel.getHeightmapPos(
-                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                player.blockPosition()
-        );
-
-        player.teleportTo(targetLevel,
-                targetPos.getX() + 0.5,
-                targetPos.getY() + 1.0,
-                targetPos.getZ() + 0.5,
-                player.getYRot(),
-                player.getXRot()
-        );
+        com.jttw.engine.dimension.RealmArrival.travel(player, next);
 
         com.jttw.engine.flight.JTTWFlight.setUniversalFlight(player, true);
         com.jttw.engine.flight.JTTWFlight.setFlightSpeedTier(player, 3);

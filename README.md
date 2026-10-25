@@ -110,7 +110,10 @@ The same node definitions drive unlock tracking in `SkillTreeData` and rendering
 [`SkillTreeScreen`](src/main/java/com/jttw/engine/client/gui/SkillTreeScreen.java). Each character
 is one [`PlayableCharacter`](src/main/java/com/jttw/engine/character/PlayableCharacter.java) in its
 own package, which owns its tree, which unlocked branch sits in each skill-bar slot and how it
-activates (`MENU`, `TOGGLE`, `HELD`, `PASSIVE`), and what each slot's key does.
+activates (`MENU`, `TOGGLE`, `HELD`, `PASSIVE`), and what each slot's key does: V, B, N and M,
+and with Shift held a second page (Shift + V, B, N, M) for a fourth ability, the realm leaps and the
+true forms (Yuan Di's Primordial Step, a blink of 8 blocks where he looks for 5 Qi, is on Shift + V;
+it was once sprint + sneak, which sneaking broke off).
 [`Characters`](src/main/java/com/jttw/engine/character/Characters.java) is the one place a player's
 reincarnation outcome is mapped to their character. A passive ability is a new node; an active one
 is a new node plus its slot in that character's class.
@@ -239,7 +242,14 @@ is what makes the rest possible:
   glide rather than an abrupt stop.
 - **Speed tiers.** Glide-only (sinks, cannot gain altitude), full flight, and a top tier that also
   permits dimension travel (Shift + V: the Dragon's to the realm it picks, Wukong's Somersault Cloud
-  to the next on the wheel of Overworld, Nether, End, Hell and Heaven, 20 Qi a leap) — with
+  to the next on the wheel of Overworld, Nether, End, Hell and Heaven, 20 Qi a leap; both come down
+  at the realm's own arrival, [`RealmArrival`](src/main/java/com/jttw/engine/dimension/RealmArrival.java):
+  Hell's arrival plaza and Heaven's arrival, as every traveller's; in the Nether, near the place
+  scaled as a portal scales it (x / 8, z / 8), the nearest ground within 16 blocks with two blocks
+  of air over it, not lava nor magma, under the bedrock roof (below y 120), or else an obsidian
+  platform at y 65; in the End, its obsidian platform, laid as for the end portal; in the Overworld,
+  the surface where one was (eight times out from the Nether), or, on water, lava or nothing, one's
+  bed or anchor, else the world's spawn) — with
   per-character speed variation layered on top (Erlang Shen's Wind and Fog, Sun Wukong's Cloud Step
   and the Phoenix's Rising Ember are true flight from their first tier, a little under cruising
   speed, never a glide; the Dragon's Elytra Glide stays a glide; Nezha flies on his Wind Fire

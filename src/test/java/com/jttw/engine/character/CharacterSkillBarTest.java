@@ -115,6 +115,15 @@ class CharacterSkillBarTest {
     }
 
     @Test
+    void yuanDiStepsOnShiftV() {
+        PlayableCharacter yd = Characters.byOutcome("yuan_di");
+        assertTrue(yd.shiftBar(Set.of()).stream().allMatch(AbilitySlot::isEmpty), "nothing until learned");
+        AbilitySlot step = yd.shiftBar(Set.of("yd_step_1", "yd_step_2")).get(0);
+        assertEquals("yd_step", step.id(), "Shift + V: Primordial Step");
+        assertEquals(2, step.tier());
+    }
+
+    @Test
     void dragonKeepsDimensionTravelOnShiftVWhateverElseItLearns() {
         PlayableCharacter dragon = Characters.byOutcome("dragon");
         Set<String> flight3 = Set.of("dr_flight_1", "dr_flight_2", "dr_flight_3");
