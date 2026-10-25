@@ -1,5 +1,6 @@
 package com.jttw.engine.gametest.character;
 
+import com.jttw.engine.registry.ModEffects;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.character.AbilityAction;
 import com.jttw.engine.character.Characters;
@@ -288,7 +289,8 @@ public class DragonGameTests {
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 4);
         List<Hit> hits = watch(golem);
         DragonAbilityHandler.castTidalWave(p);
-        eq(h, 4, amp(golem, MobEffects.MOVEMENT_SLOWDOWN), "Slowness V: held in place");
+        eq(h, 0, amp(golem, ModEffects.PINNED), "pinned: held in place");
+        eq(h, 60, duration(golem, ModEffects.PINNED), "for 3 s");
         tick(p, DragonAbilityHandler::onPlayerTick, 80);
         List<Hit> drown = of(hits, DamageTypes.DROWN);
         check(h, !drown.isEmpty(), "bubble drowns its prisoner");

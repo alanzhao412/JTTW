@@ -48,7 +48,7 @@ public final class NineSpiritsSkillTree {
                 new String[]{ "A bolt that leaps on to 2", "more foes nearby. Every", "head hits harder: ATK x1.3." },
                 3, 0, 1, List.of(HEADS_1), AbilityType.TOGGLE, 2, "Heads"));
         TREE.add(new SkillNode(HEADS_3, "Frost Head",
-                new String[]{ "A shard that slows, then", "freezes. Thunder leaps on", "to 4 more foes, not 2." },
+                new String[]{ "A shard: frozen fast 2 s,", "then slowed. Thunder leaps", "on to 4 more foes, not 2." },
                 4, 0, 2, List.of(HEADS_2), AbilityType.TOGGLE, 3, "Heads"));
 
         // ── HEAVEN-SHAKING ROAR (col 1) ─────────────────────────────────

@@ -1,5 +1,6 @@
 package com.jttw.engine.gametest.character;
 
+import com.jttw.engine.registry.ModEffects;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.character.AbilityAction;
 import com.jttw.engine.character.Characters;
@@ -139,7 +140,8 @@ public class ByakkoGameTests {
         land(p);
         // tier 3: 12 + attack 4 x 1.0 = 16, falloff 1 - 2/7
         near(h, 16.0 * (5.0 / 7.0), of(hits, DamageTypes.PLAYER_ATTACK).get(0).amount(), "impact damage");
-        eq(h, 3, amp(golem, MobEffects.MOVEMENT_SLOWDOWN), "stun: Slowness IV");
+        eq(h, 0, amp(golem, ModEffects.STUNNED), "stunned");
+        eq(h, 20, duration(golem, ModEffects.STUNNED), "for 1 s");
         check(h, golem.hasEffect(MobEffects.BLINDNESS), "stun: blind");
         h.succeed();
     }
@@ -204,11 +206,11 @@ public class ByakkoGameTests {
         hound.getPersistentData().putUUID(com.jttw.engine.character.erlang.XiaotianQuanManager.XTQ_OWNER_TAG, p.getUUID());
         character().use(p, "bk_roar", AbilityAction.USE);
         near(h, 92f, QiData.getCurrent(p), "8 Qi");
-        eq(h, 5, amp(husk, MobEffects.MOVEMENT_SLOWDOWN), "Slowness VI");
-        eq(h, 60, duration(husk, MobEffects.MOVEMENT_SLOWDOWN), "for 3 s");
+        eq(h, 0, amp(husk, ModEffects.PINNED), "pinned");
+        eq(h, 60, duration(husk, ModEffects.PINNED), "for 3 s");
         check(h, husk.getTarget() == null, "forgets its target");
         near(h, 1.5, husk.getDeltaMovement().z, "thrown back");
-        check(h, !hound.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "the player's own companion is spared");
+        check(h, !hound.hasEffect(ModEffects.PINNED), "the player's own companion is spared");
         eq(h, -1, amp(p, MobEffects.MOVEMENT_SPEED), "no Speed below tier 2");
         h.succeed();
     }
@@ -493,8 +495,8 @@ public class ByakkoGameTests {
         Husk husk = mob(h, EntityType.HUSK, 2, 4);
         Husk corner = h.spawnWithNoFreeWill(EntityType.HUSK, new net.minecraft.core.BlockPos(8, 2, 8)); // 6, 6 off: 8.5
         ByakkoAbilityHandler.castRoar(p);
-        eq(h, 5, amp(husk, MobEffects.MOVEMENT_SLOWDOWN), "near: pinned");
-        eq(h, -1, amp(corner, MobEffects.MOVEMENT_SLOWDOWN), "8.5 blocks off: untouched");
+        eq(h, 0, amp(husk, ModEffects.PINNED), "near: pinned");
+        eq(h, -1, amp(corner, ModEffects.PINNED), "8.5 blocks off: untouched");
         corner.discard();
         h.succeed();
     }

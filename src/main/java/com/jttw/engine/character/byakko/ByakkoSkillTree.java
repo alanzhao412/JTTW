@@ -136,7 +136,7 @@ public final class ByakkoSkillTree {
         // ── TERRITORIAL ROAR (col 5, USE active) ─────────────────────────
         TREE.add(new SkillNode(
                 ROAR_1, "Territorial Roar I",
-                new String[]{ "Press B: all within 8", "blocks are pinned 3 s and", "thrown back. 30 s rest." },
+                new String[]{ "Press B: all within 8", "blocks are thrown back and", "pinned 3 s. 30 s rest." },
                 2, 5, 0, List.of(), AbilityType.TOGGLE, 1, "Territorial Roar"
         ));
         TREE.add(new SkillNode(

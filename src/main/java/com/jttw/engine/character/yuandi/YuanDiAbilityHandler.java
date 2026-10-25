@@ -613,10 +613,9 @@ public final class YuanDiAbilityHandler {
                         100, 1, false, true));
             }
 
-            // T3: 2s stun (Slowness V + Blindness)
+            // T3: 2s stun (cannot move nor strike; blinded)
             if (tier >= 3) {
-                target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,
-                        40, 4, false, false));
+                com.jttw.engine.world.Stun.stun(target, 40, player);
                 target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS,
                         40, 0, false, false));
                 target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN,

@@ -268,10 +268,10 @@ public final class NineSpiritsAbilityHandler {
             level.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 30, 0.8, 0.6, 0.8, 0.05);
             level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 1.0F, 1.0F);
         } else if (result instanceof EntityHitResult eh && eh.getEntity() instanceof LivingEntity target) {
-            // Frost: slows, and freezes in place
+            // Frost: frozen in place (pinned) 2 s, slowed a second more
             target.hurt(owner.damageSources().indirectMagic(shot, owner), damage * markBonus(target));
             target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 2), owner);
-            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 9), owner);
+            com.jttw.engine.world.Stun.pin(target, 40, owner);
             target.setTicksFrozen(Math.max(target.getTicksFrozen(), target.getTicksRequiredToFreeze() + 60));
             level.sendParticles(ParticleTypes.SNOWFLAKE, at.x, at.y + 0.5, at.z, 25, 0.4, 0.6, 0.4, 0.02);
         } else {

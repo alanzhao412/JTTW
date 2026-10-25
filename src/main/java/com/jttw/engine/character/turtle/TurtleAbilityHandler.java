@@ -334,7 +334,7 @@ public final class TurtleAbilityHandler {
 
             // Tier 3: stun the targets the impact damaged (not those only knocked back)
             if (tier >= 3 && dist <= damageRadius && target instanceof LivingEntity living) {
-                living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 4));
+                com.jttw.engine.world.Stun.stun(living, 40, player);
                 living.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 30, 0));
             }
         }

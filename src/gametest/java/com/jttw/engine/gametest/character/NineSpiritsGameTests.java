@@ -1,5 +1,6 @@
 package com.jttw.engine.gametest.character;
 
+import com.jttw.engine.registry.ModEffects;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.character.AbilityAction;
 import com.jttw.engine.character.Characters;
@@ -131,7 +132,10 @@ public class NineSpiritsGameTests {
         Zombie z = mob(h, EntityType.ZOMBIE, 2, 5);
         NineSpiritsAbilityHandler.onHeadShotLands(new ProjectileImpactEvent(shot, new EntityHitResult(z)));
         check(h, z.getHealth() < z.getMaxHealth(), "hurt");
-        eq(h, 9, amp(z, MobEffects.MOVEMENT_SLOWDOWN), "frozen in place");
+        eq(h, 0, amp(z, ModEffects.PINNED), "frozen in place");
+        eq(h, 40, duration(z, ModEffects.PINNED), "for 2 s");
+        eq(h, 2, amp(z, MobEffects.MOVEMENT_SLOWDOWN), "and slowed");
+        eq(h, 60, duration(z, MobEffects.MOVEMENT_SLOWDOWN), "a second longer");
         check(h, z.isFullyFrozen(), "rimed with frost");
         h.succeed();
     }
@@ -356,7 +360,7 @@ public class NineSpiritsGameTests {
         ServerPlayer anyone = as(h, ReincarnationOutcome.EYE_OF_HEAVEN);
         Zombie near = mob(h, EntityType.ZOMBIE, 2, 4);
         eq(h, 1, BellOfTaiyiItem.ring(anyone), "one in reach");
-        eq(h, 9, amp(near, MobEffects.MOVEMENT_SLOWDOWN), "held still");
+        eq(h, 0, amp(near, ModEffects.STUNNED), "held still");
         eq(h, 0L, near.getPersistentData().getLong(NineSpiritsAbilityHandler.KEY_BELL_MARK), "no mark from anyone else");
 
         ServerPlayer p = saint(h);
