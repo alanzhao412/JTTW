@@ -136,9 +136,13 @@ public final class TransformationAbilityHandler {
     private static final double GUARDIAN_LASER_RANGE = 15.0D;
     private static final int GUARDIAN_LASER_MAX_TICKS = 100; // 5 seconds max channel
 
-    /** Tracks active guardian laser beams: player UUID → LaserState(targetId, startTick). */
+    /** Tracks active guardian laser beams: player UUID → LaserState(targetId, startTick, pulses dealt). */
     private static final Map<UUID, LaserState> GUARDIAN_LASERS = new HashMap<>();
-    private record LaserState(int targetId, long startTick) {}
+    private record LaserState(int targetId, long startTick, int[] pulses) {
+        LaserState(int targetId, long startTick) {
+            this(targetId, startTick, new int[1]);
+        }
+    }
 
     private static final Map<UUID, Long> SNOWBALL_COOLDOWNS = new HashMap<>();
     private static final long SNOWBALL_COOLDOWN_TICKS = 10L; // 0.5 seconds
@@ -557,8 +561,9 @@ public final class TransformationAbilityHandler {
         long now = level.getGameTime();
         int elapsed = (int)(now - state.startTick());
 
-        // Max channel duration reached (5 seconds)
+        // Max channel duration reached (5 seconds): any pulse still owed lands first
         if (elapsed >= GUARDIAN_LASER_MAX_TICKS) {
+            pulseGuardianLaser(sp, state, target, GUARDIAN_LASER_MAX_TICKS - 1);
             endGuardianLaser(sp);
             return;
         }
@@ -577,9 +582,7 @@ public final class TransformationAbilityHandler {
         }
 
         // --- Deal the laser's damage (at the player's power) every 10 ticks ---
-        if (elapsed > 0 && elapsed % GUARDIAN_LASER_DAMAGE_INTERVAL == 0) {
-            target.hurt(level.damageSources().magic(), LevelPower.scaled(sp, GUARDIAN_LASER_TICK_DAMAGE));
-        }
+        pulseGuardianLaser(sp, state, target, elapsed);
 
         // --- Apply Mining Fatigue I to target each tick (refresh duration) ---
         target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 30, 0, false, true, true));
@@ -592,6 +595,21 @@ public final class TransformationAbilityHandler {
     }
 
     /** Ends the guardian laser and starts the 3-second cooldown. */
+    /**
+     * The beam's pulses owed by {@code elapsed} ticks (one each 10), less those dealt. Counted, not
+     * read off the clock, so a tick the beam was not ticked on (a late or doubled tick) loses no
+     * pulse: what is owed lands together, as one blow. And each pulse lands just as the last one's
+     * hurt-immunity runs out; a steady beam is not a fresh blow to be parried, so a target a tick
+     * late on its own clock does not swallow it.
+     */
+    private static void pulseGuardianLaser(ServerPlayer sp, LaserState state, LivingEntity target, int elapsed) {
+        int owed = Math.max(0, elapsed) / GUARDIAN_LASER_DAMAGE_INTERVAL - state.pulses()[0];
+        if (owed <= 0) return;
+        state.pulses()[0] += owed;
+        if (target.invulnerableTime <= GUARDIAN_LASER_DAMAGE_INTERVAL + 1) target.invulnerableTime = 0;
+        target.hurt(sp.serverLevel().damageSources().magic(), owed * LevelPower.scaled(sp, GUARDIAN_LASER_TICK_DAMAGE));
+    }
+
     private static void endGuardianLaser(ServerPlayer sp) {
         GUARDIAN_LASERS.remove(sp.getUUID());
         long now = sp.level().getGameTime();
