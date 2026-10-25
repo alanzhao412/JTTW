@@ -106,23 +106,16 @@ public final class DragonAbilityHandler {
         ));
         Vec3 strikePos = hitResult.getLocation();
 
-        int boltCount = (tier >= 3) ? 3 : 1;
         float damageMultiplier = switch (tier) {
             case 2 -> 1.5f;
             case 3 -> 2.5f;
             default -> 1.0f;
         };
+        // Tempest: in a thunderstorm his thunder strikes half again as hard
+        float totalDamage = (float) (LevelPower.scaled(player, BASE_LIGHTNING_DAMAGE) + attackDamage * 0.5)
+                * damageMultiplier * tempestMultiplier(player);
 
-        float totalDamage = (float) (LevelPower.scaled(player, BASE_LIGHTNING_DAMAGE) + attackDamage * 0.5) * damageMultiplier;
-
-        for (int i = 0; i < boltCount; i++) {
-            // Tier 3: spread bolts in a small cone
-            Vec3 boltPos = strikePos;
-            if (boltCount > 1 && i > 0) {
-                double offsetX = (player.getRandom().nextDouble() - 0.5) * 3.0;
-                double offsetZ = (player.getRandom().nextDouble() - 0.5) * 3.0;
-                boltPos = strikePos.add(offsetX, 0, offsetZ);
-            }
+        for (Vec3 boltPos : boltPositions(player, strikePos, tier)) {
 
             LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(player.level());
             if (bolt == null) continue;
@@ -156,6 +149,27 @@ public final class DragonAbilityHandler {
                 new SyncCooldownPacket(
                         player.getUUID(), "dr_lightning",
                         LIGHTNING_COOLDOWN_TICKS, LIGHTNING_COOLDOWN_TICKS));
+    }
+
+    /** Tier III's fan: the side bolts fall this far to either side of the first, across his facing. */
+    public static final double BOLT_FAN_SPREAD = 2.0;
+
+    /**
+     * Where the bolts fall: one where he looks; at tier III two more, fanned out to its left and
+     * right across his facing, so the three spread like a cone from him.
+     */
+    public static List<Vec3> boltPositions(ServerPlayer player, Vec3 strikePos, int tier) {
+        if (tier < 3) return List.of(strikePos);
+        // across his facing (his yaw, so a bolt called down at his feet still fans out)
+        double yaw = Math.toRadians(player.getYRot());
+        Vec3 across = new Vec3(Math.cos(yaw), 0, Math.sin(yaw)).scale(BOLT_FAN_SPREAD);
+        return List.of(strikePos, strikePos.add(across), strikePos.subtract(across));
+    }
+
+    /** Tempest's +50%: what Call Thunder's damage is multiplied by now (1 outside a thunderstorm). */
+    public static float tempestMultiplier(ServerPlayer player) {
+        return DragonSkillTree.TREE.highestTier(SkillTreeData.getUnlockedNodes(player), "dr_weather") >= 2
+                && player.level().isThundering() ? 1.5f : 1.0f;
     }
 
     // -----------------------------------------------------------------------
@@ -276,9 +290,9 @@ public final class DragonAbilityHandler {
                 player.getYRot(),
                 player.getXRot());
 
-        // Maintain flight
+        // Keep his flight, at its own speed (Dimension Travel is the third, fastest tier)
         com.jttw.engine.flight.JTTWFlight.setUniversalFlight(player, true);
-        com.jttw.engine.flight.JTTWFlight.setFlightSpeedTier(player, 2);
+        com.jttw.engine.flight.JTTWFlight.setFlightSpeedTier(player, drFlightTier);
 
         player.sendSystemMessage(Component.literal(
                 "§b[Dragon] §rYou arrive in §e" + DIMENSION_NAMES[selectedIdx] + "§r."));
@@ -551,53 +565,76 @@ public final class DragonAbilityHandler {
     /** Tracks entities that were recently knocked back for wall impact check. */
     private static final Map<Integer, KnockbackEntry> KNOCKBACK_TARGETS = new ConcurrentHashMap<>();
 
-    private record KnockbackEntry(int entityId, UUID sourcePlayerId, float originalDamage,
-                                  Vec3 initialVelocity, long expireTick) {}
+    private record KnockbackEntry(int entityId, UUID sourcePlayerId, float originalDamage, long expireTick) {}
+
+    /** The Dragon's melee blows landing this tick: who was struck, by whom, how hard, at what tier. */
+    private static final Map<Integer, ForceBlow> FORCE_BLOWS = new ConcurrentHashMap<>();
+
+    private record ForceBlow(UUID attacker, float damage, int tier, long tick) {}
+
+    /** How long after the blow a mob flung into a wall still takes the impact: half a second. */
+    public static final int WALL_IMPACT_WINDOW = 10;
+
+    /** Vanilla's knockback from a blow, which Tidal Force multiplies. */
+    public static final double BASE_KNOCKBACK = 0.4;
+
+    public static double knockbackMultiplier(int tier) {
+        return tier >= 2 ? 5.0 : tier == 1 ? 3.0 : 1.0;
+    }
+
+    /** Set while a wall impact is dealt, so the impact is not itself a blow that flings again. */
+    private static boolean impacting;
 
     /**
-     * Tidal Force passive — amplifies knockback on melee attacks.
+     * Tidal Force passive: the Dragon's melee blows (his hand, not his thunder or his scales) fling
+     * what they strike.
      * <ul>
-     *   <li>T1: 3x knockback on all melee attacks</li>
-     *   <li>T2: 5x knockback. If mob hits a wall, bonus impact damage = 25% of original.</li>
+     *   <li>T1: 3x a blow's knockback</li>
+     *   <li>T2: 5x. A mob flung into a wall within half a second takes a quarter of the blow again.</li>
      * </ul>
+     * The blow is noted here and the fling made when the game knocks the mob back
+     * ({@link #onTidalForceKnockback}), in place of vanilla's knockback: made here, before it,
+     * vanilla's would halve it.
      */
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public static void onTidalForceHurt(LivingIncomingDamageEvent event) {
-        // Only for player attacks (melee)
+        if (impacting) return;
+        // Only the player's own melee: a player attack whose direct entity is the attacker
         if (!(event.getSource().getEntity() instanceof ServerPlayer attacker)) return;
+        if (!event.getSource().is(DamageTypes.PLAYER_ATTACK) || event.getSource().getDirectEntity() != attacker) return;
         if (!isDragon(attacker)) return;
-        // Only for direct melee (attacker is the direct entity)
-        if (event.getSource().getDirectEntity() != attacker) return;
 
-        Set<String> nodes = SkillTreeData.getUnlockedNodes(attacker);
-        int tier = DragonSkillTree.TREE.highestTier(nodes, "dr_force");
+        int tier = DragonSkillTree.TREE.highestTier(SkillTreeData.getUnlockedNodes(attacker), "dr_force");
         if (tier < 1) return;
+        FORCE_BLOWS.put(event.getEntity().getId(),
+                new ForceBlow(attacker.getUUID(), event.getAmount(), tier, attacker.level().getGameTime()));
+    }
 
+    /**
+     * The fling: the blow's knockback, multiplied, away from the Dragon, and lifted as vanilla
+     * lifts it. Like Tidal Wave's water it takes no account of a mob's footing (its knockback
+     * resistance), as it never did.
+     */
+    @SubscribeEvent
+    public static void onTidalForceKnockback(net.neoforged.neoforge.event.entity.living.LivingKnockBackEvent event) {
         LivingEntity target = event.getEntity();
-        Vec3 knockDir = target.position().subtract(attacker.position()).normalize();
+        ForceBlow blow = FORCE_BLOWS.remove(target.getId());
+        if (blow == null || blow.tick() != target.level().getGameTime()) return;
+        event.setCanceled(true);
 
-        double knockMultiplier = (tier >= 2) ? 5.0 : 3.0;
-        double baseKnock = 0.4; // Vanilla base knockback
-
-        Vec3 knockVelocity = new Vec3(
-                knockDir.x * baseKnock * knockMultiplier,
-                0.4, // upward component
-                knockDir.z * baseKnock * knockMultiplier
-        );
-
-        // Apply knockback on next tick (after vanilla knockback is applied)
-        // We schedule by storing the data and applying in the tick handler
-        target.setDeltaMovement(target.getDeltaMovement().add(knockVelocity));
-        if (target instanceof ServerPlayer sp) sp.hurtMarked = true;
+        // vanilla pushes away from (ratioX, ratioZ), the way back to the striker
+        Vec3 toward = new Vec3(event.getOriginalRatioX(), 0, event.getOriginalRatioZ());
+        Vec3 away = toward.lengthSqr() < 1e-8 ? Vec3.ZERO : toward.normalize().scale(-1);
+        Vec3 fling = away.scale(BASE_KNOCKBACK * knockbackMultiplier(blow.tier()));
+        Vec3 old = target.getDeltaMovement();
+        target.setDeltaMovement(old.x / 2 + fling.x, 0.4, old.z / 2 + fling.z);
+        target.hasImpulse = true;
         target.hurtMarked = true;
 
-        // T2: track for wall impact check (10 ticks later)
-        if (tier >= 2) {
-            long expireTick = attacker.level().getGameTime() + 10;
-            KNOCKBACK_TARGETS.put(target.getId(), new KnockbackEntry(
-                    target.getId(), attacker.getUUID(), event.getAmount(),
-                    knockVelocity, expireTick
-            ));
+        // T2: watch for it striking a wall
+        if (blow.tier() >= 2) {
+            KNOCKBACK_TARGETS.put(target.getId(), new KnockbackEntry(target.getId(), blow.attacker(), blow.damage(),
+                    target.level().getGameTime() + WALL_IMPACT_WINDOW));
         }
     }
 
@@ -664,41 +701,36 @@ public final class DragonAbilityHandler {
     }
 
     /**
-     * Check if knocked-back entities hit a wall (velocity near zero after being high).
-     * If so, deal bonus impact damage = 25% of the original hit damage.
+     * Those flung by Tidal Force II: one that runs into a wall (its own movement stopped by a block
+     * across its way) within the window takes a quarter of the blow's damage again. One that flies
+     * free and slows on open ground takes nothing.
      */
     private static void tickWallImpact(ServerLevel level) {
         long now = level.getGameTime();
         Iterator<Map.Entry<Integer, KnockbackEntry>> it = KNOCKBACK_TARGETS.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<Integer, KnockbackEntry> entry = it.next();
-            KnockbackEntry kb = entry.getValue();
-
-            // Wait until expire tick
-            if (now < kb.expireTick()) continue;
-
-            it.remove();
-
+            KnockbackEntry kb = it.next().getValue();
+            if (now > kb.expireTick()) {
+                it.remove();
+                continue;
+            }
             Entity entity = level.getEntity(kb.entityId());
-            if (entity == null || !entity.isAlive()) continue;
-
-            // Check: if velocity is near zero, entity hit something
-            Vec3 currentVel = entity.getDeltaMovement();
-            double currentHorizSpeed = Math.sqrt(currentVel.x * currentVel.x + currentVel.z * currentVel.z);
-            double initialHorizSpeed = Math.sqrt(
-                    kb.initialVelocity().x * kb.initialVelocity().x
-                    + kb.initialVelocity().z * kb.initialVelocity().z);
-
-            // If current speed is < 20% of initial, they hit something
-            if (initialHorizSpeed > 0.1 && currentHorizSpeed < initialHorizSpeed * 0.2) {
-                float impactDamage = kb.originalDamage() * 0.25f;
-                if (impactDamage > 0.5f && entity instanceof LivingEntity living) {
-                    ServerPlayer source = level.getServer().getPlayerList().getPlayer(kb.sourcePlayerId());
-                    if (source != null) {
-                        living.hurt(source.damageSources().playerAttack(source), impactDamage);
-                    } else {
-                        living.hurt(level.damageSources().generic(), impactDamage);
-                    }
+            if (entity == null) continue; // another level's, or gone: the window clears it
+            if (!entity.isAlive()) {
+                it.remove();
+                continue;
+            }
+            if (!entity.horizontalCollision) continue;
+            it.remove();
+            float impactDamage = kb.originalDamage() * 0.25f;
+            if (impactDamage > 0.5f && entity instanceof LivingEntity living) {
+                ServerPlayer source = level.getServer().getPlayerList().getPlayer(kb.sourcePlayerId());
+                impacting = true;
+                try {
+                    living.hurt(source != null ? source.damageSources().playerAttack(source)
+                            : level.damageSources().flyIntoWall(), impactDamage);
+                } finally {
+                    impacting = false;
                 }
             }
         }

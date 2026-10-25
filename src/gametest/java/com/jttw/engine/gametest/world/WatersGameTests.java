@@ -280,10 +280,26 @@ public class WatersGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM)
+    /**
+     * A Dragon King's wrath reaches {@value DragonKingEntity#WRATH_RANGE} blocks, past this test's
+     * five-block platform into its neighbours' (a test's platforms stand closer than that; once a
+     * neighbouring test's zombie, 8.9 blocks off, was caught with the golem). So the tests that count
+     * whom it caught run alone, each in its own batch, and first clear its reach of any creature an
+     * earlier batch left there.
+     */
+    private static void clearReach(GameTestHelper h, DragonKingEntity king) {
+        long start = h.getLevel().getGameTime() - h.getTick();
+        h.getLevel().getEntities(king, king.getBoundingBox().inflate(DragonKingEntity.WRATH_RANGE + 1),
+                        e -> e instanceof LivingEntity && !(e instanceof net.minecraft.world.entity.player.Player)
+                                && com.jttw.engine.gametest.EntityAge.joinedBefore(e, start))
+                .forEach(Entity::discard);
+    }
+
+    @GameTest(template = PLATFORM, batch = "aoGuangsTidalSurge")
     public static void aoGuangsTidalSurgeHurlsAllAway(GameTestHelper h) {
         DragonKingEntity king = king(h, ModEntities.AO_GUANG.get(), new BlockPos(0, 2, 0));
         king.setNoAi(true);
+        clearReach(h, king);
         LivingEntity g = golem(h, new BlockPos(3, 2, 3));
         ShrimpSoldierEntity own = sea(h, ModEntities.SHRIMP_SOLDIER.get(), 47, false, new BlockPos(1, 2, 3));
         float before = g.getHealth(), ownBefore = own.getHealth();
@@ -295,10 +311,11 @@ public class WatersGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(template = PLATFORM, batch = "aoQinsBoilingSea")
     public static void aoQinsBoilingSeaScaldsAndSaps(GameTestHelper h) {
         DragonKingEntity king = king(h, ModEntities.AO_QIN.get(), new BlockPos(0, 2, 0));
         king.setNoAi(true);
+        clearReach(h, king);
         LivingEntity g = golem(h, new BlockPos(3, 2, 3));
         float before = g.getHealth();
         eq(h, 1, king.boilingSea(), "caught");
@@ -325,10 +342,11 @@ public class WatersGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM)
+    @GameTest(template = PLATFORM, batch = "aoShunsFrozenAbyss")
     public static void aoShunsFrozenAbyssFreezes(GameTestHelper h) {
         DragonKingEntity king = king(h, ModEntities.AO_SHUN.get(), new BlockPos(0, 2, 0));
         king.setNoAi(true);
+        clearReach(h, king);
         LivingEntity g = golem(h, new BlockPos(3, 2, 3));
         float before = g.getHealth();
         eq(h, 1, king.frozenAbyss(), "caught");

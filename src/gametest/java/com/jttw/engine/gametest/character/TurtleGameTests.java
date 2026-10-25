@@ -414,4 +414,82 @@ public class TurtleGameTests {
         check(h, !TurtleAbilityHandler.isGuarding(p.getUUID()), "shell off on STOP");
         h.succeed();
     }
+
+    // ── Audit: what the tooltips promise ────────────────────────────
+
+    /** Shell Guard III, the immovable mountain: nothing knocks the guarding turtle back; below III, it can be. */
+    @GameTest(template = PLATFORM, batch = "shellGuardThreeCannotBeKnockedBack")
+    public static void shellGuardThreeCannotBeKnockedBack(GameTestHelper h) {
+        ServerPlayer two = turtle(h);
+        grant(two, "tu_shell_1", "tu_shell_2");
+        TurtleAbilityHandler.startGuard(two);
+        eq(h, null, modifier(two, Attributes.KNOCKBACK_RESISTANCE, com.jttw.engine.character.PassiveModifiers.id(TurtleAbilityHandler.SHELL_STEADY)),
+                "tier 2: no footing of stone");
+        TurtleAbilityHandler.stopGuard(two);
+
+        ServerPlayer three = turtle(h);
+        grant(three, "tu_shell_1", "tu_shell_2", "tu_shell_3");
+        TurtleAbilityHandler.startGuard(three);
+        near(h, 1.0, three.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE), "tier 3, guarding: unmovable");
+        TurtleAbilityHandler.stopGuard(three);
+        near(h, 0.0, three.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE), "out of the shell: as before");
+        h.succeed();
+    }
+
+    /** Unstoppable Force bursts on the first foe it runs into, without waiting to land. */
+    @GameTest(template = PLATFORM, batch = "unstoppableForceBurstsOnTheFirstFoeHit")
+    public static void unstoppableForceBurstsOnTheFirstFoeHit(GameTestHelper h) {
+        ServerPlayer p = turtle(h);
+        grant(p, "tu_force_1");
+        presTwentyFive(p);
+        p.setYRot(0f);
+        p.setXRot(0f);
+        IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 4);
+        List<Hit> hits = watch(golem);
+        TurtleAbilityHandler.castUnstoppableForce(p);
+        p.setOnGround(false); // in the air, not landed
+        ticks(p, 1);
+        check(h, hits.isEmpty(), "nothing touched yet");
+        var at = h.absoluteVec(new net.minecraft.world.phys.Vec3(2.5, 2, 3.5)); // carried up against the golem
+        p.setPos(at.x, at.y, at.z);
+        ticks(p, 1);
+        eq(h, 1, of(hits, DamageTypes.PLAYER_ATTACK).size(), "burst on striking it, still in the air");
+        near(h, 0.0, p.getDeltaMovement().length(), "and stopped there");
+        h.succeed();
+    }
+
+    /** Gravity Well I's reverse knockback: with the well up his blows draw the struck toward him. */
+    @GameTest(template = PLATFORM, batch = "gravityWellTurnsKnockbackAbout")
+    public static void gravityWellTurnsKnockbackAbout(GameTestHelper h) {
+        ServerPlayer p = turtle(h);
+        grant(p, "tu_gravity_1");
+        var ds = h.getLevel().damageSources();
+        net.minecraft.world.entity.animal.Pig pushed = mob(h, EntityType.PIG, 2, 4); // 2 blocks south
+        pushed.hurt(ds.playerAttack(p), 1f);
+        check(h, pushed.getDeltaMovement().z > 0.1, "no well: knocked away, south: " + pushed.getDeltaMovement());
+
+        TurtleAbilityHandler.toggleGravityWell(p);
+        net.minecraft.world.entity.animal.Pig drawn = mob(h, EntityType.PIG, 2, 4);
+        drawn.hurt(ds.playerAttack(p), 1f);
+        check(h, drawn.getDeltaMovement().z < -0.1, "well up: drawn in, north: " + drawn.getDeltaMovement());
+        TurtleAbilityHandler.toggleGravityWell(p);
+        h.succeed();
+    }
+
+    /** Tectonic Slam reaches 6 blocks, 8 at II (and 10 at III): one 7 blocks off is struck only from II. */
+    @GameTest(template = PLATFORM, batch = "tectonicSlamReachGrowsWithItsTier")
+    public static void tectonicSlamReachGrowsWithItsTier(GameTestHelper h) {
+        ServerPlayer one = turtle(h);
+        grant(one, "tu_tectonic_1");
+        IronGolem far = h.spawnWithNoFreeWill(EntityType.IRON_GOLEM, new net.minecraft.core.BlockPos(2, 2, 9)); // 7 blocks south
+        List<Hit> hits = watch(far);
+        TurtleAbilityHandler.castTectonicSlam(one);
+        check(h, hits.isEmpty(), "tier 1: 6 blocks, short of it");
+        ServerPlayer two = turtle(h);
+        grant(two, "tu_tectonic_1", "tu_tectonic_2");
+        TurtleAbilityHandler.castTectonicSlam(two);
+        eq(h, 1, of(hits, DamageTypes.PLAYER_ATTACK).size(), "tier 2: 8 blocks, it is struck");
+        far.discard();
+        h.succeed();
+    }
 }

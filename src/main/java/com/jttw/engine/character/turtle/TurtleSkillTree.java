@@ -76,7 +76,7 @@ public final class TurtleSkillTree {
         ));
         TREE.add(new SkillNode(
                 SHELL_3, "Shell Guard III",
-                new String[]{ "Explosions are completely", "negated while guarding.", "Immovable mountain." },
+                new String[]{ "Explosions are completely", "negated while guarding.", "Nothing knocks you back." },
                 4, 0, 2, List.of(SHELL_2), AbilityType.HELD, 3, "Shell Guard"
         ));
 
@@ -107,7 +107,7 @@ public final class TurtleSkillTree {
         // ── UNSTOPPABLE FORCE (col 3, TOGGLE/USE type) ───────────────────
         TREE.add(new SkillNode(
                 FORCE_1, "Unstoppable Force I",
-                new String[]{ "Press B: dash 20 blocks", "forward. Explodes on hit,", "damage scales with phys. resist." },
+                new String[]{ "Press B: dash 20 blocks", "forward. Bursts on the first", "foe hit; scales with phys. resist." },
                 2, 3, 0, List.of(), AbilityType.TOGGLE, 1, "Unstoppable Force"
         ));
         TREE.add(new SkillNode(
@@ -129,19 +129,19 @@ public final class TurtleSkillTree {
         ));
         TREE.add(new SkillNode(
                 TECTONIC_2, "Tectonic Slam II",
-                new String[]{ "Creates earth spikes that", "linger 5s. Mobs walking", "over them take damage." },
+                new String[]{ "Reach 8 blocks. Earth spikes", "linger 5 s: all on them take", "1 damage a second." },
                 3, 4, 1, List.of(TECTONIC_1), AbilityType.TOGGLE, 2, "Tectonic Slam"
         ));
         TREE.add(new SkillNode(
                 TECTONIC_3, "Tectonic Slam III",
-                new String[]{ "Stomp launches mobs into", "the air. Fall damage", "applies on landing." },
+                new String[]{ "Reach 10 blocks. The stomp", "launches mobs into the air;", "they take the fall." },
                 4, 4, 2, List.of(TECTONIC_2), AbilityType.TOGGLE, 3, "Tectonic Slam"
         ));
 
         // ── GRAVITY WELL (col 5, TOGGLE) ────────────────────────────────
         TREE.add(new SkillNode(
                 GRAVITY_1, "Gravity Well I",
-                new String[]{ "Pull all mobs within 8", "blocks toward you slowly.", "Reverse knockback." },
+                new String[]{ "Shift + V: mobs within 8", "blocks are drawn slowly in.", "Your blows pull, not push." },
                 2, 5, 0, List.of(), AbilityType.TOGGLE, 1, "Gravity Well"
         ));
         TREE.add(new SkillNode(

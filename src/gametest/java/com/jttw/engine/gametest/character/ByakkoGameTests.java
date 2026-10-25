@@ -416,4 +416,122 @@ public class ByakkoGameTests {
         near(h, 82f, QiData.getCurrent(p), "slot 1: roar");
         h.succeed();
     }
+
+    // ── Audit: what the tooltips promise ────────────────────────────
+
+    /**
+     * Velocity Strike reads his speed off where he goes, tick to tick: a player's own running is
+     * not in his server-side motion, which stays at nothing while the client moves him.
+     */
+    @GameTest(template = PLATFORM, batch = "velocityStrikeReadsHisRunning")
+    public static void velocityStrikeReadsHisRunning(GameTestHelper h) {
+        ServerPlayer p = byakko(h);
+        grant(p, "bk_velocity_1");
+        IronGolem golem = mob(h, EntityType.IRON_GOLEM, 0, 4);
+        p.setDeltaMovement(Vec3.ZERO);
+        ticks(p, 1);
+        p.setPos(p.getX() + 0.5, p.getY(), p.getZ()); // half a block in a tick: 10 blocks a second
+        ticks(p, 1);
+        near(h, 0.0, p.getDeltaMovement().length(), "no server-side motion");
+        LivingIncomingDamageEvent running = incoming(golem, h.getLevel().damageSources().playerAttack(p), 10f);
+        ByakkoAbilityHandler.onLivingHurt(running);
+        near(h, 15f, running.getAmount(), "tier 1: +5% for each of the 10 blocks a second");
+
+        ticks(p, 1); // stood still a tick
+        LivingIncomingDamageEvent still = incoming(golem, h.getLevel().damageSources().playerAttack(p), 10f);
+        ByakkoAbilityHandler.onLivingHurt(still);
+        near(h, 10f, still.getAmount(), "standing: no bonus");
+
+        p.setPos(p.getX() + 20, p.getY(), p.getZ()); // a teleport, not a run
+        ticks(p, 1);
+        LivingIncomingDamageEvent teleported = incoming(golem, h.getLevel().damageSources().playerAttack(p), 10f);
+        ByakkoAbilityHandler.onLivingHurt(teleported);
+        near(h, 10f, teleported.getAmount(), "a teleport is no run");
+        h.succeed();
+    }
+
+    /** A bleed's second is no blow: it does not spend Predator's Instinct's doubled first strike. */
+    @GameTest(template = PLATFORM, batch = "bleedDoesNotSpendTheInstinctStrike")
+    public static void bleedDoesNotSpendTheInstinctStrike(GameTestHelper h) {
+        ServerPlayer p = byakko(h);
+        online(h, p);
+        grant(p, "bk_bleed_1", "bk_instinct_1", "bk_instinct_2");
+        IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 4);
+        List<Hit> hits = watch(golem);
+        strike(h, p, golem, 2f); // at full health: no instinct, but it bleeds
+        golem.setHealth(golem.getMaxHealth() * 0.4f);
+        ticks(p, 20);
+        eq(h, 1, of(hits, DamageTypes.PLAYER_ATTACK).size(), "the bleed's first second");
+        LivingIncomingDamageEvent blow = incoming(golem, h.getLevel().damageSources().playerAttack(p), 10f);
+        ByakkoAbilityHandler.onLivingHurt(blow);
+        near(h, 20f, blow.getAmount(), "his first true blow on the wounded is still doubled");
+        h.succeed();
+    }
+
+    /** Savage Bleed III spreads to foes near, never to his own beasts. */
+    @GameTest(template = PLATFORM, batch = "bleedSpreadSparesHisOwnBeasts")
+    public static void bleedSpreadSparesHisOwnBeasts(GameTestHelper h) {
+        ServerPlayer p = byakko(h);
+        grant(p, "bk_bleed_1", "bk_bleed_2", "bk_bleed_3");
+        IronGolem golem = mob(h, EntityType.IRON_GOLEM, 0, 0);
+        net.minecraft.world.entity.animal.Wolf wolf = mob(h, EntityType.WOLF, 0, 2);
+        wolf.tame(p);
+        IronGolem neighbour = mob(h, EntityType.IRON_GOLEM, 2, 0);
+        List<Hit> wolfHits = watch(wolf), spread = watch(neighbour);
+        strike(h, p, golem, 2f);
+        ticks(p, 20);
+        check(h, !spread.isEmpty(), "a foe near bleeds");
+        check(h, wolfHits.isEmpty(), "his wolf does not");
+        h.succeed();
+    }
+
+    /** The roar's 8 blocks are a sphere: one 8.5 blocks off on the diagonal is out of it. */
+    @GameTest(template = PLATFORM, batch = "roarReachesEightBlocksRound")
+    public static void roarReachesEightBlocksRound(GameTestHelper h) {
+        ServerPlayer p = byakko(h);
+        grant(p, "bk_roar_1");
+        Husk husk = mob(h, EntityType.HUSK, 2, 4);
+        Husk corner = h.spawnWithNoFreeWill(EntityType.HUSK, new net.minecraft.core.BlockPos(8, 2, 8)); // 6, 6 off: 8.5
+        ByakkoAbilityHandler.castRoar(p);
+        eq(h, 5, amp(husk, MobEffects.MOVEMENT_SLOWDOWN), "near: pinned");
+        eq(h, -1, amp(corner, MobEffects.MOVEMENT_SLOWDOWN), "8.5 blocks off: untouched");
+        corner.discard();
+        h.succeed();
+    }
+
+    /** The landing blast hurts the living only: a dropped item beside it survives. */
+    @GameTest(template = PLATFORM, batch = "leapLandingSparesDroppedItems")
+    public static void leapLandingSparesDroppedItems(GameTestHelper h) {
+        ServerPlayer p = byakko(h);
+        grant(p, "bk_leap_1", "bk_leap_2", "bk_leap_3");
+        var item = h.spawnItem(Items.DIAMOND, new net.minecraft.core.BlockPos(2, 2, 3));
+        ByakkoAbilityHandler.castLeap(p);
+        land(p);
+        check(h, item.isAlive(), "the diamond is still there");
+        h.succeed();
+    }
+
+    /** White Tiger II: as the tiger his pounce goes half again as far; at White Tiger I it does not. */
+    @GameTest(template = PLATFORM, batch = "theTigersLongerPounceIsWhiteTigerTwo")
+    public static void theTigersLongerPounceIsWhiteTigerTwo(GameTestHelper h) {
+        ServerPlayer one = byakko(h);
+        grant(one, "bk_leap_1", "bk_true_1");
+        one.setYRot(0f);
+        one.setXRot(0f);
+        com.jttw.engine.character.divinebeast.TrueForm.toggle(one, com.jttw.engine.registry.ModEntities.WHITE_TIGER.get(), 1, "bk_true");
+        check(h, com.jttw.engine.character.divinebeast.TrueForm.active(one), "the White Tiger (I)");
+        ByakkoAbilityHandler.castLeap(one);
+        near(h, ByakkoAbilityHandler.LEAP_SPEED, one.getDeltaMovement().z, "White Tiger I: a man's pounce");
+        com.jttw.engine.character.divinebeast.TrueForm.end(one);
+
+        ServerPlayer two = byakko(h);
+        grant(two, "bk_leap_1", "bk_true_1", "bk_true_2");
+        two.setYRot(0f);
+        two.setXRot(0f);
+        com.jttw.engine.character.divinebeast.TrueForm.toggle(two, com.jttw.engine.registry.ModEntities.WHITE_TIGER.get(), 2, "bk_true");
+        ByakkoAbilityHandler.castLeap(two);
+        near(h, ByakkoAbilityHandler.LEAP_SPEED * 1.5, two.getDeltaMovement().z, "White Tiger II: half again as far");
+        com.jttw.engine.character.divinebeast.TrueForm.end(two);
+        h.succeed();
+    }
 }

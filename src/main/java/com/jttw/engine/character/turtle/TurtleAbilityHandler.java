@@ -46,17 +46,16 @@ import java.util.UUID;
  * <ul>
  *   <li><b>Innate passive:</b> +1 physical resistance per level (+100 at level 100)</li>
  *   <li><b>Shell Guard (HELD):</b> massive damage reduction, slow, no attacks.
- *       T2: negate projectiles. T3: negate explosions.</li>
- *   <li><b>Unstoppable Force (USE):</b> dash 20 blocks forward, AoE explosion on impact,
- *       knockback scales with tier (20/35/50 blocks). Damage scales with physical resistance
- *       and the player's level power.
+ *       T2: negate projectiles. T3: negate explosions, and nothing knocks it back.</li>
+ *   <li><b>Unstoppable Force (USE):</b> dash 20 blocks forward, AoE explosion on impact (the
+ *       first foe it runs into, landing, stalling, or the key again), knockback scales with tier
+ *       (20/35/50 blocks). Damage scales with physical resistance and the player's level power.
  *       T3: stun on hit.</li>
- *   <li><b>Tectonic Slam (USE):</b> stomp the ground, AoE damage centered on player.
- *       T2: lingering damage zone. T3: launch mobs upward.</li>
- *   <li><b>Gravity Well (TOGGLE):</b> pull mobs toward player each tick.
- *       T2: pulled mobs take 15% more damage.</li>
- *   <li><b>Stored Tremor (PASSIVE):</b> see {@link StoredTremor}.
- *       T2: max stacks = guaranteed crit + stun.</li>
+ *   <li><b>Tectonic Slam (USE):</b> stomp the ground, AoE damage centered on player (6, 8, 10
+ *       blocks by tier). T2: a field of earth spikes lingers 5 s. T3: launch mobs upward.</li>
+ *   <li><b>Gravity Well (TOGGLE):</b> pull mobs toward player each tick, and his own blows draw
+ *       those he strikes in instead of knocking them away. T2: pulled mobs take 15% more damage.</li>
+ *   <li><b>Stored Tremor (PASSIVE):</b> see {@link StoredTremor}.</li>
  * </ul>
  */
 public final class TurtleAbilityHandler {
@@ -156,6 +155,9 @@ public final class TurtleAbilityHandler {
                     UUID_SHELL_SLOW, -0.70,
                     AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
         }
+        // Tier 3, the immovable mountain: nothing knocks it back while it guards
+        com.jttw.engine.character.PassiveModifiers.add(player, Attributes.KNOCKBACK_RESISTANCE, SHELL_STEADY,
+                tier >= 3 ? 1.0 : 0.0);
 
         player.sendSystemMessage(Component.literal("\u00a77[World Turtle] \u00a7rYou hunker into your shell."));
     }
@@ -163,10 +165,14 @@ public final class TurtleAbilityHandler {
     public static void stopGuard(ServerPlayer player) {
         ACTIVE_GUARDS.remove(player.getUUID());
 
-        // Remove slowness
+        // Remove slowness, and the mountain's footing
         AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
         if (speed != null) speed.removeModifier(UUID_SHELL_SLOW);
+        com.jttw.engine.character.PassiveModifiers.add(player, Attributes.KNOCKBACK_RESISTANCE, SHELL_STEADY, 0.0);
     }
+
+    /** Shell Guard III's knockback resistance, while it guards (a transient {@link com.jttw.engine.character.PassiveModifiers} bonus). */
+    public static final String SHELL_STEADY = "tu_shell_steady";
 
     public static boolean isGuarding(UUID playerId) {
         return ACTIVE_GUARDS.contains(playerId);
@@ -294,7 +300,7 @@ public final class TurtleAbilityHandler {
         // growing at level 40, so the whole sum scales, not just the base.
         float totalDamage = LevelPower.scaled(player, baseDmg + pres * defScale);
 
-        // Damage + knockback all entities in radius
+        // Damage + knockback all entities in radius (only the living are hurt: a dropped item is not)
         double damageRadius = 8.0; // direct damage radius (close range)
         AABB box = new AABB(player.position(), player.position()).inflate(knockbackRadius);
         for (Entity target : player.level().getEntities(player, box,
@@ -311,7 +317,7 @@ public final class TurtleAbilityHandler {
             if (dist <= damageRadius) {
                 // Close range: full damage + explosion visual on each target
                 float falloff = Math.max(0.3f, 1.0f - (float) dist / (float) damageRadius);
-                target.hurt(player.damageSources().playerAttack(player), totalDamage * falloff);
+                if (target instanceof LivingEntity) target.hurt(player.damageSources().playerAttack(player), totalDamage * falloff);
 
                 // Strong knockback for close-range targets
                 double knockStrength = 2.5 * (1.0 - dist / knockbackRadius);
@@ -480,7 +486,7 @@ public final class TurtleAbilityHandler {
 
         UUID uuid = sp.getUUID();
 
-        // --- Unstoppable Force auto-impact on landing/stalling ---
+        // --- Unstoppable Force auto-impact on a foe, landing or stalling ---
         if (CHARGING.contains(uuid)) {
             Vec3 vel = sp.getDeltaMovement();
             double speed = vel.length();
@@ -489,11 +495,12 @@ public final class TurtleAbilityHandler {
                 CHARGE_AIRBORNE.add(uuid);
             }
 
-            // Auto-trigger if: landed after being airborne, or stalled (hit a wall)
+            // Auto-trigger if: it ran into a foe, landed after being airborne, or stalled (hit a wall)
+            boolean struck = !chargedInto(sp).isEmpty();
             boolean landed = CHARGE_AIRBORNE.contains(uuid) && sp.onGround();
             boolean stalled = speed < 0.1 && CHARGE_AIRBORNE.contains(uuid);
 
-            if (landed || stalled) {
+            if (struck || landed || stalled) {
                 Integer tier = CHARGE_TIER.getOrDefault(uuid, 1);
                 doForceImpact(sp, tier);
                 CHARGING.remove(uuid);
@@ -563,6 +570,17 @@ public final class TurtleAbilityHandler {
 
     }
 
+    /**
+     * What the charging turtle has run into: the living its body (and half a block round it)
+     * touches, but not its allies, its own beasts, or players who cannot be hurt.
+     */
+    public static java.util.List<LivingEntity> chargedInto(ServerPlayer player) {
+        return player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(0.5),
+                e -> e != player && e.isAlive() && !e.isAlliedTo(player) && !e.isSpectator()
+                        && !(e instanceof net.minecraft.world.entity.player.Player other && other.isCreative())
+                        && !(e instanceof net.minecraft.world.entity.OwnableEntity pet && player.getUUID().equals(pet.getOwnerUUID())));
+    }
+
     // -----------------------------------------------------------------------
     // Tectonic Slam — lingering zone tick
     // -----------------------------------------------------------------------
@@ -608,8 +626,12 @@ public final class TurtleAbilityHandler {
                 }
             }
 
-            // Particles for the lingering zone
+            // The spikes: shards of stone thrown up across the field, and its dust
             if (owner.level() instanceof ServerLevel serverLevel) {
+                serverLevel.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK,
+                                net.minecraft.world.level.block.Blocks.POINTED_DRIPSTONE.defaultBlockState()),
+                        zone.center().x, zone.center().y + 0.3, zone.center().z,
+                        (int) (zone.radius() * 6), zone.radius() * 0.4, 0.2, zone.radius() * 0.4, 0.15);
                 serverLevel.sendParticles(ParticleTypes.SMOKE,
                         zone.center().x, zone.center().y + 0.3, zone.center().z,
                         8, zone.radius() * 0.3, 0.1, zone.radius() * 0.3, 0.01);
@@ -673,6 +695,39 @@ public final class TurtleAbilityHandler {
     }
 
     // -----------------------------------------------------------------------
+    // Gravity Well — reverse knockback
+    // -----------------------------------------------------------------------
+
+    /** Those the turtle struck this tick with his well up: their knockback is turned to draw them in. */
+    private static final Map<Integer, Long> DRAWN_IN = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /**
+     * Gravity Well I's reverse knockback: while the well is up, the turtle's own melee blows draw
+     * what they strike toward him instead of knocking it away (its knockback turned about: as hard,
+     * the other way). Noted as the blow lands, turned when the game knocks it back.
+     */
+    @SubscribeEvent
+    public static void onWellBlow(LivingIncomingDamageEvent event) {
+        if (!(event.getSource().getEntity() instanceof ServerPlayer turtle)) return;
+        if (!event.getSource().is(DamageTypes.PLAYER_ATTACK) || event.getSource().getDirectEntity() != turtle) return;
+        if (!ACTIVE_WELLS.contains(turtle.getUUID()) || !isTurtle(turtle)) return;
+        DRAWN_IN.put(event.getEntity().getId(), turtle.level().getGameTime());
+    }
+
+    @SubscribeEvent
+    public static void onWellKnockback(net.neoforged.neoforge.event.entity.living.LivingKnockBackEvent event) {
+        Long at = DRAWN_IN.get(event.getEntity().getId());
+        if (at == null) return;
+        if (at != event.getEntity().level().getGameTime()) {
+            DRAWN_IN.remove(event.getEntity().getId());
+            return;
+        }
+        // the blow's own knockbacks this tick (the hit's, and a sprinting blow's extra) all turn about
+        event.setRatioX(-event.getRatioX());
+        event.setRatioZ(-event.getRatioZ());
+    }
+
+    // -----------------------------------------------------------------------
     // Attack prevention — Shell Guard
     // -----------------------------------------------------------------------
 
@@ -714,5 +769,8 @@ public final class TurtleAbilityHandler {
         CHARGE_START_POS.remove(uuid);
         TECTONIC_COOLDOWNS.remove(uuid);
         ACTIVE_WELLS.remove(uuid);
+        if (event.getEntity() instanceof ServerPlayer sp) {
+            com.jttw.engine.character.PassiveModifiers.add(sp, Attributes.KNOCKBACK_RESISTANCE, SHELL_STEADY, 0.0);
+        }
     }
 }
