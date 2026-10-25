@@ -1,5 +1,6 @@
 package com.jttw.engine.character.erlang;
 
+import com.jttw.engine.character.PassiveModifiers;
 import com.jttw.engine.character.SummonLeash;
 import com.jttw.engine.registry.ModEntities;
 import com.jttw.engine.progression.qi.QiData;
@@ -11,6 +12,7 @@ import com.jttw.engine.entity.HowlProjectileEntity;
 import com.jttw.engine.entity.XiaotianQuanEntity;
 import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.network.s2c.SyncQiPacket;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
@@ -22,6 +24,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.ai.goal.*;
@@ -51,6 +54,12 @@ import java.util.*;
  *
  * <p>Tier 2+ grants tracking (Glowing effect on nearest hostile).
  * Every bite applies Slowness I for 3 seconds.
+ *
+ * <p>Berserk (its owner in Wrath at Zhàn Shén II, see {@link ErlangWrath}): +30% attack damage,
+ * +25% movement speed, a bite every half second rather than every second, and with nothing to
+ * fight it hunts the nearest hostile within {@link #BERSERK_HUNT_RANGE} blocks. It growls as it
+ * turns, and its markings burn crimson while it lasts. At Zhàn Shén III its bites slow with
+ * Slowness II.
  */
 @EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
 public final class XiaotianQuanManager {
@@ -65,6 +74,13 @@ public final class XiaotianQuanManager {
     private static final double FOLLOW_TELEPORT_DIST = 18.0;
     private static final double FOLLOW_SPREAD        = 2.0;
     private static final double TRACKING_RANGE       = 32.0;
+
+    public static final double BERSERK_DAMAGE      = 0.30;
+    public static final double BERSERK_SPEED       = 0.25;
+    public static final int    BERSERK_BITE_TICKS  = 10;
+    public static final double BERSERK_HUNT_RANGE  = 16.0;
+    public static final String BERSERK_DAMAGE_MOD  = "xtq_berserk_damage";
+    public static final String BERSERK_SPEED_MOD   = "xtq_berserk_speed";
 
     /** Tier-based stat table: {HP, ATK, SPEED, ARMOR}. HP and ATK are at level 1, times the owner's level power. */
     private static final double[][] TIER_STATS = {
@@ -116,7 +132,7 @@ public final class XiaotianQuanManager {
     public static void registerCompanionGoals(PathfinderMob mob) {
         mob.goalSelector.addGoal(1, new FloatGoal(mob));
         mob.goalSelector.addGoal(2, new XtqHowlGoal(mob));
-        mob.goalSelector.addGoal(3, new MeleeAttackGoal(mob, 1.2, true));
+        mob.goalSelector.addGoal(3, new XtqBiteGoal(mob, 1.2, true));
         mob.goalSelector.addGoal(4, new XtqFollowOwnerGoal(mob, 1.1, 5.0f, 2.5f));
         mob.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(mob, 0.8));
         mob.goalSelector.addGoal(6, new LookAtPlayerGoal(mob, Player.class, 8.0F));
@@ -125,6 +141,7 @@ public final class XiaotianQuanManager {
         mob.targetSelector.addGoal(1, new XtqOwnerHurtByGoal(mob));
         mob.targetSelector.addGoal(2, new XtqOwnerHurtGoal(mob));
         mob.targetSelector.addGoal(3, new HurtByTargetGoal(mob));
+        mob.targetSelector.addGoal(4, new XtqBerserkHuntGoal(mob));
     }
 
     // =========================================================================
@@ -183,6 +200,9 @@ public final class XiaotianQuanManager {
                 xtq = movedXtq;
             }
 
+            // Berserk while its owner is in Wrath at Zhàn Shén II
+            updateBerserk(xtq, ErlangWrath.houndBerserk(player));
+
             // Tracking: Tier 2+ applies Glowing to nearest hostile every 20 ticks
             int growthTier = SkillTreeData.getXtqGrowthTier(player);
             if (growthTier >= 2 && server.getTickCount() % 20 == 0) {
@@ -217,14 +237,14 @@ public final class XiaotianQuanManager {
         }
     }
 
-    /** XTQ attacks always apply Slowness I for 3 seconds. */
+    /** XTQ attacks apply Slowness for 3 seconds: I, or II while its owner is in Wrath at Zhàn Shén III. */
     @SubscribeEvent
     public static void onXtqAttacks(LivingIncomingDamageEvent e) {
         if (!(e.getSource().getEntity() instanceof XiaotianQuanEntity xtq)) return;
         ServerPlayer owner = resolveOwner(xtq);
         if (owner == null) return;
-        e.getEntity().addEffect(new MobEffectInstance(
-                MobEffects.MOVEMENT_SLOWDOWN, 60, 0)); // Slowness I, 3 sec
+        int amp = ErlangWrath.biteSlownessAmplifier(ErlangWrath.tier(owner), ErlangWrath.inWrath(owner));
+        e.getEntity().addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, amp));
     }
 
     @SubscribeEvent
@@ -307,6 +327,25 @@ public final class XiaotianQuanManager {
 
         var armor = xtq.getAttribute(Attributes.ARMOR);
         if (armor != null) armor.setBaseValue(stats[3]);
+    }
+
+    /**
+     * Turns the hound berserk or back: its synced flag (its look), its damage and speed. The
+     * modifiers are transient; the hound itself is never saved. Public for tests.
+     */
+    public static void updateBerserk(XiaotianQuanEntity xtq, boolean berserk) {
+        if (berserk && !xtq.isBerserk()) {
+            xtq.playSound(SoundEvents.WOLF_GROWL, 1.5F, 0.7F);
+            if (xtq.level() instanceof ServerLevel sl) {
+                sl.sendParticles(ParticleTypes.ANGRY_VILLAGER,
+                        xtq.getX(), xtq.getEyeY() + 0.3, xtq.getZ(), 4, 0.4, 0.2, 0.4, 0.0);
+            }
+        }
+        xtq.setBerserk(berserk);
+        PassiveModifiers.set(xtq, Attributes.ATTACK_DAMAGE, BERSERK_DAMAGE_MOD,
+                berserk ? BERSERK_DAMAGE : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+        PassiveModifiers.set(xtq, Attributes.MOVEMENT_SPEED, BERSERK_SPEED_MOD,
+                berserk ? BERSERK_SPEED : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
     }
 
     /** The nearest hostile mob within tracking range glows, for its owner alone. */
@@ -441,6 +480,83 @@ public final class XiaotianQuanManager {
             this.xtq.setTarget(this.target);
             ServerPlayer owner = resolveOwner(xtq);
             if (owner != null) this.timestamp = owner.getLastHurtMobTimestamp();
+            super.start();
+        }
+    }
+
+    // =========================================================================
+    // Inner goal: bite (melee), twice as often when berserk
+    // =========================================================================
+
+    private static final class XtqBiteGoal extends MeleeAttackGoal {
+
+        private long lastBite = Long.MIN_VALUE / 2;
+
+        XtqBiteGoal(PathfinderMob mob, double speed, boolean followEvenIfNotSeen) {
+            super(mob, speed, followEvenIfNotSeen);
+        }
+
+        private boolean berserk() {
+            return mob instanceof XiaotianQuanEntity x && x.isBerserk();
+        }
+
+        @Override
+        protected boolean isTimeToAttack() {
+            return berserk() ? mob.level().getGameTime() - lastBite >= BERSERK_BITE_TICKS : super.isTimeToAttack();
+        }
+
+        @Override
+        protected void checkAndPerformAttack(LivingEntity target) {
+            if (canPerformAttack(target)) lastBite = mob.level().getGameTime();
+            super.checkAndPerformAttack(target);
+        }
+    }
+
+    // =========================================================================
+    // Inner goal: berserk, it hunts the nearest hostile when it has nothing to fight
+    // =========================================================================
+
+    private static final class XtqBerserkHuntGoal extends TargetGoal {
+
+        private final Mob xtq;
+        private LivingEntity prey;
+
+        XtqBerserkHuntGoal(Mob xtq) {
+            super(xtq, false);
+            this.xtq = xtq;
+            this.setFlags(EnumSet.of(Flag.TARGET));
+        }
+
+        @Override
+        public boolean canUse() {
+            if (!(xtq instanceof XiaotianQuanEntity x) || !x.isBerserk()) return false;
+            if (xtq.getTarget() != null && xtq.getTarget().isAlive()) return false;
+            if (xtq.getRandom().nextInt(reducedTickDelay(5)) != 0) return false;
+            ServerPlayer owner = resolveOwner(xtq);
+            if (owner == null) return false;
+            prey = null;
+            double best = Double.MAX_VALUE;
+            for (LivingEntity e : xtq.level().getEntitiesOfClass(LivingEntity.class,
+                    xtq.getBoundingBox().inflate(BERSERK_HUNT_RANGE),
+                    e -> e instanceof Enemy && e.isAlive() && e != owner && !isAllyXtq(e, owner.getUUID()))) {
+                double d = e.distanceToSqr(xtq);
+                if (d < best && this.canAttack(e, TargetingConditions.DEFAULT)) {
+                    best = d;
+                    prey = e;
+                }
+            }
+            return prey != null;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return xtq instanceof XiaotianQuanEntity x && x.isBerserk()
+                    && xtq.getTarget() != null && xtq.getTarget().isAlive();
+        }
+
+        @Override
+        public void start() {
+            this.xtq.setTarget(prey);
             super.start();
         }
     }

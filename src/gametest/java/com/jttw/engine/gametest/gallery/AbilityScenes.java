@@ -271,6 +271,8 @@ final class AbilityScenes {
                 // the spear's sweeping slash: the half circle ahead, and in Wrath all round
                 new Scene("spear_slash", p -> spearman(p, false), p -> spearSlash(p), 3, false),
                 new Scene("spear_slash_wrath", p -> spearman(p, true), p -> spearSlash(p), 3, false),
+                // Zhàn Shén II: Erlang Shen in Wrath, his hound berserk at his side (crimson markings, red embers)
+                new Scene("zhan_shen_berserk", AbilityScenes::wrathWithHound, p -> {}, 1, false),
                 new Scene("xtq_howl", p -> {}, p -> {
                     // a howl crossing in front of the camera, from left to right
                     var howl = new com.jttw.engine.entity.HowlProjectileEntity(com.jttw.engine.registry.ModEntities.HOWL_PROJECTILE.get(), p.level());
@@ -782,6 +784,30 @@ final class AbilityScenes {
             p.setHealth(p.getMaxHealth() * 0.25f);
         }
         targets(p, -3, 1, 3, 1, 0, 3, 0, -2);
+    }
+
+    /** Erlang Shen in Wrath at Zhàn Shén II, spear in hand, Xiaotian Quan out beside him and berserk. */
+    private static void wrathWithHound(ServerPlayer p) {
+        AlignmentData.markReincarnated(p, ReincarnationOutcome.EYE_OF_HEAVEN);
+        LevelManager.initClass(p, ReincarnationOutcome.EYE_OF_HEAVEN);
+        for (String n : List.of("es_xtq_1", "es_wrath_1", "es_wrath_2")) SkillTreeData.grantNode(p, n);
+        com.jttw.engine.progression.qi.QiData.setMax(p, 200f);
+        com.jttw.engine.progression.qi.QiData.setCurrent(p, 200f);
+        p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.THREE_POINTED_SPEAR.get()));
+        p.setHealth(p.getMaxHealth() * 0.25f);
+        if (com.jttw.engine.character.erlang.XiaotianQuanManager.isActive(p.getUUID())) {
+            com.jttw.engine.character.erlang.XiaotianQuanManager.dismiss(p);
+        }
+        com.jttw.engine.character.erlang.XiaotianQuanManager.toggle(p);
+        var hound = com.jttw.engine.character.erlang.XiaotianQuanManager.houndOf(p);
+        if (hound != null) {
+            hound.moveTo(p.getX() + 1.5, p.getY(), p.getZ() - 0.2, 30f, 0f);
+            hound.setYHeadRot(30f);
+            hound.setNoAi(true); // stands for its picture
+            com.jttw.engine.character.erlang.XiaotianQuanManager.updateBerserk(hound, true);
+        }
+        facing = -20f;
+        closeUp = true;
     }
 
     private static void spearSlash(ServerPlayer p) {

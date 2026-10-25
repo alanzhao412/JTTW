@@ -4,7 +4,12 @@ import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.network.s2c.SyncXtqStatsPacket;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
 import com.jttw.engine.character.erlang.XiaotianQuanManager;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -20,6 +25,8 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
+import org.joml.Vector3f;
+
 import javax.annotation.Nullable;
 
 /**
@@ -31,6 +38,9 @@ import javax.annotation.Nullable;
  *
  * <p>XTQ has its own Qi and Will pools stored in persistent data.
  * Qi is consumed by the Howl ability and regenerates over time.
+ *
+ * <p>While its owner is in Wrath at Zhàn Shén II it is berserk ({@link #isBerserk}, set by the
+ * manager and synced, so its markings burn crimson and it sheds red embers).
  */
 public class XiaotianQuanEntity extends PathfinderMob {
 
@@ -45,10 +55,28 @@ public class XiaotianQuanEntity extends PathfinderMob {
     private static final float HOWL_QI_COST   = 15f;
     public  static final int   HOWL_COOLDOWN  = 100; // 5 seconds
 
+    private static final EntityDataAccessor<Boolean> BERSERK =
+            SynchedEntityData.defineId(XiaotianQuanEntity.class, EntityDataSerializers.BOOLEAN);
+
     public final AnimationState walkAnimState = new AnimationState();
 
     public XiaotianQuanEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
+    }
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(BERSERK, false);
+    }
+
+    /** Berserk: its owner is in Wrath at Zhàn Shén II or more. */
+    public boolean isBerserk() {
+        return this.entityData.get(BERSERK);
+    }
+
+    public void setBerserk(boolean berserk) {
+        this.entityData.set(BERSERK, berserk);
     }
 
     @Override
@@ -65,6 +93,16 @@ public class XiaotianQuanEntity extends PathfinderMob {
                     net.minecraft.core.particles.ParticleTypes.LARGE_SMOKE,
                     this.getRandomX(0.5), this.getY() + 0.2, this.getRandomZ(0.5),
                     0.0, 0.02, 0.0);
+            if (isBerserk()) {
+                // berserk: red embers off its back and a flash of rage at its brow
+                this.level().addParticle(new DustParticleOptions(new Vector3f(0.9f, 0.1f, 0.05f), 1.0f),
+                        this.getRandomX(0.6), this.getY() + this.getBbHeight() * (0.4 + 0.6 * this.random.nextDouble()),
+                        this.getRandomZ(0.6), 0.0, 0.0, 0.0);
+                if (this.tickCount % 20 == 0) {
+                    this.level().addParticle(ParticleTypes.ANGRY_VILLAGER,
+                            this.getX(), this.getEyeY() + 0.4, this.getZ(), 0.0, 0.0, 0.0);
+                }
+            }
             return;
         }
 

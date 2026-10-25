@@ -166,6 +166,13 @@ Abilities and items are drawn from the source material rather than invented:
 - **Wu Clones** — Wukong's hair-clone technique, implemented as summoned entities with their own
   pathfinding goals ([`WuCloneManager`](src/main/java/com/jttw/engine/character/wukong/WuCloneManager.java))
 - **Xiaotian Quan** — Erlang Shen's hound, a custom entity with hand-authored model and animation
+- **Zhàn Shén** — Erlang Shen as God of War: below 40% health he is in Wrath (gone again once healed
+  to 40%), with +15/25/35% damage on every blow and ability, and as much movement and attack speed,
+  whatever he holds. At II he cannot be knocked back and Xiaotian Quan goes berserk (crimson
+  markings and eyes, +30% bite, +25% speed, a bite every half second, and it hunts the nearest
+  hostile); at III he heals 10% of the damage he deals and the hound's bites give Slowness II. A
+  red vignette beats at the edge of his sight while it lasts
+  ([`ErlangWrath`](src/main/java/com/jttw/engine/character/erlang/ErlangWrath.java))
 - **Phoenix revival** — death-and-rebirth mechanic tied to the Phoenix line
 
 Custom **Heaven** and **Hell** dimensions ship with their own worldgen, biomes, and noise settings.
