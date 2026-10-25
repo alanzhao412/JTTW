@@ -45,10 +45,10 @@ public final class NineSpiritsSkillTree {
                 new String[]{ "Press V: a fireball that", "bursts and sets foes alight.", "Sneak + V: change head." },
                 2, 0, 0, List.of(), AbilityType.TOGGLE, 1, "Heads"));
         TREE.add(new SkillNode(HEADS_2, "Thunder Head",
-                new String[]{ "A bolt that jumps to", "the nearest foes.", "Fire burns hotter." },
+                new String[]{ "A bolt that leaps on to 2", "more foes nearby. Every", "head hits harder: ATK x1.3." },
                 3, 0, 1, List.of(HEADS_1), AbilityType.TOGGLE, 2, "Heads"));
         TREE.add(new SkillNode(HEADS_3, "Frost Head",
-                new String[]{ "A shard that slows, then", "freezes. Thunder jumps", "further." },
+                new String[]{ "A shard that slows, then", "freezes. Thunder leaps on", "to 4 more foes, not 2." },
                 4, 0, 2, List.of(HEADS_2), AbilityType.TOGGLE, 3, "Heads"));
 
         // ── HEAVEN-SHAKING ROAR (col 1) ─────────────────────────────────
@@ -67,18 +67,18 @@ public final class NineSpiritsSkillTree {
                 new String[]{ "Press N: your mane flares.", "All who look at you within", "12 blocks are blinded." },
                 2, 2, 0, List.of(), AbilityType.TOGGLE, 1, "Mane"));
         TREE.add(new SkillNode(FLARE_2, "Golden Mane Flare II",
-                new String[]{ "20 blocks; the blinded", "also stumble, slowed.", "" },
+                new String[]{ "20 blocks; blind for 5 s,", "not 3, and the blinded", "stumble, slowed." },
                 3, 2, 1, List.of(FLARE_1), AbilityType.TOGGLE, 2, "Mane"));
 
         // ── NINE-HEADED TRUE FORM (col 3) ───────────────────────────────
         TREE.add(new SkillNode(FORM_1, "True Form I",
-                new String[]{ "Press M: the great lion.", "Hits strike with 2 heads;", "tougher. Drains Qi." },
+                new String[]{ "Press M: the great lion.", "2 heads: blows x1.5. +20", "phys./magic resist. Drains Qi." },
                 3, 3, 0, List.of(), AbilityType.TOGGLE, 1, "True Form"));
         TREE.add(new SkillNode(FORM_2, "True Form II",
-                new String[]{ "Hits strike with 3 heads.", "", "" },
+                new String[]{ "3 heads: blows x2.", "+30 phys./magic resist.", "" },
                 4, 3, 1, List.of(FORM_1), AbilityType.TOGGLE, 2, "True Form"));
         TREE.add(new SkillNode(FORM_3, "True Form III",
-                new String[]{ "Hits strike with 4 heads.", "Tougher still.", "" },
+                new String[]{ "4 heads: blows x2.5.", "+40 phys./magic resist.", "" },
                 5, 3, 2, List.of(FORM_2), AbilityType.TOGGLE, 3, "True Form"));
 
         // ── NINE LIVES (col 4, PASSIVE) ─────────────────────────────────

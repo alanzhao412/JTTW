@@ -152,6 +152,52 @@ public class SaurianGameTests {
         h.succeed();
     }
 
+    @GameTest(template = PLATFORM, batch = "saurian")
+    public static void onlyTheThirdLashSlows(GameTestHelper h) {
+        ServerPlayer p = saurian(h, SaurianSkillTree.LASH_1, SaurianSkillTree.LASH_2);
+        Zombie z = still(h, new BlockPos(2, 2, 4));
+        check(h, SaurianAbilityHandler.lash(p) == z, "II: caught");
+        check(h, !z.hasEffect(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN), "II: not slowed");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM, batch = "saurian")
+    public static void theThirdLashSlowsTheLashed(GameTestHelper h) {
+        ServerPlayer p = saurian(h, SaurianSkillTree.LASH_1, SaurianSkillTree.LASH_2, SaurianSkillTree.LASH_3);
+        Zombie z = still(h, new BlockPos(2, 2, 4));
+        check(h, SaurianAbilityHandler.lash(p) == z, "III: caught");
+        eq(h, 1, CharTest.amp(z, net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN), "III: Slowness II");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM, batch = "saurian")
+    public static void theSecondFangsCarryFiveStacks(GameTestHelper h) {
+        ServerPlayer p = saurian(h, SaurianSkillTree.VENOM_1, SaurianSkillTree.VENOM_2);
+        Zombie z = still(h, new BlockPos(2, 2, 3));
+        for (int i = 0; i < 7; i++) {
+            z.invulnerableTime = 0;
+            z.setHealth(z.getMaxHealth());
+            p.attack(z);
+        }
+        eq(h, 5, SaurianAbilityHandler.venomStacks(z), "five stacks at most at II");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void scaledHideTiers(GameTestHelper h) {
+        ServerPlayer p = saurian(h, SaurianSkillTree.HIDE_1);
+        SaurianAbilityHandler.passives(p, true);
+        eq(h, 10.0, CharTest.modifier(p, ModAttributes.PHYSICAL_RESISTANCE, "sdk_hide_pres"), "I: +10 physical");
+        eq(h, null, CharTest.modifier(p, ModAttributes.MAGIC_RESISTANCE, "sdk_hide_mres"), "I: nothing against magic");
+        SkillTreeData.grantNode(p, SaurianSkillTree.HIDE_2);
+        SkillTreeData.grantNode(p, SaurianSkillTree.HIDE_3);
+        SaurianAbilityHandler.passives(p, true);
+        eq(h, 30.0, CharTest.modifier(p, ModAttributes.PHYSICAL_RESISTANCE, "sdk_hide_pres"), "III: +30 physical");
+        eq(h, 10.0, CharTest.modifier(p, ModAttributes.MAGIC_RESISTANCE, "sdk_hide_mres"), "III: +10 magic");
+        SaurianAbilityHandler.passives(p, false);
+        h.succeed();
+    }
+
     @GameTest(template = PLATFORM)
     public static void nobodyElseHasHisArts(GameTestHelper h) {
         ServerPlayer erlang = as(h, ReincarnationOutcome.EYE_OF_HEAVEN);

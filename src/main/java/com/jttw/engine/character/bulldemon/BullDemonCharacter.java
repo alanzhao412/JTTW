@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * The Bull Demon King: Bull Rush on V, the 72 Transformations on B (a menu, opened
- * client-side), the Great White Bull on M.
+ * The Bull Demon King: Bull Rush on V, the 72 Transformations on M (a menu, opened
+ * client-side), and, holding Shift, the Great White Bull on M.
  */
 public final class BullDemonCharacter implements PlayableCharacter {
 
