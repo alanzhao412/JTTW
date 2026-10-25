@@ -199,7 +199,9 @@ public class ByakkoGameTests {
         Husk husk = mob(h, EntityType.HUSK, 2, 4);
         husk.setTarget(p);
         Pig hound = mob(h, EntityType.PIG, 0, 0);
-        hound.setCustomName(Component.literal("jttw_xtq:" + p.getUUID()));
+        // a hound of his own, as Xiaotian Quan carries its owner
+        hound.getPersistentData().putBoolean(com.jttw.engine.character.erlang.XiaotianQuanManager.XTQ_TAG, true);
+        hound.getPersistentData().putUUID(com.jttw.engine.character.erlang.XiaotianQuanManager.XTQ_OWNER_TAG, p.getUUID());
         character().use(p, "bk_roar", AbilityAction.USE);
         near(h, 92f, QiData.getCurrent(p), "8 Qi");
         eq(h, 5, amp(husk, MobEffects.MOVEMENT_SLOWDOWN), "Slowness VI");

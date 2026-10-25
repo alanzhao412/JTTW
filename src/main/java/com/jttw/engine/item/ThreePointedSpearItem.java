@@ -333,42 +333,12 @@ public class ThreePointedSpearItem extends Item implements Charged {
 
     // ── Wrath (Zhàn Shén) ────────────────────────────────────────────
 
-    private static final ResourceLocation WRATH_SPEED = JTTWEngine.id("three_pointed_spear_wrath_speed");
-
-    /** Erlang Shen with Zhàn Shén I, below 40% health. */
+    /**
+     * Erlang Shen with Zhàn Shén I, below 40% health: the slash reaches all round and the lunge
+     * quickens. Wrath's damage, speed and the rest are {@link com.jttw.engine.character.erlang.ErlangWrath}'s.
+     */
     public static boolean inWrath(Player p) {
-        return isErlangShen(p) && p.getHealth() / p.getMaxHealth() < 0.4f
-                && com.jttw.engine.progression.skilltree.SkillTreeData.getEsWrathTier(p) >= 1;
-    }
-
-    /** Wrath's extra attack speed with the spear: +15/25/35% by Zhàn Shén tier. */
-    public static double wrathSpeed(int tier) {
-        return tier >= 3 ? 0.35 : tier >= 2 ? 0.25 : tier >= 1 ? 0.15 : 0.0;
-    }
-
-    /** Gives or takes Wrath's attack speed, as he is in Wrath with the spear in hand or not. */
-    public static void updateWrathSpeed(Player p) {
-        var speed = p.getAttribute(Attributes.ATTACK_SPEED);
-        if (speed == null) return;
-        double want = p.getMainHandItem().getItem() instanceof ThreePointedSpearItem && inWrath(p)
-                ? wrathSpeed(com.jttw.engine.progression.skilltree.SkillTreeData.getEsWrathTier(p)) : 0.0;
-        AttributeModifier has = speed.getModifier(WRATH_SPEED);
-        if (has != null && has.amount() == want) return;
-        if (has != null) speed.removeModifier(WRATH_SPEED);
-        if (want > 0) {
-            speed.addTransientModifier(new AttributeModifier(WRATH_SPEED, want, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
-        }
-    }
-
-    /** Keeps Wrath's attack speed in step, each tick on the server. */
-    @net.neoforged.fml.common.EventBusSubscriber(modid = JTTWEngine.MOD_ID)
-    public static final class WrathSpeed {
-        private WrathSpeed() {}
-
-        @net.neoforged.bus.api.SubscribeEvent
-        public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
-            if (!event.getEntity().level().isClientSide()) updateWrathSpeed(event.getEntity());
-        }
+        return com.jttw.engine.character.erlang.ErlangWrath.inWrath(p);
     }
 
     /** How long the throw must be drawn, like a trident. */

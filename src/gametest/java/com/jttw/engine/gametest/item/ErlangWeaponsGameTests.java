@@ -8,6 +8,7 @@ import com.jttw.engine.entity.ThrownSpearEntity;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.character.erlang.ErlangShenAbilityHandler;
 import com.jttw.engine.item.ErlangAxeItem;
+import com.jttw.engine.character.erlang.ErlangWrath;
 import com.jttw.engine.item.ThreePointedSpearItem;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
 import com.jttw.engine.progression.stats.ResistanceHandler;
@@ -553,33 +554,37 @@ public class ErlangWeaponsGameTests {
     }
 
     @GameTest(template = PLATFORM)
-    public static void wrathQuickensAttacksWithTheSpearByZhanShenTier(GameTestHelper h) {
+    public static void wrathQuickensAttacksByZhanShenTierWhateverHeHolds(GameTestHelper h) {
         ServerPlayer p = player(h);
         setOutcome(p, ReincarnationOutcome.EYE_OF_HEAVEN);
         SkillTreeData.grantNode(p, "es_wrath_1");
         double base = p.getAttributeValue(Attributes.ATTACK_SPEED);
         p.setItemInHand(InteractionHand.MAIN_HAND, spear());
-        ThreePointedSpearItem.updateWrathSpeed(p);
+        ErlangWrath.refresh(p);
         near(h, base, p.getAttributeValue(Attributes.ATTACK_SPEED), "healthy: no Wrath");
 
         p.setHealth(p.getMaxHealth() * 0.25f);
-        ThreePointedSpearItem.updateWrathSpeed(p);
+        ErlangWrath.refresh(p);
         near(h, base * 1.15, p.getAttributeValue(Attributes.ATTACK_SPEED), "Zhàn Shén I: +15%");
         SkillTreeData.grantNode(p, "es_wrath_2");
         SkillTreeData.grantNode(p, "es_wrath_3");
-        ThreePointedSpearItem.updateWrathSpeed(p);
+        ErlangWrath.refresh(p);
         near(h, base * 1.35, p.getAttributeValue(Attributes.ATTACK_SPEED), "Zhàn Shén III: +35%");
 
         p.setItemInHand(InteractionHand.MAIN_HAND, axe());
-        ThreePointedSpearItem.updateWrathSpeed(p);
-        near(h, base, p.getAttributeValue(Attributes.ATTACK_SPEED), "only with the spear in hand");
+        ErlangWrath.refresh(p);
+        near(h, base * 1.35, p.getAttributeValue(Attributes.ATTACK_SPEED), "with the axe too");
+
+        p.setHealth(p.getMaxHealth());
+        ErlangWrath.refresh(p);
+        near(h, base, p.getAttributeValue(Attributes.ATTACK_SPEED), "healed: gone");
 
         ServerPlayer other = player(h);
         setOutcome(other, ReincarnationOutcome.YUAN_DI);
         SkillTreeData.grantNode(other, "es_wrath_1");
         other.setHealth(other.getMaxHealth() * 0.25f);
         other.setItemInHand(InteractionHand.MAIN_HAND, spear());
-        ThreePointedSpearItem.updateWrathSpeed(other);
+        ErlangWrath.refresh(other);
         near(h, base, other.getAttributeValue(Attributes.ATTACK_SPEED), "not Erlang Shen");
         h.succeed();
     }

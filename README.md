@@ -165,7 +165,20 @@ Abilities and items are drawn from the source material rather than invented:
 - **Immortal Peach · Yin Yang Sword**
 - **Wu Clones** — Wukong's hair-clone technique, implemented as summoned entities with their own
   pathfinding goals ([`WuCloneManager`](src/main/java/com/jttw/engine/character/wukong/WuCloneManager.java))
-- **Xiaotian Quan** — Erlang Shen's hound, a custom entity with hand-authored model and animation
+- **Xiaotian Quan** — Erlang Shen's hound, a custom entity with hand-authored model and animation.
+  Its own branch: I summons it; II gives it +25% health and attack and tracking sense (the nearest
+  hostile glows for him); III +50%, bites that give Slowness I, and a howl that recharges twice as
+  fast. Hound Training: I +20 health, +3 attack; II +20 health more, and it tracks the three
+  nearest hostiles; III peak stats and bites that give Slowness II (the strongest Slowness wins;
+  they never stack) ([`XiaotianQuanManager`](src/main/java/com/jttw/engine/character/erlang/XiaotianQuanManager.java))
+- **Zhàn Shén** — Erlang Shen as God of War: below 40% health he is in Wrath (gone again once healed
+  to 40%), with +15/25/35% damage on every blow and ability, and as much movement and attack speed,
+  whatever he holds. At II he cannot be knocked back and Xiaotian Quan goes berserk (crimson
+  markings and eyes, +30% bite, +25% speed, a bite every half second, and it hunts the nearest
+  hostile); at III he heals 10% of the damage he deals and the hound's bites give Slowness II for
+  5 s (its own nodes give at most 3 s). A
+  red vignette beats at the edge of his sight while it lasts
+  ([`ErlangWrath`](src/main/java/com/jttw/engine/character/erlang/ErlangWrath.java))
 - **Phoenix revival** — death-and-rebirth mechanic tied to the Phoenix line
 
 Custom **Heaven** and **Hell** dimensions ship with their own worldgen, biomes, and noise settings.
@@ -224,7 +237,8 @@ is what makes the rest possible:
   below a cutoff — and the same decay continues after flight ends, so landing reads as a continuous
   glide rather than an abrupt stop.
 - **Speed tiers.** Glide-only (sinks, cannot gain altitude), full flight, and a top tier that also
-  permits dimension travel — with per-character speed variation layered on top.
+  permits dimension travel — with per-character speed variation layered on top (Erlang Shen's Wind
+  and Fog is true flight from its first tier, a little under cruising speed, never a glide).
 - **Independent velocity clamps** on the vertical and horizontal axes, plus a separate strafe scale,
   so lateral drift doesn't match forward thrust.
 - **A parallel swim system** with its own stored vector, distinct cruise and sprint speeds, and a

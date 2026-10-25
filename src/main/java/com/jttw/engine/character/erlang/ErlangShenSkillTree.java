@@ -96,14 +96,14 @@ public final class ErlangShenSkillTree {
         ));
         TREE.add(new SkillNode(
                 XTQ_2, "Xiaotian Quan II",
-                new String[]{ "Improved companion stats.", "Xiaotian Quan gains",
-                              "tracking sense." },
+                new String[]{ "+25% hound HP and ATK.", "Tracking sense: the nearest",
+                              "hostile glows for you." },
                 4, 1, 1, List.of(XTQ_1), AbilityType.TOGGLE, 2, "Xiaotian Quan"
         ));
         TREE.add(new SkillNode(
                 XTQ_3, "Xiaotian Quan III",
-                new String[]{ "Peak hound power.", "Attacks apply Slowness.",
-                              "Enhanced combat partner." },
+                new String[]{ "+50% hound HP and ATK.", "Bites apply Slowness I.",
+                              "Howl recharges twice as fast." },
                 5, 1, 2, List.of(XTQ_2), AbilityType.TOGGLE, 3, "Xiaotian Quan"
         ));
 
@@ -171,7 +171,7 @@ public final class ErlangShenSkillTree {
         ));
         TREE.add(new SkillNode(
                 WRATH_3, "Zhàn Shén III",
-                new String[]{ "Wrath: +35% damage/speed.", "10% lifesteal. XTQ gains", "Slowness II on attacks." },
+                new String[]{ "Wrath: +35% damage/speed.", "10% lifesteal. XTQ bites:", "Slowness II for 5s." },
                 4, 6, 2, List.of(WRATH_2), AbilityType.PASSIVE, 3, "Zhàn Shén"
         ));
 
@@ -183,12 +183,12 @@ public final class ErlangShenSkillTree {
         ));
         TREE.add(new SkillNode(
                 XTQ_GROWTH_2, "Hound Training II",
-                new String[]{ "Xiaotian Quan gains", "tracking ability. +20 HP.", "" },
+                new String[]{ "Xiaotian Quan gains +20 HP.", "Tracking: the 3 nearest", "hostiles glow for you." },
                 3, 5, 1, List.of(XTQ_GROWTH_1), AbilityType.PASSIVE, 0, "Hound Growth"
         ));
         TREE.add(new SkillNode(
                 XTQ_GROWTH_3, "Hound Training III",
-                new String[]{ "Peak stats. Attacks", "apply Slowness II.", "" },
+                new String[]{ "Peak stats: +10 HP, +5 ATK,", "more speed and armor.", "Bites apply Slowness II." },
                 4, 5, 2, List.of(XTQ_GROWTH_2), AbilityType.PASSIVE, 0, "Hound Growth"
         ));
 

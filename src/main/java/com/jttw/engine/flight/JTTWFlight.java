@@ -1,5 +1,6 @@
 package com.jttw.engine.flight;
 
+import com.jttw.engine.progression.skilltree.SkillTreeData;
 import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.network.s2c.SyncFlightPacket;
 import com.jttw.engine.transformation.TransformationData;
@@ -141,8 +142,12 @@ public final class JTTWFlight {
         TransformationData form = com.jttw.engine.transformation.TransformationManager.getTransformation(player);
         // by their own power: a character's flight, or a form's wings (not merely creative's)
         boolean own = canFly(player) || (form != null && form.canFly());
-        return new FlightProfile(FlightSteering.speedFor(tier, wukong),
-                isGlideOnly(player), boost(player), tag.getBoolean(THRUST_TAG), own);
+        // Erlang Shen's Wind and Fog is flight from its first tier, never a glide: slower than
+        // cruising at I, then cruising (Divine Wind) and the fastest (Celestial Gale)
+        boolean erlang = "eye_of_heaven".equals(tag.getString(com.jttw.engine.reincarnation.AlignmentData.KEY_REINCARNATION_OUTCOME))
+                && SkillTreeData.getEsFlightTier(player) >= 1;
+        double speed = erlang && tier <= 1 ? FlightSteering.ERLANG_SQUALL_SPEED : FlightSteering.speedFor(tier, wukong);
+        return new FlightProfile(speed, isGlideOnly(player) && !erlang, boost(player), tag.getBoolean(THRUST_TAG), own);
     }
 
     /** How this player flies now: on a Heavenly's cloud (only when it is the faster), or on their own. */

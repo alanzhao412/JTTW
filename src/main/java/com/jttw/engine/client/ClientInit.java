@@ -294,6 +294,7 @@ public final class ClientInit {
         // the vignette is drawn among the camera overlays now
         event.registerAbove(VanillaGuiLayers.CAMERA_OVERLAYS, JTTWEngine.id("jttw_flood_wrath"), shownWithGui(FloodWrathOverlay.OVERLAY));
         event.registerAbove(VanillaGuiLayers.CAMERA_OVERLAYS, JTTWEngine.id("jttw_solar_flare"), shownWithGui(SolarFlareOverlay.OVERLAY));
+        event.registerAbove(VanillaGuiLayers.CAMERA_OVERLAYS, JTTWEngine.id("jttw_zhan_shen"), shownWithGui(ZhanShenOverlay.OVERLAY));
         event.registerAbove(VanillaGuiLayers.FOOD_LEVEL,
                 JTTWEngine.id("jttw_second_stomach"), shownWithGui(StomachOverlay.OVERLAY));
     }
