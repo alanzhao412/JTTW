@@ -115,6 +115,21 @@ public class BullDemonGameTests {
     }
 
     @GameTest(template = PLATFORM)
+    public static void eachRushTierStunsLonger(GameTestHelper h) {
+        ServerPlayer p = bull(h, "bdk_rush_1");
+        Zombie first = mob(h, EntityType.ZOMBIE, 2, 3);
+        BullDemonAbilityHandler.wallImpact(p, new Vec3(0, 0, 1), 1);
+        eq(h, 40, duration(first, MobEffects.MOVEMENT_SLOWDOWN), "I: stunned 2 s");
+        first.removeAllEffects();
+        BullDemonAbilityHandler.wallImpact(p, new Vec3(0, 0, 1), 2);
+        eq(h, 60, duration(first, MobEffects.MOVEMENT_SLOWDOWN), "II: 3 s");
+        first.removeAllEffects();
+        BullDemonAbilityHandler.wallImpact(p, new Vec3(0, 0, 1), 3);
+        eq(h, 80, duration(first, MobEffects.MOVEMENT_SLOWDOWN), "III: 4 s");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
     public static void theRushRunsOutAndLettingGoEndsIt(GameTestHelper h) {
         ServerPlayer p = bull(h, "bdk_rush_1");
         BullDemonAbilityHandler.startRush(p);
@@ -176,6 +191,21 @@ public class BullDemonGameTests {
         check(h, !blow.isCanceled(), "a blow still lands");
         tick(p, BullDemonAbilityHandler::onPlayerTick, 20);
         near(h, 10.0, modifier(p, PHYSICAL_RESISTANCE(), "bdk_hide_pres"), "I: +10 physical resistance");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void thickHideAddsMagicThenSteadiness(GameTestHelper h) {
+        ServerPlayer p = bull(h, "bdk_hide_1", "bdk_hide_2");
+        tick(p, BullDemonAbilityHandler::onPlayerTick, 20);
+        near(h, 20.0, modifier(p, PHYSICAL_RESISTANCE(), "bdk_hide_pres"), "II: +20 physical");
+        near(h, 10.0, modifier(p, MAGIC_RESISTANCE(), "bdk_hide_mres"), "II: +10 magic");
+        eq(h, null, modifier(p, Attributes.KNOCKBACK_RESISTANCE, "bdk_hide_steady"), "II: still knocked about");
+        grant(p, "bdk_hide_3");
+        tick(p, BullDemonAbilityHandler::onPlayerTick, 20);
+        near(h, 30.0, modifier(p, PHYSICAL_RESISTANCE(), "bdk_hide_pres"), "III: +30 physical");
+        near(h, 20.0, modifier(p, MAGIC_RESISTANCE(), "bdk_hide_mres"), "III: +20 magic");
+        near(h, 0.5, modifier(p, Attributes.KNOCKBACK_RESISTANCE, "bdk_hide_steady"), "III: hard to knock back");
         h.succeed();
     }
 

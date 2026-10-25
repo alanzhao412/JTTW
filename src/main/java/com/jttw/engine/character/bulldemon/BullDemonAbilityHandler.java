@@ -56,8 +56,8 @@ import java.util.Set;
  * <ul>
  *   <li><b>V (hold), Bull Rush:</b> charges where he looks, steering as he turns, goring and
  *       tossing all in his way. Ramming a wall ends it, stunning everything near the impact.</li>
- *   <li><b>B, 72 Transformations:</b> the menu (client-side).</li>
- *   <li><b>M, Great White Bull:</b> toggle; the giant bull: more health, harder hits, unmoved by
+ *   <li><b>M, 72 Transformations:</b> the menu (client-side).</li>
+ *   <li><b>Shift + M, Great White Bull:</b> toggle; the giant bull: more health, harder hits, unmoved by
  *       blows; drains Qi.</li>
  *   <li><b>Thick Hide</b> (passive): fire cannot burn him; tougher against blows (and from II,
  *       magic); III hard to knock back.</li>

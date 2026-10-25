@@ -63,18 +63,18 @@ public final class SaurianSkillTree {
         branch(new String[]{RIVER_1, RIVER_2, RIVER_3}, "Riverborn", "Riverborn", 4, AbilityType.PASSIVE, new int[]{2, 3, 4},
                 new String[][]{
                         {"Breathe water; swim swiftly.", "", ""},
-                        {"Wet (in water or rain):", "+15% damage, and heal.", ""},
-                        {"Wet: +30% damage, and", "heal faster.", ""}});
+                        {"Wet (in water or rain):", "+15% damage; heal 1 HP", "a second."},
+                        {"Wet: +30% damage; heal", "2 HP a second.", ""}});
         branch(new String[]{HIDE_1, HIDE_2, HIDE_3}, "Scaled Hide", "Scaled Hide", 5, AbilityType.PASSIVE, new int[]{2, 3, 4},
                 new String[][]{
-                        {"Tougher against blows.", "", ""},
-                        {"Tougher still.", "", ""},
-                        {"Tougher still, and", "against magic.", ""}});
+                        {"+10 phys. resist.", "", ""},
+                        {"+20 phys. resist.", "", ""},
+                        {"+30 phys. resist.,", "+10 magic resist.", ""}});
         branch(new String[]{VENOM_1, VENOM_2, VENOM_3}, "Venom Fangs", "Venom Fangs", 6, AbilityType.PASSIVE, new int[]{2, 3, 4},
                 new String[][]{
-                        {"Your blows envenom: poison", "that stacks, up to 3.", ""},
-                        {"Up to 5 stacks, stronger.", "", ""},
-                        {"Up to 7 stacks, stronger", "still.", ""}});
+                        {"Your blows envenom: poison", "that stacks, up to 3; a stack", "burns 4% of ATK a second."},
+                        {"Up to 5 stacks, 5% each.", "", ""},
+                        {"Up to 7 stacks, 6% each.", "", ""}});
         branch(new String[]{TRANSFORM_1, TRANSFORM_2, TRANSFORM_3}, "18 Transformations", "18 Transformations", 7, AbilityType.MENU, new int[]{3, 4, 5},
                 new String[][]{
                         {"Press M: the 18", "Transformations. Neutral", "land forms."},

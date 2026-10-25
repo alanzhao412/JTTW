@@ -40,24 +40,24 @@ public final class BullDemonSkillTree {
     static {
         // ── BULL RUSH (col 0, HELD) ─────────────────────────────────────
         TREE.add(new SkillNode(RUSH_1, "Bull Rush I",
-                new String[]{ "Hold V: charge where you", "look, goring all in the way.", "Ram a wall to stun those near." },
+                new String[]{ "Hold V: charge where you", "look, goring all in the way.", "Ram a wall: stun those near, 2 s." },
                 2, 0, 0, List.of(), AbilityType.HELD, 1, "Bull Rush"));
         TREE.add(new SkillNode(RUSH_2, "Bull Rush II",
-                new String[]{ "Faster, longer, harder.", "", "" },
+                new String[]{ "Faster, longer, harder;", "stuns last 3 s.", "" },
                 3, 0, 1, List.of(RUSH_1), AbilityType.HELD, 2, "Bull Rush"));
         TREE.add(new SkillNode(RUSH_3, "Bull Rush III",
-                new String[]{ "Faster, longer, harder", "still; stuns last longer.", "" },
+                new String[]{ "Faster, longer, harder", "still; stuns last 4 s.", "" },
                 4, 0, 2, List.of(RUSH_2), AbilityType.HELD, 3, "Bull Rush"));
 
         // ── 72 TRANSFORMATIONS (col 1) ──────────────────────────────────
         TREE.add(new SkillNode(TRANSFORM_1, "72 Transformations I",
-                new String[]{ "Press M to open the", "72 Transformations.", "Neutral land and water forms." },
+                new String[]{ "Press M to open the", "72 Transformations.", "Neutral land, water and sky forms." },
                 3, 1, 0, List.of(), AbilityType.MENU, 1, "72 Transformations"));
         TREE.add(new SkillNode(TRANSFORM_2, "72 Transformations II",
-                new String[]{ "Adds neutral", "flying forms." },
+                new String[]{ "Adds hostile land forms", "(no bosses)." },
                 4, 1, 1, List.of(TRANSFORM_1), AbilityType.MENU, 2, "72 Transformations"));
         TREE.add(new SkillNode(TRANSFORM_3, "72 Transformations III",
-                new String[]{ "Adds hostile", "forms." },
+                new String[]{ "Adds bosses, hostile sea and", "sky forms, objects and players." },
                 5, 1, 2, List.of(TRANSFORM_2), AbilityType.MENU, 3, "72 Transformations"));
 
         // ── GREAT WHITE BULL (col 2) ────────────────────────────────────
@@ -73,13 +73,13 @@ public final class BullDemonSkillTree {
 
         // ── THICK HIDE (col 3, PASSIVE) ─────────────────────────────────
         TREE.add(new SkillNode(HIDE_1, "Thick Hide I",
-                new String[]{ "Fire cannot burn you.", "Tougher against blows.", "" },
+                new String[]{ "Fire cannot burn you.", "+10 phys. resist.", "" },
                 2, 3, 0, List.of(), AbilityType.PASSIVE, 1, "Thick Hide"));
         TREE.add(new SkillNode(HIDE_2, "Thick Hide II",
-                new String[]{ "Tougher against blows", "and magic.", "" },
+                new String[]{ "+20 phys. resist.", "+10 magic resist.", "" },
                 3, 3, 1, List.of(HIDE_1), AbilityType.PASSIVE, 2, "Thick Hide"));
         TREE.add(new SkillNode(HIDE_3, "Thick Hide III",
-                new String[]{ "Tougher still; hard to", "knock back.", "" },
+                new String[]{ "+30 phys., +20 magic resist.", "50% knockback resist.", "" },
                 4, 3, 2, List.of(HIDE_2), AbilityType.PASSIVE, 3, "Thick Hide"));
     }
 }

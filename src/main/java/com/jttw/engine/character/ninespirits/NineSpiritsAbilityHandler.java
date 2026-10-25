@@ -42,6 +42,7 @@ import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -61,11 +62,13 @@ import java.util.Set;
  *       frost (a shard that slows and freezes). Sneak + V turns the next head to lead. Each
  *       tier wakes another head.</li>
  *   <li><b>B, Heaven-Shaking Roar:</b> knocks back and slows everything in a cone in front;
- *       II leaves them dizzy and unable to fight back; III also drops flyers out of the sky
- *       and shatters projectiles in the cone.</li>
- *   <li><b>N, Golden Mane Flare:</b> blinds everything looking at him within 12 / 20 blocks.</li>
- *   <li><b>M, Nine-Headed True Form:</b> toggle; tougher, and each melee hit strikes with
- *       2 / 3 / 4 heads; drains Qi.</li>
+ *       II leaves them dizzy and cowed: for 2 seconds no blow or shot of theirs lands, and a
+ *       mob loses its quarry; III also drops flyers out of the sky and shatters projectiles in
+ *       the cone.</li>
+ *   <li><b>N, Golden Mane Flare:</b> blinds everything looking at him within 12 / 20 blocks,
+ *       for 3 / 5 seconds.</li>
+ *   <li><b>M, Nine-Headed True Form:</b> toggle; +20 / 30 / 40 physical and magic resistance,
+ *       and each melee hit strikes with 2 / 3 / 4 heads; drains Qi.</li>
  *   <li><b>Nine Lives</b> (passive): survives killing blows, 1 / 2 / 3 times; a spent life
  *       comes back after 5 minutes.</li>
  * </ul>
@@ -88,6 +91,10 @@ public final class NineSpiritsAbilityHandler {
     /** On a head's projectile: which element, and the damage it carries. */
     public static final String TAG_ELEMENT = "jttw_ns_element";
     public static final String TAG_DAMAGE = "jttw_ns_damage";
+    /** On a foe the roar has cowed (II and up): game time until which it cannot fight back. */
+    public static final String KEY_COWED = "jttw_ns_cowed_until";
+    /** How long the roar cows: 2 s. */
+    public static final int COWED_TICKS = 40;
     /** On a foe rung by the Bell of Taiyi: game time the mark lasts until. */
     public static final String KEY_BELL_MARK = "jttw_bell_mark_until";
     public static final float BELL_MARK_BONUS = 1.3f;
@@ -168,6 +175,11 @@ public final class NineSpiritsAbilityHandler {
         return attack * (tier >= 3 ? 1.6f : tier == 2 ? 1.3f : 1.0f);
     }
 
+    /** How many more foes the thunder bolt leaps on to after the first: 2, or 4 with the Frost Head. */
+    public static int thunderJumps(int tier) {
+        return tier >= 3 ? 4 : 2;
+    }
+
     /** V: fire the leading head. */
     public static void fireHead(ServerPlayer p) {
         int heads = tier(p, "ns_heads");
@@ -176,7 +188,7 @@ public final class NineSpiritsAbilityHandler {
         float damage = headDamage((float) p.getAttributeValue(Attributes.ATTACK_DAMAGE), heads);
         int head = leadHead(p);
         if (head == THUNDER) {
-            thunderBolt(p, damage, heads >= 3 ? 4 : 2);
+            thunderBolt(p, damage, thunderJumps(heads));
             return;
         }
         Snowball shot = new Snowball(p.level(), p);
@@ -299,7 +311,7 @@ public final class NineSpiritsAbilityHandler {
             if (tier >= 2) {
                 e.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 80, 0), p);
                 e.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 40, 9), p);
-                if (e instanceof Mob mob) mob.setTarget(null);
+                cow(e, COWED_TICKS);
             }
         }
         if (tier >= 3) {
@@ -317,7 +329,42 @@ public final class NineSpiritsAbilityHandler {
         level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 2.0F, 0.7F);
     }
 
+    /** Cows {@code e} for {@code ticks}: nothing it strikes or shoots in that time is hurt. */
+    public static void cow(LivingEntity e, int ticks) {
+        e.getPersistentData().putLong(KEY_COWED, e.level().getGameTime() + ticks);
+        if (e instanceof Mob mob) mob.setTarget(null);
+    }
+
+    public static boolean cowed(LivingEntity e) {
+        return e.getPersistentData().getLong(KEY_COWED) > e.level().getGameTime();
+    }
+
+    /** A cowed foe's blows and shots land on no one. */
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onCowedStrike(LivingIncomingDamageEvent event) {
+        if (event.getSource().getEntity() instanceof LivingEntity attacker && attacker != event.getEntity() && cowed(attacker)) {
+            event.setCanceled(true);
+        }
+    }
+
+    /** While it is cowed a mob keeps no quarry; once it is over, the mark goes. */
+    @SubscribeEvent
+    public static void onCowedTick(EntityTickEvent.Pre event) {
+        if (!(event.getEntity() instanceof LivingEntity e) || e.level().isClientSide
+                || !e.getPersistentData().contains(KEY_COWED)) return;
+        if (!cowed(e)) e.getPersistentData().remove(KEY_COWED);
+        else if (e instanceof Mob mob && mob.getTarget() != null) mob.setTarget(null);
+    }
+
     // ── N: Golden Mane Flare ───────────────────────────────────────
+
+    public static double flareRange(int tier) {
+        return tier >= 2 ? 20 : 12;
+    }
+
+    public static int flareBlindTicks(int tier) {
+        return tier >= 2 ? 100 : 60;
+    }
 
     /** True if {@code e} is looking at {@code p}: facing them and with a clear line of sight. */
     public static boolean looksAt(LivingEntity e, ServerPlayer p) {
@@ -329,11 +376,11 @@ public final class NineSpiritsAbilityHandler {
         int tier = tier(p, "ns_flare");
         if (tier < 1 || onCooldown(p, KEY_FLARE_READY_AT) || !spendQi(p, FLARE_QI)) return;
         startCooldown(p, KEY_FLARE_READY_AT, "ns_flare", FLARE_COOLDOWN);
-        double range = tier >= 2 ? 20 : 12;
+        double range = flareRange(tier);
         ServerLevel level = p.serverLevel();
         for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, p.getBoundingBox().inflate(range),
                 e -> isFoe(e, p) && e.distanceTo(p) <= range && looksAt(e, p))) {
-            e.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, tier >= 2 ? 100 : 60, 0), p);
+            e.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, flareBlindTicks(tier), 0), p);
             if (tier >= 2) e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, 1), p);
             if (e instanceof Mob mob) mob.setTarget(null);
         }
@@ -349,10 +396,14 @@ public final class NineSpiritsAbilityHandler {
         return p.getPersistentData().getBoolean(KEY_FORM);
     }
 
+    /** How many heads strike with each melee hit in true form: 2 / 3 / 4. */
+    public static int formHeads(int tier) {
+        return tier >= 3 ? 4 : tier == 2 ? 3 : 2;
+    }
+
     /** Melee damage multiplier in true form: each extra head strikes for half again. */
     public static float formHitMultiplier(int tier) {
-        int heads = tier >= 3 ? 4 : tier == 2 ? 3 : 2;
-        return 1f + 0.5f * (heads - 1);
+        return 1f + 0.5f * (formHeads(tier) - 1);
     }
 
     public static double formResistance(int tier) {
@@ -427,10 +478,12 @@ public final class NineSpiritsAbilityHandler {
         }
         // True form drains Qi and wears a golden aura
         if (inTrueForm(p)) {
-            if (!NineSpiritsCharacter.is(p) || !QiData.spend(p, FORM_QI_PER_TICK)) {
+            if (!NineSpiritsCharacter.is(p) || tier(p, "ns_form") < 1 || !QiData.spend(p, FORM_QI_PER_TICK)) {
                 endTrueForm(p);
                 p.displayClientMessage(Component.literal("§7The nine heads sink back."), true);
             } else if (p.tickCount % 4 == 0) {
+                // each second, so a tier bought in form toughens him at once
+                if (p.tickCount % 20 == 0) applyFormModifiers(p, tier(p, "ns_form"));
                 p.serverLevel().sendParticles(new DustParticleOptions(new Vector3f(1.0f, 0.75f, 0.1f), 1.5f),
                         p.getX(), p.getY() + 1.2, p.getZ(), 6, 0.6, 0.8, 0.6, 0.0);
             }

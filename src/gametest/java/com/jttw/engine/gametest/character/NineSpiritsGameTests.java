@@ -204,7 +204,63 @@ public class NineSpiritsGameTests {
         h.succeed();
     }
 
+    @GameTest(template = PLATFORM, batch = "nineSpiritsRoarCowed", timeoutTicks = 120)
+    public static void theRoaredCannotFightBackForTwoSeconds(GameTestHelper h) {
+        ServerPlayer p = saint(h);
+        grant(p, "ns_roar_1", "ns_roar_2");
+        Zombie z = mob(h, EntityType.ZOMBIE, 2, 5);
+        Pig pig = mob(h, EntityType.PIG, 0, 0);
+        z.setTarget(pig);
+        key(p, 1);
+        check(h, NineSpiritsAbilityHandler.cowed(z), "the roared one is cowed");
+        check(h, z.getTarget() == null, "and loses its quarry");
+        z.setTarget(pig);
+        NineSpiritsAbilityHandler.onCowedTick(new net.neoforged.neoforge.event.tick.EntityTickEvent.Pre(z));
+        check(h, z.getTarget() == null, "nor takes another while cowed");
+        LivingIncomingDamageEvent blow = incoming(pig, pig.damageSources().mobAttack(z), 4f);
+        NineSpiritsAbilityHandler.onCowedStrike(blow);
+        check(h, blow.isCanceled(), "its blow lands on no one");
+        // a shot: a cowed skeleton's arrow does nothing either
+        var skeleton = mob(h, EntityType.SKELETON, 4, 0);
+        NineSpiritsAbilityHandler.cow(skeleton, NineSpiritsAbilityHandler.COWED_TICKS);
+        Arrow arrow = new Arrow(h.getLevel(), skeleton, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.ARROW), null);
+        LivingIncomingDamageEvent shot = incoming(pig, pig.damageSources().arrow(arrow, skeleton), 4f);
+        NineSpiritsAbilityHandler.onCowedStrike(shot);
+        check(h, shot.isCanceled(), "nor its arrow");
+        h.runAfterDelay(NineSpiritsAbilityHandler.COWED_TICKS + 1, () -> {
+            check(h, !NineSpiritsAbilityHandler.cowed(z), "two seconds on, it is over");
+            LivingIncomingDamageEvent later = incoming(pig, pig.damageSources().mobAttack(z), 4f);
+            NineSpiritsAbilityHandler.onCowedStrike(later);
+            check(h, !later.isCanceled(), "and it fights again");
+            h.succeed();
+        });
+    }
+
+    @GameTest(template = PLATFORM, batch = "nineSpiritsRoar")
+    public static void theFirstRoarDoesNotCow(GameTestHelper h) {
+        ServerPlayer p = saint(h);
+        grant(p, "ns_roar_1");
+        Zombie z = mob(h, EntityType.ZOMBIE, 2, 5);
+        key(p, 1);
+        check(h, !NineSpiritsAbilityHandler.cowed(z), "at I the roared still fight back");
+        h.succeed();
+    }
+
     // ── N: mane flare ──────────────────────────────────────────────
+
+    @GameTest(template = PLATFORM, batch = "nineSpiritsFlare2")
+    public static void theFullManeBlindsLongerAndSlows(GameTestHelper h) {
+        openAir(h);
+        ServerPlayer p = saint(h);
+        grant(p, "ns_flare_1", "ns_flare_2");
+        Zombie watching = mob(h, EntityType.ZOMBIE, 2, 5);
+        watching.lookAt(EntityAnchorArgument.Anchor.EYES, p.getEyePosition());
+        watching.setYHeadRot(watching.getYRot());
+        key(p, 2);
+        eq(h, NineSpiritsAbilityHandler.flareBlindTicks(2), duration(watching, MobEffects.BLINDNESS), "II: blind 5 s");
+        eq(h, 1, amp(watching, MobEffects.MOVEMENT_SLOWDOWN), "and stumbling, slowed");
+        h.succeed();
+    }
 
     @GameTest(template = PLATFORM, batch = "nineSpiritsFlare")
     public static void theManeBlindsOnlyThoseLookingAtHim(GameTestHelper h) {
@@ -242,6 +298,23 @@ public class NineSpiritsGameTests {
         tick(p, NineSpiritsAbilityHandler::onPlayerTick, 1);
         check(h, !NineSpiritsAbilityHandler.inTrueForm(p), "ends without Qi");
         eq(h, null, modifier(p, PHYSICAL_RESISTANCE(), "ns_form_pres"), "and its toughness goes");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void aTierBoughtInTrueFormToughensHimAtOnce(GameTestHelper h) {
+        ServerPlayer p = saint(h);
+        grant(p, "ns_form_1");
+        key(p, 3);
+        eq(h, 20.0, modifier(p, PHYSICAL_RESISTANCE(), "ns_form_pres"), "I: +20");
+        eq(h, 20.0, modifier(p, MAGIC_RESISTANCE(), "ns_form_mres"), "against magic too");
+        grant(p, "ns_form_2", "ns_form_3");
+        tick(p, NineSpiritsAbilityHandler::onPlayerTick, 20);
+        eq(h, 40.0, modifier(p, PHYSICAL_RESISTANCE(), "ns_form_pres"), "III, bought in form: +40 within a second");
+        Pig pig = mob(h, EntityType.PIG, 2, 4);
+        LivingIncomingDamageEvent hit = incoming(pig, p.damageSources().playerAttack(p), 10f);
+        NineSpiritsAbilityHandler.onHit(hit);
+        near(h, 25.0, hit.getAmount(), "four heads: 10 x 2.5");
         h.succeed();
     }
 
