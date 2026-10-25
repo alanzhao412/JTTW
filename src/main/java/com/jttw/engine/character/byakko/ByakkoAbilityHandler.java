@@ -54,7 +54,10 @@ import java.util.concurrent.ConcurrentHashMap;
  *       damage scales with STR and level power. T2: bigger AoE. T3: stun enemies.</li>
  *   <li><b>Savage Bleed (passive):</b> attacks apply bleed DOT scaling with STR and level power.
  *       T2: stronger/longer. T3: spreads to nearby enemies.</li>
- *   <li><b>Velocity Strike (passive):</b> bonus attack damage based on movement speed.</li>
+ *   <li><b>Velocity Strike (passive):</b> bonus attack damage based on movement speed: 5% (I) or
+ *       10% (II) for each block a second he is moving across the ground.</li>
+ *   <li><b>Territorial Roar (USE):</b> all within 8 blocks pinned 3 s and thrown back.
+ *       T2: their buffs stripped, and he runs with Speed II (+40%) for 5 s.</li>
  * </ul>
  */
 public final class ByakkoAbilityHandler {
@@ -95,6 +98,45 @@ public final class ByakkoAbilityHandler {
     // -----------------------------------------------------------------------
 
     private static final Map<Integer, BleedEntry> BLEEDS = new ConcurrentHashMap<>();
+
+    /**
+     * Set while a bleed's second is dealt: a bleed is not a blow, so it does not bleed again,
+     * spread, hit harder for his speed, or spend Predator's Instinct's doubled first strike.
+     */
+    private static boolean bleeding;
+
+    // -----------------------------------------------------------------------
+    // Velocity Strike: how fast he is moving
+    // -----------------------------------------------------------------------
+
+    /**
+     * Where each Byakko stood at his last tick, and how far across the ground he had come since the
+     * one before. A player's own running is not in his server-side motion (the client moves him;
+     * the server only learns where he is), so his speed is read off where he goes.
+     */
+    private static final Map<UUID, Vec3> LAST_POS = new HashMap<>();
+    private static final Map<UUID, Double> GROUND_SPEED = new HashMap<>();
+
+    /** More than this in a tick (80 blocks a second) is no run but a teleport: it counts for nothing. */
+    private static final double TELEPORT_STEP = 4.0;
+
+    /** Velocity Strike's bonus, a share of the blow, for each block a second he is moving. */
+    public static double velocityBonusPerBlockPerSecond(int tier) {
+        return tier >= 2 ? 0.10 : tier == 1 ? 0.05 : 0.0;
+    }
+
+    /** His speed across the ground, in blocks a tick: how far he came last tick, or his motion if that is more. */
+    public static double groundSpeed(ServerPlayer player) {
+        Vec3 motion = player.getDeltaMovement();
+        return Math.max(GROUND_SPEED.getOrDefault(player.getUUID(), 0.0), Math.sqrt(motion.x * motion.x + motion.z * motion.z));
+    }
+
+    private static void trackGroundSpeed(ServerPlayer player) {
+        Vec3 now = player.position();
+        Vec3 last = LAST_POS.put(player.getUUID(), now);
+        double moved = last == null ? 0 : Math.sqrt((now.x - last.x) * (now.x - last.x) + (now.z - last.z) * (now.z - last.z));
+        GROUND_SPEED.put(player.getUUID(), moved > TELEPORT_STEP ? 0.0 : moved);
+    }
 
     private record BleedEntry(int entityId, UUID sourcePlayerId, float damagePerTick,
                               int remainingTicks, int maxTicks) {}
@@ -193,8 +235,9 @@ public final class ByakkoAbilityHandler {
         // Launch: toward where the player is looking, springing off the ground as a jump does, so
         // a level pounce arcs too (about 14 blocks looking ahead, up to about 19 looking a little up)
         Vec3 look = player.getLookAngle();
-        // as the White Tiger, the pounce carries half again as far
-        boolean tiger = com.jttw.engine.character.divinebeast.TrueForm.active(player);
+        // as the White Tiger (II and above), the pounce carries half again as far
+        boolean tiger = com.jttw.engine.character.divinebeast.TrueForm.active(player)
+                && ByakkoSkillTree.TREE.highestTier(nodes, "bk_true") >= 2;
         Vec3 launch = look.normalize().scale(tiger ? LEAP_SPEED * 1.5 : LEAP_SPEED);
         if (player.onGround()) launch = launch.add(0, LEAP_SPRING, 0);
         player.setDeltaMovement(launch);
@@ -267,9 +310,10 @@ public final class ByakkoAbilityHandler {
         double radius = switch (tier) { case 2 -> 5.0; case 3 -> 7.0; default -> 3.0; };
         float totalDamage = leapDamage(player, tier);
 
-        // Damage entities in radius (no terrain destruction)
+        // Damage the living in radius (no terrain destruction; dropped items and the like untouched)
         AABB box = new AABB(player.position(), player.position()).inflate(radius);
-        for (Entity target : player.level().getEntities(player, box, e -> e.isAlive() && e != player)) {
+        for (LivingEntity target : player.level().getEntitiesOfClass(LivingEntity.class, box,
+                e -> e.isAlive() && e != player && player.distanceTo(e) <= radius)) {
             float dist = player.distanceTo(target);
             float falloff = Math.max(0, 1.0f - dist / (float) radius);
             target.hurt(player.damageSources().playerAttack(player), totalDamage * falloff);
@@ -280,9 +324,9 @@ public final class ByakkoAbilityHandler {
             if (target instanceof ServerPlayer sp) sp.hurtMarked = true;
 
             // Tier 3: stun (slowness IV + blindness for 1 second)
-            if (tier >= 3 && target instanceof LivingEntity living) {
-                living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 3));
-                living.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 20, 0));
+            if (tier >= 3) {
+                target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 3));
+                target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 20, 0));
             }
         }
 
@@ -322,11 +366,12 @@ public final class ByakkoAbilityHandler {
                 target.getId(), attacker.getUUID(), totalPerSec,
                 durationTicks, durationTicks));
 
-        // Tier 3: spread bleed to nearby enemies within 3 blocks
+        // Tier 3: spread bleed to nearby foes within 3 blocks (never his allies or his own beasts)
         if (tier >= 3) {
             AABB spreadBox = target.getBoundingBox().inflate(3.0);
             for (Entity nearby : target.level().getEntities(target, spreadBox,
-                    e -> e instanceof LivingEntity && e.isAlive() && e != attacker)) {
+                    e -> e instanceof LivingEntity && e.isAlive() && e != attacker && !e.isAlliedTo(attacker)
+                            && !(e instanceof net.minecraft.world.entity.OwnableEntity pet && attacker.getUUID().equals(pet.getOwnerUUID())))) {
                 if (!BLEEDS.containsKey(nearby.getId())) {
                     // Spread at half strength
                     BLEEDS.put(nearby.getId(), new BleedEntry(
@@ -347,6 +392,7 @@ public final class ByakkoAbilityHandler {
         if (!isByakko(sp)) return;
 
         UUID uuid = sp.getUUID();
+        trackGroundSpeed(sp);
 
         // --- Leap landing detection ---
         if (LEAPING.contains(uuid)) {
@@ -391,15 +437,17 @@ public final class ByakkoAbilityHandler {
 
             // Deal bleed damage
             if (entity instanceof LivingEntity living) {
-                // Find the source player for damage attribution
-                Entity source = level.getEntity(
-                        level.getServer().getPlayerList().getPlayer(bleed.sourcePlayerId()) != null
-                                ? level.getServer().getPlayerList().getPlayer(bleed.sourcePlayerId()).getId()
-                                : -1);
-                if (source instanceof ServerPlayer attacker) {
-                    living.hurt(attacker.damageSources().playerAttack(attacker), bleed.damagePerTick());
-                } else {
-                    living.hurt(level.damageSources().generic(), bleed.damagePerTick());
+                // The source player, for damage attribution (online, wherever he is)
+                Entity source = level.getServer().getPlayerList().getPlayer(bleed.sourcePlayerId());
+                bleeding = true;
+                try {
+                    if (source instanceof ServerPlayer attacker) {
+                        living.hurt(attacker.damageSources().playerAttack(attacker), bleed.damagePerTick());
+                    } else {
+                        living.hurt(level.damageSources().generic(), bleed.damagePerTick());
+                    }
+                } finally {
+                    bleeding = false;
                 }
             }
 
@@ -420,6 +468,7 @@ public final class ByakkoAbilityHandler {
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public static void onLivingHurt(LivingIncomingDamageEvent event) {
         // Only for player attacks
+        if (bleeding) return; // a bleed's second is no blow
         if (!(event.getSource().getEntity() instanceof ServerPlayer attacker)) return;
         if (!isByakko(attacker)) return;
 
@@ -434,13 +483,11 @@ public final class ByakkoAbilityHandler {
         // --- Velocity Strike — bonus damage based on horizontal movement speed ---
         int velocityTier = ByakkoSkillTree.TREE.highestTier(nodes, "bk_velocity");
         if (velocityTier >= 1) {
-            Vec3 motion = attacker.getDeltaMovement();
-            double horizontalSpeed = Math.sqrt(motion.x * motion.x + motion.z * motion.z);
-            // Convert from blocks/tick to blocks/sec
-            double speedBps = horizontalSpeed * 20.0;
+            // blocks a tick to blocks a second
+            double speedBps = groundSpeed(attacker) * 20.0;
 
             // Bonus: 5% per block/sec at T1, 10% per block/sec at T2
-            double bonusPct = speedBps * (velocityTier >= 2 ? 0.10 : 0.05);
+            double bonusPct = speedBps * velocityBonusPerBlockPerSecond(velocityTier);
             if (bonusPct > 0) {
                 float bonusDamage = event.getAmount() * (float) bonusPct;
                 event.setAmount(event.getAmount() + bonusDamage);
@@ -600,6 +647,9 @@ public final class ByakkoAbilityHandler {
             return false;
         });
 
+        // within the reach as a sphere, not out to the box's corners
+        affected.removeIf(e -> e.distanceTo(player) > roarReach);
+
         for (LivingEntity mob : affected) {
             // Apply extreme Slowness (level 5 = Slowness VI) for 3 seconds
             mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 5, false, true));
@@ -628,7 +678,7 @@ public final class ByakkoAbilityHandler {
             }
         }
 
-        // T2: grant player Speed II (+20%) for 5 seconds
+        // T2: grant player Speed II (+40%) for 5 seconds
         if (tier >= 2) {
             player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 100, 1, false, true));
         }
@@ -676,5 +726,9 @@ public final class ByakkoAbilityHandler {
         LEAP_COOLDOWNS.remove(uuid);
         ROAR_COOLDOWNS.remove(uuid);
         INSTINCT_COOLDOWNS.remove(uuid);
+        LEAP_FROM.remove(uuid);
+        LEAP_STRUCK.remove(uuid);
+        LAST_POS.remove(uuid);
+        GROUND_SPEED.remove(uuid);
     }
 }

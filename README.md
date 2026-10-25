@@ -94,7 +94,8 @@ Tiger, Black Tortoise — and each of the four
 [`DivineBeastLine`](src/main/java/com/jttw/engine/progression/stats/DivineBeastLine.java) elemental paths
 grants a stat buff while you're in its domain:
 
-- **Water** (Dragon King) — oceans, rivers, and during rain
+- **Water** (Dragon King) — oceans, rivers, and during rain (once he has learned Rain Call, anywhere
+  in a world where it rains, roofed over or not)
 - **Earth** (World Turtle) — below Y=0
 - **Beast** (Byakko) — forests, jungles, plains
 - **Fire** (Solar Sovereign) — deserts, taigas, savannahs

@@ -87,12 +87,12 @@ public final class DragonSkillTree {
         // ── WEATHER CONTROL (col 1, TOGGLE type) ────────────────────────
         TREE.add(new SkillNode(
                 WEATHER_1, "Rain Call",
-                new String[]{ "Press B: toggle rain.", "Activates your water domain", "buff anywhere." },
+                new String[]{ "Press B: toggle rain. While", "it rains, your water domain", "holds anywhere, even indoors." },
                 2, 1, 0, List.of(), AbilityType.TOGGLE, 1, "Weather"
         ));
         TREE.add(new SkillNode(
                 WEATHER_2, "Tempest",
-                new String[]{ "Upgrades rain to thunderstorm.", "Lightning strikes deal +50%", "during your storms." },
+                new String[]{ "Upgrades rain to thunderstorm.", "Call Thunder deals +50%", "in a thunderstorm." },
                 3, 1, 1, List.of(WEATHER_1), AbilityType.TOGGLE, 2, "Weather"
         ));
 
@@ -174,12 +174,12 @@ public final class DragonSkillTree {
         // ── TIDAL FORCE (col 7, PASSIVE knockback) ──────────────────────
         TREE.add(new SkillNode(
                 FORCE_1, "Tidal Force I",
-                new String[]{ "Your attacks deal 3x", "knockback.", "" },
+                new String[]{ "Your melee blows deal 3x", "knockback.", "" },
                 2, 7, 0, List.of(), AbilityType.PASSIVE, 1, "Tidal Force"
         ));
         TREE.add(new SkillNode(
                 FORCE_2, "Tidal Force II",
-                new String[]{ "5x knockback. Mobs that", "hit a wall take bonus", "impact damage." },
+                new String[]{ "5x knockback. Mobs flung", "into a wall take a quarter", "of the blow again." },
                 3, 7, 1, List.of(FORCE_1), AbilityType.PASSIVE, 2, "Tidal Force"
         ));
 

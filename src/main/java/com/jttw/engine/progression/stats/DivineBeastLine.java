@@ -17,7 +17,8 @@ import javax.annotation.Nullable;
  * is in their element. See {@link DivineBeastHandler} for the buff application.
  *
  * <ul>
- *   <li>WATER (Dragon line): oceans, rivers, and during rain</li>
+ *   <li>WATER (Dragon line): oceans, rivers, and during rain (for one who has learned Rain Call,
+ *       anywhere in a world where it rains, roofed over or in a desert)</li>
  *   <li>EARTH (World Turtle line): below sea level</li>
  *   <li>BEAST (Byakko line): forests, jungles, plains, savannahs</li>
  *   <li>FIRE (Solar Sovereign line): deserts (badlands among them) and mountains</li>
@@ -51,6 +52,10 @@ public enum DivineBeastLine {
     private static boolean isWaterDomain(ServerPlayer player) {
         // Rain counts
         if (player.level().isRainingAt(player.blockPosition().above())) return true;
+        // and for a Dragon who calls the rain (Rain Call), rain anywhere in his world: under a roof,
+        // in a desert, wherever it does not reach him
+        if (player.level().isRaining()
+                && com.jttw.engine.progression.skilltree.SkillTreeData.getDrWeatherTier(player) >= 1) return true;
         // In water
         if (player.isInWater()) return true;
         // Ocean/river biomes

@@ -71,12 +71,12 @@ public final class ByakkoSkillTree {
         ));
         TREE.add(new SkillNode(
                 LEAP_2, "Predator's Leap II",
-                new String[]{ "Larger explosion radius.", "Increased damage.", "" },
+                new String[]{ "Landing blast reaches 5", "blocks (from 3). It hits", "for 8 + 3/4 STR (from 5 + 1/2)." },
                 3, 0, 1, List.of(LEAP_1), AbilityType.TOGGLE, 2, "Predator's Leap"
         ));
         TREE.add(new SkillNode(
                 LEAP_3, "Predator's Leap III",
-                new String[]{ "Massive AoE on landing.", "Briefly stuns enemies.", "Apex predator." },
+                new String[]{ "Landing blast reaches 7", "blocks, for 12 + full STR.", "Those it hits are stunned 1 s." },
                 4, 0, 2, List.of(LEAP_2), AbilityType.TOGGLE, 3, "Predator's Leap"
         ));
 
@@ -95,29 +95,29 @@ public final class ByakkoSkillTree {
         // ── SAVAGE BLEED (col 2, passive enhancement) ─────────────────────
         TREE.add(new SkillNode(
                 BLEED_1, "Savage Bleed I",
-                new String[]{ "Attacks apply bleed.", "Bleed scales with STR.", "" },
+                new String[]{ "Your blows bleed: 1 + 10%", "of STR a second, 3 s.", "" },
                 2, 2, 0, List.of(), AbilityType.PASSIVE, 1, "Savage Bleed"
         ));
         TREE.add(new SkillNode(
                 BLEED_2, "Savage Bleed II",
-                new String[]{ "Stronger bleed damage.", "Longer duration.", "" },
+                new String[]{ "Bleed: 2 + 20% of STR", "a second, 4 s.", "" },
                 3, 2, 1, List.of(BLEED_1), AbilityType.PASSIVE, 2, "Savage Bleed"
         ));
         TREE.add(new SkillNode(
                 BLEED_3, "Savage Bleed III",
-                new String[]{ "Maximum bleed power.", "Spreads to nearby enemies.", "" },
+                new String[]{ "Bleed: 3 + 30% of STR a", "second, 5 s. Spreads at half", "to foes within 3 blocks." },
                 4, 2, 2, List.of(BLEED_2), AbilityType.PASSIVE, 3, "Savage Bleed"
         ));
 
         // ── VELOCITY STRIKE (col 3, passive enhancement) ──────────────────
         TREE.add(new SkillNode(
                 VELOCITY_1, "Velocity Strike I",
-                new String[]{ "Attacks deal bonus damage", "based on movement speed.", "" },
+                new String[]{ "Your blows deal +5% for", "each block a second you", "are running." },
                 2, 3, 0, List.of(), AbilityType.PASSIVE, 1, "Velocity Strike"
         ));
         TREE.add(new SkillNode(
                 VELOCITY_2, "Velocity Strike II",
-                new String[]{ "Doubled speed bonus.", "The faster you move,", "the harder you hit." },
+                new String[]{ "Doubled: +10% for each", "block a second. The faster", "you move, the harder you hit." },
                 3, 3, 1, List.of(VELOCITY_1), AbilityType.PASSIVE, 2, "Velocity Strike"
         ));
 
@@ -141,7 +141,7 @@ public final class ByakkoSkillTree {
         ));
         TREE.add(new SkillNode(
                 ROAR_2, "Territorial Roar II",
-                new String[]{ "Roar strips buffs from", "enemies. Grants +20%", "speed for 5 seconds." },
+                new String[]{ "Roar strips buffs from", "enemies. Grants Speed II", "(+40%) for 5 seconds." },
                 3, 5, 1, List.of(ROAR_1), AbilityType.TOGGLE, 2, "Territorial Roar"
         ));
 

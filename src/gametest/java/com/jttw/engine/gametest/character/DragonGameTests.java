@@ -399,28 +399,162 @@ public class DragonGameTests {
 
     // ── Tidal Force (passive) ───────────────────────────────────────
 
+    /**
+     * Real blows, so the game's own knockback runs after the hit: Tidal Force's fling must be the
+     * whole of it (vanilla's, made first, would halve it). Iron golems shrug off vanilla knockback,
+     * so with no node they do not move; the fling moves them all the same.
+     */
     @GameTest(template = PLATFORM, batch = "tidalForceMultipliesMeleeKnockback")
     public static void tidalForceMultipliesMeleeKnockback(GameTestHelper h) {
         ServerPlayer p = dragon(h);
         var ds = h.getLevel().damageSources();
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 4);
-        DragonAbilityHandler.onTidalForceHurt(incoming(golem, ds.playerAttack(p), 4f));
+        golem.hurt(ds.playerAttack(p), 4f);
         near(h, 0.0, golem.getDeltaMovement().z, "no node, no extra knockback");
 
         grant(p, "dr_force_1");
-        DragonAbilityHandler.onTidalForceHurt(incoming(golem, ds.playerAttack(p), 4f));
-        near(h, 1.2, golem.getDeltaMovement().z, "tier 1: 0.4 x 3");
-        near(h, 0.4, golem.getDeltaMovement().y, "lifted");
+        IronGolem golem1 = mob(h, EntityType.IRON_GOLEM, 2, 4);
+        golem1.hurt(ds.playerAttack(p), 4f);
+        near(h, 1.2, golem1.getDeltaMovement().z, "tier 1: 0.4 x 3, the whole of it");
+        near(h, 0.4, golem1.getDeltaMovement().y, "lifted");
 
         IronGolem golem2 = mob(h, EntityType.IRON_GOLEM, 2, 0);
         grant(p, "dr_force_2");
-        DragonAbilityHandler.onTidalForceHurt(incoming(golem2, ds.playerAttack(p), 4f));
+        golem2.hurt(ds.playerAttack(p), 4f);
         near(h, -2.0, golem2.getDeltaMovement().z, "tier 2: 0.4 x 5, away from the player (north)");
 
         IronGolem golem3 = mob(h, EntityType.IRON_GOLEM, 4, 2);
         Arrow arrow = EntityType.ARROW.create(h.getLevel());
-        DragonAbilityHandler.onTidalForceHurt(incoming(golem3, ds.arrow(arrow, p), 4f));
+        golem3.hurt(ds.arrow(arrow, p), 4f);
         near(h, 0.0, golem3.getDeltaMovement().x, "arrows are not melee");
+
+        // nor is his thunder: Call Thunder's strike is magic, and flings nothing
+        IronGolem golem4 = mob(h, EntityType.IRON_GOLEM, 0, 2);
+        golem4.hurt(ds.indirectMagic(p, p), 4f);
+        near(h, 0.0, golem4.getDeltaMovement().x, "his thunder is not a melee blow");
+        h.succeed();
+    }
+
+    /** Tidal Force II: a mob flung into a wall takes a quarter of the blow again, once. */
+    @GameTest(template = PLATFORM, timeoutTicks = 60, batch = "tidalForceTwoSlamsMobsIntoWalls")
+    public static void tidalForceTwoSlamsMobsIntoWalls(GameTestHelper h) {
+        ServerPlayer p = dragon(h);
+        online(h, p);
+        grant(p, "dr_force_1", "dr_force_2");
+        var start = h.absoluteVec(new net.minecraft.world.phys.Vec3(2.5, 2, 0.5));
+        p.moveTo(start.x, start.y, start.z, 0f, 0f);
+        for (int x = 0; x < 5; x++) for (int y = 2; y <= 4; y++) {
+            h.setBlock(new net.minecraft.core.BlockPos(x, y, 4), net.minecraft.world.level.block.Blocks.STONE);
+        }
+        IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 2); // its face 0.8 short of the wall
+        List<Hit> hits = watch(golem);
+        golem.hurt(h.getLevel().damageSources().playerAttack(p), 4f);
+        h.onEachTick(() -> tick(p, DragonAbilityHandler::onPlayerTick, 1));
+        h.runAfterDelay(20, () -> {
+            List<Hit> blows = of(hits, DamageTypes.PLAYER_ATTACK);
+            eq(h, 2, blows.size(), "the blow and the wall's");
+            near(h, 1.0, blows.get(1).amount(), "a quarter of the 4");
+            h.succeed();
+        });
+    }
+
+    /** One flung free that merely slows (here, stopped dead in open air) is not slammed into anything. */
+    @GameTest(template = PLATFORM, timeoutTicks = 60, batch = "tidalForceTwoNeedsAWall")
+    public static void tidalForceTwoNeedsAWall(GameTestHelper h) {
+        ServerPlayer p = dragon(h);
+        online(h, p);
+        grant(p, "dr_force_1", "dr_force_2");
+        var start = h.absoluteVec(new net.minecraft.world.phys.Vec3(2.5, 2, 0.5));
+        p.moveTo(start.x, start.y, start.z, 0f, 0f);
+        IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 2);
+        List<Hit> hits = watch(golem);
+        golem.hurt(h.getLevel().damageSources().playerAttack(p), 4f);
+        golem.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO); // its flight spent at once, against nothing
+        h.onEachTick(() -> tick(p, DragonAbilityHandler::onPlayerTick, 1));
+        h.runAfterDelay(20, () -> {
+            eq(h, 1, of(hits, DamageTypes.PLAYER_ATTACK).size(), "only the blow");
+            h.succeed();
+        });
+    }
+
+    // ── Weather: Tempest and Rain Call ──────────────────────────────
+
+    /** Sets the weather at once (its levels too, not easing in), and puts it back when the test ends. */
+    private static void weather(GameTestHelper h, boolean rain, boolean thunder) {
+        ServerLevel level = h.getLevel();
+        ServerLevelData data = (ServerLevelData) level.getLevelData();
+        boolean wasRaining = data.isRaining(), wasThundering = data.isThundering();
+        CharTest.onEnd(h, () -> {
+            level.setWeatherParameters(0, 0, wasRaining, wasThundering);
+            level.setRainLevel(wasRaining ? 1f : 0f);
+            level.setThunderLevel(wasThundering ? 1f : 0f);
+        });
+        skies(level, rain, thunder);
+    }
+
+    private static void skies(ServerLevel level, boolean rain, boolean thunder) {
+        level.setWeatherParameters(rain ? 0 : 6000, rain ? 6000 : 0, rain, thunder);
+        level.setRainLevel(rain ? 1f : 0f);
+        level.setThunderLevel(thunder ? 1f : 0f);
+    }
+
+    /** Tempest: in a thunderstorm, Call Thunder deals half again as much; Rain Call alone adds nothing. */
+    @GameTest(template = PLATFORM, batch = "tempestThunderHitsHarderInAStorm")
+    public static void tempestThunderHitsHarderInAStorm(GameTestHelper h) {
+        weather(h, true, true);
+        check(h, h.getLevel().isThundering(), "a thunderstorm");
+        ServerPlayer rain = dragon(h);
+        grant(rain, "dr_lightning_1", "dr_weather_1");
+        attackThree(rain);
+        rain.setXRot(90f);
+        IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 3);
+        List<Hit> hits = watch(golem);
+        DragonAbilityHandler.castLightning(rain);
+        near(h, 5.5, of(hits, DamageTypes.INDIRECT_MAGIC).get(0).amount(), "Rain Call alone: no bonus");
+
+        ServerPlayer storm = dragon(h);
+        grant(storm, "dr_lightning_1", "dr_weather_1", "dr_weather_2");
+        attackThree(storm);
+        storm.setXRot(90f);
+        IronGolem golem2 = mob(h, EntityType.IRON_GOLEM, 2, 3);
+        List<Hit> hits2 = watch(golem2);
+        DragonAbilityHandler.castLightning(storm);
+        near(h, 5.5 * 1.5, firstHit(h, hits2, DamageTypes.INDIRECT_MAGIC, golem2).amount(), "Tempest in a storm: +50%");
+        near(h, 1.5, DragonAbilityHandler.tempestMultiplier(storm), "while it storms");
+        skies(h.getLevel(), false, false);
+        near(h, 1.0, DragonAbilityHandler.tempestMultiplier(storm), "clear skies: no bonus");
+        h.succeed();
+    }
+
+    /** Rain Call: while it rains, the Dragon's water domain holds even roofed over (the platform's barrier roof). */
+    @GameTest(template = PLATFORM, batch = "rainCallMakesTheDomainHoldIndoors")
+    public static void rainCallMakesTheDomainHoldIndoors(GameTestHelper h) {
+        weather(h, true, false);
+        ServerPlayer p = dragon(h);
+        check(h, !h.getLevel().isRainingAt(p.blockPosition().above()), "the rain does not reach him here");
+        var water = com.jttw.engine.progression.stats.DivineBeastLine.WATER;
+        check(h, !water.isInDomain(p), "without Rain Call, a roof keeps the rain off");
+        grant(p, "dr_weather_1");
+        check(h, water.isInDomain(p), "with Rain Call, rain anywhere is his domain");
+        skies(h.getLevel(), false, false);
+        check(h, !water.isInDomain(p), "and no rain, no domain");
+        h.succeed();
+    }
+
+    /** Call Thunder III's three bolts fan out across his facing: one where he looks, one 2 blocks to either side. */
+    @GameTest(template = PLATFORM, batch = "lightningTierThreeFansOut")
+    public static void lightningTierThreeFansOut(GameTestHelper h) {
+        ServerPlayer p = dragon(h);
+        p.setYRot(0f); // facing south: across is east and west
+        var at = new net.minecraft.world.phys.Vec3(10, 64, 10);
+        List<net.minecraft.world.phys.Vec3> one = DragonAbilityHandler.boltPositions(p, at, 2);
+        eq(h, 1, one.size(), "one bolt below tier 3");
+        List<net.minecraft.world.phys.Vec3> three = DragonAbilityHandler.boltPositions(p, at, 3);
+        eq(h, 3, three.size(), "three at tier 3");
+        near(h, 10.0, three.get(0).x, "the first where he looks");
+        near(h, 12.0, Math.max(three.get(1).x, three.get(2).x), "one 2 blocks east");
+        near(h, 8.0, Math.min(three.get(1).x, three.get(2).x), "one 2 blocks west");
+        near(h, 10.0, three.get(1).z, "across his facing, not along it");
         h.succeed();
     }
 

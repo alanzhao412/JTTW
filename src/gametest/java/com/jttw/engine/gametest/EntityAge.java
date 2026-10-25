@@ -33,7 +33,7 @@ public final class EntityAge {
     }
 
     /** True if the entity joined before {@code gameTime}. Unstamped entities count as old. */
-    static boolean joinedBefore(Entity e, long gameTime) {
+    public static boolean joinedBefore(Entity e, long gameTime) {
         return !e.getPersistentData().contains(JOINED_AT) || e.getPersistentData().getLong(JOINED_AT) < gameTime;
     }
 }
