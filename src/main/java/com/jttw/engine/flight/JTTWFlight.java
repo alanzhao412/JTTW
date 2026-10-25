@@ -146,8 +146,11 @@ public final class JTTWFlight {
         // cruising at I, then cruising (Divine Wind) and the fastest (Celestial Gale)
         boolean erlang = "eye_of_heaven".equals(tag.getString(com.jttw.engine.reincarnation.AlignmentData.KEY_REINCARNATION_OUTCOME))
                 && SkillTreeData.getEsFlightTier(player) >= 1;
-        double speed = erlang && tier <= 1 ? FlightSteering.ERLANG_SQUALL_SPEED : FlightSteering.speedFor(tier, wukong);
-        return new FlightProfile(speed, isGlideOnly(player) && !erlang, boost(player), tag.getBoolean(THRUST_TAG), own);
+        // so is Sun Wukong's Cloud Step: he rides a cloud from the first, slower than the Nimbus
+        boolean cloudStep = wukong && SkillTreeData.getFlightTier(player) >= 1;
+        boolean fliesFromFirst = erlang || cloudStep;
+        double speed = fliesFromFirst && tier <= 1 ? FlightSteering.FIRST_FLIGHT_SPEED : FlightSteering.speedFor(tier, wukong);
+        return new FlightProfile(speed, isGlideOnly(player) && !fliesFromFirst, boost(player), tag.getBoolean(THRUST_TAG), own);
     }
 
     /** How this player flies now: on a Heavenly's cloud (only when it is the faster), or on their own. */

@@ -354,7 +354,7 @@ public class ErlangShenGameTests {
         var flight = com.jttw.engine.flight.JTTWFlight.profile(p);
         check(h, com.jttw.engine.flight.JTTWFlight.hasUniversalFlight(p), "he flies");
         check(h, !flight.glide(), "not a glide: he can climb");
-        near(h, com.jttw.engine.flight.FlightSteering.ERLANG_SQUALL_SPEED, flight.speed(), "Wind and Fog's speed");
+        near(h, com.jttw.engine.flight.FlightSteering.FIRST_FLIGHT_SPEED, flight.speed(), "Wind and Fog's speed");
         check(h, com.jttw.engine.progression.skilltree.SkillPurchase.purchase(p, "es_flight_2"), "buy Divine Wind");
         near(h, com.jttw.engine.flight.FlightSteering.CRUISE_SPEED, com.jttw.engine.flight.JTTWFlight.profile(p).speed(), "Divine Wind: faster");
         check(h, com.jttw.engine.progression.skilltree.SkillPurchase.purchase(p, "es_flight_3"), "buy Celestial Gale");

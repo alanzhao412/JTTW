@@ -109,16 +109,26 @@ public class QiAndFlightGameTests {
     // ── Flight from skill nodes ───────────────────────────────────
 
     @GameTest(template = PLATFORM)
-    public static void firstFlightNodeGivesGlideThenSecondGivesFullFlight(GameTestHelper h) {
-        ServerPlayer p = player(h);
-        LevelManager.initClass(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
+    public static void wukongsCloudStepIsTrueFlightAndNimbusIsFaster(GameTestHelper h) {
+        ServerPlayer p = com.jttw.engine.gametest.character.CharTest.as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
         SkillTreeData.setPoints(p, 50);
         check(h, !JTTWFlight.hasUniversalFlight(p), "no flight before the node");
         check(h, SkillPurchase.purchase(p, "wu_flight_1"), "buy Cloud Step");
         check(h, JTTWFlight.hasUniversalFlight(p), "flight granted");
-        check(h, JTTWFlight.isGlideOnly(p), "tier 1 is glide only");
+        check(h, !JTTWFlight.profile(p).glide(), "Cloud Step flies, as its tooltip says: Space to ascend");
+        double cloudStep = JTTWFlight.profile(p).speed();
         check(h, SkillPurchase.purchase(p, "wu_flight_2"), "buy Nimbus");
-        check(h, !JTTWFlight.isGlideOnly(p), "tier 2 is full flight");
+        check(h, !JTTWFlight.profile(p).glide(), "the Nimbus flies");
+        check(h, JTTWFlight.profile(p).speed() > cloudStep, "the Nimbus is faster: " + cloudStep + " -> " + JTTWFlight.profile(p).speed());
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void theDragonsFirstFlightStillOnlyGlides(GameTestHelper h) {
+        ServerPlayer p = com.jttw.engine.gametest.character.CharTest.as(h, ReincarnationOutcome.DRAGON);
+        SkillTreeData.setPoints(p, 50);
+        check(h, SkillPurchase.purchase(p, "dr_flight_1"), "buy Elytra Glide");
+        check(h, JTTWFlight.profile(p).glide(), "Elytra Glide glides, as its tooltip says");
         h.succeed();
     }
 

@@ -159,7 +159,7 @@ public class XiaotianQuanEntity extends PathfinderMob {
                 qi, maxQi, will,
                 growthTier,
                 XiaotianQuanManager.biteSlowness(sp) != null,
-                growthTier >= 1,     // howl unlocked at tier 1+
+                true,                // the hound howls from the first (only Xiaotian Quan III hastens it)
                 XiaotianQuanManager.trackCount(SkillTreeData.getXtqTier(sp), growthTier) > 0
         ));
         return InteractionResult.SUCCESS;

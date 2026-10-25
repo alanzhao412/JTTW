@@ -36,8 +36,8 @@ public final class FlightSteering {
     public static final double HEAVENLY_CLOUD_SPEED = TOP_SPEED / 3;
     /** Ticks a flier holding top speed takes to build all the way to {@link #TOP_SPEED}: 10 seconds. */
     public static final int BUILD_UP_TICKS = 200;
-    /** Erlang Shen's first flight (Wind and Fog): true flight, a little under cruising. */
-    public static final double ERLANG_SQUALL_SPEED = 1.20;
+    /** The first flight tier of those who fly from it (Erlang Shen's Wind and Fog, Wukong's Cloud Step): true flight, a little under cruising. */
+    public static final double FIRST_FLIGHT_SPEED = 1.20;
     /** A flying form's own wings, without a flight tier. */
     public static final double FORM_SPEED = 1.10;
     public static final double GLIDE_SPEED = 1.20;

@@ -238,7 +238,8 @@ is what makes the rest possible:
   glide rather than an abrupt stop.
 - **Speed tiers.** Glide-only (sinks, cannot gain altitude), full flight, and a top tier that also
   permits dimension travel — with per-character speed variation layered on top (Erlang Shen's Wind
-  and Fog is true flight from its first tier, a little under cruising speed, never a glide).
+  and Fog and Sun Wukong's Cloud Step are true flight from their first tier, a little under
+  cruising speed, never a glide; the Dragon's Elytra Glide stays a glide).
 - **Independent velocity clamps** on the vertical and horizontal axes, plus a separate strafe scale,
   so lateral drift doesn't match forward thrust.
 - **A parallel swim system** with its own stored vector, distinct cruise and sprint speeds, and a
