@@ -1,5 +1,6 @@
 package com.jttw.engine.gametest.world;
 
+import com.jttw.engine.registry.ModEffects;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.dimension.JTTWDimensions;
 import com.jttw.engine.entity.MobScaling;
@@ -328,8 +329,8 @@ public class HellGameTests {
         var bell = king(h, ModEntities.KING_BIANCHENG.get(), new BlockPos(1, 2, 1));
         IronGolem b = dummy(h, new BlockPos(4, 2, 1));
         eq(h, 1, bell.toll(List.of(b)), "it kneels");
-        MobEffectInstance slow = b.getEffect(MobEffects.MOVEMENT_SLOWDOWN);
-        check(h, slow != null && slow.getAmplifier() >= 6, "cannot move");
+        MobEffectInstance kneel = b.getEffect(ModEffects.PINNED);
+        eq(h, HellKings.Biancheng.KNEEL, kneel == null ? -1 : kneel.getDuration(), "cannot move: pinned");
         h.succeed();
     }
 

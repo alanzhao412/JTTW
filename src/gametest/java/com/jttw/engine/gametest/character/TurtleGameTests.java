@@ -1,5 +1,6 @@
 package com.jttw.engine.gametest.character;
 
+import com.jttw.engine.registry.ModEffects;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.character.AbilityAction;
 import com.jttw.engine.character.Characters;
@@ -208,7 +209,7 @@ public class TurtleGameTests {
         // tier 1: (6 + resistance 25 x 0.04 = 7) x power, falloff 1 - 2/8
         near(h, 7.0 * LevelPower.of(20) * 0.75, blows.get(0).amount(), "impact damage");
         check(h, golem.getDeltaMovement().z > 0, "knocked away");
-        eq(h, -1, amp(golem, MobEffects.MOVEMENT_SLOWDOWN), "no stun below tier 3");
+        eq(h, -1, amp(golem, ModEffects.STUNNED), "no stun below tier 3");
         h.succeed();
     }
 
@@ -227,7 +228,8 @@ public class TurtleGameTests {
         ticks(p, 1);
         // tier 3: 15 + resistance 25 x 0.08 = 17, falloff 1 - 2/8
         near(h, 12.75, of(hits, DamageTypes.PLAYER_ATTACK).get(0).amount(), "landing impact");
-        eq(h, 4, amp(golem, MobEffects.MOVEMENT_SLOWDOWN), "tier 3 stun: Slowness V");
+        eq(h, 0, amp(golem, ModEffects.STUNNED), "tier 3 stun");
+        eq(h, 40, duration(golem, ModEffects.STUNNED), "for 2 s");
         check(h, golem.hasEffect(MobEffects.BLINDNESS), "tier 3 stun: blind");
         h.succeed();
     }

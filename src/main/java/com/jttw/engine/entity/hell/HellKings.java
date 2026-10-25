@@ -255,7 +255,7 @@ public final class HellKings {
             int n = 0;
             for (LivingEntity e : near) {
                 if (e.distanceTo(this) > REACH) continue;
-                e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, KNEEL, 6), this);
+                com.jttw.engine.world.Stun.pin(e, KNEEL, this);
                 e.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, KNEEL, 1), this);
                 e.setDeltaMovement(Vec3.ZERO);
                 e.hurtMarked = true;

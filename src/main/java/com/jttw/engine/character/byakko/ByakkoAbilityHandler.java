@@ -323,9 +323,9 @@ public final class ByakkoAbilityHandler {
             target.setDeltaMovement(target.getDeltaMovement().add(knockback.x, 0.3, knockback.z));
             if (target instanceof ServerPlayer sp) sp.hurtMarked = true;
 
-            // Tier 3: stun (slowness IV + blindness for 1 second)
+            // Tier 3: stunned (cannot move nor strike) and blinded for 1 second
             if (tier >= 3) {
-                target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 3));
+                com.jttw.engine.world.Stun.stun(target, 20, player);
                 target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 20, 0));
             }
         }
@@ -651,8 +651,8 @@ public final class ByakkoAbilityHandler {
         affected.removeIf(e -> e.distanceTo(player) > roarReach);
 
         for (LivingEntity mob : affected) {
-            // Apply extreme Slowness (level 5 = Slowness VI) for 3 seconds
-            mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 5, false, true));
+            // Pinned (cannot move, may still strike what is in reach) for 3 seconds
+            com.jttw.engine.world.Stun.pin(mob, 60, player);
 
             // Force them to stop targeting
             if (mob instanceof net.minecraft.world.entity.Mob mobEntity) {

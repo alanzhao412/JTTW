@@ -117,7 +117,7 @@ public final class TurtleSkillTree {
         ));
         TREE.add(new SkillNode(
                 FORCE_3, "Unstoppable Force III",
-                new String[]{ "Max knockback (50 blocks).", "Enemies are stunned on hit.", "Immovable meets unstoppable." },
+                new String[]{ "Max knockback (50 blocks).", "Those hit: stunned 2 s.", "Immovable meets unstoppable." },
                 4, 3, 2, List.of(FORCE_2), AbilityType.TOGGLE, 3, "Unstoppable Force"
         ));
 

@@ -39,6 +39,14 @@ public final class ModEffects {
     public static final DeferredHolder<MobEffect, MobEffect> SAMADHI_FIRE = EFFECTS.register("samadhi_fire",
             com.jttw.engine.world.fire.SamadhiFire.Burning::new);
 
+    /** Stunned (see {@link com.jttw.engine.world.Stun}): cannot move, jump or strike. */
+    public static final DeferredHolder<MobEffect, MobEffect> STUNNED = EFFECTS.register("stunned",
+            () -> new com.jttw.engine.world.Stun.Held("stunned", 0xE8D44A, true));
+
+    /** Pinned (see {@link com.jttw.engine.world.Stun}): cannot move or jump, but may still strike what is in reach. */
+    public static final DeferredHolder<MobEffect, MobEffect> PINNED = EFFECTS.register("pinned",
+            () -> new com.jttw.engine.world.Stun.Held("pinned", 0x7A8CA8, false));
+
     public static void register(IEventBus modEventBus) {
         EFFECTS.register(modEventBus);
     }

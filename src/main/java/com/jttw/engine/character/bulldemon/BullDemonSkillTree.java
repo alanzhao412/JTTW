@@ -43,10 +43,10 @@ public final class BullDemonSkillTree {
                 new String[]{ "Hold V: charge where you", "look, goring all in the way.", "Ram a wall: stun those near, 2 s." },
                 2, 0, 0, List.of(), AbilityType.HELD, 1, "Bull Rush"));
         TREE.add(new SkillNode(RUSH_2, "Bull Rush II",
-                new String[]{ "Faster, longer, harder;", "stuns last 3 s.", "" },
+                new String[]{ "Faster, longer, harder;", "stuns last 3 s. Stunned:", "they can't move or strike." },
                 3, 0, 1, List.of(RUSH_1), AbilityType.HELD, 2, "Bull Rush"));
         TREE.add(new SkillNode(RUSH_3, "Bull Rush III",
-                new String[]{ "Faster, longer, harder", "still; stuns last 4 s.", "" },
+                new String[]{ "Faster, longer, harder", "still; stuns last 4 s.", "They can't move or strike." },
                 4, 0, 2, List.of(RUSH_2), AbilityType.HELD, 3, "Bull Rush"));
 
         // ── 72 TRANSFORMATIONS (col 1) ──────────────────────────────────

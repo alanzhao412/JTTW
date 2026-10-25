@@ -1,5 +1,6 @@
 package com.jttw.engine.gametest.character;
 
+import com.jttw.engine.registry.ModEffects;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.character.AbilityAction;
 import com.jttw.engine.character.Characters;
@@ -426,7 +427,8 @@ public class YuanDiGameTests {
         YuanDiAbilityHandler.usePrimordialSmite(p3);
         // 16 damage, falloff 1 - 2/12
         near(h, 16.0 * (1 - 2.0 / 12.0), of(hits3, DamageTypes.MOB_ATTACK).get(0).amount(), "tier 3 damage at 2 blocks");
-        eq(h, 4, amp(golem3, MobEffects.MOVEMENT_SLOWDOWN), "stunned: Slowness V");
+        eq(h, 0, amp(golem3, ModEffects.STUNNED), "stunned");
+        eq(h, 40, duration(golem3, ModEffects.STUNNED), "for 2 s");
         check(h, golem3.hasEffect(MobEffects.BLINDNESS), "stunned: blind");
         eq(h, 3, amp(golem3, MobEffects.DIG_SLOWDOWN), "stunned: Mining Fatigue IV");
         h.succeed();

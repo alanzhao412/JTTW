@@ -26,7 +26,6 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
@@ -209,10 +208,8 @@ public final class BullDemonAbilityHandler {
         int ticks = stunTicks(tier);
         int count = 0;
         for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(2.5, 1.5, 2.5), e -> isFoe(e, p))) {
-            e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, ticks, 9));
-            e.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, ticks, 9));
+            com.jttw.engine.world.Stun.stun(e, ticks, p);
             e.addEffect(new MobEffectInstance(MobEffects.CONFUSION, ticks + 40, 0));
-            if (e instanceof Mob m) m.setTarget(null);
             e.hurt(p.damageSources().playerAttack(p), 0.5f * atk(p));
             count++;
         }

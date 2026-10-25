@@ -121,6 +121,18 @@ is a new node plus its slot in that character's class.
 Levelling runs on a Qi resource system (`QiManager`), with `BiomeLevelBand` and `EnemyTier` scaling
 the world to player level.
 
+**Stunned and Pinned.** When a skill says its mark is stunned, pinned, frozen in place, held or
+"can't move", it is a full stop, never a heavy Slowness: one shared helper,
+[`Stun`](src/main/java/com/jttw/engine/world/Stun.java), and two effects with icons of their own.
+*Pinned* takes all speed afoot, afloat and awing and every jump, and a creature drops its path each
+tick, but it may still strike what is within reach. *Stunned* is pinned and cannot strike either: a
+creature lets go of its target and takes up no other, and no blow, arrow or ability of its own
+lands. Both hold players too, and neither stops a push: what is thrown back stands where it lands.
+Bosses shake either off in half the time. Stunned: Bull Rush's wall, Predator's Leap III,
+Unstoppable Force III, Primordial Smite III, the Bell of Taiyi. Pinned: Territorial Roar, Tidal
+Wave III's bubble, the Frost Head's shard (and, against players, Biancheng's bell and the Daoist
+disciples' binding talismans).
+
 ### The 18, 36 and 72 Transformations
 
 Three transformation arts, each with its own menu and its own forms per level. A character practises
@@ -612,7 +624,7 @@ XP 125, stepped up from the Mystical Waters' 110 (575 a grunt kill at the band's
   3. **Songdi** (宋帝王), the **iron hooks**: hauls his foe from up to 14 blocks to his feet and strikes;
   4. **Wuguan** (五官王), the **scales**: takes half the difference of their health shares from a
      healthier foe;
-  6. **Biancheng** (卞城王), the **bell** of the Wailing City: all within 7 **kneel** (cannot move) 2 s;
+  6. **Biancheng** (卞城王), the **bell** of the Wailing City: all within 7 **kneel** (pinned: cannot move) 2 s;
   7. **Taishan** (泰山王), **boiling oil**: all within 7 scalded and burning (he does not burn);
   8. **Dushi** (都市王), the **crushing carts**: charges, crushing (×1.6) and flinging what he meets;
   9. **Pingdeng** (平等王), "Equal": **equal measure**, a third of every blow struck him struck back;
@@ -806,7 +818,7 @@ left to its host.
     enemy for good** (`Wuzhuang.isTempleEnemy`, kept by the soul through death, relogs and new lives):
     every disciple, Clear Wind and Bright Moon fight them on sight.
 - **Daoist disciples** (`DaoistDiscipleEntity`, level 78): 6 hits, a sword stroke of 13%; at 3–10
-  blocks a **binding talisman** (定身符: held fast 1.5 s, weakened). Righteous: they fight no one
+  blocks a **binding talisman** (定身符: pinned 1.5 s, weakened). Righteous: they fight no one
   unprovoked, except a thief of the fruit and whoever has eaten one; strike one and those near come.
   **Finite**: each temple's household is the **24** put there as the land is made (22 disciples
   about the hall, court, wings, gate and garden, and the two youths; the novel's forty-eight, half

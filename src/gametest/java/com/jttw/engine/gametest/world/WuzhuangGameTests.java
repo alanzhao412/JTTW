@@ -1,5 +1,6 @@
 package com.jttw.engine.gametest.world;
 
+import com.jttw.engine.registry.ModEffects;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.entity.MobScaling;
 import com.jttw.engine.entity.wuzhuang.CloudCraneEntity;
@@ -527,8 +528,7 @@ public class WuzhuangGameTests {
         check(h, !Wuzhuang.isThief(p), "no thief, no quarrel");
         IronGolem golem = dummy(h, new BlockPos(4, 2, 4));
         check(h, d.bind(golem), "the talisman flies");
-        check(h, golem.getEffect(MobEffects.MOVEMENT_SLOWDOWN) != null && golem.getEffect(MobEffects.MOVEMENT_SLOWDOWN).getAmplifier() >= 6
-                && golem.hasEffect(MobEffects.WEAKNESS), "bound fast, and weakened");
+        check(h, golem.hasEffect(ModEffects.PINNED) && golem.hasEffect(MobEffects.WEAKNESS), "bound fast (pinned), and weakened");
         check(h, d.getMainHandItem().is(Items.IRON_SWORD) || d.getMainHandItem().isEmpty(), "a sword at hand");
         h.succeed();
     }

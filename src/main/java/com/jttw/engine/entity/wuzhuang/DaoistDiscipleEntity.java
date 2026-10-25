@@ -128,7 +128,7 @@ public class DaoistDiscipleEntity extends WuzhuangMonster implements TempleFolk 
     /** Throws a binding talisman at {@code target}: it cannot move for a moment, and is weakened. Returns whether it struck. */
     public boolean bind(LivingEntity target) {
         if (!target.isAlive()) return false;
-        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, BOUND, 6), this);
+        com.jttw.engine.world.Stun.pin(target, BOUND, this);
         target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, BOUND * 3, 0), this);
         swing(InteractionHand.OFF_HAND);
         if (level() instanceof ServerLevel server) {

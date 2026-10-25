@@ -11,10 +11,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -30,7 +27,7 @@ import java.util.List;
  * Nine Spirits obeyed only when his master called him by name.
  *
  * <ul>
- *   <li>Anyone: ringing it freezes the creatures within {@value #RANGE} blocks for 2 seconds.</li>
+ *   <li>Anyone: ringing it stuns ({@link com.jttw.engine.world.Stun}) the creatures within {@value #RANGE} blocks for 2 seconds.</li>
  *   <li>The Grand Saint: within {@value #SAINT_RANGE} blocks, for 3 seconds, and the rung take
  *       extra damage from his elemental heads while it lasts.</li>
  * </ul>
@@ -68,10 +65,7 @@ public class BellOfTaiyiItem extends Item {
         for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(range),
                 e -> e != player && e.isAlive() && !e.isAlliedTo(player) && e.distanceTo(player) <= range)) {
             // Held still: cannot move, jump or strike
-            e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, ticks, 9, false, true), player);
-            e.addEffect(new MobEffectInstance(MobEffects.JUMP, ticks, 250, false, false), player);
-            e.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, ticks, 9, false, true), player);
-            if (e instanceof Mob mob) mob.setTarget(null);
+            com.jttw.engine.world.Stun.stun(e, ticks, player);
             if (saint) e.getPersistentData().putLong(NineSpiritsAbilityHandler.KEY_BELL_MARK, until);
             level.sendParticles(ParticleTypes.NOTE, e.getX(), e.getEyeY() + 0.5, e.getZ(), 1, 0, 0, 0, 0);
             rung++;
@@ -83,7 +77,7 @@ public class BellOfTaiyiItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.literal("Taiyi Tianzun's bell").withStyle(ChatFormatting.GOLD));
-        tooltip.add(Component.literal("Right-click: everything within 6 blocks freezes for 2 s").withStyle(ChatFormatting.GRAY));
+        tooltip.add(Component.literal("Right-click: all within 6 blocks are stunned 2 s (can't move or strike)").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.literal("Grand Saint of Nine Spirits: 16 blocks, 3 s,").withStyle(ChatFormatting.YELLOW));
         tooltip.add(Component.literal("and his heads hit the rung harder").withStyle(ChatFormatting.YELLOW));
     }

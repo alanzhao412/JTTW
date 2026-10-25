@@ -299,7 +299,7 @@ public final class DragonAbilityHandler {
      * <ul>
      *   <li>T1: 30-degree cone, push mobs 10 blocks, Slowness II 3s, 15s CD, 10 Qi</li>
      *   <li>T2: 45-degree cone, extinguish fire on targets</li>
-     *   <li>T3: trapped in water bubble — Slowness V 3s + drowning damage (1/sec for 3s)</li>
+     *   <li>T3: trapped in water bubble — pinned 3s + drowning damage (1/sec for 3s)</li>
      * </ul>
      */
     public static void castTidalWave(ServerPlayer player) {
@@ -360,10 +360,9 @@ public final class DragonAbilityHandler {
                 target.clearFire();
             }
 
-            // T3: water bubble — Slowness V (can't move) for 3s + drowning damage
+            // T3: water bubble — pinned (can't move) for 3s + drowning damage
             if (tier >= 3 && target instanceof LivingEntity living) {
-                // Slowness V (amplifier 4) = essentially immobile
-                living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 4));
+                com.jttw.engine.world.Stun.pin(living, 60, player);
                 // Track for drowning damage (1 damage/sec for 3 seconds)
                 BUBBLE_TARGETS.put(target.getId(), new BubbleEntry(
                         target.getId(), player.getUUID(), 60 // 3 seconds = 60 ticks

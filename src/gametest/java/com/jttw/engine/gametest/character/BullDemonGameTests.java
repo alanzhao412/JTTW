@@ -1,5 +1,6 @@
 package com.jttw.engine.gametest.character;
 
+import com.jttw.engine.registry.ModEffects;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.character.AbilityAction;
 import com.jttw.engine.character.AbilitySlot;
@@ -106,7 +107,7 @@ public class BullDemonGameTests {
         BullDemonAbilityHandler.startRush(p);
         BullDemonAbilityHandler.tickRush(p);
         check(h, !BullDemonAbilityHandler.isRushing(p), "the wall ends the charge");
-        eq(h, 9, amp(pinned, MobEffects.MOVEMENT_SLOWDOWN), "stunned");
+        eq(h, 0, amp(pinned, ModEffects.STUNNED), "stunned");
         check(h, pinned.hasEffect(MobEffects.CONFUSION), "and reeling");
         check(h, h.getBlockState(new BlockPos(2, 2, 3)).is(Blocks.STONE), "the wall stands");
         BullDemonAbilityHandler.startRush(p);
@@ -119,13 +120,13 @@ public class BullDemonGameTests {
         ServerPlayer p = bull(h, "bdk_rush_1");
         Zombie first = mob(h, EntityType.ZOMBIE, 2, 3);
         BullDemonAbilityHandler.wallImpact(p, new Vec3(0, 0, 1), 1);
-        eq(h, 40, duration(first, MobEffects.MOVEMENT_SLOWDOWN), "I: stunned 2 s");
+        eq(h, 40, duration(first, ModEffects.STUNNED), "I: stunned 2 s");
         first.removeAllEffects();
         BullDemonAbilityHandler.wallImpact(p, new Vec3(0, 0, 1), 2);
-        eq(h, 60, duration(first, MobEffects.MOVEMENT_SLOWDOWN), "II: 3 s");
+        eq(h, 60, duration(first, ModEffects.STUNNED), "II: 3 s");
         first.removeAllEffects();
         BullDemonAbilityHandler.wallImpact(p, new Vec3(0, 0, 1), 3);
-        eq(h, 80, duration(first, MobEffects.MOVEMENT_SLOWDOWN), "III: 4 s");
+        eq(h, 80, duration(first, ModEffects.STUNNED), "III: 4 s");
         h.succeed();
     }
 
