@@ -196,18 +196,28 @@ public final class WukongAbilityHandler {
                     com.jttw.engine.dimension.JTTWDimensions.HEAVEN  // the peaches, the pills, the wine
             };
 
+    /** Realm leap: 20 Qi a somersault. */
+    public static final float REALM_LEAP_QI = 20f;
+
+    /**
+     * The realm one somersault carries him to from {@code current}: Overworld, Nether, End, Hell,
+     * Heaven and round again. From anywhere off that wheel, home to the Overworld.
+     */
+    public static ResourceKey<Level> nextRealm(ResourceKey<Level> current) {
+        for (int i = 0; i < DIMENSION_CYCLE.length; i++) {
+            if (DIMENSION_CYCLE[i].equals(current)) return DIMENSION_CYCLE[(i + 1) % DIMENSION_CYCLE.length];
+        }
+        return Level.OVERWORLD;
+    }
+
+    /**
+     * Shift + V with Somersault Cloud (Cloud Step III): one somersault to the next realm
+     * ({@link #nextRealm}), for {@link #REALM_LEAP_QI} Qi, landing on the ground above where he was.
+     */
     public static void cycleDimension(ServerPlayer player) {
         if (SkillTreeData.getFlightTier(player) < 3) return;
 
-        ResourceKey<Level> current = player.level().dimension();
-        ResourceKey<Level> next = Level.OVERWORLD;
-
-        for (int i = 0; i < DIMENSION_CYCLE.length; i++) {
-            if (DIMENSION_CYCLE[i].equals(current)) {
-                next = DIMENSION_CYCLE[(i + 1) % DIMENSION_CYCLE.length];
-                break;
-            }
-        }
+        ResourceKey<Level> next = nextRealm(player.level().dimension());
 
         MinecraftServer server = player.getServer();
         if (server == null) return;
@@ -215,11 +225,12 @@ public final class WukongAbilityHandler {
         ServerLevel targetLevel = server.getLevel(next);
         if (targetLevel == null) return;
 
-        if (!QiData.spend(player, 20f)) {
+        if (!QiData.spend(player, REALM_LEAP_QI)) {
             player.sendSystemMessage(
                     net.minecraft.network.chat.Component.literal("§cNot enough Qi to travel dimensions."));
             return;
         }
+        QiManager.syncNow(player);
 
         BlockPos targetPos = targetLevel.getHeightmapPos(
                 net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,

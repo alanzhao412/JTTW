@@ -230,6 +230,40 @@ public class PengGameTests {
         h.succeed();
     }
 
+    /** Eclipse Wings II: in the dark the darkened cannot hunt past 4 blocks, until the dark lifts. */
+    @GameTest(template = PLATFORM, batch = "eclipsedCannotHuntBeyondFourBlocksUntilTheDarkLifts")
+    public static void eclipsedCannotHuntBeyondFourBlocksUntilTheDarkLifts(GameTestHelper h) {
+        ServerPlayer one = peng(h, "gp_eclipse_1");
+        Zombie lightly = mob(h, EntityType.ZOMBIE, 2, 6);
+        PengAbilityHandler.eclipse(one);
+        check(h, !PengAbilityHandler.isEclipsed(lightly), "Eclipse Wings I: weakened and slowed, not blinded");
+        lightly.setTarget(one);
+        check(h, lightly.getTarget() == one, "I: it still hunts");
+        lightly.discard();
+
+        ServerPlayer p = peng(h, "gp_eclipse_1", "gp_eclipse_2");
+        Zombie z = mob(h, EntityType.ZOMBIE, 2, 8);  // 6 blocks from the Peng
+        Pig pig = mob(h, EntityType.PIG, 2, 10);     // 2 blocks from the zombie
+        PengAbilityHandler.eclipse(p);
+        check(h, PengAbilityHandler.isEclipsed(z), "II: darkened");
+        eq(h, 160L, z.getPersistentData().getLong(PengAbilityHandler.KEY_ECLIPSED_UNTIL) - h.getLevel().getGameTime(),
+                "for 8 s");
+        z.setTarget(p);
+        eq(h, null, z.getTarget(), "the Peng, 6 blocks off, is out of its sight");
+        z.setTarget(pig);
+        check(h, z.getTarget() == pig, "what is 2 blocks off it may still hunt");
+        pig.setPos(pig.getX(), pig.getY(), pig.getZ() + 6);
+        PengAbilityHandler.onLivingTick(new EntityTickEvent.Pre(z));
+        eq(h, null, z.getTarget(), "and loses it once it slips out of sight");
+
+        z.getPersistentData().putLong(PengAbilityHandler.KEY_ECLIPSED_UNTIL, h.getLevel().getGameTime()); // the dark lifts
+        PengAbilityHandler.onLivingTick(new EntityTickEvent.Pre(z));
+        check(h, !z.getPersistentData().contains(PengAbilityHandler.KEY_ECLIPSED_UNTIL), "the mark is gone");
+        z.setTarget(p);
+        check(h, z.getTarget() == p, "it sees again");
+        h.succeed();
+    }
+
     // ── Yin-Yang Two-Qi Vase ───────────────────────────────────────
 
     @GameTest(template = PLATFORM)

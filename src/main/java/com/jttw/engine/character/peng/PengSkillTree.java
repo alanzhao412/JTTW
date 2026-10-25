@@ -54,10 +54,10 @@ public final class PengSkillTree {
                 new String[]{ "In flight, all you touch", "is struck. The faster you", "fly, the harder it hits." },
                 2, 1, 0, List.of(), AbilityType.PASSIVE, 1, "Wingstrike"));
         TREE.add(new SkillNode(STRIKE_2, "Wingstrike II",
-                new String[]{ "Strikes harder.", "", "" },
+                new String[]{ "Strikes 40% harder.", "", "" },
                 3, 1, 1, List.of(STRIKE_1), AbilityType.PASSIVE, 2, "Wingstrike"));
         TREE.add(new SkillNode(STRIKE_3, "Wingstrike III",
-                new String[]{ "Strikes harder still,", "and wider.", "" },
+                new String[]{ "Strikes 80% harder than I,", "and reaches 2 blocks either", "side of your path, not 1.2." },
                 4, 1, 2, List.of(STRIKE_2), AbilityType.PASSIVE, 3, "Wingstrike"));
 
         // ── FEATHER STORM (col 2) ───────────────────────────────────────
@@ -65,18 +65,18 @@ public final class PengSkillTree {
                 new String[]{ "Press B: a fan of 5 golden", "feathers, on the ground", "or in the air." },
                 2, 2, 0, List.of(), AbilityType.TOGGLE, 1, "Feather Storm"));
         TREE.add(new SkillNode(FEATHERS_2, "Feather Storm II",
-                new String[]{ "7 feathers, harder.", "", "" },
+                new String[]{ "7 feathers, 25% harder.", "", "" },
                 3, 2, 1, List.of(FEATHERS_1), AbilityType.TOGGLE, 2, "Feather Storm"));
         TREE.add(new SkillNode(FEATHERS_3, "Feather Storm III",
-                new String[]{ "9 feathers that pierce", "through all in their way.", "" },
+                new String[]{ "9 feathers, 50% harder than", "I, that pierce through all", "in their way." },
                 4, 2, 2, List.of(FEATHERS_2), AbilityType.TOGGLE, 3, "Feather Storm"));
 
         // ── ECLIPSE WINGS (col 3) ───────────────────────────────────────
         TREE.add(new SkillNode(ECLIPSE_1, "Eclipse Wings I",
-                new String[]{ "Press N: your wings blot", "out the sun. All within 10", "blocks are weakened, slowed." },
+                new String[]{ "Press N: blot out the sun.", "All within 10 blocks get 5s", "of Weakness II, Slowness II." },
                 3, 3, 0, List.of(), AbilityType.TOGGLE, 1, "Eclipse"));
         TREE.add(new SkillNode(ECLIPSE_2, "Eclipse Wings II",
-                new String[]{ "16 blocks, longer; the", "darkened lose their prey", "and glow for you." },
+                new String[]{ "16 blocks, 8s. The darkened", "lose their prey, cannot hunt", "past 4 blocks, glow for you." },
                 4, 3, 1, List.of(ECLIPSE_1), AbilityType.TOGGLE, 2, "Eclipse"));
     }
 }

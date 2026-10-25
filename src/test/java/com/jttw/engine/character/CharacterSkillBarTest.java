@@ -98,6 +98,16 @@ class CharacterSkillBarTest {
     }
 
     @Test
+    void wukongLeapsRealmsOnShiftVOnceHeHasSomersaultCloud() {
+        PlayableCharacter wu = Characters.byOutcome("celestial_primate");
+        assertTrue(wu.shiftBar(Set.of("wu_flight_1", "wu_flight_2")).stream().allMatch(AbilitySlot::isEmpty),
+                "Nimbus Cloud: no Shift page");
+        List<AbilitySlot> page = wu.shiftBar(Set.of("wu_flight_1", "wu_flight_2", "wu_flight_3"));
+        assertEquals("wu_realm", page.get(0).id(), "Somersault Cloud: Shift + V leaps to the next realm");
+        assertEquals(3, page.get(0).tier());
+    }
+
+    @Test
     void yuanDiTransformOnlyTakesAKeyFromTierTwo() {
         PlayableCharacter yd = Characters.byOutcome("yuan_di");
         assertTrue(yd.skillBar(Set.of("yd_transform_1")).get(3).isEmpty());

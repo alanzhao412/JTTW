@@ -93,14 +93,14 @@ public final class WukongSkillTree {
         ));
         TREE.add(new SkillNode(
                 FLIGHT_2, "Nimbus Cloud",
-                new String[]{ "Flight speed greatly", "increased. Somersault",
-                              "cloud momentum physics." },
+                new String[]{ "Flight speed greatly", "increased: the Nimbus",
+                              "outflies any cruising flier." },
                 3, 6, 1, List.of(FLIGHT_1), AbilityType.PASSIVE, 2, "Flight"
         ));
         TREE.add(new SkillNode(
                 FLIGHT_3, "Somersault Cloud",
                 new String[]{ "Faster; held at full speed,", "builds over 10s to the fastest",
-                              "flight. B: travel realms." },
+                              "flight. Shift+V: next realm." },
                 4, 6, 2, List.of(FLIGHT_2), AbilityType.PASSIVE, 3, "Flight"
         ));
 
@@ -113,8 +113,8 @@ public final class WukongSkillTree {
         ));
         TREE.add(new SkillNode(
                 RING_2, "Ring of Fire II",
-                new String[]{ "While ring is active, your", "Qi regenerates faster",
-                              "inside the ring." },
+                new String[]{ "While the ring burns, it", "feeds you 3 Qi a second,",
+                              "more than its 2 Qi upkeep." },
                 3, 2, 1, List.of(RING_1), AbilityType.HELD, 2, "Ring of Fire"
         ));
         TREE.add(new SkillNode(
@@ -127,12 +127,12 @@ public final class WukongSkillTree {
         // ── VITALITY PASSIVES (col 3) ─────────────────────────────────────
         TREE.add(new SkillNode(
                 VITALITY_1, "Iron Body I",
-                new String[]{ "+20 max HP.", "" },
+                new String[]{ "+20 max HP, growing", "with your level." },
                 1, 3, 0, List.of(), AbilityType.PASSIVE, 0, "Vitality"
         ));
         TREE.add(new SkillNode(
                 VITALITY_2, "Iron Body II",
-                new String[]{ "+20 max HP.", "" },
+                new String[]{ "+20 max HP, growing", "with your level." },
                 2, 3, 1, List.of(VITALITY_1), AbilityType.PASSIVE, 0, "Vitality"
         ));
 
@@ -168,12 +168,12 @@ public final class WukongSkillTree {
         // ── SHADOW CLONE (col 1, TOGGLE / HELD type) ───────────────────────
         TREE.add(new SkillNode(
                 CLONE_1, "Shadow Clone I",
-                new String[]{ "Press B: summon 1 clone", "that fights alongside you.", "Costs Qi to maintain." },
+                new String[]{ "Press B: summon a clone with", "your stats and weapon, that", "fights for you. Costs Qi." },
                 3, 1, 0, List.of(), AbilityType.TOGGLE, 1, "Shadow Clone"
         ));
         TREE.add(new SkillNode(
                 CLONE_2, "Shadow Clone II",
-                new String[]{ "Summon 2 clones.", "Mirrors your stats and", "equipped weapon." },
+                new String[]{ "Up to 2 clones at once.", "Hit a clone to dismiss it.", "" },
                 4, 1, 1, List.of(CLONE_1), AbilityType.TOGGLE, 2, "Shadow Clone"
         ));
         TREE.add(new SkillNode(
