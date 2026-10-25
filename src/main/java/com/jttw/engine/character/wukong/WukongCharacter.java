@@ -63,9 +63,36 @@ public final class WukongCharacter implements PlayableCharacter {
         return PlayableCharacter.bar(bar.get(0), bar.get(1), GOLDEN_EYES, bar.get(3));
     }
 
+    /** Shift + V: the Somersault Cloud's leap to the next realm (Cloud Step III). */
+    public static final String REALM_LEAP = "wu_realm";
+
+    /** Shift + V: with Somersault Cloud, a leap to the next realm, as the Dragon's Dimension Travel. */
+    @Override
+    public List<AbilitySlot> shiftBar(Set<String> unlocked) {
+        int flight = skillTree().highestTier(unlocked, "wu_flight");
+        return PlayableCharacter.shiftPage(flight >= 3
+                        ? new AbilitySlot(REALM_LEAP, "Somersault to the Next Realm", AbilityType.TOGGLE, flight)
+                        : AbilitySlot.EMPTY,
+                AbilitySlot.EMPTY, AbilitySlot.EMPTY, AbilitySlot.EMPTY);
+    }
+
+    /**
+     * Once there is a Shift page, Shift + N reaches it rather than the first: the Golden Eyes go on
+     * it too, so sneaking with N still turns their x-ray on and off.
+     */
+    @Override
+    public List<AbilitySlot> fullBar(net.minecraft.world.entity.player.Player player) {
+        List<AbilitySlot> all = PlayableCharacter.super.fullBar(player);
+        if (all.size() <= SLOT_COUNT || !ImmortalItems.hasFieryGoldenEyes(player)) return all;
+        List<AbilitySlot> withEyes = new java.util.ArrayList<>(all);
+        withEyes.set(SLOT_COUNT + 2, GOLDEN_EYES);
+        return List.copyOf(withEyes);
+    }
+
     @Override
     public void use(ServerPlayer player, String abilityId, AbilityAction action) {
         switch (abilityId) {
+            case REALM_LEAP -> { if (action == AbilityAction.USE) WukongAbilityHandler.cycleDimension(player); }
             case "wu_ring" -> {
                 if (action == AbilityAction.START) WukongAbilityHandler.startRing(player);
                 else if (action == AbilityAction.STOP) WukongAbilityHandler.stopRing(player);

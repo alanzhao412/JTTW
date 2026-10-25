@@ -49,20 +49,21 @@ import java.util.UUID;
 /**
  * Server-side handler for Yuan Di — the Primordial Emperor, first Demon King.
  *
- * <h3>Primordial Transformation (X)</h3>
+ * <h3>Primordial Transformation (M)</h3>
  * <ul>
  *   <li><b>T1 — Awakening:</b> auto-triggers at &lt;30% HP. 10s, 30s cooldown.
  *       +10% dmg, +15% speed, +16 physical resistance, +30% KB resist.</li>
- *   <li><b>T2 — Controlled Shift:</b> toggle on X. 60s, 90s recharge.
+ *   <li><b>T2 — Controlled Shift:</b> toggle on M. 60s, 90s recharge.
  *       +18% dmg, +20% speed, +24 physical resistance, +40% KB resist.</li>
  *   <li><b>T3 — Mastered Form:</b> unlimited, drains 2 Qi/s.
- *       +30% dmg, +25% speed, +32 physical resistance, +50% KB resist. Enhances all abilities.</li>
+ *       +30% dmg, +25% speed, +32 physical resistance, +50% KB resist. While in it, Smite,
+ *       Abyssal Gravity and Primordial Step recharge in half the time.</li>
  * </ul>
  *
  * <h3>Sovereign's Command (innate to Transform activation)</h3>
  * When transformation activates, a fear pulse fires automatically.
  * T1: 8-block Slowness III. T2: 12-block + Weakness + mob infighting.
- * T3: 16-block + all non-boss mobs fight each other (24 in Form).
+ * T3: 16-block, and any non-boss mob is dominated; 24 blocks when the form taken is the Mastered Form.
  *
  * <p><b>How mob domination works:</b> Dominated mobs get a persistent NBT tag
  * {@code jttw_dominated_by:<uuid>} and a duration tag. Every server tick, dominated
@@ -71,17 +72,17 @@ import java.util.UUID;
  * are removed and normal AI resumes. Bosses (entities where
  * {@code canChangeDimensions()} returns false) are immune.
  *
- * <h3>Demon's Breath (C — HELD)</h3>
+ * <h3>Demon's Breath (V — HELD)</h3>
  * Exhale dark smoke in the direction you look. Deals magic damage, applies Wither.
  * Range: 5 blocks at level 1, 20 at level 100. Width: 1 block (2 at T3).
  * Cannot move while active. Enhanced in Primordial Form (+50% range, x1.5 damage).
  *
- * <h3>Primordial Smite (V — USE, cooldown)</h3>
+ * <h3>Primordial Smite (B — USE, cooldown)</h3>
  * Ground slam shockwave. No terrain damage (uses mobAttack damage source).
- * Knockback + launch. T2: slow field. T3: 2s stun. Enhanced in Form.
+ * Knockback + launch. T2: leaves a field of Slowness II for 5s. T3: 2s stun. Enhanced in Form.
  *
  * <h3>Night Power (passive)</h3>
- * Scaled bonuses at night. T3: HP regen doubles.
+ * Scaled bonuses at night. T3: heals 1 HP a second at level 1, scaled by his power.
  */
 public final class YuanDiAbilityHandler {
     private YuanDiAbilityHandler() {}
@@ -146,6 +147,21 @@ public final class YuanDiAbilityHandler {
     private static final int SMITE_CD_T1 = 400;   // 20s
     private static final int SMITE_CD_T2 = 300;   // 15s
     private static final int SMITE_CD_T3 = 240;   // 12s
+    /** Smite II's lingering field: how long it stays, and how often it renews its Slowness II. */
+    public static final int SLOW_FIELD_TICKS = 100;  // 5s
+    private static final int SLOW_FIELD_PULSE = 10;
+
+    private static final class SlowField {
+        final Vec3 center;
+        final double radius;
+        int ticksLeft = SLOW_FIELD_TICKS;
+
+        SlowField(Vec3 center, double radius) {
+            this.center = center;
+            this.radius = radius;
+        }
+    }
+    private static final Map<UUID, List<SlowField>> SLOW_FIELDS = new HashMap<>();
 
     // -----------------------------------------------------------------------
     // Abyssal Gravity state
@@ -336,20 +352,24 @@ public final class YuanDiAbilityHandler {
      *       are immune to domination at all tiers.</li>
      * </ol>
      */
+    /**
+     * How far Sovereign's Command reaches: 8 / 12 / 16 blocks by its tier, and at III 24 when the
+     * form he takes is the Mastered Form ({@code formTier} 3).
+     */
+    public static double commandRadius(int cmdTier, int formTier) {
+        return switch (cmdTier) {
+            case 2 -> 12.0;
+            case 3 -> formTier >= 3 ? 24.0 : 16.0;
+            default -> 8.0;
+        };
+    }
+
     private static void fireSovereignPulse(ServerPlayer player) {
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
         int cmdTier = YuanDiSkillTree.TREE.highestTier(nodes, "yd_command");
         if (cmdTier < 1) return;
 
-        boolean transformed = isTransformed(player);
-
-        double radius;
-        switch (cmdTier) {
-            case 1 -> radius = 8.0;
-            case 2 -> radius = 12.0;
-            case 3 -> radius = transformed ? 24.0 : 16.0;
-            default -> radius = 8.0;
-        }
+        double radius = commandRadius(cmdTier, getTransformTier(player));
 
         int effectDuration = switch (cmdTier) {
             case 1 -> 60;   // 3 seconds
@@ -608,10 +628,17 @@ public final class YuanDiAbilityHandler {
         int cooldown = switch (tier) {
             case 1 -> SMITE_CD_T1;
             case 2 -> SMITE_CD_T2;
-            case 3 -> transformed ? (SMITE_CD_T3 / 2) : SMITE_CD_T3;
+            case 3 -> SMITE_CD_T3;
             default -> SMITE_CD_T1;
         };
+        // halved by Smite III in any form, or by the Mastered Form (never both)
+        if ((tier >= 3 && transformed) || isMastered(player)) cooldown /= 2;
         SMITE_COOLDOWNS.put(uuid, cooldown);
+
+        // T2+: the ground stays heavy, slowing whatever walks in for the next 5 seconds
+        if (tier >= 2) {
+            SLOW_FIELDS.computeIfAbsent(uuid, k -> new ArrayList<>()).add(new SlowField(player.position(), radius));
+        }
         NetworkHandler.sendToPlayer(player, new SyncCooldownPacket(player.getUUID(), "yd_smite", cooldown, cooldown));
 
         // Visuals — earthquake, no explosion block damage
@@ -635,6 +662,32 @@ public final class YuanDiAbilityHandler {
                     player.getX(), player.getY() + 0.2, player.getZ(),
                     30, radius * 0.3, 0.1, radius * 0.3, 0.08);
         }
+    }
+
+    /**
+     * Smite II and III leave the ground heavy where they struck: for {@link #SLOW_FIELD_TICKS}
+     * ticks, everything but Yuan Di within the slam's radius of where he stood is given Slowness II,
+     * renewed every half second, so what walks in later is slowed too.
+     */
+    private static void tickSlowFields(ServerPlayer player) {
+        List<SlowField> fields = SLOW_FIELDS.get(player.getUUID());
+        if (fields == null) return;
+        for (Iterator<SlowField> it = fields.iterator(); it.hasNext(); ) {
+            SlowField f = it.next();
+            if (--f.ticksLeft <= 0) { it.remove(); continue; }
+            if (f.ticksLeft % SLOW_FIELD_PULSE != 0) continue;
+            int left = Math.min(f.ticksLeft, SLOW_FIELD_PULSE * 2);
+            for (LivingEntity e : player.level().getEntitiesOfClass(LivingEntity.class,
+                    new AABB(f.center, f.center).inflate(f.radius),
+                    e -> e != player && e.isAlive() && e.position().distanceTo(f.center) <= f.radius)) {
+                e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, left, 1, false, true));
+            }
+            if (player.level() instanceof ServerLevel sl) {
+                sl.sendParticles(ParticleTypes.ASH, f.center.x, f.center.y + 0.2, f.center.z,
+                        (int) (f.radius * 2), f.radius * 0.5, 0.1, f.radius * 0.5, 0.0);
+            }
+        }
+        if (fields.isEmpty()) SLOW_FIELDS.remove(player.getUUID());
     }
 
     // =======================================================================
@@ -756,6 +809,9 @@ public final class YuanDiAbilityHandler {
         // --- Gravity well tick ---
         tickGravityWells(sp);
 
+        // --- Smite II's slow field ---
+        tickSlowFields(sp);
+
         // --- Primordial Step (passive: sprint + sneak triggers blink) ---
         tickPrimordialStep(sp);
 
@@ -843,7 +899,7 @@ public final class YuanDiAbilityHandler {
 
 
     // =======================================================================
-    // ABYSSAL GRAVITY (M — USE, cooldown)
+    // ABYSSAL GRAVITY (N — USE, cooldown)
     // =======================================================================
 
     /**
@@ -893,6 +949,7 @@ public final class YuanDiAbilityHandler {
             case 3 -> GRAVITY_CD_T3;
             default -> GRAVITY_CD_T1;
         };
+        if (isMastered(player)) cooldown /= 2;
         GRAVITY_COOLDOWNS.put(uuid, cooldown);
         NetworkHandler.sendToPlayer(player, new SyncCooldownPacket(uuid, "yd_gravity", cooldown, cooldown));
 
@@ -1028,6 +1085,7 @@ public final class YuanDiAbilityHandler {
 
         // Set cooldown
         int cooldown = (tier >= 2) ? STEP_CD_T2 : STEP_CD_T1;
+        if (isMastered(player)) cooldown /= 2;
         STEP_COOLDOWNS.put(uuid, cooldown);
 
         // Visual + sound
@@ -1196,6 +1254,11 @@ public final class YuanDiAbilityHandler {
         return state != null && state.transformed;
     }
 
+    /** In the Mastered Form (Transform III): Smite, Abyssal Gravity and Primordial Step recharge twice as fast. */
+    public static boolean isMastered(ServerPlayer player) {
+        return getTransformTier(player) >= 3;
+    }
+
     public static int getTransformTier(ServerPlayer player) {
         TransformState state = STATES.get(player.getUUID());
         return state != null && state.transformed ? state.tier : 0;
@@ -1217,6 +1280,7 @@ public final class YuanDiAbilityHandler {
             GRAVITY_COOLDOWNS.remove(uuid);
             STEP_COOLDOWNS.remove(uuid);
             ACTIVE_WELLS.removeIf(w -> w.ownerUUID.equals(uuid));
+            SLOW_FIELDS.remove(uuid);
             AttributeInstance speed = sp.getAttribute(Attributes.MOVEMENT_SPEED);
             if (speed != null) speed.removeModifier(UUID_BREATH_SLOW);
         }

@@ -16,7 +16,11 @@ import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
+import com.jttw.engine.dimension.JTTWDimensions;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
@@ -592,6 +596,56 @@ public class WukongGameTests {
         check(h, WukongCheckpoints.isComplete(after, Checkpoint.HELLS_BOOK), "checkpoint");
         check(h, !WukongCheckpoints.isComplete(after, Checkpoint.IMMORTAL_PEACHES), "unfinished stays unfinished");
         check(h, after.getPersistentData().getBoolean("jttw_projectile_immune"), "projectile immunity");
+        h.succeed();
+    }
+
+    // ── Somersault Cloud: the realm leap (Shift + V) ────────────────
+
+    @GameTest(template = PLATFORM, batch = "somersaultCloudLeapsToTheNextRealmOnShiftV")
+    public static void somersaultCloudLeapsToTheNextRealmOnShiftV(GameTestHelper h) {
+        ServerPlayer p = wukong(h);
+        grant(p, "wu_flight_1", "wu_flight_2");
+        PlayableCharacter c = character();
+        eq(h, 4, c.fullBar(p).size(), "no Shift page before Somersault Cloud");
+        c.activate(p, 4, AbilityAction.USE);
+        WukongAbilityHandler.cycleDimension(p);
+        near(h, 100f, QiData.getCurrent(p), "no leap below Cloud Step III");
+
+        grant(p, "wu_flight_3");
+        List<com.jttw.engine.character.AbilitySlot> bar = c.fullBar(p);
+        eq(h, 8, bar.size(), "a Shift page");
+        eq(h, WukongCharacter.REALM_LEAP, bar.get(4).id(), "Shift + V: the realm leap");
+        QiData.setCurrent(p, 19f);
+        c.activate(p, 4, AbilityAction.USE);
+        near(h, 19f, QiData.getCurrent(p), "under 20 Qi: refused");
+        eq(h, Level.OVERWORLD, p.level().dimension(), "and he stays");
+
+        eq(h, Level.NETHER, WukongAbilityHandler.nextRealm(Level.OVERWORLD), "Overworld, then the Nether");
+        eq(h, Level.END, WukongAbilityHandler.nextRealm(Level.NETHER), "then the End");
+        eq(h, JTTWDimensions.HELL, WukongAbilityHandler.nextRealm(Level.END), "then Hell");
+        eq(h, JTTWDimensions.HEAVEN, WukongAbilityHandler.nextRealm(JTTWDimensions.HELL), "then Heaven");
+        eq(h, Level.OVERWORLD, WukongAbilityHandler.nextRealm(JTTWDimensions.HEAVEN), "and round again");
+        eq(h, Level.OVERWORLD, WukongAbilityHandler.nextRealm(
+                ResourceKey.create(Registries.DIMENSION, JTTWEngine.id("nowhere"))), "off the wheel: home");
+        h.succeed();
+    }
+
+    /** Once he has a Shift page, Shift + N reaches it: the Golden Eyes are there too, for the x-ray. */
+    @GameTest(template = PLATFORM, batch = "goldenEyesFollowWukongOntoHisShiftPage")
+    public static void goldenEyesFollowWukongOntoHisShiftPage(GameTestHelper h) {
+        ServerPlayer p = wukong(h);
+        p.getPersistentData().putBoolean(ImmortalItems.KEY_FIERY_GOLDEN_EYES, true);
+        PlayableCharacter c = character();
+        eq(h, 4, c.fullBar(p).size(), "one page without Somersault Cloud");
+        eq(h, "wu_golden_eyes", c.fullBar(p).get(2).id(), "N: the Golden Eyes");
+        grant(p, "wu_flight_1", "wu_flight_2", "wu_flight_3");
+        List<com.jttw.engine.character.AbilitySlot> bar = c.fullBar(p);
+        eq(h, "wu_golden_eyes", bar.get(2).id(), "still on N");
+        eq(h, "wu_golden_eyes", bar.get(6).id(), "and on Shift + N, where sneaking now lands");
+
+        ServerPlayer plain = wukong(h);
+        grant(plain, "wu_flight_1", "wu_flight_2", "wu_flight_3");
+        check(h, c.fullBar(plain).get(6).isEmpty(), "no Golden Eyes, nothing on Shift + N");
         h.succeed();
     }
 

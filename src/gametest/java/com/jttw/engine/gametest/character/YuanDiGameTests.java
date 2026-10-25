@@ -269,6 +269,25 @@ public class YuanDiGameTests {
         h.succeed();
     }
 
+    /** Command III reaches 16 blocks, and 24 when the form he takes is the Mastered Form. */
+    @GameTest(template = PLATFORM, batch = "commandTierThreeReachesTwentyFourOnlyIntoTheMasteredForm")
+    public static void commandTierThreeReachesTwentyFourOnlyIntoTheMasteredForm(GameTestHelper h) {
+        Pig far = mob(h, EntityType.PIG, 2, 22); // 20 blocks off
+        ServerPlayer p = yuanDi(h);
+        grant(p, "yd_transform_1", "yd_transform_2", "yd_command_1", "yd_command_2", "yd_command_3");
+        YuanDiAbilityHandler.toggleTransform(p);
+        eq(h, -1, amp(far, MobEffects.MOVEMENT_SLOWDOWN), "Controlled Shift: 16 blocks, the pig at 20 is beyond");
+        endIfTransformed(p);
+
+        ServerPlayer m = yuanDi(h);
+        grant(m, "yd_transform_1", "yd_transform_2", "yd_transform_3", "yd_command_1", "yd_command_2", "yd_command_3");
+        YuanDiAbilityHandler.toggleTransform(m);
+        eq(h, 2, amp(far, MobEffects.MOVEMENT_SLOWDOWN), "into the Mastered Form: 24 blocks");
+        eq(h, m.getStringUUID(), far.getPersistentData().getString(DOMINATED_BY), "and the pig fights for him");
+        endIfTransformed(m);
+        h.succeed();
+    }
+
     // ── Demon's Breath (slot 1, held) ───────────────────────────────
 
     /** A pig two blocks ahead, with the player aiming at its middle. */
@@ -437,6 +456,82 @@ public class YuanDiGameTests {
         h.succeed();
     }
 
+    /** Smite II leaves the ground heavy: what walks in within 5 s is slowed too. */
+    @GameTest(template = PLATFORM, batch = "smiteTierTwoLeavesASlowFieldForFiveSeconds")
+    public static void smiteTierTwoLeavesASlowFieldForFiveSeconds(GameTestHelper h) {
+        ServerPlayer one = yuanDi(h);
+        grant(one, "yd_smite_1");
+        YuanDiAbilityHandler.usePrimordialSmite(one);
+        IronGolem afterOne = mob(h, EntityType.IRON_GOLEM, 2, 5);
+        ticks(one, 10);
+        eq(h, -1, amp(afterOne, MobEffects.MOVEMENT_SLOWDOWN), "tier 1 leaves no field");
+        afterOne.discard();
+
+        ServerPlayer p = yuanDi(h);
+        grant(p, "yd_smite_1", "yd_smite_2");
+        YuanDiAbilityHandler.usePrimordialSmite(p);
+        IronGolem late = mob(h, EntityType.IRON_GOLEM, 2, 6);      // walks in after the slam, 4 blocks off
+        IronGolem outside = mob(h, EntityType.IRON_GOLEM, 2, 12);  // 10 blocks off: past the 8-block field
+        eq(h, -1, amp(late, MobEffects.MOVEMENT_SLOWDOWN), "not there for the slam");
+        ticks(p, 10);
+        eq(h, 1, amp(late, MobEffects.MOVEMENT_SLOWDOWN), "the field slows it: Slowness II");
+        eq(h, -1, amp(outside, MobEffects.MOVEMENT_SLOWDOWN), "nothing past the slam's radius");
+        check(h, !p.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "Yuan Di walks his own field freely");
+        late.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
+        ticks(p, 80);
+        eq(h, 1, amp(late, MobEffects.MOVEMENT_SLOWDOWN), "still there at 90 ticks");
+        late.removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
+        ticks(p, 10);
+        eq(h, -1, amp(late, MobEffects.MOVEMENT_SLOWDOWN), "gone after 100 ticks");
+        h.succeed();
+    }
+
+    /** The Mastered Form halves Abyssal Gravity's and Primordial Step's cooldowns. */
+    @GameTest(template = PLATFORM, batch = "masteredFormHalvesGravityAndStepCooldowns")
+    public static void masteredFormHalvesGravityAndStepCooldowns(GameTestHelper h) {
+        ServerPlayer p = yuanDi(h);
+        grant(p, "yd_transform_1", "yd_transform_2", "yd_transform_3", "yd_gravity_1", "yd_step_1");
+        qi(p, 1000f, 1000f);
+        YuanDiAbilityHandler.toggleTransform(p);
+        check(h, YuanDiAbilityHandler.isMastered(p), "in the Mastered Form");
+
+        p.setXRot(90f);
+        YuanDiAbilityHandler.useAbyssalGravity(p);
+        ticks(p, 199);
+        float before = QiData.getCurrent(p);
+        YuanDiAbilityHandler.useAbyssalGravity(p);
+        near(h, before, QiData.getCurrent(p), "gravity on cooldown at 199 ticks");
+        ticks(p, 1);
+        before = QiData.getCurrent(p);
+        YuanDiAbilityHandler.useAbyssalGravity(p);
+        near(h, before - 15f, QiData.getCurrent(p), "gravity ready at 200 ticks, half of 400");
+
+        p.setXRot(-90f);
+        p.setSprinting(true);
+        p.setShiftKeyDown(true);
+        before = QiData.getCurrent(p);
+        float drain = formDrain(p, 1);
+        ticks(p, 1);
+        near(h, before - 5f - drain, QiData.getCurrent(p), "sprint + sneak: a step");
+        before = QiData.getCurrent(p);
+        drain = formDrain(p, 99);
+        ticks(p, 99);
+        near(h, before - drain, QiData.getCurrent(p), "step on cooldown for 99 ticks");
+        before = QiData.getCurrent(p);
+        drain = formDrain(p, 1);
+        ticks(p, 1);
+        near(h, before - 5f - drain, QiData.getCurrent(p), "step ready after 100 ticks, half of 200");
+        endIfTransformed(p);
+        h.succeed();
+    }
+
+    /** What the Mastered Form will take over the next {@code n} ticks: 2 Qi on each 20th. */
+    private static float formDrain(ServerPlayer p, int n) {
+        float drain = 0f;
+        for (int t = p.tickCount + 1; t <= p.tickCount + n; t++) if (t % 20 == 0) drain += 2f;
+        return drain;
+    }
+
     // ── Abyssal Gravity (slot 3) ────────────────────────────────────
 
     @GameTest(template = PLATFORM, batch = "abyssalGravityCosts15QiPullsMobsAndHasA20SecondCooldown")
@@ -529,6 +624,27 @@ public class YuanDiGameTests {
             p.tickCount = 79;
             ticks(p, 1);
             eq(h, null, modifier(p, Attributes.ATTACK_DAMAGE, "jttw:yd_night_dmg"), "gone by day");
+        } finally {
+            level.setDayTime(time);
+            level.updateSkyBrightness();
+        }
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM, batch = "moonlitApexHealsOneHealthASecondAtNight")
+    public static void moonlitApexHealsOneHealthASecondAtNight(GameTestHelper h) {
+        ServerPlayer p = yuanDi(h);
+        grant(p, "yd_night_1", "yd_night_2", "yd_night_3");
+        ServerLevel level = h.getLevel();
+        long time = level.getDayTime();
+        try {
+            level.setDayTime(18000);
+            level.updateSkyBrightness();
+            p.setHealth(p.getMaxHealth() / 2);
+            float before = p.getHealth();
+            p.tickCount = 19;
+            ticks(p, 1);
+            near(h, before + LevelPower.scaled(p, 1.0), p.getHealth(), "1 health a second at level 1, by his power");
         } finally {
             level.setDayTime(time);
             level.updateSkyBrightness();

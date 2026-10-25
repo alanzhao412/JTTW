@@ -11,12 +11,13 @@ import java.util.List;
  * <p><b>Core mechanic — Primordial Transformation:</b>
  * <ul>
  *   <li>T1 (Uncontrollable): auto-triggers at &lt;30% HP. 10s, 30s cooldown.</li>
- *   <li>T2 (Controlled): toggle on X. 60s, 90s recharge.</li>
- *   <li>T3 (Mastered): unlimited, drains Qi/s. All abilities enhanced.</li>
+ *   <li>T2 (Controlled): toggle on M. 60s, 90s recharge.</li>
+ *   <li>T3 (Mastered): unlimited, drains 2 Qi/s. Smite, Abyssal Gravity and Primordial Step
+ *       recharge in half the time while in it.</li>
  * </ul>
  *
  * <p><b>Sovereign's Command:</b> innate fear pulse on transformation activation.
- * Enemies are slowed and flee. Higher tiers dominate mobs to fight for you.
+ * All near are slowed. Higher tiers dominate mobs to fight for you.
  * Scales with Sovereign tree nodes but auto-fires — not a separate button.
  *
  * <p><b>Tree layout — 6 columns, 3 rows max:</b>
@@ -90,34 +91,34 @@ public final class YuanDiSkillTree {
         // ── PRIMORDIAL TRANSFORMATION (col 0) ────────────────────────────
         TREE.add(new SkillNode(
                 TRANSFORM_1, "Awakening",
-                new String[]{ "Primordial form activates", "uncontrollably when HP", "drops below 30%." },
+                new String[]{ "Below 30% HP the form wakes", "for 10s (30s recharge): +10%", "dmg, +15% speed, +16 resist." },
                 2, 0, 0, List.of(), AbilityType.PASSIVE, 1, "Transform"
         ));
         TREE.add(new SkillNode(
                 TRANSFORM_2, "Controlled Shift",
-                new String[]{ "Press M to transform at", "will. 60s duration with a", "recharge timer." },
+                new String[]{ "Press M: transform for 60s", "(90s recharge): +18% dmg,", "+20% speed, +24 resist." },
                 3, 0, 1, List.of(TRANSFORM_1), AbilityType.TOGGLE, 2, "Transform"
         ));
         TREE.add(new SkillNode(
                 TRANSFORM_3, "Mastered Form",
-                new String[]{ "Unlimited transformation.", "Drains Qi per second.", "All abilities enhanced." },
+                new String[]{ "Unlimited; 2 Qi a second.", "+30% dmg, +25% spd, +32 res.", "Smite/Gravity/Step CD halved." },
                 4, 0, 2, List.of(TRANSFORM_2), AbilityType.TOGGLE, 3, "Transform"
         ));
 
         // ── SOVEREIGN'S COMMAND (col 1, PASSIVE — innate to Transform) ───
         TREE.add(new SkillNode(
                 COMMAND_1, "Sovereign's Command I",
-                new String[]{ "Transforming emits a fear", "pulse. 8-block AOE.", "Enemies get Slowness III." },
+                new String[]{ "Transforming emits a fear", "pulse: all within 8 blocks", "get Slowness III for 3s." },
                 2, 1, 0, List.of(), AbilityType.PASSIVE, 1, "Sovereign"
         ));
         TREE.add(new SkillNode(
                 COMMAND_2, "Sovereign's Command II",
-                new String[]{ "12-block fear pulse. Adds", "Weakness II. Hostile mobs", "retarget each other 10s." },
+                new String[]{ "12-block pulse. Adds", "Weakness II. Hostile mobs", "fight for you for 10s." },
                 3, 1, 1, List.of(COMMAND_1), AbilityType.PASSIVE, 2, "Sovereign"
         ));
         TREE.add(new SkillNode(
                 COMMAND_3, "Sovereign's Command III",
-                new String[]{ "16-block pulse. All non-boss", "mobs fight each other.", "In Form: 24 blocks." },
+                new String[]{ "16-block pulse; any non-boss", "mob fights for you. Into", "Mastered Form: 24 blocks." },
                 4, 1, 2, List.of(COMMAND_2), AbilityType.PASSIVE, 3, "Sovereign"
         ));
 
@@ -146,12 +147,12 @@ public final class YuanDiSkillTree {
         ));
         TREE.add(new SkillNode(
                 SMITE_2, "Primordial Smite II",
-                new String[]{ "8-block radius. More damage.", "Lingering slow field for", "5s. 15s cooldown." },
+                new String[]{ "8-block radius. More damage.", "Leaves a Slowness II field", "for 5s. 15s cooldown." },
                 3, 3, 1, List.of(SMITE_1), AbilityType.TOGGLE, 2, "Smite"
         ));
         TREE.add(new SkillNode(
                 SMITE_3, "Primordial Smite III",
-                new String[]{ "12-block radius. Enemies", "stunned 2s. In Form:", "18 blocks, x1.5 damage." },
+                new String[]{ "12 blocks; enemies stunned", "2s. In Form: 18 blocks,", "x1.5 damage, half cooldown." },
                 4, 3, 2, List.of(SMITE_2), AbilityType.TOGGLE, 3, "Smite"
         ));
 
@@ -168,19 +169,19 @@ public final class YuanDiSkillTree {
         ));
         TREE.add(new SkillNode(
                 NIGHT_3, "Moonlit Apex",
-                new String[]{ "At night: +30% damage,", "+20% speed, +24 phys. resist.", "HP regen doubles." },
+                new String[]{ "At night: +30% damage,", "+20% speed, +24 phys. resist.", "Heal 1 HP/s, more with level." },
                 4, 4, 2, List.of(NIGHT_2), AbilityType.PASSIVE, 3, "Night"
         ));
 
         // ── PRIMORDIAL BODY + QI (col 5) ─────────────────────────────────
         TREE.add(new SkillNode(
                 BODY_1, "Iron Flesh I",
-                new String[]{ "+20 max HP. +8 phys. resist.", "10% knockback resist." },
+                new String[]{ "+20 max HP (more with level).", "+8 phys. resist, 10% KB resist." },
                 1, 5, 0, List.of(), AbilityType.PASSIVE, 0, "Body"
         ));
         TREE.add(new SkillNode(
                 BODY_2, "Iron Flesh II",
-                new String[]{ "+20 max HP. +8 phys. resist.", "25% knockback resist." },
+                new String[]{ "+20 max HP (more with level).", "+8 phys. resist, 25% KB resist." },
                 2, 5, 1, List.of(BODY_1), AbilityType.PASSIVE, 0, "Body"
         ));
         TREE.add(new SkillNode(
@@ -214,12 +215,12 @@ public final class YuanDiSkillTree {
         // ── PRIMORDIAL STEP (col 8, USE mobility) ───────────────────────
         TREE.add(new SkillNode(
                 STEP_1, "Primordial Step I",
-                new String[]{ "Press N: blink 8 blocks", "in look direction.", "10s cooldown. Costs 5 Qi." },
+                new String[]{ "Sprint + sneak: blink 8", "blocks where you look.", "10s cooldown. Costs 5 Qi." },
                 2, 8, 0, List.of(), AbilityType.TOGGLE, 1, "Primordial Step"
         ));
         TREE.add(new SkillNode(
                 STEP_2, "Primordial Step II",
-                new String[]{ "Blink leaves a fear pulse", "at origin. Cooldown", "reduced to 6 seconds." },
+                new String[]{ "Blink leaves a 6-block fear", "pulse at origin: Slowness III,", "knockback. 6s cooldown." },
                 3, 8, 1, List.of(STEP_1), AbilityType.TOGGLE, 2, "Primordial Step"
         ));
 
@@ -231,7 +232,7 @@ public final class YuanDiSkillTree {
         ));
         TREE.add(new SkillNode(
                 DOMINION_2, "Ancient Dominion II",
-                new String[]{ "Debuffed mobs also deal", "15% less damage to all", "nearby players." },
+                new String[]{ "Marked mobs also deal 15%", "less damage to players", "within 10 blocks of you." },
                 3, 9, 1, List.of(DOMINION_1), AbilityType.PASSIVE, 2, "Ancient Dominion"
         ));
     }

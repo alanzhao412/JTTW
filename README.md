@@ -237,7 +237,8 @@ is what makes the rest possible:
   below a cutoff — and the same decay continues after flight ends, so landing reads as a continuous
   glide rather than an abrupt stop.
 - **Speed tiers.** Glide-only (sinks, cannot gain altitude), full flight, and a top tier that also
-  permits dimension travel — with per-character speed variation layered on top (Erlang Shen's Wind
+  permits dimension travel (Shift + V: the Dragon's to the realm it picks, Wukong's Somersault Cloud
+  to the next on the wheel of Overworld, Nether, End, Hell and Heaven, 20 Qi a leap) — with per-character speed variation layered on top (Erlang Shen's Wind
   and Fog and Sun Wukong's Cloud Step are true flight from their first tier, a little under
   cruising speed, never a glide; the Dragon's Elytra Glide stays a glide).
 - **Independent velocity clamps** on the vertical and horizontal axes, plus a separate strafe scale,

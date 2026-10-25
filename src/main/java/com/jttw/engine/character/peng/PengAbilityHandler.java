@@ -56,7 +56,8 @@ import java.util.Arrays;
  *   <li><b>B, Feather Storm:</b> a fan of 5 / 7 / 9 golden feathers, flying or not; III's
  *       pierce.</li>
  *   <li><b>N, Eclipse Wings:</b> everything within 10 / 16 blocks is weakened and slowed (players
- *       also darkened); II makes them lose their prey and glow.</li>
+ *       also darkened) for 5 / 8 seconds; II makes them lose their prey and glow, and while the
+ *       dark lasts they cannot hunt anything farther than {@value #ECLIPSE_SIGHT} blocks off.</li>
  * </ul>
  * With the Yin-Yang Two-Qi Vase he can also hold players and bosses, which no one else can:
  * they are held in the vase's pull for 5 seconds, dissolving, then burst out in a yin-yang blast.
@@ -76,6 +77,8 @@ public final class PengAbilityHandler {
     private static final String KEY_STRUCK_AT = "jttw_gp_struck_at";
     private static final String KEY_FEATHERS_READY_AT = "jttw_gp_feathers_ready_at";
     private static final String KEY_ECLIPSE_READY_AT = "jttw_gp_eclipse_ready_at";
+    /** On a creature Eclipse Wings II darkened: the game time its sight comes back. */
+    public static final String KEY_ECLIPSED_UNTIL = "jttw_gp_eclipsed_until";
     /** On a feather: its damage, whether it pierces, and who it has already struck. */
     public static final String TAG_FEATHER = "jttw_gp_feather";
     private static final String TAG_PIERCE = "jttw_gp_pierce";
@@ -93,6 +96,8 @@ public final class PengAbilityHandler {
     public static final float FEATHERS_QI = 6f;
     public static final int ECLIPSE_COOLDOWN = 400;
     public static final float ECLIPSE_QI = 20f;
+    /** How far the darkened can see to hunt, under Eclipse Wings II. */
+    public static final double ECLIPSE_SIGHT = 4.0;
     public static final int JAIL_TICKS = 100;
     /** Share of max health the vase dissolves each second. */
     public static final float DISSOLVE_PER_SECOND = 0.05f;
@@ -313,7 +318,10 @@ public final class PengAbilityHandler {
             if (e instanceof Player) e.addEffect(new MobEffectInstance(MobEffects.DARKNESS, ticks, 0));
             if (tier >= 2) {
                 com.jttw.engine.world.PrivateGlow.show(p, e, ticks); // they glow for the Peng alone
-                if (e instanceof Mob m) m.setTarget(null);
+                if (e instanceof Mob m) {
+                    m.getPersistentData().putLong(KEY_ECLIPSED_UNTIL, level.getGameTime() + ticks);
+                    m.setTarget(null);
+                }
             }
             count++;
         }
@@ -404,6 +412,33 @@ public final class PengAbilityHandler {
     public static void onLivingTick(EntityTickEvent.Pre event) {
         if (!(event.getEntity() instanceof LivingEntity e)) return;
         if (!e.level().isClientSide && isJailed(e)) tickJailed(e);
+        if (!e.level().isClientSide && e instanceof Mob m && m.getPersistentData().contains(KEY_ECLIPSED_UNTIL)) tickEclipsed(m);
+    }
+
+    /** True while Eclipse Wings II has this creature in the dark. */
+    public static boolean isEclipsed(Entity e) {
+        return e.level().getGameTime() < e.getPersistentData().getLong(KEY_ECLIPSED_UNTIL);
+    }
+
+    /** True if the dark keeps {@code hunter} from seeing {@code prey}: it is eclipsed and the prey beyond its sight. */
+    public static boolean blindTo(Entity hunter, @javax.annotation.Nullable Entity prey) {
+        return prey != null && isEclipsed(hunter) && hunter.distanceTo(prey) > ECLIPSE_SIGHT;
+    }
+
+    /** In the dark the prey it was chasing slips away once it is out of sight; the dark lifts in time. */
+    private static void tickEclipsed(Mob m) {
+        if (!isEclipsed(m)) {
+            m.getPersistentData().remove(KEY_ECLIPSED_UNTIL);
+            return;
+        }
+        if (blindTo(m, m.getTarget())) m.setTarget(null);
+    }
+
+    /** The darkened cannot take up a hunt for anything beyond their sight. */
+    @SubscribeEvent
+    public static void onEclipsedTarget(net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent event) {
+        if (event.getEntity().level().isClientSide) return;
+        if (blindTo(event.getEntity(), event.getNewAboutToBeSetTarget())) event.setCanceled(true);
     }
 
     // The held cannot fight or use anything
