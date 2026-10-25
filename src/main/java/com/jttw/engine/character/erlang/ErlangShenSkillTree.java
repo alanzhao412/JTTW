@@ -90,7 +90,7 @@ public final class ErlangShenSkillTree {
         // ── XIAOTIAN QUAN (col 1, TOGGLE type) ────────────────────────
         TREE.add(new SkillNode(
                 XTQ_1, "Xiaotian Quan I",
-                new String[]{ "Press V: summon your", "celestial hound companion.",
+                new String[]{ "Press V: summon your hound.", "Its bites: Slowness I, 2 s.",
                               "Costs Qi to maintain." },
                 3, 1, 0, List.of(), AbilityType.TOGGLE, 1, "Xiaotian Quan"
         ));
@@ -102,7 +102,7 @@ public final class ErlangShenSkillTree {
         ));
         TREE.add(new SkillNode(
                 XTQ_3, "Xiaotian Quan III",
-                new String[]{ "+50% hound HP and ATK.", "Bites apply Slowness I.",
+                new String[]{ "+50% hound HP and ATK.", "Bites: Slowness I for 3 s.",
                               "Howl recharges twice as fast." },
                 5, 1, 2, List.of(XTQ_2), AbilityType.TOGGLE, 3, "Xiaotian Quan"
         ));
@@ -188,7 +188,7 @@ public final class ErlangShenSkillTree {
         ));
         TREE.add(new SkillNode(
                 XTQ_GROWTH_3, "Hound Training III",
-                new String[]{ "Peak stats: +10 HP, +5 ATK,", "more speed and armor.", "Bites apply Slowness II." },
+                new String[]{ "Peak stats: +10 HP, +5 ATK,", "more speed and armor.", "Bites: Slowness II, 3 s." },
                 4, 5, 2, List.of(XTQ_GROWTH_2), AbilityType.PASSIVE, 0, "Hound Growth"
         ));
 

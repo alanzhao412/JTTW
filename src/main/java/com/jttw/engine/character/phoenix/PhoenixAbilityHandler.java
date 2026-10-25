@@ -53,8 +53,8 @@ import java.util.UUID;
  *   <li><b>Flamethrower (HELD):</b> breathe fire in the direction you look.
  *       Range: 5 blocks at level 1, 20 at level 100. Width: 1 block, 3 at level 100 with T3.
  *       Cannot move while active. Drains Qi.</li>
- *   <li><b>Life Drain (PASSIVE):</b> T1: heal 0.5 hearts per damaging attack.
- *       T2: heal 1 heart per attack. (At level 1; scaled by the player's power.)</li>
+ *   <li><b>Life Drain (PASSIVE):</b> T1: heal 0.5 hearts per blow that lands (deals damage).
+ *       T2: heal 1 heart per blow that lands. (At level 1; scaled by the player's power.)</li>
  *   <li><b>Rebirth Mastery (PASSIVE):</b> T1: 8 block explosion at 40% of max HP, not 25%.
  *       T2: 12 blocks + 2 revives/week.</li>
  *   <li><b>Solar Flare (B):</b> see {@link SolarFlare}.</li>
@@ -366,9 +366,9 @@ public final class PhoenixAbilityHandler {
     // -----------------------------------------------------------------------
 
     /**
-     * Life Drain: heal on dealing damage.
      * Molten Talons T1: melee attacks set targets on fire for 3s.
-     * (Molten Talons T2, its fire healing it, is {@link #onFireDamageDealt}.)
+     * (Life Drain is {@link #onDamageLanded}; Molten Talons T2, its fire healing it, is
+     * {@link #onFireDamageDealt}.)
      */
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public static void onDealDamage(LivingIncomingDamageEvent event) {
@@ -377,15 +377,6 @@ public final class PhoenixAbilityHandler {
         if (!isPhoenix(attacker)) return;
 
         Set<String> nodes = SkillTreeData.getUnlockedNodes(attacker);
-
-        // --- Life Drain ---
-        int drainTier = PhoenixSkillTree.TREE.highestTier(nodes, "ph_drain");
-        // A heart (II) or half a heart (I) at level 1, scaled by the player's power
-        if (drainTier >= 2) {
-            attacker.heal(LevelPower.scaled(attacker, 2.0));
-        } else if (drainTier >= 1) {
-            attacker.heal(LevelPower.scaled(attacker, 1.0));
-        }
 
         // --- Molten Talons T1: melee attacks set targets on fire ---
         int talonsTier = PhoenixSkillTree.TREE.highestTier(nodes, "ph_talons");
@@ -397,6 +388,24 @@ public final class PhoenixAbilityHandler {
             }
         }
 
+    }
+
+    /**
+     * Life Drain: every blow of its that lands heals it, half a heart (I) or a heart (II) at level
+     * 1, scaled by its power. Only a blow that truly dealt damage: one its target's hurt-immunity
+     * turns aside (the Flamethrower's every tick on a target still flinching) heals nothing.
+     */
+    @SubscribeEvent
+    public static void onDamageLanded(net.neoforged.neoforge.event.entity.living.LivingDamageEvent.Post event) {
+        if (event.getNewDamage() <= 0) return;
+        if (!(event.getSource().getEntity() instanceof ServerPlayer attacker) || attacker == event.getEntity()) return;
+        if (!isPhoenix(attacker)) return;
+        int drainTier = PhoenixSkillTree.TREE.highestTier(SkillTreeData.getUnlockedNodes(attacker), "ph_drain");
+        if (drainTier >= 2) {
+            attacker.heal(LevelPower.scaled(attacker, 2.0));
+        } else if (drainTier >= 1) {
+            attacker.heal(LevelPower.scaled(attacker, 1.0));
+        }
     }
 
     /**

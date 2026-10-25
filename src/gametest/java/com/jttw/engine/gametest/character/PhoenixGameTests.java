@@ -197,9 +197,26 @@ public class PhoenixGameTests {
             float burn = com.jttw.engine.progression.stats.LevelPower.scaled(p, com.jttw.engine.character.phoenix.SolarFlare.burnPerSecond(1));
             Hit pigBurn = firstHit(h, pigHits, DamageTypes.PLAYER_ATTACK, pig);
             near(h, burn, pigBurn.amount(), "a second's burn");
-            near(h, burn * 2, firstHit(h, undeadHits, DamageTypes.PLAYER_ATTACK, undead).amount(), "the undead twice");
+            near(h, burn, firstHit(h, undeadHits, DamageTypes.PLAYER_ATTACK, undead).amount(), "the undead no worse before III");
             check(h, pig.isOnFire(), "set alight");
             eq(h, 0, of(farHits, DamageTypes.PLAYER_ATTACK).size(), "beyond its reach, untouched");
+            h.succeed();
+        });
+    }
+
+    /** At Solar Flare III the undead burn twice over. */
+    @GameTest(template = PLATFORM, batch = "solarFlareThreeBurnsTheUndeadTwiceOver", timeoutTicks = 100)
+    public static void solarFlareThreeBurnsTheUndeadTwiceOver(GameTestHelper h) {
+        ServerPlayer p = sun(h, "ph_radiance_1", "ph_radiance_2", "ph_radiance_3");
+        Husk undead = mob(h, EntityType.HUSK, 0, 2);
+        Pig pig = mob(h, EntityType.PIG, 4, 2);
+        List<Hit> undeadHits = watch(undead), pigHits = watch(pig);
+        // its burn at the level it casts at (its second second's burn kills, and the kill's experience could raise it)
+        float burn = com.jttw.engine.progression.stats.LevelPower.scaled(p, com.jttw.engine.character.phoenix.SolarFlare.burnPerSecond(3));
+        check(h, com.jttw.engine.character.phoenix.SolarFlare.cast(p), "cast");
+        h.runAfterDelay(5, () -> {
+            near(h, burn, firstHit(h, pigHits, DamageTypes.PLAYER_ATTACK, pig).amount(), "a second's burn, hotter at III");
+            near(h, burn * 2, firstHit(h, undeadHits, DamageTypes.PLAYER_ATTACK, undead).amount(), "the undead twice over");
             h.succeed();
         });
     }
@@ -228,7 +245,7 @@ public class PhoenixGameTests {
 
     @GameTest(template = PLATFORM, batch = "solarFlareEndsInABlindingBurstThenRests", timeoutTicks = 260)
     public static void solarFlareEndsInABlindingBurstThenRests(GameTestHelper h) {
-        ServerPlayer p = sun(h, "ph_radiance_1");
+        ServerPlayer p = sun(h, "ph_radiance_1", "ph_radiance_2");
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 0, 2);
         check(h, com.jttw.engine.character.phoenix.SolarFlare.cast(p), "cast");
         check(h, !com.jttw.engine.character.phoenix.SolarFlare.cast(p), "not twice at once");
@@ -237,6 +254,19 @@ public class PhoenixGameTests {
             check(h, !p.hasEffect(com.jttw.engine.registry.ModEffects.SOLAR_FLARE), "the sun gone");
             check(h, golem.hasEffect(MobEffects.BLINDNESS), "the burst blinds");
             check(h, !com.jttw.engine.character.phoenix.SolarFlare.cast(p), "it rests 30 s before the next");
+            h.succeed();
+        });
+    }
+
+    /** Solar Flare I simply goes out: the blinding burst is II's. */
+    @GameTest(template = PLATFORM, batch = "solarFlareOneEndsWithoutABurst", timeoutTicks = 260)
+    public static void solarFlareOneEndsWithoutABurst(GameTestHelper h) {
+        ServerPlayer p = sun(h, "ph_radiance_1");
+        IronGolem golem = mob(h, EntityType.IRON_GOLEM, 0, 2);
+        check(h, com.jttw.engine.character.phoenix.SolarFlare.cast(p), "cast");
+        h.runAfterDelay(com.jttw.engine.character.phoenix.SolarFlare.TICKS + 3, () -> {
+            check(h, !com.jttw.engine.character.phoenix.SolarFlare.active(p), "8 s, then it ends");
+            check(h, !golem.hasEffect(MobEffects.BLINDNESS), "no burst, no blinding, before II");
             h.succeed();
         });
     }
@@ -347,22 +377,26 @@ public class PhoenixGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM, batch = "lifeDrainHealsOnEveryHit")
-    public static void lifeDrainHealsOnEveryHit(GameTestHelper h) {
+    @GameTest(template = PLATFORM, batch = "lifeDrainHealsOnEveryBlowThatLands")
+    public static void lifeDrainHealsOnEveryBlowThatLands(GameTestHelper h) {
         ServerPlayer p = phoenix(h);
         PlayerLevel.setLevel(p, 20); // the heals are set at level 1, scaled by the player's power
         LevelManager.reapplyStats(p);
         float power = (float) LevelPower.of(20);
-        Pig pig = mob(h, EntityType.PIG, 0, 0);
+        IronGolem golem = mob(h, EntityType.IRON_GOLEM, 0, 0); // a deep well of health: no kill, no experience
         var ds = h.getLevel().damageSources();
         p.setHealth(10f);
-        PhoenixAbilityHandler.onDealDamage(incoming(pig, ds.playerAttack(p), 3f));
+        golem.hurt(ds.playerAttack(p), 1f);
         near(h, 10f, p.getHealth(), "no node, no heal");
         grant(p, "ph_drain_1");
-        PhoenixAbilityHandler.onDealDamage(incoming(pig, ds.playerAttack(p), 3f));
+        golem.invulnerableTime = 0;
+        check(h, golem.hurt(ds.playerAttack(p), 1f), "a blow that lands");
         near(h, 10f + power, p.getHealth(), "tier 1: half a heart at level 1, scaled to 20");
+        check(h, !golem.hurt(ds.playerAttack(p), 1f), "the next, while it still flinches, is turned aside");
+        near(h, 10f + power, p.getHealth(), "a blow that does not land heals nothing");
         grant(p, "ph_drain_2");
-        PhoenixAbilityHandler.onDealDamage(incoming(pig, ds.playerAttack(p), 3f));
+        golem.invulnerableTime = 0;
+        check(h, golem.hurt(ds.playerAttack(p), 1f), "a blow that lands");
         near(h, 10f + 3 * power, p.getHealth(), "tier 2: a heart at level 1, scaled to 20");
         h.succeed();
     }

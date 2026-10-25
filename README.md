@@ -167,11 +167,11 @@ Abilities and items are drawn from the source material rather than invented:
 - **Wu Clones** — Wukong's hair-clone technique, implemented as summoned entities with their own
   pathfinding goals ([`WuCloneManager`](src/main/java/com/jttw/engine/character/wukong/WuCloneManager.java))
 - **Xiaotian Quan** — Erlang Shen's hound, a custom entity with hand-authored model and animation.
-  Its own branch: I summons it; II gives it +25% health and attack and tracking sense (the nearest
-  hostile glows for him); III +50%, bites that give Slowness I, and a howl that recharges twice as
-  fast. Hound Training: I +20 health, +3 attack; II +20 health more, and it tracks the three
-  nearest hostiles; III peak stats and bites that give Slowness II (the strongest Slowness wins;
-  they never stack) ([`XiaotianQuanManager`](src/main/java/com/jttw/engine/character/erlang/XiaotianQuanManager.java))
+  Every bite slows (Slowness I, 2 s). Its own branch: I summons it; II gives it +25% health and
+  attack and tracking sense (the nearest hostile glows for him); III +50%, its bites' Slowness I
+  lasting 3 s, and a howl that recharges twice as fast. Hound Training: I +20 health, +3 attack; II
+  +20 health more, and it tracks the three nearest hostiles; III peak stats and bites that give
+  Slowness II for 3 s (the strongest Slowness wins; they never stack) ([`XiaotianQuanManager`](src/main/java/com/jttw/engine/character/erlang/XiaotianQuanManager.java))
 - **Zhàn Shén** — Erlang Shen as God of War: below 40% health he is in Wrath (gone again once healed
   to 40%), with +15/25/35% damage on every blow and ability, and as much movement and attack speed,
   whatever he holds. At II he cannot be knocked back and Xiaotian Quan goes berserk (crimson
@@ -242,8 +242,9 @@ is what makes the rest possible:
   to the next on the wheel of Overworld, Nether, End, Hell and Heaven, 20 Qi a leap) — with
   per-character speed variation layered on top (Erlang Shen's Wind and Fog, Sun Wukong's Cloud Step
   and the Phoenix's Rising Ember are true flight from their first tier, a little under cruising
-  speed, never a glide; the Dragon's Elytra Glide stays a glide; Nezha flies on his Wind Fire
-  Wheels at cruising speed, and at the fastest with Blazing Trail).
+  speed, never a glide; the Dragon's Elytra Glide stays a glide, but only in its own shape: a
+  form with wings, the Azure Dragon or a flying form of the 18 Transformations, always flies; Nezha
+  flies on his Wind Fire Wheels at cruising speed, and at the fastest with Blazing Trail).
 - **Independent velocity clamps** on the vertical and horizontal axes, plus a separate strafe scale,
   so lateral drift doesn't match forward thrust.
 - **A parallel swim system** with its own stored vector, distinct cruise and sprint speeds, and a

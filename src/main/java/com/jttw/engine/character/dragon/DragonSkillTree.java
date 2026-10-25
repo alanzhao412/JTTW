@@ -208,7 +208,7 @@ public final class DragonSkillTree {
         ));
         TREE.add(new SkillNode(
                 TRUE_2, "Azure Dragon II",
-                new String[]{ "30 s as the Azure Dragon.", "It swims the air; its", "thunder needs no rest." },
+                new String[]{ "30 s as the Azure Dragon.", "Its thunder needs no rest.", "" },
                 5, 9, 1, List.of(TRUE_1), AbilityType.TOGGLE, 2, "Azure Dragon"
         ));
         TREE.add(new SkillNode(

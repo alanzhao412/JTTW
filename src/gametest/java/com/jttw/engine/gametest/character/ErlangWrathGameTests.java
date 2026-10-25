@@ -245,7 +245,8 @@ public class ErlangWrathGameTests {
         health(p, 0.3f);
         Pig two = mob(h, EntityType.PIG, 0, 0);
         XiaotianQuanManager.onXtqAttacks(incoming(two, bite, 2f));
-        eq(h, -1, amp(two, MobEffects.MOVEMENT_SLOWDOWN), "Zhàn Shén II, no hound III: no slowing");
+        eq(h, 0, amp(two, MobEffects.MOVEMENT_SLOWDOWN), "Zhàn Shén II, no hound III: the bite's own Slowness I");
+        eq(h, 40, duration(two, MobEffects.MOVEMENT_SLOWDOWN), "for 2 s");
 
         grant(p, "es_wrath_3");
         Pig three = mob(h, EntityType.PIG, 1, 0);
@@ -256,7 +257,8 @@ public class ErlangWrathGameTests {
         health(p, 0.9f);
         Pig calm = mob(h, EntityType.PIG, 0, 1);
         XiaotianQuanManager.onXtqAttacks(incoming(calm, bite, 2f));
-        eq(h, -1, amp(calm, MobEffects.MOVEMENT_SLOWDOWN), "out of Wrath: the hound's own (none)");
+        eq(h, 0, amp(calm, MobEffects.MOVEMENT_SLOWDOWN), "out of Wrath: the hound's own, Slowness I");
+        eq(h, 40, duration(calm, MobEffects.MOVEMENT_SLOWDOWN), "for 2 s");
 
         // on top of Hound Training III's Slowness II, Zhàn Shén III lengthens it
         grant(p, "es_xtq_growth_1", "es_xtq_growth_2", "es_xtq_growth_3");

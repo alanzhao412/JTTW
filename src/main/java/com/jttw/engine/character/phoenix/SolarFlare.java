@@ -35,9 +35,9 @@ import java.util.UUID;
 
 /**
  * The Phoenix's Solar Flare (B): for {@value #TICKS} ticks it is a small sun. Once a second
- * everything within its reach (6 / 8 / 10 blocks by tier) burns and takes fire damage, the undead
- * twice; arrows and other missiles that enter it burn up; it lights the dark about it as it goes.
- * It ends in a blinding burst. A ring of flame marks how far it reaches; its own sight is rimmed
+ * everything within its reach (6 / 8 / 10 blocks by tier) burns and takes fire damage; arrows and
+ * other missiles that enter it burn up; it lights the dark about it as it goes. From II it ends in
+ * a blinding burst; from III the undead burn twice over ({@link #undeadTwice}). A ring of flame marks how far it reaches; its own sight is rimmed
  * in white-gold while it lasts (client.SolarFlareOverlay).
  */
 @EventBusSubscriber(modid = JTTWEngine.MOD_ID)
@@ -50,6 +50,15 @@ public final class SolarFlare {
     /** Fire damage a second, at level 1 (grown by level power); the burst is twice it. */
     public static float burnPerSecond(int tier) { return 2f + tier; }
     public static double reach(int tier) { return tier >= 3 ? 10 : tier == 2 ? 8 : 6; }
+    /** Whether it ends in a blinding burst: from Solar Flare II. */
+    public static boolean bursts(int tier) { return tier >= 2; }
+    /** Whether the undead burn twice over: from Solar Flare III. */
+    public static boolean undeadTwice(int tier) { return tier >= 3; }
+
+    /** Its fire on {@code e}: twice over on the undead, from III. */
+    private static float burnOn(LivingEntity e, float burn, int tier) {
+        return undeadTwice(tier) && e.getType().is(EntityTypeTags.UNDEAD) ? burn * 2 : burn;
+    }
 
     private static final String KEY_ENDS = "jttw_ph_flare_ends", KEY_READY = "jttw_ph_flare_ready";
     /** The light it carries, where it was put. */
@@ -85,7 +94,7 @@ public final class SolarFlare {
         if (ends == 0) return;
         long now = p.level().getGameTime();
         if (now >= ends) {
-            burst(p);
+            if (bursts(Math.max(1, tier(p)))) burst(p);
             end(p);
             return;
         }
@@ -105,7 +114,7 @@ public final class SolarFlare {
             float burn = LevelPower.scaled(p, burnPerSecond(tier));
             for (LivingEntity e : within(p, r)) {
                 e.igniteForSeconds(3);
-                PhoenixAbilityHandler.hurtWithOwnFire(p, e, p.damageSources().playerAttack(p), e.getType().is(EntityTypeTags.UNDEAD) ? burn * 2 : burn);
+                PhoenixAbilityHandler.hurtWithOwnFire(p, e, p.damageSources().playerAttack(p), burnOn(e, burn, tier));
             }
         }
         // its body blazes; a ring of flame marks its reach
@@ -131,13 +140,13 @@ public final class SolarFlare {
                 e -> e != p && e.isAlive() && e.distanceTo(p) <= r);
     }
 
-    /** The end: a blinding burst, twice a second's burn, over all within it. */
+    /** The end, from II: a blinding burst, twice a second's burn, over all within it. */
     private static void burst(ServerPlayer p) {
         int tier = Math.max(1, tier(p));
         double r = reach(tier);
         float burn = LevelPower.scaled(p, burnPerSecond(tier)) * 2;
         for (LivingEntity e : within(p, r)) {
-            PhoenixAbilityHandler.hurtWithOwnFire(p, e, p.damageSources().playerAttack(p), e.getType().is(EntityTypeTags.UNDEAD) ? burn * 2 : burn);
+            PhoenixAbilityHandler.hurtWithOwnFire(p, e, p.damageSources().playerAttack(p), burnOn(e, burn, tier));
             e.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 40, 0), p);
             e.igniteForSeconds(4);
         }
