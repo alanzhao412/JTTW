@@ -4,7 +4,6 @@ import com.jttw.engine.registry.ModEntities;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.progression.stats.LevelPower;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -32,12 +31,21 @@ import java.util.UUID;
  *
  * Travels 200 blocks in the direction the player was looking, destroying
  * all blocks (except bedrock) and damaging entities in an expanding cone.
- * Leaves fire in its wake.
+ * Leaves fire in its wake. It is drawn as a translucent golden crescent the width of what it
+ * strikes (QiWaveRenderer), so the client is told its reach and how far through its course it is.
  */
 public class QiWaveEntity extends Entity {
 
     private static final EntityDataAccessor<Optional<UUID>> OWNER_UUID =
             SynchedEntityData.defineId(QiWaveEntity.class, EntityDataSerializers.OPTIONAL_UUID);
+    /** Its reach: the half-width of what it strikes this tick, for drawing it at its true size. */
+    private static final EntityDataAccessor<Float> RADIUS =
+            SynchedEntityData.defineId(QiWaveEntity.class, EntityDataSerializers.FLOAT);
+    /** How far through its course it is, 0 to 1, so it can be drawn spending itself at the end. */
+    private static final EntityDataAccessor<Float> PROGRESS =
+            SynchedEntityData.defineId(QiWaveEntity.class, EntityDataSerializers.FLOAT);
+    /** On the client, its reach last tick and this one, so its growth is drawn smoothly between ticks. */
+    private float radiusO = -1, radiusNow = -1;
 
     /** Direction the wave travels (normalized). */
     private Vec3 direction = Vec3.ZERO;
@@ -101,8 +109,12 @@ public class QiWaveEntity extends Entity {
                 owner.getEyeY() - 0.5 + dir.y * offset,
                 owner.getZ() + dir.z * offset);
         this.direction = dir;
+        // faced the way it goes, so the client draws it so
+        this.setYRot((float) Math.toDegrees(Math.atan2(-dir.x, dir.z)));
+        this.setXRot((float) -Math.toDegrees(Math.asin(Math.max(-1, Math.min(1, dir.y)))));
         this.attackDamage = attackDamage;
         this.entityData.set(OWNER_UUID, Optional.of(owner.getUUID()));
+        this.entityData.set(RADIUS, (float) startRadius);
     }
 
     /**
@@ -118,6 +130,26 @@ public class QiWaveEntity extends Entity {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(OWNER_UUID, Optional.empty());
+        builder.define(RADIUS, (float) MIN_CONE_START);
+        builder.define(PROGRESS, 0f);
+    }
+
+    /** Its reach (the half-width of what it strikes), between last tick's and this one's. */
+    public float radius(float partialTick) {
+        if (radiusNow < 0) return this.entityData.get(RADIUS);
+        return radiusO + (radiusNow - radiusO) * partialTick;
+    }
+
+    /** How far through its course it is, 0 to 1. */
+    public float progress() {
+        return this.entityData.get(PROGRESS);
+    }
+
+    /** Seen as far off as its size deserves, not as a one-block thing. */
+    @Override
+    public boolean shouldRenderAtSqrDistance(double distance) {
+        double d = (64 + 2 * this.entityData.get(RADIUS)) * getViewScale();
+        return distance < d * d;
     }
 
     @Nullable
@@ -130,6 +162,10 @@ public class QiWaveEntity extends Entity {
     @Override
     public void tick() {
         super.tick();
+        if (level().isClientSide()) {
+            radiusO = radiusNow < 0 ? this.entityData.get(RADIUS) : radiusNow;
+            radiusNow = this.entityData.get(RADIUS);
+        }
         if (level().isClientSide() || direction.equals(Vec3.ZERO)) {
             if (!level().isClientSide() && direction.equals(Vec3.ZERO)) discard();
             return;
@@ -220,14 +256,8 @@ public class QiWaveEntity extends Entity {
                 target.hasImpulse = true;
             }
 
-            // Particles — flame trail along the beam
-            int particleCount = (int)(4 + 6 * chargePower);
-            serverLevel.sendParticles(ParticleTypes.FLAME,
-                    newPos.x, newPos.y, newPos.z, particleCount,
-                    effectiveRadius * 0.4, effectiveRadius * 0.4, effectiveRadius * 0.4, 0.02);
-            serverLevel.sendParticles(ParticleTypes.SMOKE,
-                    newPos.x, newPos.y, newPos.z, particleCount / 2,
-                    effectiveRadius * 0.3, effectiveRadius * 0.3, effectiveRadius * 0.3, 0.01);
+            this.entityData.set(RADIUS, (float) effectiveRadius);
+            this.entityData.set(PROGRESS, (float) t);
         }
 
         com.jttw.engine.world.TerrainBreaker.breakBlocks(serverLevel, carved);
