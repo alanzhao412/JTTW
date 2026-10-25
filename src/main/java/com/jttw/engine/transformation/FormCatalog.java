@@ -59,10 +59,12 @@ public final class FormCatalog {
     /**
      * Forms only a character's own ability takes, never offered in a menu: the Great White Bull
      * is the Bull Demon King's true form, with its own cost and strength (BullDemonAbilityHandler);
-     * the White Tiger, Byakko's (TrueForm).
+     * the White Tiger, Byakko's (TrueForm); the Nine-Headed Lion, the Grand Saint of Nine Spirits'
+     * (NineSpiritsAbilityHandler).
      */
     public static final Set<ResourceLocation> ABILITY_FORMS = Set.of(
             ResourceLocation.fromNamespaceAndPath(com.jttw.engine.JTTWEngine.MOD_ID, "great_white_bull"),
+            ResourceLocation.fromNamespaceAndPath(com.jttw.engine.JTTWEngine.MOD_ID, "nine_headed_lion"),
             ResourceLocation.fromNamespaceAndPath(com.jttw.engine.JTTWEngine.MOD_ID, "white_tiger"),
             ResourceLocation.fromNamespaceAndPath(com.jttw.engine.JTTWEngine.MOD_ID, "azure_dragon"),
             ResourceLocation.fromNamespaceAndPath(com.jttw.engine.JTTWEngine.MOD_ID, "black_tortoise"),

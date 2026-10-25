@@ -110,6 +110,7 @@ public final class ClientInit {
         event.registerLayerDefinition(XiaotianQuanModel.LAYER_LOCATION, XiaotianQuanModel::createBodyLayer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.RidgeRenderers.WRAITH_LAYER, com.jttw.engine.client.renderer.RidgeRenderers::wraithLayer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.GreatWhiteBullRenderer.LAYER, com.jttw.engine.client.renderer.GreatWhiteBullRenderer::layer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.NineHeadedLionRenderer.LAYER, com.jttw.engine.client.renderer.NineHeadedLionRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.WhiteTigerRenderer.LAYER, com.jttw.engine.client.renderer.WhiteTigerRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.AzureDragonRenderer.LAYER, com.jttw.engine.client.renderer.AzureDragonRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.BlackTortoiseRenderer.LAYER, com.jttw.engine.client.renderer.BlackTortoiseRenderer::layer);
@@ -182,6 +183,7 @@ public final class ClientInit {
         event.registerEntityRenderer(ModEntities.WRAITH.get(), com.jttw.engine.client.renderer.RidgeRenderers.WraithRenderer::new);
         event.registerEntityRenderer(ModEntities.HEAVENLY_SOLDIER.get(), com.jttw.engine.client.renderer.HeavenRenderers.SoldierRenderer::new);
         event.registerEntityRenderer(ModEntities.GREAT_WHITE_BULL.get(), com.jttw.engine.client.renderer.GreatWhiteBullRenderer::new);
+        event.registerEntityRenderer(ModEntities.NINE_HEADED_LION.get(), com.jttw.engine.client.renderer.NineHeadedLionRenderer::new);
         event.registerEntityRenderer(ModEntities.WHITE_TIGER.get(), com.jttw.engine.client.renderer.WhiteTigerRenderer::new);
         event.registerEntityRenderer(ModEntities.AZURE_DRAGON.get(), com.jttw.engine.client.renderer.AzureDragonRenderer::new);
         event.registerEntityRenderer(ModEntities.BLACK_TORTOISE.get(), com.jttw.engine.client.renderer.BlackTortoiseRenderer::new);

@@ -156,6 +156,18 @@ model and cape, and shows their name.
 
 The player, not the creature's AI, drives a form.
 
+Some forms are no art's but a character's own ability's, and no menu offers them (`FormCatalog.ABILITY_FORMS`):
+the Bull Demon King's **Great White Bull**, and the Grand Saint of Nine Spirits' True Form (M), in which
+he becomes the **Nine-Headed Lion** (`NineHeadedLionEntity`, 2.8 by 3.6 blocks, his heads rising
+far over it): a vast golden lion, the Taiyi Heavenly Worthy's mount, in a great shaggy mane, a jewelled
+gold breast-collar hung with bells and a celestial-blue saddle-cloth, nine maned necks fanned from his
+shoulders in two ranks, the middle head the largest, each a guardian lion's with spiral curls, a
+scowling brow and smouldering gold-ember eyes. The heads that strike with each of his blows (2 / 3 / 4
+by True Form's tier) are awake, their eyes burning full (any client reads the tier from his
+toughness); as he strikes or roars they lunge and bite while the rest rear back roaring. Its model and
+skin come from [`assets_source/nine_headed_lion.py`](assets_source/nine_headed_lion.py). Leaving the
+form, or being made another shape, ends it.
+
 **Objects** (72, level III) are entities, such as minecarts, arrows and boats. Some entities
 aren't offered: the ones with no body to be (lightning, a fishing bobber, markers, empty display
 frames, a dropped item with no item, evoker fangs, an ominous item spawner with no item), primed TNT, and the mod's own machinery (Qi Wave, the thrown spear).
