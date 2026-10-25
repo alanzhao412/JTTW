@@ -9,7 +9,6 @@ import com.jttw.engine.progression.stats.ProgressionClass;
 import com.jttw.engine.network.NetworkHandler;
 import com.jttw.engine.network.s2c.SyncCooldownPacket;
 import com.jttw.engine.network.s2c.SyncQiPacket;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -24,7 +23,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
@@ -220,14 +218,8 @@ public final class DragonAbilityHandler {
     /** NBT key for the Dragon's currently selected dimension index. */
     private static final String KEY_SELECTED_DIM = "jttw_dragon_dim_select";
 
-    @SuppressWarnings("unchecked")
-    private static final ResourceKey<Level>[] DIMENSION_CYCLE = new ResourceKey[]{
-            Level.OVERWORLD,
-            Level.NETHER,
-            Level.END,
-            com.jttw.engine.dimension.JTTWDimensions.HELL,
-            com.jttw.engine.dimension.JTTWDimensions.HEAVEN
-    };
+    /** The realms it may pick, in the wheel's order (RealmArrival.WHEEL). */
+    private static final List<ResourceKey<Level>> DIMENSION_CYCLE = com.jttw.engine.dimension.RealmArrival.WHEEL;
 
     private static final String[] DIMENSION_NAMES = {
             "Overworld", "Nether", "End", "Hell", "Heaven"
@@ -240,7 +232,7 @@ public final class DragonAbilityHandler {
         if (drFlightTier < 3) return;
 
         int current = player.getPersistentData().getInt(KEY_SELECTED_DIM);
-        current = ((current + direction) % DIMENSION_CYCLE.length + DIMENSION_CYCLE.length) % DIMENSION_CYCLE.length;
+        current = ((current + direction) % DIMENSION_CYCLE.size() + DIMENSION_CYCLE.size()) % DIMENSION_CYCLE.size();
         player.getPersistentData().putInt(KEY_SELECTED_DIM, current);
 
         player.sendSystemMessage(Component.literal(
@@ -260,8 +252,8 @@ public final class DragonAbilityHandler {
         NetworkHandler.sendToPlayer(player, new SyncQiPacket(QiData.getCurrent(player), QiData.getMax(player)));
 
         int selectedIdx = player.getPersistentData().getInt(KEY_SELECTED_DIM);
-        selectedIdx = Math.min(selectedIdx, DIMENSION_CYCLE.length - 1);
-        ResourceKey<Level> target = DIMENSION_CYCLE[selectedIdx];
+        selectedIdx = Math.min(selectedIdx, DIMENSION_CYCLE.size() - 1);
+        ResourceKey<Level> target = DIMENSION_CYCLE.get(selectedIdx);
 
         // Don't teleport if already in that dimension
         if (player.level().dimension().equals(target)) {
@@ -280,15 +272,8 @@ public final class DragonAbilityHandler {
             return;
         }
 
-        BlockPos targetPos = targetLevel.getHeightmapPos(
-                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, player.blockPosition());
-
-        player.teleportTo(targetLevel,
-                targetPos.getX() + 0.5,
-                targetPos.getY() + 1.0,
-                targetPos.getZ() + 0.5,
-                player.getYRot(),
-                player.getXRot());
+        // to the realm's own arrival: Hell's plaza, Heaven's, the End's platform, safe ground in the Nether
+        com.jttw.engine.dimension.RealmArrival.travel(player, target);
 
         // Keep his flight, at its own speed (Dimension Travel is the third, fastest tier)
         com.jttw.engine.flight.JTTWFlight.setUniversalFlight(player, true);

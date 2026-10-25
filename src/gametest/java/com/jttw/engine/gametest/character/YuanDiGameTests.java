@@ -507,29 +507,19 @@ public class YuanDiGameTests {
         near(h, before - 15f, QiData.getCurrent(p), "gravity ready at 200 ticks, half of 400");
 
         p.setXRot(-90f);
-        p.setSprinting(true);
-        p.setShiftKeyDown(true);
         before = QiData.getCurrent(p);
-        float drain = formDrain(p, 1);
-        ticks(p, 1);
-        near(h, before - 5f - drain, QiData.getCurrent(p), "sprint + sneak: a step");
-        before = QiData.getCurrent(p);
-        drain = formDrain(p, 99);
+        character().activate(p, 4, AbilityAction.USE);
+        near(h, before - 5f, QiData.getCurrent(p), "Shift + V: a step");
         ticks(p, 99);
-        near(h, before - drain, QiData.getCurrent(p), "step on cooldown for 99 ticks");
         before = QiData.getCurrent(p);
-        drain = formDrain(p, 1);
+        character().activate(p, 4, AbilityAction.USE);
+        near(h, before, QiData.getCurrent(p), "step on cooldown for 99 ticks");
         ticks(p, 1);
-        near(h, before - 5f - drain, QiData.getCurrent(p), "step ready after 100 ticks, half of 200");
+        before = QiData.getCurrent(p);
+        character().activate(p, 4, AbilityAction.USE);
+        near(h, before - 5f, QiData.getCurrent(p), "step ready after 100 ticks, half of 200");
         endIfTransformed(p);
         h.succeed();
-    }
-
-    /** What the Mastered Form will take over the next {@code n} ticks: 2 Qi on each 20th. */
-    private static float formDrain(ServerPlayer p, int n) {
-        float drain = 0f;
-        for (int t = p.tickCount + 1; t <= p.tickCount + n; t++) if (t % 20 == 0) drain += 2f;
-        return drain;
     }
 
     // ── Abyssal Gravity (slot 3) ────────────────────────────────────
@@ -579,24 +569,29 @@ public class YuanDiGameTests {
         h.succeed();
     }
 
-    // ── Primordial Step (passive: sprint + sneak) ───────────────────
+    // ── Primordial Step (Shift + V) ─────────────────────────────────
 
     @GameTest(template = PLATFORM, batch = "primordialStepCostsFiveQiAndTierTwoFrightensTheOrigin")
     public static void primordialStepCostsFiveQiAndTierTwoFrightensTheOrigin(GameTestHelper h) {
         ServerPlayer p = yuanDi(h);
+        PlayableCharacter c = character();
+        eq(h, 4, c.fullBar(p).size(), "no Shift page before Primordial Step");
         grant(p, "yd_step_1", "yd_step_2");
+        eq(h, "yd_step", c.fullBar(p).get(4).id(), "Shift + V: Primordial Step");
         Husk husk = mob(h, EntityType.HUSK, 2, 4);
         p.setXRot(-90f);
         p.setSprinting(true);
-        ticks(p, 1);
-        near(h, 100f, QiData.getCurrent(p), "sprinting alone does not step");
         p.setShiftKeyDown(true);
         ticks(p, 1);
-        near(h, 95f, QiData.getCurrent(p), "sprint + sneak steps for 5 Qi");
+        near(h, 100f, QiData.getCurrent(p), "sprinting and sneaking no longer step");
+        c.activate(p, 4, AbilityAction.USE);
+        near(h, 95f, QiData.getCurrent(p), "Shift + V steps for 5 Qi");
         eq(h, 2, amp(husk, MobEffects.MOVEMENT_SLOWDOWN), "Slowness III at the origin");
         ticks(p, 119);
+        c.activate(p, 4, AbilityAction.USE);
         near(h, 95f, QiData.getCurrent(p), "tier 2 cooldown is 120 ticks");
         ticks(p, 1);
+        c.activate(p, 4, AbilityAction.USE);
         near(h, 90f, QiData.getCurrent(p), "steps again at 120 ticks");
         h.succeed();
     }

@@ -812,9 +812,6 @@ public final class YuanDiAbilityHandler {
         // --- Smite II's slow field ---
         tickSlowFields(sp);
 
-        // --- Primordial Step (passive: sprint + sneak triggers blink) ---
-        tickPrimordialStep(sp);
-
         // --- Dominated mob AI tick (every 10 ticks for performance) ---
         if (sp.tickCount % 10 == 0) {
             tickDominatedMobs(sp);
@@ -1044,21 +1041,17 @@ public final class YuanDiAbilityHandler {
     }
 
     // =======================================================================
-    // PRIMORDIAL STEP — passive (sprint + sneak = blink)
+    // PRIMORDIAL STEP — Shift + V (blink)
     // =======================================================================
 
     /**
-     * Checks if the player is sprinting and sneaking simultaneously; if so,
-     * teleports them forward 8 blocks in their look direction.
+     * Shift + V: teleports him forward 8 blocks in his look direction.
      * T2: also emits a fear pulse at the origin point.
      */
-    private static void tickPrimordialStep(ServerPlayer player) {
+    public static void usePrimordialStep(ServerPlayer player) {
         Set<String> nodes = SkillTreeData.getUnlockedNodes(player);
         int tier = YuanDiSkillTree.TREE.highestTier(nodes, "yd_step");
         if (tier < 1) return;
-
-        // Only trigger when sprinting and sneaking at the same time
-        if (!player.isSprinting() || !player.isShiftKeyDown()) return;
 
         UUID uuid = player.getUUID();
         int cd = STEP_COOLDOWNS.getOrDefault(uuid, 0);
