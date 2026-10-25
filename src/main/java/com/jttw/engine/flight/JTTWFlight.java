@@ -148,7 +148,11 @@ public final class JTTWFlight {
                 && SkillTreeData.getEsFlightTier(player) >= 1;
         // so is Sun Wukong's Cloud Step: he rides a cloud from the first, slower than the Nimbus
         boolean cloudStep = wukong && SkillTreeData.getFlightTier(player) >= 1;
-        boolean fliesFromFirst = erlang || cloudStep;
+        // and the Phoenix's Rising Ember: it rises on its own fire from the first, never sinking
+        boolean ember = com.jttw.engine.reincarnation.ReincarnationOutcome.PHOENIX.id.equals(
+                tag.getString(com.jttw.engine.reincarnation.AlignmentData.KEY_REINCARNATION_OUTCOME))
+                && SkillTreeData.getPhEmberTier(player) >= 1;
+        boolean fliesFromFirst = erlang || cloudStep || ember;
         double speed = fliesFromFirst && tier <= 1 ? FlightSteering.FIRST_FLIGHT_SPEED : FlightSteering.speedFor(tier, wukong);
         return new FlightProfile(speed, isGlideOnly(player) && !fliesFromFirst, boost(player), tag.getBoolean(THRUST_TAG), own);
     }

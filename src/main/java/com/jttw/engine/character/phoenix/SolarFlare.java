@@ -105,7 +105,7 @@ public final class SolarFlare {
             float burn = LevelPower.scaled(p, burnPerSecond(tier));
             for (LivingEntity e : within(p, r)) {
                 e.igniteForSeconds(3);
-                e.hurt(p.damageSources().playerAttack(p), e.getType().is(EntityTypeTags.UNDEAD) ? burn * 2 : burn);
+                PhoenixAbilityHandler.hurtWithOwnFire(p, e, p.damageSources().playerAttack(p), e.getType().is(EntityTypeTags.UNDEAD) ? burn * 2 : burn);
             }
         }
         // its body blazes; a ring of flame marks its reach
@@ -137,7 +137,7 @@ public final class SolarFlare {
         double r = reach(tier);
         float burn = LevelPower.scaled(p, burnPerSecond(tier)) * 2;
         for (LivingEntity e : within(p, r)) {
-            e.hurt(p.damageSources().playerAttack(p), e.getType().is(EntityTypeTags.UNDEAD) ? burn * 2 : burn);
+            PhoenixAbilityHandler.hurtWithOwnFire(p, e, p.damageSources().playerAttack(p), e.getType().is(EntityTypeTags.UNDEAD) ? burn * 2 : burn);
             e.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 40, 0), p);
             e.igniteForSeconds(4);
         }

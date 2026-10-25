@@ -69,17 +69,17 @@ public final class PhoenixSkillTree {
         // ── FLAMETHROWER (col 0, HELD type) ──────────────────────────────
         TREE.add(new SkillNode(
                 FLAME_1, "Flamethrower I",
-                new String[]{ "Hold V: breathe fire.", "Range scales with level.", "Cannot move while active." },
+                new String[]{ "Hold V: breathe fire, 5 to 20", "blocks by level; 5 Qi a sec.", "Cannot move while active." },
                 2, 0, 0, List.of(), AbilityType.HELD, 1, "Flamethrower"
         ));
         TREE.add(new SkillNode(
                 FLAME_2, "Flamethrower II",
-                new String[]{ "Increased damage. Targets", "burn longer. Reduced Qi", "drain." },
+                new String[]{ "+50% damage. Targets burn", "3 s, not 2. 30% less Qi", "drain." },
                 3, 0, 1, List.of(FLAME_1), AbilityType.HELD, 2, "Flamethrower"
         ));
         TREE.add(new SkillNode(
                 FLAME_3, "Flamethrower III",
-                new String[]{ "Beam widens to 3 blocks", "at max level. Devastating", "inferno." },
+                new String[]{ "+50% damage again. The beam", "widens with level, to 3", "blocks at level 100." },
                 4, 0, 2, List.of(FLAME_2), AbilityType.HELD, 3, "Flamethrower"
         ));
 
@@ -98,7 +98,7 @@ public final class PhoenixSkillTree {
         // ── REBIRTH MASTERY (col 2, PASSIVE) ─────────────────────────────
         TREE.add(new SkillNode(
                 REBIRTH_1, "Rebirth Mastery I",
-                new String[]{ "Revive explosion radius", "increased to 8 blocks.", "Stronger fire burst." },
+                new String[]{ "Revive explosion radius", "increased to 8 blocks; it", "deals 40% of max HP, not 25%." },
                 2, 2, 0, List.of(), AbilityType.PASSIVE, 1, "Rebirth Mastery"
         ));
         TREE.add(new SkillNode(
@@ -132,7 +132,7 @@ public final class PhoenixSkillTree {
         ));
         TREE.add(new SkillNode(
                 EMBER_2, "Rising Ember II",
-                new String[]{ "Flight speed greatly", "increased. Immune to all", "fire and lava damage." },
+                new String[]{ "Flies faster: cruising speed.", "Immune to all fire and", "lava damage." },
                 3, 4, 1, List.of(EMBER_1), AbilityType.PASSIVE, 2, "Rising Ember"
         ));
 
@@ -144,7 +144,7 @@ public final class PhoenixSkillTree {
         ));
         TREE.add(new SkillNode(
                 TALONS_2, "Molten Talons II",
-                new String[]{ "Fire damage you deal heals", "you for 25%.", "" },
+                new String[]{ "Your fire (Flamethrower, Solar", "Flare, any fire you deal)", "heals you 25% of its damage." },
                 3, 5, 1, List.of(TALONS_1), AbilityType.PASSIVE, 2, "Molten Talons"
         ));
         TREE.add(new SkillNode(
@@ -190,12 +190,12 @@ public final class PhoenixSkillTree {
         // ── TRUE FORM (col 8, TOGGLE) ──────────────────────────────────
         TREE.add(new SkillNode(
                 TRUE_1, "Vermilion Bird I",
-                new String[]{ "Shift + M: become the Vermilion Bird,", "20 s. x3 health, x2.5", "attack. Then exhausted 1 min." },
+                new String[]{ "Shift + M: become the Vermilion Bird,", "20 s: it flies, x3 health, x2.5", "attack. Then exhausted 1 min." },
                 4, 8, 0, List.of(), AbilityType.TOGGLE, 1, "Vermilion Bird"
         ));
         TREE.add(new SkillNode(
                 TRUE_2, "Vermilion Bird II",
-                new String[]{ "30 s. It flies; fire trails", "where it passes, and its", "wingbeats burn all near." },
+                new String[]{ "30 s. Fire trails where it", "flies, and its wingbeats burn", "all within 4 blocks." },
                 5, 8, 1, List.of(TRUE_1), AbilityType.TOGGLE, 2, "Vermilion Bird"
         ));
         TREE.add(new SkillNode(

@@ -405,6 +405,44 @@ public class NezhaGameTests {
         h.succeed();
     }
 
+    @GameTest(template = PLATFORM, batch = "wheelStepCruisesAndBlazingTrailFliesFastestTrailingFire")
+    public static void wheelStepCruisesAndBlazingTrailFliesFastestTrailingFire(GameTestHelper h) {
+        ServerPlayer p = nezha(h);
+        p.setItemSlot(EquipmentSlot.FEET, new ItemStack(ModItems.WIND_FIRE_WHEELS.get()));
+        grant(p, "nz_flight_1");
+        tick(p, NezhaAbilityHandler::onPlayerTick, 1);
+        var wheelStep = JTTWFlight.profile(p);
+        check(h, !wheelStep.glide(), "Wheel Step flies, never a glide");
+        near(h, com.jttw.engine.flight.FlightSteering.CRUISE_SPEED, wheelStep.speed(), "Wheel Step: cruising speed");
+        p.getAbilities().flying = true;
+        check(h, !NezhaAbilityHandler.leavesFireTrail(p), "no trail of fire before Blazing Trail");
+
+        grant(p, "nz_flight_2");
+        tick(p, NezhaAbilityHandler::onPlayerTick, 1);
+        var blazing = JTTWFlight.profile(p);
+        check(h, !blazing.glide(), "Blazing Trail flies");
+        near(h, com.jttw.engine.flight.FlightSteering.FAST_SPEED, blazing.speed(), "Blazing Trail: the fastest");
+        check(h, blazing.speed() > wheelStep.speed(), "faster than Wheel Step");
+        check(h, NezhaAbilityHandler.leavesFireTrail(p), "a trail of fire in flight");
+        p.getAbilities().flying = false;
+        check(h, !NezhaAbilityHandler.leavesFireTrail(p), "none on the ground");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM, batch = "threeHeadsSixArmsEndsWithHisDeath")
+    public static void threeHeadsSixArmsEndsWithHisDeath(GameTestHelper h) {
+        ServerPlayer p = nezha(h);
+        grant(p, "nz_form_1");
+        NezhaAbilityHandler.toggleThreeHeadsSixArms(p);
+        check(h, NezhaAbilityHandler.threeHeadsActive(p), "the form is upon him");
+        NezhaAbilityHandler.onDeath(new net.neoforged.neoforge.event.entity.living.LivingDeathEvent(p,
+                h.getLevel().damageSources().generic()));
+        check(h, !NezhaAbilityHandler.threeHeadsActive(p), "it ends with him, and drains no more Qi");
+        eq(h, null, modifier(p, Attributes.ATTACK_DAMAGE, "jttw:three_heads_atk"), "its strength gone");
+        check(h, !p.getPersistentData().getBoolean("jttw_nz_three_heads"), "no spear barrage without it");
+        h.succeed();
+    }
+
     @GameTest(template = PLATFORM, batch = "huntianClothGivesMagicResistance")
     public static void huntianClothGivesMagicResistance(GameTestHelper h) {
         ServerPlayer p = nezha(h);

@@ -63,6 +63,20 @@ public final class NezhaAbilityHandler {
 
     private static final ResourceLocation THREE_HEADS_ATK_UUID = JTTWEngine.id("three_heads_atk");
     private static final float THREE_HEADS_QI_DRAIN = 0.15f;
+    /**
+     * The flight speed tier his Wheel Step and Blazing Trail fly at: cruising on the wheels alone,
+     * the fastest with Blazing Trail. His wheels never merely glide.
+     */
+    public static int wheelsSpeedTier(int flightNodeTier) {
+        return flightNodeTier <= 0 ? 0 : Math.min(3, flightNodeTier + 1);
+    }
+
+    /** Blazing Trail: in flight on his wheels he leaves a trail of fire behind him. */
+    public static boolean leavesFireTrail(ServerPlayer sp) {
+        return isNezha(sp) && SkillTreeData.getNzFlightTier(sp) >= 2 && sp.getAbilities().flying
+                && !com.jttw.engine.item.Armory.find(sp, "wind_fire_wheels").isEmpty();
+    }
+
     /** Armament Mastery I-III: what his armaments in hand add to his attack. */
     private static final double[] ARM_MASTERY = {0, 0.05, 0.10, 0.25};
 
@@ -224,6 +238,19 @@ public final class NezhaAbilityHandler {
                         + String.format("%.1f", damage) + " §edamage!"));
     }
 
+    /** Whether Three Heads Six Arms is upon him now. */
+    public static boolean threeHeadsActive(ServerPlayer player) {
+        return ACTIVE_THREE_HEADS.contains(player.getUUID());
+    }
+
+    /** Ends Three Heads Six Arms without a word: on death, and on leaving the world. */
+    private static void endThreeHeads(ServerPlayer player) {
+        ACTIVE_THREE_HEADS.remove(player.getUUID());
+        var atkAttr = player.getAttribute(Attributes.ATTACK_DAMAGE);
+        if (atkAttr != null) atkAttr.removeModifier(THREE_HEADS_ATK_UUID);
+        player.getPersistentData().putBoolean("jttw_nz_three_heads", false);
+    }
+
     public static void toggleThreeHeadsSixArms(ServerPlayer player) {
         if (SkillTreeData.getNzFormTier(player) < 1) return;
 
@@ -286,12 +313,20 @@ public final class NezhaAbilityHandler {
         int flightTier = SkillTreeData.getNzFlightTier(sp);
         if (hasWheels && flightTier >= 1) {
             com.jttw.engine.flight.JTTWFlight.setUniversalFlight(sp, true);
-            com.jttw.engine.flight.JTTWFlight.setFlightSpeedTier(sp, flightTier);
+            com.jttw.engine.flight.JTTWFlight.setFlightSpeedTier(sp, wheelsSpeedTier(flightTier));
+            com.jttw.engine.flight.JTTWFlight.setGlideOnly(sp, false);
         } else {
             // Only revoke if we previously granted it
             if (com.jttw.engine.flight.JTTWFlight.hasUniversalFlight(sp)) {
                 com.jttw.engine.flight.JTTWFlight.setUniversalFlight(sp, false);
             }
+        }
+
+        // Blazing Trail: fire streams from the wheels as he flies
+        if (sp.tickCount % 2 == 0 && leavesFireTrail(sp)) {
+            Vec3 back = sp.getDeltaMovement().scale(-0.5);
+            sp.serverLevel().sendParticles(ParticleTypes.FLAME, sp.getX() + back.x, sp.getY() + 0.1 + back.y,
+                    sp.getZ() + back.z, 4, 0.15, 0.1, 0.15, 0.01);
         }
 
         tickSamadhiStream(sp);
@@ -340,10 +375,22 @@ public final class NezhaAbilityHandler {
         }
     }
 
+    /**
+     * Three Heads Six Arms ends with him. It was kept by his id, so it outlived him: draining the
+     * Qi of the man respawned, who had none of its strength.
+     */
+    @SubscribeEvent
+    public static void onDeath(net.neoforged.neoforge.event.entity.living.LivingDeathEvent event) {
+        if (event.getEntity() instanceof ServerPlayer sp && ACTIVE_THREE_HEADS.contains(sp.getUUID())) endThreeHeads(sp);
+    }
+
     @SubscribeEvent
     public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         UUID id = event.getEntity().getUUID();
-        if (event.getEntity() instanceof ServerPlayer sp) stopSamadhiFire(sp); // the key is not held after logging back in
+        if (event.getEntity() instanceof ServerPlayer sp) {
+            stopSamadhiFire(sp); // the key is not held after logging back in
+            endThreeHeads(sp); // nor the form: its spear barrage went on without it
+        }
         ACTIVE_THREE_HEADS.remove(id);
         CHARGING_DETONATION.remove(id);
         DETONATION_IMMUNE.remove(id);

@@ -299,7 +299,7 @@ public class PhoenixGameTests {
         PhoenixAbilityHandler.onTakeDamage(incoming(p, h.getLevel().damageSources().generic(), 1f));
         double dist = p.distanceTo(far);
         // tier 1: 8-block radius
-        near(h, max * 0.25 * (1 - dist / 8.0), of(hits, DamageTypes.ON_FIRE).get(0).amount(), "blast damage at 8-block radius");
+        near(h, max * 0.40 * (1 - dist / 8.0), of(hits, DamageTypes.ON_FIRE).get(0).amount(), "a stronger burst (40% of max HP) at 8-block radius");
         h.succeed();
     }
 
@@ -381,12 +381,62 @@ public class PhoenixGameTests {
         PhoenixAbilityHandler.onDealDamage(incoming(shot, ds.arrow(arrow, p), 3f));
         check(h, shot.getRemainingFireTicks() <= 0, "arrows do not ignite");
 
-        grant(p, "ph_talons_2");
-        p.setHealth(10f);
         SmallFireball ball = new SmallFireball(h.getLevel(), p, net.minecraft.world.phys.Vec3.ZERO);
-        PhoenixAbilityHandler.onDealDamage(incoming(shot, ds.fireball(ball, p), 8f));
-        near(h, 12f, p.getHealth(), "fire damage heals 25% of 8");
+        p.setHealth(10f);
+        shot.hurt(ds.fireball(ball, p), 2f);
+        near(h, 10f, p.getHealth(), "no healing from fire before Molten Talons II");
+        grant(p, "ph_talons_2");
+        shot.invulnerableTime = 0;
+        shot.hurt(ds.fireball(ball, p), 6f); // not a kill: its experience would level the Phoenix and heal it
+        near(h, 11.5f, p.getHealth(), "fire damage heals 25% of 6");
         ball.discard();
+        h.succeed();
+    }
+
+    /** Molten Talons II feeds on its own fire, the Flamethrower's and Solar Flare's, by what it truly dealt. */
+    @GameTest(template = PLATFORM, batch = "moltenTalonsTwoHealsFromItsOwnFire")
+    public static void moltenTalonsTwoHealsFromItsOwnFire(GameTestHelper h) {
+        ServerPlayer p = phoenix(h);
+        grant(p, "ph_flame_1");
+        IronGolem golem = golemInFlame(h, p);
+        p.setHealth(10f);
+        p.tickCount = 1; // clear of the innate regen, which comes on every 20th tick
+        PhoenixAbilityHandler.startFlame(p);
+        ticks(p, 4);
+        near(h, 10f, p.getHealth(), "the Flamethrower heals nothing before Molten Talons II");
+        grant(p, "ph_talons_1", "ph_talons_2");
+        float before = golem.getHealth();
+        ticks(p, 4);
+        float dealt = before - golem.getHealth();
+        check(h, dealt > 0, "the golem burns");
+        near(h, 10f + dealt * PhoenixAbilityHandler.TALONS_FIRE_HEAL, p.getHealth(), "a quarter of what the flame dealt");
+        PhoenixAbilityHandler.stopFlame(p);
+
+        // Solar Flare, a second's burn
+        grant(p, "ph_radiance_1");
+        Pig pig = mob(h, EntityType.PIG, 0, 0);
+        pig.moveTo(p.getX() + 2, p.getY(), p.getZ());
+        p.setHealth(10f);
+        float pigBefore = pig.getHealth(), golemBefore = golem.getHealth(); // the golem is in its reach too
+        check(h, com.jttw.engine.character.phoenix.SolarFlare.cast(p), "a sun");
+        tick(p, com.jttw.engine.character.phoenix.SolarFlare::onPlayerTick, 1); // its first tick burns
+        float burnt = pigBefore - pig.getHealth();
+        check(h, burnt > 0, "the pig burns in the sun");
+        burnt += golemBefore - golem.getHealth();
+        near(h, 10f + burnt * PhoenixAbilityHandler.TALONS_FIRE_HEAL, p.getHealth(), "a quarter of the sun's burn");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM, batch = "moltenTalonsTierThreeBurstSparesThePhoenix")
+    public static void moltenTalonsTierThreeBurstSparesThePhoenix(GameTestHelper h) {
+        ServerPlayer p = phoenix(h);
+        grant(p, "ph_talons_1", "ph_talons_2", "ph_talons_3");
+        Pig victim = mob(h, EntityType.PIG, 0, 0);
+        p.moveTo(victim.getX() + 1.5, victim.getY(), victim.getZ());
+        victim.setRemainingFireTicks(40);
+        List<Hit> self = watch(p);
+        PhoenixAbilityHandler.onEntityDeath(new LivingDeathEvent(victim, h.getLevel().damageSources().playerAttack(p)));
+        eq(h, 0, self.size(), "its own talons' burst does not touch it");
         h.succeed();
     }
 
@@ -422,6 +472,22 @@ public class PhoenixGameTests {
         p.setRemainingFireTicks(100);
         ticks(p, 1);
         check(h, !p.isOnFire(), "flames put out on tick");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM, batch = "risingEmberFliesFromItsFirstTierAndFasterAtItsSecond")
+    public static void risingEmberFliesFromItsFirstTierAndFasterAtItsSecond(GameTestHelper h) {
+        ServerPlayer p = phoenix(h);
+        com.jttw.engine.progression.skilltree.SkillTreeData.setPoints(p, 50);
+        check(h, com.jttw.engine.progression.skilltree.SkillPurchase.purchase(p, "ph_ember_1"), "buy Rising Ember I");
+        check(h, com.jttw.engine.flight.JTTWFlight.hasUniversalFlight(p), "it flies");
+        var first = com.jttw.engine.flight.JTTWFlight.profile(p);
+        check(h, !first.glide(), "true flight, as its tooltip says: Space to ascend");
+        near(h, com.jttw.engine.flight.FlightSteering.FIRST_FLIGHT_SPEED, first.speed(), "a little under cruising");
+        check(h, com.jttw.engine.progression.skilltree.SkillPurchase.purchase(p, "ph_ember_2"), "buy Rising Ember II");
+        var second = com.jttw.engine.flight.JTTWFlight.profile(p);
+        check(h, !second.glide(), "still flies");
+        near(h, com.jttw.engine.flight.FlightSteering.CRUISE_SPEED, second.speed(), "faster: cruising speed");
         h.succeed();
     }
 
