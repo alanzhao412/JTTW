@@ -24,7 +24,34 @@ different numbers:
 | **Primordial** | 1200 | Erratic | Punishing early game, dramatically outscales everything after level 50. A long-term investment. |
 | **Divine Beast** | 1100 | Medium-fast | Naturally strong and stable. +16% stats at each form phase (20/40/60/80/100). |
 | **Yaoguai** | 1030 | Fluctuating | Lower stat floor, strong transformation mechanics. Power comes from abilities, not raw stats. |
-| **Heavenly** | 1000 | Medium | Widest utility toolkit. Ability-expansion focused; higher forms gain perception and authority advantages. |
+| **Heavenly** | 1000 | Medium | Widest utility toolkit. Ability-expansion focused: power comes from each character's own skill tree. |
+
+### Class passives
+
+Besides each character's own skill tree there is one shared class layer
+([`AbilityUnlock`](src/main/java/com/jttw/engine/progression/skilltree/AbilityUnlock.java)), shown on
+the character screen's Skills tab (H) and announced in chat as each level is reached. It belongs to
+the **Divine Beasts**: their forms come by level alone and stand on it as free milestones, and
+between them come passives bought with skill points from the same pool as the tree (1 point below
+level 50, 2 from 50, 3 at 100), kept running by
+[`BeastPassives`](src/main/java/com/jttw/engine/character/divinebeast/BeastPassives.java):
+
+| Lv | Entry | Cost | What it does |
+|---|---|---|---|
+| 1 | Lesser Form | free milestone | The beast's first shape, worn from the day you awaken. |
+| 20 | Domain Sense | 1 | Hostile creatures that take you as their target within 24 blocks glow for you alone (3 s, renewed while they hunt you). |
+| 30 | Guardian's Hide | 1 | +10% physical and magic resistance (a share of the whole, so it multiplies with the domain buff). |
+| 40 | Intermediate Form | free milestone | The true beast form. |
+| 60 | Domain Authority | 2 | Hostile creatures below your level within 8 blocks get Slowness I and Weakness I, renewed each second while they stay. A creature with no level of its own (a vanilla mob) counts as lower; players, tamed or owned creatures, allies and anything not hostile are left alone. |
+| 80 | Sovereign Form | free milestone | The sovereign beast. |
+| 100 | Apex Domain | 3, after Domain Authority | The domain reaches 16 blocks, and the creatures it holds deal 20% less damage, to anyone. |
+
+The other classes draw their power from their characters' trees. Of their old class abilities only
+the Heavenly cloud is left: **Heavenly Mobility** (Heavenly, level 10, 1 point), a slow cloud to fly
+on. The rest were retired
+([`RetiredUnlocks`](src/main/java/com/jttw/engine/progression/skilltree/RetiredUnlocks.java)): a save
+that still holds one, or a paid-for form, has it cleared at login and its points returned, once,
+with a line in chat saying what came back.
 
 Stats resolve at runtime through
 [`StatBlock.compute()`](src/main/java/com/jttw/engine/progression/stats/StatBlock.java) from class and

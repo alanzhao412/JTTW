@@ -567,10 +567,16 @@ public class CharacterScreen extends Screen {
     // -----------------------------------------------------------------------
 
     private static final int NODE_W  = 290;
-    private static final int NODE_H  = 18;
+    /** A node's first row (level, name, state); its description is wrapped beneath. */
+    private static final int NODE_ROW_H = 13;
     private static final int NODE_GAP = 8;
     private static final int SPINE_X_OFFSET = 12; // spine line x within content area
 
+    /**
+     * The class layer: the Divine Beast's milestones and passives, the Heavenly cloud. Each node
+     * shows its level, its name, where it stands (reached, learned, its price, what it still
+     * needs) and, under them, what it does.
+     */
     private void renderSkills(GuiGraphics g, Minecraft mc, Player player,
                                int cx, int cy, int cw, int ch, int mouseX, int mouseY) {
         buyable.clear();
@@ -589,80 +595,118 @@ public class CharacterScreen extends Screen {
                 .toList();
 
         // Header: the class, and the points to spend (the same pool as the skill tree's)
-        g.drawString(mc.font, "§6" + formatClassName(cls) + " §7Abilities  §8|  §7Skill points §e" + points,
+        String kind = cls == ProgressionClass.DIVINE_BEAST ? " §7Passives" : " §7Abilities";
+        g.drawString(mc.font, "§6" + formatClassName(cls) + kind + "  §8|  §7Skill points §e" + points,
                 cx, cy, C_LABEL, false);
         g.fill(cx, cy + 10, cx + cw, cy + 11, C_SEPARATOR);
 
+        if (unlocks.isEmpty()) {
+            g.drawCenteredString(mc.font, "§7Your class's power is in your own skill tree.",
+                    cx + cw / 2, cy + ch / 2 - 8, C_DESC);
+            g.drawCenteredString(mc.font, "§8(Press K)", cx + cw / 2, cy + ch / 2 + 4, C_DESC);
+            return;
+        }
+
         int listTop = cy + 14;
         int spineX  = cx + SPINE_X_OFFSET;
-
-        // Total content height for scroll clamping
-        int totalH = unlocks.size() * (NODE_H + NODE_GAP);
-        int maxScroll = Math.max(0, totalH - (ch - 16));
-        skillScrollY = Math.min(skillScrollY, maxScroll);
-
         int nodeX = cx + SPINE_X_OFFSET + 12;
         int nodeW = Math.min(NODE_W, cw - SPINE_X_OFFSET - 14);
+
+        // Each node's height: its row, and its description wrapped to the node's width
+        List<List<net.minecraft.util.FormattedCharSequence>> descs = new java.util.ArrayList<>();
+        int[] tops = new int[unlocks.size()];
+        int[] heights = new int[unlocks.size()];
+        int totalH = 0;
+        for (int i = 0; i < unlocks.size(); i++) {
+            var lines = mc.font.split(unlocks.get(i).describe(), nodeW - 8);
+            descs.add(lines);
+            tops[i] = totalH;
+            heights[i] = NODE_ROW_H + lines.size() * mc.font.lineHeight + 3;
+            totalH += heights[i] + NODE_GAP;
+        }
+        int maxScroll = Math.max(0, totalH - (ch - 16));
+        skillScrollY = Math.min(skillScrollY, maxScroll);
 
         // Draw spine line (full height of content, clipped by scissor)
         int spineTop = listTop - skillScrollY;
         g.fill(spineX, spineTop, spineX + 2, spineTop + totalH, C_SPINE);
 
-        // Draw nodes: learned (green), reached and to be bought (gold), or not yet reached (grey)
+        // Draw nodes: held (green), reached and to be bought (gold), or not yet reached (grey)
         for (int i = 0; i < unlocks.size(); i++) {
             AbilityUnlock unlock = unlocks.get(i);
-            boolean unlocked = com.jttw.engine.client.ClientAbilityData.hasClassAbility(unlock.abilityId());
+            int nodeH = heights[i];
+            boolean milestone = unlock.milestone();
+            boolean unlocked = milestone ? unlock.reachedAt(level)
+                    : com.jttw.engine.client.ClientAbilityData.hasClassAbility(unlock.abilityId());
             boolean available = !unlocked && level >= unlock.requiredLevel();
-            boolean affordable = available && points >= unlock.cost();
+            boolean needsOther = available && unlock.requires() != null
+                    && !com.jttw.engine.client.ClientAbilityData.hasClassAbility(unlock.requires());
+            boolean affordable = available && !needsOther && points >= unlock.cost();
 
-            int nodeY = listTop + i * (NODE_H + NODE_GAP) - skillScrollY;
+            int nodeY = listTop + tops[i] - skillScrollY;
 
             // Skip fully off-screen
-            if (nodeY + NODE_H < listTop) continue;
+            if (nodeY + nodeH < listTop) continue;
             if (nodeY > listTop + ch - 16) break;
 
             boolean hover = affordable && mouseX >= nodeX && mouseX < nodeX + nodeW
-                    && mouseY >= nodeY && mouseY < nodeY + NODE_H;
-            if (affordable) buyable.put(unlock.abilityId(), new int[]{nodeX, nodeY, nodeW, NODE_H});
+                    && mouseY >= nodeY && mouseY < nodeY + nodeH;
+            if (affordable) buyable.put(unlock.abilityId(), new int[]{nodeX, nodeY, nodeW, nodeH});
 
-            // Color spine segment above this node as done if unlocked
+            // Color spine segment above this node as done if held
             if (unlocked && i > 0) {
-                int prevNodeY = listTop + (i - 1) * (NODE_H + NODE_GAP) - skillScrollY + NODE_H;
-                g.fill(spineX, prevNodeY, spineX + 2, nodeY + NODE_H / 2, C_SPINE_DONE);
+                int prevNodeY = listTop + tops[i - 1] - skillScrollY + heights[i - 1];
+                g.fill(spineX, prevNodeY, spineX + 2, nodeY + NODE_ROW_H / 2, C_SPINE_DONE);
             }
 
             int border = unlocked ? C_NODE_BORDER_U
                     : available ? (hover ? C_NODE_HOVER_A : C_NODE_BORDER_A) : C_NODE_BORDER_L;
             int bg = unlocked ? C_NODE_UNLOCKED : available ? C_NODE_AVAIL : C_NODE_LOCKED;
 
-            // Diamond connector on spine
-            int dotY = nodeY + NODE_H / 2;
+            // Diamond connector on spine, level with the node's row
+            int dotY = nodeY + NODE_ROW_H / 2;
             g.fill(spineX - 1, dotY - 1, spineX + 3, dotY + 2, border);
 
             // Node: border, then the background inset
-            g.fill(nodeX - 1, nodeY - 1, nodeX + nodeW + 1, nodeY + NODE_H + 1, border);
-            g.fill(nodeX, nodeY, nodeX + nodeW, nodeY + NODE_H, bg);
+            g.fill(nodeX - 1, nodeY - 1, nodeX + nodeW + 1, nodeY + nodeH + 1, border);
+            g.fill(nodeX, nodeY, nodeX + nodeW, nodeY + nodeH, bg);
 
-            int textY = nodeY + (NODE_H - mc.font.lineHeight) / 2 + 1;
+            int textY = nodeY + 3;
 
             // Level badge
             String lvlTag = "Lv " + unlock.requiredLevel();
             g.drawString(mc.font, lvlTag, nodeX + 3, textY,
                     unlocked || available ? C_NODE_LEVEL_U : C_NODE_LEVEL_L, false);
 
-            // Ability name
-            String nameText = (unlocked ? "§a✦ " : available ? "§e◆ " : "§7⬡ ") + unlock.displayName();
+            // Name
+            String mark = unlocked ? "§a✦ " : available ? "§e◆ " : "§7⬡ ";
             int nameX = nodeX + mc.font.width("Lv 100") + 10;
-            g.drawString(mc.font, nameText, nameX, textY,
+            g.drawString(mc.font, Component.literal(mark).append(unlock.name()), nameX, textY,
                     unlocked ? C_NODE_TEXT_U : available ? C_CLASS_NAME : C_NODE_TEXT_L, false);
 
-            // What it takes: learned, its price, or the level it needs
+            // Where it stands: a milestone reached or to come; learned; its price; what it needs
             String pts = unlock.cost() + (unlock.cost() == 1 ? " pt" : " pts");
-            String state = unlocked ? "§aLearned"
-                    : affordable ? (hover ? "§fClick to learn · " : "§eLearn · ") + pts
-                    : available ? "§cNeeds " + pts
-                    : "§8" + pts + " at Lv " + unlock.requiredLevel();
+            String state;
+            if (milestone) {
+                state = unlocked ? "§aReached · free" : "§8Free at Lv " + unlock.requiredLevel();
+            } else if (unlocked) {
+                state = "§aLearned";
+            } else if (needsOther) {
+                AbilityUnlock needed = AbilityUnlock.byId(unlock.requires());
+                state = "§cNeeds " + (needed == null ? unlock.requires() : needed.name().getString());
+            } else {
+                state = affordable ? (hover ? "§fClick to learn · " : "§eLearn · ") + pts
+                        : available ? "§cNeeds " + pts
+                        : "§8" + pts + " at Lv " + unlock.requiredLevel();
+            }
             g.drawString(mc.font, state, nodeX + nodeW - mc.font.width(state) - 4, textY, C_WHITE, false);
+
+            // What it does
+            int lineY = nodeY + NODE_ROW_H;
+            for (var line : descs.get(i)) {
+                g.drawString(mc.font, line, nodeX + 4, lineY, unlocked || available ? C_DESC : C_NODE_TEXT_L, false);
+                lineY += mc.font.lineHeight;
+            }
         }
 
         // Scroll hint

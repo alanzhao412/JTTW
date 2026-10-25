@@ -96,6 +96,12 @@ public class LadyWhiteBoneEntity extends ZoneBoss implements RangedAttackMob {
     /** How many of the three health marks (3/4, 1/2, 1/4) have called her servants. */
     private int marks;
 
+    /** Its level, as its name shows it. */
+    @Override
+    public int mobLevel() {
+        return LEVEL;
+    }
+
     public LadyWhiteBoneEntity(EntityType<? extends LadyWhiteBoneEntity> type, Level level) {
         super(type, level);
         xpReward = 200;

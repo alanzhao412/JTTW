@@ -91,6 +91,12 @@ public abstract class DragonKingEntity extends ZoneBoss implements RangedAttackM
     private Vec3 whirl;
     private int whirlLeft;
 
+    /** Its level, as its name shows it. */
+    @Override
+    public int mobLevel() {
+        return LEVEL;
+    }
+
     protected DragonKingEntity(EntityType<? extends DragonKingEntity> type, Level level) {
         super(type, level);
         xpReward = 300;

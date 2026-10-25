@@ -30,7 +30,7 @@ import net.minecraft.world.level.Level;
  * shoe: no XP, no karma, no boss bar. Struck down, or after a minute, it falls back into the shoe
  * it was (dropped where it stood), and whoever is near learns she has fled deeper into the cave.
  */
-public class EarthFlowDecoyEntity extends PathfinderMob {
+public class EarthFlowDecoyEntity extends PathfinderMob implements com.jttw.engine.entity.zone.MobLevel {
 
     /** Six of a level-43 character's ordinary hits to fell; a cut of a twentieth of their health. */
     public static final double HITS = 6, CUT = 0.05;
@@ -46,6 +46,12 @@ public class EarthFlowDecoyEntity extends PathfinderMob {
         setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(ModItems.EARTH_FLOW_SWORD_FEMALE.get()));
         setDropChance(EquipmentSlot.MAINHAND, 0f);
         setDropChance(EquipmentSlot.OFFHAND, 0f);
+    }
+
+    /** Hers: it is her likeness. */
+    @Override
+    public int mobLevel() {
+        return LadyEarthFlowEntity.LEVEL;
     }
 
     public static AttributeSupplier.Builder createAttributes() {

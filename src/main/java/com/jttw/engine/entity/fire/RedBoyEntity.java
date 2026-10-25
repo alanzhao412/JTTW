@@ -93,6 +93,12 @@ public class RedBoyEntity extends ZoneBoss {
     /** How far round him his fight spreads: his carts' ring, his ring of fire, his breath's reach (see {@link #confine}). */
     private double arena = CART_RADIUS;
 
+    /** Its level, as its name shows it. */
+    @Override
+    public int mobLevel() {
+        return LEVEL;
+    }
+
     public RedBoyEntity(EntityType<? extends RedBoyEntity> type, Level level) {
         super(type, level);
         xpReward = 300;

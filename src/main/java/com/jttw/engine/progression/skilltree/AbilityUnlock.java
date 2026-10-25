@@ -1,126 +1,148 @@
 package com.jttw.engine.progression.skilltree;
 
 import com.jttw.engine.progression.stats.ProgressionClass;
+import net.minecraft.network.chat.Component;
+
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * Defines every ability milestone for all four classes.
+ * The class layer beside each character's own skill tree: what a class's members gain, at what
+ * level, besides what their character's tree teaches them.
  *
- * <p>An {@code AbilityUnlock} is a gate — it stores what becomes available at what level for
- * which class. Reaching the level only makes it available: the player buys it with skill points
- * (see {@link #cost()} and {@link SkillPurchase#purchaseClassAbility}). Gameplay systems that
- * care about a specific ability should check:
+ * <p>It belongs, in the end, to the Divine Beasts. Their beast grows into its forms by level
+ * alone, and those forms stand on the list as <b>milestones</b>: reached, never bought, costing
+ * nothing. Between them come the beast's <b>passives</b>, bought with skill points once their
+ * level is reached (see {@link #cost()} and {@link SkillPurchase#purchaseClassAbility}), and kept
+ * running by {@link com.jttw.engine.character.divinebeast.BeastPassives}. The other classes'
+ * power is in their characters' trees; of their old class abilities only the Heavenly cloud
+ * remains ({@code heavenly_mobility}, see
+ * {@link com.jttw.engine.flight.JTTWFlight#hasHeavenlyCloud}). Those that were retired, and the
+ * points paid for them, are in {@link RetiredUnlocks}.
+ *
+ * <p>A system that cares about a bought entry checks:
  * <pre>{@code
  * if (PlayerLevel.hasAbility(player, "heavenly_mobility")) { ... }
  * }</pre>
+ * A milestone is never held that way; it is reached when the level is ({@link #reachedAt}).
  *
- * <p>Adding a new ability requires only:
- * <ol>
- *   <li>A new {@code reg()} line in the static block below.</li>
- *   <li>A check in the relevant gameplay system using the matching ability ID string.</li>
- * </ol>
- * No changes to {@link LevelManager} or {@link PlayerLevel} are needed.
- *
- * <p>Only {@code heavenly_mobility} does anything yet (the Heavenly cloud, see
- * {@link com.jttw.engine.flight.JTTWFlight#hasHeavenlyCloud}); the rest can be bought but have no
- * effect.
- *
- * <p><b>Milestone overview:</b>
+ * <p><b>The list:</b>
  * <pre>
- * ── DIVINE BEAST (form-gated, domain authority) ──────────────────────────
- *   Lv  1   lesser_form         Base identity. Lesser domain presence.
- *   Lv 20   domain_sense        Passive territorial awareness.
- *   Lv 40   intermediate_form   Form evolution phase I.
- *   Lv 60   domain_authority    Area suppression aura.
- *   Lv 80   sovereign_form      Form evolution phase II.
- *   Lv100   apex_domain         Peak domain control.
+ * ── DIVINE BEAST ──────────────────────────────────────────────────────────
+ *   Lv  1   lesser_form         milestone   The beast's first shape.
+ *   Lv 20   domain_sense        1 pt        Who hunts you within 24 blocks glows for you alone.
+ *   Lv 30   guardians_hide      1 pt        +10% physical and magic resistance.
+ *   Lv 40   intermediate_form   milestone   The true beast.
+ *   Lv 60   domain_authority    2 pts       Lesser hostiles within 8 blocks: Slowness I, Weakness I.
+ *   Lv 80   sovereign_form      milestone   The sovereign beast.
+ *   Lv100   apex_domain         3 pts       The domain to 16 blocks; those in it deal 20% less.
+ *                                           Needs domain_authority.
  *
- * ── HEAVENLY (ability expansion, widest toolkit) ─────────────────────────
- *   Lv 10   heavenly_mobility   A slow cloud to fly on (sprint in flight).
- *   Lv 20   divine_perception   See through concealment and illusions.
- *   Lv 30   formation_sense     Detect enemy formations and hidden traps.
- *   Lv 40   celestial_support   Unlocks support utility package.
- *   Lv 60   heavenly_authority  Command weaker beings. Social power.
- *   Lv 80   eye_of_heaven       Omniscient situational perception.
- *   Lv100   mandate_of_heaven   Peak divine authority. Heaven ratifies your actions.
- *
- * ── PRIMORDIAL (sparse gates, massive payoffs) ───────────────────────────
- *   Lv  1   primordial_seed     Dormant power. Unremarkable start.
- *   Lv 30   awakening           First power stir. Something ancient moves.
- *   Lv 50   half_awakening      MAJOR breakpoint. Stat ramp kicks in. (see StatBlock)
- *   Lv 70   primal_form         First true form emerges.
- *   Lv 90   chaos_embodiment    Near-peak primordial state. Pre-origin power.
- *   Lv100   primordial_origin   Full awakening. Chaos made manifest.
- *
- * ── YAOGUAI (aggressive power spikes, transformation focus) ──────────────
- *   Lv 20   demon_instinct      Combat intuition. Aggression unlocked.
- *   Lv 30   first_spike         Power Spike I. (StatBlock +20% bonus applied)
- *   Lv 50   demon_transformation  Transformation ability unlocked.
- *   Lv 50   second_spike        Power Spike II.
- *   Lv 70   great_demon_body    Body refinement. Hardened form.
- *   Lv 70   third_spike         Power Spike III.
- *   Lv 90   demon_sovereign     Apex Yaoguai form. Demon king territory.
- *   Lv 90   fourth_spike        Power Spike IV.
+ * ── HEAVENLY ──────────────────────────────────────────────────────────────
+ *   Lv 10   heavenly_mobility   1 pt        A slow cloud to fly on (sprint in flight).
  * </pre>
+ *
+ * <p>The English names and descriptions here are the fallbacks; the lang file carries the same
+ * under {@link #nameKey()} and {@link #descriptionKey()}.
  */
 public record AbilityUnlock(
         ProgressionClass cls,
         int requiredLevel,
         String abilityId,
-        String displayName
+        String displayName,
+        String description,
+        boolean milestone,
+        @Nullable String requires
 ) {
+    public static final String LESSER_FORM = "lesser_form";
+    public static final String DOMAIN_SENSE = "domain_sense";
+    public static final String GUARDIANS_HIDE = "guardians_hide";
+    public static final String INTERMEDIATE_FORM = "intermediate_form";
+    public static final String DOMAIN_AUTHORITY = "domain_authority";
+    public static final String SOVEREIGN_FORM = "sovereign_form";
+    public static final String APEX_DOMAIN = "apex_domain";
+    public static final String HEAVENLY_MOBILITY = "heavenly_mobility";
+
     private static final List<AbilityUnlock> REGISTRY = new ArrayList<>();
 
     static {
         // ── DIVINE BEAST ──────────────────────────────────────────────────────
-        reg(ProgressionClass.DIVINE_BEAST,   1, "lesser_form",          "Lesser Form");
-        reg(ProgressionClass.DIVINE_BEAST,  20, "domain_sense",         "Domain Sense");
-        reg(ProgressionClass.DIVINE_BEAST,  40, "intermediate_form",    "Intermediate Form");
-        reg(ProgressionClass.DIVINE_BEAST,  60, "domain_authority",     "Domain Authority");
-        reg(ProgressionClass.DIVINE_BEAST,  80, "sovereign_form",       "Sovereign Form");
-        reg(ProgressionClass.DIVINE_BEAST, 100, "apex_domain",          "Apex Domain");
+        milestone(ProgressionClass.DIVINE_BEAST, 1, LESSER_FORM, "Lesser Form",
+                "Free milestone. The beast's first shape, worn from the day you awaken.");
+        passive(ProgressionClass.DIVINE_BEAST, 20, DOMAIN_SENSE, "Domain Sense",
+                "Hostile creatures that set their sights on you within 24 blocks glow for you alone.", null);
+        passive(ProgressionClass.DIVINE_BEAST, 30, GUARDIANS_HIDE, "Guardian's Hide",
+                "+10% physical and magic resistance.", null);
+        milestone(ProgressionClass.DIVINE_BEAST, 40, INTERMEDIATE_FORM, "Intermediate Form",
+                "Free milestone. The lesser shell is shed: your true beast form.");
+        passive(ProgressionClass.DIVINE_BEAST, 60, DOMAIN_AUTHORITY, "Domain Authority",
+                "Hostile creatures below your level within 8 blocks are slowed and weakened.", null);
+        milestone(ProgressionClass.DIVINE_BEAST, 80, SOVEREIGN_FORM, "Sovereign Form",
+                "Free milestone. Heaven has written your name: the sovereign beast.");
+        passive(ProgressionClass.DIVINE_BEAST, 100, APEX_DOMAIN, "Apex Domain",
+                "Your domain reaches 16 blocks, and the creatures it holds deal 20% less damage.",
+                DOMAIN_AUTHORITY);
 
         // ── HEAVENLY ──────────────────────────────────────────────────────────
-        reg(ProgressionClass.HEAVENLY,  10, "heavenly_mobility",    "Heavenly Mobility");
-        reg(ProgressionClass.HEAVENLY,  20, "divine_perception",    "Divine Perception");
-        reg(ProgressionClass.HEAVENLY,  30, "formation_sense",      "Formation Sense");
-        reg(ProgressionClass.HEAVENLY,  40, "celestial_support",    "Celestial Support");
-        reg(ProgressionClass.HEAVENLY,  60, "heavenly_authority",   "Heavenly Authority");
-        reg(ProgressionClass.HEAVENLY,  80, "eye_of_heaven",        "Eye of Heaven");
-        reg(ProgressionClass.HEAVENLY, 100, "mandate_of_heaven",    "Mandate of Heaven");
-
-        // ── PRIMORDIAL ────────────────────────────────────────────────────────
-        reg(ProgressionClass.PRIMORDIAL,   1, "primordial_seed",    "Primordial Seed");
-        reg(ProgressionClass.PRIMORDIAL,  30, "awakening",          "Awakening");
-        reg(ProgressionClass.PRIMORDIAL,  50, "half_awakening",     "Half Awakening");
-        reg(ProgressionClass.PRIMORDIAL,  70, "primal_form",        "Primal Form");
-        reg(ProgressionClass.PRIMORDIAL,  90, "chaos_embodiment",   "Chaos Embodiment");
-        reg(ProgressionClass.PRIMORDIAL, 100, "primordial_origin",  "Primordial Origin");
-
-        // ── YAOGUAI ───────────────────────────────────────────────────────────
-        reg(ProgressionClass.YAOGUAI,  20, "demon_instinct",        "Demon Instinct");
-        reg(ProgressionClass.YAOGUAI,  30, "first_spike",           "Power Spike I");
-        reg(ProgressionClass.YAOGUAI,  50, "demon_transformation",  "Demon Transformation");
-        reg(ProgressionClass.YAOGUAI,  50, "second_spike",          "Power Spike II");
-        reg(ProgressionClass.YAOGUAI,  70, "great_demon_body",      "Great Demon Body");
-        reg(ProgressionClass.YAOGUAI,  70, "third_spike",           "Power Spike III");
-        reg(ProgressionClass.YAOGUAI,  90, "demon_sovereign",       "Demon Sovereign");
-        reg(ProgressionClass.YAOGUAI,  90, "fourth_spike",          "Power Spike IV");
+        passive(ProgressionClass.HEAVENLY, 10, HEAVENLY_MOBILITY, "Heavenly Mobility",
+                "A slow cloud to fly on: sprint while flying to ride it.", null);
     }
 
-    private static void reg(ProgressionClass cls, int level, String id, String name) {
-        REGISTRY.add(new AbilityUnlock(cls, level, id, name));
+    private static void milestone(ProgressionClass cls, int level, String id, String name, String description) {
+        REGISTRY.add(new AbilityUnlock(cls, level, id, name, description, true, null));
+    }
+
+    private static void passive(ProgressionClass cls, int level, String id, String name, String description,
+                                @Nullable String requires) {
+        REGISTRY.add(new AbilityUnlock(cls, level, id, name, description, false, requires));
     }
 
     /**
-     * Skill points to buy it: 1 below level 50, 2 from level 50, 3 at level 100. Points come one
-     * every 5 levels (20 in all) and the skill trees want about twice that, so these stay cheap
-     * beside a tree node, while the late, big ones cost more.
+     * Skill points to buy it: 1 below level 50, 2 from level 50, 3 at level 100, and nothing for
+     * a milestone, which is not bought. Points come one every 5 levels (20 in all) and the skill
+     * trees want about twice that, so these stay cheap beside a tree node, while the late, big
+     * ones cost more.
      */
     public int cost() {
+        return milestone ? 0 : costAt(requiredLevel);
+    }
+
+    /** What an entry bought at this level costs: the scheme {@link RetiredUnlocks} refunds by, too. */
+    public static int costAt(int requiredLevel) {
         return 1 + requiredLevel / 50;
+    }
+
+    /** Whether it is bought with points (a milestone is not). */
+    public boolean purchasable() {
+        return !milestone;
+    }
+
+    /** Whether a player of this level has reached it (for a milestone, whether it is theirs). */
+    public boolean reachedAt(int level) {
+        return level >= requiredLevel;
+    }
+
+    /** Divine Beast entries are passives; the Heavenly cloud is still called an ability. */
+    public boolean isPassive() {
+        return cls == ProgressionClass.DIVINE_BEAST;
+    }
+
+    public String nameKey() {
+        return "class_unlock.jttw_engine." + abilityId;
+    }
+
+    public String descriptionKey() {
+        return nameKey() + ".desc";
+    }
+
+    public Component name() {
+        return Component.translatableWithFallback(nameKey(), displayName);
+    }
+
+    public Component describe() {
+        return Component.translatableWithFallback(descriptionKey(), description);
     }
 
     // -----------------------------------------------------------------------
@@ -128,7 +150,7 @@ public record AbilityUnlock(
     // -----------------------------------------------------------------------
 
     /** The unlock with this ability id, or null. */
-    @javax.annotation.Nullable
+    @Nullable
     public static AbilityUnlock byId(String abilityId) {
         for (AbilityUnlock u : REGISTRY) {
             if (u.abilityId.equals(abilityId)) return u;

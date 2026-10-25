@@ -35,7 +35,7 @@ import java.util.List;
  * <ul>
  *   <li>Grant XP from kills, gated by level phase (vanilla vs biome)</li>
  *   <li>Process level-up chains and apply stat changes via {@link StatBlock}</li>
- *   <li>Announce class abilities that become available to buy via {@link AbilityUnlock}</li>
+ *   <li>Announce the class milestones reached and passives there to buy ({@link AbilityUnlock})</li>
  *   <li>Manage Divine Beast form stage transitions via {@link FormStage}</li>
  *   <li>Re-apply stat modifiers on respawn, clone, and login</li>
  *   <li>Sync level data to client after every change via {@link SyncLevelPacket}</li>
@@ -49,10 +49,11 @@ import java.util.List;
  *       (ritual completions, boss events, etc.).</li>
  * </ul>
  *
- * <p><b>Biome XP hook (TODO):</b>
- * When biome enemies are defined, tag them with:
+ * <p><b>Biome XP:</b> from level 20 a kill pays only if the creature carries an enemy tier
+ * ({@code jttw_enemy_tier}, an {@link EnemyTier}) and, as every zone's creature and boss does, its
+ * zone ({@code jttw_enemy_zone}); {@link #onEntityKilled} pays it by that zone's
+ * {@link BiomeLevelBand}. Any other mob can be tagged by hand:
  * <pre>{@code entity.getPersistentData().putString("jttw_enemy_tier", "GENERAL");}</pre>
- * {@link #onEntityKilled} will pick up the tag automatically once the TODO block is enabled.
  */
 @EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
 public final class LevelManager {
@@ -78,7 +79,7 @@ public final class LevelManager {
      * Initialise the level system for a player who has just reincarnated.
      *
      * <p>Resets to level 1, assigns the class derived from {@code outcome},
-     * announces level-1 abilities, applies base stats, and sends the first
+     * announces its level-1 class entries, applies base stats, and sends the first
      * sync packet.
      *
      * <p><b>Call this from {@link com.jttw.engine.reincarnation.ReincarnationHandler}
@@ -100,7 +101,7 @@ public final class LevelManager {
             }
         }
 
-        // Level-1 abilities (e.g. lesser_form, primordial_seed) are available to buy from the start
+        // The level-1 entries: the Divine Beast's Lesser Form, a milestone, reached at once
         processUnlocks(player, cls, 0, 1);
 
         // Apply base stats immediately
@@ -261,6 +262,8 @@ public final class LevelManager {
     @SubscribeEvent
     public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
+        // Class abilities since retired: cleared, and their points given back (once)
+        com.jttw.engine.progression.skilltree.RetiredUnlocks.refund(sp);
         // Re-apply in case attributes were wiped during a server restart
         reapplyStats(sp);
         syncToClient(sp);
@@ -357,17 +360,27 @@ public final class LevelManager {
         return anyLevelUp;
     }
 
-    /** Class abilities reached at this level become available to buy with skill points. */
+    /**
+     * The class layer at this level: a milestone is announced as reached, and a passive or ability
+     * as there to buy with skill points, each with what it does.
+     */
     private static void processUnlocks(ServerPlayer player, ProgressionClass cls,
                                        int prevLevel, int newLevel) {
         List<AbilityUnlock> unlocks = AbilityUnlock.getNewUnlocks(cls, prevLevel, newLevel);
         for (AbilityUnlock unlock : unlocks) {
+            if (unlock.milestone()) {
+                player.sendSystemMessage(Component.literal("§d[Milestone Reached] §e").append(unlock.name())
+                        .append(Component.literal("\n§7")).append(unlock.describe()));
+                continue;
+            }
             if (PlayerLevel.hasAbility(player, unlock.abilityId())) continue; // held from an older save
             int cost = unlock.cost();
             player.sendSystemMessage(Component.literal(
-                    "§6[Ability Available] §e" + unlock.displayName()
-                            + " §rcan be learned for §e" + cost + " skill point" + (cost == 1 ? "" : "s")
-                            + " §7(Press H, Skills tab)"));
+                    (unlock.isPassive() ? "§6[Passive Available] §e" : "§6[Ability Available] §e"))
+                    .append(unlock.name())
+                    .append(Component.literal(" §rcan be learned for §e" + cost + " skill point" + (cost == 1 ? "" : "s")
+                            + " §7(Press H, Skills tab)\n§7"))
+                    .append(unlock.describe()));
         }
     }
 
@@ -382,11 +395,7 @@ public final class LevelManager {
                     "§d[Form Shift] §r" + newStage.displayName));
             player.sendSystemMessage(Component.literal(
                     "§7" + newStage.transitionMessage));
-
-            // TODO: trigger morph / visual update to the new form entity.
-            // The target entity type should come from the player's ReincarnationOutcome
-            // and the current FormStage.  Add a mapping in FormStage or a separate
-            // FormEntityMap class once entity types are defined.
+            // The look follows the level by itself: BeastFormShown sends each stage to the clients.
         }
     }
 

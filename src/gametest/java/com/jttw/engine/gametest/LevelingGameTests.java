@@ -40,7 +40,7 @@ public class LevelingGameTests {
         eq(h, DivineBeastLine.WATER, PlayerLevel.getBeastLine(p), "beast line");
         eq(h, 1, PlayerLevel.getLevel(p), "level");
         eq(h, 0L, PlayerLevel.getXp(p), "xp");
-        check(h, !PlayerLevel.hasAbility(p, "lesser_form"), "level-1 ability is to be bought, not given");
+        check(h, !PlayerLevel.hasAbility(p, "lesser_form"), "Lesser Form is a milestone, never held as a bought ability");
         h.succeed();
     }
 
@@ -117,7 +117,7 @@ public class LevelingGameTests {
         LevelManager.grantXp(p, xpToReach(ProgressionClass.DIVINE_BEAST, 20), "test");
         eq(h, 20, PlayerLevel.getLevel(p), "level");
         eq(h, FormStage.GUARDIAN.stageIndex, PlayerLevel.getFormStage(p), "form stage");
-        check(h, !PlayerLevel.hasAbility(p, "domain_sense"), "level-20 ability is to be bought, not given");
+        check(h, !PlayerLevel.hasAbility(p, "domain_sense"), "level-20 passive is to be bought, not given");
         h.succeed();
     }
 
