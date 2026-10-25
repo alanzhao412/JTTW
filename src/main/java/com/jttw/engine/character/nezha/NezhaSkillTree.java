@@ -90,10 +90,10 @@ public final class NezhaSkillTree {
 
         // ── FLIGHT (col 4) ────────────────────────────────────────────
         TREE.add(new SkillNode(FLIGHT_1, "Wheel Step",
-                new String[]{ "Grants flight while wearing", "Wind and Fire Wheels.", "" },
+                new String[]{ "Flight while he has his Wind", "Fire Wheels, worn or in his", "armory: cruising speed." },
                 2, 4, 0, List.of(), AbilityType.PASSIVE, 1, "Flight"));
         TREE.add(new SkillNode(FLIGHT_2, "Blazing Trail",
-                new String[]{ "Faster flight speed.", "Fire trail particles.", "" },
+                new String[]{ "Flies at the fastest speed", "(2.4 blocks a tick, up from", "1.55), trailing fire behind." },
                 3, 4, 1, List.of(FLIGHT_1), AbilityType.PASSIVE, 2, "Flight"));
 
         // ── FORTITUDE (col 5) ─────────────────────────────────────────

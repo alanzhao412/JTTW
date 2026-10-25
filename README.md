@@ -238,9 +238,11 @@ is what makes the rest possible:
   glide rather than an abrupt stop.
 - **Speed tiers.** Glide-only (sinks, cannot gain altitude), full flight, and a top tier that also
   permits dimension travel (Shift + V: the Dragon's to the realm it picks, Wukong's Somersault Cloud
-  to the next on the wheel of Overworld, Nether, End, Hell and Heaven, 20 Qi a leap) — with per-character speed variation layered on top (Erlang Shen's Wind
-  and Fog and Sun Wukong's Cloud Step are true flight from their first tier, a little under
-  cruising speed, never a glide; the Dragon's Elytra Glide stays a glide).
+  to the next on the wheel of Overworld, Nether, End, Hell and Heaven, 20 Qi a leap) — with
+  per-character speed variation layered on top (Erlang Shen's Wind and Fog, Sun Wukong's Cloud Step
+  and the Phoenix's Rising Ember are true flight from their first tier, a little under cruising
+  speed, never a glide; the Dragon's Elytra Glide stays a glide; Nezha flies on his Wind Fire
+  Wheels at cruising speed, and at the fastest with Blazing Trail).
 - **Independent velocity clamps** on the vertical and horizontal axes, plus a separate strafe scale,
   so lateral drift doesn't match forward thrust.
 - **A parallel swim system** with its own stored vector, distinct cruise and sprint speeds, and a

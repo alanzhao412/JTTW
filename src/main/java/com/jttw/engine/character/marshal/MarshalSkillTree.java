@@ -46,10 +46,10 @@ public final class MarshalSkillTree {
                 new String[]{ "Press V: leap and crash down.", "The fuller you are, the", "wider and harder the quake." },
                 2, 0, 0, List.of(), AbilityType.TOGGLE, 1, "Belly Slam"));
         TREE.add(new SkillNode(SLAM_2, "Belly Slam II",
-                new String[]{ "Hits harder; the quaked", "are left staggering.", "" },
+                new String[]{ "Hits 25% harder; the quaked", "are left staggering", "(Slowness II, 3 s)." },
                 3, 0, 1, List.of(SLAM_1), AbilityType.TOGGLE, 2, "Belly Slam"));
         TREE.add(new SkillNode(SLAM_3, "Belly Slam III",
-                new String[]{ "Hits harder still, and", "the quake spreads wider.", "" },
+                new String[]{ "Hits 50% harder than I, and", "the quake spreads 2 blocks", "wider." },
                 4, 0, 2, List.of(SLAM_2), AbilityType.TOGGLE, 3, "Belly Slam"));
 
         // ── TRUFFLE SNOUT (col 1) ───────────────────────────────────────

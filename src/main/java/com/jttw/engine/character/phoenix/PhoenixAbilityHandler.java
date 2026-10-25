@@ -55,13 +55,16 @@ import java.util.UUID;
  *       Cannot move while active. Drains Qi.</li>
  *   <li><b>Life Drain (PASSIVE):</b> T1: heal 0.5 hearts per damaging attack.
  *       T2: heal 1 heart per attack. (At level 1; scaled by the player's power.)</li>
- *   <li><b>Rebirth Mastery (PASSIVE):</b> T1: 8 block explosion. T2: 12 blocks + 2 revives/week.</li>
+ *   <li><b>Rebirth Mastery (PASSIVE):</b> T1: 8 block explosion at 40% of max HP, not 25%.
+ *       T2: 12 blocks + 2 revives/week.</li>
  *   <li><b>Solar Flare (B):</b> see {@link SolarFlare}.</li>
  *   <li><b>Burning Plumage (passive):</b> whatever strikes it in melee catches fire: 3 s, then
  *       5 s; at III it takes back twice the blow as fire and is weakened.</li>
- *   <li><b>Rising Ember (PASSIVE flight):</b> T1: grant flight. T2: increased speed + fire/lava immunity.</li>
+ *   <li><b>Rising Ember (PASSIVE flight):</b> T1: true flight, never a glide (JTTWFlight).
+ *       T2: cruising speed + fire/lava immunity.</li>
  *   <li><b>Molten Talons (PASSIVE combat):</b> T1: melee sets targets on fire 3s.
- *       T2: fire damage heals 25%. T3: killing burning enemy causes explosion.</li>
+ *       T2: its fire (Flamethrower, Solar Flare, fire it is author of) heals it for 25% of the
+ *       damage dealt. T3: killing burning enemy causes explosion.</li>
  * </ul>
  */
 @EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
@@ -95,6 +98,47 @@ public final class PhoenixAbilityHandler {
     // -----------------------------------------------------------------------
 
     private static final double REVIVE_BASE_RADIUS = 5.0;
+
+    /** Share of max HP the revive burst deals at its heart: 25%, and 40% with Rebirth Mastery. */
+    public static float reviveBurstShare(int rebirthTier) {
+        return rebirthTier >= 1 ? 0.40f : 0.25f;
+    }
+
+    // -----------------------------------------------------------------------
+    // Its own fire (Molten Talons II)
+    // -----------------------------------------------------------------------
+
+    /** Share of the damage its own fire deals that comes back to it as health (Molten Talons II). */
+    public static final float TALONS_FIRE_HEAL = 0.25f;
+
+    /** The Phoenix whose fire is striking now, and what it strikes (see {@link #hurtWithOwnFire}). */
+    private static ServerPlayer fireAuthor;
+    private static Entity fireTarget;
+
+    /**
+     * Deals a blow of the Phoenix's own fire (the Flamethrower, Solar Flare). Its damage types are
+     * not all fire, nor all credited to it (the Flamethrower's magic half is no one's), so the blow
+     * is marked as its fire while it lands, and Molten Talons II feeds on it.
+     */
+    public static boolean hurtWithOwnFire(ServerPlayer author, Entity target, DamageSource source, float amount) {
+        ServerPlayer wasAuthor = fireAuthor;
+        Entity wasTarget = fireTarget;
+        fireAuthor = author;
+        fireTarget = target;
+        try {
+            return target.hurt(source, amount);
+        } finally {
+            fireAuthor = wasAuthor;
+            fireTarget = wasTarget;
+        }
+    }
+
+    /** The Phoenix whose fire this blow to {@code target} is, or null if it is no Phoenix's fire. */
+    static ServerPlayer fireOf(DamageSource source, Entity target) {
+        if (fireAuthor != null && fireTarget == target) return fireAuthor;
+        if (source.is(DamageTypeTags.IS_FIRE) && source.getEntity() instanceof ServerPlayer sp && sp != target) return sp;
+        return null;
+    }
 
     // -----------------------------------------------------------------------
     // Flamethrower activation
@@ -258,9 +302,9 @@ public final class PhoenixAbilityHandler {
             if (perpDist <= halfWidth + 0.5) { // +0.5 for entity hitbox tolerance
                 // 50% physical (reduced by armor) + 50% magic (bypasses armor)
                 float half = damage / 2.0f;
-                target.hurt(player.damageSources().mobAttack(player), half);
+                hurtWithOwnFire(player, target, player.damageSources().mobAttack(player), half);
                 target.invulnerableTime = 0; // reset so magic hit lands
-                target.hurt(player.damageSources().magic(), half);
+                hurtWithOwnFire(player, target, player.damageSources().magic(), half);
                 target.igniteForSeconds(fireTicks / 20);
             }
         }
@@ -324,7 +368,7 @@ public final class PhoenixAbilityHandler {
     /**
      * Life Drain: heal on dealing damage.
      * Molten Talons T1: melee attacks set targets on fire for 3s.
-     * Molten Talons T2: fire damage dealt heals the player for 25%.
+     * (Molten Talons T2, its fire healing it, is {@link #onFireDamageDealt}.)
      */
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public static void onDealDamage(LivingIncomingDamageEvent event) {
@@ -353,14 +397,18 @@ public final class PhoenixAbilityHandler {
             }
         }
 
-        // --- Molten Talons T2: fire damage heals attacker for 25% ---
-        if (talonsTier >= 2) {
-            DamageSource src = event.getSource();
-            if (src.is(DamageTypeTags.IS_FIRE)) {
-                float healAmount = event.getAmount() * 0.25f;
-                attacker.heal(healAmount);
-            }
-        }
+    }
+
+    /**
+     * Molten Talons T2: its fire (the Flamethrower, Solar Flare, or any fire it is the author of)
+     * heals it for a quarter of the damage that fire truly dealt.
+     */
+    @SubscribeEvent
+    public static void onFireDamageDealt(net.neoforged.neoforge.event.entity.living.LivingDamageEvent.Post event) {
+        if (event.getNewDamage() <= 0) return;
+        ServerPlayer attacker = fireOf(event.getSource(), event.getEntity());
+        if (attacker == null || !isPhoenix(attacker) || SkillTreeData.getPhTalonsTier(attacker) < 2) return;
+        attacker.heal(event.getNewDamage() * TALONS_FIRE_HEAL);
     }
 
     /**
@@ -482,11 +530,12 @@ public final class PhoenixAbilityHandler {
         // Only trigger if the victim was on fire
         if (!victim.isOnFire()) return;
 
-        // Create a cosmetic explosion (no block damage)
+        // The burst breaks no block, and spares the Phoenix: it is the explosion's source, which an
+        // explosion never harms. Its damage is credited to no one, so a kill by it sets off no other.
         victim.level().explode(
-                null, // no entity source for the explosion itself
+                attacker, victim.level().damageSources().explosion(null, null), null,
                 victim.getX(), victim.getY(), victim.getZ(),
-                2.0f,
+                2.0f, false,
                 Level.ExplosionInteraction.NONE
         );
 
@@ -532,8 +581,8 @@ public final class PhoenixAbilityHandler {
             default -> radius = REVIVE_BASE_RADIUS;
         }
 
-        // Damage scales with max HP (25% of max HP as base)
-        float explosionDamage = maxHp * 0.25f;
+        // Damage scales with max HP: a quarter of it, two fifths with Rebirth Mastery
+        float explosionDamage = maxHp * reviveBurstShare(rebirthTier);
 
         AABB box = new AABB(player.position(), player.position()).inflate(radius);
         for (Entity target : player.level().getEntities(player, box,
