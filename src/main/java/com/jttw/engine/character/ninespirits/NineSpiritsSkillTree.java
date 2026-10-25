@@ -72,7 +72,7 @@ public final class NineSpiritsSkillTree {
 
         // ── NINE-HEADED TRUE FORM (col 3) ───────────────────────────────
         TREE.add(new SkillNode(FORM_1, "True Form I",
-                new String[]{ "Press M: the great lion.", "2 heads: blows x1.5. +20", "phys./magic resist. Drains Qi." },
+                new String[]{ "M: become the nine-headed lion.", "2 heads: blows x1.5. +20", "phys./magic resist. Drains Qi." },
                 3, 3, 0, List.of(), AbilityType.TOGGLE, 1, "True Form"));
         TREE.add(new SkillNode(FORM_2, "True Form II",
                 new String[]{ "3 heads: blows x2.", "+30 phys./magic resist.", "" },

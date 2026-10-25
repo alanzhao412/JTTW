@@ -10,7 +10,10 @@ import com.jttw.engine.progression.qi.QiManager;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
 import com.jttw.engine.progression.stats.LevelPower;
 import com.jttw.engine.registry.ModAttributes;
+import com.jttw.engine.registry.ModEntities;
 import com.jttw.engine.transformation.FormClassifier;
+import com.jttw.engine.transformation.TransformationData;
+import com.jttw.engine.transformation.TransformationManager;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -26,11 +29,14 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.entity.projectile.Snowball;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
@@ -67,8 +73,9 @@ import java.util.Set;
  *       the cone.</li>
  *   <li><b>N, Golden Mane Flare:</b> blinds everything looking at him within 12 / 20 blocks,
  *       for 3 / 5 seconds.</li>
- *   <li><b>M, Nine-Headed True Form:</b> toggle; +20 / 30 / 40 physical and magic resistance,
- *       and each melee hit strikes with 2 / 3 / 4 heads; drains Qi.</li>
+ *   <li><b>M, Nine-Headed True Form:</b> toggle; he becomes the Nine-Headed Lion (as the Bull
+ *       Demon King becomes the Great White Bull); +20 / 30 / 40 physical and magic resistance, and
+ *       each melee hit strikes with 2 / 3 / 4 heads; drains Qi.</li>
  *   <li><b>Nine Lives</b> (passive): survives killing blows, 1 / 2 / 3 times; a spent life
  *       comes back after 5 minutes.</li>
  * </ul>
@@ -327,6 +334,7 @@ public final class NineSpiritsAbilityHandler {
             level.sendParticles(ParticleTypes.SONIC_BOOM, at.x, at.y, at.z, 1, 0, 0, 0, 0);
         }
         level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 2.0F, 0.7F);
+        if (inTrueForm(p)) p.swing(InteractionHand.MAIN_HAND, true); // the lion's heads rear and roar
     }
 
     /** Cows {@code e} for {@code ticks}: nothing it strikes or shoots in that time is hurt. */
@@ -410,6 +418,23 @@ public final class NineSpiritsAbilityHandler {
         return tier >= 3 ? 40 : tier == 2 ? 30 : 20;
     }
 
+    /**
+     * The tier of true form {@code p} is in, read from the toughness it gives him (synced to every
+     * client that sees him, so his heads wake there too): 0 if he is not in it.
+     */
+    public static int formTierShown(Player p) {
+        AttributeInstance res = p.getAttribute(ModAttributes.PHYSICAL_RESISTANCE);
+        AttributeModifier m = res == null ? null : res.getModifier(PassiveModifiers.id("ns_form_pres"));
+        if (m == null) return 0;
+        for (int t = 3; t >= 1; t--) if (m.amount() >= formResistance(t)) return t;
+        return 0;
+    }
+
+    private static boolean inLionShape(Player p) {
+        TransformationData data = TransformationManager.getTransformation(p);
+        return data != null && data.getEntityType() == ModEntities.NINE_HEADED_LION.get();
+    }
+
     public static void toggleTrueForm(ServerPlayer p) {
         int tier = tier(p, "ns_form");
         if (tier < 1) return;
@@ -419,14 +444,17 @@ public final class NineSpiritsAbilityHandler {
             return;
         }
         p.getPersistentData().putBoolean(KEY_FORM, true);
+        TransformationManager.transform(p, ModEntities.NINE_HEADED_LION.get());
         applyFormModifiers(p, tier);
         p.serverLevel().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 1.5F, 0.5F);
+        p.serverLevel().sendParticles(ParticleTypes.CLOUD, p.getX(), p.getY() + 1.5, p.getZ(), 40, 1.4, 1.4, 1.4, 0.05);
         p.displayClientMessage(Component.literal("§6§lThe nine heads rise."), true);
     }
 
     public static void endTrueForm(ServerPlayer p) {
         p.getPersistentData().remove(KEY_FORM);
         applyFormModifiers(p, 0);
+        if (inLionShape(p)) TransformationManager.demorph(p);
     }
 
     private static void applyFormModifiers(ServerPlayer p, int tier) {
@@ -476,9 +504,11 @@ public final class NineSpiritsAbilityHandler {
             if (used - 1 > 0) pd.putLong(KEY_LIFE_BACK_AT, p.level().getGameTime() + LIFE_RECHARGE_TICKS);
             else pd.remove(KEY_LIFE_BACK_AT);
         }
-        // True form drains Qi and wears a golden aura
+        // True form drains Qi and wears a golden aura; it ends if he is made another shape. The lion's
+        // shape without the form (carried through death, or saved in it) is shed.
+        if (!inTrueForm(p) && inLionShape(p)) TransformationManager.demorph(p);
         if (inTrueForm(p)) {
-            if (!NineSpiritsCharacter.is(p) || tier(p, "ns_form") < 1 || !QiData.spend(p, FORM_QI_PER_TICK)) {
+            if (!NineSpiritsCharacter.is(p) || tier(p, "ns_form") < 1 || !inLionShape(p) || !QiData.spend(p, FORM_QI_PER_TICK)) {
                 endTrueForm(p);
                 p.displayClientMessage(Component.literal("§7The nine heads sink back."), true);
             } else if (p.tickCount % 4 == 0) {

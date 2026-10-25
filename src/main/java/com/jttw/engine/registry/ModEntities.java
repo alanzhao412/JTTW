@@ -478,6 +478,15 @@ public final class ModEntities {
                             .clientTrackingRange(10)
                             .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "great_white_bull").toString()));
 
+    /** The Grand Saint of Nine Spirits' true form, never spawned: only taken. Its heads rise far over it; the body he moves in is his shoulders'. */
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.ninespirits.NineHeadedLionEntity>> NINE_HEADED_LION =
+            ENTITIES.register("nine_headed_lion", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.ninespirits.NineHeadedLionEntity>of(com.jttw.engine.entity.ninespirits.NineHeadedLionEntity::new, MobCategory.MISC)
+                            .sized(2.8F, 3.6F)
+                            .eyeHeight(3.3F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "nine_headed_lion").toString()));
+
     // ── Heaven's host ─────────────────────────────────────────────
 
     public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.heaven.HeavenlySoldierEntity>> HEAVENLY_SOLDIER =
@@ -631,6 +640,7 @@ public final class ModEntities {
         event.put(BONE_SERVANT.get(), com.jttw.engine.entity.ridge.BoneServantEntity.createAttributes().build());
         event.put(WRAITH.get(), com.jttw.engine.entity.ridge.WraithEntity.createAttributes().build());
         event.put(GREAT_WHITE_BULL.get(), com.jttw.engine.entity.bull.GreatWhiteBullEntity.createAttributes().build());
+        event.put(NINE_HEADED_LION.get(), com.jttw.engine.entity.ninespirits.NineHeadedLionEntity.createAttributes().build());
         event.put(WHITE_TIGER.get(), com.jttw.engine.entity.beast.WhiteTigerEntity.createAttributes().build());
         event.put(AZURE_DRAGON.get(), com.jttw.engine.entity.beast.TrueFormEntity.createAttributes().build());
         event.put(BLACK_TORTOISE.get(), com.jttw.engine.entity.beast.TrueFormEntity.createAttributes().build());

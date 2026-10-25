@@ -99,6 +99,10 @@ final class AbilityScenes {
             java.util.Map.entry("lion_azure_lion_revealed", 20), java.util.Map.entry("lion_white_elephant_revealed", 20),
             // the Great White Bull close, its transformation's cloud blown away before the picture
             java.util.Map.entry("bull_side", 70), java.util.Map.entry("bull_front", 70), java.util.Map.entry("bull_face", 70), java.util.Map.entry("bull_rear", 70),
+            // the Nine-Headed Lion likewise
+            java.util.Map.entry("nlion_front", 70), java.util.Map.entry("nlion_quarter", 70), java.util.Map.entry("nlion_side", 70),
+            java.util.Map.entry("nlion_heads", 70), java.util.Map.entry("nlion_scale", 70), java.util.Map.entry("nlion_roar", 70),
+            java.util.Map.entry("nlion_rear", 70), java.util.Map.entry("nlion_tier1", 70), java.util.Map.entry("nlion_faces", 70),
             // Fengdu, laid off the stage; the Hell plaza's Gate of Ghosts and its side doors
             java.util.Map.entry("fengdu_gate", 140), java.util.Map.entry("fengdu_above", 100), java.util.Map.entry("fengdu_ghost_gate", 80),
             java.util.Map.entry("fengdu_ghost_gate_close", 60), java.util.Map.entry("fengdu_palace", 80), java.util.Map.entry("fengdu_palace_inside", 60),
@@ -625,6 +629,31 @@ final class AbilityScenes {
                     saint(p, NineSpiritsAbilityHandler.FIRE, "ns_form_1", "ns_form_2", "ns_form_3");
                     NineSpiritsAbilityHandler.toggleTrueForm(p);
                 }, p -> {}, 1, false),
+                // the Nine-Headed Lion close, its transformation's cloud blown away before the picture: from the
+                // front, the three-quarter, the side and behind; its heads close; beside a man; roaring (the
+                // four waking heads lunging, the rest rearing); at True Form I, two heads awake
+                new Scene("nlion_front", p -> { lion(p); facing = 0f; sceneCam = new double[]{0.5, 3.6, 15.5, 0.5, 3.0, 0.5}; },
+                        p -> {}, 1, false),
+                new Scene("nlion_quarter", p -> { lion(p); facing = 0f; sceneCam = new double[]{8.0, 4.0, 10.5, 0.5, 3.0, 1.5}; },
+                        p -> {}, 1, false),
+                new Scene("nlion_side", p -> { lion(p); facing = -90f; sceneCam = new double[]{1.0, 3.4, 12.5, 1.0, 3.0, 0.5}; },
+                        p -> {}, 1, false),
+                new Scene("nlion_rear", p -> { lion(p); facing = 140f; sceneCam = new double[]{9.5, 4.6, 11.0, 0.5, 2.8, 0.5}; },
+                        p -> {}, 1, false),
+                new Scene("nlion_heads", p -> { lion(p); facing = -20f; sceneCam = new double[]{3.5, 4.4, 11.0, 0.6, 4.0, 3.5}; },
+                        p -> {}, 1, false),
+                new Scene("nlion_faces", p -> { lion(p); facing = 0f; sceneCam = new double[]{0.5, 5.2, 9.0, 0.5, 4.9, 3.5}; },
+                        p -> {}, 1, false),
+                new Scene("nlion_scale", p -> { lion(p); facing = -90f; targets(p, 6, 2); sceneCam = new double[]{3.5, 3.0, 15.5, 2.5, 2.4, 0.5}; },
+                        p -> {}, 1, false),
+                new Scene("nlion_roar", p -> { lion(p, "ns_roar_1", "ns_roar_2", "ns_roar_3"); facing = 0f; sceneCam = new double[]{8.0, 4.0, 10.5, 0.5, 3.0, 1.5}; },
+                        NineSpiritsAbilityHandler::roar, 3, false),
+                new Scene("nlion_tier1", p -> {
+                    saint(p, NineSpiritsAbilityHandler.FIRE, "ns_form_1");
+                    NineSpiritsAbilityHandler.toggleTrueForm(p);
+                    facing = -20f;
+                    sceneCam = new double[]{3.5, 4.4, 11.0, 0.6, 4.0, 3.5};
+                }, p -> {}, 1, false),
                 new Scene("ns_head_tint_thunder", p -> {
                     saint(p, NineSpiritsAbilityHandler.THUNDER, "ns_heads_1", "ns_heads_2");
                     NineSpiritsAbilityHandler.syncHead(p);
@@ -735,6 +764,13 @@ final class AbilityScenes {
         }
         QiData.setMax(p, 1000f);
         QiData.setCurrent(p, 1000f);
+    }
+
+    /** Makes the player the Grand Saint at True Form III (and these nodes), in his true form: the nine-headed lion. */
+    private static void lion(ServerPlayer p, String... nodes) {
+        saint(p, NineSpiritsAbilityHandler.FIRE, "ns_form_1", "ns_form_2", "ns_form_3");
+        for (String n : nodes) SkillTreeData.grantNode(p, n);
+        NineSpiritsAbilityHandler.toggleTrueForm(p);
     }
 
     /** Makes the player the Marshal with these nodes and Qi to spend, his abilities ready. */

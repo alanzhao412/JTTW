@@ -10,7 +10,10 @@ import com.jttw.engine.progression.level.LevelManager;
 import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.stats.LevelPower;
+import com.jttw.engine.registry.ModEntities;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
+import com.jttw.engine.transformation.TransformationData;
+import com.jttw.engine.transformation.TransformationManager;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
@@ -287,7 +290,9 @@ public class NineSpiritsGameTests {
         grant(p, "ns_form_1", "ns_form_2");
         key(p, 3);
         check(h, NineSpiritsAbilityHandler.inTrueForm(p), "in true form");
+        check(h, lion(p), "he is the nine-headed lion");
         eq(h, 30.0, modifier(p, PHYSICAL_RESISTANCE(), "ns_form_pres"), "tougher (II)");
+        eq(h, 2, NineSpiritsAbilityHandler.formTierShown(p), "his toughness tells any client his tier, so three heads wake");
         Pig pig = mob(h, EntityType.PIG, 2, 4);
         LivingIncomingDamageEvent hit = incoming(pig, p.damageSources().playerAttack(p), 10f);
         NineSpiritsAbilityHandler.onHit(hit);
@@ -298,6 +303,57 @@ public class NineSpiritsGameTests {
         tick(p, NineSpiritsAbilityHandler::onPlayerTick, 1);
         check(h, !NineSpiritsAbilityHandler.inTrueForm(p), "ends without Qi");
         eq(h, null, modifier(p, PHYSICAL_RESISTANCE(), "ns_form_pres"), "and its toughness goes");
+        eq(h, null, TransformationManager.getTransformation(p), "and he is himself again");
+        eq(h, 0, NineSpiritsAbilityHandler.formTierShown(p), "no heads awake");
+        h.succeed();
+    }
+
+    private static boolean lion(ServerPlayer p) {
+        TransformationData data = TransformationManager.getTransformation(p);
+        return data != null && data.getEntityType() == ModEntities.NINE_HEADED_LION.get();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void theTrueFormIsTheLionAndPressedAgainHeIsHimself(GameTestHelper h) {
+        ServerPlayer p = saint(h);
+        grant(p, "ns_form_1");
+        key(p, 3);
+        check(h, lion(p), "the lion");
+        TransformationData data = TransformationManager.getTransformation(p);
+        check(h, data.getWidth() > 2f && data.getHeight() > 3f, "a huge body: " + data.getWidth() + " x " + data.getHeight());
+        check(h, data.getEyeHeight() < data.getHeight(), "his eyes within it");
+        key(p, 3);
+        check(h, !NineSpiritsAbilityHandler.inTrueForm(p), "out of form");
+        eq(h, null, TransformationManager.getTransformation(p), "himself");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void anotherShapeEndsTheFormAndTheLionIsNotKeptOutOfIt(GameTestHelper h) {
+        ServerPlayer p = saint(h);
+        grant(p, "ns_form_1");
+        key(p, 3);
+        TransformationManager.transform(p, EntityType.PIG);
+        tick(p, NineSpiritsAbilityHandler::onPlayerTick, 1);
+        check(h, !NineSpiritsAbilityHandler.inTrueForm(p), "made a pig, he is out of true form");
+        eq(h, null, modifier(p, PHYSICAL_RESISTANCE(), "ns_form_pres"), "and its toughness goes");
+        check(h, TransformationManager.getTransformation(p) != null, "but the pig's shape is not his form's to undo");
+        TransformationManager.demorph(p);
+        // the lion's shape carried somewhere without the form (through death, or saved in it) is shed
+        TransformationManager.transform(p, ModEntities.NINE_HEADED_LION.get());
+        tick(p, NineSpiritsAbilityHandler::onPlayerTick, 1);
+        eq(h, null, TransformationManager.getTransformation(p), "the lion's shape alone is shed");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void inTrueFormTheRoarRearsTheHeads(GameTestHelper h) {
+        ServerPlayer p = saint(h);
+        grant(p, "ns_form_1", "ns_roar_1");
+        key(p, 3);
+        p.swinging = false;
+        key(p, 1);
+        check(h, p.swinging, "the heads rear and roar (his swing, which the lion's model plays)");
         h.succeed();
     }
 
