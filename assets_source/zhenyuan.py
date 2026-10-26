@@ -42,37 +42,103 @@ PALE_GOLD = (240, 218, 150)   # the halo: a paler, softer gold
 # How much larger than his pixels he is drawn: ZhenyuanRenderer.SIZE
 SIZE = 1.2
 
-# the cloud's puffs: (centre x, centre z, size, how far it rises): big ones at its heart, smaller and
-# smaller toward its rim, a few heaped on top; each painted soft and round, its edges thinning away
-PUFF = {'A': (8, 3.2, 7.5), 'B': (6, 2.6, 6), 'C': (4.5, 2.1, 4.5), 'D': (3, 1.6, 3), 'E': (2, 1.2, 2)}
-PUFFS = [(-4, -3, 'A', 0), (3.5, -2.5, 'A', 0), (-1, 4, 'A', 0), (4.5, 4.5, 'B', 0),
-         (-8.5, 0.5, 'B', 0), (8.5, 0, 'B', 0), (0, -8.5, 'B', 0), (0.5, 8.5, 'B', 0),
-         (-6.5, -6.5, 'B', 0), (6.5, -6.5, 'B', 0), (-6.5, 6.5, 'B', 0),
-         (-11.5, -3, 'C', 0), (11.5, 3, 'C', 0), (-3, -11.5, 'C', 0), (3, 11.5, 'C', 0),
-         (-11, 4.5, 'C', 0), (11, -4.5, 'C', 0), (4, -11, 'C', 0), (-4.5, 11, 'C', 0), (9, 8.5, 'C', 0),
-         (-14, 0.5, 'D', 0), (14, -0.5, 'D', 0), (0.5, -14, 'D', 0), (-0.5, 14, 'D', 0), (-9.5, -9.5, 'D', 0),
-         (0, 0, 'B', 1.4), (-3.5, 2.5, 'C', 1.2), (3, -3, 'C', 1.3), (2.5, 3.5, 'D', 2.2), (-3.5, -3.5, 'D', 2),
-         (-7, 3, 'D', 1.4), (7, -2, 'D', 1.3)]
+# The cloud is not boxes: boxes of cloud, however softly painted, read up close as little cubes, their
+# sides shaded grey. ZhenyuanModel.renderCloud draws it instead as soft round puffs that always face the
+# eye (billboards), heaped and overlapping, lit evenly (no side darker than another), drifting a little,
+# with flat wisps of mist about its foot. Their sprites: cloud_sprites(), below.
+SPRITE = 128                   # each sprite's size, in texture pixels; the sheet is 2x2 of them
 
 
-def puffs():
-    out = []
-    for cx, cz, s, lift in PUFFS:
-        w, h, d = PUFF[s]
-        cx, cz = cx * 0.85, cz * 0.85                             # close enough that they run together
-        out.append((cx - w / 2, 1.8 - h - lift, cz - d / 2, w, h, d, 'puff'))
-    # and a thin mist wrapped about them all, that blurs where one puff meets the next
-    out.append((-12.5, -0.4, -12, 25, 2.2, 24, 'haze'))
-    out.append((-8, -2, -7.5, 16, 1.8, 15, 'haze_top'))
-    return out
+def cloud_puff(rnd, blobs, size=SPRITE):
+    """A puff of cumulus as a sprite: the round `blobs` (x, y, r in 0..1 of the sprite) melted into one
+    billowing surface (each a ball, blended smoothly where they meet so no seam shows), lit from above
+    and a little to the left, its underside and the hollows between the billows in soft lilac shadow;
+    its edge thinning away to nothing (no square corners, no hard rim)."""
+    from PIL import Image
+    img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+    height = [[0.0] * size for _ in range(size)]
+    cover = [[0.0] * size for _ in range(size)]
+    for j in range(size):
+        for i in range(size):
+            u, v = (i + 0.5) / size, (j + 0.5) / size
+            acc, cov = 0.0, 0.0
+            for bx, by, br in blobs:
+                d2 = ((u - bx) ** 2 + (v - by) ** 2) / (br * br)
+                z = math.sqrt(max(0.0, 1 - d2)) * br
+                acc += math.exp(z * 40)                            # a soft maximum: the billows melt together
+                cov = max(cov, 1 - math.sqrt(d2))
+            height[j][i] = math.log(acc) / 40 - math.log(len(blobs)) / 40
+            cover[j][i] = cov
+    lx, ly, lz = -0.35, -0.7, 0.62                               # the light: above, a little left, toward us
+    ln = math.sqrt(lx * lx + ly * ly + lz * lz)
+    lx, ly, lz = lx / ln, ly / ln, lz / ln
+    dark, mid, lit = (186, 192, 224), (228, 232, 248), (255, 255, 255)
+    for j in range(size):
+        for i in range(size):
+            cov = cover[j][i]
+            if cov <= 0:
+                continue
+            h = lambda x, y: height[max(0, min(size - 1, y))][max(0, min(size - 1, x))]
+            gx = (h(i + 1, j) - h(i - 1, j)) * size / 2
+            gy = (h(i, j + 1) - h(i, j - 1)) * size / 2
+            nx, ny, nz = -gx, -gy, 1.0
+            nn = math.sqrt(nx * nx + ny * ny + nz * nz)
+            lam = max(0.0, (nx * lx + ny * ly + nz * lz) / nn)
+            v = (j + 0.5) / size
+            shade = (0.35 + 0.65 * lam) * (1.06 - 0.22 * max(0.0, v - 0.45) / 0.55)   # its belly a little shadowed
+            shade = max(0.0, min(1.0, shade))
+            if shade < 0.7:
+                c = [x + (y - x) * (shade / 0.7) for x, y in zip(dark, mid)]
+            else:
+                c = [x + (y - x) * ((shade - 0.7) / 0.3) for x, y in zip(mid, lit)]
+            n = rnd.randint(-2, 2)
+            edge = min(1.0, cov / 0.4) ** 1.5                      # thinning to nothing over its outer part
+            a = 236 * edge
+            img.putpixel((i, j), tuple(max(0, min(255, int(x + n))) for x in c) + (max(0, min(255, int(a))),))
+    return img
+
+
+def cloud_wisp(rnd, size=SPRITE):
+    """A streak of mist: long and low, thinning to nothing at its ends and edges, faintly banded."""
+    from PIL import Image
+    img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+    for j in range(size):
+        for i in range(size):
+            u, v = (i + 0.5) / size * 2 - 1, (j + 0.5) / size * 2 - 1
+            d = math.hypot(u, v * 1.0)
+            if d >= 1:
+                continue
+            band = 0.75 + 0.25 * math.sin(math.atan2(v, u) * 3 + d * 9)
+            a = (1 - d) ** 1.4 * 200 * band
+            c = [236 + 19 * (1 - d), 240 + 15 * (1 - d), 255]
+            n = rnd.randint(-3, 3)
+            img.putpixel((i, j), tuple(max(0, min(255, int(x + n))) for x in c) + (max(0, min(255, int(a))),))
+    return img
+
+
+def cloud_sprites():
+    """The cloud's sprite sheet (256x256): a big heaped puff, a second unlike it, a small lumpy one, a
+    round wisp of mist (laid flat about the cloud's foot)."""
+    import random
+    from PIL import Image
+    rnd = random.Random(31)
+    sheet = Image.new('RGBA', (SPRITE * 2, SPRITE * 2), (0, 0, 0, 0))
+    sheet.paste(cloud_puff(rnd, [(0.5, 0.56, 0.3), (0.3, 0.62, 0.2), (0.72, 0.6, 0.22), (0.42, 0.38, 0.2),
+                                 (0.62, 0.4, 0.17), (0.5, 0.7, 0.22)]), (0, 0))
+    sheet.paste(cloud_puff(rnd, [(0.45, 0.55, 0.27), (0.68, 0.5, 0.24), (0.3, 0.66, 0.18), (0.55, 0.33, 0.19),
+                                 (0.78, 0.68, 0.15), (0.5, 0.72, 0.2)]), (SPRITE, 0))
+    sheet.paste(cloud_puff(rnd, [(0.5, 0.55, 0.26), (0.32, 0.6, 0.19), (0.68, 0.62, 0.19), (0.5, 0.36, 0.16)]),
+                (0, SPRITE))
+    sheet.paste(cloud_wisp(rnd), (SPRITE, SPRITE))
+    sheet.save('src/main/resources/assets/jttw_engine/textures/entity/zhenyuan_cloud.png')
 
 
 # where the figure stands over the cloud: lifted to make room for the long robe (ZhenyuanModel)
 FIGURE_Y = -4
 
 ZHENYUAN = mirrored([
-    # the small cloud he stands on, and the figure over it (it rises and falls a little)
-    part('cloud', 'root', (0, 22.4, 0), (0, 0, 0), puffs()),
+    # the small cloud he stands on (drawn by ZhenyuanModel.renderCloud), and the figure over it (it rises and falls a little)
+    part('cloud', 'root', (0, 22.4, 0), (0, 0, 0), []),
     part('figure', 'root', (0, FIGURE_Y, 0), (0, 0, 0), []),
     # a tall, narrow-waisted figure: the breast, a waist drawn in under the jade belt, and the robe
     # belling out below it in tiers to a wide hem
@@ -316,48 +382,6 @@ def folds(p, rect, base, period=7, depth=0.16, phase=0.0, light=1.0):
 
 
 def paint_zhenyuan(p, style, f, dims):
-    if style in ('haze', 'haze_top'):                             # a mist: faint, thinning to nothing at its rim and its top
-        for k, r in f.items():
-            fx, fy, fw, fh = r
-            for j in range(fh):
-                for i in range(fw):
-                    u, v = (i + 0.5) / fw * 2 - 1, (j + 0.5) / fh * 2 - 1
-                    if k in ('top', 'bottom'):
-                        d = math.hypot(u, v)
-                        a = 0 if d > 1 else (1 - d) ** 0.7 * (70 if k == 'top' else 0)
-                    else:
-                        down = (v + 1) / 2                        # 0 at the top .. 1 at the bottom
-                        a = max(0, 1 - abs(u) ** 2) * down * 90
-                    soft(p, (fx + i, fy + j), [c + p.rnd.randint(-3, 3) for c in (244, 246, 255)], a)
-
-    if style == 'puff':                                           # a soft, round puff of cloud, thinning at its edges
-        for k, r in f.items():
-            fx, fy, fw, fh = r
-            for j in range(fh):
-                for i in range(fw):
-                    u, v = (i + 0.5) / fw * 2 - 1, (j + 0.5) / fh * 2 - 1
-                    if k in ('top', 'bottom'):
-                        d = math.hypot(u, v)                      # the round of it, seen from above
-                        if d > 1.04:
-                            soft(p, (fx + i, fy + j), CLOUD, 0)
-                            continue
-                        a = 255 if d < 0.5 else 255 - (d - 0.5) / 0.54 * 190
-                        c = CLOUD if k == 'top' else (200, 202, 226)
-                        c = [x * (1.0 - 0.08 * d) + p.rnd.randint(-4, 4) for x in c]
-                    else:                                         # its sides: rounded off at the top corners, thin below
-                        top = 1 - (v + 1) / 2                     # 1 at the top .. 0 at the bottom
-                        r_ = abs(u)
-                        if r_ > 1 - 0.55 * top ** 2 + 0.02:
-                            soft(p, (fx + i, fy + j), CLOUD, 0)
-                            continue
-                        edge = max(r_, 1 - top * 1.6)
-                        a = 255 if edge < 0.45 else 255 - (edge - 0.45) / 0.55 * 185
-                        c = [a_ + (b_ - a_) * (1 - top) for a_, b_ in zip((255, 255, 255), (236, 238, 252))]
-                        c = [x * (1.0 - 0.05 * r_) + p.rnd.randint(-4, 4) for x in c]
-                    if p.rnd.random() < 0.05:                    # faint curls
-                        c = [x * 0.93 for x in c]
-                    soft(p, (fx + i, fy + j), c, a)
-
     if style == 'robe':
         robe(p, f)
         fx, fy, fw, fh = f['front']                                # 18x24: the crossed collar, left over right
@@ -801,6 +825,7 @@ if __name__ == '__main__':
     p = Painter(88)
     slots = paint(ZHENYUAN, p, paint_zhenyuan)
     p.save('zhenyuan')
+    cloud_sprites()
     emit(ZHENYUAN, slots, JAVA, 'zhenyuan')
     print('zhenyuan', len(ZHENYUAN), 'parts,', len(slots), 'boxes')
     from lion_camel import extent
