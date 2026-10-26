@@ -237,7 +237,9 @@ public class WuzhuangGameTests {
     public static void theTemplesBlueprint(GameTestHelper h) {
         check(h, Temple.size() > 8000, "a temple of some size: " + Temple.size());
         eq(h, Blocks.POLISHED_DEEPSLATE, Temple.at(0, 1, 0).getBlock(), "Zhenyuan's hall floor under him");
-        check(h, open(Temple.at(0, Temple.ZHENYUAN_Y, 0)) && open(Temple.at(0, Temple.ZHENYUAN_Y + 1, 0)), "room for him to stand");
+        for (int dy = 0; dy < Math.ceil(ModEntities.ZHENYUAN.get().getHeight()); dy++) {
+            check(h, open(Temple.at(0, Temple.ZHENYUAN_Y + dy, 0)), "room for him to stand, all his height: " + dy);
+        }
         check(h, Temple.SIGNS.stream().anyMatch(s -> s.lines()[1].contains("天")), "the altar's 天地");
         check(h, Temple.SIGNS.stream().anyMatch(s -> s.lines()[0].equals("五庄观")), "the gate's plaque");
         check(h, Temple.at(0, 3, 32).isAir() && Temple.at(0, 3, 28).isAir(), "the gate is open");

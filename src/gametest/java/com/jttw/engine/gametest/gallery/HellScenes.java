@@ -181,6 +181,8 @@ final class HellScenes {
                     if (y != null) y.wrath();
                 }, new double[]{0.5, 3.6, 4.0, 0.5, 3.5, 7.5}),
                 scene("hell_yama_side", p -> put(p, ModEntities.KING_YAMA.get(), 0.5, 7.5, 90f), new double[]{0.5, 3.4, 1.0, 0.5, 2.4, 8.0}),
+                // three-quarters on, close: the depth of him, his beard and brows, the ring of fire edge-on
+                scene("hell_yama_three_quarter", p -> put(p, ModEntities.KING_YAMA.get(), 0.5, 7.5, 180f), new double[]{-2.6, 3.2, 4.4, 0.5, 2.6, 7.5}),
                 scene("hell_yama_back", p -> put(p, ModEntities.KING_YAMA.get(), 0.5, 7.5, 20f), new double[]{0.5, 3.4, 1.0, 0.5, 2.4, 8.0}),
                 // how he towers over a man
                 scene("hell_yama_scale", p -> {

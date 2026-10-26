@@ -86,8 +86,18 @@ def halo_parts():
         a = math.radians(deg)
         r = 14
         tall = 7.5 if k % 2 == 0 else 5.5
-        out.append(part('halo_flame_%d' % k, 'halo', (r * math.sin(a), -r * math.cos(a), 0.3), (0, 0, a),
-                        [(-2, -tall, -0.25, 4, tall, 0.5, 'flame' if k % 2 == 0 else 'flame_small')]))
+        # each tongue a cross of two flat flames, so that it shows from the side as well as the front;
+        # the long ones lean back, licking away behind him
+        out.append(part('halo_flame_%d' % k, 'halo', (r * math.sin(a), -r * math.cos(a), 0.6), (-0.3 if k % 2 == 0 else -0.12, 0, a),
+                        [(-2, -tall, -0.25, 4, tall, 0.5, 'flame' if k % 2 == 0 else 'flame_small'),
+                         (-0.25, -tall, -2, 0.5, tall, 4, 'flame_x' if k % 2 == 0 else 'flame_x_small')]))
+    # the ring has body: a rim of dark, ember-seamed segments running back from it, all the way round
+    n = 24
+    for k in range(n):
+        a = k * 2 * math.pi / n
+        rr = 11.6
+        out.append(part('halo_rim_%d' % k, 'halo', (rr * math.sin(a), -rr * math.cos(a), 0.5), (0, 0, a),
+                        [(-1.6, -1.6, 0, 3.2, 3.2, 3.2, 'halo_rim')]))
     return out
 
 
@@ -105,26 +115,31 @@ def hem_flames():
 YAMA = mirrored([
     # the body from the waist up; its pivot the waist, so it carries the head, arms and halo as it breathes
     part('body', 'root', (0, 1, 0), (0, 0, 0), [
-        (-7, -18, -5, 14, 18, 10, 'chest'),
+        (-7, -18, -6, 14, 18, 12, 'chest'),
+        (-6.4, -9.6, -7.6, 12.8, 4.8, 1.8, 'belly'),
         (-4.5, -19.4, -3.6, 9, 2, 7.2, 'collar'),
         (-2.6, -22, -2.6, 5.2, 4, 5.2, 'neck'),
-        (-8.6, -18.7, -6, 17.2, 1, 12, 'cloudtop'),
-        (-7.6, -18.2, -6.1, 15.2, 6, 0.5, 'lappet'),
-        (-7.6, -18.2, 5.6, 15.2, 7, 0.5, 'lappet_back'),
-        (-7.9, -5, -6.1, 15.8, 2.5, 12.2, 'jadebelt'),
-        (-2.5, -5.8, -6.6, 5, 4, 1, 'beltskull'),
+        (-8.6, -18.7, -7, 17.2, 1, 14, 'cloudtop'),
+        (-7.6, -18.2, -7.1, 15.2, 6, 0.5, 'lappet'),
+        (-7.6, -18.2, 6.6, 15.2, 7, 0.5, 'lappet_back'),
+        (-7.9, -5, -7.9, 15.8, 2.5, 15, 'jadebelt'),
+        (-2.5, -5.8, -8.4, 5, 4, 1, 'beltskull'),
     ]),
     part('skirt', 'body', (0, 0, 0), (0, 0, 0), [
-        (-7.6, 0, -5.5, 15.2, 8, 11, 'robe1'),
-        (-8.8, 7.5, -6.5, 17.6, 8, 13, 'robe2'),
-        (-10.5, 15, -8, 21, 8, 16, 'hem'),
+        (-7.6, 0, -7, 15.2, 8, 14, 'robe1'),
+        (-8.8, 7.5, -7.8, 17.6, 8, 15.6, 'robe2'),
+        (-10.5, 15, -9, 21, 8, 18, 'hem'),
     ]),
-    part('apron', 'skirt', (0, -1, -5.8), (-0.13, 0, 0), [(-4, 0, -1, 8, 23, 1, 'apron')]),
-    part('right_panel', 'skirt', (-6.2, -1, -5.1), (-0.1, 0.35, 0.05), [(-2.5, 0, -0.5, 5, 22, 0.5, 'panel')]),
-    part('right_pendant', 'skirt', (-5.3, -1.6, -6.4), (-0.14, 0, 0.04), [
+    part('apron', 'skirt', (0, -1, -7.4), (-0.13, 0, 0), [(-4, 0, -1, 8, 23, 1, 'apron')]),
+    part('right_panel', 'skirt', (-6.2, -1, -6.6), (-0.1, 0.35, 0.05), [(-2.5, 0, -0.5, 5, 22, 0.5, 'panel')]),
+    # the robe in layers behind too: a long panel down his back, a shorter one over it, panels at his back's sides
+    part('back_panel', 'skirt', (0, -1.5, 7.3), (0.12, 0, 0), [(-5, 0, 0, 10, 23.5, 0.6, 'backpanel')]),
+    part('back_flap', 'skirt', (0, -2.5, 8.1), (0.2, 0, 0), [(-6.5, 0, 0, 13, 11, 0.6, 'backflap')]),
+    part('right_back_panel', 'skirt', (-6.4, -1, 6.6), (0.1, -0.35, 0.05), [(-2.5, 0, 0, 5, 22, 0.5, 'panel')]),
+    part('right_pendant', 'skirt', (-5.3, -1.6, -7.9), (-0.14, 0, 0.04), [
         (-0.4, 0, -0.4, 0.8, 5, 0.8, 'cord'), (-1.6, 5, -0.7, 3.2, 3.2, 1, 'jadedisc'), (-0.6, 8.2, -0.5, 1.2, 4, 1, 'tassel')]),
     # the chain that drags souls to judgement, hung at his left hip
-    part('chain', 'skirt', (7.4, -2.6, -2.5), (0, 0, -0.08), [
+    part('chain', 'skirt', (7.4, -2.6, -3.2), (0, 0, -0.08), [
         (-0.3, 0, -0.7, 0.6, 1.8, 1.4, 'link_a'),
         (-0.7, 1.5, -0.3, 1.4, 1.8, 0.6, 'link_b'),
         (-0.3, 3, -0.7, 0.6, 1.8, 1.4, 'link_a'),
@@ -136,17 +151,20 @@ YAMA = mirrored([
         (-1.2, 12.1, -1.2, 2.4, 2.4, 2.4, 'shackle'),
     ]),
     # his court boots, their toes turned up, from under the hem
-    part('right_boot', 'root', (-3.6, 22.4, -6.4), (0, 0.12, 0), [
+    part('right_boot', 'root', (-3.6, 22.4, -7.6), (0, 0.12, 0), [
         (-1.9, 0, -2.6, 3.8, 1.6, 4.6, 'boot'), (-1.3, -0.9, -3.4, 2.6, 1.4, 1, 'boottoe')]),
     # the arms: armoured shoulders, the forearms brought forward, great sleeves hanging from them
     part('right_arm', 'body', (-9, -16, 0), ARM, [(-4, -2, -3.2, 5.6, 10, 6.4, 'sleeve')]),
     part('right_pauldron', 'right_arm', (-1.4, -2.6, 0), (0, 0, 0.32), [
-        (-4.6, -1.8, -4.4, 6, 2, 9, 'pauldron'),
-        (-5.4, 0.2, -4.8, 6.5, 2, 10, 'pauldron2'),
-        (-6.2, 2.2, -5.2, 7, 2.5, 10.5, 'pauldron3'),
+        (-4.6, -1.8, -5.4, 6, 2, 11, 'pauldron'),
+        (-5.4, 0.2, -6, 6.5, 2, 12, 'pauldron2'),
+        (-6.2, 2.2, -6.6, 7, 2.5, 13.2, 'pauldron3'),
+        (-3.4, -3.4, -5, 1.4, 1.8, 10, 'pauldron_crest'),
         (-6.8, -0.8, -2.5, 1, 4.5, 5, 'beastface'),
         (-7.3, 0.6, -1.8, 0.5, 1.5, 3.5, 'beastjaw'),
     ]),
+    part('right_pauldron_front', 'right_pauldron', (-2.6, 1, -6.4), (-0.35, 0, 0), [(-3.2, 0, -0.4, 6, 5, 0.8, 'lamellar_flap')]),
+    part('right_pauldron_back', 'right_pauldron', (-2.6, 1, 6.4), (0.35, 0, 0), [(-3.2, 0, -0.4, 6, 5, 0.8, 'lamellar_flap')]),
     part('right_forearm', 'right_arm', (-1.2, 7.4, 0), FOREARM, [
         (-2.6, 0, -2.6, 5.2, 8, 5.2, 'forearm'),
         (-3.1, 5.8, -3.1, 6.2, 2.2, 6.2, 'cuff'),
@@ -177,8 +195,11 @@ YAMA = mirrored([
         (2, -3.4, -4.9, 0.9, 1.7, 0.8, 'fang'),
     ]),
     part('right_eye', 'head', (-2.5, -6.7, -4.5), (0, 0.18, 0), [(-1.6, -0.8, -0.5, 3.2, 1.8, 0.6, 'eye')]),
-    part('right_brow', 'head', (-0.3, -7.5, -4.8), (0, 0.12, 0.34), [(-5.4, -1.5, -0.9, 5.4, 1.9, 2.2, 'brow')]),
-    part('right_browflame', 'right_brow', (-5, -1, 0.4), (0.2, -0.5, 0.5), [(-0.25, -4, 0, 0.5, 4.5, 4.5, 'browflame')]),
+    part('right_brow', 'head', (-0.3, -7.5, -4.8), (0, 0.12, 0.34), [(-5.2, -1.1, -0.5, 5.2, 1.3, 1.6, 'brow')]),
+    part('right_brow_lock_0', 'right_brow', (-0.2, -0.9, -0.5), (0, 0, 0.02), [(-2.4, -0.55, -0.7, 2.6, 1.1, 1.4, 'browlock')]),
+    part('right_brow_lock_1', 'right_brow', (-2.1, -1.1, -0.4), (0.05, 0.06, 0.14), [(-2.5, -0.5, -0.65, 2.7, 1, 1.3, 'browlock_mid')]),
+    part('right_brow_lock_2', 'right_brow', (-4, -1.3, -0.2), (0.1, 0.12, 0.3), [(-2.8, -0.45, -0.6, 2.9, 0.9, 1.2, 'browlock_end')]),
+    part('right_browflame', 'right_brow', (-5.6, -1.6, 0.3), (0.2, -0.5, 0.5), [(-0.25, -3.6, 0, 0.5, 4, 3.8, 'browflame')]),
     part('right_sideburn', 'head', (-5.6, -6.4, -1.2), (0.05, 0.25, 0.55), [(-0.4, 0, -1.6, 0.8, 7.5, 3.2, 'sideburn')]),
     part('right_moustache', 'head', (-0.7, -4.0, -5.6), (0, 0.22, -0.12), [(-5.5, -0.75, -0.75, 5.5, 1.5, 1.5, 'moustache')]),
     part('right_moustache_tip', 'right_moustache', (-5.2, 0, 0), (0, 0.2, 0.8), [(-4, -0.5, -0.5, 4, 1, 1, 'moustache_tip')]),
@@ -187,9 +208,14 @@ YAMA = mirrored([
         (-2.6, -0.9, -3.8, 0.8, 1, 0.7, 'tusk'),
         (1.8, -0.9, -3.8, 0.8, 1, 0.7, 'tusk'),
     ]),
-    part('beard', 'jaw', (0, 2, -3.9), (0.16, 0, 0), [(-3, 0, -1, 6, 8.5, 2, 'beard')]),
-    part('beard_tip', 'beard', (0, 8.2, 0), (-0.08, 0, 0), [(-2.5, 0, -1, 5, 7, 2, 'beard_tip')]),
-    part('right_beard', 'jaw', (-3.4, 1.4, -3.2), (0.14, 0.25, 0.62), [(-2, 0, -1, 4, 10, 2, 'sidebeard')]),
+    part('beard', 'jaw', (0, 2.2, -3.9), (0.16, 0, 0), [(-1.5, 0, -1, 3, 9, 2, 'lock_c')]),
+    part('beard_tip', 'beard', (0, 8.6, 0), (-0.08, 0, 0), [(-1.1, 0, -0.9, 2.2, 7, 1.8, 'lock_tip')]),
+    part('right_beard_inner', 'jaw', (-1.8, 2, -3.7), (0.18, 0.04, 0.14), [(-1.2, 0, -0.9, 2.4, 8.5, 1.8, 'lock_a')]),
+    part('right_beard_inner_end', 'right_beard_inner', (0, 8.1, 0), (-0.06, 0, 0.1), [(-0.8, 0, -0.7, 1.6, 4.5, 1.4, 'lock_end')]),
+    part('right_beard', 'jaw', (-3.3, 1.6, -3.3), (0.14, 0.25, 0.42), [(-1.1, 0, -0.9, 2.2, 9, 1.8, 'lock_b')]),
+    part('right_beard_end', 'right_beard', (0, 8.6, 0), (0, 0, 0.25), [(-0.8, 0, -0.7, 1.6, 5, 1.4, 'lock_end')]),
+    part('right_beard_outer', 'jaw', (-4.3, 0.8, -2.6), (0.12, 0.35, 0.62), [(-1, 0, -0.9, 2, 7, 1.8, 'lock_d')]),
+    part('right_beard_tuft', 'jaw', (-0.9, 2.6, -4.3), (0.32, 0, 0.05), [(-0.9, 0, -0.6, 1.8, 4, 1.2, 'lock_s')]),
     # the mian crown: a tall cap banded in gold, its plaque bearing 王; the flat board, a little low at
     # the front, its strings of beads; red cords to jade balls at the ears
     part('crown', 'head', (0, -10, 0), (0, 0, 0), [
@@ -199,7 +225,8 @@ YAMA = mirrored([
         (-0.6, -6.6, -0.6, 1.2, 2.2, 1.2, 'crown_pin'),
         (-7, -5.2, -0.4, 14, 0.8, 0.8, 'crown_hairpin'),
     ]),
-    part('board', 'crown', (0, -4.6, 0), (0.07, 0, 0), [(-6.8, -0.8, -9.2, 13.6, 0.8, 16.4, 'board')]
+    part('board', 'crown', (0, -4.6, 0), (0.07, 0, 0), [(-6.8, -1.8, -9.2, 13.6, 1.8, 16.4, 'board'),
+                                                            (-7.1, -0.5, -9.5, 14.2, 0.5, 17, 'board_rim')]
          + [(-6 + 2 * k - 0.25, 0, -8.9, 0.5, 4.5, 0.5, 'beads') for k in range(7)]
          + [(-6 + 2 * k - 0.25, 0, 6.6, 0.5, 4.5, 0.5, 'beads') for k in range(7)]),
     part('right_eartie', 'crown', (-7, -4.8, 0), (0, 0, -0.08), [
@@ -328,6 +355,47 @@ def point(p, rect, keep=0.0, down=True, sharp=0.8):
         for i in range(fw):
             if abs(i - fw / 2 + 0.5) > half:
                 p.clear((fx + i, fy + j))
+
+
+LOCK_LIT = (106, 80, 86)      # light catching a lock of his black hair
+
+
+def lock(p, f, along_x=False, keep=0.5, taper=0.35):
+    """A lock of black hair: lit where it springs from and along its crest, darker toward its tip and
+    its underside, a few lighter strands down it, cut to a point at its end (a brow's lock: a leaf, its
+    ends drawn fine)."""
+    for s, r in f.items():
+        fx, fy, fw, fh = r
+        for j in range(fh):
+            for i in range(fw):
+                if along_x:
+                    t = j / max(1, fh - 1)                        # 0 at its crest .. 1 beneath
+                    c = mixc(LOCK_LIT, HAIR, min(1, t * 1.6)) if s != 'bottom' else HAIR
+                    if s == 'top':
+                        c = mixc(LOCK_LIT, HAIR_SHEEN, 0.5)
+                    if (i + j) % 4 == 0 and s != 'bottom':
+                        c = mixc(c, HAIR_GREY, 0.6)
+                else:
+                    t = j / max(1, fh - 1)                        # 0 at its root .. 1 at its tip
+                    edge = min(i, fw - 1 - i)
+                    c = mixc(LOCK_LIT, HAIR, min(1, t * 2.2))
+                    if (i + j // 5) % 3 == 1:                     # strands
+                        c = mixc(c, HAIR_SHEEN, 0.35)
+                    if edge == 0 and fw > 2:
+                        c = k(c, 0.55)
+                    c = k(c, 1 - 0.3 * t)
+                p.px((fx + i, fy + j), noisy(p, c, 3))
+    if along_x:
+        for s in ('front', 'back', 'top', 'bottom'):
+            fx, fy, fw, fh = f[s]
+            for i in range(fw):
+                reach = min((i + 1) / (fw * 0.35), (fw - i) / (fw * 0.5), 1)
+                for j in range(fh):
+                    if s in ('front', 'back') and j > fh * reach:
+                        p.clear((fx + i, fy + j))
+    else:
+        for s in ('front', 'back', 'right', 'left'):
+            point(p, f[s], keep=keep, sharp=taper)
 
 
 def ragged(p, rect, teeth=3, depth=4, down=True):
@@ -1015,6 +1083,97 @@ def paint_yama(p, style, f, dims):
                 for i in range(fw):
                     p.px((fx + i, fy + j), k(c, 1.1 if j % 2 == 0 else 0.75))
 
+    if style == 'belly':                                         # his paunch under the breast: the dragon robe swelling over it
+        cloth(p, f, CRIMSON, folds=False)
+        fx, fy, fw, fh = f['front']                               # 26x10
+        for j in range(fh):
+            for i in range(fw):
+                p.px((fx + i, fy + j), k(CRIMSON, 1.05 - 0.25 * abs(i / (fw - 1) - 0.5) - 0.12 * j / fh))
+        for i in range(2, fw - 2, 5):                             # gold waves breaking over it
+            for t in range(4):
+                p.px((fx + i + t, fy + 3 + (t % 2)), GOLD_DEEP)
+        flames_band(p, (fx, fy, fw, fh), fh - 4, 4, FIRE_DEEP, (200, 70, 24), every=4)
+        for i in range(fw):
+            p.px((fx + i, fy), GOLD_DEEP)
+        p.face(f['top'], CRIMSON, 0.95, noise=3)
+        p.face(f['bottom'], CRIMSON_DEEP, 0.8, noise=3)
+
+    if style in ('backpanel', 'backflap'):                       # the robe's layers down his back: black and crimson, gold-edged
+        base = CRIMSON_DEEP if style == 'backpanel' else BLACK
+        for kk, r in f.items():
+            p.face(r, base, 1.0, noise=4, fall=0.15)
+        for s in ('front', 'back'):
+            fx, fy, fw, fh = f[s]
+            vedges(p, f[s], GOLD)
+            for i in range(fw):
+                p.px((fx + i, fy), GOLD)
+                p.px((fx + i, fy + fh - 1), GOLD)
+                p.px((fx + i, fy + fh - 2), GOLD_DEEP)
+            if style == 'backpanel':
+                scrolls(p, (fx + 1, fy + 22, fw - 2, fh - 40), GOLD_DEEP, every=8, rows=10)
+                flames_band(p, (fx + 1, fy, fw - 2, fh), fh - 16, 14, FIRE_DEEP, (190, 60, 20), every=4)
+                skull_row(p, (fx, fy, fw, fh), fh - 9, BONE, BONE_SHADE, every=8, start=3)
+            else:                                                 # a cloud-collar's points along its foot
+                for i in range(fw):
+                    t = (i % 9) / 8
+                    depth = int(6 * (1 - abs(t - 0.5) * 2))
+                    for j in range(depth):
+                        p.clear((fx + i, fy + fh - 1 - j))
+                    if depth < 6:
+                        p.px((fx + i, fy + fh - 1 - depth), GOLD)
+                dragon_roundel(p, fx + fw / 2, fy + 9, 7)
+
+    if style == 'pauldron_crest':                                # the raised ridge along the shoulder: gold, studded
+        p.shaded(f, GOLD)
+        for s in sides + ('top',):
+            fx, fy, fw, fh = f[s]
+            for i in range(0, fw, 3):
+                p.px((fx + i, fy + fh // 2), GOLD_DEEP)
+            for i in range(fw):
+                p.px((fx + i, fy + fh - 1), GOLD_DEEP)
+
+    if style == 'lamellar_flap':                                 # lames hanging before and behind the shoulder
+        p.shaded(f, BLACK_SHEEN)
+        for s in sides:
+            fx, fy, fw, fh = f[s]
+            for j in range(fh):
+                for i in range(fw):
+                    if j % 3 == 2:
+                        p.px((fx + i, fy + j), GOLD_DEEP)
+                    elif (i + (j // 3) * 2) % 4 == 0:
+                        p.px((fx + i, fy + j), BLACK)
+            for i in range(fw):
+                p.px((fx + i, fy + fh - 1), GOLD)
+
+    if style == 'board_rim':                                     # the gold rim under the mian board
+        p.shaded(f, GOLD)
+        for s in sides:
+            fx, fy, fw, fh = f[s]
+            for i in range(0, fw, 4):
+                p.px((fx + i, fy), GOLD_DEEP)
+
+    if style in ('browlock', 'browlock_mid', 'browlock_end'):    # a lock of his brow: lit along its top, tapering outward
+        lock(p, f, along_x=True)
+
+    if style.startswith('lock_'):                                # a lock of his beard, flaring
+        lock(p, f, keep=0.6 if style in ('lock_c', 'lock_a', 'lock_b') else 0.4,
+             taper=0.3 if style in ('lock_c', 'lock_a', 'lock_b', 'lock_d') else 0.45)
+
+    if style == 'halo_rim':                                      # the body of the ring: black iron, seamed with embers
+        p.shaded(f, (36, 10, 12))
+        for s in sides + ('top', 'bottom'):
+            fx, fy, fw, fh = f[s]
+            for j in range(fh):
+                for i in range(fw):
+                    if (i * 3 + j * 5) % 11 == 0:
+                        p.lit((fx + i, fy + j), FIRE_DEEP, calm=0.5, wrath=1.0, skin=(70, 14, 10), hot=FIRE)
+            for i in range(fw):
+                p.px((fx + i, fy), GOLD_DEEP)
+        for s in ('top', 'bottom'):                               # its inner and outer faces: fire running in a seam
+            fx, fy, fw, fh = f[s]
+            for i in range(fw):
+                p.lit((fx + i, fy + fh // 2), FIRE, calm=0.45, wrath=1.0, skin=FIRE_DEEP, hot=FIRE_HOT)
+
     if style == 'halo':                                          # the ring of hellfire: a black ring rimmed with flame, open in the middle
         for kk in ('right', 'left', 'top', 'bottom'):            # (its thin edges: nothing)
             fx, fy, fw, fh = f[kk]
@@ -1067,8 +1226,9 @@ def paint_yama(p, style, f, dims):
                 if i % 2:
                     p.px((fx + i, fy), (40, 28, 24))
 
-    if style in ('flame', 'flame_small', 'hemflame', 'hemflame_small'):                        # a tongue of hellfire: a deep red root, a hot heart, a flickering tip
-        for s in ('front', 'back'):
+    if style in ('flame', 'flame_small', 'hemflame', 'hemflame_small', 'flame_x', 'flame_x_small'):  # a tongue of hellfire: a deep red root, a hot heart, a flickering tip
+        flat = ('right', 'left') if style.startswith('flame_x') else ('front', 'back')
+        for s in flat:
             fx, fy, fw, fh = f[s]
             for j in range(fh):
                 t = 1 - j / max(1, fh - 1)                        # 0 at the root .. 1 at the tip
@@ -1082,7 +1242,7 @@ def paint_yama(p, style, f, dims):
                     core = abs(dx) < half * 0.45 and t < 0.75
                     c = mixc(FIRE_HOT, FIRE, t) if core else mixc(FIRE, FIRE_DEEP, min(1, t * 1.4))
                     p.lit((fx + i, fy + j), c, calm=0.6, wrath=1.0, skin=c)
-        for s in ('right', 'left', 'top', 'bottom'):                # its thin edges: nothing (the flat tongue alone shows)
+        for s in [s_ for s_ in ('front', 'back', 'right', 'left', 'top', 'bottom') if s_ not in flat]:  # its thin edges: nothing (the flat tongue alone shows)
             fx, fy, fw, fh = f[s]
             for j in range(fh):
                 for i in range(fw):
