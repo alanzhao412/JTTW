@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -43,15 +44,18 @@ class FengduPlacementTest {
     }
 
     @Test
-    void itIsAPlaceOfNoBandLastOfAll() {
+    void itIsAPlaceOfNoBandAfterEveryZone() {
         assertFalse(F.hasLevelBand(), "no band of its own: Hell's is the band it leads to");
         assertTrue(Zones.HELL.hasLevelBand() && Zones.LION_CAMEL.hasLevelBand());
-        assertEquals(Zones.ALL.size() - 1, Zones.ALL.indexOf(F), "last: it keeps clear of every zone, none of them of it");
+        for (Zones.Zone zone : Zones.ALL) {
+            if (zone.hasLevelBand()) assertTrue(Zones.ALL.indexOf(zone) < Zones.ALL.indexOf(F), "after " + zone.id() + ": it keeps clear of every zone");
+        }
+        assertEquals(List.of(Zones.KUNLUN), Zones.ALL.subList(Zones.ALL.indexOf(F) + 1, Zones.ALL.size()), "only Mount Kunlun, another place, after it");
         assertTrue(Zones.MAP.zones().contains(F));
         assertSame(F, Zones.byBiome(Zones.FENGDU_BIOME));
         assertEquals(Zones.Vertical.WHOLE_COLUMN, F.vertical(), "the whole column: no zone shares its ground at any height");
         for (Zones.Zone zone : Zones.ALL) {
-            if (zone != F) assertTrue(zone.hasLevelBand(), zone.id() + " has its band");
+            if (zone != F && zone != Zones.KUNLUN) assertTrue(zone.hasLevelBand(), zone.id() + " has its band");
         }
     }
 

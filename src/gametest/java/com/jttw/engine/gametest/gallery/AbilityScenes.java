@@ -112,7 +112,10 @@ final class AbilityScenes {
             java.util.Map.entry("fengdu_gate_sealed", 100), java.util.Map.entry("fengdu_gate_sealed_close", 60), java.util.Map.entry("fengdu_swarm", 100),
             java.util.Map.entry("fengdu_swarm_close", 80), java.util.Map.entry("fengdu_gate_igniting", 100), java.util.Map.entry("fengdu_gate_burning", 200),
             java.util.Map.entry("fengdu_side_door", 60), java.util.Map.entry("ancient_frame", 80), java.util.Map.entry("ancient_frame_lighting", 80),
-            java.util.Map.entry("ancient_frame_lit", 80));
+            java.util.Map.entry("ancient_frame_lit", 80),
+            // Mount Kunlun's summit, laid off the stage
+            java.util.Map.entry("kunlun_gate", 140), java.util.Map.entry("kunlun_above", 100), java.util.Map.entry("kunlun_jade_pool", 80),
+            java.util.Map.entry("kunlun_palace", 80), java.util.Map.entry("kunlun_palace_inside", 60));
 
         /** Set by a scene that photographs a screen (a furnace's, say), so the gallery leaves it open. */
     static volatile boolean keepScreen;
@@ -125,6 +128,7 @@ final class AbilityScenes {
         all.addAll(WuzhuangScenes.all());
         all.addAll(LionScenes.all());
         all.addAll(FengduScenes.all());
+        all.addAll(KunlunScenes.all());
         return all;
     }
 

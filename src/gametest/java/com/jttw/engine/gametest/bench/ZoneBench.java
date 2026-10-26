@@ -224,6 +224,7 @@ final class ZoneBench {
         if (zone == Zones.MOUNT_WUZHUANG) return "Mount Wuzhuang";
         if (zone == Zones.LION_CAMEL) return "Lion-Camel Ridge";
         if (zone == Zones.FENGDU) return "Fengdu";
+        if (zone == Zones.KUNLUN) return "Mount Kunlun";
         return zone.biome().location().getPath();
     }
 
@@ -235,6 +236,7 @@ final class ZoneBench {
         if (zone == Zones.MOUNT_WUZHUANG) return new Color(255, 215, 0);
         if (zone == Zones.LION_CAMEL) return new Color(230, 0, 130);
         if (zone == Zones.FENGDU) return new Color(60, 200, 170);
+        if (zone == Zones.KUNLUN) return new Color(150, 220, 255);
         return Color.MAGENTA;
     }
 

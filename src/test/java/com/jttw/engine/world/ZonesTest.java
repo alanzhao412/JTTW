@@ -49,6 +49,11 @@ class ZonesTest {
         int prevFar = 0;
         for (Zones.Zone zone : Zones.MAP.zones()) {
             ZoneLayout l = zone.layout();
+            if (zone == Zones.KUNLUN) {
+                // a place of no band, kept to the west in the middle rings, not past the last
+                assertTrue(l.near() > l.margin(), zone.id() + ": clear of spawn");
+                continue;
+            }
             assertTrue(l.near() >= prevFar, zone.id() + ": its ring beyond the last zone's");
             assertTrue(l.near() > l.margin(), zone.id() + ": clear of spawn");
             prevFar = l.far();

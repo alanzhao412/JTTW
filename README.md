@@ -391,6 +391,8 @@ third; Hell, a dimension of its own, is the fourth; then the Flaming Mountains, 
 the first aerial zone, in the sky; Lion-Camel Ridge, the last band, is the last. Past it all lies
 Fengdu, the Ghost City: a place, not a zone of a band, placed as the zones are, whose Gate of
 Ghosts is the way down to Hell for everyone who comes to it by an Ancient City and fights it open.
+Far to the west stands Mount Kunlun, another such place: a towering sacred peak with the Queen
+Mother of the West's palace on its summit, where the Banana-Leaf Fan lies.
 
 **One of each a world.** Every boss lives in one place: each overworld zone has a single region a
 world (`ZoneMap`), except the Mystical Waters, which have one in each of the Four Seas, east, south,
@@ -407,6 +409,7 @@ west lengthens with the pilgrim: the higher a zone's levels, the farther out its
 | Mount Wuzhuang (over the clouds) | 78–88 | 6–7.5 km | one, ~260 |
 | Lion-Camel Ridge | 89–100 | 7.5–9 km | one, ~380 |
 | Fengdu, the Ghost City (river and hill country) | none: the way to Hell | 9–10.5 km | one, ~240 |
+| Mount Kunlun (mountain country, to the west) | none: the Banana-Leaf Fan | 5–8 km, within 30° of west | one, ~380 |
 
 Where in its ring follows from the world seed and its biomes: earliest zone first, the places its
 layout offers (spread evenly over the ring by the seed) are tried in turn, and it takes the first on
@@ -438,6 +441,9 @@ known, to Fengdu. Standing in Fengdu's country, they are told its gate is sealed
 those who come by an Ancient City's frame and break its guard.
 In Hell itself the needle points to the Ten Courts' gate; asked sneaking (and held while sneaking)
 it shows the way back up instead, the nearer side door of the Gate of Ghosts on the arrival plaza.
+In the world of the living, asked sneaking (and held while sneaking), anyone of any level is told
+the way to Mount Kunlun instead, and the needle points to its summit; every other answer there
+ends with a grey word on how to ask it, so the guidance by level is otherwise unchanged.
 In the Nether, the End or Heaven no Earth God hears, and it spins.
 
 To add a zone:
@@ -734,7 +740,8 @@ Boy's Fire Cloud Cave on Mount Haohao (火云洞, chapters 40–42), in
   alight for 3 s; **Fire Resistance**, or being fire-proof, keeps it off entirely (as it does the
   fire on the ground). Rock, ash and fanned earth are safe. Fire on lit earth never goes out, and
   creeps across it (never more than five fires in a 5x5).
-- **The Banana-Leaf Fan** (芭蕉扇) puts it out: as before it throws back what is in front (the Bull
+- **The Banana-Leaf Fan** (芭蕉扇; one a world, in the treasure chest on Mount Kunlun's summit: see
+  "Mount Kunlun" below) puts it out: as before it throws back what is in front (the Bull
   Demon King's blows it away), and now each wave also quenches the burning earth and ordinary fire
   in its sweep (60° either side) out to **12 blocks** (20 in the Bull Demon King's hand) for **a
   minute**, after which the earth kindles again by itself. It does nothing to the Samadhi fire.
@@ -1202,6 +1209,80 @@ Wukong's dimension travel could. In
   as vanilla lays it, lighting and lit), `hell_yin_soldier` and `hell_gate_doors`; in a real world
   with `./gradlew runWorldgenBench -Pbench.mode=zones` (Fengdu's place, its floor, its gate sealed
   and its side doors, and pictures from the road, before its Gate of Ghosts and over the city).
+
+
+#### Mount Kunlun (the Banana-Leaf Fan)
+
+Mount Kunlun (昆仑山), at the western end of the world, is in the old books the pillar of heaven
+and the home of the Queen Mother of the West, whose Jade Pool (瑶池) is on it; and in the novel
+(chapter 59) the Banana-Leaf Fan is a treasure that grew behind it when chaos first parted, the
+essence of the Great Yin. Here it is where the fan is found: one in the world, in a treasure chest
+in the Queen Mother's palace on the summit. A place, not a combat zone: nothing fights there. In
+[`world/kunlun/`](src/main/java/com/jttw/engine/world/kunlun/).
+
+- **Where** (`Zones.KUNLUN = Zone.place(kunlun, kunlun_hosts, ZoneLayout.KUNLUN, WHOLE_COLUMN)`,
+  host judged at y 256): no level band (none registered, it pays no XP, the Earth Gods never send
+  anyone there by level). One a world, placed by `ZoneMap` last of all, so it keeps clear of every
+  zone and of Fengdu: **5–8 km out, within 30° of due west** (the journey west; its layout keeps to
+  the western quarter as a sea's keeps to its own, `ZoneLayout.quarter`, and if it must widen it
+  widens westward still), a region about 380 blocks across (never under 300) on mountain country
+  (jagged, frozen and stony peaks, snowy slopes, groves, meadows, cherry groves, windswept hills,
+  gravelly hills and forests: the Bottomless Cave's hosts). In the bench's worlds: seed 12345 at
+  (−6341, −1652), 6.6 km west, on grove (summit y 248, 80 over the highest land round it); seed 42 at
+  (−7272, −1873), 7.5 km west, on meadow (summit y 248, 107 over it).
+- **The peak** (`KunlunShape`, pure, unit-tested; laid by `world/feature/KunlunFeature` chunk by
+  chunk): one dominant peak raised out of the land round it, its summit a level circle 25 blocks
+  out each way at the highest land within 240 blocks and 40 more (at least 150 over its foot,
+  never under y 248, never over the sky less 32: y 248–288). Its flanks fall to the land's own over
+  about 112 blocks, steep under the summit and gentler toward the foot, run out along five ridges
+  (fading at the foot), broken by crags and stepped into ledges and cliffs; past 148 blocks, the
+  land's own. Grass, ferns and pines low down, bare rock banded with white calcite where steep, and
+  from about 95 under the summit up, snow (on the gentler ground, and more and more of the cliffs). **Clouds** (celestial cloud) cling round its shoulders,
+  about 48 under the summit, never close over the stair. Round it, its **country** keeps the land's
+  shape (steep places bare rock, high places snow, grass and pines lower down); a pale sky, and
+  nothing hostile spawns in it (rabbits do).
+- **The stair** (`KunlunShape.path`): a stone way three or four blocks wide that winds up round the
+  peak (twice round, or so) from its foot to the summit's south edge, laid out by walking down from
+  the summit along the flank as it is really shaped, a quarter block lower a block, turning gently
+  and never coming near its own turns; then kept to a climb of at most a third of a block a block, so it is walked
+  in half steps (stone brick, a slab where the way is half a block up), never a whole block at once.
+  Cut into the flank where it is higher, built out on stone where it is lower, a stone-brick rail
+  along any drop, a lantern on a post every 18 blocks on the outer side.
+- **The summit** (`KunlunPalace`, a blueprint as Fengdu's city is, laid column by column with its
+  signs and its treasure): a terrace paved in white jade (quartz, polished diorite, calcite) 21
+  blocks out, a white balustrade round it, snow and snow-laden pines round that; at its south edge,
+  where the stair arrives, a three-bay **gate** (牌坊) of white pillars, a beam trimmed with gold
+  under a roof of celestial blue tiles (dark prismarine), 昆仑 *Mount Kunlun* on its face and 瑶池
+  *The Jade Pool* on its back. Within, the **Jade Pool** in two halves either side of a white
+  causeway with rails and lamps, rimmed with jade, lit from below by sea lanterns (so it never
+  freezes up there), lilies on it; peach trees in blossom (cherry, petals fallen round them) by it
+  and by the palace. The **palace** (西王母宫) on a white plinth up two steps: white walls and quartz
+  pillars with gold heads, windows of light blue glass, a hip roof of blue tiles with a ridge ending
+  in gold; within, lanterns, a blue carpet, a screen of jade and gold, and on a dais before it
+  between candles the **treasure chest**.
+- **The treasure** (`loot_table/chests/kunlun_treasure`, `Kunlun.TREASURE`): the Banana-Leaf Fan,
+  always, once, alone in a pool of one roll; and three to five modest gifts (heavenly wine, an
+  immortal peach now and then, jade, gold, emeralds, cherry saplings, lily pads). No other signature
+  weapon, and no other loot table, recipe or tag in the mod gives the fan.
+- **The Earth God's Luopan**: asked sneaking in the world of the living, the way to Kunlun, for
+  anyone (see the luopan, above).
+- **Art**: vanilla blocks, the mod's jade and celestial cloud.
+- **Tests and pictures**: `KunlunPlacementTest` (one a world, 5–8 km out and within 30° of west in
+  every seed, widened or not, on its hosts, never on a zone's or Fengdu's ground, the same for the
+  same seed; a place of no band; the peak, the stair and the palace inside its region; the peak's
+  shape and its summit's height; the stair from its foot to the summit's south edge, never steeper
+  than its climb, its turns well apart, walked in half steps from any block of it to the next; the
+  fan in Kunlun's treasure once and in no other data file); `KunlunGameTests` (the blueprint: from
+  the stair's head through the gate, over the causeway, up the palace's steps to the chest, room to
+  stand, one chest, water only in the pool, every sign on a wall; the treasure rolled forty times,
+  the fan in it once each time, no other weapon; the chest laid on the summit in the test world,
+  opened, the fan in it; the luopan asked and held sneaking, and not, at every level, in Diyu and
+  the Nether); gallery scenes `-Pgallery.only=kunlun_` (the gate from the stair's head, the summit
+  from above, the Jade Pool, the palace, the chest within); in a real world with `./gradlew
+  runWorldgenBench -Pbench.mode=kunlun -Pbench.seed=<seed>` (`KunlunBench`: its place, bearing and
+  host, its summit against the highest land round it, the chest and its loot, the stair walked
+  block by block, and pictures from afar on two sides, among the clouds at its shoulder, up the
+  stair, before the gate and over the summit). `-Pbench.mode=zones` shows it on the map.
 
 ---
 
