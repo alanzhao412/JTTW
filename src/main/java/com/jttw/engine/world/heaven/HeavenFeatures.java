@@ -28,7 +28,8 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
  * What stands on Heaven's islands: now and then a pavilion of the Immortals with a chest in it (and
  * in the chests, now and then, Laozi's elixir pills); rarely, instead, a garden of the Queen Mother's
  * peach trees, Immortal Peaches hanging in them; and once in all Heaven, the Jade Palace, with the
- * Heavenly Wine of its banquet and more of the pills.
+ * Heavenly Wine of its banquet and more of the pills, and in one of its two treasury chests, the
+ * Bell of Taiyi (one in all Heaven).
  */
 public final class HeavenFeatures {
 
@@ -41,6 +42,9 @@ public final class HeavenFeatures {
             net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "chests/heaven_pavilion"));
     public static final net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable> PALACE_CHEST =
             net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "chests/jade_palace"));
+    /** The Jade Palace's other treasury chest: the palace's loot, and the Bell of Taiyi, always (one palace, one bell). */
+    public static final net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable> PALACE_TREASURY =
+            net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "chests/jade_palace_treasury"));
 
     private static void set(WorldGenLevel level, BlockPos p, BlockState s) {
         level.setBlock(p, s, Block.UPDATE_CLIENTS);
@@ -188,9 +192,9 @@ public final class HeavenFeatures {
                 else if (dz % 3 == 1) set(level, p.set(x + side, y + 1, z + dz), Blocks.YELLOW_CANDLE.defaultBlockState()
                         .setValue(net.minecraft.world.level.block.CandleBlock.CANDLES, 3).setValue(net.minecraft.world.level.block.CandleBlock.LIT, true));
             }
-            // the treasury, either side of the throne
+            // the treasury, either side of the throne: the Bell of Taiyi in the east one
             chest(level, p.set(x - 5, y, z - 6).immutable(), Direction.SOUTH, PALACE_CHEST, r);
-            chest(level, p.set(x + 5, y, z - 6).immutable(), Direction.SOUTH, PALACE_CHEST, r);
+            chest(level, p.set(x + 5, y, z - 6).immutable(), Direction.SOUTH, PALACE_TREASURY, r);
             // red lanterns hung on chains, down the hall and at the gate
             for (int[] l : new int[][]{{-2, -2}, {2, -2}, {-2, 2}, {2, 2}, {-2, 5}, {2, 5}}) {
                 set(level, p.set(x + l[0], y + 4, z + l[1]), Blocks.CHAIN.defaultBlockState());

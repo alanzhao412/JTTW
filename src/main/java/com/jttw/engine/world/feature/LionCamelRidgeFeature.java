@@ -176,7 +176,7 @@ public class LionCamelRidgeFeature extends Feature<NoneFeatureConfiguration> {
                     for (int ly = LionCamelCity.BOTTOM; ly <= LionCamelCity.TOP; ly++) {
                         BlockState st = LionCamelCity.at(lx, ly, lz);
                         int y = floor + ly;
-                        if (st != null && y >= minY && y <= maxY) level.setBlock(p.set(x, y, z), st, Block.UPDATE_CLIENTS);
+                        if (st != null && y >= minY && y <= maxY) LionCamelCity.lay(level, p.set(x, y, z), st, context.random());
                     }
                     // under the walls and towers, footings down to the ground
                     if (!LionCamelCity.inside(lx, lz) && LionCamelCity.at(lx, 1, lz) != null && !LionCamelCity.at(lx, 1, lz).isAir()) {

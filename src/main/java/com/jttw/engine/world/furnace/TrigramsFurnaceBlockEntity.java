@@ -31,7 +31,9 @@ import java.util.function.Supplier;
  * Laozi's Eight Trigrams Furnace: where armaments are forged and refined, and nowhere else.
  *
  * <p>Eight trigram slots ring a centre. With the centre empty and the trigrams holding exactly what
- * an armament's forging takes, it forges that armament into the centre. With an armament in the
+ * an armament's forging takes, it forges that armament into the centre; holding exactly one of its
+ * recipes' materials instead ({@link TrigramsRecipe}: the Nine-Tooth Rake's), that recipe's result.
+ * With an armament in the
  * centre and the trigrams holding at least its next refinement's cost, it refines it a level. Either
  * way it takes its time: forging {@value #FORGE_TICKS} ticks, refining longer the higher the level.
  *
@@ -115,6 +117,21 @@ public class TrigramsFurnaceBlockEntity extends BlockEntity implements Container
         return null;
     }
 
+    /** What lies in the trigram slots, as a recipe sees it. */
+    public TrigramsRecipe.Trigrams trigrams() {
+        return new TrigramsRecipe.Trigrams(items.subList(0, TRIGRAMS));
+    }
+
+    /**
+     * The furnace recipe the trigrams would forge (they hold exactly its materials), with the centre
+     * empty and no armament's forging matching them; or null.
+     */
+    @Nullable
+    public net.minecraft.world.item.crafting.RecipeHolder<TrigramsRecipe> forgingRecipe() {
+        if (level == null || !items.get(CENTRE).isEmpty() || forging() != null) return null;
+        return level.getRecipeManager().getRecipeFor(com.jttw.engine.registry.ModRecipes.TRIGRAMS_FORGING.get(), trigrams(), level).orElse(null);
+    }
+
     /** The cost of refining the armament in the centre, if it is one and can go further; else null. */
     @Nullable
     public Map<Item, Integer> refining() {
@@ -127,7 +144,7 @@ public class TrigramsFurnaceBlockEntity extends BlockEntity implements Container
     }
 
     private int jobTicks() {
-        if (forging() != null) return FORGE_TICKS;
+        if (forging() != null || forgingRecipe() != null) return FORGE_TICKS;
         if (refining() != null) return REFINE_BASE_TICKS + REFINE_TICKS_PER_LEVEL * Armaments.refine(items.get(CENTRE));
         return 0;
     }
@@ -265,6 +282,13 @@ public class TrigramsFurnaceBlockEntity extends BlockEntity implements Container
         if (forge != null) {
             for (int i = 0; i < TRIGRAMS; i++) items.set(i, ItemStack.EMPTY); // exactly its cost: all of it goes
             items.set(CENTRE, forge.forged().get());
+            return;
+        }
+        var recipe = forgingRecipe();
+        if (recipe != null) {
+            ItemStack made = recipe.value().assemble(trigrams(), level.registryAccess());
+            for (int i = 0; i < TRIGRAMS; i++) items.set(i, ItemStack.EMPTY); // exactly its materials: all of them go
+            items.set(CENTRE, made);
             return;
         }
         Map<Item, Integer> cost = refining();

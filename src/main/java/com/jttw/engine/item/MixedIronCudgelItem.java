@@ -25,20 +25,26 @@ import java.util.List;
  * The Mixed-Iron Cudgel, the Bull Demon King's weapon.
  *
  * <ul>
- *   <li>Anyone: a heavy, slow club.</li>
+ *   <li>Anyone: a heavy, slow club of plain iron, about an iron sword's worth: {@value #DAMAGE}
+ *       attack at {@value #SPEED} swings a second (an iron sword: 6 at 1.6), an iron tool's
+ *       durability. It is crafted cheaply at a crafting table (two iron ingots, two nuggets, a
+ *       stick).</li>
  *   <li>The Bull Demon King: hold right-click to raise it, let go to smash the ground. Held 1 /
  *       2 / 3 seconds, the shockwave runs 6 / 9 / 12 blocks, tossing all it passes; it breaks
- *       nothing.</li>
+ *       nothing. The club is ordinary; the strength is his.</li>
  * </ul>
  */
 public class MixedIronCudgelItem extends SwordItem implements Charged {
 
     public static final int TICKS_PER_CHARGE = 20;
     public static final int COOLDOWN = 40;
+    /** Its attack (a bare hand's 1, iron's 2, its own 4) and its swings a second. */
+    public static final int DAMAGE = 7;
+    public static final float SPEED = 1.0f;
 
     public MixedIronCudgelItem() {
-        super(Tiers.NETHERITE, new Properties().rarity(Rarity.EPIC).fireResistant()
-                .attributes(SwordItem.createAttributes(Tiers.NETHERITE, 6, -3.2f)));
+        super(Tiers.IRON, new Properties().rarity(Rarity.UNCOMMON)
+                .attributes(SwordItem.createAttributes(Tiers.IRON, 4, -3.0f)));
     }
 
     /** Charge from ticks held: 0 (too short) to 3. */

@@ -151,6 +151,65 @@ public class FurnaceGameTests {
         h.succeed();
     }
 
+    /** The Nine-Tooth Rake's materials (data/jttw_engine/recipe/nine_tooth_rake.json) into the trigrams. */
+    private static void rakeMaterials(TrigramsFurnaceBlockEntity f) {
+        put(f, 0, Items.IRON_INGOT, 9);
+        put(f, 1, Items.GOLD_INGOT, 3);
+        put(f, 2, ModItems.RIME_SHACKLE.get(), 1);
+        put(f, 3, ModItems.JADE_BLOCK_ITEM.get(), 1);
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void theFurnaceForgesTheNineToothRakeFromItsRecipe(GameTestHelper h) {
+        TrigramsFurnaceBlockEntity f = furnace(h);
+        rakeMaterials(f);
+        put(f, TrigramsFurnaceBlockEntity.FUEL, ModItems.TRUE_SAMADHI_FIRE.get(), 8);
+        check(h, f.forging() == null, "no armament's forging");
+        check(h, f.forgingRecipe() != null && f.forgingRecipe().id().equals(JTTWEngine.id("nine_tooth_rake")), "but the rake's recipe");
+        run(h, f, TrigramsFurnaceBlockEntity.FORGE_TICKS - 1);
+        check(h, f.getItem(TrigramsFurnaceBlockEntity.CENTRE).isEmpty(), "not before its time");
+        run(h, f, 1);
+        check(h, f.getItem(TrigramsFurnaceBlockEntity.CENTRE).is(ModItems.NINE_TOOTH_RAKE.get()), "the rake forged into the centre");
+        for (int i = 0; i < TrigramsFurnaceBlockEntity.TRIGRAMS; i++) check(h, f.getItem(i).isEmpty(), "its materials used");
+        run(h, f, TrigramsFurnaceBlockEntity.FORGE_TICKS + 5);
+        eq(h, 1, f.getItem(TrigramsFurnaceBlockEntity.CENTRE).getCount(), "and nothing more");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void theRakesRecipeTakesExactlyItsMaterials(GameTestHelper h) {
+        TrigramsFurnaceBlockEntity f = furnace(h);
+        rakeMaterials(f);
+        put(f, 0, Items.IRON_INGOT, 10);
+        put(f, TrigramsFurnaceBlockEntity.FUEL, ModItems.TRUE_SAMADHI_FIRE.get(), 8);
+        check(h, f.forgingRecipe() == null, "an ingot too many: nothing");
+        run(h, f, TrigramsFurnaceBlockEntity.FORGE_TICKS + 5);
+        check(h, f.getItem(TrigramsFurnaceBlockEntity.CENTRE).isEmpty(), "nothing forged");
+        put(f, 0, Items.IRON_INGOT, 9);
+        put(f, 2, Items.AIR, 0);
+        check(h, f.forgingRecipe() == null, "without the Rime Shackle: nothing");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void noCraftingTableMakesTheNineToothRake(GameTestHelper h) {
+        var recipes = h.getLevel().getRecipeManager();
+        for (net.minecraft.world.item.crafting.RecipeHolder<?> r : recipes.getRecipes()) {
+            if (!r.value().getResultItem(h.getLevel().registryAccess()).is(ModItems.NINE_TOOTH_RAKE.get())) continue;
+            check(h, r.value().getType() == com.jttw.engine.registry.ModRecipes.TRIGRAMS_FORGING.get(), r.id() + " makes the rake outside the furnace");
+        }
+        // its materials laid in a crafting grid make nothing
+        java.util.List<ItemStack> grid = new java.util.ArrayList<>(java.util.Collections.nCopies(9, ItemStack.EMPTY));
+        grid.set(0, new ItemStack(Items.IRON_INGOT));
+        grid.set(1, new ItemStack(Items.GOLD_INGOT));
+        grid.set(2, new ItemStack(ModItems.RIME_SHACKLE.get()));
+        grid.set(4, new ItemStack(ModItems.JADE_BLOCK_ITEM.get()));
+        check(h, recipes.getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING,
+                net.minecraft.world.item.crafting.CraftingInput.of(3, 3, grid), h.getLevel()).isEmpty(), "no crafting recipe from them");
+        check(h, recipes.byKey(JTTWEngine.id("nine_tooth_rake")).isPresent(), "the furnace's recipe is loaded");
+        h.succeed();
+    }
+
     @GameTest(template = PLATFORM)
     public static void aCaptainLeavesItsSigil(GameTestHelper h) {
         ServerPlayer p = player(h);

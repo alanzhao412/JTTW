@@ -191,6 +191,28 @@ Abilities and items are drawn from the source material rather than invented:
 - **Wind Fire Wheels · Huntian Cloth · Fire Tip Spear · Qiankun Ring** — Nezha's arsenal
 - **Three-Pointed Spear · Erlang Axe** — Erlang Shen, whose form is *Eye of Heaven* after his third eye
 - **Immortal Peach · Yin Yang Sword**
+- **The signature weapons and treasures, and where they are come by** (none of them in any other
+  loot, vanilla's or ours):
+  - **Nine-Tooth Rake** (九齿钉耙, the Marshal of the Heavenly Canopy's): forged only in the Eight
+    Trigrams Furnace, as Laozi forged it, from exactly **9 iron ingots, 3 gold ingots, a Rime
+    Shackle** (King Chujiang's ice-iron, from the Second Court's cold hell) **and a jade block**,
+    with the centre empty and True Samadhi Fire burning (400 ticks, as an armament). No crafting
+    table makes it. The furnace's recipes besides the armaments are data
+    (`data/jttw_engine/recipe/`, type `jttw_engine:trigrams_forging`:
+    [`TrigramsRecipe`](src/main/java/com/jttw/engine/world/furnace/TrigramsRecipe.java)), and its
+    screen lists them with the armaments.
+  - **Mixed-Iron Cudgel** (混铁棍, the Bull Demon King's): crafted cheaply at a crafting table, two
+    iron ingots and two iron nuggets on a diagonal over a stick (` NI` / ` IN` / `S  `). A plain
+    iron club: 7 attack at 1 swing a second, 250 durability, uncommon (it was netherite-tier, 11
+    attack at 0.8, epic and fireproof); the Bull Demon King's shockwave is his own, in any cudgel.
+  - **Bell of Taiyi** (太乙钟): in the Jade Palace, one in all Heaven: the east one of the two
+    treasury chests beside the throne (`chests/jade_palace_treasury`, the palace's loot and the bell,
+    always). One palace a world, so one bell.
+  - **Yin-Yang Vase** (阴阳二气瓶, the Great Peng's): in Lion-Camel City alone, in the demon kings'
+    treasury, a chest on the throne-hall dais beside the Great Peng's empty throne
+    (`chests/lion_camel_treasury`: the vase, always, among gold, gems, bones and the ridge's
+    spoils). One city a world, so one vase.
+  - **Banana-Leaf Fan**: not yet found anywhere in survival (it is to be Mount Kunlun's).
 - **Wu Clones** — Wukong's hair-clone technique, implemented as summoned entities with their own
   pathfinding goals ([`WuCloneManager`](src/main/java/com/jttw/engine/character/wukong/WuCloneManager.java))
 - **Xiaotian Quan** — Erlang Shen's hound, a custom entity with hand-authored model and animation.

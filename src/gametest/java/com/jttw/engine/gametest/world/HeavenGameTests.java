@@ -152,4 +152,21 @@ public class HeavenGameTests {
         check(h, palace > pavilion * 3, "the Jade Palace's, far more often: " + palace);
         h.succeed();
     }
+
+    /** How many Bells of Taiyi one roll of this table gives, with this seed. */
+    private static int bells(GameTestHelper h, net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable> table, long seed) {
+        var items = h.getLevel().getServer().reloadableRegistries().getLootTable(table).getRandomItems(new LootParams.Builder(h.getLevel())
+                .withParameter(LootContextParams.ORIGIN, Vec3.ZERO).create(LootContextParamSets.CHEST), seed);
+        return items.stream().filter(s -> s.is(ModItems.BELL_OF_TAIYI.get())).mapToInt(ItemStack::getCount).sum();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void theBellOfTaiyiLiesInTheJadePalacesTreasuryAlone(GameTestHelper h) {
+        for (long seed = 0; seed < 50; seed++) {
+            eq(h, 1, bells(h, HeavenFeatures.PALACE_TREASURY, seed), "the treasury's chest: the bell, one, always (seed " + seed + ")");
+            eq(h, 0, bells(h, HeavenFeatures.PALACE_CHEST, seed), "the palace's other chest: none");
+            eq(h, 0, bells(h, HeavenFeatures.PAVILION_CHEST, seed), "a pavilion's: none");
+        }
+        h.succeed();
+    }
 }

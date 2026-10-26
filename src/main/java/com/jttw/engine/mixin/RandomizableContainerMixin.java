@@ -33,7 +33,8 @@ public abstract class RandomizableContainerMixin {
     private void jttw$robbingHeaven(int id, Inventory inventory, Player opener, CallbackInfoReturnable<AbstractContainerMenu> cir) {
         Player player = inventory.player;
         if (lootTable == null || !(player instanceof ServerPlayer sp) || sp.isCreative()) return;
-        if (lootTable.equals(HeavenFeatures.PAVILION_CHEST) || lootTable.equals(HeavenFeatures.PALACE_CHEST)) {
+        if (lootTable.equals(HeavenFeatures.PAVILION_CHEST) || lootTable.equals(HeavenFeatures.PALACE_CHEST)
+                || lootTable.equals(HeavenFeatures.PALACE_TREASURY)) {
             Morality.deed(sp, Morality.LOOT_HEAVEN, "you looted Heaven's treasury");
         } else if (lootTable.equals(com.jttw.engine.world.waters.DragonPalace.TREASURY)) {
             Morality.deed(sp, Morality.LOOT_DRAGON_PALACE, "you plundered a Dragon King's treasury");
