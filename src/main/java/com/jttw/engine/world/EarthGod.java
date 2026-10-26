@@ -55,6 +55,11 @@ import java.util.Set;
  * side doors of the Gate of Ghosts on the arrival plaza. Anywhere else (the Nether, the End,
  * Heaven) no Earth God hears.
  *
+ * <p>Asked sneaking in the world of the living, by anyone of any level, they tell the way to Mount
+ * Kunlun instead ({@link #toKunlun}), where the Banana-Leaf Fan lies on the summit, and the needle
+ * points there while its holder sneaks; every other answer there ends with a word on how to ask it
+ * ({@link #KUNLUN_HINT}). The guidance by level is otherwise as it was.
+ *
  * <p>Every player is given a luopan once, the first time they join a world.
  */
 @EventBusSubscriber(modid = JTTWEngine.MOD_ID)
@@ -180,6 +185,36 @@ public final class EarthGod {
         if (!dimension.equals(Level.OVERWORLD)) {
             return new Answer(null, null, Component.literal("You knock, but no Earth God hears you here: their ground is the mortal world's."));
         }
+        if (wayOut) return toKunlun(at, seed);
+        Answer a = forLevel(at, level, seed, fallen, city);
+        return new Answer(a.target(), a.zone(), a.words().copy().append(Component.literal(KUNLUN_HINT)));
+    }
+
+    /** Said after every answer in the world of the living: how to ask the way to Mount Kunlun. */
+    public static final String KUNLUN_HINT = " §7(Sneak as you ask, for the way to Mount Kunlun.)";
+
+    /**
+     * The way to Mount Kunlun, for anyone in the world of the living who asks sneaking: the far-western
+     * mountain where the Queen Mother of the West keeps the Jade Pool, and where the Banana-Leaf Fan
+     * lies in her palace on the summit; the needle to its summit.
+     */
+    public static Answer toKunlun(Vec3 at, long seed) {
+        int[] c = Zones.KUNLUN.centres(seed)[0];
+        StringBuilder words = new StringBuilder("\"Mount Kunlun, the pillar of heaven, stands at the western end of the world. On its summit the Queen "
+                + "Mother of the West keeps her palace by the Jade Pool, and in it the Banana-Leaf Fan, that grew behind the mountain when chaos "
+                + "first parted. ");
+        if (Zones.KUNLUN.depth(seed, (int) Math.floor(at.x), (int) Math.floor(at.z)) > 0) {
+            words.append("You stand on its slopes now: the stone stair winds up round the peak to the gate at its top.\"");
+        } else {
+            double d = Math.hypot(c[0] - at.x, c[1] - at.z);
+            words.append("It lies some ").append(roughly(d)).append(" blocks to the ").append(wind(at.x, at.z, c[0], c[1]))
+                    .append("; a stone stair winds up it to the summit.\"");
+        }
+        return new Answer(GlobalPos.of(Level.OVERWORLD, new BlockPos(c[0], 64, c[1])), Zones.KUNLUN, Component.literal(words.toString()));
+    }
+
+    /** What the Earth God answers a player at their place and level in the world of the living, of the zone for it. */
+    private static Answer forLevel(Vec3 at, int level, long seed, Set<Sea> fallen, @Nullable BlockPos city) {
         Zones.Zone zone = overworldZoneFor(level);
         int[] c = regionFor(zone, seed, (int) Math.floor(at.x), (int) Math.floor(at.z), fallen);
         if (zone == Zones.FENGDU && c != null) return wayIn(at, seed, c, city);

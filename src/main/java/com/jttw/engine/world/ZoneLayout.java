@@ -14,8 +14,20 @@ package com.jttw.engine.world;
  * @param wobble  how far its edge strays from the circle, in blocks
  * @param salt    keeps zones of different kinds from trying the same places
  * @param perSea  one region in each quarter of the compass (east, south, west, north), not one in all
+ * @param quarter the one quarter of the compass its region is tried in (0 east, 1 south, 2 west, 3
+ *                north, as {@link #quarterOf}), as a sea's is; {@link #ANY_QUARTER} for anywhere round
  */
-public record ZoneLayout(int near, int far, int radius, int wobble, long salt, boolean perSea) {
+public record ZoneLayout(int near, int far, int radius, int wobble, long salt, boolean perSea, int quarter) {
+
+    /** No quarter of its own: its region may lie anywhere round the ring. */
+    public static final int ANY_QUARTER = -1;
+    /** The quarter of the compass to the west (-x), where the journey goes. */
+    public static final int WEST = 2;
+
+    /** A layout whose region may lie anywhere round its ring (or, {@code perSea}, one in each quarter). */
+    public ZoneLayout(int near, int far, int radius, int wobble, long salt, boolean perSea) {
+        this(near, far, radius, wobble, salt, perSea, ANY_QUARTER);
+    }
 
     /** White Bone Ridge, the first band: a region about 520 blocks across, 1-2 km from spawn. */
     public static final ZoneLayout WHITE_BONE = new ZoneLayout(1000, 2000, 260, 70, 0x5EEDB0E1L, false);
@@ -50,7 +62,17 @@ public record ZoneLayout(int near, int far, int radius, int wobble, long salt, b
      */
     public static final ZoneLayout FENGDU = new ZoneLayout(9000, 10500, 120, 16, 0xF3D6D0C1L, false);
 
-    /** Each quarter's half-width, in degrees, a sea's region is tried in: well inside its 45, so the four lie plainly round the compass. */
+    /**
+     * Mount Kunlun, the far-western mountain: no band of its own; a region about 380 blocks across
+     * (never under 300) round its peak, 5-8 km out and within 30 degrees of due west, as a sea's
+     * region keeps to its quarter (widening, it keeps to the west still).
+     */
+    public static final ZoneLayout KUNLUN = new ZoneLayout(5000, 8000, 170, 20, 0x6B0A1F5EL, false, WEST);
+
+    /**
+     * Each quarter's half-width, in degrees, a sea's region (or one kept to a quarter) is tried in:
+     * well inside its 45, so the four lie plainly round the compass.
+     */
     private static final double SEA_HALF_ARC = 30;
 
     /** How many regions a world holds: four for the Four Seas, else one. */
@@ -65,12 +87,13 @@ public record ZoneLayout(int near, int far, int radius, int wobble, long salt, b
 
     /**
      * The {@code i}th place tried for region {@code region} (for the seas, its quarter: 0 east, 1
-     * south, 2 west, 3 north, as {@code Sea}), between {@code from} and {@code to} blocks out, as {x, z}.
+     * south, 2 west, 3 north, as {@code Sea}; for a layout kept to a quarter, in that one), between {@code from} and {@code to} blocks out, as {x, z}.
      * Spread evenly over the ring's area, by the seed alone.
      */
     public int[] candidate(long seed, int region, int i, int from, int to) {
         long h = mix(seed ^ salt, region * 1_000_003L + i, from);
-        double a = perSea ? Math.toRadians(region * 90 + (unit(mix(h, 1, 0)) * 2 - 1) * SEA_HALF_ARC)
+        int q = perSea ? region : quarter;
+        double a = q >= 0 ? Math.toRadians(q * 90 + (unit(mix(h, 1, 0)) * 2 - 1) * SEA_HALF_ARC)
                 : unit(mix(h, 1, 0)) * 2 * Math.PI;
         double d = Math.sqrt((double) from * from + unit(mix(h, 2, 0)) * ((double) to * to - (double) from * from));
         return new int[]{(int) Math.round(Math.cos(a) * d), (int) Math.round(Math.sin(a) * d)};

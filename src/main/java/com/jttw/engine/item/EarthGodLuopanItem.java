@@ -22,7 +22,8 @@ import java.util.List;
  * dwell (the zone for their level), which way and how far ({@link EarthGod}); held, its needle points
  * there, as a compass's does, updated every few seconds as its holder goes (for Hell's band, to the
  * nearest Ancient City, the way in, looked for only when it is used; in Hell, while its holder
- * sneaks, to the way back up instead of the Ten Courts). Each player is given one
+ * sneaks, to the way back up instead of the Ten Courts; in the world of the living, while its holder
+ * sneaks, to Mount Kunlun). Each player is given one
  * on first joining a world; more are crafted from planks, a copper ingot and red dye.
  */
 public class EarthGodLuopanItem extends Item {
@@ -56,6 +57,6 @@ public class EarthGodLuopanItem extends Item {
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.literal("Use: call up the Earth God, who tells where the demons of your strength dwell").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.literal("Held: its needle points the way").withStyle(ChatFormatting.DARK_GRAY));
-        tooltip.add(Component.literal("In Diyu, sneaking: the way back up to the living").withStyle(ChatFormatting.DARK_GRAY));
+        tooltip.add(Component.literal("Sneaking: the way to Mount Kunlun (in Diyu, back up to the living)").withStyle(ChatFormatting.DARK_GRAY));
     }
 }

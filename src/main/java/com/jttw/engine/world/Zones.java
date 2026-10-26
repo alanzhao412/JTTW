@@ -298,8 +298,24 @@ public final class Zones {
     public static final Zone FENGDU = Zone.place(FENGDU_BIOME,
             TagKey.create(Registries.BIOME, id("fengdu_hosts")), ZoneLayout.FENGDU, Vertical.WHOLE_COLUMN).hostSampledAt(256);
 
+    public static final ResourceKey<Biome> KUNLUN_BIOME = ResourceKey.create(Registries.BIOME, id("kunlun"));
+
+    /**
+     * Mount Kunlun (昆仑山), the sacred mountain at the world's western end, where the Queen Mother
+     * of the West keeps her palace and the Jade Pool, and behind which the Banana-Leaf Fan grew: one
+     * towering, snow-capped peak raised out of mountain country (the Bottomless Cave's hosts), the
+     * whole column, host judged at y 256. Not a zone of a band but a place ({@link Zone#place}): no
+     * one is sent there by level, nothing fights there, it pays no XP; the Earth Gods point the way
+     * to anyone who asks sneaking ({@code EarthGod}). It lies 5-8 km out and within 30 degrees of
+     * due west ({@code ZoneLayout.KUNLUN}), and keeps clear of every zone and of Fengdu
+     * ({@code world/kunlun/Kunlun}).
+     */
+    public static final Zone KUNLUN = Zone.place(KUNLUN_BIOME,
+            TagKey.create(Registries.BIOME, id("kunlun_hosts")), ZoneLayout.KUNLUN, Vertical.WHOLE_COLUMN).hostSampledAt(256);
+
     /** Every zone, in order: a later one keeps clear of an earlier one sharing its heights. Append new ones. */
-    public static final List<Zone> ALL = List.of(WHITE_BONE, BOTTOMLESS, MYSTICAL_WATERS, HELL, FIRE_MOUNTAIN, MOUNT_WUZHUANG, LION_CAMEL, FENGDU);
+    public static final List<Zone> ALL = List.of(WHITE_BONE, BOTTOMLESS, MYSTICAL_WATERS, HELL, FIRE_MOUNTAIN, MOUNT_WUZHUANG, LION_CAMEL, FENGDU,
+            KUNLUN);
 
     /** Where the overworld zones of {@link #ALL} lie. */
     public static final ZoneMap MAP = new ZoneMap(ALL);
