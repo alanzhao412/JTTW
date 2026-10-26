@@ -196,9 +196,9 @@ YAMA = mirrored([
     ]),
     part('right_eye', 'head', (-2.5, -6.7, -4.5), (0, 0.18, 0), [(-1.6, -0.8, -0.5, 3.2, 1.8, 0.6, 'eye')]),
     part('right_brow', 'head', (-0.3, -7.5, -4.8), (0, 0.12, 0.34), [(-5.2, -1.1, -0.5, 5.2, 1.3, 1.6, 'brow')]),
-    part('right_brow_lock_0', 'right_brow', (-0.2, -0.9, -0.5), (0, 0, 0.02), [(-2.4, -0.55, -0.7, 2.6, 1.1, 1.4, 'browlock')]),
-    part('right_brow_lock_1', 'right_brow', (-2.1, -1.1, -0.4), (0.05, 0.06, 0.14), [(-2.5, -0.5, -0.65, 2.7, 1, 1.3, 'browlock_mid')]),
-    part('right_brow_lock_2', 'right_brow', (-4, -1.3, -0.2), (0.1, 0.12, 0.3), [(-2.8, -0.45, -0.6, 2.9, 0.9, 1.2, 'browlock_end')]),
+    part('right_brow_lock_0', 'right_brow', (-0.2, -0.9, -0.5), (-0.06, 0, -0.04), [(-2.4, -0.55, -0.7, 2.6, 1.1, 1.4, 'browlock')]),
+    part('right_brow_lock_1', 'right_brow', (-2.0, -1.2, -0.4), (0.08, 0.1, 0.2), [(-2.5, -0.5, -0.65, 2.7, 1, 1.3, 'browlock_mid')]),
+    part('right_brow_lock_2', 'right_brow', (-3.9, -1.5, -0.1), (0.16, 0.2, 0.46), [(-2.8, -0.45, -0.6, 2.9, 0.9, 1.2, 'browlock_end')]),
     part('right_browflame', 'right_brow', (-5.6, -1.6, 0.3), (0.2, -0.5, 0.5), [(-0.25, -3.6, 0, 0.5, 4, 3.8, 'browflame')]),
     part('right_sideburn', 'head', (-5.6, -6.4, -1.2), (0.05, 0.25, 0.55), [(-0.4, 0, -1.6, 0.8, 7.5, 3.2, 'sideburn')]),
     part('right_moustache', 'head', (-0.7, -4.0, -5.6), (0, 0.22, -0.12), [(-5.5, -0.75, -0.75, 5.5, 1.5, 1.5, 'moustache')]),
@@ -208,14 +208,16 @@ YAMA = mirrored([
         (-2.6, -0.9, -3.8, 0.8, 1, 0.7, 'tusk'),
         (1.8, -0.9, -3.8, 0.8, 1, 0.7, 'tusk'),
     ]),
-    part('beard', 'jaw', (0, 2.2, -3.9), (0.16, 0, 0), [(-1.5, 0, -1, 3, 9, 2, 'lock_c')]),
-    part('beard_tip', 'beard', (0, 8.6, 0), (-0.08, 0, 0), [(-1.1, 0, -0.9, 2.2, 7, 1.8, 'lock_tip')]),
-    part('right_beard_inner', 'jaw', (-1.8, 2, -3.7), (0.18, 0.04, 0.14), [(-1.2, 0, -0.9, 2.4, 8.5, 1.8, 'lock_a')]),
-    part('right_beard_inner_end', 'right_beard_inner', (0, 8.1, 0), (-0.06, 0, 0.1), [(-0.8, 0, -0.7, 1.6, 4.5, 1.4, 'lock_end')]),
-    part('right_beard', 'jaw', (-3.3, 1.6, -3.3), (0.14, 0.25, 0.42), [(-1.1, 0, -0.9, 2.2, 9, 1.8, 'lock_b')]),
-    part('right_beard_end', 'right_beard', (0, 8.6, 0), (0, 0, 0.25), [(-0.8, 0, -0.7, 1.6, 5, 1.4, 'lock_end')]),
-    part('right_beard_outer', 'jaw', (-4.3, 0.8, -2.6), (0.12, 0.35, 0.62), [(-1, 0, -0.9, 2, 7, 1.8, 'lock_d')]),
-    part('right_beard_tuft', 'jaw', (-0.9, 2.6, -4.3), (0.32, 0, 0.05), [(-0.9, 0, -0.6, 1.8, 4, 1.2, 'lock_s')]),
+    # the beard in separate locks, each its own shade of black (blue-black, brown-black, one gone grey),
+    # springing from the jaw and flaring apart at their ends, at angles all their own
+    part('beard', 'jaw', (0, 2.2, -3.9), (0.2, 0, 0), [(-1.5, 0, -1, 3, 9, 2, 'lock_c')]),
+    part('beard_tip', 'beard', (0, 8.6, 0), (-0.14, 0, 0), [(-1.1, 0, -0.9, 2.2, 7, 1.8, 'lock_tip')]),
+    part('right_beard_inner', 'jaw', (-1.9, 2, -3.7), (0.3, 0.04, 0.2), [(-1.2, 0, -0.9, 2.4, 8.5, 1.8, 'lock_a')]),
+    part('right_beard_inner_end', 'right_beard_inner', (0, 8.1, 0), (-0.04, 0, 0.22), [(-0.75, 0, -0.65, 1.5, 4.5, 1.3, 'lock_end_a')]),
+    part('right_beard', 'jaw', (-3.4, 1.5, -3.2), (0.1, 0.28, 0.58), [(-1.1, 0, -0.9, 2.2, 9, 1.8, 'lock_b')]),
+    part('right_beard_end', 'right_beard', (0, 8.6, 0), (0.06, 0, 0.38), [(-0.75, 0, -0.65, 1.5, 5, 1.3, 'lock_end_b')]),
+    part('right_beard_outer', 'jaw', (-4.4, 0.6, -2.4), (0.02, 0.4, 0.95), [(-1, 0, -0.9, 2, 7, 1.8, 'lock_d')]),
+    part('right_beard_tuft', 'jaw', (-0.95, 2.6, -4.3), (0.46, 0, -0.05), [(-0.9, 0, -0.6, 1.8, 4, 1.2, 'lock_s')]),
     # the mian crown: a tall cap banded in gold, its plaque bearing 王; the flat board, a little low at
     # the front, its strings of beads; red cords to jade balls at the ears
     part('crown', 'head', (0, -10, 0), (0, 0, 0), [
@@ -359,31 +361,47 @@ def point(p, rect, keep=0.0, down=True, sharp=0.8):
 
 LOCK_LIT = (106, 80, 86)      # light catching a lock of his black hair
 
+# the shades of his black hair, so the locks of beard and brow part from each other: (shadow, body,
+# lit crest, highlight)
+BLUE_BLACK = ((6, 8, 16), (26, 30, 50), (70, 82, 122), (132, 148, 190))
+BROWN_BLACK = ((14, 8, 6), (48, 32, 24), (114, 82, 60), (174, 134, 100))
+ASH = ((26, 24, 30), (70, 68, 76), (124, 122, 132), (184, 182, 192))      # a lock gone grey
 
-def lock(p, f, along_x=False, keep=0.5, taper=0.35):
-    """A lock of black hair: lit where it springs from and along its crest, darker toward its tip and
-    its underside, a few lighter strands down it, cut to a point at its end (a brow's lock: a leaf, its
-    ends drawn fine)."""
+
+def shade_of(tone, t):
+    """A tone's colour at t: 0 shadow .. 1 body .. 2 crest .. 3 highlight."""
+    t = max(0.0, min(3.0, t))
+    i = min(2, int(t))
+    return mixc(tone[i], tone[i + 1], t - i)
+
+
+def lock(p, f, along_x=False, keep=0.5, taper=0.35, tone=BLUE_BLACK, grey=0.0):
+    """A lock of black hair in its own `tone`, rounded: lit along its crest with a highlight running
+    down it, deep in shadow at its edges (so it parts from the locks beside it) and beneath; strands
+    down it, a few of them grey (`grey`, how many); cut to a point at its end (a brow's lock: a leaf,
+    its ends drawn fine)."""
+    cols = {}
     for s, r in f.items():
         fx, fy, fw, fh = r
         for j in range(fh):
             for i in range(fw):
                 if along_x:
-                    t = j / max(1, fh - 1)                        # 0 at its crest .. 1 beneath
-                    c = mixc(LOCK_LIT, HAIR, min(1, t * 1.6)) if s != 'bottom' else HAIR
-                    if s == 'top':
-                        c = mixc(LOCK_LIT, HAIR_SHEEN, 0.5)
-                    if (i + j) % 4 == 0 and s != 'bottom':
-                        c = mixc(c, HAIR_GREY, 0.6)
+                    across, along, n = j / max(1, fh - 1), i / max(1, fw - 1), fh   # 0 at its crest .. 1 beneath
+                    round_ = 1 - abs(across - 0.3) * 1.6
                 else:
-                    t = j / max(1, fh - 1)                        # 0 at its root .. 1 at its tip
-                    edge = min(i, fw - 1 - i)
-                    c = mixc(LOCK_LIT, HAIR, min(1, t * 2.2))
-                    if (i + j // 5) % 3 == 1:                     # strands
-                        c = mixc(c, HAIR_SHEEN, 0.35)
-                    if edge == 0 and fw > 2:
-                        c = k(c, 0.55)
-                    c = k(c, 1 - 0.3 * t)
+                    across, along, n = (i + 0.5) / fw, j / max(1, fh - 1), fw       # along: 0 at its root .. 1 at its tip
+                    round_ = 1 - abs(across - 0.45) * 2.1
+                key = (s, i if not along_x else j)
+                if key not in cols:                               # each strand a little lighter or darker; some grey
+                    cols[key] = (p.rnd.uniform(-0.25, 0.25), p.rnd.random() < grey)
+                jitter, is_grey = cols[key]
+                light = {'top': 0.35, 'front': 0.1, 'back': -0.55, 'bottom': -1.2}.get(s, -0.15)
+                t = 0.35 + 1.75 * max(0.0, round_) + light + jitter
+                if not along_x:
+                    t += 0.35 * along - 0.4 * max(0.0, 0.25 - along) * 4   # the root in the jaw's shadow, the end catching light
+                if n > 2 and min(i if not along_x else j, (fw if not along_x else fh) - 1 - (i if not along_x else j)) == 0:
+                    t = min(t, 0.45)                              # its edges: the dark between the locks
+                c = shade_of(ASH if is_grey else tone, t)
                 p.px((fx + i, fy + j), noisy(p, c, 3))
     if along_x:
         for s in ('front', 'back', 'top', 'bottom'):
@@ -1153,11 +1171,14 @@ def paint_yama(p, style, f, dims):
                 p.px((fx + i, fy), GOLD_DEEP)
 
     if style in ('browlock', 'browlock_mid', 'browlock_end'):    # a lock of his brow: lit along its top, tapering outward
-        lock(p, f, along_x=True)
+        lock(p, f, along_x=True, tone={'browlock': BLUE_BLACK, 'browlock_mid': BROWN_BLACK}.get(style, BLUE_BLACK),
+             grey=0.25 if style == 'browlock_end' else 0.08)
 
     if style.startswith('lock_'):                                # a lock of his beard, flaring
+        tone = {'lock_a': BROWN_BLACK, 'lock_end_a': BROWN_BLACK, 'lock_d': BROWN_BLACK, 'lock_s': ASH}.get(style, BLUE_BLACK)
         lock(p, f, keep=0.6 if style in ('lock_c', 'lock_a', 'lock_b') else 0.4,
-             taper=0.3 if style in ('lock_c', 'lock_a', 'lock_b', 'lock_d') else 0.45)
+             taper=0.3 if style in ('lock_c', 'lock_a', 'lock_b', 'lock_d') else 0.45, tone=tone,
+             grey={'lock_d': 0.3, 'lock_tip': 0.12, 'lock_b': 0.1}.get(style, 0.04))
 
     if style == 'halo_rim':                                      # the body of the ring: black iron, seamed with embers
         p.shaded(f, (36, 10, 12))
