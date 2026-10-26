@@ -99,14 +99,16 @@ def spike(name, parent, at, rot, k=1.0):
 
 
 def horn():
-    """The right horn: out from the skull, thick and black, then up and forward in four ridged,
-    tapering joints, in toward the point (the left is mirrored)."""
+    """The right horn: from the back of the skull's crown, thick and black, out and rising, then
+    up and forward over the brow in four ridged, tapering joints, in toward the point (the left is
+    mirrored). Rooted behind the eyes and above them, so that from the side the horn stands clear
+    of the face."""
     return [
-        part('right_horn', 'head', (-6, -5, -6), (0, -0.2, 0.15), [
-            (-10, -2.3, -2.3, 10, 4.6, 4.6, 'hornroot'),
-            (-3.5, -2.7, -2.7, 2, 5.4, 5.4, 'gold'),          # a gold ring about it
+        part('right_horn', 'head', (-5, -6, -1.8), (0, 0.15, 0.6), [
+            (-9, -2.2, -2.2, 9, 4.4, 4.4, 'hornroot'),
+            (-3.2, -2.6, -2.6, 2, 5.2, 5.2, 'gold'),          # a gold ring about it
         ]),
-        part('right_horn_up', 'right_horn', (-9.2, 0, 0), (0.6, 0, -0.45), [(-1.9, -5, -1.9, 3.8, 5.4, 3.8, 'horn1')]),
+        part('right_horn_up', 'right_horn', (-8.2, 0, 0), (0.66, 0, -0.9), [(-1.9, -5, -1.9, 3.8, 5.4, 3.8, 'horn1')]),
         part('right_horn_mid', 'right_horn_up', (0, -4.8, 0), (0.3, 0, 0.25), [(-1.5, -4, -1.5, 3, 4.4, 3, 'horn2')]),
         part('right_horn_end', 'right_horn_mid', (0, -3.8, 0), (0.3, 0, 0.35), [(-1.1, -3.4, -1.1, 2.2, 3.8, 2.2, 'horn3')]),
         part('right_horn_tip', 'right_horn_end', (0, -3.2, 0), (0.25, 0, 0.35), [(-0.7, -3, -0.7, 1.4, 3.2, 1.4, 'horn4')]),
@@ -118,10 +120,11 @@ BULL = mirrored([
     # the hump crested with bone spikes, the neck thick and thrust forward and down
     part('body', 'root', (0, 0, 0), (0, 0, 0), [
         (-10, -9, -18, 20, 19, 16, 'chest'),                 # chest and shoulders
-        (-9, -7, -3, 18, 15, 10, 'ribs'),                    # the ribs, behind the shoulders
-        (-8, -7, 7, 16, 12.5, 7, 'flank'),                   # the loins, the belly drawn up
-        (-8.5, -8, 13, 17, 13, 8, 'haunch'),                 # the haunches
+        (-9.4, -7.8, -4, 18.8, 16, 11, 'ribs'),              # the ribs, behind the shoulders
+        (-8.6, -7.4, 6, 17.2, 13, 8.5, 'flank'),             # the loins, the belly drawn up
+        (-8.6, -8, 13, 17.2, 13, 8, 'haunch'),               # the haunches
         (-6, -11, -6, 12, 5, 16, 'back'),                    # the back, stepping down from the hump
+        (-8.4, -9.4, -7, 16.8, 3, 19, 'loin'),               # and the barrel's shoulder, under the back
         (-7, -16, -17, 14, 8, 11, 'hump'),                   # the hump
         (-5, -18, -15, 10, 3, 7, 'hump'),                    # its crown
         (-7, -8, -24, 14, 13, 8, 'neck'),                    # the neck
@@ -134,13 +137,14 @@ BULL = mirrored([
         (-2.2, -1.2, -19.6, 4.4, 4.6, 1.4, 'boss'),          # a gold boss on the breast
     ]),
     # the muscles cut out of it: the plates of the chest, the shoulders, the rolls of the neck
+    part('belly', 'body', (0, 8.6, -4), (0.2, 0, 0), [(-8.2, -4, 0, 16.4, 4, 17, 'belly')]),   # the underline, rising to the loins
     part('right_pec', 'body', (-0.4, -1, -18), (0.08, 0.22, 0), [(-9, -4, -1.6, 9, 13, 2, 'muscle')]),
-    part('right_shoulder', 'body', (-10, -5, -11), (-0.12, 0, 0.1), [(-1.6, -7, -5.5, 2.2, 14, 10, 'muscle')]),
+    part('right_shoulder', 'body', (-9.5, -5, -11), (-0.12, 0, 0.1), [(-1.6, -7, -5.5, 2.2, 14, 10, 'muscle')]),
     part('right_shoulder_top', 'body', (-7.2, -14, -12), (0, 0, -0.55), [(-1.6, -1, -5, 3, 6, 9, 'muscle')]),
     part('right_neck_roll', 'body', (-7, -6, -20), (0.45, 0, 0.06), [(-1.4, -4, -3, 2, 10, 5, 'muscle')]),
     part('right_neck_roll2', 'body', (-6.7, -1, -23.5), (0.7, 0, 0.08), [(-1.3, -3, -2, 1.8, 8, 4, 'muscle')]),
-    part('right_ribcage', 'body', (-9, -1, 2), (0, 0, 0.06), [(-0.8, -5, -4.5, 1.4, 10, 9, 'ribs')]),
-    part('right_thigh_plate', 'body', (-8.5, -4, 17), (0.12, 0, 0.05), [(-1.2, -4, -4, 1.8, 11, 8, 'muscle')]),
+    part('right_ribcage', 'body', (-9.2, -1, 2), (0, 0, 0.06), [(-0.8, -5, -4.5, 1.4, 10, 9, 'ribs')]),
+    part('right_thigh_plate', 'body', (-8.1, -4, 17), (0.12, 0, 0.05), [(-1.2, -4, -4, 1.8, 11, 8, 'muscle')]),
     part('rump', 'body', (0, -8, 13), (-0.28, 0, 0), [(-7.5, 0, 0, 15, 4, 9.5, 'back')]),   # sloping down to the tail
     # bone spikes along the hump's crest, falling away
     spike('spike1', 'body', (0, -17.5, -14), (-0.45, 0, 0), 1.15),
@@ -149,10 +153,10 @@ BULL = mirrored([
     spike('spike4', 'body', (0, -10.5, -2), (-0.8, 0, 0), 0.7),
     spike('spike5', 'body', (0, -10.5, 3), (-0.95, 0, 0), 0.55),
     # the shaggy mane down its neck, and the hair under its dewlap
-    lock('mane1', 'body', (0, -12, -21), (-0.6, 0, 0), 1.25),
-    lock('right_mane1', 'body', (-4.5, -11.5, -21), (-0.75, 0, -0.55), 1.2),
-    lock('right_mane2', 'body', (-6.8, -7, -22), (-1.0, 0, -1.2), 1.15),
-    lock('right_mane3', 'body', (-7, -1, -23), (-1.25, 0, -1.6), 1.0),
+    lock('mane1', 'body', (0, -12, -19.5), (-0.85, 0, 0), 1.2),
+    lock('right_mane1', 'body', (-4.5, -11.5, -19.5), (-0.95, 0, -0.5), 1.15),
+    lock('right_mane2', 'body', (-6.6, -7, -19.5), (-1.4, 0, -0.75), 1.05),
+    lock('right_mane3', 'body', (-6.6, -1.5, -20), (-1.5, 0, -0.95), 0.9),
     lock('right_mane4', 'body', (-6.6, -14, -16), (-0.9, 0, -0.75), 1.0),
     tuft('dewlap_tuft', 'body', (0, 10.5, -22), (0.25, 0, 0), 1.15),
     tuft('right_dewlap_tuft', 'body', (-2.6, 10, -19), (0.2, 0, 0.12), 0.9),
@@ -168,11 +172,11 @@ BULL = mirrored([
         (-2.5, 5, -17.8, 5, 1, 1, 'ring'),                   # the nose ring
         (-2.5, 2, -17.8, 1, 3, 1, 'ring'), (1.5, 2, -17.8, 1, 3, 1, 'ring'),
     ]),
-    tuft('forelock', 'head', (0, -5.5, -6), (-2.7, 0, 0), 1.1),   # the poll's shag, bristling up between the horns
-    tuft('right_forelock', 'head', (-2.6, -5.5, -4), (-2.5, 0, 0.35), 0.85),
+    tuft('forelock', 'head', (0, -5.5, -5), (-3.05, 0, 0), 0.95),   # the poll's shag, bristling up between the horns
+    tuft('right_forelock', 'head', (-2.4, -5.5, -3.5), (-2.95, 0, 0.3), 0.75),
     tuft('beard', 'head', (0, 6.5, -12), (0.3, 0, 0), 0.75),
     # ears laid back under the horns
-    part('right_ear', 'head', (-6, -3, -3), (0.3, 0.5, -0.4), [(-4.5, 0, 0, 4.5, 2.2, 1, 'ear')]),
+    part('right_ear', 'head', (-6, -3, -2), (0.3, 0.85, -0.35), [(-4.5, 0, 0, 4.5, 2.2, 1, 'ear')]),
 ] + horn() + [
     # thick forelegs under the weight, the knee and cannon below, split hooves
     part('right_front_leg', 'root', (-6, 10, -12), (0, 0, 0), [
@@ -231,14 +235,35 @@ def darken(p, x, y, k):
 SIDES = ('front', 'back', 'right', 'left')
 
 
-def hide(p, f, base=WHITE, cool=0.0, strokes=1.0, light=1.0):
+# The torso's hide is shaded down its sides by height on the body, not by each box's own height,
+# so the masses of chest, ribs, loins and haunch run into one another without a seam: each torso
+# box's top and bottom (model y, the body's frame), filled in before painting from BULL.
+TORSO = ('chest', 'ribs', 'flank', 'haunch', 'back', 'loin', 'belly', 'hump', 'muscle')
+TORSO_TOP, TORSO_BOTTOM = -14.0, 10.5
+SPAN = {}
+
+
+def spans(parts):
+    for name, parent, (px, py, pz), r, boxes, _ in parts:
+        if parent not in ('root', 'body') or name.endswith('_leg'):
+            continue
+        for b in boxes:
+            if b[6] in TORSO:
+                SPAN.setdefault(bg.size(b) + (b[6],), (py + b[1], py + b[1] + b[4]))
+
+
+def hide(p, f, base=WHITE, cool=0.0, strokes=1.0, light=1.0, span=None):
     """White hide in short hair: lit above, cooling to grey-blue down its sides and beneath; strokes
-    of hair, paler and darker, running down and back."""
+    of hair, paler and darker, running down and back. With `span` (the box's top and bottom on the
+    body), its sides are shaded by where they lie on the torso."""
     for k, r in f.items():
         fx, fy, fw, fh = r
         lit = {'top': 1.05, 'bottom': 0.84, 'front': 1.0, 'back': 0.9}.get(k, 0.95) * light
         for j in range(fh):
             t = j / max(1, fh - 1)
+            if span:
+                y = span[0] + (j + 0.5) / fh * (span[1] - span[0])
+                t = max(0.0, min(1.0, (y - TORSO_TOP) / (TORSO_BOTTOM - TORSO_TOP)))
             for i in range(fw):
                 if k == 'top':
                     c = mix(base, COOL, 0.04 + cool * 0.5)
@@ -507,8 +532,9 @@ def paint_skull(p, f):
 
 
 def paint_bull(p, style, f, dims):
+    span = SPAN.get(tuple(dims) + (style,))
     if style == 'chest':
-        hide(p, f)
+        hide(p, f, span=span)
         bulge(p, f, (0.42, 0.42), (0.62, 0.62))                     # the shoulder
         bulge(p, f, (0.3, 0.8), (0.42, 0.34))                       # the forearm's root, the elbow
         for k in ('right', 'left'):
@@ -521,20 +547,21 @@ def paint_bull(p, style, f, dims):
                 darken(p, fx + fw // 2 + d, fy + j, 0.84)
         scars(p, f['front'], 2)
     elif style == 'ribs':
-        hide(p, f, cool=0.03)
+        hide(p, f, cool=0.03, span=span)
         for k in ('right', 'left'):
             ribs(p, f[k])
             scars(p, f[k], 1)
     elif style == 'flank':
-        hide(p, f, cool=0.06)
+        hide(p, f, cool=0.03, span=span)
         for k in ('right', 'left'):
             fx, fy, fw, fh = f[k]
-            for i in range(fw):                               # the flank's hollow before the thigh
+            for i in range(fw):                               # the flank's hollow before the thigh, soft-edged
                 for j in range(fh // 3, fh):
-                    darken(p, fx + i, fy + j, 0.9 - 0.06 * (j / fh))
+                    a = min(1.0, (j - fh // 3) / (fh / 4))
+                    darken(p, fx + i, fy + j, 1 - (0.08 + 0.06 * (j / fh)) * a)
             ribs(p, (fx, fy, fw // 2, fh), every=6)
     elif style == 'haunch':
-        hide(p, f)
+        hide(p, f, span=span)
         bulge(p, f, (0.55, 0.45), (0.8, 0.75))                      # the round of the haunch
         for k in ('right', 'left', 'back'):
             scars(p, f[k], 1 if k == 'back' else 2)
@@ -542,15 +569,20 @@ def paint_bull(p, style, f, dims):
         for j in range(fh // 4, fh):
             for d in (-1, 0):
                 darken(p, fx + fw // 2 + d, fy + j, 0.7)
+    elif style in ('loin', 'belly'):
+        hide(p, f, cool=0.02, span=span)
+        if style == 'loin':
+            for k in ('right', 'left'):
+                ribs(p, (f[k][0] + f[k][2] // 5, f[k][1], f[k][2] * 3 // 5, f[k][3]), every=8)
     elif style in ('back', 'hide'):
-        hide(p, f)
+        hide(p, f, span=span)
         if 'top' in f:                                       # a dark ridge down the spine
             fx, fy, fw, fh = f['top']
             for j in range(fh):
                 for d in (-1, 0):
                     darken(p, fx + fw // 2 + d, fy + j, 0.82)
     elif style == 'hump':
-        hide(p, f)
+        hide(p, f, span=span)
         for k in ('right', 'left'):
             scars(p, f[k], 1)
             highlight(p, f[k], 3)
@@ -579,11 +611,11 @@ def paint_bull(p, style, f, dims):
                 for j in range(fh):
                     darken(p, fx + x0, fy + j, 0.82)
     elif style == 'muscle':
-        hide(p, f, light=1.02)
-        for k in SIDES:
+        hide(p, f, light=1.02, span=span)
+        for k in SIDES:                                       # its edges shaded softly into the body beneath
             fx, fy, fw, fh = f[k]
-            highlight(p, f[k], 3, 1.1)
-            contour(p, f[k], bottom=5, left=3, right=3, k=0.6)
+            highlight(p, f[k], 3, 1.06)
+            contour(p, f[k], bottom=5, left=3, right=3, k=0.8)
         veins(p, f['right'], 1)
         veins(p, f['left'], 1)
     elif style == 'mane':
@@ -816,9 +848,26 @@ def lowest(parts, names):
     return low
 
 
+def keep_face(p, slots):
+    """The skull and brow exactly as they were first drawn (the eyes, their mask and glow), kept in
+    great_white_bull_face.png: each box's skin, then its glow, the skull above the brow."""
+    from PIL import Image
+    ref = Image.open('assets_source/great_white_bull_face.png')
+    y = 0
+    for key in ((12, 10, 10, 'skull'), (14, 3, 4, 'brow')):
+        w, h, d, _ = key
+        u, v = slots[key]
+        cw, ch = (2 * d + 2 * w) * S, (d + h) * S
+        for img in (p.img, p.glow):
+            img.paste(ref.crop((0, y, cw, y + ch)), (u * S, v * S))
+            y += ch
+
+
 if __name__ == '__main__':
+    spans(BULL)
     p = Painter(7)
     slots = paint(BULL, p, paint_bull)
+    keep_face(p, slots)
     p.img.save('src/main/resources/assets/jttw_engine/textures/entity/great_white_bull.png')
     p.glow.save('src/main/resources/assets/jttw_engine/textures/entity/great_white_bull_eyes.png')
     emit(BULL, slots, JAVA)
