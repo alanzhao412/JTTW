@@ -864,4 +864,47 @@ public class LionCamelGameTests {
         }
         h.succeed();
     }
+
+    // ── The demon kings' treasury: the Yin-Yang Vase ─────────────────────
+
+    @GameTest(template = PLATFORM)
+    public static void theTreasuryTableAlwaysHoldsOneYinYangVase(GameTestHelper h) {
+        var table = h.getLevel().getServer().reloadableRegistries().getLootTable(LionCamelCity.TREASURY_LOOT);
+        for (long seed = 0; seed < 50; seed++) {
+            var items = table.getRandomItems(new LootParams.Builder(h.getLevel())
+                    .withParameter(LootContextParams.ORIGIN, Vec3.ZERO).create(LootContextParamSets.CHEST), seed);
+            eq(h, 1, items.stream().filter(s -> s.is(ModItems.YIN_YANG_VASE.get())).mapToInt(ItemStack::getCount).sum(),
+                    "one vase, always (seed " + seed + ")");
+            check(h, items.size() > 1, "among the demons' hoard");
+        }
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void theCityHasOneTreasuryChestAndItHoldsTheVase(GameTestHelper h) {
+        // the blueprint: one chest in all the city, on the dais beside the Peng's empty throne
+        int[] t = LionCamelCity.TREASURY;
+        int chests = 0;
+        for (int x = -LionCamelCity.OUTER; x <= LionCamelCity.OUTER; x++) for (int z = -LionCamelCity.OUTER; z <= LionCamelCity.OUTER; z++)
+            for (int y = LionCamelCity.BOTTOM; y <= LionCamelCity.TOP; y++) {
+                BlockState s = LionCamelCity.at(x, y, z);
+                if (s != null && s.is(Blocks.CHEST)) {
+                    chests++;
+                    check(h, x == t[0] && y == t[1] && z == t[2], "the chest at the treasury: " + x + " " + y + " " + z);
+                }
+            }
+        eq(h, 1, chests, "one chest in the city");
+        BlockState under = LionCamelCity.at(t[0], t[1] - 1, t[2]);
+        check(h, under != null && under.blocksMotion(), "on the dais: " + under);
+        // laid as the ridge lays it: the chest, its loot the vase's
+        BlockPos at = h.absolutePos(new BlockPos(2, 2, 2));
+        LionCamelCity.lay(h.getLevel(), at, LionCamelCity.at(t[0], t[1], t[2]), h.getLevel().getRandom());
+        var chest = (net.minecraft.world.level.block.entity.ChestBlockEntity) h.getLevel().getBlockEntity(at);
+        check(h, chest != null && LionCamelCity.TREASURY_LOOT.equals(chest.getLootTable()), "its loot table set");
+        chest.unpackLootTable(null);
+        int vases = 0;
+        for (int i = 0; i < chest.getContainerSize(); i++) if (chest.getItem(i).is(ModItems.YIN_YANG_VASE.get())) vases += chest.getItem(i).getCount();
+        eq(h, 1, vases, "the Yin-Yang Vase in it");
+        h.succeed();
+    }
 }

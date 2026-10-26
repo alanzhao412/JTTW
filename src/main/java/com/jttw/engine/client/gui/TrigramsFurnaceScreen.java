@@ -18,8 +18,8 @@ import java.util.List;
 /**
  * The Eight Trigrams Furnace's screen: the eight trigram slots in a ring round the centre, the fuel
  * slot, how far the work has got, and at the side, what it can do: what the armament in the centre
- * needs for its next refinement, or with the centre empty, what this character can forge and from
- * what.
+ * needs for its next refinement, or with the centre empty, what this character can forge (and what
+ * anyone can, the furnace's recipes: the Nine-Tooth Rake) and from what.
  */
 public class TrigramsFurnaceScreen extends AbstractContainerScreen<TrigramsFurnaceMenu> {
 
@@ -92,6 +92,11 @@ public class TrigramsFurnaceScreen extends AbstractContainerScreen<TrigramsFurna
             for (Armaments.Armament a : forgeable) {
                 lines.add("§f" + a.displayName());
                 lines.add(" §7" + Armaments.describe(a.forging()));
+            }
+            // and what else it forges, for anyone (the Nine-Tooth Rake)
+            for (var r : minecraft.level.getRecipeManager().getAllRecipesFor(com.jttw.engine.registry.ModRecipes.TRIGRAMS_FORGING.get())) {
+                lines.add("§f" + r.value().result().getHoverName().getString());
+                lines.add(" §7" + r.value().describe());
             }
             lines.add("§7Or put an armament in");
             lines.add("§7the centre to refine it.");

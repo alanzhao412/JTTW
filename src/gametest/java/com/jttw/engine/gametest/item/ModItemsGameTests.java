@@ -227,18 +227,19 @@ public class ModItemsGameTests {
                 ModItems.RUYI_JINGU_BANG, ModItems.THREE_POINTED_SPEAR, ModItems.ERLANG_AXE,
                 ModItems.FIRE_TIP_SPEAR, ModItems.QIANKUN_RING, ModItems.YIN_YANG_SWORD,
                 ModItems.WIND_FIRE_WHEELS, ModItems.HUNTIAN_CLOTH, ModItems.BELL_OF_TAIYI,
-                ModItems.NINE_TOOTH_RAKE, ModItems.YIN_YANG_VASE, ModItems.MIXED_IRON_CUDGEL, ModItems.BANANA_LEAF_FAN)) {
+                ModItems.NINE_TOOTH_RAKE, ModItems.YIN_YANG_VASE, ModItems.BANANA_LEAF_FAN)) {
             eq(h, Rarity.EPIC, new ItemStack(epic.get()).getRarity(), epic.getId().getPath() + " rarity");
         }
         for (DeferredHolder<Item, ? extends Item> fireproof : List.of(ModItems.RUYI_JINGU_BANG, ModItems.THREE_POINTED_SPEAR,
                 ModItems.ERLANG_AXE, ModItems.FIRE_TIP_SPEAR, ModItems.WIND_FIRE_WHEELS,
-                ModItems.NINE_TOOTH_RAKE, ModItems.MIXED_IRON_CUDGEL)) {
+                ModItems.NINE_TOOTH_RAKE)) {
             check(h, new ItemStack(fireproof.get()).has(net.minecraft.core.component.DataComponents.FIRE_RESISTANT), fireproof.getId().getPath() + " survives lava");
         }
         for (DeferredHolder<Item, ? extends Item> burnable : List.of(ModItems.QIANKUN_RING, ModItems.YIN_YANG_SWORD,
-                ModItems.HUNTIAN_CLOTH, ModItems.IMMORTAL_PEACH)) {
+                ModItems.HUNTIAN_CLOTH, ModItems.IMMORTAL_PEACH, ModItems.MIXED_IRON_CUDGEL)) {
             check(h, !new ItemStack(burnable.get()).has(net.minecraft.core.component.DataComponents.FIRE_RESISTANT), burnable.getId().getPath() + " is not fire resistant");
         }
+        eq(h, Rarity.UNCOMMON, new ItemStack(ModItems.MIXED_IRON_CUDGEL.get()).getRarity(), "the cudgel: a plain iron club, crafted cheaply");
         check(h, new ItemStack(ModItems.IMMORTAL_PEACH.get()).has(net.minecraft.core.component.DataComponents.FOOD), "peach is edible");
         check(h, new ItemStack(ModItems.IMMORTAL_PILL.get()).has(net.minecraft.core.component.DataComponents.FOOD), "pill is edible");
         h.succeed();

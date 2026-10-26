@@ -1,0 +1,24 @@
+{
+  "type": "jttw_engine:trigrams_forging",
+  "materials": [
+    {
+      "item": "minecraft:iron_ingot",
+      "count": 9
+    },
+    {
+      "item": "minecraft:gold_ingot",
+      "count": 3
+    },
+    {
+      "item": "jttw_engine:rime_shackle",
+      "count": 1
+    },
+    {
+      "item": "jttw_engine:jade_block",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "jttw_engine:nine_tooth_rake"
+  }
+}

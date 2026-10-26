@@ -1,12 +1,17 @@
 package com.jttw.engine.world.lion;
 
+import com.jttw.engine.JTTWEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.LanternBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
@@ -15,6 +20,8 @@ import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.SlabType;
+import net.minecraft.world.RandomizableContainer;
+import net.minecraft.world.level.storage.loot.LootTable;
 
 import javax.annotation.Nullable;
 
@@ -38,7 +45,8 @@ import javax.annotation.Nullable;
  *       iron bars where they kept what they meant to eat), rubble, and yards heaped with bones;</li>
  *   <li><b>the palace</b> in its red-walled compound: a terrace, and on it the throne hall, its
  *       roof of dark tiles fallen in at one corner, red pillars, soul lanterns, the three demon
- *       kings' thrones (the third, the Great Peng's, empty), braziers in the courtyard; the Azure
+ *       kings' thrones (the third, the Great Peng's, empty, his treasury beside it: the Yin-Yang
+ *       Vase), braziers in the courtyard; the Azure
  *       Lion holds court on the terrace at the centre;</li>
  *   <li><b>the elephant court</b> behind the palace, walled, ringed with great tusks of ivory, hay
  *       along its walls: the White Elephant's.</li>
@@ -77,6 +85,12 @@ public final class LionCamelCity {
     /** Where the thrones stand (local z), and the three of them (local x): the Elephant's, the Lion's, the Peng's; each a giant's, its back so high. */
     public static final int THRONE_Z = -15, THRONE_BACK = 5;
     public static final int[] THRONES = {-6, 0, 6};
+    /**
+     * The demon kings' treasury: a chest on the dais beside the Great Peng's empty throne (local x,
+     * y, z), the Yin-Yang Vase always in it ({@link #TREASURY_LOOT}). One city a world, so one vase.
+     */
+    public static final int[] TREASURY = {THRONES[2] + 3, TERRACE_H + 2, THRONE_Z};
+    public static final ResourceKey<LootTable> TREASURY_LOOT = ResourceKey.create(Registries.LOOT_TABLE, JTTWEngine.id("chests/lion_camel_treasury"));
     /** The elephant court: its extent and its centre; its wall's height. */
     public static final int COURT_X = 16, COURT_N = -50, COURT_S = -27, COURT_Z = -38, COURT_WALL_H = 6;
     /** The gates of the palace and of the elephant court, the kings' ways: half-width of the way through, and its height. */
@@ -527,6 +541,8 @@ public final class LionCamelCity {
         }
         // the thrones, a giant's each: a seat three wide, arms, a gilded back, a skull atop it
         if (h >= 2 && h <= THRONE_BACK + 2) {
+            // the treasury beside the Peng's
+            if (x == TREASURY[0] && h == TREASURY[1] - TERRACE_H && z == TREASURY[2]) return Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, Direction.SOUTH);
             for (int t : THRONES) {
                 int d = Math.abs(x - t);
                 if (h == 2 && d <= 1 && z == THRONE_Z) return stair(Blocks.POLISHED_BLACKSTONE_STAIRS, Direction.NORTH);
@@ -592,12 +608,18 @@ public final class LionCamelCity {
         return null;
     }
 
+    /** Lays one block of the city at world {@code p}: the treasury's chest with its loot. */
+    public static void lay(LevelAccessor level, BlockPos p, BlockState s, RandomSource random) {
+        level.setBlock(p, s, Block.UPDATE_CLIENTS);
+        if (s.is(Blocks.CHEST)) RandomizableContainer.setBlockEntityLootTable(level, random, p, TREASURY_LOOT);
+    }
+
     /** Lays the whole city round {@code ground} (its ground's level at the centre) at once: the gallery's, and tests'. */
     public static void layWhole(LevelAccessor level, BlockPos ground) {
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
         for (int x = -OUTER; x <= OUTER; x++) for (int z = -OUTER; z <= OUTER; z++) for (int y = BOTTOM; y <= TOP; y++) {
             BlockState s = at(x, y, z);
-            if (s != null) level.setBlock(p.set(ground.getX() + x, ground.getY() + y, ground.getZ() + z), s, Block.UPDATE_CLIENTS);
+            if (s != null) lay(level, p.set(ground.getX() + x, ground.getY() + y, ground.getZ() + z), s, level.getRandom());
         }
     }
 }
