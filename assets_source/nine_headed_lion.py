@@ -26,10 +26,10 @@ import beastgen as bg
 from beastgen import Painter, paint, emit
 from fire_court import part, mirrored
 from lion_camel import (pelt, mane, strands, rosette, flame_marks, glare, teeth, claws, blend, plain,
-                        extent, THROAT, MOUTH)
+                        extent, flame, THROAT, MOUTH)
 from great_white_bull import bulge
 
-bg.UNITS = 320
+bg.UNITS = 352
 bg.TEX = bg.UNITS * bg.S
 S = bg.S
 
@@ -90,16 +90,12 @@ def curl(x, y, z, s=4.0, d=2.5):
     return (x - s / 2, y - s / 2, z, s, s, d, 'ncurl')
 
 
-def lock(name, parent, at, r, k=1.0, fin=False):
-    """A lock of the mane like a tongue of flame, pointing up (-y) from its pivot, tapering in two steps
-    to a point; flat across x, or (a `fin`) across z."""
-    w, d = (2.2 * k, 5.5 * k) if fin else (5.5 * k, 2.2 * k)
-    l1, l2, l3 = 6 * k, 4.5 * k, 3.5 * k
-    return part(name, parent, at, r, [
-        (-w / 2, -l1, -d / 2, w, l1, d, 'nlock'),
-        (-w * 0.32, -l1 - l2, -d / 2 + 0.6 * k, w * 0.64, l2, d * 0.7, 'nlockmid'),
-        (-w * 0.15, -l1 - l2 - l3, -d / 2 + 1.3 * k, w * 0.3, l3, d * 0.45, 'nlocktip'),
-    ])
+def lock(name, parent, at, r, k=1.0, fin=False, bend=0.3, twist=0.0, across=None):
+    """A tuft of the mane like a tongue of flame (the Azure Lion's: lion_camel.flame), pointing up (-y)
+    from its pivot, broad at its root and tapering in tiers that curl over toward its tip; flat across
+    x, or (a `fin`) across z. A list of parts: the tuft's root, its middle and its tip."""
+    return flame(name, parent, at, r, k, fin=fin, bend=bend, twist=twist, broad=7.6,
+                 styles=('nlock', 'nlockmid', 'nlocktip'), across=across)
 
 
 def head(p, parent, at, r, k, full):
@@ -146,64 +142,69 @@ def head(p, parent, at, r, k, full):
             b(-1.6, -1.2, -5.6, 3.2, 1.2, 0.8, 'nteeth'),
         ] + beard),                                                 # his beard
     ]
-    if full:                                                    # the middle head's crown of locks
-        parts.append(lock(p + '_lock_top', p + '_head', (0, -9.5 * k, -1 * k), (-1.25, 0, 0), 0.95 * k, fin=True))
-    sides = ((5.5, -9, 0.5, 0.95, True), (8.5, -3.5, 1.05, 1.0, False), (8.5, 3, 1.6, 0.95, False)) if full else ()
+    # a crown of flame-locks swept back off every head, so each stands out in its own mane; the middle
+    # head's the fuller, with locks down its cheeks too
+    parts += lock(p + '_lock_top', p + '_head', (0, -9.5 * k, -1 * k), (-1.3, 0, 0), (0.95 if full else 0.65) * k,
+                  fin=True, bend=0.3)
+    sides = ((5.5, -9, 0.5, 0.8, True), (8.5, -3.5, 1.05, 0.85, False), (8.5, 3, 1.6, 0.8, False)) if full else ()
     for side, tag in ((-1, 'a'), (1, 'b')):
         for n, (x, y, rz, kk, fin) in enumerate(sides):
-            parts.append(lock('%s_lock_%s%d' % (p, tag, n), p + '_head', (x * side * k, y * k, -0.5 * k),
-                              (-1.05 + 0.08 * n, 0, rz * side), kk * k, fin))
+            # (the bend about z, out of a flat lock's breadth, turns with the side it's on)
+            parts += lock('%s_lock_%s%d' % (p, tag, n), p + '_head', (x * side * k, y * k, -0.5 * k),
+                          (-1.15 + 0.08 * n, 0, rz * side), kk * k, fin, bend=0.28 if fin else -0.28 * side)
     return parts
 
 
-# The nine heads' pivots (the right ones; the left mirror them), fanned over the shoulders in two arcs
-# about a point over his chest: the middle head and every other one on the outer arc, high and set
-# back, the rest on the inner arc, lower and thrust forward, so that from the front each shows in the
-# gap between its neighbours and from the side they stand in two ranks; the outermost low and wide
-# beside his shoulders.
-def fan(i):
-    outer = i % 2 == 0
-    radius, phi = (44 if i == 0 else 37 if outer else 27), math.radians(19 * i)
-    z = (-38, -52, -33, -49, -31)[i]
-    return (-radius * math.sin(phi), -7 - radius * math.cos(phi), z)
-
-
-PLACES = [fan(i) for i in range(5)]
-# The left heads stand a little off their right twins (the front rank further forward and lower, the
-# back rank higher and further back), so that from the side the far heads show between the near ones.
-LEFT_SHIFT = [None, (0, 3, -5), (0, -3, 4), (0, 3, -5), (0, -3, 4)]
+# The nine heads' pivots (the right ones; the left mirror them), spread so that from the front they fan
+# into a crown, the middle head highest, and from the side they stand apart along his length in a
+# rising wave, not in one column: the inner pair thrust far out ahead and low, the middle head high over
+# them, the next pair high and set back over his shoulders, the pair after low and forward and out
+# wide, the outermost pair furthest back of all, rising off his withers and splayed out over his flanks.
+PLACES = [(0, -54, -46), (-10, -29, -68), (-21, -52, -25), (-30, -23, -46), (-46, -40, -8)]
+# where each neck rises out of the mane, in the body's pixels (before it's grown): the forward heads'
+# from the front of his neck, the set-back heads' from his shoulders and withers
+ROOTS = [(0, -11, -20), (-3.5, -5, -24), (-6.5, -12, -13), (-8, -4, -21), (-9.5, -11, -6)]
+# the heads turned out from his line, the further out the more, and rolled out with it (radians)
+YAW = [0, 0.2, 0.42, 0.55, 0.85]
+ROLL = [0, 0.04, 0.1, 0.14, 0.24]
+# The left heads stand a little off their right twins (some further forward and lower, some higher
+# and further back), so that from the side the far heads show between the near ones.
+LEFT_SHIFT = [None, (0, -5, 7), (0, 4, -6), (0, -5, 6), (0, 5, -6)]
 
 
 def neck(name, i, shift=(0, 0, 0)):
     """A neck from the shoulders to its head in two arched segments, thick and maned, and the head on it."""
     # its root on the shoulders (in the body's pixels, grown), the right heads' on -x
-    base = tuple(c * GROW for c in (-3.2 * i, -10 + 1.5 * i, -17 + 0.5 * i))
+    base = tuple(c * GROW for c in ROOTS[i])
     end = tuple(e - o + d for e, o, d in zip(PLACES[i], BODY_AT, shift))
     mid = [base[c] + 0.5 * (end[c] - base[c]) for c in range(3)]
     mid[1] -= 5 - 0.6 * i                                       # arched up, the inner necks the more
     mid[2] += 2.5
+    m = 1.2 if i == 0 else 0.7                                  # how full its mane
     rx1, ry1, l1 = bg.segment(base, mid)
     rx2, ry2, l2 = bg.segment(mid, end)
     m1, m2 = rot(rx1, ry1, 0), rot(rx2, ry2, 0)
     k = 1.2 if i == 0 else 0.9
-    t = 3.4 if i == 0 else 2.8
-    # the head: facing ahead and out, the further out the more; the middle one glowering down, the rest
-    # with their snouts lifted a touch
-    hm = rot(0.12 if i == 0 else -0.08, math.radians(16 * i) * 0.9, 0)
+    t = 3.4 if i == 0 else 2.6
+    # the head: facing ahead and out, the further out the more, rolled out with it; the middle one
+    # glowering down, the rest with their snouts lifted a touch
+    hm = rot(0.12 if i == 0 else -0.08, YAW[i], -ROLL[i])
     loc2 = euler(mm(tr(m1), m2))
     loch = euler(mm(tr(m2), hm))
     parts = [
         part(name + '_neck', 'body', base, (rx1, ry1, 0), [
             (-t, -t, -1, 2 * t, 2 * t, l1 + 2, 'nneck'),
-            (-t - 0.8, -t - 2.2, -1, 2 * t + 1.6, 3, l1 + 2, 'nneckmane'),     # its mane along the crest
+            # its mane along the crest: on the middle neck a full one, on the rest a narrow ridge, so the
+            # heads part from one another
+            (-t * m, -t - 1.4 * m, -1, 2 * t * m, 2.4 * m, l1 + 2, 'nneckmane'),
         ]),
         part(name + '_neck2', name + '_neck', (0, 0, l1), loc2, [
             (-t * 0.92, -t * 0.92, -1, 1.84 * t, 1.84 * t, l2 + 1, 'nneck'),
-            (-t - 0.4, -t - 2, -1, 2 * t + 0.8, 3, l2 + 1, 'nneckmane'),
+            (-t * m * 0.85, -t - 1.2 * m, -1, 1.7 * t * m, 2.2 * m, l2 + 1, 'nneckmane'),
         ]),
     ]
     if i == 0:                                                  # a crest of mane on the middle neck
-        parts.append(lock(name + '_crest_a', name + '_neck', (0, -t - 1, l1 * 0.4), (-1.15, 0, 0), 0.85, fin=True))
+        parts += lock(name + '_crest_a', name + '_neck', (0, -t - 1, l1 * 0.4), (-1.25, 0, 0), 0.85, fin=True)
     return parts + head(name, name + '_neck2', (0, 0, l2), loch, k, i == 0)
 
 
@@ -248,19 +249,37 @@ BODY = mirrored([
         (-9.6, -9.2, -5, 19.2, 2.2, 14, 'ncloth'),              # the saddle-cloth over his back
         (-9.8, -8, -5.2, 1.4, 11, 14.4, 'nclothside'), (8.4, -8, -5.2, 1.4, 11, 14.4, 'nclothside'),
         (-3, -10.2, -2, 6, 1.2, 8, 'njewelplate'),               # a jewelled plate on it
+        (-10.8, 3, 7.4, 1.4, 5, 1.4, 'ntassel'), (9.4, 3, 7.4, 1.4, 5, 1.4, 'ntassel'),    # tassels at its corners
+        (-10.8, 3, -4.6, 1.4, 4, 1.4, 'ntassel'), (9.4, 3, -4.6, 1.4, 4, 1.4, 'ntassel'),
+        # and behind, the breeching: a jewelled strap from the saddle-cloth round his haunches, under
+        # his tail, hung with bells
+        (-10.6, -3, 9, 1.2, 3.2, 13.4, 'nstrap'), (9.4, -3, 9, 1.2, 3.2, 13.4, 'nstrap'),
+        (-10.6, -3, 21.6, 21.2, 3.2, 1.2, 'nstrap'),
+        (-3, -3.4, 22.2, 6, 6, 1.2, 'nmedal'),                  # a gold boss under his tail
+        (-0.7, 2.6, 22.4, 1.4, 5, 1.4, 'ntassel'),
+        (-8, 0.2, 21.8, 2.6, 3, 2.6, 'nbell'), (5.4, 0.2, 21.8, 2.6, 3, 2.6, 'nbell'),
     ]),
-    part('rump', 'body', (0, -8, 10), (-0.35, 0, 0), [(-9.5, 0, 0, 19, 7, 13, 'nfur')]),   # sloping to the tail
-    lock('spine_a', 'body', (0, -10, 6), (-1.4, 0, 0), 0.8, fin=True),
-    lock('spine_b', 'body', (0, -9.5, 13), (-1.5, 0, 0), 0.65, fin=True),
-    lock('right_mane_a', 'body', (-12, -12, -18), (-1.3, 0, -0.7), 1.25, fin=True),
-    lock('right_mane_b', 'body', (-13, -4, -19), (-1.3, 0, -1.25), 1.3),
-    lock('right_mane_c', 'body', (-12.5, 3, -20), (-1.2, 0, -1.9), 1.15),
-    lock('right_mane_d', 'body', (-11.5, -10, -10), (-1.45, 0, -0.95), 1.05),
-    lock('right_mane_e', 'body', (-11, -3, -10), (-1.5, 0, -1.4), 0.95),
-    # the mane falling in locks down his breast
-    lock('apron', 'body', (0, -3, -27.5), (2.95, 0, 0), 1.1),
-    lock('right_apron', 'body', (-5, -3, -27.2), (2.95, 0, -0.18), 1.05),
-    lock('right_apron_b', 'body', (-9.5, -3.5, -26), (2.95, 0, -0.4), 0.95),
+    part('rump', 'body', (0, -8, 10), (-0.35, 0, 0), [
+        (-9.5, 0, 0, 19, 7, 13, 'nfur'),                        # sloping to the tail
+        (-1.4, -0.6, -0.5, 2.8, 0.8, 13.6, 'nstrap'),           # the crupper, down it to the tail
+    ]),
+    # the mane in tiers: a crest of flames along his spine, dwindling to his tail; flames swept back off
+    # the necks' roots and over his shoulders, lying each over the root of the next; and from behind,
+    # the last of them falling back over his withers either side of the saddle-cloth
+    *lock('spine_a', 'body', (0, -10.5, 4), (-1.45, 0, 0), 0.85, fin=True, bend=0.32),
+    *lock('spine_b', 'body', (0, -9.5, 11), (-1.5, 0, 0), 0.72, fin=True, bend=0.35),
+    *lock('spine_c', 'body', (0, -9, 17), (-1.55, 0, 0), 0.58, fin=True, bend=0.38),
+    *lock('right_mane_a', 'body', (-12, -12, -18), (-1.4, 0, -0.65), 1.2, fin=True, bend=0.26),
+    *lock('right_mane_b', 'body', (-13, -4, -19), (-1.45, 0, -1.1), 1.2, bend=0.24),
+    *lock('right_mane_c', 'body', (-12.5, 3, -20), (-1.45, 0, -1.7), 1.1, bend=0.26),
+    *lock('right_mane_d', 'body', (-11.5, -11, -10), (-1.5, 0, -0.7), 1.05, fin=True, bend=0.28),
+    *lock('right_mane_e', 'body', (-11.5, -3, -10), (-1.55, 0, -1.35), 1.0, bend=0.26),
+    *lock('right_mane_f', 'body', (-10, -11, -4), (-1.62, 0, -0.85), 0.9, bend=0.3),
+    *lock('right_mane_g', 'body', (-10.5, 4, -12), (-1.8, 0, -1.6), 0.85, bend=0.3),
+    # the mane falling in locks down his breast, curling forward at their ends
+    *lock('apron', 'body', (0, -3, -27.5), (2.95, 0, 0), 1.1, bend=-0.25, across=True),
+    *lock('right_apron', 'body', (-5, -3, -27.2), (2.95, 0, -0.18), 1.05, bend=-0.25, across=True),
+    *lock('right_apron_b', 'body', (-9.5, -3.5, -26), (2.95, 0, -0.4), 0.95, bend=-0.25, across=True),
     # thick forelegs: the shoulder's muscle, the forearm, a great clawed paw
     part('right_foreleg', 'body', (-8.5, -1, -15), (0, 0, 0), [
         (-5, -4, -6, 10, 13, 12, 'nfur'),
@@ -283,7 +302,9 @@ BODY = mirrored([
         (-3, -3, 3.5, 6, 6, 5, 'nmane'),
         curl(0, 0, 8.4, 4.4, 1.5),
     ]),
-    lock('tail_flame', 'tail_tip', (0, -1, 7), (-1.1, 0, 0), 1.0, fin=True),
+    # its tuft a brush of flames, fanned so it shows from behind
+    *lock('tail_flame', 'tail_tip', (0, -1, 7), (-1.1, 0, 0), 1.0, fin=True, bend=0.35),
+    *lock('right_tail_flame', 'tail_tip', (-2, 0, 6.5), (-1.25, 0, -0.75), 0.8, bend=0.3),
 ])
 LION = grow(BODY, GROW) + heads()
 
@@ -330,6 +351,9 @@ def paint_lion(p, style, f, dims):
             for i in list(range(3)) + list(range(fw - 3, fw)):
                 c = p.img.getpixel((fx + i, fy + j))
                 p.px((fx + i, fy + j), [v * 0.8 for v in c[:3]])
+        for cx in (fw * 0.24, fw * 0.76):                              # a guardian lion's curls on his hams
+            for cy in (fh * 0.28, fh * 0.56):
+                rosette(p, f['back'], cx + (fw * 0.04 if cy > fh / 2 else 0), cy, 2.6 * S, MANE, MANE_DEEP, MANE_TIP)
     elif style in ('nfur', 'nflank', 'ntail', 'nchest', 'nleg'):
         base = {'nflank': [v * 0.95 for v in HIDE], 'nchest': blend(HIDE, HIDE_PALE, 0.35)}.get(style, HIDE)
         pelt(p, f, base, HIDE_DARK, HIDE_PALE, along=style != 'nleg')
@@ -463,11 +487,12 @@ def paint_lion(p, style, f, dims):
             flame_marks(p, f[k], HIDE_DARK, n=2)
     elif style == 'nruff':
         mane(p, f, MANE, MANE_DEEP, MANE_TIP)
-        fx, fy, fw, fh = f['front']                                    # curl on curl behind the face
         rad = 2.2 * S
-        for row, cy in enumerate(range(int(rad), fh, int(rad * 1.9))):
-            for cx in range(int(rad) + (int(rad) if row % 2 else 0), fw, int(rad * 2)):
-                rosette(p, f['front'], cx, cy, rad, MANE, MANE_DEEP, MANE_TIP)
+        for k in ('front', 'back'):                                    # curl on curl behind the face, and behind the head
+            fx, fy, fw, fh = f[k]
+            for row, cy in enumerate(range(int(rad), fh, int(rad * 1.9))):
+                for cx in range(int(rad) + (int(rad) if row % 2 else 0), fw, int(rad * 2)):
+                    rosette(p, f[k], cx, cy, rad, MANE, MANE_DEEP, MANE_TIP)
     elif style == 'ncurl':
         strands(p, f, MANE, MANE_DEEP, MANE_TIP, 0.35, 0.8)
         fx, fy, fw, fh = f['front']
@@ -550,6 +575,37 @@ def paint_lion(p, style, f, dims):
                 for i in range(0, fw, 3):
                     for j in range(fh - 4, fh):
                         p.px((fx + i, fy + j), RUBY if j < fh - 2 else GOLD_HI)
+    elif style == 'nstrap':                                           # a gold strap set with jewels all round
+        gold(p, f)
+        for n, k in enumerate(('front', 'back', 'right', 'left', 'top')):
+            fx, fy, fw, fh = f[k]
+            if fw >= fh and fw > 8:
+                for m, i in enumerate(range(S * 3, fw - S * 2, S * 6)):
+                    jewel(p, f[k], i, fh // 2, (RUBY, SAPPHIRE, JADE)[(m + n) % 3])
+            elif fh > 8:
+                for m, j in enumerate(range(S * 3, fh - S * 2, S * 6)):
+                    jewel(p, f[k], fw // 2, j, (RUBY, SAPPHIRE, JADE)[(m + n) % 3])
+    elif style == 'ntassel':                                          # a crimson tassel under a gold cap
+        for k, r in f.items():
+            p.gradient(r, RUBY, (90, 10, 20), noise=4)
+        for k in ('front', 'back', 'right', 'left'):
+            fx, fy, fw, fh = f[k]
+            for i in range(fw):
+                for j in range(S + 1):
+                    p.px((fx + i, fy + j), GOLD if j < S else GOLD_DEEP)
+            for i in range(0, fw, 2):
+                p.px((fx + i, fy + fh - 1), (60, 6, 14))
+        p.face(f['top'], GOLD, 1.0, noise=3)
+    elif style == 'nmedal':                                           # a round gold boss, a cloud scroll on it, a jewel
+        plain(p, f, GOLD_DEEP)
+        for k in ('back', 'front'):
+            fx, fy, fw, fh = f[k]
+            for j in range(fh):
+                for i in range(fw):
+                    if math.hypot(i + 0.5 - fw / 2, j + 0.5 - fh / 2) > fw / 2:
+                        p.px((fx + i, fy + j), (70, 44, 14))
+            cloud_scroll(p, f[k], fw / 2, fh / 2, fw / 2 - 0.5)
+            jewel(p, f[k], fw // 2, fh // 2, RUBY)
     elif style == 'njewelplate':
         gold(p, f)
         fx, fy, fw, fh = f['top']

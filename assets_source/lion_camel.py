@@ -707,17 +707,39 @@ AZ_EMBER = (108, 52, 6)        # his eyes smoulder deeper in this shape: a banke
 AZ_CORE = (142, 80, 10)
 
 
-def lock(prefix, parent, at, rot, k=1.0, fin=False):
-    """A lock of the mane like a tongue of flame: broad at its root, tapering in two steps to a point
-    that bends over. It points up (-y) from its pivot; `rot` sweeps it back and fans it out. Flat across
-    x, or (a `fin`) across z, so that swept back without a roll it still shows its breadth from the side."""
-    w, d = (2.6 * k, 6.5 * k) if fin else (6.5 * k, 2.6 * k)
-    l1, l2, l3 = 7 * k, 5 * k, 4 * k
-    return part(prefix, parent, at, rot, [
-        (-w / 2, -l1, -d / 2, w, l1, d, 'azlock'),
-        (-w * 0.32, -l1 - l2, -d / 2 + 0.7 * k, w * 0.64, l2, d * 0.7, 'azlockmid'),
-        (-w * 0.15, -l1 - l2 - l3, -d / 2 + 1.5 * k, w * 0.3, l3, d * 0.45, 'azlocktip'),
-    ])
+def flame(prefix, parent, at, rot, k=1.0, fin=True, bend=0.4, twist=0.0, broad=9.0,
+          styles=('azlock', 'azlockmid', 'azlocktip'), across=None):
+    """A tuft of the mane like a tongue of flame, in three tiers of fur each set on the last: a broad,
+    flat root, then narrower and narrower, each tier bent `bend` further over (and `twist`ed about the
+    lock's length), so the tuft sweeps back and curls up at its tip like a flame rather than running
+    out straight as a rod; the narrower tiers lie to the inside of the curl, so its outer edge runs in
+    one curve. It points up (-y) from its pivot; `rot` sweeps it back and fans it out. Flat across x,
+    or (a `fin`) across z: a fin shows its breadth from the side while it's swept back with little
+    roll, a flat lock when it's rolled out sideways (|z| about a right angle). It bends in its breadth,
+    or `across` it (a flat lock hanging down a breast, curling forward)."""
+    w, t = broad * k, max(1.6, 2.4 * k)
+    l1, l2, l3 = 6.5 * k, 5.5 * k, 4.5 * k
+
+    def box(wid, length, th, style, lean):
+        if fin:
+            return (-th / 2, -length, -wid / 2 - lean, th, length, wid, style)
+        return (-wid / 2 - lean, -length, -th / 2, wid, length, th, style)
+
+    def bent(b):
+        return (b, twist, 0) if fin != bool(across) else (0, twist, b)
+
+    return [
+        part(prefix, parent, at, rot, [box(w, l1, t, styles[0], 0)]),
+        part(prefix + '_mid', prefix, (0, -l1 + 0.8 * k, 0), bent(bend), [box(w * 0.66, l2, t * 0.85, styles[1], w * 0.1)]),
+        part(prefix + '_tip', prefix + '_mid', (0, -l2 + 0.7 * k, 0), bent(bend * 1.25), [box(w * 0.34, l3, t * 0.7, styles[2], w * 0.14)]),
+    ]
+
+
+def ringlet(x, y, z, n=3, s=4.4, side=-1, drop=None, style='azcurlside'):
+    """A lock of spiral curls hanging down a neck's side: `n` curls seen end on from the side, each
+    below the last and a little behind it, their faces out at x (on the `side` it hangs on)."""
+    drop = drop or s * 0.86
+    return [(x if side > 0 else x - 2.4, y + i * drop - s / 2, z + i * s * 0.32 - s / 2, 2.4, s, s, style) for i in range(n)]
 
 
 def curl(x, y, z, s=5.0, d=3):
@@ -758,12 +780,15 @@ def true_lion_head(parent, at, rot):
             curl(-5, 4.5, -7), curl(0, 5, -7.5), curl(5, 4.5, -7),   # his beard
         ]),
         part('tongue', 'jaw', (0, 0.3, -3), (0.35, 0, 0), [(-2, -0.5, -5.8, 4, 1, 6.8, 'aztongue')]),
-        lock('top_lock', 'head', (0, -12, 1), (-1.3, 0, 0), 1.15, fin=True),
-        lock('right_lock_a', 'head', (-6, -11, 0), (-1.1, 0, -0.5), 1.15, fin=True),
-        lock('right_lock_b', 'head', (-10, -5, 0), (-0.9, 0, -1.05), 1.2),
-        lock('right_lock_c', 'head', (-11, 2, 0), (-0.8, 0, -1.6), 1.2),
-        lock('right_lock_d', 'head', (-8, 8, 0), (-0.7, 0, -2.2), 1.05),
-    ]
+    ] + (
+        # the first tier of the mane, swept back off the ring of curls: broad flames over the crown and
+        # down the cheeks, each lying over the root of the one behind
+        flame('top_lock', 'head', (0, -12.5, 0.5), (-1.3, 0, 0), 1.1, bend=0.3)
+        + flame('right_lock_a', 'head', (-5.5, -11.5, 0), (-1.25, 0, -0.42), 1.05, bend=0.28, twist=-0.15)
+        + flame('right_lock_b', 'head', (-10, -5.5, 0), (-1.15, 0, -0.85), 1.05, bend=0.26, twist=-0.2)
+        + flame('right_lock_c', 'head', (-11.5, 1.5, 0), (-1.05, 0, -1.45), 1.0, fin=False, bend=0.25)
+        + flame('right_lock_d', 'head', (-8.5, 7.5, 0), (-0.9, 0, -2.1), 0.9, fin=False, bend=0.3)
+    )
 
 
 AZURE_LION_TRUE = mirrored([
@@ -778,19 +803,30 @@ AZURE_LION_TRUE = mirrored([
         (-2, 5, -25.4, 4, 4.5, 4, 'azbell'),
         (-6.6, 5, -24.4, 2.6, 3, 2.6, 'azbell'), (4, 5, -24.4, 2.6, 3, 2.6, 'azbell'),
         (-0.8, 9.5, -24.2, 1.6, 4, 1.6, 'aztassel'),
-    ]),
+        # spiral curls hanging in locks down the sides of his neck, between the tiers of flames
+    ] + ringlet(-10.5, -6, -20.5, 4) + ringlet(-10, -8, -14.5, 3, 4.0) + ringlet(10.5, -6, -20.5, 4, side=1)
+      + ringlet(10, -8, -14.5, 3, 4.0, side=1)),
     part('rump', 'body', (0, -7, 10), (-0.4, 0, 0), [(-7.5, 0, 0, 15, 7, 12, 'azfur')]),     # sloping down to his tail
-    lock('crest_a', 'body', (0, -12, -15), (-1.35, 0, 0), 1.1, fin=True),
-    lock('crest_b', 'body', (0, -11.5, -8), (-1.35, 0, 0), fin=True),
-    lock('crest_c', 'body', (0, -8.5, -1), (-1.45, 0, 0), 0.8, fin=True),
-    lock('crest_d', 'body', (0, -8, 7), (-1.5, 0, 0), 0.6, fin=True),
-    lock('right_neck_a', 'body', (-7.5, -10, -18), (-1.4, 0, -0.55), 1.3, fin=True),
-    lock('right_neck_b', 'body', (-10, -4, -18), (-1.4, 0, -1.2), 1.3),
-    lock('right_neck_c', 'body', (-9.5, 3, -19), (-1.3, 0, -1.9), 1.15),
-    lock('right_neck_d', 'body', (-9.5, -5, -9), (-1.5, 0, -1.05), 0.95),
-    lock('apron', 'body', (0, 7, -22), (-2.75, 0, 0), 0.8),
-    lock('right_apron', 'body', (-4.5, 6, -21.5), (-2.8, 0, 0.3), 0.8),
-] + true_lion_head('body', (0, -6, -21), (0.1, 0, 0)) + [
+] + (
+    # the mane in tiers down his neck and over his shoulders, each tier's flames lying over the roots
+    # of the next, curling up at their ends; a crest of them along his spine, dwindling
+    flame('crest_a', 'body', (0, -12.5, -16), (-1.42, 0, 0), 1.1, bend=0.3)
+    + flame('crest_b', 'body', (0, -12, -9), (-1.45, 0, 0), 1.0, bend=0.3)
+    + flame('crest_c', 'body', (0, -9, -2), (-1.5, 0, 0), 0.8, bend=0.32)
+    + flame('crest_d', 'body', (0, -8, 5.5), (-1.52, 0, 0), 0.62, bend=0.35)
+    + flame('right_neck_a', 'body', (-6.5, -11.5, -17.5), (-1.42, 0, -0.5), 1.2, bend=0.25, twist=-0.15)
+    + flame('right_neck_b', 'body', (-10, -5, -17.5), (-1.45, 0, -1.0), 1.2, fin=False, bend=0.22)
+    + flame('right_neck_c', 'body', (-10.5, 2.5, -18.5), (-1.5, 0, -1.6), 1.1, fin=False, bend=0.22)
+    + flame('right_neck_d', 'body', (-6, -11, -10), (-1.5, 0, -0.45), 1.0, bend=0.28, twist=-0.1)
+    + flame('right_neck_e', 'body', (-9.5, -4.5, -10), (-1.55, 0, -1.05), 1.0, fin=False, bend=0.25)
+    + flame('right_neck_f', 'body', (-9.5, 2, -11), (-1.6, 0, -1.65), 0.85, fin=False, bend=0.28)
+    # the last of it draped back over his shoulders and down them, the tips lifting
+    + flame('right_shoulder_a', 'body', (-9, 7, -15.5), (-1.85, 0, -1.45), 0.85, fin=False, bend=0.3)
+    + flame('right_shoulder_b', 'body', (-8.5, -6, -3), (-1.7, 0, -0.9), 0.75, fin=False, bend=0.32)
+    # and falling down his breast
+    + flame('apron', 'body', (0, 7, -22), (-2.75, 0, 0), 0.8, fin=False, bend=-0.15, across=True)
+    + flame('right_apron', 'body', (-4.5, 6, -21.5), (-2.8, 0, 0.3), 0.8, fin=False, bend=-0.15, across=True)
+) + true_lion_head('body', (0, -6, -21), (0.1, 0, 0)) + [
     part('right_foreleg', 'body', (-6.5, -1, -14), (0, 0, 0), [
         (-4, -4, -5, 8, 12, 10, 'azfur'),                      # the shoulder's muscle
         (-3, 8, -3.5, 6, 13, 6.5, 'azleg'),                    # the forearm, long
@@ -807,7 +843,7 @@ AZURE_LION_TRUE = mirrored([
     part('tail', 'body', (0, -3, 20.5), (-0.5, 0, 0), [(-1.3, -1.3, 0, 2.6, 2.6, 11, 'aztail')]),
     part('tail_mid', 'tail', (0, 0, 10.5), (0.9, 0, 0), [(-1.1, -1.1, 0, 2.2, 2.2, 10, 'aztail')]),
     part('tail_tip', 'tail_mid', (0, 0, 9.5), (0.8, 0, 0), [(-1, -1, 0, 2, 2, 5, 'aztail'), (-2.2, -2.2, 3.5, 4.4, 4.4, 4, 'azmane')]),
-    lock('tail_flame', 'tail_tip', (0, -0.5, 6), (-1.1, 0, 0), 0.95, fin=True),
+    *flame('tail_flame', 'tail_tip', (0, -0.5, 6), (-1.1, 0, 0), 0.8, bend=0.35),
 ])
 
 
@@ -1043,29 +1079,50 @@ def paint_azure_lion_true(p, style, f, dims):
             for k in ('right', 'left'):
                 flame_marks(p, f[k], AZ_DARK, n=max(1, f[k][2] * f[k][3] // 300))
     elif style == 'azface':
-        pelt(p, f, AZ, AZ_DARK)
+        pelt(p, f, blend(AZ, AZ_PALE, 0.32), AZ_DARK)
         fx, fy, fw, fh = f['front']
-        # a dark mask about the eyes and down the sides of the face; the brow's furrows between them
+        # no hood of shadow over the face, only a dark line through the eyes and down from their outer
+        # corners (a cat's tear-line), the brow above them lit, the scowl's furrows between them; so the
+        # brow and the eyes read as a face from the side and three-quarters too
         for j in range(fh):
             for i in range(fw):
                 edge = abs(i + 0.5 - fw / 2) / (fw / 2)
-                if j < 6 * S and edge > 0.25 or j < 2 * S:
-                    c = p.img.getpixel((fx + i, fy + j))
-                    p.px((fx + i, fy + j), [v * (0.5 if j < 2 * S else 0.66) for v in c[:3]])
+                c = p.img.getpixel((fx + i, fy + j))
+                if j < S:
+                    p.px((fx + i, fy + j), [v * 1.12 for v in c[:3]])            # the brow's lit ridge
+                elif S * 2 <= j < S * 5 and edge > 0.3:
+                    p.px((fx + i, fy + j), [v * 0.7 for v in c[:3]])
+                elif S * 5 <= j < S * 7 and 0.55 < edge < 0.8:
+                    p.px((fx + i, fy + j), [v * 0.62 for v in c[:3]])            # the tear-line
         for j in range(0, 4 * S):
             for d in (-S, S - 1):
                 p.px((fx + fw // 2 + d, fy + j), [v * 0.4 for v in AZ_DARK])
         w = fw // S
         glare(p, f, ((2, 3), (w - 3, w - 4)), 1, AZ_EMBER, AZ_CORE)
+        for k in ('right', 'left'):                                   # the cheek pale under the eye, the brow lit
+            fx, fy, fw, fh = f[k]
+            for j in range(fh):
+                for i in range(fw):
+                    c = p.img.getpixel((fx + i, fy + j))
+                    if j < S:
+                        p.px((fx + i, fy + j), [v * 1.15 for v in c[:3]])
+                    elif S * 4 <= j < S * 9:
+                        p.px((fx + i, fy + j), blend(c[:3], AZ_PALE, 0.5))
     elif style == 'azcrown':
-        pelt(p, f, [v * 0.9 for v in AZ], AZ_DARK)
+        pelt(p, f, blend(AZ, AZ_PALE, 0.28), AZ_DARK)                  # the brow's crown, lit: a face, not a helm
         for k in ('top', 'front'):                                    # the furrows of his scowl
             fx, fy, fw, fh = f[k]
             for j in range(fh):
                 for d in (-S - 1, S):
                     p.px((fx + fw // 2 + d, fy + j), [v * 0.45 for v in AZ_DARK])
+        for k in ('right', 'left', 'top'):                            # short fur combed back over it, into the mane
+            fx, fy, fw, fh = f[k]
+            for _ in range(fw * fh // 10):
+                x, y = p.rnd.randrange(fw), p.rnd.randrange(fh)
+                c = p.img.getpixel((fx + x, fy + y))
+                p.px((fx + x, fy + y), blend(c[:3], AZ_DARK if p.rnd.random() < 0.5 else AZ_PALE, 0.35))
     elif style == 'azjowl':
-        pelt(p, f, [v * 0.8 for v in AZ], AZ_DARK)
+        pelt(p, f, blend(AZ, AZ_PALE, 0.2), AZ_DARK)
         fx, fy, fw, fh = f['front']
         for j in range(fh):
             for i in range(fw):
@@ -1073,11 +1130,16 @@ def paint_azure_lion_true(p, style, f, dims):
                     c = p.img.getpixel((fx + i, fy + j))
                     p.px((fx + i, fy + j), [v * 0.72 for v in c[:3]])
     elif style == 'azbrow':
+        # a heavy brow, lit along its ridge and shadowed beneath, over the eyes' glare
+        base = blend(AZ, AZ_PALE, 0.3)
         for k, r in f.items():
-            p.face(r, (24, 42, 48), {'top': 1.8, 'bottom': 0.45, 'front': 1.1}.get(k, 1.0), noise=3)
-        fx, fy, fw, fh = f['top']
-        for i in range(fw):
-            p.px((fx + i, fy + fh - 1), [v * 0.7 for v in AZ_PALE])         # the light along its ridge
+            p.face(r, base, {'top': 1.25, 'bottom': 0.3, 'front': 0.92, 'back': 0.5}.get(k, 0.85), noise=3)
+        for k in ('front', 'right', 'left'):
+            fx, fy, fw, fh = f[k]
+            for i in range(fw):
+                p.px((fx + i, fy), [v * 1.15 for v in AZ_PALE])                # the light along its ridge
+                for j in range(fh - S, fh):
+                    p.px((fx + i, fy + j), [v * 0.55 for v in base])            # its underside, in shadow
     elif style == 'azsnout':
         pelt(p, f, [v * 0.85 for v in AZ], AZ_DARK)
         for k in ('top', 'right', 'left'):                            # the snarl's wrinkles, deep, across the bridge
@@ -1175,6 +1237,12 @@ def paint_azure_lion_true(p, style, f, dims):
         fx, fy, fw, fh = f['front']
         p.face(f['front'], blend(MANE_DEEP, MANE_TEAL, 0.3), 1.0, noise=2)
         rosette(p, f['front'], fw / 2, fh / 2, fw / 2, MANE_TEAL, MANE_DEEP, MANE_TIP, turns=1.5)
+    elif style == 'azcurlside':                                     # a curl hanging at a neck's side
+        strands(p, f, MANE_TEAL, MANE_DEEP, MANE_TIP, 0.35, 0.8)
+        for k in ('right', 'left'):
+            fx, fy, fw, fh = f[k]
+            p.face(f[k], blend(MANE_DEEP, MANE_TEAL, 0.3), 1.0, noise=2)
+            rosette(p, f[k], fw / 2, fh / 2, fw / 2, MANE_TEAL, MANE_DEEP, MANE_TIP, turns=1.5)
     elif style == 'azlock':
         strands(p, f, MANE_TEAL, MANE_DEEP, MANE_TIP, 0.4, 1.0)
     elif style == 'azlockmid':
