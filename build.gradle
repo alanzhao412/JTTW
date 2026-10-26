@@ -64,6 +64,7 @@ neoForge {
             client()
             gameDirectory = project.file('run-gallery')
             systemProperty 'jttw.formGallery', 'true'
+            systemProperty 'jttw.backgroundWindow', 'true' // opens behind your work, without focus
             // e.g. ./gradlew runFormGallery -Pgallery.only=block,special
             systemProperty 'jttw.formGallery.only', (project.findProperty('gallery.only') ?: '').toString()
         }
@@ -73,6 +74,7 @@ neoForge {
             client()
             gameDirectory = project.file('run-bench')
             systemProperty 'jttw.chunkBench', 'true'
+            systemProperty 'jttw.backgroundWindow', 'true'
             // e.g. ./gradlew runWorldgenBench -Pbench.view=6 (the server's view distance, in chunks)
             systemProperty 'jttw.chunkBench.view', (project.findProperty('bench.view') ?: '0').toString()
             // -Pbench.mode=terrain measures the abilities that break terrain instead (see TerrainBench)
@@ -86,6 +88,7 @@ neoForge {
             client()
             gameDirectory = project.file('run-playtest')
             systemProperty 'jttw.playtest', 'true'
+            systemProperty 'jttw.backgroundWindow', 'true'
         }
 
         data {
@@ -106,6 +109,25 @@ neoForge {
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+// The dev clients that run on their own open in the background (see WindowMixin): NeoForge's early
+// loading window would be made, and take focus, before the mod could say otherwise, so it is off in
+// their run directories.
+['runFormGallery': 'run-gallery', 'runWorldgenBench': 'run-bench', 'runPlaytestPass': 'run-playtest'].each { task, dir ->
+    tasks.matching { it.name == task }.configureEach {
+        doFirst {
+            def toml = project.file("${dir}/config/fml.toml")
+            toml.parentFile.mkdirs()
+            def text = toml.exists() ? toml.text : ''
+            if (text =~ /(?m)^earlyWindowControl\s*=/) {
+                text = text.replaceAll(/(?m)^earlyWindowControl\s*=.*$/, 'earlyWindowControl = false')
+            } else {
+                text = 'earlyWindowControl = false\n' + text
+            }
+            toml.text = text
+        }
+    }
+}
 
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.10.2')
