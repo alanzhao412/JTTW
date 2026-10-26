@@ -156,6 +156,8 @@ final class WuzhuangScenes {
                 }, PAIR),
                 scene("wuzhuang_zhenyuan_close", p -> put(p, ModEntities.ZHENYUAN.get(), 0.5, 0, 7.0, 170f), new double[]{0.5, 3.0, 4.3, 0.5, 2.6, 7.0}),
                 scene("wuzhuang_zhenyuan_side", p -> put(p, ModEntities.ZHENYUAN.get(), 0.5, 0, 7.0, 90f), new double[]{0.5, 3.2, 2.0, 0.5, 2.3, 8.0}),
+                // the cloud under him, close and low
+                scene("wuzhuang_zhenyuan_cloud", p -> put(p, ModEntities.ZHENYUAN.get(), 0.5, 0, 7.0, 160f), new double[]{2.0, 1.5, 4.4, 0.5, 0.6, 7.0}),
                 scene("wuzhuang_zhenyuan_back", p -> put(p, ModEntities.ZHENYUAN.get(), 0.5, 0, 7.0, 20f), new double[]{0.5, 3.2, 2.0, 0.5, 2.3, 8.0}),
                 // how he stands over a man
                 scene("wuzhuang_zhenyuan_scale", p -> {

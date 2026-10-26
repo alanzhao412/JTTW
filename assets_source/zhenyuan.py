@@ -20,7 +20,7 @@ import beastgen as bg
 from beastgen import Painter, paint, emit
 from fire_court import part, mirrored
 
-bg.UNITS = 128
+bg.UNITS = 192
 bg.TEX = bg.UNITS * bg.S
 
 JAVA = 'src/main/java/com/jttw/engine/client/renderer/WuzhuangRenderers.java'
@@ -37,34 +37,77 @@ JADE = (110, 196, 160)
 LACQUER = (120, 28, 34)
 CLOUD = (238, 240, 250)
 EYE = (110, 84, 170)          # a faint violet gleam: dark, not bright
+PALE_GOLD = (240, 218, 150)   # the halo: a paler, softer gold
 
 # How much larger than his pixels he is drawn: ZhenyuanRenderer.SIZE
-SIZE = 1.0
+SIZE = 1.2
+
+# the cloud's puffs: (centre x, centre z, size, how far it rises): big ones at its heart, smaller and
+# smaller toward its rim, a few heaped on top; each painted soft and round, its edges thinning away
+PUFF = {'A': (8, 3.2, 7.5), 'B': (6, 2.6, 6), 'C': (4.5, 2.1, 4.5), 'D': (3, 1.6, 3), 'E': (2, 1.2, 2)}
+PUFFS = [(-4, -3, 'A', 0), (3.5, -2.5, 'A', 0), (-1, 4, 'A', 0), (4.5, 4.5, 'B', 0),
+         (-8.5, 0.5, 'B', 0), (8.5, 0, 'B', 0), (0, -8.5, 'B', 0), (0.5, 8.5, 'B', 0),
+         (-6.5, -6.5, 'B', 0), (6.5, -6.5, 'B', 0), (-6.5, 6.5, 'B', 0),
+         (-11.5, -3, 'C', 0), (11.5, 3, 'C', 0), (-3, -11.5, 'C', 0), (3, 11.5, 'C', 0),
+         (-11, 4.5, 'C', 0), (11, -4.5, 'C', 0), (4, -11, 'C', 0), (-4.5, 11, 'C', 0), (9, 8.5, 'C', 0),
+         (-14, 0.5, 'D', 0), (14, -0.5, 'D', 0), (0.5, -14, 'D', 0), (-0.5, 14, 'D', 0), (-9.5, -9.5, 'D', 0),
+         (0, 0, 'B', 1.4), (-3.5, 2.5, 'C', 1.2), (3, -3, 'C', 1.3), (2.5, 3.5, 'D', 2.2), (-3.5, -3.5, 'D', 2),
+         (-7, 3, 'D', 1.4), (7, -2, 'D', 1.3)]
+
+
+def puffs():
+    out = []
+    for cx, cz, s, lift in PUFFS:
+        w, h, d = PUFF[s]
+        cx, cz = cx * 0.85, cz * 0.85                             # close enough that they run together
+        out.append((cx - w / 2, 1.8 - h - lift, cz - d / 2, w, h, d, 'puff'))
+    # and a thin mist wrapped about them all, that blurs where one puff meets the next
+    out.append((-12.5, -0.4, -12, 25, 2.2, 24, 'haze'))
+    out.append((-8, -2, -7.5, 16, 1.8, 15, 'haze_top'))
+    return out
+
+
+# where the figure stands over the cloud: lifted to make room for the long robe (ZhenyuanModel)
+FIGURE_Y = -4
 
 ZHENYUAN = mirrored([
     # the small cloud he stands on, and the figure over it (it rises and falls a little)
-    part('cloud', 'root', (0, 22.4, 0), (0, 0, 0), [
-        (-8, -0.6, -7, 16, 2.4, 14, 'cloud'),
-        (-11.5, 0, -4, 5, 1.8, 8, 'puff'),
-        (7, 0.2, -4.5, 5, 1.6, 9, 'puff'),
-        (-5, 0.2, -10.5, 10, 1.6, 4, 'puff'),
-        (-4, 0, 6.5, 9, 1.8, 4.5, 'puff'),
-        (-13.5, 0.6, 0, 3, 1, 4, 'puff_top'),
-        (11.5, 0.8, -1, 3, 1, 3, 'puff_top'),
-        (-7, -1.6, -5.5, 6, 1.2, 6, 'puff_top'),
-        (2, -1.4, 0.5, 5, 1, 6, 'puff_top'),
-    ]),
-    part('figure', 'root', (0, 0, 0), (0, 0, 0), []),
+    part('cloud', 'root', (0, 22.4, 0), (0, 0, 0), puffs()),
+    part('figure', 'root', (0, FIGURE_Y, 0), (0, 0, 0), []),
+    # a tall, narrow-waisted figure: the breast, a waist drawn in under the jade belt, and the robe
+    # belling out below it in tiers to a wide hem
     part('body', 'figure', (0, -10, 0), (0, 0, 0), [
-        (-4.5, 0, -2.6, 9, 14, 5.2, 'robe'),
+        (-4.5, 0, -2.7, 9, 9, 5.4, 'robe'),
         (-5.6, -0.4, -3.2, 11.2, 3.8, 6.4, 'mantle'),
-        (-4.9, 13, -3, 9.8, 2, 6, 'belt'),
-        (-5.6, 14.6, -3.4, 11.2, 8, 6.8, 'skirt_upper'),
-        (-6.8, 21, -4.4, 13.6, 10.2, 8.8, 'skirt_lower'),
-        (-2.2, 21.6, -5, 4.4, 9.4, 0.5, 'apron'),
-        (2.2, 15, -3.9, 1.4, 3, 0.4, 'pendant'),
+        (-3.8, 8.6, -2.3, 7.6, 4.4, 4.6, 'waist'),
+        (-4.3, 12.4, -2.7, 8.6, 2, 5.4, 'belt'),
+        (-5, 14, -3.2, 10, 7, 6.4, 'skirt_upper'),
+        (-6.2, 20.5, -3.9, 12.4, 7.2, 7.8, 'skirt_mid'),
+        (-7.4, 27.2, -4.6, 14.8, 6.6, 9.2, 'skirt_lower'),
+        (-8.6, 33.4, -5.4, 17.2, 1.8, 10.8, 'hem'),
+        (2.4, 14.6, -3.6, 1.4, 3, 0.4, 'pendant'),
     ]),
-    part('train', 'body', (0, 30.6, 4), (-0.32, 0, 0), [(-6.4, -0.6, -0.4, 12.8, 0.8, 7, 'train')]),
+    # the earth-gold apron from the belt, and the jade belt's two sash ends beside it
+    part('apron', 'body', (0, 14.2, -3.3), (-0.13, 0, 0), [(-2.1, 0, -0.5, 4.2, 19, 0.5, 'apron')]),
+    part('right_sash', 'body', (-1.6, 13.6, -2.9), (-0.08, 0, 0.05), [(-0.7, 0, -0.2, 1.4, 9, 0.4, 'sash')]),
+    # the outer robe's panels, hung from the waist and swinging out over the tiers: two at the front,
+    # parted on the under-robe, one at each side, one down the back; each with its folds
+    part('right_front_panel', 'body', (-2.4, 13, -3.4), (-0.14, 0.22, 0.12), [
+        (-4.4, 0, -0.35, 4.4, 22, 0.7, 'panel'),
+        (-3.4, 1, -0.75, 0.8, 20.5, 0.45, 'fold'),
+        (-1.6, 2, -0.75, 0.8, 19.5, 0.45, 'fold'),
+    ]),
+    part('right_side_panel', 'body', (-5.2, 13, 0), (0, 0, 0.22), [
+        (-0.35, 0, -3.5, 0.7, 22, 7, 'panel_side'),
+        (-0.75, 1.5, -1.4, 0.45, 20, 0.8, 'fold'),
+        (-0.75, 1.5, 1.4, 0.45, 20, 0.8, 'fold'),
+    ]),
+    part('back_panel', 'body', (0, 13, 3.2), (0.14, 0, 0), [
+        (-5, 0, -0.35, 10, 22, 0.7, 'panel_back'),
+        (-2.8, 1, 0.3, 0.8, 20.5, 0.45, 'fold'),
+        (2, 1, 0.3, 0.8, 20.5, 0.45, 'fold'),
+    ]),
+    part('train', 'body', (0, 34.4, 5), (-0.32, 0, 0), [(-7.4, -0.6, -0.4, 14.8, 0.8, 8, 'train')]),
     part('halo', 'body', (0, -7, 6.2), (0, 0, 0), [(-9, -9, 0, 18, 18, 1, 'halo')]),
     part('hair', 'body', (0, -6.5, 4.5), (0.06, 0, 0), [(-3.8, 0, -0.2, 7.6, 18, 1, 'mane')]),
     part('hair_end', 'hair', (0, 18, 0), (0.05, 0, 0), [(-3, 0, -0.2, 6, 6, 0.8, 'mane_end')]),
@@ -90,13 +133,16 @@ ZHENYUAN = mirrored([
         (-2.6, 10.4, -1.4, 2.6, 2.4, 2.8, 'hand'),
     ]),
     # the great sleeve hangs from the forearm; a gold lip about its mouth, the mouth itself the dark
+    # it billows: narrow at the arm, belling wide to its mouth, a loose fold swinging out from it
     part('right_sleeve', 'right_arm', (-1.2, 3, 1.2), (0, 0, 0), [
-        (-3.5, 0, -3.5, 7, 16, 8, 'sleeve'),
-        (-4, 15, -4, 8, 1.4, 0.6, 'lip'),
-        (-4, 15, 4.4, 8, 1.4, 0.6, 'lip'),
-        (-4, 15, -3.4, 0.6, 1.4, 7.8, 'lip_side'),
-        (3.4, 15, -3.4, 0.6, 1.4, 7.8, 'lip_side'),
+        (-3.5, 0, -3.5, 7, 7, 8, 'sleeve_top'),
+        (-4.6, 6.4, -4.4, 9.2, 10.6, 9.8, 'sleeve'),
+        (-5.1, 15.8, -4.9, 10.2, 1.4, 0.6, 'lip'),
+        (-5.1, 15.8, 5.3, 10.2, 1.4, 0.6, 'lip'),
+        (-5.1, 15.8, -4.3, 0.6, 1.4, 9.6, 'lip_side'),
+        (4.5, 15.8, -4.3, 0.6, 1.4, 9.6, 'lip_side'),
     ]),
+    part('right_sleeve_flap', 'right_sleeve', (-4.6, 6, 0.4), (0, 0, 0.2), [(-0.4, 0, -4.6, 0.8, 11.5, 9.4, 'sleeve_flap')]),
     part('whisk', 'right_arm', (-1.3, 11.8, -0.6), (-0.5, 0, 0), [
         (-0.5, -7, -0.5, 1, 9, 1, 'handle'),
         (-0.8, -8, -0.8, 1.6, 1.2, 1.6, 'gold'),
@@ -244,21 +290,73 @@ def gold_edges(p, f, sides=('front', 'back', 'right', 'left'), top=True, bottom=
 
 # ── The skin ────────────────────────────────────────────────────────────────
 
+def soft(p, xy, colour, alpha):
+    """A pixel of the skin, partly see-through (the cloud and the halo are drawn translucent)."""
+    x, y = int(xy[0]), int(xy[1])
+    if 0 <= x < bg.TEX and 0 <= y < bg.TEX:
+        a = max(0, min(255, int(alpha)))
+        p.img.putpixel((x, y), tuple(max(0, min(255, int(v))) for v in colour[:3]) + (a,) if a else (0, 0, 0, 0))
+
+
+def mixc(a, b, t):
+    return [x + (y - x) * t for x, y in zip(a, b)]
+
+
+def folds(p, rect, base, period=7, depth=0.16, phase=0.0, light=1.0):
+    """Cloth falling in soft vertical folds: lit ridges, shadowed hollows, a darker crease in each."""
+    fx, fy, fw, fh = rect
+    for i in range(fw):
+        s = math.sin((i + phase) * 2 * math.pi / period)
+        kk = light * (1 + depth * s)
+        crease = s < -0.92
+        for j in range(fh):
+            fall = 1 - 0.18 * j / max(1, fh)
+            c = [v * kk * fall * (0.8 if crease else 1) + p.rnd.randint(-3, 3) for v in base]
+            p.px((fx + i, fy + j), c)
+
+
 def paint_zhenyuan(p, style, f, dims):
-    if style in ('cloud', 'puff', 'puff_top'):
+    if style in ('haze', 'haze_top'):                             # a mist: faint, thinning to nothing at its rim and its top
         for k, r in f.items():
-            if k == 'bottom':
-                p.face(r, (176, 178, 206), 1.0, noise=6)
-            elif k == 'top':
-                p.face(r, CLOUD, 1.0, noise=5)
-            else:
-                p.gradient(r, CLOUD, (190, 190, 222), noise=5)
-        for k in ('front', 'back', 'right', 'left', 'top'):        # soft curls
-            fx, fy, fw, fh = f[k]
-            for _ in range(fw * fh // 14):
-                x, y = fx + p.rnd.randrange(fw), fy + p.rnd.randrange(fh)
-                p.px((x, y), (214, 216, 238))
-                p.px((x + 1, y), (214, 216, 238))
+            fx, fy, fw, fh = r
+            for j in range(fh):
+                for i in range(fw):
+                    u, v = (i + 0.5) / fw * 2 - 1, (j + 0.5) / fh * 2 - 1
+                    if k in ('top', 'bottom'):
+                        d = math.hypot(u, v)
+                        a = 0 if d > 1 else (1 - d) ** 0.7 * (70 if k == 'top' else 0)
+                    else:
+                        down = (v + 1) / 2                        # 0 at the top .. 1 at the bottom
+                        a = max(0, 1 - abs(u) ** 2) * down * 90
+                    soft(p, (fx + i, fy + j), [c + p.rnd.randint(-3, 3) for c in (244, 246, 255)], a)
+
+    if style == 'puff':                                           # a soft, round puff of cloud, thinning at its edges
+        for k, r in f.items():
+            fx, fy, fw, fh = r
+            for j in range(fh):
+                for i in range(fw):
+                    u, v = (i + 0.5) / fw * 2 - 1, (j + 0.5) / fh * 2 - 1
+                    if k in ('top', 'bottom'):
+                        d = math.hypot(u, v)                      # the round of it, seen from above
+                        if d > 1.04:
+                            soft(p, (fx + i, fy + j), CLOUD, 0)
+                            continue
+                        a = 255 if d < 0.5 else 255 - (d - 0.5) / 0.54 * 190
+                        c = CLOUD if k == 'top' else (200, 202, 226)
+                        c = [x * (1.0 - 0.08 * d) + p.rnd.randint(-4, 4) for x in c]
+                    else:                                         # its sides: rounded off at the top corners, thin below
+                        top = 1 - (v + 1) / 2                     # 1 at the top .. 0 at the bottom
+                        r_ = abs(u)
+                        if r_ > 1 - 0.55 * top ** 2 + 0.02:
+                            soft(p, (fx + i, fy + j), CLOUD, 0)
+                            continue
+                        edge = max(r_, 1 - top * 1.6)
+                        a = 255 if edge < 0.45 else 255 - (edge - 0.45) / 0.55 * 185
+                        c = [a_ + (b_ - a_) * (1 - top) for a_, b_ in zip((255, 255, 255), (236, 238, 252))]
+                        c = [x * (1.0 - 0.05 * r_) + p.rnd.randint(-4, 4) for x in c]
+                    if p.rnd.random() < 0.05:                    # faint curls
+                        c = [x * 0.93 for x in c]
+                    soft(p, (fx + i, fy + j), c, a)
 
     if style == 'robe':
         robe(p, f)
@@ -309,25 +407,99 @@ def paint_zhenyuan(p, style, f, dims):
                     p.px((fx + i + 1, fy + j), GOLD_DEEP)
         gold_edges(p, f, colour=GOLD_DEEP)
 
-    if style == 'skirt_upper':
-        robe(p, f)
-        fx, fy, fw, fh = f['front']                               # the earth-gold under-robe in the opening
-        for j in range(fh):
-            for i in range(fw // 2 - 4, fw // 2 + 4):
-                edge = abs(i - fw // 2 + 0.5) > 3
-                p.px((fx + i, fy + j), GOLD if edge else [c + p.rnd.randint(-6, 6) for c in EARTH])
-        for k in ('right', 'left', 'back'):
-            scrolls(p, f[k], GOLD_DEEP, every=10)
-
-    if style == 'skirt_lower':
-        robe(p, f)
+    if style == 'waist':                                          # drawn in under the breast: the robe gathered
+        p.shaded(f, INDIGO)
         for k in ('front', 'back', 'right', 'left'):
-            scrolls(p, f[k], GOLD_DEEP, every=11, skip_bottom=8)
-            sea_hem(p, f[k], rows=7)
-        fx, fy, fw, fh = f['front']
-        for j in range(fh - 9):                                   # the opening's gold borders run on down
-            for i in (fw // 2 - 5, fw // 2 + 4):
-                p.px((fx + i, fy + j), GOLD)
+            folds(p, f[k], INDIGO, period=4, depth=0.2)
+        fx, fy, fw, fh = f['front']                               # the crossed collar's lapels run on down
+        for j in range(fh):
+            for i in range(fw // 2 - 3, fw // 2 + 3):
+                p.px((fx + i, fy + j), WHITE if abs(i - fw // 2 + 0.5) < 1 else GOLD if abs(i - fw // 2 + 0.5) < 2 else EARTH)
+
+    if style in ('skirt_upper', 'skirt_mid', 'skirt_lower'):    # the under-robe's tiers, belling out
+        p.shaded(f, INDIGO, light=0.92)
+        for k in ('back', 'right', 'left'):
+            folds(p, f[k], INDIGO, period=6, depth=0.28, light=0.92)
+        fx, fy, fw, fh = f['front']                               # the earth-gold under-robe in the parting
+        folds(p, f['front'], INDIGO, period=6, depth=0.28, light=0.9)
+        half = 4 + (style != 'skirt_upper') + (style == 'skirt_lower')
+        for j in range(fh):
+            for i in range(fw // 2 - half, fw // 2 + half):
+                edge = abs(i - fw // 2 + 0.5) > half - 1
+                c = GOLD if edge else [c_ * (1 + 0.1 * math.sin(i * 1.4)) + p.rnd.randint(-6, 6) for c_ in EARTH]
+                p.px((fx + i, fy + j), c)
+        if style == 'skirt_lower':
+            for k in ('front', 'back', 'right', 'left'):
+                sea_hem(p, f[k], rows=5)
+        else:
+            for k in ('back', 'right', 'left'):
+                scrolls(p, f[k], GOLD_DEEP, every=10)
+
+    if style == 'hem':                                            # the hem sweeping out wide: gold-bordered sea and cliffs
+        p.shaded(f, INDIGO)
+        for k in ('front', 'back', 'right', 'left'):
+            fx, fy, fw, fh = f[k]
+            for j in range(fh):
+                for i in range(fw):
+                    c = (VIOLET, INDIGO, (120, 96, 168), GOLD_DEEP)[((i + j) // 2) % 4]
+                    p.px((fx + i, fy + j), c)
+            for i in range(fw):
+                p.px((fx + i, fy), GOLD)
+                p.px((fx + i, fy + fh - 1), GOLD_DEEP)
+        p.face(f['top'], INDIGO, 1.0)
+        fx, fy, fw, fh = f['top']
+        for i in range(fw):
+            p.px((fx + i, fy), GOLD)
+            p.px((fx + i, fy + fh - 1), GOLD)
+
+    if style in ('panel', 'panel_side', 'panel_back'):            # the outer robe's panels: folds, scrolls, a gold border, sea at the foot
+        for k, r in f.items():
+            p.face(r, INDIGO, 0.9 if k in ('front', 'back') else 0.8, noise=3)
+        for k in ('front', 'back', 'right', 'left'):
+            fx, fy, fw, fh = f[k]
+            if fw < 3:
+                for j in range(fh):
+                    for i in range(fw):
+                        p.px((fx + i, fy + j), GOLD_DEEP)
+                continue
+            outer = (k == 'front') == (style != 'panel_back') if style != 'panel_side' else k in ('right', 'left')
+            folds(p, f[k], INDIGO, period=5 + (fw > 14), depth=0.32, phase=1.5, light=1.0 if outer else 0.75)
+            if outer:
+                scrolls(p, (fx + 2, fy + 2, fw - 4, fh - 14), GOLD_DEEP, every=9)
+                sea_hem(p, f[k], rows=8)
+                for j in range(fh):                               # the gold border down its edges
+                    p.px((fx, fy + j), GOLD)
+                    p.px((fx + fw - 1, fy + j), GOLD)
+                    p.px((fx + 1, fy + j), GOLD_DEEP)
+                    p.px((fx + fw - 2, fy + j), GOLD_DEEP)
+            else:                                                 # its lining: violet
+                for j in range(fh):
+                    for i in range(fw):
+                        p.px((fx + i, fy + j), [c * (0.8 - 0.15 * j / fh) for c in VIOLET])
+        if style == 'panel_back':                                 # the bagua over his back's skirts
+            fx, fy, fw, fh = f['back']
+            bagua(p, fx + fw / 2, fy + 12, 8)
+
+    if style == 'fold':                                           # a fold standing out of the cloth: lit along its ridge
+        for k, r in f.items():
+            p.face(r, INDIGO, 1.12 if k in ('front', 'back', 'top') else 0.78, noise=3)
+        for k in ('front', 'back', 'right', 'left'):
+            fx, fy, fw, fh = f[k]
+            for i in range(fw):
+                for j in range(fh - 16, fh):
+                    t = (j - (fh - 16)) / 16
+                    p.px((fx + i, fy + j), [c * (1 + 0.15 * (i % 2)) for c in mixc(INDIGO, VIOLET, t)])
+                p.px((fx + i, fy + fh - 1), GOLD)
+                p.px((fx + i, fy + fh - 2), GOLD_DEEP)
+
+    if style == 'sash':                                           # the belt's sash ends: jade-green silk, gold-tipped
+        for k, r in f.items():
+            p.gradient(r, (90, 168, 136), (60, 120, 96), noise=4)
+        for k in ('front', 'back'):
+            fx, fy, fw, fh = f[k]
+            for i in range(fw):
+                for j in range(fh - 3, fh):
+                    p.px((fx + i, fy + j), GOLD if j < fh - 1 else GOLD_DEEP)
 
     if style == 'apron':                                          # the earth-gold apron, a taiji at its head
         for k, r in f.items():
@@ -359,17 +531,45 @@ def paint_zhenyuan(p, style, f, dims):
             for j in (fh - 1, fh - 2):
                 p.px((fx + i, fy + j), GOLD if j == fh - 2 else GOLD_DEEP)
 
-    if style == 'halo':                                           # a ring of gold, the eight trigrams on it
+    if style == 'halo':                                           # a ring of pale gold, the eight trigrams on it: half there, drawn translucent
+        for k in ('right', 'left', 'top', 'bottom'):
+            fx, fy, fw, fh = f[k]
+            for j in range(fh):
+                for i in range(fw):
+                    soft(p, (fx + i, fy + j), PALE_GOLD, 0)
         for k in ('front', 'back'):
             fx, fy, fw, fh = f[k]
-            cx, cy = fx + fw / 2, fy + fh / 2
-            circle(p, cx, cy, fw / 2 - 2.2, fw / 2 - 0.6, GOLD, glow=0.4)
-            circle(p, cx, cy, fw / 2 - 7.5, fw / 2 - 6.6, GOLD_DEEP, glow=0.4,
-                   skip=lambda dx, dy: abs(math.sin(math.atan2(dy, dx) * 12)) < 0.35)
+            cx, cy, R = fx + fw / 2, fy + fh / 2, fw / 2
+            for y in range(fy, fy + fh):                          # a faint wash of light within the ring
+                for x in range(fx, fx + fw):
+                    d = math.hypot(x + 0.5 - cx, y + 0.5 - cy) / R
+                    soft(p, (x, y), (250, 240, 200), 0 if d > 0.98 else 26 * (1 - d) + 10 * (d > 0.55))
+            for r0, r1, a in ((R - 2.0, R - 0.9, 190), (R - 2.6, R - 2.0, 90), (R - 0.9, R - 0.4, 80)):
+                for y in range(fy, fy + fh):
+                    for x in range(fx, fx + fw):
+                        d = math.hypot(x + 0.5 - cx, y + 0.5 - cy)
+                        if r0 <= d < r1:
+                            soft(p, (x, y), PALE_GOLD, a)
+                            p.glow.putpixel((x, y), tuple(int(v * 0.16) for v in PALE_GOLD) + (255,))
+            for y in range(fy, fy + fh):                          # the dotted inner ring
+                for x in range(fx, fx + fw):
+                    dx, dy = x + 0.5 - cx, y + 0.5 - cy
+                    if R - 7.4 <= math.hypot(dx, dy) <= R - 6.6 and abs(math.sin(math.atan2(dy, dx) * 12)) >= 0.35:
+                        soft(p, (x, y), PALE_GOLD, 130)
             for n, lines in enumerate(TRIGRAMS):
                 a = -math.pi / 2 + n * math.pi / 4
-                trigram(p, cx + math.cos(a) * (fw / 2 - 4.4), cy + math.sin(a) * (fw / 2 - 4.4), a, lines,
-                        GOLD, glow=0.4, length=5)
+                ux, uy = math.cos(a), math.sin(a)
+                ccx, ccy = cx + ux * (R - 4.4), cy + uy * (R - 4.4)
+                for m, whole in enumerate(lines):
+                    off = (m - 1) * 2
+                    for t in range(5):
+                        s_ = t - 2
+                        if whole == '0' and abs(s_) < 0.8:
+                            continue
+                        xy = (round(ccx + ux * off - uy * s_), round(ccy + uy * off + ux * s_))
+                        soft(p, xy, PALE_GOLD, 200)
+                        if 0 <= xy[0] < bg.TEX and 0 <= xy[1] < bg.TEX:
+                            p.glow.putpixel(xy, tuple(int(v * 0.2) for v in PALE_GOLD) + (255,))
 
     if style == 'mane':                                           # long white hair down his back
         for k, r in f.items():
@@ -537,9 +737,30 @@ def paint_zhenyuan(p, style, f, dims):
             for i in range(1, fw, 2):
                 p.px((fx + i, fy + fh - 1), [c * 0.8 for c in SKIN])
 
+    if style == 'sleeve_top':                                      # the sleeve where it hangs from the arm, gathered
+        p.shaded(f, INDIGO)
+        for k in ('front', 'back', 'right', 'left'):
+            folds(p, f[k], INDIGO, period=4, depth=0.2)
+        p.face(f['top'], VIOLET, 0.9)
+
+    if style == 'sleeve_flap':                                     # a loose fold of the sleeve swinging out
+        for k, r in f.items():
+            p.face(r, INDIGO, 0.85, noise=3)
+        for k in ('right', 'left'):
+            fx, fy, fw, fh = f[k]
+            folds(p, f[k], INDIGO, period=5, depth=0.22, phase=2)
+            scrolls(p, (fx, fy, fw, fh - 6), GOLD_DEEP, every=9)
+            sea_hem(p, f[k], rows=5)
+            for j in range(fh):
+                p.px((fx, fy + j), GOLD_DEEP)
+                p.px((fx + fw - 1, fy + j), GOLD_DEEP)
+        for k in ('front', 'back', 'bottom'):
+            p.face(f[k], GOLD, 0.9, noise=3)
+
     if style == 'sleeve':                                          # the great hanging sleeve; its mouth the universe
         robe(p, f)
         for k in ('front', 'back', 'right', 'left'):
+            folds(p, f[k], INDIGO, period=6, depth=0.18, phase=k == 'back')
             scrolls(p, f[k], GOLD_DEEP, every=9, skip_bottom=7)
             sea_hem(p, f[k], rows=5)
         p.face(f['top'], VIOLET, 0.9)
