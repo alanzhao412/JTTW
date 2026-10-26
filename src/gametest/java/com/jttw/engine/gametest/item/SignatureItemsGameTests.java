@@ -3,7 +3,6 @@ package com.jttw.engine.gametest.item;
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.item.MixedIronCudgelItem;
 import com.jttw.engine.registry.ModItems;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
@@ -73,7 +72,7 @@ public class SignatureItemsGameTests {
             "jttw_engine:yin_yang_vase", Set.of("chests/lion_camel_treasury"),
             "jttw_engine:nine_tooth_rake", Set.of(),
             "jttw_engine:mixed_iron_cudgel", Set.of(),
-            "jttw_engine:banana_leaf_fan", Set.of());
+            "jttw_engine:banana_leaf_fan", Set.of("chests/kunlun_treasure"));
 
     @GameTest(template = PLATFORM)
     public static void noOtherLootTableHoldsTheSignatureItems(GameTestHelper h) throws IOException {
@@ -97,8 +96,7 @@ public class SignatureItemsGameTests {
                         item.getKey() + " is in " + id + ", and should be nowhere but " + item.getValue());
             }
         }
-        eq(h, 2, found.size(), "the bell and the vase, each in its one table: " + found);
-        check(h, BuiltInRegistries.ITEM.containsKey(ResourceLocation.parse("jttw_engine:banana_leaf_fan")), "(the fan exists, unfound for now)");
+        eq(h, 3, found.size(), "the bell, the vase and the fan, each in its one table: " + found);
         h.succeed();
     }
 }

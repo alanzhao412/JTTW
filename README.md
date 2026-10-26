@@ -212,7 +212,7 @@ Abilities and items are drawn from the source material rather than invented:
     treasury, a chest on the throne-hall dais beside the Great Peng's empty throne
     (`chests/lion_camel_treasury`: the vase, always, among gold, gems, bones and the ridge's
     spoils). One city a world, so one vase.
-  - **Banana-Leaf Fan**: not yet found anywhere in survival (it is to be Mount Kunlun's).
+  - **Banana-Leaf Fan**: one a world, in the treasure chest of the palace on Mount Kunlun's summit (see Mount Kunlun).
 - **Wu Clones** — Wukong's hair-clone technique, implemented as summoned entities with their own
   pathfinding goals ([`WuCloneManager`](src/main/java/com/jttw/engine/character/wukong/WuCloneManager.java))
 - **Xiaotian Quan** — Erlang Shen's hound, a custom entity with hand-authored model and animation.
