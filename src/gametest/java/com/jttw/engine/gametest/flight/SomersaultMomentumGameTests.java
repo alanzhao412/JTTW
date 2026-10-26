@@ -41,7 +41,8 @@ public class SomersaultMomentumGameTests {
         near(h, FlightSteering.WUKONG_FAST_SPEED, JTTWFlight.profile(p).effectiveSpeed(), "starts at 2.8");
         for (int i = 0; i < 100; i++) fly(p, 1.0);
         double half = JTTWFlight.profile(p).effectiveSpeed();
-        check(h, half > 4.0 && half < 4.4, "halfway after 5 seconds: " + half);
+        double mid = (FlightSteering.WUKONG_FAST_SPEED + FlightSteering.TOP_SPEED) / 2;
+        check(h, Math.abs(half - mid) < 0.2, "halfway after 5 seconds: " + half);
         for (int i = 0; i < 100; i++) fly(p, 1.0);
         near(h, FlightSteering.TOP_SPEED, JTTWFlight.profile(p).effectiveSpeed(), "the Peng's top speed after 10");
         for (int i = 0; i < 40; i++) fly(p, 1.0);

@@ -300,7 +300,9 @@ is what makes the rest possible:
   and the Phoenix's Rising Ember are true flight from their first tier, a little under cruising
   speed, never a glide; the Dragon's Elytra Glide stays a glide, but only in its own shape: a
   form with wings, the Azure Dragon or a flying form of the 18 Transformations, always flies; Nezha
-  flies on his Wind Fire Wheels at cruising speed, and at the fastest with Blazing Trail).
+  flies on his Wind Fire Wheels at cruising speed, and at the fastest with Blazing Trail). Above
+  every tier, Sun Wukong at full Somersault Cloud momentum and the Gold-Winged Peng at the height
+  of his Ninety-Thousand-Li wingbeats reach the top speed anyone flies: 200 blocks a second.
 - **Independent velocity clamps** on the vertical and horizontal axes, plus a separate strafe scale,
   so lateral drift doesn't match forward thrust.
 - **A parallel swim system** with its own stored vector, distinct cruise and sprint speeds, and a

@@ -152,7 +152,7 @@ public final class ClientPass {
         }, 260, (mc, tick) -> {
             if (tick == 15) mc.getSingleplayerServer().execute(() -> PengAbilityHandler.startSoaring(server(mc)));
             if (tick >= 15) sampleSpeed(mc);
-        }, mc -> report.add("  " + speedLine(1.55, 5.58))));
+        }, mc -> report.add("  " + speedLine(1.55, com.jttw.engine.flight.FlightSteering.TOP_SPEED))));
         all.add(new Step("Wukong flies forward (Flight III) for 12 s", p -> {
             become(p, ReincarnationOutcome.CELESTIAL_PRIMATE);
             aloft(p);
@@ -163,7 +163,7 @@ public final class ClientPass {
             if (tick >= 15) sampleSpeed(mc);
         }, mc -> {
             KeyMapping.set(mc.options.keyUp.getKey(), false);
-            report.add("  " + speedLine(2.8, 5.58));
+            report.add("  " + speedLine(2.8, com.jttw.engine.flight.FlightSteering.TOP_SPEED));
         }));
         // ── Teleported straight out of fast flight, he arrives where he was sent ──
         all.add(new Step("Wukong flies fast, stops, and is teleported 200 blocks", p -> {

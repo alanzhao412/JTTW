@@ -46,7 +46,7 @@ public final class PengSkillTree {
                 new String[]{ "Up to almost three times", "your flying speed.", "" },
                 3, 0, 1, List.of(SOAR_1), AbilityType.HELD, 2, "Flight"));
         TREE.add(new SkillNode(SOAR_3, "Ninety-Thousand-Li III",
-                new String[]{ "Over three and a half times:", "the fastest flight there is.", "" },
+                new String[]{ "Over six times: 200 blocks", "a second, the fastest", "flight there is." },
                 4, 0, 2, List.of(SOAR_2), AbilityType.HELD, 3, "Flight"));
 
         // ── WINGSTRIKE (col 1, PASSIVE) ─────────────────────────────────

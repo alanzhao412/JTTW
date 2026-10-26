@@ -17,6 +17,7 @@ class FlightLookAheadTest {
     void slowFliersAndTeleportsGetNoCorridor() {
         assertTrue(FlightLookAhead.corridor(ORIGIN, new Vec3(0.9, 0, 0)).isEmpty(), "the server keeps up");
         assertTrue(FlightLookAhead.corridor(ORIGIN, new Vec3(50, 0, 0)).isEmpty(), "a teleport");
+        assertFalse(FlightLookAhead.corridor(ORIGIN, new Vec3(FlightSteering.TOP_SPEED, 0, 0)).isEmpty(), "the top speed is flight, not a teleport");
         assertTrue(FlightLookAhead.corridor(ORIGIN, new Vec3(0, -3, 0)).isEmpty(), "falling straight down");
     }
 
@@ -24,7 +25,7 @@ class FlightLookAheadTest {
     void theCorridorRunsAheadThreeChunksWideNearestFirst() {
         List<ChunkPos> c = FlightLookAhead.corridor(ORIGIN, new Vec3(FlightSteering.TOP_SPEED, 0, 0));
         assertEquals(new ChunkPos(0, 0), c.get(1), "starts where he is");
-        double lead = FlightSteering.TOP_SPEED * FlightLookAhead.LEAD_TICKS;
+        double lead = Math.min(FlightLookAhead.MAX_LEAD_BLOCKS, FlightSteering.TOP_SPEED * FlightLookAhead.LEAD_TICKS);
         int farthest = c.stream().mapToInt(p -> p.x).max().orElseThrow();
         assertEquals((int) ((8 + lead) / 16), farthest, "reaches " + FlightLookAhead.LEAD_TICKS + " ticks ahead");
         assertTrue(c.stream().allMatch(p -> Math.abs(p.z) <= 1), "three chunks wide");
@@ -36,7 +37,7 @@ class FlightLookAheadTest {
     void theCorridorFollowsTheHeadingAndIsCapped() {
         List<ChunkPos> diagonal = FlightLookAhead.corridor(ORIGIN, new Vec3(-4, 0, -4));
         assertTrue(diagonal.stream().allMatch(p -> p.x <= 1 && p.z <= 1), "north-west only");
-        List<ChunkPos> fast = FlightLookAhead.corridor(ORIGIN, new Vec3(9.9, 0, 0));
+        List<ChunkPos> fast = FlightLookAhead.corridor(ORIGIN, new Vec3(14.9, 0, 0));
         int farthest = fast.stream().mapToInt(p -> p.x).max().orElseThrow();
         assertTrue(farthest * 16 <= 8 + FlightLookAhead.MAX_LEAD_BLOCKS, "never past the cap: " + farthest);
     }

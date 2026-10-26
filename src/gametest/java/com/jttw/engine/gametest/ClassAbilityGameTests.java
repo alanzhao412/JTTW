@@ -164,7 +164,7 @@ public class ClassAbilityGameTests {
         double wukongTop = JTTWFlight.profile(wukong).effectiveSpeed();
         near(h, FlightSteering.TOP_SPEED, wukongTop, "Wukong's cloud at its height");
         check(h, v < wukongStart, "slower than Wukong's cloud even as he first takes it");
-        near(h, wukongTop / 3, v, "a third of Wukong's top speed");
+        near(h, FlightSteering.HEAVENLY_CLOUD_SPEED, v, "the cloud keeps its own pace, well under Wukong's top");
 
         p.getAbilities().flying = false;
         eq(h, FlyingState.GROUNDED, FlyingState.mode(p), "and none sprinting on the ground");

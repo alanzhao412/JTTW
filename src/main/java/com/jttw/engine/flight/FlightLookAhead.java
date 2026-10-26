@@ -38,12 +38,12 @@ public final class FlightLookAhead {
 
     /** Below this (blocks per tick, 20 blocks a second) the server's own loading keeps up. */
     public static final double MIN_SPEED = 1.0;
-    /** Faster than this is a teleport, not flight (the server itself rejects moves past 10). */
-    public static final double MAX_SPEED = 10.0;
+    /** Faster than this is a teleport, not flight (the top speed anyone flies is 10, 200 blocks a second). */
+    public static final double MAX_SPEED = 15.0;
     /** How far ahead to reach, in ticks of flight at the current speed. */
     public static final int LEAD_TICKS = 100;
-    /** Never further than this, whatever the speed. */
-    public static final double MAX_LEAD_BLOCKS = 640;
+    /** Never further than this, whatever the speed: five seconds ahead of the top speed. */
+    public static final double MAX_LEAD_BLOCKS = 1000;
     /** A request lasts this long unless the path renews it. */
     public static final int TICKET_TICKS = LEAD_TICKS + 60;
     /** Chunks either side of the path. */

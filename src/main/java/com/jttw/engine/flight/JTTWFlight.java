@@ -66,6 +66,24 @@ public final class JTTWFlight {
         return com.jttw.engine.character.peng.PengCharacter.is(player);
     }
 
+    /**
+     * The server's "moved too quickly" limit for one move packet (squared blocks past the motion it
+     * knows of): vanilla's 100, ten blocks a tick, is the very top speed Wukong and the Peng reach,
+     * and the server never learns their motion (it is steered on the client), so in flight it
+     * would throw them back. While they fly by the mod's own flight the limit is half as high again
+     * as the top speed; on the ground, or flying any other way, it is vanilla's.
+     */
+    public static float moveCheckLimit(ServerPlayer player, float vanilla) {
+        if (!player.getAbilities().flying || !(canFly(player) || own(player))) return vanilla;
+        double room = FlightSteering.TOP_SPEED * 1.5;
+        return (float) Math.max(vanilla, room * room);
+    }
+
+    private static boolean own(ServerPlayer player) {
+        TransformationData form = com.jttw.engine.transformation.TransformationManager.getTransformation(player);
+        return form != null && form.canFly();
+    }
+
     /** Whether this player may fly now, by any means but a form's wings. */
     public static boolean canFly(ServerPlayer player) {
         return hasUniversalFlight(player) || fliesInnately(player) || hasHeavenlyCloud(player);

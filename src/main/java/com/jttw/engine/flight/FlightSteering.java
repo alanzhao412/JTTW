@@ -26,14 +26,15 @@ public final class FlightSteering {
     public static final double WUKONG_FAST_SPEED = 2.80;
     /**
      * The fastest anyone flies: the Peng at the height of his wingbeats, Wukong at full
-     * somersault momentum. 112 blocks a second.
+     * somersault momentum. 200 blocks a second: past what the superhero packs' fliers reach
+     * (FSang18's Heroes, Silver Surfer and Captain Marvel stacked, about 90).
      */
-    public static final double TOP_SPEED = 5.58;
+    public static final double TOP_SPEED = 10.0;
     /**
-     * A Heavenly's cloud (Heavenly Mobility): a third of Wukong's cloud at its height, 37 blocks
-     * a second, and never building up.
+     * A Heavenly's cloud (Heavenly Mobility): 37 blocks a second, and never building up (a third
+     * of Wukong's cloud when its height was 112; it did not rise with it).
      */
-    public static final double HEAVENLY_CLOUD_SPEED = TOP_SPEED / 3;
+    public static final double HEAVENLY_CLOUD_SPEED = 5.58 / 3;
     /** Ticks a flier holding top speed takes to build all the way to {@link #TOP_SPEED}: 10 seconds. */
     public static final int BUILD_UP_TICKS = 200;
     /** The first flight tier of those who fly from it (Erlang Shen's Wind and Fog, Wukong's Cloud Step, the Phoenix's Rising Ember): true flight, a little under cruising. */

@@ -5,6 +5,7 @@ import com.jttw.engine.character.AbilityAction;
 import com.jttw.engine.character.Characters;
 import com.jttw.engine.character.peng.PengAbilityHandler;
 import com.jttw.engine.character.peng.PengCharacter;
+import com.jttw.engine.flight.FlightSteering;
 import com.jttw.engine.flight.JTTWFlight;
 import com.jttw.engine.item.StackData;
 import com.jttw.engine.item.YinYangVaseItem;
@@ -125,7 +126,7 @@ public class PengGameTests {
         PengCharacter.INSTANCE.use(p, "gp_soar", AbilityAction.STOP);
         tick(p, PengAbilityHandler::onPlayerTick, 20);
         near(h, 1.0, PengAbilityHandler.boost(p), "let go: back to cruising");
-        near(h, 3.6, PengAbilityHandler.maxBoost(3), "III tops out at 3.6x");
+        near(h, FlightSteering.TOP_SPEED / FlightSteering.CRUISE_SPEED, PengAbilityHandler.maxBoost(3), "III tops out at the top speed anyone flies");
         h.succeed();
     }
 

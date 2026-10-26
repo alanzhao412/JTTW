@@ -9,6 +9,8 @@ import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -58,6 +60,12 @@ public class ServerGamePacketListenerMixin {
     private boolean jttw_skipInWall(Entity instance) {
         if (jttw_phasingMoveActive && instance instanceof ServerPlayer) return false;
         return instance.isInWall();
+    }
+
+    /** The "moved too quickly" limit, raised for the mod's fliers at their top speed (see JTTWFlight.moveCheckLimit). */
+    @ModifyConstant(method = "handleMovePlayer", constant = @Constant(floatValue = 100.0F))
+    private float jttw_flightMoveLimit(float vanilla) {
+        return com.jttw.engine.flight.JTTWFlight.moveCheckLimit(player, vanilla);
     }
 
     @Inject(method = "handleMovePlayer", at = @At("TAIL"))
