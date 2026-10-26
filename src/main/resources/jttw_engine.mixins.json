@@ -32,7 +32,8 @@
     "LocalPlayerMixin",
     "MinecraftMixin",
     "PlayerRendererMixin",
-    "RenderBuffersMixin"
+    "RenderBuffersMixin",
+    "WindowMixin"
   ],
   "injectors": {
     "defaultRequire": 1
