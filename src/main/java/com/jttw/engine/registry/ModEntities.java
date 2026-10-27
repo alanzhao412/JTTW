@@ -540,11 +540,11 @@ public final class ModEntities {
                 net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
         event.register(BONE_SERVANT.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
                 net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
+                com.jttw.engine.world.ridge.RidgeRules::spawnRule,
                 net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
         event.register(WRAITH.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
                 net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                net.minecraft.world.entity.monster.Monster::checkAnyLightMonsterSpawnRules,
+                com.jttw.engine.world.ridge.RidgeRules::spawnRule,
                 net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
         // the mountains' fire demons, in any light
         event.register(EMBER_IMP.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,

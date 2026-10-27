@@ -29,8 +29,12 @@ public record ZoneLayout(int near, int far, int radius, int wobble, long salt, b
         this(near, far, radius, wobble, salt, perSea, ANY_QUARTER);
     }
 
-    /** White Bone Ridge, the first band: a region about 520 blocks across, 1-2 km from spawn. */
-    public static final ZoneLayout WHITE_BONE = new ZoneLayout(1000, 2000, 260, 70, 0x5EEDB0E1L, false);
+    /**
+     * White Bone Ridge, the first band: a region about 840 blocks across (never under 720), room for
+     * the bone mountain over the White Bone Cave at its heart, the road up to its door and the
+     * outposts round it; 1-2 km from spawn.
+     */
+    public static final ZoneLayout WHITE_BONE = new ZoneLayout(1000, 2000, 420, 60, 0x5EEDB0E1L, false);
 
     /**
      * The Bottomless Cave: a region about 380 blocks across, never less than 330 (radius less all its

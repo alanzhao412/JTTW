@@ -229,6 +229,7 @@ public final class EarthGod {
         }
         if (zone == Zones.MYSTICAL_WATERS && fallen.size() >= 4) words.append("All four Dragon Kings have fallen, yet their seas remain. ");
         words.append(whoDwells(zone, c));
+        if (zone == Zones.WHITE_BONE) return com.jttw.engine.world.ridge.CaveSites.toTheDoor(at, seed, c, words);
         double d = Math.hypot(c[0] - at.x, c[1] - at.z);
         if (zone.depth(seed, (int) Math.floor(at.x), (int) Math.floor(at.z)) > 0) {
             words.append(zone == Zones.FENGDU ? ". You stand in the Ghost City's country now; its Gate of Ghosts is on the terrace at the city's heart.\""

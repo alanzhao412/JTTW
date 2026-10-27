@@ -126,7 +126,11 @@ final class AbilityScenes {
             java.util.Map.entry("tang_village_plains_square", 80), java.util.Map.entry("tang_ghost_market", 160),
             java.util.Map.entry("tang_ghost_market_close", 60), java.util.Map.entry("tang_heaven_merchant", 100),
             // the Bottomless Cave, laid off the stage
-            java.util.Map.entry("cave_palace", 120), java.util.Map.entry("cave_gate_hall", 80));
+            java.util.Map.entry("cave_palace", 120), java.util.Map.entry("cave_gate_hall", 80),
+            // the White Bone Cave's inside, laid south of the stage
+            java.util.Map.entry("ridge_cave_ossuary", 300), java.util.Map.entry("ridge_cave_bone_forge", 200),
+            java.util.Map.entry("ridge_cave_borrowed_faces", 200), java.util.Map.entry("ridge_cave_seal", 200),
+            java.util.Map.entry("ridge_cave_throne_lady", 200), java.util.Map.entry("ridge_cave_throne_hall", 160));
 
         /** Set by a scene that photographs a screen (a furnace's, say), so the gallery leaves it open. */
     static volatile boolean keepScreen;
@@ -142,6 +146,7 @@ final class AbilityScenes {
         all.addAll(KunlunScenes.all());
         all.addAll(VillageScenes.all());
         all.addAll(CaveScenes.all());
+        all.addAll(RidgeScenes.all());
         return all;
     }
 
