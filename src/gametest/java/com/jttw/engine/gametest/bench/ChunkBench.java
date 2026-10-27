@@ -114,11 +114,17 @@ public final class ChunkBench {
         if (!worldRequested && mc.level == null && mc.screen != null && mc.getOverlay() == null) {
             worldRequested = true;
             mc.options.onboardAccessibility = false;
+            String open = System.getProperty("jttw.chunkBench.open", "");
+            if (!open.isEmpty()) {
+                // a world already saved (an older one, say), opened as a player would
+                mc.createWorldOpenFlows().openWorld(open, () -> JTTWEngine.LOGGER.error("ChunkBench: could not open {}", open));
+                return;
+            }
             LevelSettings settings = new LevelSettings("jttw_bench_" + System.currentTimeMillis(), GameType.CREATIVE,
                     false, Difficulty.PEACEFUL, true, new GameRules(), WorldDataConfiguration.DEFAULT);
             mc.createWorldOpenFlows().createFreshLevel(settings.levelName(), settings, new WorldOptions(Long.getLong("jttw.chunkBench.seed", 12345L), true, false),
-                    access -> access.registryOrThrow(Registries.WORLD_PRESET).getHolderOrThrow(WorldPresets.NORMAL)
-                            .value().createWorldDimensions(), new net.minecraft.client.gui.screens.TitleScreen());
+                    access -> withSky(access, access.registryOrThrow(Registries.WORLD_PRESET).getHolderOrThrow(WorldPresets.NORMAL)
+                            .value().createWorldDimensions()), new net.minecraft.client.gui.screens.TitleScreen());
         }
         if (mc.level != null) {
             // A paused singleplayer game stops the server, and the bench with it
@@ -129,6 +135,28 @@ public final class ChunkBench {
             step = null;
             mc.stop();
         }
+    }
+
+    /**
+     * The default world's dimensions, its Overworld under vanilla's sky instead of the taller one if
+     * {@code -Pbench.sky=vanilla} (to see what the taller sky costs, the same world otherwise).
+     */
+    private static net.minecraft.world.level.levelgen.WorldDimensions withSky(net.minecraft.core.RegistryAccess access,
+                                                                                  net.minecraft.world.level.levelgen.WorldDimensions dims) {
+        if (!"vanilla".equals(System.getProperty("jttw.chunkBench.sky", ""))) return dims;
+        var stems = new java.util.LinkedHashMap<>(dims.dimensions());
+        var overworld = stems.get(net.minecraft.world.level.dimension.LevelStem.OVERWORLD);
+        stems.put(net.minecraft.world.level.dimension.LevelStem.OVERWORLD, new net.minecraft.world.level.dimension.LevelStem(
+                access.registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(net.minecraft.world.level.dimension.BuiltinDimensionTypes.OVERWORLD),
+                overworld.generator()));
+        return new net.minecraft.world.level.levelgen.WorldDimensions(stems);
+    }
+
+    /** The world as made: its Overworld's dimension type and build height. */
+    static String worldLine(ServerLevel level) {
+        return String.format("world %s: its Overworld %s, build height %d to %d", level.getServer().getWorldData().getLevelName(),
+                level.dimensionTypeRegistration().unwrapKey().map(k -> k.location().toString()).orElse("?"),
+                level.getMinBuildHeight(), level.getMaxBuildHeight());
     }
 
     @SubscribeEvent
@@ -244,9 +272,11 @@ public final class ChunkBench {
                 }
                 int view = Integer.getInteger("jttw.chunkBench.view", 0); // e.g. -Pbench.view=6
                 if (view > 0) server.getPlayerList().setViewDistance(view);
+                report.add(worldLine(level));
                 report.add("view distance: " + server.getPlayerList().getViewDistance()
                         + " chunks; cores: " + Runtime.getRuntime().availableProcessors());
                 int base = 20000; // chunks: far from spawn, never touched
+                heapBefore = usedHeap();
                 for (int cx = 0; cx < GRID; cx++) for (int cz = 0; cz < GRID; cz++) {
                     ChunkPos c = new ChunkPos(base + cx, cz);
                     grid.add(c);
@@ -259,7 +289,21 @@ public final class ChunkBench {
                 long loaded = grid.stream().filter(c -> level.getChunkSource().getChunkNow(c.x, c.z) != null).count();
                 if (loaded < grid.size() && ticks < 20 * 300) return;
                 double seconds = (System.nanoTime() - startNanos) / 1e9;
-                report.add(String.format("generation: %d new chunks in %.1f s = %.1f chunks/s", loaded, seconds, loaded / seconds));
+                report.add(String.format("generation: %d new chunks in %.1f s = %.1f chunks/s (build height %d to %d)", loaded, seconds, loaded / seconds,
+                        level.getMinBuildHeight(), level.getMaxBuildHeight()));
+                // what they hold: the heap they take while loaded (collected before and after), and their size saved
+                long heapAfter = usedHeap();
+                level.save(null, true, false);
+                java.nio.file.Path region = server.getWorldPath(net.minecraft.world.level.storage.LevelResource.ROOT)
+                        .resolve("region").resolve("r." + (20000 >> 5) + ".0.mca");
+                long disk = 0;
+                try {
+                    disk = Files.size(region);
+                } catch (IOException ignored) {
+                    // not written yet: reported as 0
+                }
+                report.add(String.format("memory: %.0f KB of heap a chunk while loaded (%.1f MB for the %d); saved, %.1f KB a chunk on disk (%s)",
+                        (heapAfter - heapBefore) / 1024.0 / loaded, (heapAfter - heapBefore) / 1048576.0, loaded, disk / 1024.0 / loaded, region.getFileName()));
                 for (ChunkPos c : grid) level.getChunkSource().removeRegionTicket(BENCH, c, 0, c);
                 next(Step.SETTLE_1);
             }
@@ -316,6 +360,15 @@ public final class ChunkBench {
             }
             default -> {}
         }
+    }
+
+    private static long heapBefore;
+
+    /** The heap in use once what can be collected is. */
+    private static long usedHeap() {
+        Runtime rt = Runtime.getRuntime();
+        for (int i = 0; i < 3; i++) System.gc();
+        return rt.totalMemory() - rt.freeMemory();
     }
 
     private static void next(Step s) {

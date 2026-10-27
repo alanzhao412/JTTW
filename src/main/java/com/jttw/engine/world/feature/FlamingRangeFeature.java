@@ -49,7 +49,7 @@ public class FlamingRangeFeature extends Feature<NoneFeatureConfiguration> {
     /** The hall's floor of the region round (cx, cz) in this level. */
     public static int hallFloor(WorldGenLevel level, int cx, int cz) {
         DensityFunction shape = ZoneTerrain.broadShape(level);
-        int minY = level.getMinBuildHeight(), maxY = level.getMaxBuildHeight();
+        int minY = level.getMinBuildHeight(), maxY = ZoneTerrain.landTop(level);
         return RangeShape.hallFloor(level.getSeed(), cx, cz, (x, z) -> ZoneTerrain.landAt(shape, x, z, minY, maxY), level.getSeaLevel() + 2);
     }
 
@@ -112,7 +112,7 @@ public class FlamingRangeFeature extends Feature<NoneFeatureConfiguration> {
         }
         if (!inside) return false;
         DensityFunction shape = ZoneTerrain.broadShape(level);
-        int minY = level.getMinBuildHeight(), maxY = level.getMaxBuildHeight();
+        int minY = level.getMinBuildHeight(), maxY = ZoneTerrain.landTop(level);
         int[][] made = new int[5][5];
         for (int i = 0; i < 5; i++) for (int j = 0; j < 5; j++) made[i][j] = ZoneTerrain.landAt(shape, x0 + i * 4, z0 + j * 4, minY, maxY);
         int[] c = ZONE.centre(seed, x0 + 8, z0 + 8); // a chunk lies in one cell

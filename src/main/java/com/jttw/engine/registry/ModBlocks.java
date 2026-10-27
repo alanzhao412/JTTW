@@ -18,6 +18,7 @@ public final class ModBlocks {
     public static final DeferredRegister<Block> BLOCKS =
             DeferredRegister.create(Registries.BLOCK, JTTWEngine.MOD_ID);
 
+    /** Celestial cloud: soft, half-seen through; where cloud meets cloud no face is drawn between them (as glass's), so a bank of it is drawn by its outside alone. */
     public static final DeferredHolder<Block, Block> CELESTIAL_CLOUD =
             BLOCKS.register("celestial_cloud", () -> new com.jttw.engine.world.tough.Tough.Stone(
                     BlockBehaviour.Properties.of()
@@ -25,7 +26,13 @@ public final class ModBlocks {
                             .strength(0.5F, com.jttw.engine.world.tough.Tough.RESISTANCE)
                             .sound(SoundType.WOOL)
                             .noOcclusion()
-                            .isViewBlocking((s, g, p) -> false)));
+                            .isViewBlocking((s, g, p) -> false)) {
+                @Override
+                protected boolean skipRendering(net.minecraft.world.level.block.state.BlockState state,
+                                                net.minecraft.world.level.block.state.BlockState adjacent, net.minecraft.core.Direction side) {
+                    return adjacent.is(this) || super.skipRendering(state, adjacent, side);
+                }
+            });
 
     /** Laozi's Eight Trigrams Furnace: where armaments are forged and refined. */
     public static final DeferredHolder<Block, Block> EIGHT_TRIGRAMS_FURNACE =

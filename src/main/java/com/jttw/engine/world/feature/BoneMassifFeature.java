@@ -185,11 +185,11 @@ public class BoneMassifFeature extends Feature<NoneFeatureConfiguration> {
         DensityFunction shape = ZoneTerrain.broadShape(level);
         int[][] made = new int[5][5];
         for (int i = 0; i < 5; i++) for (int j = 0; j < 5; j++) {
-            made[i][j] = ZoneTerrain.landAt(shape, x0 + i * 4, z0 + j * 4, level.getMinBuildHeight(), level.getMaxBuildHeight());
+            made[i][j] = ZoneTerrain.landAt(shape, x0 + i * 4, z0 + j * 4, level.getMinBuildHeight(), ZoneTerrain.landTop(level));
         }
         int[] centre = ZONE.centre(seed, x0 + 8, z0 + 8); // a chunk lies in one cell
         int floor = centre != null && Math.hypot(Math.max(Math.abs(centre[0] - x0 - 8) - 8, 0), Math.max(Math.abs(centre[1] - z0 - 8) - 8, 0)) <= LAIR_RADIUS + 1
-                ? lairFloor(seed, shape, centre[0], centre[1], level.getMinBuildHeight(), level.getMaxBuildHeight()) : Integer.MIN_VALUE;
+                ? lairFloor(seed, shape, centre[0], centre[1], level.getMinBuildHeight(), ZoneTerrain.landTop(level)) : Integer.MIN_VALUE;
         boolean any = false;
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
         for (int dx = 0; dx < 16; dx++) {

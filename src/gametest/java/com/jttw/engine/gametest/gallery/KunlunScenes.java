@@ -12,16 +12,17 @@ import java.util.List;
 /**
  * Mount Kunlun's summit in the form gallery: the Queen Mother's palace by the Jade Pool laid whole a
  * way off the stage (on the gallery's flat ground, the summit's snow round it), seen from the
- * stair's head before its gate, from above, over the Jade Pool, before the palace, and within it,
- * the treasure chest on its dais. The peak itself, its stair and its clouds are seen in a real
- * world: the Kunlun bench ({@code -Pbench.mode=kunlun}).
+ * stair's head before its gate, from above, over the Jade Pool and the Jade Terrace, from the upper
+ * court with its towers, before the palace, and within it, the treasure chest before the throne.
+ * The massif itself, its stair and its clouds are seen in a real world: the Kunlun bench
+ * ({@code -Pbench.mode=kunlun}).
  */
 final class KunlunScenes {
 
     private KunlunScenes() {}
 
     /** Where the summit is laid: its centre, from the stage's origin (east of it, clear of the other works off the stage). */
-    private static final int CX = 110, CZ = 45;
+    private static final int CX = 130, CZ = 50;
 
     private static boolean laid;
 
@@ -54,12 +55,13 @@ final class KunlunScenes {
     }
 
     static List<AbilityScenes.Scene> all() {
-        int f = KunlunPalace.PLINTH_H + 1;
+        int f = KunlunPalace.FLOOR + 1, up = KunlunPalace.UP + 1;
         return List.of(
-                shot("kunlun_gate", new double[]{4.5, 4.0, KunlunPalace.SUMMIT + 6.0, 0.5, 4.0, KunlunPalace.GATE_Z}),
-                shot("kunlun_above", new double[]{0.5, 46.0, KunlunPalace.SUMMIT + 30.0, 0.5, 0.0, -2.0}),
-                shot("kunlun_jade_pool", new double[]{-12.5, 6.0, 18.0, 4.0, 1.0, 6.0}),
-                shot("kunlun_palace", new double[]{8.5, 6.0, 9.0, 0.5, 8.0, KunlunPalace.HALL_S - 4.0}),
-                shot("kunlun_palace_inside", new double[]{2.5, f + 2.2, KunlunPalace.HALL_S - 1.5, 0.5, f + 0.8, KunlunPalace.CHEST_Z}));
+                shot("kunlun_gate", new double[]{5.5, 4.0, KunlunPalace.SUMMIT + 8.0, 0.5, 5.0, KunlunPalace.GATE_Z}),
+                shot("kunlun_above", new double[]{0.5, 78.0, KunlunPalace.SUMMIT + 52.0, 0.5, 0.0, -4.0}),
+                shot("kunlun_jade_pool", new double[]{-21.5, 9.0, 43.0, 3.0, 3.0, KunlunPalace.POOL_HALL_Z - 2.0}),
+                shot("kunlun_upper_court", new double[]{0.5, up + 5.0, KunlunPalace.UPPER_S + 7.0, 0.5, up + 9.0, -16.0}),
+                shot("kunlun_palace", new double[]{14.5, f + 7.0, -4.0, 0.5, f + 9.0, KunlunPalace.HALL_S - 6.0}),
+                shot("kunlun_palace_inside", new double[]{3.5, f + 2.4, KunlunPalace.HALL_S - 2.5, 0.5, f + 1.2, KunlunPalace.CHEST_Z}));
     }
 }

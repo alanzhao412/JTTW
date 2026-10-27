@@ -55,7 +55,7 @@ public class LionCamelRidgeFeature extends Feature<NoneFeatureConfiguration> {
     /** The city's floor (its ground's top) in the region round (cx, cz) in this level. */
     public static int cityFloor(WorldGenLevel level, int cx, int cz) {
         DensityFunction shape = ZoneTerrain.broadShape(level);
-        int minY = level.getMinBuildHeight(), maxY = level.getMaxBuildHeight();
+        int minY = level.getMinBuildHeight(), maxY = ZoneTerrain.landTop(level);
         return RidgeShape.cityFloor(level.getSeed(), cx, cz, (x, z) -> ZoneTerrain.landAt(shape, x, z, minY, maxY),
                 level.getSeaLevel() + RidgeShape.ABOVE_SEA, maxY - RidgeShape.UNDER_SKY);
     }

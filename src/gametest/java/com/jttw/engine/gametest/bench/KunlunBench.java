@@ -24,11 +24,12 @@ import java.util.List;
 /**
  * Mount Kunlun in a real world ({@code -Pbench.mode=kunlun}, {@code -Pbench.seed=N} for another):
  * where it was placed (its distance and bearing from spawn, the vanilla biome under it, whether it
- * had to widen), its summit's height against the highest land round it, the treasure chest and its
- * loot, and the stair walked from its foot to the summit's edge, block by block (the greatest step
- * up or down along it, and anywhere without room to stand); then pictures: the peak from afar on
- * two sides, from its shoulder among the clouds, up the stair, at the stair's head before the
- * palace's gate, and over the summit.
+ * had to widen), the world's sky, its summit's height against the highest land round it, how long
+ * its chunks took to make, the treasure chest and its loot, and the stair walked from its foot to
+ * the summit's edge, block by block (the greatest step up or down along it, anywhere without room
+ * to stand or ground under it, its bridges, pavilions and shrines); then pictures: the massif from
+ * afar (as far off as the bench draws, 24 chunks) low and high, the gate at its foot, the stair
+ * partway, a pavilion, over the cloud belts, the summit's gate and the summit from above.
  */
 final class KunlunBench {
 
@@ -36,8 +37,17 @@ final class KunlunBench {
 
     private static final Zones.Zone ZONE = Zones.KUNLUN;
     private static final List<String> report = new ArrayList<>();
-    private static int stage, ticks, summit;
+    private static int stage, ticks, summit, foot, shot;
     private static int[] c;
+    private static KunlunVista.Surface vista;
+    private static int strip;
+    private static long vistaFrom;
+    /** When the mountain's chunks were asked for, and how long they took to be made (the 21 by 21 round its centre). */
+    private static long madeFrom, madeIn;
+    /** How far off the pictures from afar are taken (inside the chunks the bench draws). */
+    private static final int AFAR = 375;
+    /** The chunks drawn round the camera: as many as the integrated graphics this was made on bear with the taller sky's chunks. */
+    private static final int VIEW = 10;
 
     static List<String> report() {
         return report;
@@ -62,22 +72,28 @@ final class KunlunBench {
                     host = under.unwrapKey().map(k -> k.location().getPath()).orElse("?") + (under.is(ZONE.hosts()) ? " (a host)" : " (NOT a host)");
                 }
                 summit = KunlunFeature.summit(level, c[0], c[1]);
+                foot = KunlunFeature.foot(level, c[0], c[1]);
+                report.add(ChunkBench.worldLine(level));
                 report.add(String.format("seed %d: Mount Kunlun at %d %d, %.0f blocks from spawn, to the %s (bearing %.0f degrees from east by south); on %s; "
-                                + "its summit's ground at y %d, the land round its foot at y %d; widenings: %s",
+                                + "its summit's ground at y %d, the land round its foot at y %d (a rise of %d); snow from about y %.0f; cloud belts at y %d, %d and %d; widenings: %s",
                         seed, c[0], c[1], Math.hypot(c[0], c[1]), EarthGod.wind(0, 0, c[0], c[1]), Math.toDegrees(Math.atan2(c[1], c[0])), host, summit,
-                        KunlunFeature.foot(level, c[0], c[1]), Zones.MAP.placement(seed).notes().isEmpty() ? "none" : Zones.MAP.placement(seed).notes()));
+                        foot, summit - foot, summit - KunlunShape.SNOW_SHARE * (summit - foot),
+                        KunlunShape.beltY(0, summit, foot), KunlunShape.beltY(1, summit, foot), KunlunShape.beltY(2, summit, foot),
+                        Zones.MAP.placement(seed).notes().isEmpty() ? "none" : Zones.MAP.placement(seed).notes()));
                 p.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
-                level.getServer().getPlayerList().setViewDistance(22);
+                level.getServer().getPlayerList().setViewDistance(VIEW);
                 Minecraft mc = Minecraft.getInstance();
                 mc.execute(() -> {
-                    mc.options.renderDistance().set(22);
+                    mc.options.renderDistance().set(VIEW);
                     mc.options.cloudStatus().set(net.minecraft.client.CloudStatus.OFF); // the mountain's own clouds, not the sky's
+                    mc.options.fov().set(80);
                     mc.getToasts().clear();
                     mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE);
                 });
                 level.setDayTime(5000);
                 level.setWeatherParameters(20 * 60 * 30, 0, false, false);
                 p.teleportTo(level, c[0] + 0.5, summit + 40, c[1] + 0.5, 0f, 60f);
+                madeFrom = System.nanoTime();
                 stage = 1;
                 ticks = 0;
             }
@@ -88,9 +104,39 @@ final class KunlunBench {
                     if (level.getChunkSource().getChunkNow(x, z) == null) { loaded = false; break; }
                 }
                 if (!loaded && ticks < 20 * 300) return false;
+                if (madeIn == 0) madeIn = System.nanoTime() - madeFrom;
                 if (ticks < 100) return false;
                 measure(level, seed, loaded);
                 stage = 2;
+                ticks = 0;
+            }
+            case 2 -> {
+                // the ground round it read a strip at a time, then the views from afar drawn from it
+                if (vista == null) {
+                    vista = new KunlunVista.Surface(c[0], c[1]);
+                    vista.ask(level, 0);
+                    vistaFrom = System.nanoTime();
+                }
+                if (!vista.ready(level, strip) && ticks < 20 * 120) return false;
+                vista.read(level, strip++);
+                ticks = 0;
+                if (strip < vista.strips()) {
+                    vista.ask(level, strip);
+                    return false;
+                }
+                double bx = -c[0], bz = -c[1], bl = Math.hypot(bx, bz);
+                File dir = new File(Minecraft.getInstance().gameDirectory, "screenshots/zones");
+                try {
+                    KunlunVista.draw(vista, summit, foot, 1000, bx / bl, bz / bl, 40, new File(dir, "kunlun_vista_1km_" + seed + ".png"));
+                    KunlunVista.draw(vista, summit, foot, 2000, bx / bl, bz / bl, 60, new File(dir, "kunlun_vista_2km_" + seed + ".png"));
+                    KunlunVista.draw(vista, summit, foot, 1000, bz / bl, -bx / bl, 40, new File(dir, "kunlun_vista_1km_side_" + seed + ".png"));
+                } catch (java.io.IOException e) {
+                    report.add("  the views from afar could not be written: " + e);
+                }
+                report.add(String.format("  the ground %d blocks round it read in %.0f s; views from afar drawn from it (the game draws no farther than 32 chunks): "
+                        + "screenshots/zones/kunlun_vista_{1km,2km,1km_side}_%d.png", KunlunVista.HALF, (System.nanoTime() - vistaFrom) / 1e9, seed));
+                vista = null;
+                stage = 3;
                 ticks = 0;
             }
             default -> {
@@ -105,79 +151,111 @@ final class KunlunBench {
         BlockPos ground = new BlockPos(c[0], summit, c[1]);
         int highest = Integer.MIN_VALUE;
         int[] where = null;
-        for (int dx = -260; dx <= 260; dx += 8) for (int dz = -260; dz <= 260; dz += 8) {
-            double r = Math.hypot(dx, dz);
-            if (r < KunlunShape.REACH + 10 || r > 260) continue;
+        for (int a = 0; a < 360; a += 10) for (int r = KunlunShape.REACH + 20; r <= KunlunShape.REACH + 90; r += 35) {
+            int dx = (int) Math.round(Math.cos(Math.toRadians(a)) * r), dz = (int) Math.round(Math.sin(Math.toRadians(a)) * r);
             int y = topAt(level, c[0] + dx, c[1] + dz);
             if (y > highest) {
                 highest = y;
                 where = new int[]{dx, dz};
             }
         }
+        report.add(String.format("  the 441 chunks round it made in %.1f s (%.1f ms a chunk, with the client drawing them)", madeIn / 1e9, madeIn / 1e6 / 441));
         BlockPos chest = Kunlun.chest(level);
         var be = level.getBlockEntity(chest);
         String loot = be instanceof ChestBlockEntity box ? (box.getLootTable() == null ? "NO loot table" : "loot " + box.getLootTable().location())
                 : "NO chest (" + level.getBlockState(chest).getBlock().getName().getString() + ")";
         report.add(String.format("  %s; the summit's paving at the centre: %s; the gate's beam: %s; the chest at %s: %s; "
-                        + "the highest land 160-260 blocks round it: y %d (at %d %d out), the summit %d over it",
+                        + "the highest land just past its foot (%d-%d blocks out): y %d (at %d %d out), the summit %d over it",
                 loaded ? "made" : "NOT all made", level.getBlockState(ground).getBlock().getName().getString(),
                 level.getBlockState(ground.offset(0, KunlunPalace.GATE_BEAM, KunlunPalace.GATE_Z)).getBlock().getName().getString(),
-                chest.toShortString(), loot, highest, where == null ? 0 : where[0], where == null ? 0 : where[1], summit - highest));
+                chest.toShortString(), loot, KunlunShape.REACH + 20, KunlunShape.REACH + 90, highest, where == null ? 0 : where[0], where == null ? 0 : where[1],
+                summit - highest));
         // the stair, walked: at each of its points, the ground one stands on there, and the step from the last
         KunlunShape.Path path = KunlunFeature.path(level, c[0], c[1]);
-        int cramped = 0, last = Integer.MIN_VALUE, offWay = 0;
+        int cramped = 0, offWay = 0, wet = 0, bridged = 0;
         StringBuilder tight = new StringBuilder();
         double maxStep = 0, prev = Double.NaN;
+        int last = 0;
         for (int i = 0; i < path.size(); i++) {
             int x = c[0] + (int) Math.floor(path.x[i]), z = c[1] + (int) Math.floor(path.z[i]);
             var hit = path.nearest(x - c[0], z - c[1], KunlunShape.PATH_HALF);
             if (hit == null || KunlunPalace.covers(x - c[0], z - c[1])) continue; // its last on the summit's way in
+            level.getChunk(x >> 4, z >> 4);
             int want = (int) Math.floor(hit.y());
             BlockPos at = new BlockPos(x, want + 1, z);
             var under = level.getBlockState(at.below());
             var on = level.getBlockState(at);
-            double stand = on.is(Blocks.STONE_BRICK_SLAB) ? want + 1.5 : want + 1;
+            boolean slab = on.is(Blocks.STONE_BRICK_SLAB);
+            double stand = slab ? want + 1.5 : want + 1;
             if (!under.blocksMotion()) offWay++;
-            if (level.getBlockState(at.above()).blocksMotion() || level.getBlockState(at.above(2)).blocksMotion()
-                    || !on.is(Blocks.STONE_BRICK_SLAB) && on.blocksMotion()) {
+            if (!level.getFluidState(at).isEmpty()) wet++;
+            if (level.getBlockState(at.below(2)).isAir() || level.getBlockState(at.below(4)).isAir()) bridged++;
+            BlockPos body = slab ? at.above() : at; // the blocks one's body takes, standing there: this and the one over it
+            if (level.getBlockState(body).blocksMotion() || level.getBlockState(body.above()).blocksMotion()) {
                 if (cramped++ < 6) tight.append(String.format(" %d at %s (%s over it);", i, at.toShortString(), on.getBlock().getName().getString()));
             }
             if (!Double.isNaN(prev)) maxStep = Math.max(maxStep, Math.abs(stand - prev));
             prev = stand;
             last = want;
         }
+        long pavilions = path.sites.stream().filter(s -> s.kind() == KunlunShape.SiteKind.PAVILION).count();
+        long shrines = path.sites.stream().filter(s -> s.kind() == KunlunShape.SiteKind.SHRINE).count();
         report.add(String.format("  the stair: %d blocks long, from %.0f out at y %.0f up to the summit's edge at y %d; the greatest step along it %.1f; "
-                        + "%d of its blocks without ground under them, %d without room to stand%s",
-                path.size(), Math.hypot(path.x[0], path.z[0]), path.y[0], last, maxStep, offWay, cramped, tight));
+                        + "%d of its blocks without ground under them, %d without room to stand%s, %d with water on them; %d on bridges; a gate, %d pavilions, %d shrines",
+                path.size(), Math.hypot(path.x[0], path.z[0]), path.y[0], last, maxStep, offWay, cramped, tight, wet, bridged, pavilions, shrines));
     }
+
+    private static final String[] SHOTS = {"foot_gate", "stair", "pavilion", "above_clouds", "shoulder", "summit_gate", "summit_above"};
 
     private static boolean shoot(ServerPlayer p, ServerLevel level) {
         int x0 = c[0], z0 = c[1];
         KunlunShape.Path path = KunlunFeature.path(level, x0, z0);
-        if (ticks == 1) look(p, level, x0 + 205.5, summit - 25, z0 + 135.5, new BlockPos(x0, summit - 60, z0));
-        if (ticks == 500) shot("kunlun_from_afar_" + Zones.seed());
-        if (ticks == 510) look(p, level, x0 - 165.5, summit - 75, z0 - 140.5, new BlockPos(x0, summit - 50, z0));
-        if (ticks == 640) shot("kunlun_from_afar_west_" + Zones.seed());
-        if (ticks == 650) look(p, level, x0 + 70.5, summit - KunlunShape.CLOUD_BELOW + 3, z0 - 60.5, new BlockPos(x0, summit, z0));
-        if (ticks == 780) shot("kunlun_shoulder_" + Zones.seed());
-        if (ticks == 790) {
-            int i = path.size() * 2 / 3;
-            int j = Math.min(path.size() - 1, i + 12);
-            look(p, level, x0 + path.x[i], path.y[i] + 3.2, z0 + path.z[i], new BlockPos(x0 + (int) path.x[j], (int) path.y[j] + 2, z0 + (int) path.z[j]));
+        if (shot >= SHOTS.length) return true;
+        String name = SHOTS[shot];
+        // the way travellers come: from spawn, to the east of it
+        double bx = -x0, bz = -z0, bl = Math.hypot(bx, bz);
+        bx /= bl;
+        bz /= bl;
+        if (ticks == 1) {
+            switch (name) {
+                case "from_afar" -> look(p, level, x0 + bx * AFAR + 0.5, foot + 60, z0 + bz * AFAR + 0.5, new BlockPos(x0, summit - 230, z0));
+                case "from_afar_high" -> look(p, level, x0 + bz * AFAR + 0.5, summit - 120, z0 - bx * AFAR + 0.5, new BlockPos(x0, summit - 190, z0));
+                case "foot_gate" -> {
+                    KunlunShape.Site gate = path.sites.get(0);
+                    int i = Math.max(0, gate.index() - 14);
+                    look(p, level, x0 + path.x[i], path.y[i] + 4.5, z0 + path.z[i], new BlockPos(x0 + gate.x(), gate.y() + 9, z0 + gate.z()));
+                }
+                case "stair" -> {
+                    int i = path.size() * 9 / 20, j = Math.min(path.size() - 1, i + 14);
+                    look(p, level, x0 + path.x[i], path.y[i] + 3.4, z0 + path.z[i], new BlockPos(x0 + (int) path.x[j], (int) path.y[j] + 4, z0 + (int) path.z[j]));
+                }
+                case "pavilion" -> {
+                    KunlunShape.Site pav = path.sites.stream().filter(s -> s.kind() == KunlunShape.SiteKind.PAVILION).skip(3).findFirst().orElse(path.sites.get(0));
+                    int i = Math.max(0, pav.index() - 13);
+                    look(p, level, x0 + path.x[i], path.y[i] + 5.5, z0 + path.z[i], new BlockPos(x0 + pav.x(), pav.y() + 4, z0 + pav.z()));
+                }
+                case "above_clouds" -> {
+                    // from the summit's west edge, out and down over the highest belt
+                    int belt = KunlunShape.beltY(KunlunShape.BELTS - 1, summit, foot);
+                    look(p, level, x0 - KunlunShape.TOP - 2.5, summit + 9, z0 + 0.5, new BlockPos(x0 - 150, belt - 15, z0 + 20));
+                }
+                case "shoulder" -> {
+                    int belt = KunlunShape.beltY(1, summit, foot);
+                    look(p, level, x0 - bz * 150 + 0.5, belt + 12, z0 + bx * 150 + 0.5, new BlockPos(x0, summit - 40, z0));
+                }
+                case "summit_gate" -> look(p, level, x0 + 4.5, summit + 4.5, z0 + KunlunPalace.SUMMIT + 7.5, new BlockPos(x0, summit + 6, z0 + KunlunPalace.GATE_Z));
+                case "summit_above" -> look(p, level, x0 + 0.5, summit + 70, z0 + 95.5, new BlockPos(x0, summit, z0 - 4));
+                default -> {}
+            }
         }
-        if (ticks == 900) shot("kunlun_stair_" + Zones.seed());
-        if (ticks == 910) look(p, level, x0 + 3.5, summit + 3.5, z0 + KunlunPalace.SUMMIT + 3.5, new BlockPos(x0, summit + 4, z0 + KunlunPalace.GATE_Z));
-        if (ticks == 1000) shot("kunlun_summit_gate_" + Zones.seed());
-        if (ticks == 1010) look(p, level, x0 + 0.5, summit + 40, z0 + 48.5, new BlockPos(x0, summit, z0));
-        if (ticks == 1130) shot("kunlun_summit_above_" + Zones.seed());
-        if (ticks == 1140) {
-            // the stair's foot, looking up it
-            int j = Math.min(path.size() - 1, 10);
-            look(p, level, x0 + path.x[0] - (path.x[j] - path.x[0]) * 0.8, path.y[0] + 6, z0 + path.z[0] - (path.z[j] - path.z[0]) * 0.8,
-                    new BlockPos(x0 + (int) path.x[j], (int) path.y[j] + 2, z0 + (int) path.z[j]));
+        // the far ones wait for the world round them to be made
+        int wait = name.startsWith("from_afar") ? 20 * 90 : name.equals("shoulder") || name.equals("above_clouds") ? 20 * 30 : 20 * 10;
+        if (ticks == wait) shot(name + "_" + Zones.seed());
+        if (ticks >= wait + 10) {
+            shot++;
+            ticks = 0;
         }
-        if (ticks == 1270) shot("kunlun_stair_foot_" + Zones.seed());
-        return ticks >= 1280;
+        return false;
     }
 
     /** Puts the (spectating) player at (x, y, z) looking at {@code at}. */
@@ -195,8 +273,8 @@ final class KunlunBench {
             mc.getToasts().clear();
             mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE);
             new File(mc.gameDirectory, "screenshots/zones").mkdirs();
-            Screenshot.grab(mc.gameDirectory, "zones/" + name + ".png", mc.getMainRenderTarget(), msg -> {});
+            Screenshot.grab(mc.gameDirectory, "zones/kunlun_" + name + ".png", mc.getMainRenderTarget(), msg -> {});
         });
-        report.add("  picture: screenshots/zones/" + name + ".png");
+        report.add("  picture: screenshots/zones/kunlun_" + name + ".png");
     }
 }
