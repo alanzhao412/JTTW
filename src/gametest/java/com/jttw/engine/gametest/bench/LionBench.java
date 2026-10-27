@@ -1,10 +1,13 @@
 package com.jttw.engine.gametest.bench;
 
-import com.jttw.engine.entity.lion.AzureLionEntity;
+import com.jttw.engine.entity.lion.DemonKingEntity;
 import com.jttw.engine.entity.lion.LionCamelMonster;
-import com.jttw.engine.entity.lion.WhiteElephantEntity;
 import com.jttw.engine.world.Zones;
+import com.jttw.engine.world.feature.LionCamelRidgeFeature;
 import com.jttw.engine.world.lion.LionCamelCity;
+import com.jttw.engine.world.lion.LionFortress;
+import com.jttw.engine.world.lion.LionGates;
+import com.jttw.engine.world.lion.RidgeApproach;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.core.BlockPos;
@@ -30,8 +33,10 @@ import java.util.TreeMap;
  * map of the 32x32 km round spawn counting its regions, the regions its layout rolled and why the
  * rest came to nothing (given up to an earlier surface zone, or not centred in mountain country),
  * how many lie over a Bottomless Cave, and the nearest; then a visit to that one, once its ground is
- * made, to read its surface and Lion-Camel City and take pictures: the city from above and before
- * its main gate, the throne hall, the elephant court, a street, the ridge from the walls.
+ * made, to time it, read its surface, find the Lion-Camel Cave's kings and keepers, and take
+ * pictures: the ridge from afar (and again with its kept demons glowing, to count them by eye), the
+ * city and the mountain behind it, an outpost, a patrol on the road, the great door, the gate hall,
+ * each of the eight floors, a stair down, and the throne room with its kings, in both their shapes.
  */
 final class LionBench {
 
@@ -114,6 +119,12 @@ final class LionBench {
                     if (level.getChunkSource().getChunkNow(x, z) == null) { loaded = false; break; }
                 }
                 if (!loaded && ticks < 20 * 240) return false;
+                long chunks = com.jttw.engine.world.feature.LionCamelRidgeFeature.CHUNKS.get();
+                report.add(String.format("worldgen: the 21x21 chunks round the centre made in %.1f s; the ridge's feature laid %d chunks of the zone in %.0f ms "
+                                + "(%.2f ms a chunk), the court's feature took %.0f ms in all",
+                        ticks / 20.0, chunks, com.jttw.engine.world.feature.LionCamelRidgeFeature.NANOS.get() / 1e6,
+                        chunks == 0 ? 0 : com.jttw.engine.world.feature.LionCamelRidgeFeature.NANOS.get() / 1e6 / chunks,
+                        com.jttw.engine.world.feature.LionCamelCityFeature.NANOS.get() / 1e6));
                 Map<String, Integer> tops = new TreeMap<>();
                 int columns = 0, peak = Integer.MIN_VALUE, low = Integer.MAX_VALUE, water = 0;
                 long seed = Zones.seed();
@@ -142,53 +153,126 @@ final class LionBench {
         return false;
     }
 
-    private static boolean shoot(ServerPlayer p, ServerLevel level) {
-        int x0 = centre.getX(), z0 = centre.getZ();
-        if (ticks == 1) {
-            // the city's ground: under the terrace at the centre
-            int y = Integer.MIN_VALUE;
-            for (int k = topAt(level, x0, z0); k > level.getMinBuildHeight(); k--) {
-                var s = level.getBlockState(new BlockPos(x0, k, z0));
-                if (s.is(Blocks.POLISHED_DEEPSLATE)) { y = k - LionCamelCity.TERRACE_H; break; } // the hall's floor (its roof is of tiles)
-            }
-            floor = y == Integer.MIN_VALUE ? topAt(level, x0, z0) : y;
-            var lions = level.getEntitiesOfClass(AzureLionEntity.class, new AABB(centre.atY(floor)).inflate(40, 30, 40));
-            var elephants = level.getEntitiesOfClass(WhiteElephantEntity.class, new AABB(centre.atY(floor)).inflate(70, 30, 70));
-            var garrison = level.getEntitiesOfClass(LionCamelMonster.class, new AABB(centre.atY(floor)).inflate(70, 30, 70));
-            BlockPos plaque = new BlockPos(x0, floor + 10, z0 + LionCamelCity.WALL_OUT + 2);
-            report.add(String.format("Lion-Camel City: ground (under the terrace) at y %s; the Azure Lion %s; the White Elephant %s; "
-                            + "demons within 70: %d; the gate's plaque %s; the wall at (30, 5, %d) %s",
-                    y == Integer.MIN_VALUE ? "NOT FOUND" : String.valueOf(y),
-                    lions.isEmpty() ? "NOT there" : "at " + lions.get(0).blockPosition().toShortString(),
-                    elephants.isEmpty() ? "NOT there" : "at " + elephants.get(0).blockPosition().toShortString(), garrison.size(),
-                    level.getBlockState(plaque).getBlock().getName().getString(), LionCamelCity.WALL_OUT,
-                    level.getBlockState(new BlockPos(x0 + 30, floor + 5, z0 + LionCamelCity.WALL_OUT)).getBlock().getName().getString()));
-            look(p, level, x0 + 70.5, floor + 75, z0 + 95.5, centre.atY(floor));
+    /** A picture: its name, where the camera stands and what it looks at (local to the city's centre and floor), and whether the demons glow. */
+    private record Shot(String name, double x, double y, double z, double ax, double ay, double az, boolean glow) {}
+
+    private static List<Shot> shots;
+    private static int shot, shotAt;
+
+    private static List<Shot> shots(ServerLevel level, int[] c) {
+        List<Shot> s = new ArrayList<>();
+        int fz = LionFortress.FZ, door = LionFortress.DOOR_LZ;
+        // the ridge from afar: the road up from the south, the city, the mountain behind it
+        int sb = LionCamelRidgeFeature.roadHeight(level, c, floor, 0, 240) - floor;
+        s.add(new Shot("lion_ridge_approach", 30.5, Math.max(sb, 0) + 55, 175.5, 0, 10, -30, false));
+        s.add(new Shot("lion_ridge_hordes_marked", 30.5, Math.max(sb, 0) + 55, 175.5, 0, 10, -30, true));
+        s.add(new Shot("lion_city_and_mountain", 45.5, 55, 70.5, 0, 25, -130, false));
+        s.add(new Shot("lion_mountain_from_the_east", 170.5, 70, -60.5, 0, 30, -120, false));
+        // an outpost by the south road, and a patrol out on it
+        RidgeApproach.Outpost o = RidgeApproach.OUTPOST_LIST.get(0);
+        int[] away = RidgeApproach.toRoad(o);
+        int ob = LionCamelRidgeFeature.roadHeight(level, c, floor, o.road(), o.along()) - floor;
+        s.add(new Shot("lion_outpost", o.dx() - away[0] * 22 + 6.5, ob + 16, o.dz() - away[1] * 22 + 6.5, o.dx(), ob + 5, o.dz(), false));
+        int[] pat = RidgeApproach.point(0, RidgeApproach.PATROLS[1], 0), cam = RidgeApproach.point(0, RidgeApproach.PATROLS[1] + 14, 1);
+        int pb = LionCamelRidgeFeature.roadHeight(level, c, floor, 0, RidgeApproach.PATROLS[1]) - floor;
+        int cb = LionCamelRidgeFeature.roadHeight(level, c, floor, 0, RidgeApproach.PATROLS[1] + 14) - floor;
+        s.add(new Shot("lion_patrol_on_the_road", cam[0] + 0.5, cb + 5, cam[1] + 0.5, pat[0], pb + 1, pat[1], false));
+        // the forecourt and the great door
+        s.add(new Shot("lion_forecourt_wardens", 26.5, 26, door + 34.5, 0, 2, door + 8, true));
+        s.add(new Shot("lion_great_door", 16.5, 11, door + 18.5, 0, 10, door, false));
+        s.add(new Shot("lion_great_door_close", 0.5, 3, door + 9.5, 0, 11, door, false));
+        // inside: the gate hall, the floors, a stair down, the throne room
+        s.add(new Shot("lion_gate_hall", -4.5, 9, fz + 30.5, 0, 4, fz - 20, false));
+        for (int k : new int[]{1, 2, 3, 4, 5, 6, 7, 8}) {
+            int[] a = LionFortress.arrival(k);
+            int y = LionFortress.floorY(k);
+            double cx = a[0] > 0 ? 22.5 : -21.5, cz = a[1] > 0 ? 22.5 : -21.5;
+            s.add(new Shot("lion_floor_" + k, cx, y + 8, fz + cz, -cx * 0.3, y + 2, fz - cz * 0.3, false));
         }
-        if (ticks == 160) shot("lion_city_from_above");
-        if (ticks == 170) look(p, level, x0 + 14.5, floor + 14, z0 + LionCamelCity.OUTER + 26.5, centre.atY(floor + 6).offset(0, 0, LionCamelCity.WALL_OUT));
-        if (ticks == 300) shot("lion_city_gate");
-        if (ticks == 310) look(p, level, x0 + 0.5, floor + LionCamelCity.TERRACE_H + 4, z0 + 8.5, centre.atY(floor + LionCamelCity.TERRACE_H + 2).offset(0, 0, LionCamelCity.THRONE_Z));
-        if (ticks == 420) shot("lion_city_throne_hall");
-        if (ticks == 430) look(p, level, x0 + 6.5, floor + 8, z0 + LionCamelCity.COURT_S - 2.0, centre.atY(floor + 2).offset(0, 0, LionCamelCity.COURT_Z));
-        if (ticks == 540) shot("lion_city_elephant_court");
-        if (ticks == 550) look(p, level, x0 + 25.5, floor + 3, z0 + 50.5, centre.atY(floor + 1).offset(25, 0, 8));
-        if (ticks == 660) shot("lion_city_street");
-        if (ticks == 670) {
-            int t = LionCamelCity.TOWER_AT;
-            look(p, level, x0 - t + 0.5, floor + LionCamelCity.TOWER_H + 4, z0 + t + 0.5, centre.atY(floor + 30).offset(-t - 120, 0, t + 120));
-        }
-        if (ticks == 800) shot("lion_ridge_from_the_walls");
-        if (ticks == 810) {
-            int ex = x0 + 150, ez = z0 + 40;
-            look(p, level, ex + 0.5, topAt(level, ex, ez) + 30, ez + 0.5, centre.atY(floor + 10));
-        }
-        if (ticks == 940) shot("lion_ridge_toward_the_city");
-        return ticks >= 950;
+        LionFortress.Stair st = LionFortress.stair(2);
+        int mid = (st.u0() + st.u1()) / 2, y2 = LionFortress.floorY(2);
+        s.add(new Shot("lion_stair_down", mid + 0.5, y2 + 4, fz + st.landing() + 0.5, mid, y2 - 10, fz + st.stepV(st.steps()), false));
+        int ty = LionFortress.THRONE_Y;
+        s.add(new Shot("lion_throne_room", 0.5, ty + 13, fz - 33.5, 0, ty + 4, fz - 68, false));
+        s.add(new Shot("lion_throne_kings", 10.5, ty + 6, fz - 38.5, -5, ty + 3, fz - 54, false));
+        s.add(new Shot("lion_throne_kings_true", 10.5, ty + 6, fz - 38.5, -5, ty + 3, fz - 54, false));
+        s.add(new Shot("lion_throne_stair_from_below", 6.5, ty + 3, fz - 46.5, 0, ty + 14, fz - 12, false));
+        return s;
     }
 
-    /** Puts the (spectating) player at (x, y, z) looking at {@code at}. */
+    private static boolean shoot(ServerPlayer p, ServerLevel level) {
+        int x0 = centre.getX(), z0 = centre.getZ();
+        int[] c = {x0, z0};
+        if (ticks == 1) {
+            floor = LionCamelRidgeFeature.cityFloor(level, x0, z0);
+            report(level, c);
+            shots = shots(level, c);
+            shot = 0;
+            shotAt = 2;
+        }
+        if (shot >= shots.size()) return ticks > shotAt + 5;
+        Shot s = shots.get(shot);
+        if (ticks == shotAt) {
+            int around = s.name().startsWith("lion_ridge") || s.name().contains("mountain") ? 7 : 2;
+            for (int dx = -around; dx <= around; dx++) for (int dz = -around; dz <= around; dz++) level.getChunk((x0 + (int) s.x() >> 4) + dx, (z0 + (int) s.z() >> 4) + dz);
+            if (s.name().equals("lion_throne_kings_true")) {
+                level.getEntitiesOfClass(DemonKingEntity.class, new AABB(centre.atY(floor)).inflate(80, 300, 260)).forEach(DemonKingEntity::revealTrueForm);
+            }
+            for (LionCamelMonster m : level.getEntitiesOfClass(LionCamelMonster.class, new AABB(centre.atY(floor)).inflate(400, 300, 400))) {
+                if (s.glow()) m.addEffect(new MobEffectInstance(MobEffects.GLOWING, 1200, 0, false, false));
+                else m.removeEffect(MobEffects.GLOWING);
+            }
+            look(p, level, x0 + s.x(), floor + s.y(), z0 + s.z(), new BlockPos((int) Math.floor(x0 + s.ax()), (int) Math.floor(floor + s.ay()), (int) Math.floor(z0 + s.az())));
+        }
+        if (ticks == shotAt + (s.name().startsWith("lion_ridge") || s.name().contains("mountain") ? 400 : 150)) {
+            shot(s.name());
+            shot++;
+            shotAt = ticks + 10;
+        }
+        return false;
+    }
+
+    /** What the bench finds of the fortress and its keepers: the kings, each floor's keepers, the door's wardens, the ridge's hordes. */
+    private static void report(ServerLevel level, int[] c) {
+        LionGates.Fortress f = new LionGates.Fortress(c[0], c[1], floor);
+        AABB fortress = new AABB(c[0] - 40, floor + LionFortress.BOTTOM, c[1] + LionFortress.FZ + LionFortress.THRONE_N - 6,
+                c[0] + 40, floor + 30, c[1] + LionFortress.FZ + LionFortress.FACADE_V + 20);
+        for (int x = (int) fortress.minX >> 4; x <= (int) fortress.maxX >> 4; x++) for (int z = (int) fortress.minZ >> 4; z <= (int) fortress.maxZ >> 4; z++) level.getChunk(x, z);
+        StringBuilder kings = new StringBuilder();
+        for (DemonKingEntity k : level.getEntitiesOfClass(DemonKingEntity.class, fortress)) {
+            kings.append(k.getType().getDescription().getString()).append(" at ").append(k.blockPosition().toShortString())
+                    .append(LionGates.inThroneRoom(level, k.blockPosition()) ? " (in the throne room)" : " (NOT in the throne room)").append("; ");
+        }
+        int[] perFloor = new int[LionFortress.THRONE + 1];
+        int wardens = 0, door = 0;
+        for (LionCamelMonster m : level.getEntitiesOfClass(LionCamelMonster.class, fortress.inflate(0, 0, 30))) {
+            int ly = m.getBlockY() - floor;
+            int lz = m.getBlockZ() - c[1];
+            if (m.getPersistentData().contains(LionCamelMonster.KEY_WARDEN)) {
+                if (m.getPersistentData().getInt(LionCamelMonster.KEY_WARDEN) == LionGates.DOOR) door++;
+                else wardens++;
+            }
+            if (lz > LionFortress.DOOR_LZ || ly > LionFortress.HALL_AIR) continue;
+            perFloor[LionFortress.bandOf(ly)]++;
+        }
+        StringBuilder floors = new StringBuilder();
+        for (int k = 0; k <= LionFortress.FLOORS; k++) floors.append(k).append(": ").append(perFloor[k]).append(", ");
+        int ridge = level.getEntitiesOfClass(LionCamelMonster.class, new AABB(centre.atY(floor)).inflate(400, 300, 400),
+                m -> m.isPersistenceRequired() && !fortress.inflate(0, 0, 30).contains(m.position())).size();
+        StringBuilder gates = new StringBuilder();
+        for (int g = LionGates.DOOR; g <= LionFortress.FLOORS; g++) gates.append(LionGates.isShut(level, f, g) ? "shut" : "OPEN").append(g < LionFortress.FLOORS ? "/" : "");
+        report.add(String.format("the Lion-Camel Cave: city floor y %d, the great door at %s, the throne room's floor at y %d; kings: %s"
+                        + "keepers by floor (0 the gate hall) %s; floors' wardens %d, the door's wardens %d; the ridge's kept demons outside it (city, outposts, patrols) %d; gates %s",
+                floor, f.world(0, 1, LionFortress.DOOR_LZ).toShortString(), floor + LionFortress.THRONE_Y,
+                kings.length() == 0 ? "NONE FOUND; " : kings, floors, wardens, door, ridge, gates));
+    }
+
+    /** Puts the (spectating) player at (x, y, z) looking at {@code at} (no clouds in the way). */
     private static void look(ServerPlayer p, ServerLevel level, double x, double y, double z, BlockPos at) {
+        Minecraft.getInstance().execute(() -> {
+            Minecraft.getInstance().options.cloudStatus().set(net.minecraft.client.CloudStatus.OFF);
+            Minecraft.getInstance().options.entityDistanceScaling().set(5.0); // the hordes seen from afar
+        });
         double dx = at.getX() + 0.5 - x, dy = at.getY() + 0.5 - y, dz = at.getZ() + 0.5 - z;
         float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
         float pitch = (float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)));

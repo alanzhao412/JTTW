@@ -141,7 +141,8 @@ public final class EarthGod {
         }
         if (zone == Zones.FIRE_MOUNTAIN) return "Past the heat of the Flaming Mountains, Red Boy keeps his Fire Cloud Cave";
         if (zone == Zones.MOUNT_WUZHUANG) return "Over the clouds floats Mount Longevity, where the Great Immortal Zhenyuan tends his ginseng tree";
-        if (zone == Zones.LION_CAMEL) return "Lion-Camel Ridge: eight hundred li of demons, and the city they devoured";
+        if (zone == Zones.LION_CAMEL) return "Lion-Camel Ridge: eight hundred li of demons, and the city they devoured. Its kings sit at the "
+                + "bottom of the Lion-Camel Cave, behind the great door in the mountain north of the city";
         return "There the demons of your strength dwell";
     }
 
@@ -234,7 +235,13 @@ public final class EarthGod {
         } else {
             words.append(". It lies some ").append(roughly(d)).append(" blocks to the ").append(wind(at.x, at.z, c[0], c[1])).append(".\"");
         }
-        return new Answer(GlobalPos.of(Level.OVERWORLD, new BlockPos(c[0], 64, c[1])), zone, Component.literal(words.toString()));
+        return new Answer(GlobalPos.of(Level.OVERWORLD, needle(zone, c)), zone, Component.literal(words.toString()));
+    }
+
+    /** Where the needle points for a zone's region centred at {@code c}: its centre; for Lion-Camel Ridge, the fortress's great door. */
+    public static BlockPos needle(Zones.Zone zone, int[] c) {
+        if (zone == Zones.LION_CAMEL) return new BlockPos(c[0], 64, c[1] + com.jttw.engine.world.lion.LionFortress.DOOR_LZ);
+        return new BlockPos(c[0], 64, c[1]);
     }
 
     /**
