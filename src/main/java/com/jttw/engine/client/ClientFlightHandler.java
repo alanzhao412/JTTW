@@ -27,7 +27,9 @@ public final class ClientFlightHandler {
     /** Where the player was last tick: a jump further than any flight is a teleport. */
     private static Vec3 lastPos;
     /** Further than this in a tick, faster than anyone flies, and it was a teleport. */
-    private static final double TELEPORT_JUMP = FlightSteering.TOP_SPEED * 1.5 + 2;
+    private static double teleportJump(LocalPlayer p) {
+        return FlightSteering.topSpeed(p.level().dimension().equals(com.jttw.engine.dimension.GreatVoid.KEY)) * 1.5 + 2;
+    }
 
     public static void setProfile(FlightProfile newProfile) {
         profile = newProfile;
@@ -53,7 +55,7 @@ public final class ClientFlightHandler {
         }
 
         // A teleport ends all momentum: it is not carried from where you were to where you are
-        if (lastPos != null && pos.distanceTo(lastPos) > TELEPORT_JUMP) {
+        if (lastPos != null && pos.distanceTo(lastPos) > teleportJump(p)) {
             flightVector = Vec3.ZERO;
             landingMomentum = Vec3.ZERO;
             swimVector = Vec3.ZERO;

@@ -302,7 +302,7 @@
   "class_unlock.jttw_engine.apex_domain": "Apex Domain",
   "class_unlock.jttw_engine.apex_domain.desc": "Your domain reaches 16 blocks, and the creatures it holds deal 20% less damage.",
   "class_unlock.jttw_engine.heavenly_mobility": "Heavenly Mobility",
-  "class_unlock.jttw_engine.heavenly_mobility.desc": "A slow cloud to fly on: sprint while flying to ride it.",
+  "class_unlock.jttw_engine.heavenly_mobility.desc": "A cloud to fly on: sprint while flying to ride it. Held at full speed, it builds to 100 blocks a second.",
   "item.jttw_engine.copper_cash": "Copper Cash",
   "item.jttw_engine.copper_cash.desc": "A round coin with a square hole (铜钱): one wen. 8 make a string, 64 a tael of silver.",
   "item.jttw_engine.string_of_cash": "String of Cash",

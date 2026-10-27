@@ -16,8 +16,9 @@ class FlightLookAheadTest {
     @Test
     void slowFliersAndTeleportsGetNoCorridor() {
         assertTrue(FlightLookAhead.corridor(ORIGIN, new Vec3(0.9, 0, 0)).isEmpty(), "the server keeps up");
-        assertTrue(FlightLookAhead.corridor(ORIGIN, new Vec3(50, 0, 0)).isEmpty(), "a teleport");
+        assertTrue(FlightLookAhead.corridor(ORIGIN, new Vec3(FlightLookAhead.MAX_SPEED + 1, 0, 0)).isEmpty(), "a teleport");
         assertFalse(FlightLookAhead.corridor(ORIGIN, new Vec3(FlightSteering.TOP_SPEED, 0, 0)).isEmpty(), "the top speed is flight, not a teleport");
+        assertFalse(FlightLookAhead.corridor(ORIGIN, new Vec3(FlightSteering.VOID_TOP_SPEED, 0, 0)).isEmpty(), "nor the Great Void's");
         assertTrue(FlightLookAhead.corridor(ORIGIN, new Vec3(0, -3, 0)).isEmpty(), "falling straight down");
     }
 

@@ -142,7 +142,7 @@ public final class ErlangShenSkillTree {
         ));
         TREE.add(new SkillNode(
                 FLIGHT_3, "Celestial Gale",
-                new String[]{ "Flight speed increased", "again: your swiftest.", "" },
+                new String[]{ "Your swiftest flight; held", "at full speed, builds over", "10s to 150 blocks a second." },
                 4, 3, 2, List.of(FLIGHT_2), AbilityType.PASSIVE, 3, "Flight"
         ));
 

@@ -141,12 +141,17 @@ public final class PengAbilityHandler {
 
     /** Top boost: 2.0 / 2.8 times flying speed; III reaches the top speed anyone flies. */
     public static double maxBoost(int tier) {
-        return tier >= 3 ? FlightSteering.TOP_SPEED / FlightSteering.CRUISE_SPEED : tier >= 2 ? 2.8 : tier >= 1 ? 2.0 : 1.0;
+        return maxBoost(tier, false);
+    }
+
+    /** As {@link #maxBoost(int)}; in the Great Void, III reaches its top speed instead. */
+    public static double maxBoost(int tier, boolean inVoid) {
+        return tier >= 3 ? FlightSteering.topSpeed(inVoid) / FlightSteering.CRUISE_SPEED : tier >= 2 ? 2.8 : tier >= 1 ? 2.0 : 1.0;
     }
 
     /** How much the boost climbs each tick held: the top takes 10 seconds to reach at any tier. */
-    public static double boostRamp(int tier) {
-        return (maxBoost(tier) - 1) / FlightSteering.BUILD_UP_TICKS;
+    public static double boostRamp(int tier, boolean inVoid) {
+        return (maxBoost(tier, inVoid) - 1) / FlightSteering.BUILD_UP_TICKS;
     }
 
     public static double boost(ServerPlayer p) {
@@ -180,7 +185,8 @@ public final class PengAbilityHandler {
             pd.remove(KEY_SOARING);
         }
         if (soaring) {
-            b = Math.min(maxBoost(tier), b + boostRamp(tier));
+            boolean inVoid = com.jttw.engine.dimension.GreatVoid.isIn(p);
+            b = Math.min(maxBoost(tier, inVoid), b + boostRamp(tier, inVoid));
             if (p.tickCount % 6 == 0) {
                 p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ENDER_DRAGON_FLAP, SoundSource.PLAYERS, 0.7f, 1.4f);
             }

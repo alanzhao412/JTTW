@@ -109,7 +109,7 @@ public final class DragonSkillTree {
         ));
         TREE.add(new SkillNode(
                 FLIGHT_3, "Dimension Travel",
-                new String[]{ "Shift + scroll: choose a", "dimension. Shift + V: go", "there. 20 Qi a jump." },
+                new String[]{ "Shift + scroll: choose a", "dimension. Shift + V: go", "there. 20 Qi a jump.", "Flight builds to 100/s." },
                 4, 2, 2, List.of(FLIGHT_2), AbilityType.PASSIVE, 3, "Flight"
         ));
 

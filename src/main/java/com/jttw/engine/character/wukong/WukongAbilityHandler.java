@@ -508,52 +508,19 @@ public final class WukongAbilityHandler {
     // Somersault momentum (Flight III)
     // -----------------------------------------------------------------------
 
-    private static final String KEY_LAST_X = "jttw_wu_last_x", KEY_LAST_Y = "jttw_wu_last_y", KEY_LAST_Z = "jttw_wu_last_z";
-    /** His recent pace, blocks a tick, averaged so one late movement packet does not read as a stop. */
-    private static final String KEY_PACE = "jttw_wu_pace";
-    /** How much each tick's movement moves the average: about the last second counts. */
-    private static final double PACE_WEIGHT = 0.1;
-
     /** Momentum at its height: Wukong's 2.8 built up to the top speed anyone flies. */
     public static double momentumMax() {
-        return com.jttw.engine.flight.FlightSteering.TOP_SPEED / com.jttw.engine.flight.FlightSteering.WUKONG_FAST_SPEED;
+        return momentumMax(false);
     }
 
-    /** Flying at his full speed builds momentum, over 10 seconds; falling short loses it in 2. */
+    /** As {@link #momentumMax()}; in the Great Void, built up to its top speed instead. */
+    public static double momentumMax(boolean inVoid) {
+        return com.jttw.engine.flight.FlightSteering.topSpeed(inVoid) / com.jttw.engine.flight.FlightSteering.WUKONG_FAST_SPEED;
+    }
+
+    /** Flying at his full speed builds momentum, over 10 seconds; falling short loses it in 2 (as everyone's: FlightMomentum). */
     public static void tickMomentum(ServerPlayer player) {
-        if (!isWukong(player)) return; // someone else's boost (the Peng's wingbeats) is not his to touch
-        var pd = player.getPersistentData();
-        boolean hadLast = pd.contains(KEY_LAST_X);
-        Vec3 last = hadLast
-                ? new Vec3(pd.getDouble(KEY_LAST_X), pd.getDouble(KEY_LAST_Y), pd.getDouble(KEY_LAST_Z)) : player.position();
-        pd.putDouble(KEY_LAST_X, player.getX());
-        pd.putDouble(KEY_LAST_Y, player.getY());
-        pd.putDouble(KEY_LAST_Z, player.getZ());
-
-        com.jttw.engine.flight.FlightProfile profile = com.jttw.engine.flight.JTTWFlight.profile(player);
-        boolean flightThree = player.getAbilities().flying && !profile.glide()
-                && profile.speed() >= com.jttw.engine.flight.FlightSteering.WUKONG_FAST_SPEED;
-        double max = momentumMax();
-        double b = profile.boost(); // exact: rounding is only for sending
-        if (!flightThree) {
-            pd.remove(KEY_PACE);
-            if (b > 1) com.jttw.engine.flight.JTTWFlight.setBoost(player, 1, false);
-            return;
-        }
-        // The server sees where the client put him, not his keys: full speed is how far he went,
-        // on average, so movement packets arriving bunched up do not read as stalls
-        if (!hadLast) return; // the first look: nothing moved yet to measure
-        double moved = player.position().distanceTo(last);
-        double pace = pd.contains(KEY_PACE) ? pd.getDouble(KEY_PACE) * (1 - PACE_WEIGHT) + moved * PACE_WEIGHT : moved;
-        pd.putDouble(KEY_PACE, pace);
-        if (pace >= 0.8 * profile.effectiveSpeed()) b = Math.min(max, b + (max - 1) / com.jttw.engine.flight.FlightSteering.BUILD_UP_TICKS);
-        else b = Math.max(1, b - (max - 1) / 40);
-        com.jttw.engine.flight.JTTWFlight.setBoost(player, b, false);
-    }
-
-    @SubscribeEvent
-    public static void onPlayerTickMomentum(PlayerTickEvent.Post event) {
-        if (event.getEntity() instanceof ServerPlayer sp) tickMomentum(sp);
+        com.jttw.engine.flight.FlightMomentum.tick(player);
     }
 
     // -----------------------------------------------------------------------

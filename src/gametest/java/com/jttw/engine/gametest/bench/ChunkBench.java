@@ -347,7 +347,7 @@ public final class ChunkBench {
             tickMsMax = Math.max(tickMsMax, ms);
         }
         lastTickNanos = now;
-        double next = x + FlightSteering.TOP_SPEED;
+        double next = x + FlightSteering.topSpeed(VOID);
         if (level.getChunkSource().getChunkNow(((int) Math.floor(next)) >> 4, 0) != null) {
             x = next;
             p.teleportTo(level, x, ALTITUDE, 8, -90f, 0f);
@@ -367,7 +367,7 @@ public final class ChunkBench {
         double made = (x - startX) / flownTicks * 20;
         return String.format("flight %s (%.0f blocks), aiming for %.0f blocks/s: made %.0f blocks/s, stalled %d of %d ticks (%.0f%%); "
                         + "loaded world %.1f chunks ahead on average; server %.0f ms/tick average, %.0f worst",
-                label, x - startX, FlightSteering.TOP_SPEED * 20, made, stalls, flownTicks, 100.0 * stalls / flownTicks,
+                label, x - startX, FlightSteering.topSpeed(VOID) * 20, made, stalls, flownTicks, 100.0 * stalls / flownTicks,
                 leadSum / leadSamples, tickMsSum / Math.max(1, leadSamples - 1), tickMsMax);
     }
 

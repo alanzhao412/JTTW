@@ -25,11 +25,16 @@ public final class FlightSteering {
     public static final double WUKONG_CRUISE_SPEED = 1.85;
     public static final double WUKONG_FAST_SPEED = 2.80;
     /**
-     * The fastest anyone flies: the Peng at the height of his wingbeats, Wukong at full
-     * somersault momentum. 200 blocks a second: past what the superhero packs' fliers reach
+     * The fastest anyone flies in the world: the Peng at the height of his wingbeats, Wukong at
+     * full somersault momentum. 150 blocks a second: past what the superhero packs' fliers reach
      * (FSang18's Heroes, Silver Surfer and Captain Marvel stacked, about 90).
      */
-    public static final double TOP_SPEED = 10.0;
+    public static final double TOP_SPEED = 7.5;
+    /**
+     * Their top speed in the Great Void, where nothing is made and nothing is in the way: 1000
+     * blocks a second.
+     */
+    public static final double VOID_TOP_SPEED = 50.0;
     /**
      * A Heavenly's cloud (Heavenly Mobility): 37 blocks a second, and never building up (a third
      * of Wukong's cloud when its height was 112; it did not rise with it).
@@ -58,6 +63,11 @@ public final class FlightSteering {
     public static final double NO_INPUT_CUTOFF_SQR = 0.001;
     /** The momentum carried after flight ends decays like this each tick. */
     public static final double LANDING_DECAY = 0.9;
+
+    /** The top speed in the Great Void, or anywhere else. */
+    public static double topSpeed(boolean inVoid) {
+        return inVoid ? VOID_TOP_SPEED : TOP_SPEED;
+    }
 
     /** Flight speed for a flight tier (0 = a flying form with no tier of its own). */
     public static double speedFor(int tier, boolean wukong) {

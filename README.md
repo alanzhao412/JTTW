@@ -300,16 +300,25 @@ is what makes the rest possible:
   and the Phoenix's Rising Ember are true flight from their first tier, a little under cruising
   speed, never a glide; the Dragon's Elytra Glide stays a glide, but only in its own shape: a
   form with wings, the Azure Dragon or a flying form of the 18 Transformations, always flies; Nezha
-  flies on his Wind Fire Wheels at cruising speed, and at the fastest with Blazing Trail). Above
-  every tier, Sun Wukong at full Somersault Cloud momentum and the Gold-Winged Peng at the height
-  of his Ninety-Thousand-Li wingbeats reach the top speed anyone flies: 200 blocks a second.
-- **The Great Void.** Faster than the world can be generated (about 80 blocks a second over new
-  land on a 16-core machine), so those two also have a key (Y) into
+  flies on his Wind Fire Wheels at cruising speed, and at the fastest with Blazing Trail).
+- **Momentum.** Above every tier, a flier held at full speed in their highest flight (the top tier
+  of their flight line, or a form's wings or a Heavenly's cloud, which have none) builds over 10
+  seconds to their own top speed, and loses it in 2 when they fall short
+  ([`FlightMomentum`](src/main/java/com/jttw/engine/flight/FlightMomentum.java)): Sun Wukong and
+  Erlang Shen 150 blocks a second; Nezha 120; the Dragon, the Phoenix, Heaven's other beings and
+  everyone else 100; the great bulky ones (the Bull Demon King, the Saurian Demon King, the Turtle,
+  the Grand Saint of Nine Spirits) 65. The Gold-Winged Peng builds to 150 his own way, by his
+  Ninety-Thousand-Li wingbeats.
+- **The Great Void.** Wukong and the Peng fly faster than the world can be generated (about 80
+  blocks a second over new land on a 16-core machine), so they also have a key (Y) into
   [`GreatVoid`](src/main/java/com/jttw/engine/dimension/GreatVoid.java): an empty dimension laid
-  one to one over every other, nothing generated in it, where the full 200 holds (194 measured
-  over never-visited space, against 72 in the Overworld). One goes in at the same x, y, z and comes
-  out at the same x, z, in the realm one came from, at one's own height, or the nearest room above
-  or below if that is inside something. In the Void one always flies and is held up at its floor.
+  one to one over every other, nothing generated in it, loaded only three chunks round a
+  traveller, where their momentum builds to 1000 blocks a second. Empty chunks still cost the
+  server something, so on that machine about 500 a second is made in practice (485 measured over
+  never-visited space, against 72 in the Overworld at 200). One goes in at the same x, y, z and
+  comes out at the same x, z, in the realm one came from, at one's own height, or the nearest room
+  above or below if that is inside something. In the Void one always flies and is held up at its
+  floor.
 - **Independent velocity clamps** on the vertical and horizontal axes, plus a separate strafe scale,
   so lateral drift doesn't match forward thrust.
 - **A parallel swim system** with its own stored vector, distinct cruise and sprint speeds, and a

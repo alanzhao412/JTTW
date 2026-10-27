@@ -20,6 +20,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 /**
  * The Great Void (Taixu): an empty realm laid one to one over every other, for the fastest fliers
@@ -40,6 +41,13 @@ public final class GreatVoid {
 
     /** The realm a traveller in the Void came from, and goes back to. */
     public static final String ORIGIN_TAG = "jttw_void_origin";
+
+    /**
+     * How far the Void is loaded and sent round each traveller, in chunks. There is nothing in it
+     * to see, and at its top speed a full view (a square 25 chunks wide) is more than a thousand
+     * new chunks a second; a narrow one and the path loaded ahead (FlightLookAhead) keep up.
+     */
+    public static final int VIEW_DISTANCE = 3;
 
     /** How far up or down from where one comes out the nearest open space is looked for. */
     public static final int EXIT_SEARCH = 64;
@@ -154,5 +162,15 @@ public final class GreatVoid {
             Vec3 v = player.getDeltaMovement();
             player.setDeltaMovement(v.x, Math.max(0, v.y), v.z);
         }
+    }
+
+    /** Keeps the Void's view narrow: the server's own view setting resets every realm's. Unchanged, it costs nothing. */
+    @SubscribeEvent
+    public static void onServerTick(ServerTickEvent.Post event) {
+        if (event.getServer().getTickCount() % 20 != 0) return;
+        ServerLevel voidLevel = event.getServer().getLevel(KEY);
+        if (voidLevel == null) return;
+        voidLevel.getChunkSource().setViewDistance(VIEW_DISTANCE);
+        voidLevel.getChunkSource().setSimulationDistance(Math.min(VIEW_DISTANCE, event.getServer().getPlayerList().getSimulationDistance()));
     }
 }
