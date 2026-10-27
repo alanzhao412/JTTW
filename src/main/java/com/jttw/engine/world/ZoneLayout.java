@@ -33,10 +33,11 @@ public record ZoneLayout(int near, int far, int radius, int wobble, long salt, b
     public static final ZoneLayout WHITE_BONE = new ZoneLayout(1000, 2000, 260, 70, 0x5EEDB0E1L, false);
 
     /**
-     * The Bottomless Cave: a region about 220 blocks across, never less than 180 (radius less all its
-     * wobble), round a labyrinth 147 blocks across; 2-3 km out.
+     * The Bottomless Cave: a region about 380 blocks across, never less than 330 (radius less all its
+     * wobble), round Pit-Hole Mountain, its road and outposts, and the fortress under it (its widest
+     * floor some 200 blocks across); 2-3 km out.
      */
-    public static final ZoneLayout BOTTOMLESS_CAVE = new ZoneLayout(2000, 3000, 110, 20, 0xB0770C4EL, false);
+    public static final ZoneLayout BOTTOMLESS_CAVE = new ZoneLayout(2000, 3000, 190, 25, 0xB0770C4EL, false);
 
     /**
      * The Mystical Waters: four regions about 440 blocks across (a trench and its palace), one in each

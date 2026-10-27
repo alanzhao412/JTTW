@@ -130,7 +130,7 @@ public final class EarthGod {
     /** Who keeps the zone's region, and what it is, in an Earth God's words (the sea's, for the waters). */
     private static String whoDwells(Zones.Zone zone, int[] c) {
         if (zone == Zones.WHITE_BONE) return "On White Bone Ridge a corpse fiend wearing borrowed faces waits for pilgrims: Lady White Bone";
-        if (zone == Zones.BOTTOMLESS) return "Under the mountains the Bottomless Cave winds down to the den of Lady Earth Flow, the Gold-Nosed White Mouse";
+        if (zone == Zones.BOTTOMLESS) return "On Pit-Hole Mountain a great door opens on the Bottomless Cave, eight floors of maze winding down to the den of Lady Earth Flow, the Gold-Nosed White Mouse";
         if (zone == Zones.MYSTICAL_WATERS) {
             return switch (Sea.of(c[0], c[1])) {
                 case EAST -> "Beneath the Eastern Sea stands the crystal palace of Ao Guang, its Dragon King";
@@ -220,6 +220,7 @@ public final class EarthGod {
         int[] c = regionFor(zone, seed, (int) Math.floor(at.x), (int) Math.floor(at.z), fallen);
         if (zone == Zones.FENGDU && c != null) return wayIn(at, seed, c, city);
         if (c == null) return new Answer(null, null, Component.literal("The Earth God scratches his head: he knows of no such place."));
+        if (zone == Zones.BOTTOMLESS) c = com.jttw.engine.world.feature.Labyrinth.doorOf(seed, c[0], c[1]); // its great door
         StringBuilder words = new StringBuilder();
         if (!zoneFor(level).hasFootprint()) {
             words.append("\"Your trials lie in Diyu, the underworld, below any Earth God's ground. ");
