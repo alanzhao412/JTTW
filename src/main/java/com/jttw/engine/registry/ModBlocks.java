@@ -145,6 +145,22 @@ public final class ModBlocks {
                     .sound(SoundType.SOUL_SAND).lightLevel(s -> 11).emissiveRendering((s, g, p) -> true)
                     .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
 
+    // ── The Bottomless Cave ──────────────────────────────────────
+    /**
+     * The cave's own rock, at three depths, and its great door and the frame it hangs in: no one digs,
+     * blasts, pushes or phases through them (world.cave.BottomlessCave), so its mazes are walked.
+     */
+    public static final DeferredHolder<Block, Block> BOTTOMLESS_EARTH = BLOCKS.register("bottomless_earth", () -> caveRock(MapColor.DIRT, SoundType.ROOTED_DIRT));
+    public static final DeferredHolder<Block, Block> BOTTOMLESS_STONE = BLOCKS.register("bottomless_stone", () -> caveRock(MapColor.STONE, SoundType.TUFF));
+    public static final DeferredHolder<Block, Block> BOTTOMLESS_DEEP = BLOCKS.register("bottomless_deep", () -> caveRock(MapColor.DEEPSLATE, SoundType.DEEPSLATE));
+    public static final DeferredHolder<Block, Block> BOTTOMLESS_GATE = BLOCKS.register("bottomless_gate", () -> caveRock(MapColor.COLOR_RED, SoundType.WOOD));
+    public static final DeferredHolder<Block, Block> BOTTOMLESS_GATE_FRAME = BLOCKS.register("bottomless_gate_frame", () -> caveRock(MapColor.COLOR_BLACK, SoundType.POLISHED_DEEPSLATE));
+
+    private static Block caveRock(MapColor colour, SoundType sound) {
+        return new Block(BlockBehaviour.Properties.of().mapColor(colour).strength(-1.0F, 3600000.0F).noLootTable().sound(sound)
+                .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK));
+    }
+
     public static void register(IEventBus modEventBus) {
         BLOCKS.register(modEventBus);
     }

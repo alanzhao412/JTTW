@@ -41,7 +41,7 @@ import java.util.List;
  *                                           Needs domain_authority.
  *
  * ── HEAVENLY ──────────────────────────────────────────────────────────────
- *   Lv 10   heavenly_mobility   1 pt        A slow cloud to fly on (sprint in flight).
+ *   Lv 10   heavenly_mobility   1 pt        A cloud to fly on (sprint in flight).
  * </pre>
  *
  * <p>The English names and descriptions here are the fallbacks; the lang file carries the same
@@ -87,7 +87,7 @@ public record AbilityUnlock(
 
         // ── HEAVENLY ──────────────────────────────────────────────────────────
         passive(ProgressionClass.HEAVENLY, 10, HEAVENLY_MOBILITY, "Heavenly Mobility",
-                "A slow cloud to fly on: sprint while flying to ride it.", null);
+                "A cloud to fly on: sprint while flying to ride it. Held at full speed, it builds to 100 blocks a second.", null);
     }
 
     private static void milestone(ProgressionClass cls, int level, String id, String name, String description) {

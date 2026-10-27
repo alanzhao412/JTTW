@@ -77,6 +77,8 @@ public final class ChunkBench {
     private static final boolean VOID = "void".equals(System.getProperty("jttw.chunkBench.mode", ""));
     /** "village" runs {@link VillageBench}: the nearest Tang village of each kind, and the nearest as built. */
     private static final boolean VILLAGE = "village".equals(System.getProperty("jttw.chunkBench.mode", ""));
+    /** "ridge" runs {@link RidgeBench}: White Bone Ridge, what its heart costs to make, and pictures of it. */
+    private static final boolean RIDGE = "ridge".equals(System.getProperty("jttw.chunkBench.mode", ""));
     private static final TicketType<ChunkPos> BENCH = TicketType.create("jttw_bench", Comparator.comparingLong(ChunkPos::toLong));
     private static final int GRID = 12;
     private static final int FLIGHT_TICKS = 400;
@@ -194,6 +196,15 @@ public final class ChunkBench {
             if (p.tickCount < 100) return;
             if (VillageBench.tick(p)) {
                 report.addAll(VillageBench.report());
+                write();
+                next(Step.DONE);
+            }
+            return;
+        }
+        if (RIDGE) {
+            if (p.tickCount < 100) return;
+            if (RidgeBench.tick(p)) {
+                report.addAll(RidgeBench.report());
                 write();
                 next(Step.DONE);
             }
@@ -400,7 +411,7 @@ public final class ChunkBench {
             tickMsMax = Math.max(tickMsMax, ms);
         }
         lastTickNanos = now;
-        double next = x + FlightSteering.TOP_SPEED;
+        double next = x + FlightSteering.topSpeed(VOID);
         if (level.getChunkSource().getChunkNow(((int) Math.floor(next)) >> 4, 0) != null) {
             x = next;
             p.teleportTo(level, x, ALTITUDE, 8, -90f, 0f);
@@ -420,7 +431,7 @@ public final class ChunkBench {
         double made = (x - startX) / flownTicks * 20;
         return String.format("flight %s (%.0f blocks), aiming for %.0f blocks/s: made %.0f blocks/s, stalled %d of %d ticks (%.0f%%); "
                         + "loaded world %.1f chunks ahead on average; server %.0f ms/tick average, %.0f worst",
-                label, x - startX, FlightSteering.TOP_SPEED * 20, made, stalls, flownTicks, 100.0 * stalls / flownTicks,
+                label, x - startX, FlightSteering.topSpeed(VOID) * 20, made, stalls, flownTicks, 100.0 * stalls / flownTicks,
                 leadSum / leadSamples, tickMsSum / Math.max(1, leadSamples - 1), tickMsMax);
     }
 

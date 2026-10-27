@@ -68,14 +68,14 @@ public final class JTTWFlight {
 
     /**
      * The server's "moved too quickly" limit for one move packet (squared blocks past the motion it
-     * knows of): vanilla's 100, ten blocks a tick, is the very top speed Wukong and the Peng reach,
-     * and the server never learns their motion (it is steered on the client), so in flight it
+     * knows of): vanilla's 100, ten blocks a tick, is less than the top speed Wukong and the Peng
+     * reach in the Great Void, and the server never learns their motion (it is steered on the client), so in flight it
      * would throw them back. While they fly by the mod's own flight the limit is half as high again
      * as the top speed; on the ground, or flying any other way, it is vanilla's.
      */
     public static float moveCheckLimit(ServerPlayer player, float vanilla) {
         if (!player.getAbilities().flying || !(canFly(player) || own(player))) return vanilla;
-        double room = FlightSteering.TOP_SPEED * 1.5;
+        double room = FlightSteering.topSpeed(com.jttw.engine.dimension.GreatVoid.isIn(player)) * 1.5;
         return (float) Math.max(vanilla, room * room);
     }
 
@@ -115,10 +115,10 @@ public final class JTTWFlight {
                 && ownSpeed(player) < FlightSteering.HEAVENLY_CLOUD_SPEED;
     }
 
-    /** How fast this player flies on their own now, without the cloud: a glider at gliding speed. */
+    /** How fast this player flies on their own, without the cloud or momentum: a glider at gliding speed. */
     private static double ownSpeed(ServerPlayer player) {
         FlightProfile own = ownProfile(player);
-        return own.glide() ? FlightSteering.GLIDE_SPEED : own.effectiveSpeed();
+        return own.glide() ? FlightSteering.GLIDE_SPEED : own.speed();
     }
 
     public static void setGlideOnly(ServerPlayer player, boolean glide) {
@@ -127,6 +127,11 @@ public final class JTTWFlight {
 
     public static boolean isGlideOnly(ServerPlayer player) {
         return player.getPersistentData().getBoolean(GLIDE_ONLY_TAG);
+    }
+
+    /** The flight speed tier granted (1, 2 or 3); 0 for none, though one may still fly (the Peng's own, a form's wings, a cloud). */
+    public static int flightTier(ServerPlayer player) {
+        return player.getPersistentData().getInt(FLIGHT_SPEED_TIER_TAG);
     }
 
     /** Sets the flight speed tier (1, 2, or 3), when a flight node is unlocked or granted. */
@@ -182,7 +187,8 @@ public final class JTTWFlight {
     public static FlightProfile profile(ServerPlayer player) {
         FlightProfile own = ownProfile(player);
         if (onHeavenlyCloud(player)) {
-            return new FlightProfile(FlightSteering.HEAVENLY_CLOUD_SPEED, false, 1.0, false, own.own());
+            // the cloud builds as one's own flight does (FlightMomentum)
+            return new FlightProfile(FlightSteering.HEAVENLY_CLOUD_SPEED, false, boost(player), false, own.own());
         }
         return own;
     }

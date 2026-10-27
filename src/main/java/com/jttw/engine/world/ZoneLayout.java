@@ -29,14 +29,19 @@ public record ZoneLayout(int near, int far, int radius, int wobble, long salt, b
         this(near, far, radius, wobble, salt, perSea, ANY_QUARTER);
     }
 
-    /** White Bone Ridge, the first band: a region about 520 blocks across, 1-2 km from spawn. */
-    public static final ZoneLayout WHITE_BONE = new ZoneLayout(1000, 2000, 260, 70, 0x5EEDB0E1L, false);
+    /**
+     * White Bone Ridge, the first band: a region about 840 blocks across (never under 720), room for
+     * the bone mountain over the White Bone Cave at its heart, the road up to its door and the
+     * outposts round it; 1-2 km from spawn.
+     */
+    public static final ZoneLayout WHITE_BONE = new ZoneLayout(1000, 2000, 420, 60, 0x5EEDB0E1L, false);
 
     /**
-     * The Bottomless Cave: a region about 220 blocks across, never less than 180 (radius less all its
-     * wobble), round a labyrinth 147 blocks across; 2-3 km out.
+     * The Bottomless Cave: a region about 380 blocks across, never less than 330 (radius less all its
+     * wobble), round Pit-Hole Mountain, its road and outposts, and the fortress under it (its widest
+     * floor some 200 blocks across); 2-3 km out.
      */
-    public static final ZoneLayout BOTTOMLESS_CAVE = new ZoneLayout(2000, 3000, 110, 20, 0xB0770C4EL, false);
+    public static final ZoneLayout BOTTOMLESS_CAVE = new ZoneLayout(2000, 3000, 190, 25, 0xB0770C4EL, false);
 
     /**
      * The Mystical Waters: four regions about 440 blocks across (a trench and its palace), one in each
@@ -44,8 +49,11 @@ public record ZoneLayout(int near, int far, int radius, int wobble, long salt, b
      */
     public static final ZoneLayout MYSTICAL_WATERS = new ZoneLayout(3000, 4500, 220, 45, 0x5EA5D4A6L, true);
 
-    /** The Flaming Mountains: a range about 400 blocks across, 4.5-6 km out. */
-    public static final ZoneLayout FIRE_MOUNTAIN = new ZoneLayout(4500, 6000, 200, 40, 0xF1A3E5A7L, false);
+    /**
+     * The Flaming Mountains: a range about 640 blocks across (never under 540), room for the demons'
+     * outposts over it and the ravine up to the Fire Cloud Cave's door; 4.5-6 km out.
+     */
+    public static final ZoneLayout FIRE_MOUNTAIN = new ZoneLayout(4500, 6000, 320, 50, 0xF1A3E5A7L, false);
 
     /**
      * Mount Wuzhuang: a region about 260 blocks across (never under 224), round a floating island about
@@ -53,8 +61,12 @@ public record ZoneLayout(int near, int far, int radius, int wobble, long salt, b
      */
     public static final ZoneLayout MOUNT_WUZHUANG = new ZoneLayout(6000, 7500, 128, 16, 0x3A1FC10DL, false);
 
-    /** Lion-Camel Ridge, the last band: a region about 380 blocks across (the city and the ridge round it), 7.5-9 km out. */
-    public static final ZoneLayout LION_CAMEL = new ZoneLayout(7500, 9000, 190, 30, 0x11C0CA3EL, false);
+    /**
+     * Lion-Camel Ridge, the last band: a region about 680 blocks across (never under 600): the city,
+     * the mountain behind it with the demon kings' fortress in it, and the ridge round them crawling
+     * with their hordes, its roads and outposts; 7.5-9 km out.
+     */
+    public static final ZoneLayout LION_CAMEL = new ZoneLayout(7500, 9000, 340, 40, 0x11C0CA3EL, false);
 
     /**
      * Fengdu, the Ghost City, the gateway to Hell: no band of its own; a region about 240 blocks

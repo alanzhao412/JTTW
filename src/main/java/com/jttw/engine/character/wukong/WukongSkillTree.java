@@ -101,7 +101,7 @@ public final class WukongSkillTree {
                 FLIGHT_3, "Somersault Cloud",
                 new String[]{ "Faster; held at full speed,", "builds over 10s to the fastest",
                               "flight. Shift+V: next realm.",
-                              "Y: the Great Void." },
+                              "Y: the Great Void, 1000/s." },
                 4, 6, 2, List.of(FLIGHT_2), AbilityType.PASSIVE, 3, "Flight"
         ));
 

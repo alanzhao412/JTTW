@@ -11,7 +11,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
-import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.LanternBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
@@ -45,11 +44,12 @@ import javax.annotation.Nullable;
  *       iron bars where they kept what they meant to eat), rubble, and yards heaped with bones;</li>
  *   <li><b>the palace</b> in its red-walled compound: a terrace, and on it the throne hall, its
  *       roof of dark tiles fallen in at one corner, red pillars, soul lanterns, the three demon
- *       kings' thrones (the third, the Great Peng's, empty, his treasury beside it: the Yin-Yang
- *       Vase), braziers in the courtyard; the Azure
- *       Lion holds court on the terrace at the centre;</li>
+ *       kings' thrones of state (the third, the Great Peng's, empty), braziers in the courtyard;
+ *       the kings themselves no longer sit here, but deep in the mountain behind the city, in the
+ *       Lion-Camel Cave ({@link LionFortress}), where their treasury is too;</li>
  *   <li><b>the elephant court</b> behind the palace, walled, ringed with great tusks of ivory, hay
- *       along its walls: the White Elephant's.</li>
+ *       along its walls: the White Elephant's, kept by his elephant-demons; its north gate and the
+ *       city's lead on to the forecourt before the cave's great door.</li>
  * </ul>
  * It is built for its kings, giants two and a half times a man's height whose true forms are
  * larger still: the hall stands {@value #HALL_H} high within, its thrones are a giant's, the gates
@@ -86,10 +86,10 @@ public final class LionCamelCity {
     public static final int THRONE_Z = -15, THRONE_BACK = 5;
     public static final int[] THRONES = {-6, 0, 6};
     /**
-     * The demon kings' treasury: a chest on the dais beside the Great Peng's empty throne (local x,
-     * y, z), the Yin-Yang Vase always in it ({@link #TREASURY_LOOT}). One city a world, so one vase.
+     * The demon kings' treasury's loot, the Yin-Yang Vase always in it: its chest stands beside the
+     * Great Peng's empty throne in the throne room of the Lion-Camel Cave ({@link LionFortress#TREASURY}).
+     * One fortress a world, so one vase.
      */
-    public static final int[] TREASURY = {THRONES[2] + 3, TERRACE_H + 2, THRONE_Z};
     public static final ResourceKey<LootTable> TREASURY_LOOT = ResourceKey.create(Registries.LOOT_TABLE, JTTWEngine.id("chests/lion_camel_treasury"));
     /** The elephant court: its extent and its centre; its wall's height. */
     public static final int COURT_X = 16, COURT_N = -50, COURT_S = -27, COURT_Z = -38, COURT_WALL_H = 6;
@@ -189,11 +189,12 @@ public final class LionCamelCity {
     // ── The blueprint ───────────────────────────────────────────────────
 
     /**
-     * Where the city's court and garrison stand (local x, y over the city's ground, z), kept clear
-     * of the bones that lie everywhere else: the Azure Lion on the terrace, the White Elephant in
-     * his court, lion-demon captains at the palace gate, lion- and peng-demons in the hall and on the
-     * terrace, elephant-demons at the main gate and in the court, a Little Wind-Driller at each gate.
-     * Who stands at each is the city feature's ({@code LionCamelCityFeature}).
+     * Where the city's garrison stands (local x, y over the city's ground, z), kept clear of the bones
+     * that lie everywhere else: a lion-demon captain on the terrace where the Azure Lion held court,
+     * an elephant-demon captain in the White Elephant's court, lion-demon captains at the palace gate,
+     * lion- and peng-demons in the hall and on the terrace, elephant-demons at the main gate and in the
+     * court, a Little Wind-Driller at each gate. Who stands at each is the city feature's
+     * ({@code LionCamelCityFeature}).
      */
     public static final int[][] POSTS = {
             {0, TERRACE_H + 1, 0}, {0, 1, COURT_Z},
@@ -541,8 +542,8 @@ public final class LionCamelCity {
         }
         // the thrones, a giant's each: a seat three wide, arms, a gilded back, a skull atop it
         if (h >= 2 && h <= THRONE_BACK + 2) {
-            // the treasury beside the Peng's
-            if (x == TREASURY[0] && h == TREASURY[1] - TERRACE_H && z == TREASURY[2]) return Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, Direction.SOUTH);
+            // where tribute was heaped beside the Peng's: a skull now, the hoard gone down into the cave
+            if (x == THRONES[2] + 3 && h == 2 && z == THRONE_Z) return skull(x, z);
             for (int t : THRONES) {
                 int d = Math.abs(x - t);
                 if (h == 2 && d <= 1 && z == THRONE_Z) return stair(Blocks.POLISHED_BLACKSTONE_STAIRS, Direction.NORTH);
@@ -608,7 +609,7 @@ public final class LionCamelCity {
         return null;
     }
 
-    /** Lays one block of the city at world {@code p}: the treasury's chest with its loot. */
+    /** Lays one block of the city at world {@code p} (a chest, if one were there, would hold the treasury's loot). */
     public static void lay(LevelAccessor level, BlockPos p, BlockState s, RandomSource random) {
         level.setBlock(p, s, Block.UPDATE_CLIENTS);
         if (s.is(Blocks.CHEST)) RandomizableContainer.setBlockEntityLootTable(level, random, p, TREASURY_LOOT);

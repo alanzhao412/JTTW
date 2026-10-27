@@ -267,23 +267,24 @@ public final class Zones {
 
     public static final ResourceKey<Biome> LION_CAMEL_RIDGE_BIOME = ResourceKey.create(Registries.BIOME, id("lion_camel_ridge"));
 
-    /** The height from which Lion-Camel Ridge takes the column: over the Bottomless Cave's, so the two may share mountains. */
+    /** The height from which Lion-Camel Ridge reshapes its ground (its fortress goes deeper). */
     public static final int LION_CAMEL_FLOOR = BOTTOMLESS_CAVE_TOP;
 
     /**
      * Levels 89-100, the last band: Lion-Camel Ridge (狮驼岭, chapters 74-77), eight hundred li of
-     * mountains swarming with demons, and Lion-Camel City (狮驼国), the walled city they took after
-     * eating all its people, where the Azure Lion and the White Elephant hold court. Over mountain
+     * mountains swarming with demons, Lion-Camel City (狮驼国), the walled city they took after
+     * eating all its people, and behind it the Lion-Camel Cave, the fortress sunk deep in the
+     * mountain where the Azure Lion and the White Elephant hold court at the bottom. Over mountain
      * country (the Bottomless Cave's hosts) and the rugged savanna highlands (plateaus, windswept
-     * savanna), from y {@value #LION_CAMEL_FLOOR} up: it shares no heights with the cave under the
-     * same mountains, so the two may lie in the same columns, the ridge over the labyrinth; it keeps
-     * clear of every zone before it that takes the surface. Its host is judged at y 256, as the
-     * cave's is. Its creatures are the Great Peng's kin and
-     * followers: they spare a Peng player ({@link ZoneAllies#PENG}), the two demon kings too.
+     * savanna), the whole column: the fortress goes far down under the city, so the ridge keeps clear
+     * of the Bottomless Cave as of every zone before it. Its host is judged at y 256, as the cave's
+     * is. Its ground is reshaped only from y {@value #LION_CAMEL_FLOOR} up. Its creatures are the
+     * Great Peng's kin and followers: they spare a Peng player ({@link ZoneAllies#PENG}), the two
+     * demon kings too.
      */
     public static final Zone LION_CAMEL = Zone.overworld(LION_CAMEL_RIDGE_BIOME,
             TagKey.create(Registries.BIOME, id("lion_camel_ridge_hosts")), ZoneLayout.LION_CAMEL,
-            Vertical.above(LION_CAMEL_FLOOR), 89, 100, 160).hostSampledAt(256).alliedTo(ZoneAllies.PENG);
+            Vertical.WHOLE_COLUMN, 89, 100, 160).hostSampledAt(256).alliedTo(ZoneAllies.PENG);
 
     public static final ResourceKey<Biome> FENGDU_BIOME = ResourceKey.create(Registries.BIOME, id("fengdu"));
 

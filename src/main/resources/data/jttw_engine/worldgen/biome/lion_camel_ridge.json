@@ -87,26 +87,26 @@
       {
         "type": "jttw_engine:lion_demon",
         "weight": 60,
-        "minCount": 2,
-        "maxCount": 4
+        "minCount": 3,
+        "maxCount": 6
       },
       {
         "type": "jttw_engine:peng_demon",
         "weight": 40,
         "minCount": 2,
-        "maxCount": 3
+        "maxCount": 4
       },
       {
         "type": "jttw_engine:elephant_demon",
         "weight": 30,
-        "minCount": 1,
-        "maxCount": 2
+        "minCount": 2,
+        "maxCount": 3
       },
       {
         "type": "jttw_engine:little_wind_driller",
         "weight": 18,
         "minCount": 1,
-        "maxCount": 1
+        "maxCount": 2
       }
     ],
     "underground_water_creature": [],

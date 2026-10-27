@@ -208,10 +208,10 @@ Abilities and items are drawn from the source material rather than invented:
   - **Bell of Taiyi** (太乙钟): in the Jade Palace, one in all Heaven: the east one of the two
     treasury chests beside the throne (`chests/jade_palace_treasury`, the palace's loot and the bell,
     always). One palace a world, so one bell.
-  - **Yin-Yang Vase** (阴阳二气瓶, the Great Peng's): in Lion-Camel City alone, in the demon kings'
-    treasury, a chest on the throne-hall dais beside the Great Peng's empty throne
-    (`chests/lion_camel_treasury`: the vase, always, among gold, gems, bones and the ridge's
-    spoils). One city a world, so one vase.
+  - **Yin-Yang Vase** (阴阳二气瓶, the Great Peng's): at the bottom of the Lion-Camel Cave alone, in
+    the demon kings' treasury, a chest on the throne room's dais beside the Great Peng's empty
+    throne (`chests/lion_camel_treasury`: the vase, always, among gold, gems, bones and the ridge's
+    spoils). One fortress a world, so one vase.
   - **Banana-Leaf Fan**: one a world, in the treasure chest of the palace on Mount Kunlun's summit (see Mount Kunlun).
 - **Wu Clones** — Wukong's hair-clone technique, implemented as summoned entities with their own
   pathfinding goals ([`WuCloneManager`](src/main/java/com/jttw/engine/character/wukong/WuCloneManager.java))
@@ -300,16 +300,25 @@ is what makes the rest possible:
   and the Phoenix's Rising Ember are true flight from their first tier, a little under cruising
   speed, never a glide; the Dragon's Elytra Glide stays a glide, but only in its own shape: a
   form with wings, the Azure Dragon or a flying form of the 18 Transformations, always flies; Nezha
-  flies on his Wind Fire Wheels at cruising speed, and at the fastest with Blazing Trail). Above
-  every tier, Sun Wukong at full Somersault Cloud momentum and the Gold-Winged Peng at the height
-  of his Ninety-Thousand-Li wingbeats reach the top speed anyone flies: 200 blocks a second.
-- **The Great Void.** Faster than the world can be generated (about 80 blocks a second over new
-  land on a 16-core machine), so those two also have a key (Y) into
+  flies on his Wind Fire Wheels at cruising speed, and at the fastest with Blazing Trail).
+- **Momentum.** Above every tier, a flier held at full speed in their highest flight (the top tier
+  of their flight line, or a form's wings or a Heavenly's cloud, which have none) builds over 10
+  seconds to their own top speed, and loses it in 2 when they fall short
+  ([`FlightMomentum`](src/main/java/com/jttw/engine/flight/FlightMomentum.java)): Sun Wukong and
+  Erlang Shen 150 blocks a second; Nezha 120; the Dragon, the Phoenix, Heaven's other beings and
+  everyone else 100; the great bulky ones (the Bull Demon King, the Saurian Demon King, the Turtle,
+  the Grand Saint of Nine Spirits) 65. The Gold-Winged Peng builds to 150 his own way, by his
+  Ninety-Thousand-Li wingbeats.
+- **The Great Void.** Wukong and the Peng fly faster than the world can be generated (about 80
+  blocks a second over new land on a 16-core machine), so they also have a key (Y) into
   [`GreatVoid`](src/main/java/com/jttw/engine/dimension/GreatVoid.java): an empty dimension laid
-  one to one over every other, nothing generated in it, where the full 200 holds (194 measured
-  over never-visited space, against 72 in the Overworld). One goes in at the same x, y, z and comes
-  out at the same x, z, in the realm one came from, at one's own height, or the nearest room above
-  or below if that is inside something. In the Void one always flies and is held up at its floor.
+  one to one over every other, nothing generated in it, loaded only three chunks round a
+  traveller, where their momentum builds to 1000 blocks a second. Empty chunks still cost the
+  server something, so on that machine about 500 a second is made in practice (485 measured over
+  never-visited space, against 72 in the Overworld at 200). One goes in at the same x, y, z and
+  comes out at the same x, z, in the realm one came from, at one's own height, or the nearest room
+  above or below if that is inside something. In the Void one always flies and is held up at its
+  floor.
 - **Independent velocity clamps** on the vertical and horizontal axes, plus a separate strafe scale,
   so lateral drift doesn't match forward thrust.
 - **A parallel swim system** with its own stored vector, distinct cruise and sprint speeds, and a
@@ -410,13 +419,13 @@ west lengthens with the pilgrim: the higher a zone's levels, the farther out its
 
 | Zone | Levels | Distance from spawn (centre) | Regions |
 |---|---|---|---|
-| White Bone Ridge | 20–36 | 1–2 km | one, ~520 blocks across |
-| Bottomless Cave (under mountains) | 37–46 | 2–3 km | one, ~220 |
+| White Bone Ridge | 20–36 | 1–2 km | one, ~840 blocks across (never under 720) |
+| Bottomless Cave (Pit-Hole Mountain and under it) | 37–46 | 2–3 km | one, ~380 |
 | Mystical Waters (deep ocean) | 47–56 | 3–4.5 km | four, one per sea (within 30° of east, south, west, north), ~440 |
 | Hell (a dimension, entered through Fengdu) | 57–66 | — | the Ten Courts |
-| Flaming Mountains | 67–77 | 4.5–6 km | one, ~400 |
+| Flaming Mountains | 67–77 | 4.5–6 km | one, ~640 |
 | Mount Wuzhuang (over the clouds) | 78–88 | 6–7.5 km | one, ~260 |
-| Lion-Camel Ridge | 89–100 | 7.5–9 km | one, ~380 |
+| Lion-Camel Ridge | 89–100 | 7.5–9 km | one, ~680 |
 | Fengdu, the Ghost City (river and hill country) | none: the way to Hell | 9–10.5 km | one, ~240 |
 | Mount Kunlun (mountain country, to the west) | none: the Banana-Leaf Fan | 5–8 km, within 30° of west | one, ~380 |
 
@@ -479,58 +488,252 @@ To add a zone:
    -Pbench.mode=zones -Pbench.seed=<seed>` (`ZoneBench`: each zone's place, distance and host, a
    map of the 20 km square round spawn, and a visit to each region: its biome, its bosses, a picture).
 
+#### White Bone Ridge (levels 20–36)
+
+A bleak massif of bleached stone, crags and mesas strewn with bones, its dead (Bone Servants and
+Wraiths, `entity/ridge`) about it in any light, two to four at a time. At its heart stands a great
+bone mountain, and under it the **White Bone Cave** (白骨洞), Lady White Bone's fortress: a blueprint
+(`world/ridge/WhiteBoneCave`) laid chunk by chunk as the land is made (`WhiteBoneCaveFeature`, the
+mountain and the road by `BoneMassifFeature`), so it comes out whole whichever chunk is made first.
+
+- **The approach.** The region is about 840 blocks across. The mountain is some 260 across, a spire
+  at its top and great tusks of bone leaning out of its flanks; the ridge's own crags are worn down
+  toward it so it rises out of them. A paved road winds 130 blocks down its southern face from the
+  forecourt, under a bone arch, past three pairs of watchtowers; five palisaded outposts with a
+  tower and a fire stand 190–260 blocks out round it. Over a hundred of the garrison stand outside: the
+  door's two keepers and their escort in the forecourt, a sentry at each tower's foot and on its
+  top, four patrols on the road (a captain and two), each outpost's captain and four, and sixteen
+  packs of a captain and three roaming the flanks.
+- **The great door.** In the back of a forecourt cut into the mountain, under a skull carved in the
+  cliff with eyes of crying obsidian, a door of bone and iron 13 wide and 16 high in a frame of
+  blackstone, two ribs arched over the court before it. It stays shut while either of its keepers,
+  the **Keepers of the Bone Gate** (level 28 captains), lives; once both are dead it grinds open as
+  someone comes within 12 blocks, its leaves folding back against the passage, and stays open for
+  good (`CaveKeeper`, `CaveState`).
+- **Eight floors**, each 16 blocks under the last, each a hall some 90 blocks across in its own
+  stone, light and dead: the **Ossuary Gate** (a vaulted nave of bone pillars); the **Corpse Halls**
+  (three long halls of biers, the middle one walled across); the **Bone Forge** (a forge chimney in a
+  ring of lava, two lava channels bridged only near their ends); the **Catacombs** (a 12 by 12 maze
+  of burial passages, the world's own); the **Hall of Borrowed Faces** (galleries of plaster, dark
+  wood and smoked glass, her cast-off shapes against the walls, crossed by its inner ring); the
+  **Charnel Pit** (a pit of bones seven deep, a ribbed causeway over it); the **Soul-Fire Crypt** (a
+  low forest of basalt pillars, trenches of soul fire); and the **Bone Bridge** (a chasm, a bridge of
+  bone over it). Each way down is a corridor in the hall's wall behind a **seal** of iron bars, then
+  a stair in the rock; the stairs alternate north and south, so every floor is crossed end to end.
+- **Who holds them.** Each floor has 8 + k regulars and 1 + k/2 captains (k from 0), regulars from
+  level 21 on the first to 33 on the last, captains five over, placed at fixed posts (laid by the
+  seed); and before its seal its **Warden** (a Bone Servant captain six levels over its floor, with
+  60% more health). A Warden's death breaks its seal for good. Every one of them is kept (never
+  despawned) and held near its post. One found off its floor with no one to fight is put back at its
+  post, and none is ever let into the throne room.
+- **Restocking.** A floor no player has been on for 15 minutes is manned again when someone comes
+  back to it: each empty post is filled (the Warden too, though the seal stays broken), never within
+  12 blocks of a player.
+- **Checkpoints: the well of the dead.** A ladder shaft runs in the rock from the first floor to the
+  last, a short corridor to it from each. A grate bars it over each floor's landing until that floor
+  is won (the seal above it broken), so after a death one climbs straight down to the deepest floor
+  reached instead of fighting through again.
+- **The Throne of Bones**, under the last floor: 61 by 69 blocks under a vault 28 high ribbed like a
+  ribcage, two rows of bone pillars, braziers of soul fire, walls of stacked bone set with skulls, a
+  great skull over a stepped dais and a throne of bone. Lady White Bone is put there when the land is
+  made, passing for one of her court of six; her fight is as it was (found out by a blow or by
+  truth-seeing eyes, her blinks, her false deaths, her veil, her boss bar only while she is herself),
+  but she never leaves the room: a blink that would take her out of it is not taken, and if she is
+  ever outside it (thrown, pulled) she is back in its middle at once. She persists and, once killed,
+  does not come back.
+- **Natural spawns** keep to the open ridge (`RidgeRules`): none inside the cave, whose floors hold
+  only their garrison.
+- **The Earth God's Luopan** points the ridge's band to the great door, and in the ridge's country
+  says the door is at the head of the road, that its keepers must fall first, and that eight floors
+  lie under it.
+- **Old worlds.** Whether a world has the cave is decided once, the first time it is loaded with it,
+  and remembered (`CaveSites`, `CaveState`): a world any of whose chunks over the fortress were
+  already made keeps its old open-air lair at the region's centre, Lady White Bone in it, and gets no
+  mountain or cave at all, so nothing is half-built round her. The region's ground already made keeps
+  its old shape; new ground out to the larger radius is the ridge's too, so its edge may show a seam.
+- **Cost.** The ridge bench (`./gradlew runWorldgenBench -Pbench.mode=ridge -Pbench.seed=<seed>`,
+  `RidgeBench`) times the 19 by 19 chunks round the heart and photographs the mountain, the road,
+  the door and every floor: on seeds 12345 and 42, 18–26 s for the 361 chunks (14–20 a second; 14–15
+  s, 24–26 a second, before the cave), the massif 12–14 ms a chunk and the cave 5–8 ms a chunk where it lies. The
+  cave's inside is also laid in the form gallery (`RidgeScenes`).
+
 #### The Bottomless Cave (levels 37–46)
 
-Mount Xiankong's Bottomless Cave (无底洞, chapters 80–83), home of Lady Earth Flow, the
+Pit-Hole Mountain's Bottomless Cave (陷空山无底洞, chapters 80–83), home of Lady Earth Flow, the
 Golden-Nosed, White-Furred Mouse Spirit. An underground zone (`Zones.BOTTOMLESS`):
 `Vertical.below(40)` under mountain country (peaks, slopes, groves, meadows, cherry groves,
-windswept hills), one region a world 2–3 km from spawn, about 220 blocks across. Its host is judged
-at y 256, above any mountain's top, where a column's biome is always its surface biome (judged lower,
-under a tall peak, it can be a cave biome). Being after White Bone Ridge in `Zones.ALL` and sharing
-its heights, it keeps clear of the ridge's region. Grunt XP 100 (260 a kill there,
-with the band's scaling), against the ridge's 80.
+windswept hills), one region a world 2–3 km from spawn, about 380 blocks across (radius 190, never
+under 330). Its host is judged at y 256, above any mountain's top, where a column's biome is always
+its surface biome (judged lower, under a tall peak, it can be a cave biome). Being after White Bone
+Ridge in `Zones.ALL` and sharing its heights, it keeps clear of the ridge's region. Grunt XP 100 (260
+a kill there, with the band's scaling), against the ridge's 80. Her lair is no longer out in the
+open: the mountain crawls with her household, a giant door in its side opens on the cave, and eight
+floors of maze go down, each wider and harder than the last, to her throne room at the very bottom
+of the world.
 
-- **Terrain** (`world/feature/Labyrinth`, `BottomlessCaveFeature`): at the region's centre a
-  sinkhole and a mouth about ten feet across, then a shaft down from the surface to y 32, open in
-  the middle (a pool at the bottom to fall into) with a spiral mud-brick stair round it, laid in
-  half blocks, a lantern each turn. Below, three levels of labyrinth (walked at y 32, 16 and 0), each
-  a maze on a 21x21 grid within 70 blocks of the centre: a Kruskal spanning tree (it branches and
-  dead-ends often) with a few loops, six chambers a level (nests, larders, bone heaps, flowered
-  grottoes), and three spiral stairs down from each level, out toward the rim and never under one
-  another, so every level must be crossed. The top level's hub takes the shaft. At the bottom, her
-  palace: a 31-block hall of blackstone and gold, red pillars, a carpet from gate to gate up to her
-  dais, flower beds down both sides, smoking censers, candles, lanterns on chains, spore blossoms
-  and shroomlight lamps; and out toward the rim, her shrine, with tablets to her adoptive father and
-  brother (Li Jing and Nezha). The labyrinth is worked out from the seed and the region's centre
-  alone (`Labyrinth.of`, pure Java, unit-tested): each chunk lays its own part, palace included, so
-  nothing laid later undoes it. Its slabs of height are its own (rock where not open), so vanilla
-  caves, water and lava never break in. Tunnels are lit here and there (lanterns, pale soul
-  lanterns), stairs by a light in their pillar, chambers by a lantern, the palace well.
+- **Pit-Hole Mountain** (`world/feature/PitHole`, pure, unit-tested; laid by
+  `BottomlessCaveFeature`): a craggy massif raised out of the land round the region's centre, steep
+  (it falls 1.5 a block), its summit sunk in a hollow 18 deep (as its name says), rising to y 200,
+  with a brow of rock 22 blocks over the door and a talus of rock falling away round the forecourt. A **road** winds up to the door: from the land below,
+  a track of beaten earth, then a shelf cut into the mountain's flank, curling round it and climbing
+  0.42 a block (about 220 blocks of it up on the mountain), lanterns on posts along its outer edge.
+  **Outposts** watch it and the slopes: spruce watchtowers on stilts (a ladder up, a railed deck, a
+  lantern, a banner), burrow mounds with a mouse hole, the mice's camps (a fire, log seats, a pot,
+  hay), guard nooks along the mountain road, and where the road leaves the mountain, a stele
+  (陷空山 Pit-Hole Mountain, 无底洞 ahead). Forecourt and road are laid in ground no tree roots in.
+- **The great door**: in the mountainside, 56 blocks out from the centre on one of the four sides
+  (from the seed), at the height of the land there but never under y 150: a forecourt cut level into
+  the slope and open to the sky (mud-brick way, skulls on stakes, a soul lantern either side), and
+  across its back the gate: leaves of red lacquer banded in iron and studded in gold, **nine wide
+  and eleven high**, in a frame of black stone carved with a gold cloud-scroll; before it two great
+  pillars of blackstone banded in gold with soul fire on their heads, a red beam with the plaque
+  (无底洞 THE BOTTOMLESS CAVE) and a roof of dark tiles with lanterns hung from its eaves. **It is
+  barred from within while its guard stands**: a mouse captain, three of his pack and two maids are
+  posted in the forecourt; use the door with any of them alive within 48 blocks and it will not move
+  (you are told how many still stand); when the last has fallen, it grinds open at a touch (its
+  leaves are gone) and stays open. Its leaves and frame are the cave's own (see below).
+- **The gate hall and the great shaft**: behind the door a hall 11 wide and 13 high runs in to the
+  centre (deepslate and blackstone, lamps in its walls, pillars capped in gold, lanterns, a red
+  carpet), and there **the great shaft** drops to the first floor's hub, some 50 blocks: a void 6
+  across in the middle, a pool at its foot to fall into, and round it a mud-brick stair in a spiral,
+  laid in half blocks (walked without a jump), a lantern each turn.
+- **Eight floors of maze** (`world/feature/Labyrinth`, pure, unit-tested), one under another, each a
+  maze on a grid of cells 7 blocks apart (3-block tunnels, 4 of rock between), wider and harder the
+  deeper:
+
+  | Floor | Walked at | Across | Halls |
+  |---|---|---|---|
+  | 1, the Burrows | y 98 (galleries 103) | ~84 | nests, larders; earth and roots |
+  | 2, the Granaries | y 81 | ~98 | granaries (stolen grain, sacks, barrels), larders; mud brick in courses, planking |
+  | 3, the Bone Warrens | y 64 | ~112 | bone heaps, nests; tuff, cobwebs, skulls |
+  | 4, the Fungus Caverns | y 47 | ~126 | giant mushrooms on moss, grottoes; spore blossoms, glow lichen |
+  | 5, the Underground River | y 30 | ~140 | the river through its halls, grottoes; a run of flooded tunnels across the floor |
+  | 6, the Dark Warren | y 13 | ~154 | bone heaps, nests; blackstone and soul soil (soul sand slows), **unlit** |
+  | 7, the Storerooms | y −4 | ~168 | her storerooms (chests of `chests/bottomless_storeroom`, barrels, gold), granaries |
+  | 8, the Bridal Halls | y −21 | ~182 | her bridal chambers made ready for the Tang monk (red carpet, red candles, flowers), grottoes |
+
+  Each floor is **a hard maze**: a spanning tree of its cells (Kruskal's: it branches and dead-ends
+  everywhere), with a few loops (more the deeper); 3–6 halls merged from several cells; and **two
+  storeys**: tunnels at its floor and galleries five blocks over them (blobs of upper cells, more and
+  larger the deeper), joined to the tunnels by ramps (both ways) and dropped out of by holes in their
+  floors and by balconies over the halls (one way only: what you drop into, you must walk out of).
+  Every cell is reached both ways by the tree; the drops are shortcuts and traps. Lanterns light a
+  share of the tunnels (13% on the first floor, fewer deeper, none on the sixth): long stretches are
+  dark. **The way down is hidden deep in each floor**: a spiral stair in the cell farthest *by the
+  walk* from where one came in (never within four cells of it as the crow flies; 18–49 cells' walk
+  in, the deeper the longer), a step a block of the fall (17 blocks between floors, 29 for the last
+  descent to the throne level), a light in its pillar at each end; its **guardian** stands in the cell
+  before it (see below). Each floor's stair comes out in the next floor's maze, where its way down is
+  again the farthest cell. From the door to her throne the cave falls some 200 blocks, from the mountain's side down
+  nearly to the world's floor.
+- **The throne level** (y −50): **her palace**, a hall 31 blocks square and 20 high (blackstone and
+  gold, red pillars, a carpet from gate to gate up to her dais, flower beds down both sides, censers,
+  candles, lanterns on long chains, spore blossoms, shroomlight lamps in two rows), reached from the
+  last stair's foot by a processional way (red carpet, lanterns) round to its nearer gate; behind it,
+  out of its back gate and down a narrow turning way, **her shrine** (tablets to Li Jing and Nezha,
+  candles, incense, flowers).
+- **The cave's own rock** (`bottomless_earth`, `bottomless_stone`, `bottomless_deep`, the door's
+  `bottomless_gate` and `bottomless_gate_frame`; textures from `assets_source/bottomless_rock.py`):
+  every floor's walls, floors and roofs, the shell round each floor, the stairs' wells, the gate
+  hall, the shaft. **None digs it** (unbreakable), **blasts it** (resistance 3,600,000), **carves
+  it** (`Carving` cost infinite, for every destruction power), **pushes it** (pistons) or **phases
+  through it** (the tag `jttw_engine:unphasable`, which `BlockStateBaseMixin` respects). Where a face
+  of it is backed by more of it, the face is dressed in the floor's own stone or earth (which may be
+  dug, but only to find the cave's rock behind it); ceilings and the one-block slabs between storeys
+  are the cave's rock itself. Chorus fruit does not work inside the fortress. Hitting it tells you so.
+  The mazes must be walked.
+- **The household** (`world/cave/CaveRules`, `CaveHousehold`):
+  - **Outside**: no other monster comes of itself over the cave's region, on the mountain or in the
+    fortress (`MobSpawnEvent.SpawnPlacementCheck`); instead the mountain is kept **crawling**: round
+    anyone climbing it, packs of 3–5 mice and pairs of maids (12% led by a captain with escorts) come
+    up out of sight 22–44 blocks off, every 3 s while fewer than 16 are within 48 blocks; a third of
+    them **patrol** the road, a stretch at a time, up toward the door or down. Each outpost has its
+    watch posted (4–5 mice, a captain at the towers; mixed at the camps; 3 at the nooks), the gate its
+    guard.
+  - **Inside**: each floor's household is **posted** when the land is made: a group in every hall (two
+    in the larger), a few at crossings and in the galleries, more and with more captains the deeper
+    (about 14 on the first floor to 30 on the eighth), and its **guardian** before its way down: a
+    captain of more than a captain's strength (twice its health), named for the floor ("Warden of the
+    Granaries"), mice on odd floors, maids on even (who mend the rest). **Stronger the deeper**:
+    regulars level 38 on the first floor to 44 on the eighth, captains 43 to 49, guardians 40 to 47
+    (the mountain's 37 and 44). The posted are kept (never despawned, even on Peaceful) and keep to
+    their floor: idle and off it (having chased someone up or down a stair, or fallen), they go back
+    to their post. **Respawn**: the posted, the guardians and the gate's guard do not come back once
+    killed; but **the cave breeds**: while someone walks a floor, now and then (every 15 s on the first,
+    11 s on the eighth) a group of that floor's strength comes up out of the tunnels 14–32 blocks off,
+    while fewer than 5–8 are near. The bred are not kept, and one found off its floor with no one to
+    fight slinks away (is gone), so none wanders down into her throne room.
+- **The Earth Gods' landings (checkpoints)**: inside the door, on each floor in the cell one first
+  steps into from the stair (on the first, the hub's edge), and before her palace's gate, an Earth
+  God keeps a niche (his tablet, 土地, and three candles). Step up to one and he will raise you there
+  should you fall: your respawn is set there (forced, no bed needed), and you are told. Dying on the
+  sixth floor sends you back to the sixth floor's landing, not the mountain's foot.
 - **Mouse Spirit** (`entity/cave/MouseSpiritEntity`): 2 hits, a bite of 7% of health; quick
   (0.36), in packs of 3–5 (a captain brings 4). Strike one and the pack turns on you; each darts in,
   bites and scurries back, so a pack circles.
 - **Flower Maid** (`FlowerMaidEntity`): 5 hits, a stab of 15%; every 5 s she mends the most
   wounded of the household near her (a fifth of its health; 3% of her mistress's), and pressed
   close she breathes out pollen (Slowness II and Weakness for 4 s).
-- **Lady Earth Flow** (`LadyEarthFlowEntity`, a `ZoneBoss`, level 43, 80 hits, pink bar): her
-  twin swords cut twice a stroke (12.5% each; the female blade slows). At 60% (phase 1) she calls
-  4 mice and 2 maids and starts to burrow, rising behind whoever she fights. At 30% (phase 2),
-  once, she leaves her embroidered shoe in her likeness (`EarthFlowDecoyEntity`: weak, no XP or
-  karma, a shoe again when struck down or after a minute) and flees to her shrine, strewing petals
-  on the floor along the way; no blow kills her before that. Alone there she mends, up to half her
-  health; found, she fights to the end. Karma +150, captains +5.
+- **Lady Earth Flow** (`LadyEarthFlowEntity`, a `ZoneBoss`, level 43, 80 hits, pink bar), put on her
+  dais once when the land is made, two maids beside her: her twin swords cut twice a stroke (12.5%
+  each; the female blade slows). At 60% (phase 1) she calls 4 mice and 2 maids and starts to burrow,
+  rising behind whoever she fights. At 30% (phase 2), once, she leaves her embroidered shoe in her
+  likeness (`EarthFlowDecoyEntity`: weak, no XP or karma, a shoe again when struck down or after a
+  minute) and flees out of the palace's back gate to her shrine, strewing petals along the way; no
+  blow kills her before that. Alone there she mends, up to half her health; found, she fights to the
+  end. Karma +150, captains +5. **She never leaves her throne room**: bound to her cave, she keeps to
+  her palace (18 blocks round her dais), and fled, to her shrine (8); drawn or carried six blocks
+  past it, or as high or low, she is back where she belongs within a second (`keepToLair`). She is
+  never despawned and, killed, does not come back.
 - **Drops**: her twin swords (`EarthFlowSwordItem`, male and female: +35% damage, a quick sword;
   held as a pair, drawn into both hands like Nezha's Yin-Yang Swords through `PairedBlade`, every cut
   is followed by a second for 40%), the Stolen Candle of Spirit Mountain, sigils, gold; Spirit
   Whiskers from mice, Night-Blooming Petals from maids (and a second True Samadhi Fire recipe from
-  them), the Embroidered Shoe from her likeness.
+  them), the Embroidered Shoe from her likeness; the storerooms' chests (gold, emeralds, bread,
+  wheat, candles, iron, now and then a diamond or a captain's sigil, whiskers and petals).
+- **The Earth God's Luopan** points to the great door (by the seed and the region's centre alone:
+  `Labyrinth.doorOf`), and the Earth God tells of Pit-Hole Mountain's door and the eight floors.
+- **Older worlds**: the cave's region is larger, so in a world made before this its place may have
+  moved (its host is checked farther out). Ground already made keeps what it has: an old three-level
+  labyrinth and its lady stay as they were and work as before (she is not bound to a fortress, so she
+  is not leashed and, fleeing, runs off rather than to a shrine); new ground gets the new design, so
+  a region half made before may have a fortress cut off at the old chunks' edge (closed in by the
+  cave's rock; nothing breaks) or an old lady and, where the new throne room is first made, a new
+  one. The Luopan points to where the new door is or will be. (Both bench seeds moved: 12345's from
+  −1851 −1872 to 1283 2242, 42's from −2668 879 to −2668 1240.)
+- **Cost**: the cave's own feature takes 2.3–3.1 ms a chunk where it lays anything (some 475 chunks
+  round a region, 1.1–1.5 s of worker time all told; the old cave took 0.9–1.0 ms a chunk over about
+  100 chunks), and posting the household about 0.2 s more; the 289 chunks round the centre take some
+  18–20 s to make against 9 s before (`runWorldgenBench -Pbench.mode=cave` reports all three). In
+  the GameTests the fortress is laid a few chunks a tick, its rock set straight into the chunks'
+  sections: laid the ordinary way into the flat test world, its two million blocks of rock queued so
+  much light work that the batch's platforms never came to tick.
 - **Art**: `CaveRenderers` (a box model for the mice; a person's frame with skirt, collar, hair,
   ears, gold nose and tail for the maids and her); skins from `assets_source/mouse_spirit.py`,
-  `flower_maid.py`, `lady_earth_flow.py`, item icons from `cave_items.py` (helpers in `cave_skin.py`).
-- **Seeing it**: `./gradlew runFormGallery -Pgallery.only=cave_` (creatures, her, her likeness,
-  and the labyrinth laid in the gallery's flat world: palace, shrine, tunnel, stair, hub);
-  `./gradlew runWorldgenBench -Pbench.mode=cave` (its region: a plan of each level as
-  built, a cut through the shaft, and pictures, in `run-bench/screenshots/zones/`).
+  `flower_maid.py`, `lady_earth_flow.py`, item icons from `cave_items.py` (helpers in `cave_skin.py`),
+  the cave's blocks from `bottomless_rock.py`.
+- **Tests and pictures**: `LabyrinthTest` (the same cave from every chunk; eight floors, each under
+  the last and wider; a block-by-block walk from inside the door reaches every floor's way in and way
+  down, her palace and her shrine, and from her throne the way back up to the door; shut, the door
+  holds; each floor a maze of dead ends, branchings, galleries, ramps and drops, its way down deep in
+  it; one guardian a floor, more household the deeper; the stairs a step a block; the great shaft
+  walked without a jump; the trail to her shrine), `PitHoleTest` (the mountain over every floor that
+  rises above the land, the door in its cliff, the road down without a break, the outposts),
+  `BottomlessCaveZoneTest` (one region a world, about 380 across, in its ring, its fortress, outposts
+  and door within it, clear of the other zones); GameTests in `CaveFortressGameTests` (the fortress laid
+  in a world and walked block by block from inside the door to every floor's way down and her throne;
+  its walls the cave's own rock; the household posted floor by floor, a guardian before each way
+  down; she stays in her throne room, and her fight there, her flight to her shrine; the door barred
+  while its guard stands and open when they fall; the Earth Gods' landings; the Luopan to the door;
+  no other monster over the cave; the household keeping to its floors) and `CaveGameTests` (the
+  creatures and her fight). `./gradlew runFormGallery -Pgallery.only=cave_` (creatures, her, her
+  likeness, and the fortress laid off the stage: her palace, dais and shrine, a tunnel of the
+  burrows, the fungus caverns, a granary, a storeroom, a bridal hall, a ramp, a stair, a guardian, the
+  hub, the gate hall); `./gradlew runWorldgenBench -Pbench.mode=cave` (its region in a real world: a
+  plan of each floor's storeys as built, a cut through the whole depth, the household as posted,
+  and pictures, from the mountain afar and its road to the door, the gate hall, the shaft, the
+  floors, the last descent and her palace, in `run-bench/screenshots/zones/`).
+
 #### The Mystical Waters (levels 47–56)
 
 The Four Seas and the Dragon Kings' crystal palaces (水晶宫, novel chapter 3), in
@@ -734,16 +937,23 @@ Boy's Fire Cloud Cave on Mount Haohao (火云洞, chapters 40–42), in
 
 - **Where** (`Zones.FIRE_MOUNTAIN`): over hot, dry country (desert, badlands, eroded and wooded
   badlands, savanna, savanna plateau, windswept savanna; White Bone Ridge's hosts and plain savanna),
-  the whole column. One range a world, about 400 blocks across, 4.5–6 km from spawn, on hot, dry
-  ground and clear of every zone before it.
+  the whole column. One range a world, about 640 blocks across (never under 540), 4.5–6 km from
+  spawn, on hot, dry ground and clear of every zone before it.
 - **The range** (`RangeShape`, `FlamingRangeFeature`, pure and unit-tested): from the region's edge
   the ground climbs over the outer fifth into long chains of red mountains (ridged noise, rounded
-  summits, up to some 90 blocks over the land), valleys between them; Mount Haohao rises 45 more
-  at the heart, and a gorge is cut through it from the cave's gate to the region's edge. Faces show
+  summits, up to some 90 blocks over the land), valleys between them; Mount Haohao rises 55 more
+  over 140 blocks round the heart, and **Withered Pine Ravine** (枯松涧) is cut through it, 37 blocks
+  wide, from the cave's great door to the region's edge, withered black pines along its floor. Faces show
   banded flame rock, red, orange and brown terracotta with seams of magma; high ground is flame
   rock and cinder ash; valley floors (about a quarter of it) are **burning earth**. Fire on the
   burning earth in patches, seams of lava in level valley floors, smoking vents, charred basalt
   spires (`FlameSeamsFeature`). Orange sky and fog, falling ash, no rain; nothing grows.
+- **The outposts** (`RangeShape.outposts`, laid by `FlameSeamsFeature`): watchtowers of red brick in
+  rings of black stone, a signal fire smoking on top and braziers round them, one tried every 72
+  blocks over the range (some 20–35 a region) and three on the ravine's rims looking down on the way
+  to the door. Each has its band, put there once and kept: a captain and three or four imps and
+  brutes; about one band in three is a patrol that roams 40 blocks round its tower. The mountains'
+  own creatures come in bigger packs than before (imps 3–5, brutes 1–2) and one in eight is a captain.
 - **The heat** (`FireMountain`, `BurningEarthBlock`): lit burning earth scorches whatever stands on
   it once a second, **4% of its health** (magma's hot-floor damage, so armour softens it) and sets it
   alight for 3 s; **Fire Resistance**, or being fire-proof, keeps it off entirely (as it does the
@@ -761,8 +971,8 @@ Boy's Fire Cloud Cave on Mount Haohao (火云洞, chapters 40–42), in
   armoured, blows of 30%; when close they raise both fists for 0.8 s and slam the ground: 22%, thrown
   up and set alight within 4 blocks).
 - **Red Boy's Six Strong Generals** (六健将, `StrongGeneralEntity`, one model, six skins): always of a
-  captain's strength (level 74, 25 hits, blows of 29%), alone, posted at the cave (the two Winds at
-  the gate, four in the hall), kept even on Peaceful. Each has his trick every 5 s: **Cloud-Soaring
+  captain's strength (25 hits, blows of 29%), each the guardian of one of the cave's first six
+  floors (below), kept even on Peaceful. Each has his trick every 5 s: **Cloud-Soaring
   Sprite** (云里雾) leaps high and lands in a burst of blinding cloud; **Fog-Diving Monster** (雾里云)
   vanishes into fog and comes out behind his foe; **Mad-Hurrying Wind** (急如火) charges, fire springing
   up in his track; **Swift-Rushing Wind** (快如风), the fastest, hurls all near him away; **Flame-Head
@@ -786,11 +996,62 @@ Boy's Fire Cloud Cave on Mount Haohao (火云洞, chapters 40–42), in
   the burning). On the ground it burns out after 5–8 s and only so: no water flows into it or can be
   poured on it, a splash of water does not douse it, no hand beats it out, the fan passes over it.
   It spares Red Boy's household. His breath lights the Eight Trigrams Furnace in its line.
-- **The Fire Cloud Cave** (`FireCloudCave`, a blueprint each chunk lays its share of): a stone gate of
-  polished blackstone with a gilded plaque, red pillars and braziers, at the head of the gorge; a
-  lantern-hung passage into the mountain; the inner hall, a domed cavern of red brick, six pillars
-  with fire-lamps, four pools of lava, a gilded dais where Red Boy stands, a red carpet to it, his
-  throne between two braziers. Red Boy and his generals are put there once (`FireCloudCaveFeature`).
+- **The Fire Cloud Cave** (`FortressPlan`, a plan of the whole fortress worked out once, the same in
+  every world, pure and unit-tested; `FortressBlocks` says what each of its codes is, and the range
+  lays it column by column so it comes out whole across its chunks; `FireFortress` keeps it). Red Boy
+  is no longer in the open: the cave goes eight floors down into Mount Haohao, under the region's
+  centre, and he sits at the very bottom.
+  - **The great door**, at the head of Withered Pine Ravine: a facade of black stone in the cliff,
+    two red pillars with braziers on them, two crouching demons with eyes of fire, a gilded plaque
+    and a tiered roof; the door two leaves of bronze banded with black iron and studded with gold,
+    **13 blocks wide and 14 high**. Before it a forecourt of standing braziers and **its two
+    wardens** (Furnace-Brick Brutes of a captain's strength) with four imps. **The rule**: while the
+    wardens live the door is barred from within (knock on it, that is use it, and they turn on you);
+    kill them and knock again and it grinds open from the middle out over two seconds, and stays
+    open. It does not yield to picks (nor do the floors' grates). A player in creative opens it
+    regardless.
+  - **Eight floors**, each a great hall of its own (at least 1,200 open columns, none a corridor),
+    each 13 blocks under the last, reached down a stair cut in the rock round the halls (on a
+    different side each time); each floor's way down is shut by an iron grate its **guardian**
+    holds, and his death throws it open: (1) **the Outer Court**, a pillared nave with aisles, the
+    flame idol on its dais; (2) **the Forges**, nine bays round a great furnace, lava hearths under
+    hoods, anvils; (3) **the Lava Channels**, a rough cavern crossed by three channels of lava, a
+    bridge over each; (4) **the Barracks of the Six Generals**, a round yard and six walled
+    barracks round it, their standards; (5) **the Kitchen of the Captives**, the great steamer over
+    its fire pit, cages along the wall, cauldrons; (6) **the Smoke Galleries**, a maze of narrow
+    brick galleries, smoke in the dead ends, dim; (7) **the Hall of the Five Carts**, a round hall,
+    the five-element pentagon in its floor round a well of fire, the five carts on their daises;
+    (8) **the Magma Cistern**, a lake of lava, a causeway winding over it from island to island.
+    Guardians: the six generals on floors 1–6 (the two Winds, Flame-Head, Eye-Spark, Fog-Diving,
+    Cloud-Soaring), a warden on 7 and 8.
+  - **The garrisons**: 15–17 a floor besides the guardian, placed by the plan on open floor (not on
+    fire). Levels step up: regulars 68 on the first floor to 75 on the eighth, captains four over
+    (no more than 77), guardians 71 to 77; captains grow from one or two on the first floors to
+    three to five lower down. A floor is **mustered** when someone comes near it (the forecourt
+    when near the cave, the first floor at the door, each floor below when someone is on the floor
+    over it). Each member is kept to its floor: one that strays up or down a stair (or anywhere off
+    it) is taken back to its post, so nothing walks down into the throne room. Nothing of the
+    world's own is born inside the cave. **Respawn**: a floor whose garrison is all dead stays
+    empty for **20 minutes**; after that it is mustered again the next time someone comes near
+    while no one is on it. A grate once opened stays open.
+  - **Checkpoints**: coming down a stair onto a floor's landing marks it; the **return brazier** by
+    the door (use it) then brings you straight back down to the deepest landing you have reached, so
+    a death does not mean the whole descent again. It works only once the door is open.
+  - **The throne room**, at the bottom (113 blocks under the door): a hall 53 by 59, its nave 18
+    high, two rows of great red pillars, a moat of lava down each side, lamps in the floor round the
+    open arena of his gilded dais (room for his five carts and his ring of fire), a red carpet from
+    his doors, and behind, his throne of gold on its steps before a wall of flame; **his treasury**
+    chest beside it (True Samadhi Fire, gold, ember cores, furnace bricks). Red Boy is put on his
+    dais once, when the land is made (`FireCloudCaveFeature`), and is kept to the throne room:
+    should anything bring him off it he is taken back to his dais. His fight (phases, bar, carts,
+    breath) is as it was.
+  - **Old worlds**: chunks already made keep what they have. Where the region's centre was made
+    before (the old cave, its hall at the gorge's level, Red Boy in it), the old cave is left as it
+    is and none of this applies there. Where the centre is new but some of the fortress's chunks
+    were made before, the fortress is finished over each of them when it is first loaded with someone
+    near (a chunk most of whose sampled blocks are not the plan's is laid over whole; one changed a
+    little by players since is left alone), so the way down is whole and Red Boy is never shut away.
+  - **Where it is**: the Earth Gods' luopan points to the great door, and says so.
 - **What they leave**: Red Boy **2–3 True Samadhi Fire** (the furnace's fuel; a real source of it at
   last), **his own spear** one time in two (55% with Looting I, +5% a level after), ember cores,
   furnace bricks, gold, sigils. **Red Boy's Fire-Tipped Spear** (火尖枪, `RedBoySpearItem`): a slim
@@ -809,9 +1070,14 @@ Boy's Fire Cloud Cave on Mount Haohao (火云洞, chapters 40–42), in
   blocks and items (Red Boy's spear among them) from `assets_source/fire_items.py`.
 - **Tests and pictures**: `FireGameTests` (heat, fan, Samadhi fire and water, Red Boy's breath,
   carts and phases, that he says nothing through a whole fight (to a Bull Demon too), his spear's
-  bare stats, creatures, generals, drops, XP, karma, the cave's blueprint),
-  `FireMountainPlacementTest`; gallery scenes `-Pgallery.only=fire_`; the range in a real world with
-  `./gradlew runWorldgenBench -Pbench.mode=fire`.
+  bare stats, creatures, generals, drops, XP, karma), `FireFortressGameTests` (the whole fortress laid
+  off the grid: the door's rule, every floor's way down walked by a zombie from the door to the dais,
+  the musters, a guardian's death opening his grate, a cleared floor staying empty, the garrisons and
+  Red Boy kept to their floors, his fight in the throne room, the landings and the brazier, the
+  luopan), `FireFortressPlanTest` (eight floors, a way on foot from door to throne that each grate
+  shuts, hall sizes, garrisons, the throne room's arena), `FireMountainPlacementTest` (the bigger
+  region, its outposts); gallery scenes `-Pgallery.only=fire_`; the range, the outposts and every
+  floor in a real world with `./gradlew runWorldgenBench -Pbench.mode=fire`.
 
 #### Mount Wuzhuang (levels 78–88)
 
@@ -956,24 +1222,24 @@ left to its host.
 
 Lion-Camel Ridge (狮驼岭, chapters 74–77: eight hundred li of mountains swarming with demons, forty-seven
 thousand little demons on the ridge alone) and Lion-Camel City (狮驼国), the walled kingdom the demons
-took after eating its king, his court and all its people, where the Azure Lion and the White Elephant
-hold court. The last band, to the levels' cap. In [`world/lion/`](src/main/java/com/jttw/engine/world/lion/)
+took after eating its king, his court and all its people; and behind the city the Lion-Camel Cave
+(狮驼洞), the demon kings' fortress sunk deep in the mountain, where the Azure Lion and the White
+Elephant hold court at the bottom. The last band, to the levels' cap. In [`world/lion/`](src/main/java/com/jttw/engine/world/lion/)
 and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
 
 - **Where** (`Zones.LION_CAMEL`): over mountain country (the Bottomless Cave's hosts: peaks, slopes,
   groves, meadows, cherry groves, windswept hills) and the rugged savanna highlands (plateaus,
-  windswept savanna), host judged at y 256, **from y 40 up**
-  (`Vertical.above(40)`). The Bottomless Cave takes the same mountains below y 40, so the two share no
-  heights and may lie in the same columns: the ridge over the labyrinth (its shaft is left alone where
-  it comes up through the ridge). It keeps clear of every zone before it that takes the surface. One
-  region a world, about 380 blocks across, the farthest out: 7.5–9 km from spawn, the end of the
-  road west.
+  windswept savanna), host judged at y 256, **the whole column** (`Vertical.WHOLE_COLUMN`): the
+  fortress goes some 130 blocks down under the city, so the ridge no longer lies over the Bottomless
+  Cave's labyrinth but keeps clear of it, as of every zone before it (its ground is still reshaped
+  only from y 40 up). One region a world, **about 680 blocks across** (radius 340, never under 600:
+  `ZoneLayout.LION_CAMEL`), the farthest out: 7.5–9 km from spawn, the end of the road west.
 - **The ridge** (`RidgeShape`, `LionCamelRidgeFeature`, pure and unit-tested): the mountains are broken
   into grim crags (ridged noise, up to 30 blocks more), climbing out of the land over the outer fifth;
   faces bare stone banded with tuff, andesite and deepslate; ground of coarse dirt, gravel, podzol and
   stone, a little yellowed grass, snow over y 196; skulls on stakes and bones about, great ribcages
   (`RidgeBonesFeature`, never on the city's ground) and dead shrubs. A grey sky and haze, a little ash
-  in the air. Nothing under y 40 is touched.
+  in the air. Nothing under y 40 is touched but the cave.
 - **Lion-Camel City** (`LionCamelCity`, a blueprint each chunk lays its share of): on a level apron cut
   into (or built up on) the mountain round the centre, the ground climbing back to the ridge's over
   40 blocks. Walls of grim deepslate brick 11 high and three thick, 113 blocks square, crenellated,
@@ -991,9 +1257,75 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   high, and a demon king walks from the hall to the court (round the terrace, through the palace's
   north gate and into his court); the court has room for the elephant he truly is. Its court and
   garrison are put there once, each by the chunk its post lies in (`LionCamelCityFeature`), and kept
-  (even on Peaceful): the Azure Lion on the terrace, the White Elephant in his court, lion-demon
-  captains at the palace gate, lion- and peng-demons in the hall, elephant-demons at the main gate
-  and in the court, a Little Wind-Driller at each gate.
+  (even on Peaceful): lion-demon captains on the terrace where the Lion held court and at the palace
+  gate, an elephant-demon captain in the Elephant's court, lion- and peng-demons in the hall,
+  elephant-demons at the main gate and in the court, a Little Wind-Driller at each gate. The kings
+  themselves have gone down into the mountain: the thrones in the hall stand empty, and the court's
+  north gate and the city's lead on to the forecourt of the cave.
+- **The ways up** (`RidgeApproach`, pure and unit-tested): three winding roads, south, east and west,
+  from the region's edge to the city's gates, cut through the crags and built up over the hollows,
+  paved down the middle, skulls on stakes along them; **nine outposts** beside them (a watch tower of
+  dark brick 14 high with a beacon of soul fire on its railed platform, a ladder within, a ring of
+  stakes open to the road, a cooking fire), each kept by a lion-demon captain, a lion-demon, an
+  elephant-demon, a Little Wind-Driller and a peng-demon up on the tower; and **twelve patrols** of
+  three out on the roads (a captain with the farthest). Some 100 demons are kept out on the ridge and
+  in the city; the ridge's own spawning comes in bigger packs (lion-demons 3–6, peng-demons 2–4,
+  elephant-demons 2–3, Wind-Drillers 1–2). Demons put at a post keep to it (they wander 12–20 blocks
+  and are back at it if drawn 40–72 away).
+- **The Lion-Camel Cave** (`LionFortress`, a blueprint each chunk lays its share of, pure and
+  unit-tested; `LionGates`): north of the city a **mountain** rises (`RidgeShape.massifAt`, some 48
+  blocks over the city, a cliff across its front), and in its cliff, past a forecourt of black stone
+  lit by soul braziers between skulls on stakes, stands the **great door**: two leaves of dark wood
+  15 wide and 17 high, banded with iron and studded with gold, knockers on them, between pillars of
+  black stone and red under a lintel with the cave's name in gold (狮驼洞), crouching stone lions at
+  its sides, a tower with a beacon at each end of the wall. **It holds while its six wardens stand**
+  (two elephant-demon captains, two lion-demons, two peng-demons in the forecourt): try it and it
+  will not move; once they have fallen it **opens to a hand** (use it), its leaves grinding back from
+  the middle. The Great Peng's kin open it to him at once. Behind it the **gate hall** (63 blocks
+  square, 20 high, two rows of red pillars, braziers), and under it **eight floors**, each 13 blocks
+  under the last, each a hall 63 blocks square and 10 high in its own stone and look:
+  1. **the Barracks**: dark timber, rows of straw pallets under red cloth, mess tables, the armoury;
+  2. **the Drill Yard**: an open yard of sand with straw men on posts, a colonnade, the reviewing stands;
+  3. **the Steaming Kitchens**: great cauldrons on fires over magma hearths, the steamers stacked,
+     the pens where they kept the pilgrims they meant to eat;
+  4. **the Bone Pits**: deepslate and bone, pits heaped with bones under cobwebs;
+  5. **the Menagerie**: mossy pens of iron bars, hay and troughs;
+  6. **the Vault**: black stone and gold, the hoard on plinths, pools of lava;
+  7. **the Great Peng's Halls**: terracotta and gold, perches and fallen golden feathers;
+  8. **the Generals' Hall**: nether brick and red pillars, moats of lava, the generals' standards.
+
+  Side halls open off some through wide doorways under lintels. Each floor's **way down is a stair
+  against a wall behind a portcullis**, coming down on the next floor at the other side (so every
+  floor is crossed); the portcullis **rises of itself when the floor's warden falls** (a captain's
+  level and half again a captain's health, before it). The generals' hall's way down is a grand
+  stair, balustraded, into the **throne room** at the bottom, some 127 blocks under the city: 63 by
+  67 blocks and 20 high, great pillars banded with gold, braziers down the nave, bones heaped in the
+  corners, a red carpet to a dais with the three thrones (a gold lion's face over the Lion's; the
+  Great Peng's empty, his treasury beside it), the Azure Lion and the White Elephant before theirs.
+  Its walls, floors, stairs and gates are proof against picks and blasts (the furnishings are not).
+- **Who keeps the cave**: each floor's keepers are put there once (`LionCamelCityFeature`), kept and
+  never despawned: 5 in the gate hall, then 7, 8, … 14 on the eighth floor, more captains the deeper
+  (1 to 3), stronger the deeper (regulars level 89 in the gate hall up to 97 on the eighth floor,
+  captains 93–100, wardens 94–100), and the warden before the gate. Each keeps to its floor: it is
+  back at its post if it strays 40 blocks or off its floor's heights, so none follows a foe down the
+  stairs, and none comes into the throne room. **Respawn**: what is put there is put once (a fallen
+  keeper is not replaced, a fallen warden's gate stays open), but the ridge's demons rise of
+  themselves in the halls as anywhere in the zone (any light, as their mob cap allows) and keep to the
+  hall they rose in; none rises in the throne room. **Checkpoints**: as a floor's way down opens,
+  every player in its hall will rise again, should he fall, on its landing at the head of the stair
+  down (whatever bed he had); and the gates once opened never close, so he walks back down through
+  the floors he won. The Earth God's Luopan points to the great door.
+- **The kings in their throne room**: they are put there once, as the land is made, their lairs
+  before their thrones, and keep to them: drawn more than 16 blocks past their lairs (up the grand
+  stair after a foe) they let go whatever they hold and are back before their thrones. Their fight is
+  as before, phases, bars, true forms and all; the room is high and wide enough for the true forms.
+- **Old worlds**: ground already made keeps what it had (no migration); new ground gets the new
+  design. A king of a world made before (in the city) stays there until his region's throne room has
+  been made and is loaded, then goes down to it, his lair with him; if a king of his kind was put
+  there already, the city's is gone (`DemonKingEntity.goDownToHisThrone`). A cave laid half on ground
+  made before is broken where the old ground is (it can be dug through: only the blueprint's own
+  blocks are proof against picks), never sealed. A world whose city was made before keeps its old
+  treasury chest on the hall's dais, so there the throne room's makes a second vase.
 - **Creatures** (`LionCamelMonster`: level 89, captains 96, any light, in numbers): **Lion-Demons**
   (狮子精, the Azure Lion's kin: 9 hits, sabre cuts of 22%; they pounce from 4–11 blocks for 26% and
   a stagger; strike one and the pride turns), **Elephant-Demons** (象精, the White Elephant's
@@ -1014,7 +1346,7 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   let go), then the beast stands in his place, in another model and a larger body, and the players
   near are told what he is. The true form is synced and saved; the fight goes on in it.
 - **The Azure Lion** (青狮, Manjushri's lion; `AzureLionEntity`, a `ZoneBoss`, level 100, 90 hits,
-  an azure bar, in the throne hall): a hulking demon king in dark lacquered armour, a wild green-blue
+  an azure bar, in the throne room): a hulking demon king in dark lacquered armour, a wild green-blue
   mane bristling about a snarling maw, clawed hands, a giant's broadsword: blows of 26%. Every 9 s he throws back his head
   and **roars**: a cone 12 blocks long, 12%, Slowness II and Weakness, thrown back. Every 13 s, a foe
   within 4.5 blocks before him, his jaws gape for a second, and he **swallows the foe whole**: inside
@@ -1029,7 +1361,7 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   reach the foe as he lands, it is swallowed (inside the lion as inside the demon king, and fought
   out of him the same way).
 - **The White Elephant** (白象, Samantabhadra's six-tusked elephant; `WhiteElephantEntity`, level 98,
-  85 hits, a white bar, in the elephant court): a giant in ivory-and-gold plate, a great domed
+  85 hits, a white bar, in the throne room): a giant in ivory-and-gold plate, a great domed
   elephant's head under a gold war-frontlet, ears like sails, a heavy trunk, six tusks, a giant's
   lance held upright: thrusts of 24%. Every 10 s, a foe within 6
   blocks before him, his trunk rears and **coils round the foe, lifting him high**: it crushes him
@@ -1041,7 +1373,7 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   the Bodhisattva's empty seat on his back. He **charges** at foes 5–14 blocks off, goring for 22% and
   trampling (Slowness III); his stamping becomes a **trampling** up on his hind legs that strikes
   within 7 blocks; his trunk reaches 8 blocks, comes quicker and lifts its catch high over his head.
-  The two kings' lairs are 38 blocks apart: each is its own fight.
+  The two kings stand 14 blocks apart before their thrones, so the two fights are as one.
 - **The Peng rule** (`ZoneAllies.PENG`, for the whole zone, both kings included): a player who is the
   Gold-Winged Peng, the third brother, is **never targeted and never fought back**, whatever he does:
   no demon, captain, Wind-Driller, the Azure Lion nor the White Elephant sets on him, nor swallows,
@@ -1077,10 +1409,17 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   lift, crush, hurl and breaking free; roar, stamp, charge, phases; the true forms' reveal at a third,
   their bodies, their keeping; the lion's swallowing and pounce, the elephant's lift, trampling and
   goring; the alarm; the creatures' tricks; captains; drops and the Peng's empty hands; the band's XP
-  to the cap; karma; the city's blueprint, built for its giants), `LionCamelPlacementTest`; gallery
-  scenes `-Pgallery.only=lion_` (the kings from the front, the side, close and beside the player, in
-  both shapes; the reveal; the swallow, the pounce, the trunk and the trampling; the hall and the
-  court with the kings in them, and the kings' way between); the ridge and the city in a real world
+  to the cap; karma; the city's blueprint, built for its giants), `LionFortressGameTests` (the way on
+  foot from the door to the throne room, every floor's stair; who keeps each floor; the great door
+  holding while its wardens stand, opening to a hand, at once to the Peng; a portcullis rising as
+  its warden falls; the fabric against picks; the checkpoints; the kings kept to the throne room,
+  an old world's king going down to it; the Lion's fight and true form in the throne room; the
+  needle to the door), `LionCamelPlacementTest`, `LionFortressTest` (eight floors, their stairs, the
+  walk from the door to the kings with the gates open and barred with them shut, the keepers, the
+  treasury, where it lies, the roads and outposts); gallery scenes `-Pgallery.only=lion_` (the kings
+  from the front, the side, close and beside the player, in both shapes; the reveal; the swallow, the
+  pounce, the trunk and the trampling; the city; the throne room with the kings, in both shapes, and
+  the generals' hall); the ridge, the city, the door, every floor and the throne room in a real world
   with `./gradlew runWorldgenBench -Pbench.mode=lion` (and every zone's place with `zones`).
 
 #### Fengdu, the Ghost City (the way to Hell)

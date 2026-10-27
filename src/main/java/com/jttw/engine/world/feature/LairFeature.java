@@ -2,6 +2,9 @@ package com.jttw.engine.world.feature;
 
 import com.jttw.engine.registry.ModEntities;
 import com.jttw.engine.world.Zones;
+import com.jttw.engine.world.ridge.CaveGarrison;
+import com.jttw.engine.world.ridge.CaveSites;
+import com.jttw.engine.world.ridge.WhiteBoneCave;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -13,10 +16,13 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SkullBlock;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 /**
- * Lady White Bone's lair, at the heart of each region of the ridge, on the round floor the massif
+ * Lady White Bone's lair. Where the world has the White Bone Cave, her place in its throne room and
+ * the cave's garrison (see {@link #place}). In a world from before the cave: her lair at the heart
+ * of each region of the ridge, on the round floor the massif
  * levels there: bone pillars crowned with skulls round the edge, a dais of bone in the middle, and
  * she herself, put there once, when the land is made. There is one of her to each region; killed,
  * she does not come back.
@@ -41,6 +47,20 @@ public class LairFeature extends ZoneLairFeature {
     @Override
     protected EntityType<? extends Mob> boss() {
         return ModEntities.LADY_WHITE_BONE.get();
+    }
+
+    /**
+     * Where the world has the White Bone Cave, she is put in its throne room and its garrison at
+     * their posts, each by the chunk it lies in ({@link CaveGarrison}); else (a world from before
+     * the cave) the open-air lair is built at the centre as it always was, and she is put on it.
+     */
+    @Override
+    public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
+        WorldGenLevel level = context.level();
+        WhiteBoneCave.Site site = CaveSites.site(level);
+        if (site == null) return super.place(context);
+        int x0 = context.origin().getX() & ~15, z0 = context.origin().getZ() & ~15;
+        return CaveGarrison.fill(level, WhiteBoneCave.of(level.getSeed()), site, x0, z0, context.random());
     }
 
     @Override

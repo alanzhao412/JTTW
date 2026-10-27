@@ -132,7 +132,7 @@ public final class PhoenixSkillTree {
         ));
         TREE.add(new SkillNode(
                 EMBER_2, "Rising Ember II",
-                new String[]{ "Flies faster: cruising speed.", "Immune to all fire and", "lava damage." },
+                new String[]{ "Flies faster: cruising speed,", "building to 100/s held at full.", "Immune to fire and lava." },
                 3, 4, 1, List.of(EMBER_1), AbilityType.PASSIVE, 2, "Rising Ember"
         ));
 

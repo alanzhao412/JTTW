@@ -2,7 +2,8 @@ package com.jttw.engine.world.feature;
 
 import com.jttw.engine.registry.ModBlocks;
 import com.jttw.engine.world.Zones;
-import com.jttw.engine.world.fire.FireCloudCave;
+import com.jttw.engine.world.fire.FortressBlocks;
+import com.jttw.engine.world.fire.FortressPlan;
 import com.jttw.engine.world.fire.RangeShape;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
@@ -20,8 +21,9 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
 /**
  * Raises the Flaming Mountains (火焰山) out of the hot, dry country they take over ({@link RangeShape}):
  * long chains of red mountains with valleys of burning earth between, Mount Haohao at the heart, and
- * the gorge cut through to the Fire Cloud Cave's stone gate; and lays the cave itself, column by
- * column ({@link FireCloudCave}), so it comes out whole across the chunks it spans.
+ * the gorge, Withered Pine Ravine, cut through to the Fire Cloud Cave's great door; and lays the
+ * cave itself, its door and its eight floors and the throne room under them, column by column
+ * ({@link FortressPlan}), so it comes out whole across the chunks it spans.
  * <ul>
  *   <li><b>faces</b> (a step of three or more to a neighbour) show the mountains' red rock in bands of
  *       red, orange and brown terracotta, seams of magma in it;</li>
@@ -66,7 +68,7 @@ public class FlamingRangeFeature extends Feature<NoneFeatureConfiguration> {
     }
 
     /** The mountains' rock inside, in uneven bands of red, orange and brown, a seam of magma now and then. */
-    private static BlockState inner(int y, int x, int z) {
+    public static BlockState inner(int y, int x, int z) {
         int band = Math.floorMod(y + ((x * 31 + z * 17) >> 5), 11);
         return switch (band) {
             case 0 -> s(Blocks.RED_TERRACOTTA);
@@ -153,10 +155,12 @@ public class FlamingRangeFeature extends Feature<NoneFeatureConfiguration> {
                 }
                 any = true;
                 // the Fire Cloud Cave, its share in this column
-                if (c != null && FireCloudCave.covers(lx, lz)) {
-                    for (int ly = FireCloudCave.BOTTOM; ly <= FireCloudCave.TOP; ly++) {
-                        BlockState st = FireCloudCave.at(lx, ly, lz);
-                        if (st != null) level.setBlock(p.set(x, floor + ly, z), st, Block.UPDATE_CLIENTS);
+                if (c != null && FortressPlan.covers(lx, lz)) {
+                    FortressPlan.Built plan = FortressPlan.get();
+                    int lo = Math.max(FortressPlan.Y_MIN, minY + 1 - floor), hi = Math.min(FortressPlan.Y_MAX, maxY - 2 - floor);
+                    for (int ly = lo; ly <= hi; ly++) {
+                        BlockState st = FortressBlocks.state(plan, lx, ly, lz, x, floor + ly, z);
+                        if (st != null) FortressBlocks.lay(level, p.set(x, floor + ly, z), st, context.random());
                     }
                 }
             }

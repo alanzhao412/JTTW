@@ -2,6 +2,8 @@ package com.jttw.engine.world.feature;
 
 import com.jttw.engine.world.Zones;
 import com.jttw.engine.world.lion.LionCamelCity;
+import com.jttw.engine.world.lion.LionFortress;
+import com.jttw.engine.world.lion.RidgeApproach;
 import com.jttw.engine.world.lion.RidgeShape;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
@@ -46,18 +48,64 @@ public class LionCamelRidgeFeature extends Feature<NoneFeatureConfiguration> {
     /** How near the Bottomless Cave's shaft the ridge leaves the ground alone. */
     private static final double SHAFT_CLEAR = Labyrinth.DISH_RADIUS + 4;
 
-    private static final int FACE = 0, GROUND = 1, SNOW = 2, APRON = 3;
+    private static final int FACE = 0, GROUND = 1, SNOW = 2, APRON = 3, ROAD = 4, COURT = 5;
 
     public LionCamelRidgeFeature(Codec<NoneFeatureConfiguration> codec) {
         super(codec);
     }
 
-    /** The city's floor (its ground's top) in the region round (cx, cz) in this level. */
+    /** The city's floor (its ground's top) in the region round (cx, cz) in this level: high enough over the world's floor for the fortress under it. */
     public static int cityFloor(WorldGenLevel level, int cx, int cz) {
         DensityFunction shape = ZoneTerrain.broadShape(level);
         int minY = level.getMinBuildHeight(), maxY = ZoneTerrain.landTop(level);
         return RidgeShape.cityFloor(level.getSeed(), cx, cz, (x, z) -> ZoneTerrain.landAt(shape, x, z, minY, maxY),
-                level.getSeaLevel() + RidgeShape.ABOVE_SEA, maxY - RidgeShape.UNDER_SKY);
+                Math.max(level.getSeaLevel() + RidgeShape.ABOVE_SEA, minY + RidgeShape.FORTRESS_ROOM),
+                Math.min(maxY - RidgeShape.UNDER_SKY, RidgeShape.HIGHEST));
+    }
+
+    /** The ridge's own heights under the roads' middles, and the roads' heights, by region, road and how far out: worked out once each. */
+    private static final java.util.Map<Long, Integer> ROAD_GROUND = new java.util.concurrent.ConcurrentHashMap<>(),
+            ROAD_HEIGHTS = new java.util.concurrent.ConcurrentHashMap<>();
+    /** How far along a road its ground is evened out, each way; how far apart along it the ridge's ground is sampled. */
+    private static final int ROAD_EVEN = 14, ROAD_SAMPLE = 8;
+
+    private static long roadKey(WorldGenLevel level, int[] c, int road, int along) {
+        return ((level.getSeed() * 31 + c[0]) * 31 + c[1]) * 1031 + road * 1000L + along;
+    }
+
+    /** The ridge's own ground (crags and all) under a road's middle at {@code along}, from the terrain's noise. */
+    private static int roadGround(WorldGenLevel level, int[] c, int road, int along) {
+        return ROAD_GROUND.computeIfAbsent(roadKey(level, c, road, along), k -> {
+            int[] p = RidgeApproach.point(road, along, 0);
+            int x = c[0] + p[0], z = c[1] + p[1];
+            var source = level.getLevel().getChunkSource();
+            int ground = source.getGenerator().getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, level, source.randomState()) - 1;
+            return Math.max(ground, level.getSeaLevel()) + RidgeShape.cragAt(level.getSeed(), x, z);
+        });
+    }
+
+    /**
+     * The height a road's ground is brought to at {@code along} (its whole width, and an outpost
+     * beside it there): the ridge's own ground under its middle, evened out along it (so it climbs
+     * and falls with the mountains, cutting through a crag and built up over a gully), eased into the
+     * city's floor near the walls as the ridge's ground is.
+     */
+    public static int roadHeight(WorldGenLevel level, int[] c, int floor, int road, int along) {
+        return ROAD_HEIGHTS.computeIfAbsent(roadKey(level, c, road, along), k -> {
+            int[] p = RidgeApproach.point(road, along, 0);
+            double share = RidgeShape.cityShare(p[0], p[1]);
+            if (share <= 0) return floor;
+            double sum = 0;
+            int n = 0;
+            for (int a = along - ROAD_EVEN; a <= along + ROAD_EVEN; a += 7) {
+                int at = Math.max(a, RidgeApproach.ROAD_FROM), a0 = Math.floorDiv(at, ROAD_SAMPLE) * ROAD_SAMPLE;
+                double f = (at - a0) / (double) ROAD_SAMPLE;
+                sum += Mth.lerp(f, roadGround(level, c, road, a0), roadGround(level, c, road, a0 + ROAD_SAMPLE));
+                n++;
+            }
+            int ground = (int) Math.round(sum / n);
+            return (int) Math.round(Mth.lerp(share, floor, Mth.clamp(ground, level.getSeaLevel() + 1, level.getMaxBuildHeight() - 40)));
+        });
     }
 
     private static int hash(int x, int z, int salt) {
@@ -84,8 +132,13 @@ public class LionCamelRidgeFeature extends Feature<NoneFeatureConfiguration> {
         };
     }
 
-    private static BlockState top(int kind, int x, int y, int z) {
+    private static BlockState top(int kind, int x, int y, int z, RidgeApproach.Spot road) {
         int r = hash(x >> 1, z >> 1, 5);
+        if (kind == ROAD) return RidgeApproach.roadTop(road, x, z);
+        if (kind == COURT) {
+            int q = hash(x, z, 7);
+            return q < 50 ? s(Blocks.POLISHED_BLACKSTONE_BRICKS) : q < 75 ? s(Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS) : q < 90 ? s(Blocks.BLACKSTONE) : s(Blocks.GRAVEL);
+        }
         return switch (kind) {
             case FACE -> rock(y, x, z);
             case SNOW -> r < 80 ? s(Blocks.SNOW_BLOCK) : s(Blocks.STONE);
@@ -97,11 +150,25 @@ public class LionCamelRidgeFeature extends Feature<NoneFeatureConfiguration> {
 
     private static BlockState under(int kind, int x, int y, int z) {
         if (kind == FACE || kind == SNOW) return rock(y, x, z);
+        if (kind == ROAD || kind == COURT) return hash(x, z, 6 + y) < 50 ? s(Blocks.COBBLESTONE) : s(Blocks.STONE);
         return hash(x, z, 6 + y) < 60 ? s(Blocks.COARSE_DIRT) : s(Blocks.STONE);
     }
 
+    /** The time this feature has taken, in nanoseconds, and the chunks of the ridge it has laid (the bench reads them). */
+    public static final java.util.concurrent.atomic.AtomicLong NANOS = new java.util.concurrent.atomic.AtomicLong(), CHUNKS = new java.util.concurrent.atomic.AtomicLong();
+
     @Override
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
+        long start = System.nanoTime();
+        boolean laid = lay(context);
+        if (laid) {
+            NANOS.addAndGet(System.nanoTime() - start);
+            CHUNKS.incrementAndGet();
+        }
+        return laid;
+    }
+
+    private boolean lay(FeaturePlaceContext<NoneFeatureConfiguration> context) {
         WorldGenLevel level = context.level();
         long seed = level.getSeed();
         BlockPos origin = context.origin();
@@ -112,7 +179,7 @@ public class LionCamelRidgeFeature extends Feature<NoneFeatureConfiguration> {
         if (!inside) return false;
         int[] c = ZONE.centre(seed, x0 + 8, z0 + 8); // a chunk lies in one cell
         int floor = c == null ? Integer.MIN_VALUE : cityFloor(level, c[0], c[1]);
-        int minY = Zones.LION_CAMEL_FLOOR, maxY = level.getMaxBuildHeight() - 2;
+        int minY = Zones.LION_CAMEL_FLOOR, maxY = level.getMaxBuildHeight() - 2, bottom = level.getMinBuildHeight() + 1;
         // the Bottomless Cave's shaft, if one comes up near
         int[] shaft = null;
         int[] cave = Zones.BOTTOMLESS.centre(seed, x0 + 8, z0 + 8);
@@ -134,6 +201,7 @@ public class LionCamelRidgeFeature extends Feature<NoneFeatureConfiguration> {
             int natural = g + rise;
             if (rise > 0) natural = Math.max(natural, top); // a crag rises out of any water, leaving none on it
             int t = c == null ? natural : RidgeShape.groundAt(natural, floor, x - c[0], z - c[1]);
+            if (c != null) t = shaped(level, c, floor, x - c[0], z - c[1], t, seed);
             target[i][j] = Mth.clamp(t, minY, maxY);
         }
         boolean any = false;
@@ -150,8 +218,12 @@ public class LionCamelRidgeFeature extends Feature<NoneFeatureConfiguration> {
                         Math.max(Math.abs(target[dx + 1][dz] - t), Math.abs(target[dx + 1][dz + 2] - t)));
                 int lx = c == null ? Integer.MAX_VALUE / 2 : x - c[0], lz = c == null ? Integer.MAX_VALUE / 2 : z - c[1];
                 boolean apron = c != null && RidgeShape.onApron(lx, lz);
-                boolean wet = sur > g && t <= sur && !apron && t == g; // a lake or a river left as it was
-                int kind = apron ? APRON : step >= STEEP ? FACE : t >= SNOWLINE ? SNOW : GROUND;
+                RidgeApproach.Spot road = c == null ? null : RidgeApproach.road(lx, lz);
+                RidgeApproach.Outpost outpost = c == null ? null : RidgeApproach.outpostAt(lx, lz);
+                boolean court = c != null && LionFortress.onForecourt(lx, lz);
+                boolean made = road != null || outpost != null || (c != null && nearOutpost(lx, lz) != null); // built ground: no lake left on it
+                boolean wet = sur > g && t <= sur && !apron && !made && t == g; // a lake or a river left as it was
+                int kind = court ? COURT : road != null && !apron ? ROAD : apron ? APRON : step >= STEEP ? FACE : t >= SNOWLINE ? SNOW : GROUND;
                 // cut down to it
                 for (int y = Math.max(t + 1, minY); y <= Math.max(sur, g); y++) {
                     if (wet && y > g) break;
@@ -160,19 +232,38 @@ public class LionCamelRidgeFeature extends Feature<NoneFeatureConfiguration> {
                 // built up to it, or its top few blocks made over
                 if (!wet && t > g) {
                     for (int y = Math.max(minY, g + 1); y <= t; y++) {
-                        BlockState st = y == t ? top(kind, x, y, z) : y > t - 4 ? under(kind, x, y, z) : rock(y, x, z);
+                        BlockState st = y == t ? top(kind, x, y, z, road) : y > t - 4 ? under(kind, x, y, z) : rock(y, x, z);
                         level.setBlock(p.set(x, y, z), st, Block.UPDATE_CLIENTS);
                     }
                 } else if (!wet) {
                     // its top few blocks made over (a cave just under them left open)
                     for (int y = Math.max(minY, t - 3); y <= t; y++) {
                         if (y < t && !level.getBlockState(p.set(x, y, z)).blocksMotion()) continue;
-                        level.setBlock(p.set(x, y, z), y == t ? top(kind, x, y, z) : under(kind, x, y, z), Block.UPDATE_CLIENTS);
+                        level.setBlock(p.set(x, y, z), y == t ? top(kind, x, y, z, road) : under(kind, x, y, z), Block.UPDATE_CLIENTS);
                     }
                 }
                 any = true;
+                if (c == null) {
+                    if (!wet && kind == GROUND) decorate(level, x, t, z, p);
+                    continue;
+                }
+                // the ways up: the road's stakes, an outpost
+                if (road != null && !apron) {
+                    for (int h = 1; h <= 3; h++) {
+                        BlockState st = RidgeApproach.roadside(road, h, x, z);
+                        if (st != null) level.setBlock(p.set(x, t + h, z), st, Block.UPDATE_CLIENTS);
+                    }
+                }
+                if (outpost != null) {
+                    int base = roadHeight(level, c, floor, outpost.road(), outpost.along());
+                    for (int h = 0; h <= RidgeApproach.TOWER_H + 2; h++) {
+                        BlockState st = RidgeApproach.outpost(outpost, lx - outpost.dx(), h, lz - outpost.dz());
+                        if (st != null && base + h <= maxY) level.setBlock(p.set(x, base + h, z), st, Block.UPDATE_CLIENTS);
+                    }
+                }
+                if (court) forecourt(level, lx, lz, floor, x, z, p);
                 // Lion-Camel City, its share in this column
-                if (c != null && LionCamelCity.covers(lx, lz)) {
+                if (LionCamelCity.covers(lx, lz)) {
                     for (int ly = LionCamelCity.BOTTOM; ly <= LionCamelCity.TOP; ly++) {
                         BlockState st = LionCamelCity.at(lx, ly, lz);
                         int y = floor + ly;
@@ -185,12 +276,70 @@ public class LionCamelRidgeFeature extends Feature<NoneFeatureConfiguration> {
                             level.setBlock(p, s(Blocks.COBBLED_DEEPSLATE), Block.UPDATE_CLIENTS);
                         }
                     }
-                } else if (!wet && kind == GROUND) {
+                } else if (!wet && kind == GROUND && !made) {
                     decorate(level, x, t, z, p);
+                }
+                // the Lion-Camel Cave, the fortress in the mountain behind the city, its share in this column
+                // (its outer rock only where the mountain has none: its halls' own walls keep them)
+                if (LionFortress.covers(lx, lz)) {
+                    for (int ly = LionFortress.BOTTOM; ly <= LionFortress.TOP; ly++) {
+                        int y = floor + ly;
+                        if (y < bottom || y > maxY) continue;
+                        int cell = LionFortress.cell(lx, ly, lz);
+                        int part = LionFortress.kind(cell);
+                        if (part == LionFortress.OUT) continue;
+                        if (part == LionFortress.ROCK) {
+                            BlockState there = level.getBlockState(p.set(x, y, z));
+                            if (there.blocksMotion() && there.getFluidState().isEmpty()) continue;
+                        }
+                        BlockState st = LionFortress.state(cell, lx, ly, lz);
+                        if (st != null) LionFortress.lay(level, p.set(x, y, z), st, context.random());
+                    }
                 }
             }
         }
         return any;
+    }
+
+    /**
+     * The height the ground at local (lx, lz) is brought to, given {@code t}, the ridge's: the
+     * mountain over the fortress raised over it, a road's or an outpost's level ground cut or built.
+     */
+    private static int shaped(WorldGenLevel level, int[] c, int floor, int lx, int lz, int t, long seed) {
+        int m = RidgeShape.massifAt(seed, lx, lz);
+        if (m > 0) t = Math.max(t, (int) Math.round(Mth.lerp(RidgeShape.massifBlend(lx, lz), t, floor + m)));
+        RidgeApproach.Outpost o = nearOutpost(lx, lz);
+        if (o != null) return roadHeight(level, c, floor, o.road(), o.along());
+        RidgeApproach.Spot road = RidgeApproach.road(lx, lz);
+        if (road != null && !RidgeShape.onApron(lx, lz)) return roadHeight(level, c, floor, road.road(), road.along());
+        return t;
+    }
+
+    /** The outpost whose levelled ground (its ring and a block round it, and the way joining its road) local (lx, lz) is on, or null. */
+    @javax.annotation.Nullable
+    private static RidgeApproach.Outpost nearOutpost(int lx, int lz) {
+        for (RidgeApproach.Outpost o : RidgeApproach.OUTPOST_LIST) {
+            int ox = lx - o.dx(), oz = lz - o.dz();
+            if (ox * ox + oz * oz <= (RidgeApproach.OUTPOST_R + 1) * (RidgeApproach.OUTPOST_R + 1)) return o;
+            int[] t = RidgeApproach.toRoad(o);
+            int along = t[0] * ox + t[1] * oz, side = Math.abs(-t[1] * ox + t[0] * oz);
+            if (along >= 0 && along <= RidgeApproach.OUTPOST_ACROSS && side <= 3) return o; // the way from the road to its ring
+        }
+        return null;
+    }
+
+    /** The forecourt before the great door: braziers down the way, skulls on stakes at its sides. */
+    private static void forecourt(WorldGenLevel level, int lx, int lz, int floor, int x, int z, BlockPos.MutableBlockPos p) {
+        int ax = Math.abs(lx);
+        if (ax == 7 && Math.floorMod(lz, 6) == 0) {
+            level.setBlock(p.set(x, floor + 1, z), s(Blocks.POLISHED_BLACKSTONE), Block.UPDATE_CLIENTS);
+            level.setBlock(p.set(x, floor + 2, z), Blocks.SOUL_CAMPFIRE.defaultBlockState()
+                    .setValue(net.minecraft.world.level.block.CampfireBlock.SIGNAL_FIRE, false), Block.UPDATE_CLIENTS);
+        } else if (ax == LionFortress.FORECOURT_HALF && Math.floorMod(lz, 3) == 0) {
+            level.setBlock(p.set(x, floor + 1, z), s(Blocks.DARK_OAK_FENCE), Block.UPDATE_CLIENTS);
+            level.setBlock(p.set(x, floor + 2, z), s(Blocks.DARK_OAK_FENCE), Block.UPDATE_CLIENTS);
+            level.setBlock(p.set(x, floor + 3, z), Blocks.SKELETON_SKULL.defaultBlockState().setValue(SkullBlock.ROTATION, 8), Block.UPDATE_CLIENTS);
+        }
     }
 
     /** Now and then a skull on a stake, a bone lying, on the ridge's open ground. */

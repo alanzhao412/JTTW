@@ -28,6 +28,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(BlockBehaviour.BlockStateBase.class)
 public class BlockStateBaseMixin {
 
+    /** Blocks no phasing player passes through (the tag {@code jttw_engine:unphasable}). */
+    @org.spongepowered.asm.mixin.Unique
+    private static final net.minecraft.tags.TagKey<net.minecraft.world.level.block.Block> jttw$UNPHASABLE = net.minecraft.tags.TagKey.create(
+            net.minecraft.core.registries.Registries.BLOCK, net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("jttw_engine", "unphasable"));
+
     @Inject(
         method = "getCollisionShape(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/phys/shapes/CollisionContext;)Lnet/minecraft/world/phys/shapes/VoxelShape;",
         at = @At("RETURN"),
@@ -41,6 +46,8 @@ public class BlockStateBaseMixin {
 
         TransformationData data = TransformationManager.getTransformation(living);
         if (data != null && data.canPhase()) {
+            // the Bottomless Cave's own rock holds even so: its mazes are walked
+            if (((BlockBehaviour.BlockStateBase) (Object) this).is(jttw$UNPHASABLE)) return;
             cir.setReturnValue(Shapes.empty());
         }
     }

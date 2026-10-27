@@ -5,7 +5,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Where the Bottomless Cave lies: once a world, 2-3 km out, below its height only, never where the ridge is. */
+/**
+ * Where the Bottomless Cave lies: once a world, 2-3 km out, about 380 blocks across, below its height
+ * only, never where the ridge is; its fortress, its mountain's outposts and its door within it.
+ */
 class BottomlessCaveZoneTest {
 
     private static final Zones.Zone CAVE = Zones.BOTTOMLESS;
@@ -33,7 +36,7 @@ class BottomlessCaveZoneTest {
                 if (!CAVE.covers(seed, x, z)) continue;
                 found++;
                 assertEquals(CAVE, Zones.MAP.zoneAt(seed, x, Zones.BOTTOMLESS_CAVE_TOP - 1, z), "just under its top, the cave");
-                assertEquals(CAVE, Zones.MAP.zoneAt(seed, x, Labyrinth.FLOOR[Labyrinth.LEVELS - 1], z), "at its palace's floor");
+                assertEquals(CAVE, Zones.MAP.zoneAt(seed, x, Labyrinth.THRONE, z), "at its palace's floor");
                 assertNotEquals(CAVE, Zones.MAP.zoneAt(seed, x, Zones.BOTTOMLESS_CAVE_TOP, z), "at its top, not");
                 assertNotEquals(CAVE, Zones.MAP.zoneAt(seed, x, 120, z), "at the mountain's surface, not");
                 assertFalse(CAVE.covers(seed, x, Zones.BOTTOMLESS_CAVE_TOP, z));
@@ -61,9 +64,16 @@ class BottomlessCaveZoneTest {
     }
 
     @Test
-    void itsLabyrinthLiesWhollyWithinItsRegion() {
-        // every open block of the labyrinth is at most this far from the centre
-        double reach = Labyrinth.REACH + Labyrinth.PITCH;
+    void itIsLargeAboutThreeHundredAndEightyBlocksAcross() {
+        assertEquals(190, CAVE.layout().radius());
+        assertTrue(CAVE.layout().radius() - CAVE.layout().wobble() >= 160, "never under 320 across");
+        assertTrue(CAVE.layout().radius() >= 2 * 110 - 30, "much larger than it was (110)");
+    }
+
+    @Test
+    void itsFortressMountainAndOutpostsLieWhollyWithinItsRegion() {
+        // every open block of the fortress is at most this far from the centre
+        double reach = com.jttw.engine.world.cave.BottomlessCave.FORTRESS_REACH;
         int regions = 0;
         for (long seed = -20; seed <= 20; seed++) {
             int[] c = CAVE.centres(seed)[0];
@@ -71,9 +81,39 @@ class BottomlessCaveZoneTest {
             for (int a = 0; a < 64; a++) {
                 double t = a * Math.PI / 32;
                 assertTrue(CAVE.covers(seed, c[0] + (int) Math.round(Math.cos(t) * reach), c[1] + (int) Math.round(Math.sin(t) * reach)),
-                        "the labyrinth's rim is in the region");
+                        "the fortress's rim is in the region");
             }
+            Labyrinth lab = Labyrinth.of(seed, c[0], c[1]);
+            var pit = new com.jttw.engine.world.feature.PitHole(lab, Labyrinth.Land.flat(80));
+            for (var o : pit.outposts()) {
+                for (int dx = -6; dx <= 6; dx += 6) for (int dz = -6; dz <= 6; dz += 6) {
+                    assertTrue(CAVE.covers(seed, o.x() + dx, o.z() + dz), "seed " + seed + ": an outpost in the region");
+                }
+            }
+            int[] door = lab.beforeDoor(PitHole_FORE);
+            assertTrue(CAVE.covers(seed, door[0], door[2]), "the forecourt");
         }
         assertTrue(regions > 20, "regions: " + regions);
+    }
+
+    private static final int PitHole_FORE = com.jttw.engine.world.feature.PitHole.FORE_OUT + 2;
+
+    @Test
+    void itsDoorIsWhereTheEarthGodSaysAndKeepsClearOfTheOtherZones() {
+        for (long seed : SEEDS) {
+            int[] c = CAVE.centres(seed)[0];
+            Labyrinth lab = Labyrinth.of(seed, c[0], c[1]);
+            int[] door = lab.door(), told = Labyrinth.doorOf(seed, c[0], c[1]);
+            assertEquals(door[0], told[0]);
+            assertEquals(door[2], told[1]);
+            assertEquals(Labyrinth.DOOR_AT, (int) Math.round(Math.hypot(door[0] - c[0], door[2] - c[1])), "the door on the mountain's flank");
+            for (Zones.Zone other : Zones.MAP.zones()) {
+                if (other == CAVE || !other.vertical().overlaps(CAVE.vertical())) continue;
+                for (int[] o : other.centres(seed)) {
+                    assertTrue(Math.hypot(o[0] - c[0], o[1] - c[1]) >= CAVE.layout().margin() + other.layout().margin(),
+                            "seed " + seed + ": clear of " + other.id());
+                }
+            }
+        }
     }
 }

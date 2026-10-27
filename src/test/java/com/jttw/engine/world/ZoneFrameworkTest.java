@@ -43,8 +43,8 @@ class ZoneFrameworkTest {
         assertEquals(80, Zones.WHITE_BONE.hostY());
         assertSame(ZoneAllies.NONE, Zones.WHITE_BONE.allies(), "allied to no one");
         assertEquals(Zones.WHITE_BONE, Zones.MAP.zones().get(0), "first: it takes the first place its ring offers");
-        assertEquals(260, ZoneLayout.WHITE_BONE.radius(), "its size as it always was");
-        assertEquals(70, ZoneLayout.WHITE_BONE.wobble());
+        assertEquals(420, ZoneLayout.WHITE_BONE.radius(), "room for the bone mountain, its road and its outposts");
+        assertEquals(60, ZoneLayout.WHITE_BONE.wobble());
     }
 
     @Test

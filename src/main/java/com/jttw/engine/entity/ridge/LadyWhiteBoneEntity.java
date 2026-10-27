@@ -54,9 +54,13 @@ import java.util.UUID;
  * </ul>
  * Whoever had a hand in killing her carries the {@link CurseOfTheDead} away.
  *
- * <p>There is one of her to each region of the ridge, put in her lair when the land is made
- * ({@link com.jttw.engine.world.feature.LairFeature}); she keeps to it, goes back to it when no one
- * is fighting her, and once killed she does not come back. So that is never by accident, she is
+ * <p>There is one of her to each region of the ridge, put when the land is made in the throne room
+ * at the bottom of the White Bone Cave ({@link com.jttw.engine.world.ridge.CaveGarrison}), among her
+ * court, passing for one of them (in a world from before the cave, in her open-air lair:
+ * {@link com.jttw.engine.world.feature.LairFeature}); she keeps to it, goes back to it when no one
+ * is fighting her, never leaves the throne room (a blink that would take her out of it is not
+ * taken; if she is ever outside it she is back in its middle at once), and once killed she does
+ * not come back. So that is never by accident, she is
  * never despawned, not even when the world is set to Peaceful. A {@link ZoneBoss}: her boss bar
  * shows while she is herself, never while she passes for one of her dead.
  */
@@ -114,7 +118,7 @@ public class LadyWhiteBoneEntity extends ZoneBoss implements RangedAttackMob {
 
     @Override
     public int lairRadius() {
-        return HIDING_GROUND;
+        return keep != null ? THRONE_KEEP : HIDING_GROUND;
     }
 
     @Override
@@ -295,7 +299,7 @@ public class LadyWhiteBoneEntity extends ZoneBoss implements RangedAttackMob {
             int x = (int) Math.floor(around.getX() + Math.cos(a) * d), z = (int) Math.floor(around.getZ() + Math.sin(a) * d);
             // from a little over her target's height, down to the ground there
             if (randomTeleport(x + 0.5, Math.floor(around.getY()) + 3, z + 0.5, false)) {
-                if (Math.abs(getY() - around.getY()) > 8) { // down a pit: not somewhere to fight from
+                if (Math.abs(getY() - around.getY()) > 8 || !inKeep()) { // down a pit, or out of her throne room: not somewhere to fight from
                     teleportTo(from.x, from.y, from.z);
                     continue;
                 }
@@ -333,9 +337,42 @@ public class LadyWhiteBoneEntity extends ZoneBoss implements RangedAttackMob {
                 m -> m.getPersistentData().getBoolean(KEY_HER_DEAD)).size();
     }
 
+    /** How far from the middle of her throne room she wanders, passing for one of her dead. */
+    public static final int THRONE_KEEP = 24;
+    /** Her throne room, where the White Bone Cave has one: she never leaves it. Null for the old open-air lair. */
+    @javax.annotation.Nullable
+    private net.minecraft.world.phys.AABB keep;
+
+    /** Keeps her to the throne room of this cave: she wanders about its middle, and is brought back if ever she is outside it. */
+    public void keepTo(com.jttw.engine.world.ridge.WhiteBoneCave.Site site) {
+        BlockPos a = site.at(-com.jttw.engine.world.ridge.WhiteBoneCave.THRONE_X, com.jttw.engine.world.ridge.WhiteBoneCave.THRONE_Y - 1,
+                com.jttw.engine.world.ridge.WhiteBoneCave.THRONE_N);
+        BlockPos b = site.at(com.jttw.engine.world.ridge.WhiteBoneCave.THRONE_X + 1, com.jttw.engine.world.ridge.WhiteBoneCave.THRONE_Y
+                + com.jttw.engine.world.ridge.WhiteBoneCave.THRONE_H, com.jttw.engine.world.ridge.WhiteBoneCave.THRONE_S + 1);
+        keep = new net.minecraft.world.phys.AABB(a.getX(), a.getY(), a.getZ(), b.getX(), b.getY(), b.getZ());
+        restrictTo(site.throne(), THRONE_KEEP);
+    }
+
+    /** Her throne room's bounds, or null where she has none (the old lair). */
+    @javax.annotation.Nullable
+    public net.minecraft.world.phys.AABB keep() {
+        return keep;
+    }
+
+    /** Whether she is where she may be: anywhere, in the old lair; in her throne room, in the cave. */
+    public boolean inKeep() {
+        return keep == null || keep.contains(position());
+    }
+
     @Override
     protected void customServerAiStep() {
         super.customServerAiStep();
+        if (keep != null && tickCount % 10 == 0 && !inKeep()) {
+            // out of her throne room (thrown, pulled, carried by a blink): back to its middle
+            BlockPos home = getRestrictCenter();
+            teleportTo(home.getX() + 0.5, home.getY(), home.getZ() + 0.5);
+            getNavigation().stop();
+        }
         LivingEntity target = getTarget();
         if (blink > 0) blink--;
         if (disguised() || target == null || !target.isAlive()) return;
@@ -488,10 +525,13 @@ public class LadyWhiteBoneEntity extends ZoneBoss implements RangedAttackMob {
         ListTag ids = new ListTag();
         for (UUID id : slayers) ids.add(NbtUtils.createUUID(id));
         tag.put("Slayers", ids);
+        if (keep != null) tag.putIntArray("Keep", new int[]{(int) keep.minX, (int) keep.minY, (int) keep.minZ, (int) keep.maxX, (int) keep.maxY, (int) keep.maxZ});
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
+        int[] k = tag.getIntArray("Keep");
+        if (k.length == 6) keep = new net.minecraft.world.phys.AABB(k[0], k[1], k[2], k[3], k[4], k[5]);
         super.readAdditionalSaveData(tag);
         marks = tag.getInt("Marks");
         entityData.set(DEATHS, tag.getInt("FalseDeaths"));

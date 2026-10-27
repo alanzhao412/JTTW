@@ -101,7 +101,8 @@ public class EarthGodGameTests {
         LodestoneTracker t = luopan.get(DataComponents.LODESTONE_TRACKER);
         check(h, t != null && t.target().isPresent(), "it points somewhere");
         int[] ridge = Zones.WHITE_BONE.centres(seed)[0];
-        eq(h, new BlockPos(ridge[0], 64, ridge[1]), t.target().get().pos(), "to White Bone Ridge at 25");
+        eq(h, new BlockPos(ridge[0], 64, ridge[1] + com.jttw.engine.world.ridge.WhiteBoneCave.THRESHOLD_Z + 2), t.target().get().pos(),
+                "to White Bone Ridge at 25: the great door of the White Bone Cave");
         eq(h, Level.OVERWORLD, t.target().get().dimension(), "in the overworld");
         check(h, p.getCooldowns().isOnCooldown(ModItems.EARTH_GOD_LUOPAN.get()), "a pause before the next calling");
         // held at another level, its needle turns as it ticks
@@ -109,7 +110,8 @@ public class EarthGodGameTests {
         p.tickCount = 0;
         luopan.inventoryTick(h.getLevel(), p, p.getInventory().selected, true);
         int[] lion = Zones.LION_CAMEL.centres(seed)[0];
-        eq(h, new BlockPos(lion[0], 64, lion[1]), luopan.get(DataComponents.LODESTONE_TRACKER).target().get().pos(), "to Lion-Camel Ridge at 95");
+        eq(h, new BlockPos(lion[0], 64, lion[1] + com.jttw.engine.world.lion.LionFortress.DOOR_LZ), luopan.get(DataComponents.LODESTONE_TRACKER).target().get().pos(),
+                "to Lion-Camel Ridge at 95: the great door of its fortress");
         h.succeed();
     }
 

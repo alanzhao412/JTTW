@@ -142,4 +142,22 @@ public class GreatVoidGameTests {
         }
         h.succeed();
     }
+
+    /** 150 blocks a second in the world; in the Void, 1000. */
+    @GameTest(template = PLATFORM)
+    public static void inTheVoidTheTopSpeedIsAThousand(GameTestHelper h) {
+        near(h, 150.0, com.jttw.engine.flight.FlightSteering.topSpeed(false) * 20, "the world's top: 150 a second");
+        near(h, 1000.0, com.jttw.engine.flight.FlightSteering.topSpeed(true) * 20, "the Void's: 1000");
+        near(h, com.jttw.engine.flight.FlightSteering.VOID_TOP_SPEED,
+                com.jttw.engine.character.wukong.WukongAbilityHandler.momentumMax(true) * com.jttw.engine.flight.FlightSteering.WUKONG_FAST_SPEED,
+                "Wukong's somersault builds to it");
+        near(h, com.jttw.engine.flight.FlightSteering.VOID_TOP_SPEED,
+                com.jttw.engine.character.peng.PengAbilityHandler.maxBoost(3, true) * com.jttw.engine.flight.FlightSteering.CRUISE_SPEED,
+                "so do the Peng's wingbeats");
+        ServerPlayer p = player(h);
+        p.getAbilities().flying = true;
+        com.jttw.engine.flight.JTTWFlight.setUniversalFlight(p, true);
+        check(h, com.jttw.engine.flight.JTTWFlight.moveCheckLimit(p, 100f) >= 7.5 * 7.5, "the server lets the world's top through");
+        h.succeed();
+    }
 }

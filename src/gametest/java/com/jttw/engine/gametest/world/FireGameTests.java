@@ -22,7 +22,6 @@ import com.jttw.engine.registry.ModItems;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
 import com.jttw.engine.world.Zones;
 import com.jttw.engine.world.fire.BurningEarthBlock;
-import com.jttw.engine.world.fire.FireCloudCave;
 import com.jttw.engine.world.fire.FireMountain;
 import com.jttw.engine.world.fire.SamadhiFire;
 import com.jttw.engine.world.morality.Morality;
@@ -60,8 +59,8 @@ import static com.jttw.engine.gametest.GT.*;
 /**
  * The Flaming Mountains: the heat of the burning earth and the fan that puts it out, the mountains'
  * creatures and captains, Red Boy's Six Strong Generals, Red Boy himself (his Samadhi fire, which
- * water does not put out, his carts and his phases), what they all leave, the band's XP and karma,
- * and the Fire Cloud Cave's blueprint.
+ * water does not put out, his carts and his phases), what they all leave, the band's XP and karma.
+ * The Fire Cloud Cave itself, its door, floors and throne room: {@link FireFortressGameTests}.
  */
 @GameTestHolder(JTTWEngine.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -673,32 +672,6 @@ public class FireGameTests {
         var recipe = h.getLevel().getRecipeManager().byKey(JTTWEngine.id("true_samadhi_fire_from_the_mountains"));
         check(h, recipe.isPresent() && recipe.get().value().getResultItem(h.getLevel().registryAccess()).is(ModItems.TRUE_SAMADHI_FIRE.get()),
                 "and the furnace's fuel is forged from them");
-        h.succeed();
-    }
-
-    // ── The cave ────────────────────────────────────────────────────────
-
-    @GameTest(template = PLATFORM)
-    public static void theFireCloudCavesBlueprint(GameTestHelper h) {
-        check(h, FireCloudCave.at(0, 1, 0).isAir() && FireCloudCave.at(0, 2, 0).isAir(), "room for him on his dais");
-        check(h, FireCloudCave.at(0, 0, 0).is(Blocks.GILDED_BLACKSTONE), "a gilded dais");
-        check(h, FireCloudCave.at(0, 1, FireCloudCave.THRONE_Z).is(Blocks.POLISHED_BLACKSTONE_STAIRS), "his throne behind him");
-        int lava = 0, lamps = 0;
-        for (int x = FireCloudCave.MIN_X; x <= FireCloudCave.MAX_X; x++) for (int z = FireCloudCave.MIN_Z; z <= FireCloudCave.MAX_Z; z++) {
-            for (int y = FireCloudCave.BOTTOM; y <= FireCloudCave.TOP; y++) {
-                BlockState s = FireCloudCave.at(x, y, z);
-                if (s == null) continue;
-                if (s.is(Blocks.LAVA)) lava++;
-                if (s.is(Blocks.SHROOMLIGHT)) lamps++;
-            }
-        }
-        eq(h, 16, lava, "four pools of lava, two by two");
-        check(h, lamps >= 12, "lit: " + lamps);
-        // the way in: from the gate's arch along the passage to the hall, open all the way
-        for (int z = FireCloudCave.GATE_Z + 1; z >= 0; z--) {
-            check(h, FireCloudCave.at(0, 1, z) != null && !FireCloudCave.at(0, 1, z).isSolid() && FireCloudCave.at(0, 3, z).isAir(), "open at z " + z);
-        }
-        check(h, FireCloudCave.at(0, 7, FireCloudCave.GATE_Z + 1).is(Blocks.GILDED_BLACKSTONE), "the gate's plaque");
         h.succeed();
     }
 }
