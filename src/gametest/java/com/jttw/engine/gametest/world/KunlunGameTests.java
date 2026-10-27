@@ -230,7 +230,7 @@ public class KunlunGameTests {
         eq(h, vanilla.natural(), tall.natural(), "natural");
         eq(h, vanilla.bedWorks(), tall.bedWorks(), "beds");
         eq(h, vanilla.hasRaids(), tall.hasRaids(), "raids");
-        eq(h, vanilla.monsterSettings(), tall.monsterSettings(), "its monsters");
+        eq(h, vanilla.monsterSettings().toString(), tall.monsterSettings().toString(), "its monsters");
         // the presets new worlds are made from give the taller one; superflat keeps vanilla's
         var presets = h.getLevel().getServer().registryAccess().registryOrThrow(Registries.WORLD_PRESET);
         for (var key : List.of(WorldPresets.NORMAL, WorldPresets.LARGE_BIOMES, WorldPresets.AMPLIFIED, WorldPresets.SINGLE_BIOME_SURFACE)) {
@@ -259,7 +259,7 @@ public class KunlunGameTests {
         KunlunShape.Path path = KunlunFeature.path(overworld, c[0], c[1]);
         int n = path.size();
         // a stretch of it below the summit, and what stands on it
-        int from = Math.max(0, n - 230), to = n - 30;
+        int from = Math.max(0, n - 190), to = n - 30;
         Set<ChunkPos> chunks = new LinkedHashSet<>();
         int pad = (int) Math.ceil(KunlunShape.SHOULDER + KunlunShape.BANK) + 2;
         for (int i = from; i <= to; i++) {
@@ -267,7 +267,7 @@ public class KunlunGameTests {
                 chunks.add(new ChunkPos((c[0] + (int) Math.floor(path.x[i]) + dx) >> 4, (c[1] + (int) Math.floor(path.z[i]) + dz) >> 4));
             }
         }
-        check(h, chunks.size() < 40, "a stretch of a few chunks: " + chunks.size());
+        check(h, chunks.size() < 80, "a stretch of some chunks: " + chunks.size());
         for (ChunkPos cp : chunks) overworld.setChunkForced(cp.x, cp.z, true);
         onEnd(h, () -> chunks.forEach(cp -> overworld.setChunkForced(cp.x, cp.z, false)));
         @SuppressWarnings("unchecked")

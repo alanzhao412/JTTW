@@ -27,9 +27,11 @@ import java.util.List;
  * had to widen), the world's sky, its summit's height against the highest land round it, how long
  * its chunks took to make, the treasure chest and its loot, and the stair walked from its foot to
  * the summit's edge, block by block (the greatest step up or down along it, anywhere without room
- * to stand or ground under it, its bridges, pavilions and shrines); then pictures: the massif from
- * afar (as far off as the bench draws, 24 chunks) low and high, the gate at its foot, the stair
- * partway, a pavilion, over the cloud belts, the summit's gate and the summit from above.
+ * to stand or ground under it, its bridges, pavilions and shrines); then the views from afar, 1 km
+ * and 2 km off toward spawn and 1 km from the side, drawn from the world's surface as made
+ * ({@link KunlunVista}: the game draws no farther than 32 chunks); then pictures in the game, near
+ * at hand: the gate at its foot, the stair partway, a pavilion, over the cloud belts from the
+ * summit's edge, its shoulder, the summit's gate and the summit from above.
  */
 final class KunlunBench {
 
@@ -44,9 +46,7 @@ final class KunlunBench {
     private static long vistaFrom;
     /** When the mountain's chunks were asked for, and how long they took to be made (the 21 by 21 round its centre). */
     private static long madeFrom, madeIn;
-    /** How far off the pictures from afar are taken (inside the chunks the bench draws). */
-    private static final int AFAR = 375;
-    /** The chunks drawn round the camera: as many as the integrated graphics this was made on bear with the taller sky's chunks. */
+    /** The chunks drawn round the camera: few, for the integrated graphics this was made on (shared with other clients) failed in its driver drawing more of the taller sky's chunks. */
     private static final int VIEW = 10;
 
     static List<String> report() {
@@ -218,8 +218,6 @@ final class KunlunBench {
         bz /= bl;
         if (ticks == 1) {
             switch (name) {
-                case "from_afar" -> look(p, level, x0 + bx * AFAR + 0.5, foot + 60, z0 + bz * AFAR + 0.5, new BlockPos(x0, summit - 230, z0));
-                case "from_afar_high" -> look(p, level, x0 + bz * AFAR + 0.5, summit - 120, z0 - bx * AFAR + 0.5, new BlockPos(x0, summit - 190, z0));
                 case "foot_gate" -> {
                     KunlunShape.Site gate = path.sites.get(0);
                     int i = Math.max(0, gate.index() - 14);
@@ -248,8 +246,8 @@ final class KunlunBench {
                 default -> {}
             }
         }
-        // the far ones wait for the world round them to be made
-        int wait = name.startsWith("from_afar") ? 20 * 90 : name.equals("shoulder") || name.equals("above_clouds") ? 20 * 30 : 20 * 10;
+        // the wider ones wait for the world round them to be made
+        int wait = name.equals("shoulder") || name.equals("above_clouds") ? 20 * 30 : 20 * 10;
         if (ticks == wait) shot(name + "_" + Zones.seed());
         if (ticks >= wait + 10) {
             shot++;

@@ -86,8 +86,8 @@ public final class KunlunShape {
     public static final double BANK_OUTER = 0.8, BANK_INNER = 1.5;
     /** How steeply it climbs, as laid out and at most, in blocks up a block along. */
     public static final double CLIMB = 0.25, MAX_CLIMB = 0.33;
-    /** Over a drop deeper than this under its way it crosses on a bridge of arches; over less, it is built out on stone. */
-    public static final int BRIDGE = 7;
+    /** Over a drop deeper than this under its way (and over every gorge) it crosses on a bridge of arches; over less, it is built out on stone. */
+    public static final int BRIDGE = 14;
     /** A bridge's arches: a pier every so many blocks along. */
     public static final int SPAN = 11;
     /** Where the stair crosses a gorge, the gorge is cut down this far under its way, so the stream runs under the bridge. */
@@ -655,7 +655,7 @@ public final class KunlunShape {
                 z[i] = pts.get(i)[1];
                 // the ground, but never far off the way's own even descent: through a ridge it is cut, over a hollow built out or bridged
                 under[i] = ground.at((int) Math.floor(x[i]), (int) Math.floor(z[i]));
-                raw[i] = Mth.clamp(ground.at((int) Math.floor(x[i]), (int) Math.floor(z[i])), pts.get(i)[2] - KEEP, pts.get(i)[2] + KEEP);
+                raw[i] = Math.max(DRY, Mth.clamp(ground.at((int) Math.floor(x[i]), (int) Math.floor(z[i])), pts.get(i)[2] - KEEP, pts.get(i)[2] + KEEP));
             }
             climb(raw, y, summit);
             // eased: a running mean, then kept to the climb again
@@ -684,13 +684,16 @@ public final class KunlunShape {
     private static final double TURN = 0.025;
     private static final int TURNS = 8, AHEAD = 14;
     /** How strongly the way is held to the massif's contour at its height (cost a block off it, a block ahead). */
-    private static final double CONTOUR = 0.08;
+    private static final double CONTOUR = 0.04;
 
     /** About how far out the massif's own profile falls to height y (the summit {@code summit}, its foot {@code foot}). */
     static double contour(double y, int summit, int foot) {
         double e = Mth.clamp((y - foot) / Math.max(1.0, summit - foot), 0, 1);
         return TOP + (REACH * 0.95 - TOP) * (1 - Math.pow(e, 1 / POWER));
     }
+
+    /** The way never lower than this (over the sea's level, never wading through a lake at the foot). */
+    private static final int DRY = 64;
 
     /** How far the way's height may stray from its even descent to follow the ground. */
     private static final double KEEP = 5;
