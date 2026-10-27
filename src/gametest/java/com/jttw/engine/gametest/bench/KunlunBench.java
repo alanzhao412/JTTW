@@ -233,9 +233,9 @@ final class KunlunBench {
                     look(p, level, x0 + path.x[i], path.y[i] + 5.5, z0 + path.z[i], new BlockPos(x0 + pav.x(), pav.y() + 4, z0 + pav.z()));
                 }
                 case "above_clouds" -> {
-                    // from the summit's west edge, out and down over the highest belt
+                    // off the summit pyramid's west face, out and down over the highest belt
                     int belt = KunlunShape.beltY(KunlunShape.BELTS - 1, summit, foot);
-                    look(p, level, x0 - KunlunShape.TOP - 2.5, summit + 9, z0 + 0.5, new BlockPos(x0 - 150, belt - 15, z0 + 20));
+                    look(p, level, x0 - 95.5, summit + 20, z0 + 0.5, new BlockPos(x0 - 210, belt, z0 + 30));
                 }
                 case "shoulder" -> {
                     int belt = KunlunShape.beltY(1, summit, foot);

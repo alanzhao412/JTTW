@@ -387,7 +387,7 @@ src/main/java/com/jttw/engine/
 ├── mixin/           14 Mixin classes — bytecode instrumentation
 ├── flight/          custom flight, glide, and swim physics (server side)
 ├── network/         c2s/ and s2c/ packets for client–server state sync
-├── dimension/       Heaven and Hell dimensions with custom worldgen
+├── dimension/       Heaven, Hell and the Great Void; the taller Overworld (TallOverworld)
 ├── world/           zones (Zones, ZoneLayout, ZoneMap, ZoneAllies), zone features, Fengdu, Heaven, morality
 ├── entity/          custom entities, projectiles, summons; zone/ holds ZoneMonster and ZoneBoss
 ├── item/            lore artifacts and weapons
@@ -397,6 +397,47 @@ src/main/java/com/jttw/engine/
 
 Largest components: `TransformationAbilityHandler` (1,385 lines), `YuanDiAbilityHandler` (1,236),
 `WuCloneManager` (874, including custom pathfinding goals).
+
+### The taller sky
+
+New worlds' Overworld reaches **y 640** instead of vanilla's 320 (from y −64, 704 high), so Mount
+Kunlun can stand far over every mountain the land makes ([`TallOverworld`](src/main/java/com/jttw/engine/dimension/TallOverworld.java)).
+
+- **How**: a dimension type of the mod's own,
+  [`tall_overworld`](src/main/resources/data/jttw_engine/dimension_type/tall_overworld.json),
+  vanilla's Overworld in all else (its sky, light, monsters, beds, raids) but 704 high and as high
+  logically; and the world presets a new world is made from (default, large biomes, amplified,
+  single biome: `data/minecraft/worldgen/world_preset/`) give their Overworld this type. Superflat
+  and debug worlds keep vanilla's. The GameTest server's world is made tall too
+  (`GameTestServerMixin`), so the tests see the world as a new one is.
+- **Only new worlds.** A world keeps the dimension type written in its level.dat when it was made,
+  so an older world's Overworld stays `minecraft:overworld`, 320 high, and loads as it always did:
+  raising a world's sky under chunks already saved would shift every section of them. (Tried: a
+  world saved by the build before this one, opened by this one, is still 320 high and loads and
+  generates cleanly.) Where an older world has not yet made Mount Kunlun, it is made pressed under
+  its lower sky (see Mount Kunlun, below).
+- **The land is vanilla's to the last block.** The Overworld's noise settings are untouched (y −64
+  to 320): the terrain noise is cut to the lower of the two heights, so the same seed makes the same
+  land, and over it there is only open sky. Ores and features keep their own heights; structures,
+  features and light reach the new top (a block can stand at y 639 under open sky). The mod's own
+  searches for the land (`ZoneTerrain.landTop`) start at the terrain's ceiling, not the sky, so the
+  zones' works stand where they always did and the search costs nothing more.
+- **What else was checked**: everything that asks how high a world is asks the world
+  (`getMaxBuildHeight`), never 320: the zones' features (their caps under the sky), the Bottomless
+  Cave's and the lairs' land, Zhenyuan's and the garrison's spots, the furnace, the villages; flight
+  (no ceiling of its own; nothing sends a flier to Heaven for flying high, the realm leap is a key)
+  and its look-ahead (horizontal); the realm arrivals (the Overworld's by its heightmap, the
+  Nether's under its roof); Heaven's void handler; the Great Void (768 high, still taller than the
+  Overworld can be); the Luopan (a compass, no height); the benches.
+- **What it costs** (`./gradlew runWorldgenBench -Pbench.view=12`, seed 12345, the same world made
+  under each sky with `-Pbench.sky=vanilla`, on a 16-core laptop shared with other work): new
+  chunks are made at about the same speed (39.7 chunks a second against 41.5
+  under vanilla's sky; on a busier run 20.8 against 25.4); a loaded chunk takes about a third more
+  (555 KB against 407) of heap (the empty sections over the
+  land are cheap but not free); saved, a chunk is the same size on disk (12.2 KB against 12.1: empty sections
+  are not written). Flight over new land is bounded by generation either way (101 blocks a second
+  against 106). Mount Kunlun's own chunks, the tallest in the world, take about 40 ms each to make
+  where the old peak's took about 25 (the 441 round its summit, with the client drawing them).
 
 ### Zones
 
@@ -409,7 +450,7 @@ third; Hell, a dimension of its own, is the fourth; then the Flaming Mountains, 
 the first aerial zone, in the sky; Lion-Camel Ridge, the last band, is the last. Past it all lies
 Fengdu, the Ghost City: a place, not a zone of a band, placed as the zones are, whose Gate of
 Ghosts is the way down to Hell for everyone who comes to it by an Ancient City and fights it open.
-Far to the west stands Mount Kunlun, another such place: a towering sacred peak with the Queen
+Far to the west stands Mount Kunlun, another such place: a towering sacred massif with the Queen
 Mother of the West's palace on its summit, where the Banana-Leaf Fan lies.
 
 **One of each a world.** Every boss lives in one place: each overworld zone has a single region a
@@ -427,7 +468,7 @@ west lengthens with the pilgrim: the higher a zone's levels, the farther out its
 | Mount Wuzhuang (over the clouds) | 78–88 | 6–7.5 km | one, ~260 |
 | Lion-Camel Ridge | 89–100 | 7.5–9 km | one, ~680 |
 | Fengdu, the Ghost City (river and hill country) | none: the way to Hell | 9–10.5 km | one, ~240 |
-| Mount Kunlun (mountain country, to the west) | none: the Banana-Leaf Fan | 5–8 km, within 30° of west | one, ~380 |
+| Mount Kunlun (mountain country, to the west) | none: the Banana-Leaf Fan | 5–8 km, within 30° of west | one, ~930 |
 
 Where in its ring follows from the world seed and its biomes: earliest zone first, the places its
 layout offers (spread evenly over the ring by the seed) are tried in turn, and it takes the first on
@@ -1565,7 +1606,8 @@ Mount Kunlun (昆仑山), at the western end of the world, is in the old books t
 and the home of the Queen Mother of the West, whose Jade Pool (瑶池) is on it; and in the novel
 (chapter 59) the Banana-Leaf Fan is a treasure that grew behind it when chaos first parted, the
 essence of the Great Yin. Here it is where the fan is found: one in the world, in a treasure chest
-in the Queen Mother's palace on the summit. A place, not a combat zone: nothing fights there. In
+in the Queen Mother's palace on the summit. A place, not a combat zone: nothing fights there. It is
+the axis of the world, the reason the Overworld's sky was raised (see **The taller sky**, above). In
 [`world/kunlun/`](src/main/java/com/jttw/engine/world/kunlun/).
 
 - **Where** (`Zones.KUNLUN = Zone.place(kunlun, kunlun_hosts, ZoneLayout.KUNLUN, WHOLE_COLUMN)`,
@@ -1573,64 +1615,114 @@ in the Queen Mother's palace on the summit. A place, not a combat zone: nothing 
   anyone there by level). One a world, placed by `ZoneMap` last of all, so it keeps clear of every
   zone and of Fengdu: **5–8 km out, within 30° of due west** (the journey west; its layout keeps to
   the western quarter as a sea's keeps to its own, `ZoneLayout.quarter`, and if it must widen it
-  widens westward still), a region about 380 blocks across (never under 300) on mountain country
+  widens westward still), a region about 930 blocks across (never under 870) on mountain country
   (jagged, frozen and stony peaks, snowy slopes, groves, meadows, cherry groves, windswept hills,
   gravelly hills and forests: the Bottomless Cave's hosts). In the bench's worlds: seed 12345 at
-  (−6341, −1652), 6.6 km west, on grove (summit y 248, 80 over the highest land round it); seed 42 at
-  (−7272, −1873), 7.5 km west, on meadow (summit y 248, 107 over it).
-- **The peak** (`KunlunShape`, pure, unit-tested; laid by `world/feature/KunlunFeature` chunk by
-  chunk): one dominant peak raised out of the land round it, its summit a level circle 25 blocks
-  out each way at the highest land within 240 blocks and 40 more (at least 150 over its foot,
-  never under y 248, never over the sky less 32: y 248–288). Its flanks fall to the land's own over
-  about 112 blocks, steep under the summit and gentler toward the foot, run out along five ridges
-  (fading at the foot), broken by crags and stepped into ledges and cliffs; past 148 blocks, the
-  land's own. Grass, ferns and pines low down, bare rock banded with white calcite where steep, and
-  from about 95 under the summit up, snow (on the gentler ground, and more and more of the cliffs). **Clouds** (celestial cloud) cling round its shoulders,
-  about 48 under the summit, never close over the stair. Round it, its **country** keeps the land's
-  shape (steep places bare rock, high places snow, grass and pines lower down); a pale sky, and
-  nothing hostile spawns in it (rabbits do).
-- **The stair** (`KunlunShape.path`): a stone way three or four blocks wide that winds up round the
-  peak (twice round, or so) from its foot to the summit's south edge, laid out by walking down from
-  the summit along the flank as it is really shaped, a quarter block lower a block, turning gently
-  and never coming near its own turns; then kept to a climb of at most a third of a block a block, so it is walked
-  in half steps (stone brick, a slab where the way is half a block up), never a whole block at once.
-  Cut into the flank where it is higher, built out on stone where it is lower, a stone-brick rail
-  along any drop, a lantern on a post every 18 blocks on the outer side.
+  (−6341, −1652), 6.6 km west, on grove (its summit 436 over the highest land just past its foot,
+  the land round its foot at y 67); seed 42 at (−7272, −1873), 7.5 km west, on meadow (426 over it,
+  the foot at y 76).
+- **The massif** (`KunlunShape`, pure, unit-tested; raised by `world/feature/KunlunFeature` chunk by
+  chunk): the summit a level circle 48 blocks out each way at **y 596** (under the taller sky: 44
+  under it, room for the palace's roofs), ringed by a sheer crown of cliff; under it a **summit
+  pyramid**, four-faced, its arêtes running out along two crossed axes, falling some 200 blocks in
+  the first 100 out; then the **flanks**, falling ever more gently to the land's own about 400
+  blocks out (a base 800 blocks and more across), meeting it without a crease (at the very foot the
+  land's own crags show through; higher, the massif rises from the land's broad shape, as its stair
+  is laid out on). Six **spurs** rib the flanks from the pyramid to the foot, their crests standing
+  over the valleys between; on five of them a **lesser peak**, a sharp faceted pyramid of its own
+  (y 350–460) rising over a saddle; in the middle of each valley a **gorge** from about 165 blocks
+  out to the foot, up to 46 deep, steep-walled, a **spring** high in each, its stream falling down
+  it. All of it broken by crags and stepped into ledges and cliff bands that wander up and down
+  across the flanks (never level rings round it).
+- **Its dress**: grass, ferns, podzol and pines low down; over the trees alpine stone, gravel and
+  moss; bare rock where it is steep, banded with white calcite, andesite, tuff and diorite; over its
+  **upper half snow** (from halfway up, wandering a little), more and more of the cliffs white the
+  higher they stand; in the hollows high up **glaciers** of packed ice, falling over the steeps in
+  **ice falls** of blue ice. Three **cloud belts** of celestial cloud ring it at about 0.36, 0.6 and
+  0.8 of the way up (y 257, 384 and 490 in seed 12345's world): broken sheets, flat beneath and
+  heaped above, thick against the flank and thinning out over the shoulders, the summit standing
+  over them all; never on the stair. Celestial cloud draws no face against cloud now (as glass), so
+  a bank of it is drawn by its outside alone (in Heaven and on Mount Wuzhuang too).
+- **The pilgrim's way** (`KunlunShape.path`): a stone way three or four blocks wide that winds about
+  twice round the massif, some 2,000–2,200 blocks from its foot to the summit's south edge (a
+  long climb: about ten minutes' walk), laid out by walking down from the summit along the flank as
+  it is really shaped, a quarter block lower a block, held near the massif's own contour at its
+  height (so it winds outward as it falls), steered off the lesser peaks, never coming near its own
+  turns; its height then kept within a few blocks of that even descent and to a climb of at most a
+  third of a block a block, so it is walked in half steps (stone brick, a slab where the way is half
+  a block up), never a whole block at once. Cut into the flank where it is higher (a bank cut back
+  gently on the drop side and at 1.5 on the uphill, so it is never a trench), built out on stone
+  where it is lower; over drops deeper than 14 blocks and across the **gorges** on **bridges** of
+  arches, a pier every 11 blocks, the gorge cut down 5 under the deck so its stream runs beneath. A
+  stone-brick rail along any drop, a lantern on a post every 18 blocks on the outer side.
+- **Along the way** (`KunlunWay`, a blueprint in each site's own frame, the way up and across): a
+  **gate** (牌坊, three bays, white pillars, a gold-trimmed beam, blue tiles) a little way up from the
+  foot, 昆仑 *Mount Kunlun, The Way Up* on its face and 天柱 *The Pillar of Heaven* on its back; a
+  **rest pavilion** (亭) over the way about every 210 blocks, four white pillars under a pyramid roof
+  of blue tiles with a gold finial, a seat on the inner side, a rail on the drop, lanterns at the
+  eaves, each its name on a board over the way in (迎仙亭 *Pavilion of Greeting the Immortals*,
+  松风亭, 听泉亭, 中天门 *the Middle Gate of Heaven*, 望云亭, 积雪亭, 揽月亭, 凌霄亭, 摘星亭 from the foot
+  up); and halfway between, a **shrine** cut into the mountain on the inner side, an altar with
+  candles and flowers under a roof of blue tiles. Sites go where the way runs straight, along an
+  axis, on its own ground; nothing of them stands on the way itself.
 - **The summit** (`KunlunPalace`, a blueprint as Fengdu's city is, laid column by column with its
-  signs and its treasure): a terrace paved in white jade (quartz, polished diorite, calcite) 21
+  signs and its treasure): a terrace paved in white jade (quartz, polished diorite, calcite) 44
   blocks out, a white balustrade round it, snow and snow-laden pines round that; at its south edge,
-  where the stair arrives, a three-bay **gate** (牌坊) of white pillars, a beam trimmed with gold
-  under a roof of celestial blue tiles (dark prismarine), 昆仑 *Mount Kunlun* on its face and 瑶池
-  *The Jade Pool* on its back. Within, the **Jade Pool** in two halves either side of a white
+  where the stair arrives, a three-bay **gate** of white pillars under blue tiles, 昆仑 on its face and
+  瑶池 on its back. The **lower court**: the **Jade Pool** in two great halves either side of a white
   causeway with rails and lamps, rimmed with jade, lit from below by sea lanterns (so it never
-  freezes up there), lilies on it; peach trees in blossom (cherry, petals fallen round them) by it
-  and by the palace. The **palace** (西王母宫) on a white plinth up two steps: white walls and quartz
-  pillars with gold heads, windows of light blue glass, a hip roof of blue tiles with a ridge ending
-  in gold; within, lanterns, a blue carpet, a screen of jade and gold, and on a dais before it
-  between candles the **treasure chest**.
+  freezes), lilies on it, and over the causeway's middle the **Jade Terrace** (瑶台), a pavilion of
+  white pillars under a pyramid roof; **peach trees of immortality** in blossom round it. Up a broad
+  flight of three steps the **upper court**: more peach trees, the **bell tower** and **drum tower**
+  either side under pyramid roofs, and two **halls of scriptures** (shelves of scrolls, lecterns).
+  At its head, up three more steps on a white plinth with a balustrade, the **palace** (西王母宫): a
+  colonnade round it under a lower roof, white walls with pillars headed in gold and windows of blue
+  glass, and over all a great hip roof of blue tiles with a gold-ended ridge (its gold 29 over the
+  paving, y 625); within, white pillars, hanging lanterns, a blue carpet to a dais, and on it,
+  before the Queen Mother's throne and a screen of jade and gold, between candles, the **treasure
+  chest**.
 - **The treasure** (`loot_table/chests/kunlun_treasure`, `Kunlun.TREASURE`): the Banana-Leaf Fan,
   always, once, alone in a pool of one roll; and three to five modest gifts (heavenly wine, an
   immortal peach now and then, jade, gold, emeralds, cherry saplings, lily pads). No other signature
   weapon, and no other loot table, recipe or tag in the mod gives the fan.
+- **In an older world** (made before the taller sky, its Overworld still 320 high): where Kunlun is
+  not yet made, it is made pressed under that sky, not cut off: its summit 44 under it (y 276), the
+  same plan, footprint and stair (its heights, crags and gorges pressed down with it), the palace
+  whole. It may stand somewhere new: the region is larger now, so where it fits in an older seed may
+  differ; one made by an earlier build stays where it is (an older world could then hold two).
 - **The Earth God's Luopan**: asked sneaking in the world of the living, the way to Kunlun, for
   anyone (see the luopan, above).
 - **Art**: vanilla blocks, the mod's jade and celestial cloud.
 - **Tests and pictures**: `KunlunPlacementTest` (one a world, 5–8 km out and within 30° of west in
   every seed, widened or not, on its hosts, never on a zone's or Fengdu's ground, the same for the
-  same seed; a place of no band; the peak, the stair and the palace inside its region; the peak's
-  shape and its summit's height; the stair from its foot to the summit's south edge, never steeper
-  than its climb, its turns well apart, walked in half steps from any block of it to the next; the
-  fan in Kunlun's treasure once and in no other data file); `KunlunGameTests` (the blueprint: from
-  the stair's head through the gate, over the causeway, up the palace's steps to the chest, room to
-  stand, one chest, water only in the pool, every sign on a wall; the treasure rolled forty times,
-  the fan in it once each time, no other weapon; the chest laid on the summit in the test world,
-  opened, the fan in it; the luopan asked and held sneaking, and not, at every level, in Diyu and
-  the Nether); gallery scenes `-Pgallery.only=kunlun_` (the gate from the stair's head, the summit
-  from above, the Jade Pool, the palace, the chest within); in a real world with `./gradlew
+  same seed; a place of no band; the massif, the stair and the palace inside its region; the
+  massif's shape: a level top, the summit pyramid falling steeply on most sides, a base 680 blocks
+  across and more, each lesser peak over its saddle and well under the summit, a deep gorge between
+  each two spurs and none high up, the snow from halfway up, the cloud belts in the open and under
+  the summit; the summit at y 596 under the taller sky and y 276 under an older one, the massif
+  pressed under it and its stair still in half steps; the stair from its foot to the summit's south
+  edge, never steeper than its climb, its turns apart, walked in half steps from any block of it to
+  the next, its gate at the foot, pavilions all the way up, shrines, every site on the way and found
+  where it stands; the fan in Kunlun's treasure once and in no other data file); `KunlunGameTests`
+  (the blueprint: from the stair's head through the gate, over the causeway under the Jade Terrace,
+  up the broad steps, into the bell tower and a hall of scriptures, up the palace's steps to the
+  chest, room to stand, one chest, water only in the pool, every sign on a wall; the treasure rolled
+  forty times, the fan in it once each time, no other weapon; the chest laid on the summit, at y 596,
+  opened, the fan in it; a stretch of the stair as the feature really lays it in the test world,
+  walked block by block: ground under every step, nothing on the way, two blocks of room over head,
+  no water, never more than a half step; an older world's Kunlun pressed under its sky; the luopan
+  asked and held sneaking, and not, at every level, in Diyu and the Nether); gallery scenes
+  `-Pgallery.only=kunlun_` (the gate from the stair's head, the summit from above, the Jade Pool, the
+  upper court, the palace, the throne and chest within); in a real world with `./gradlew
   runWorldgenBench -Pbench.mode=kunlun -Pbench.seed=<seed>` (`KunlunBench`: its place, bearing and
-  host, its summit against the highest land round it, the chest and its loot, the stair walked
-  block by block, and pictures from afar on two sides, among the clouds at its shoulder, up the
-  stair, before the gate and over the summit). `-Pbench.mode=zones` shows it on the map.
+  host, the world's sky, its summit against the highest land past its foot, its snow line and cloud
+  belts, how long its chunks took, the chest and its loot, the stair walked block by block (its
+  steps, room, water, bridges, pavilions, shrines); the views from afar drawn by `KunlunVista` from
+  the world's surface as made (the game draws no farther than 32 chunks, and the bench, on modest
+  graphics, 10): from 1 km and 2 km toward spawn and 1 km from the side; then pictures in the game:
+  the gate at the foot, the stair partway, a pavilion, over the cloud belts from the summit's edge,
+  the shoulder, the summit's gate and the summit from above). `-Pbench.mode=zones` shows it on the
+  map.
 
 ---
 

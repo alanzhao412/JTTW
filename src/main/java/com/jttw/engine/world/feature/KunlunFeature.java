@@ -408,6 +408,7 @@ public class KunlunFeature extends Feature<NoneFeatureConfiguration> {
         KunlunShape.Hit near = null;
         boolean asked = false;
         for (int belt = 0; belt < KunlunShape.BELTS; belt++) {
+            if (!KunlunShape.belt(belt, summit, foot)) continue;
             int mid = KunlunShape.beltY(belt, summit, foot);
             if (t >= mid + 3 || t < mid - KunlunShape.BELT_DROP[belt] - 5) continue;
             if (!asked) {

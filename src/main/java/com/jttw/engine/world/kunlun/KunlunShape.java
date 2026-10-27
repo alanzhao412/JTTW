@@ -318,6 +318,11 @@ public final class KunlunShape {
         return rise * (round / 4 - field(seed, x, z, dx, dz)) + gorge(seed, x, z, dx, dz) * 0.5;
     }
 
+    /** Whether the {@code belt}th belt rings this massif: all three under the taller sky; pressed under a lower one, only the middle. */
+    public static boolean belt(int belt, int summit, int foot) {
+        return summit - foot >= RISE * 0.75 || belt == 1;
+    }
+
     /** The middle of the {@code belt}th cloud belt, the summit {@code summit}, the land round the foot {@code foot}. */
     public static int beltY(int belt, int summit, int foot) {
         return foot + (int) Math.round(BELT_AT[belt] * (summit - foot));
@@ -333,7 +338,8 @@ public final class KunlunShape {
     public static double cloud(long seed, int x, int y, int z, int belt, int ground, int summit, int foot) {
         SimplexNoise n = noise(seed);
         double mid = beltY(belt, summit, foot) + 4 * n.getValue(x / 140.0 + belt * 7.1, z / 140.0 - 2.9);
-        int drop = BELT_DROP[belt];
+        if (!belt(belt, summit, foot)) return -1;
+        int drop = (int) Math.round(BELT_DROP[belt] * Math.min(1, (summit - foot) / RISE));
         if (ground >= mid - 2 || ground < mid - drop || y <= ground + 1) return -1;
         double out = (mid - ground) / drop; // 0 against the flank, 1 at the belt's outer edge
         double patch = n.getValue(x / 46.0 + 7.7 + belt * 31, z / 46.0 - 3.3) + 0.5 * n.getValue(x / 15.0 - belt * 5, z / 15.0 + 50);
@@ -605,7 +611,10 @@ public final class KunlunShape {
             for (int i = 1; i < 9000; i++) {
                 double best = Double.MAX_VALUE, bh = heading;
                 // each rate of turning tried a stretch ahead, kept to: the one whose way keeps nearest the climb, going on round
-                for (int turn = -TURNS; turn <= TURNS; turn++) {
+                // hemmed in (every way ahead onto a turn of its own), it may turn harder
+                for (int tried = 0; tried <= 4 * TURNS + 1; tried++) {
+                    int turn = tried <= 2 * TURNS ? tried - TURNS : (tried % 2 == 0 ? 1 : -1) * (TURNS + 1 + (tried - 2 * TURNS - 1) / 2);
+                    if (tried > 2 * TURNS && best < 400) break;
                     double a = heading, qx = px, qz = pz, cost = Math.abs(turn * TURN) * 2;
                     for (int ahead = 1; ahead <= AHEAD; ahead++) {
                         a += turn * TURN;

@@ -128,6 +128,18 @@ public final class ChunkBench {
                     access -> withSky(access, access.registryOrThrow(Registries.WORLD_PRESET).getHolderOrThrow(WorldPresets.NORMAL)
                             .value().createWorldDimensions()), new net.minecraft.client.gui.screens.TitleScreen());
         }
+        // opening a saved world, the game may ask first (its experimental settings, a backup): go on, as a player would
+        if (worldRequested && mc.level == null && mc.screen != null && !System.getProperty("jttw.chunkBench.open", "").isEmpty()
+                && !(mc.screen instanceof net.minecraft.client.gui.screens.TitleScreen)) {
+            for (var child : mc.screen.children()) {
+                if (child instanceof net.minecraft.client.gui.components.Button b
+                        && b.getMessage().getString().toLowerCase(java.util.Locale.ROOT).matches(".*(proceed|yes|continue|without backup|i know).*")) {
+                    JTTWEngine.LOGGER.info("ChunkBench: {} asks; answering \"{}\"", mc.screen.getClass().getSimpleName(), b.getMessage().getString());
+                    b.onPress();
+                    break;
+                }
+            }
+        }
         if (mc.level != null) {
             // A paused singleplayer game stops the server, and the bench with it
             mc.options.pauseOnLostFocus = false;
