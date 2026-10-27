@@ -1,0 +1,8 @@
+{
+  "type": "jttw_engine:tang_village",
+  "biomes": "#jttw_engine:has_structure/tang_village_oasis",
+  "spawn_overrides": {},
+  "step": "top_layer_modification",
+  "terrain_adaptation": "beard_box",
+  "variant": "oasis"
+}

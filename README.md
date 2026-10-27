@@ -1286,6 +1286,125 @@ in the Queen Mother's palace on the summit. A place, not a combat zone: nothing 
 
 ---
 
+## Tang villages
+
+Villages of the Tang (唐朝, the seventh century of the novel) generate in the overworld alongside
+vanilla's, their folk dressed as the novel's commoners and trading in copper and silver for the
+mod's own goods. Talismans and charms are not sold by mortals: only in the supernatural world, at
+the ghost market of Fengdu and by Heaven's merchant-immortals. Everything is in
+`com.jttw.engine.village`, registered by `registry/ModVillages` (apart from the shared registries,
+so it merges cleanly).
+
+**Money** (`Coins`). Copper cash (铜钱, one wen), strings of cash (一串, 8 wen) and taels of silver
+(银两, the boat-shaped 元宝, 64 wen). Fixed rates both ways: at a money-changer (the merchant: 64
+copper for a tael, a tael for 64 copper, a string for 8) or by crafting (eight copper round a string
+make a string of cash, eight strings a tael, and back). A price is paid in silver and copper (100 wen
+is a tael and 36 copper); a trader pays out in one stack. Coin comes from selling goods to the folk,
+and from loot, modestly (`VillageLoot`): copper in vanilla's village chests, dungeons and desert
+temples, a tael or two in shipwreck treasure, silver in the treasuries of the Dragon Kings,
+Lion-Camel City and Heaven's pavilions and palace. The villages' own chests hold copper, rice and
+food, now and then a tael.
+
+**The folk** (`TangFolkEntity`, `Calling`, `TangTrades`). One creature, the vanilla trading screen,
+offers in copper and silver, restocked every morning. Prices in wen (64 = a tael):
+
+| Calling | Sells | Buys |
+|---|---|---|
+| Farmer (and wife) | 8 rice 6, 4 eggs 3, 4 apples 4, 2 pumpkin pies 5 | 20 wheat 4, 22 carrots 4, 26 potatoes 4, 15 beetroot 4 |
+| Innkeeper | 3 steamed buns 6, 4 mantou 4, bowl of rice 4, rice wine 12, tea 8 | 6 chicken 5, 5 pork 5, 5 mutton 5, 6 cod 4 |
+| Herbalist | herbal decoction 20, Qi-gathering pill 96, tea 8 | 8 brown or red mushrooms 3, 2 honey 6, 12 glow berries 4, 4 spider eyes 3 |
+| Monk | tea 6, 4 mantou 3, a sutra (book) 24 | 2 candles 6, 24 paper 6, 3 honeycomb 4 |
+| Scholar | maps to White Bone Ridge 64, the Bottomless Cave 80, the Mystical Waters 96, the Flaming Mountains 128, Mount Wuzhuang 160, Lion-Camel Ridge 192, Fengdu 192, Mount Kunlun 256; 12 paper 6, a book 30 | a book 8, 12 feathers 4, 6 ink sacs 4 |
+| Fortune teller | rumour scroll 16, Earth God's Luopan 48 | 6 amethyst shards 6, a rabbit's foot 12 |
+| Merchant (money-changer) | a tael for 64 copper, a string for 8 copper; 2 white wool (silk) 6, 4 red dye 4 | a tael (64 copper), a string (8), emerald 24, gold ingot 40, diamond 128 |
+| Smith | iron ingot 10, gold ingot 56, jade 192, servant bone 40, wraith wisp 48, captain's sigil 384, Rime Shackle 768 | 4 iron 24, 12 coal 4, servant bone 16, wraith wisp 20, captain's sigil 128 |
+| Ghost merchant | demon-quelling talisman 128, ghost-warding talisman 128, house-warding talisman 256, 3 incense 64, peace charm 384 | rice wine 10, 4 steamed buns 6, 2 candles 6, hell bank note 8, wraith wisp 24 |
+| Celestial merchant | jade dew 192, demon-quelling talisman 160, peace charm 320, house-warding talisman 256, 3 incense 64 | jade 64, 2 gold ingots 64, crane plume 32 |
+
+Nothing sells for less than any trader buys it back for (`TangTradesTest`): no coin from nothing.
+No signature weapon is sold. The goods: **rice**, a **bowl of rice** (three rice, a bowl, water),
+**steamed buns** (包子), **mantou**, **rice wine** (Strength for a minute, a little dizziness), **tea**
+(Haste for 90 s; cures Nausea and Slowness), the **herbal decoction** (heals 2 hearts; cures Poison,
+Nausea, Hunger, Weakness), the **Qi-gathering pill** (15% of one's Qi, at least 40) and Heaven's
+**jade dew** (35%, a little Regeneration): far short of an Immortal Peach or Laozi's pill, which
+refill a whole pool. The scholars' **maps** are explorer's maps of each zone's region, Fengdu and
+Mount Kunlun (its place as the Earth Gods give it, `EarthGod.toKunlun`, kept to one call in
+`VillageOffers`), the land drawn round a red cross. A **rumour scroll**, read, tells which demons lie
+ahead (`Rumours`): the zone for the reader's level, who rules there, its levels, which way and how
+far; and the trial after it.
+
+Each mortal lives as a villager does: wanders the village by day, walks home to its own bed at night
+and sleeps there, flees monsters, panics when struck. Killing one, or a spirit merchant, is killing a
+villager (karma −50, `Morality`); trading is dealing fairly (+1). They are put there as the village
+is made and never spawn of themselves. Their looks (`TangFolkRenderer`, `assets_source/tang_folk.py`,
+one frame, fourteen skins): men in the round-collar robe (圆领袍) and the black futou cap (幞头) with
+its two ties; women in ru-qun (a short jacket over a high-waisted skirt to the ground, a shawl, the
+hair high in a bun with a pin, a red flower-mark on the brow); the farmer in hemp under a conical
+straw hat; the monk shaven, a grey robe under a russet kasaya; the innkeeper in a headcloth and white
+apron; the smith in a headband and leather apron; the herbalist bearded; the fortune teller in a
+long blue robe and square cap; the ghost merchant pale, half-seen and floating, a paper lantern in his
+hand; the celestial merchant in white and gold, a gold crown, a long white beard.
+
+**Demons** (`YaoguaiFear`). A Yaoguai player (the Bull Demon King, the Saurian Demon King, the Grand
+Saint of Nine Spirits) within 12 blocks sets villagers running: the Tang folk (their own avoidance)
+and vanilla's villagers too (they take the demon for a hostile and panic: `VillagerHostilesSensorMixin`).
+A mortal of the Tang villages will not trade with one ("A demon! Spare us, Great King!"); the ghost
+market and Heaven's merchants deal with demons as with anyone (Heaven's not with its own outlaws).
+As the novel's demons do, a Yaoguai may go among men disguised: in another player's likeness, as a
+block, or as any vanilla creature that is not a monster, it frightens no one and may trade. A demon's
+own true shape (the mod's creatures) or a monster's fools nobody, and a disguised demon who strikes a
+villager or a golem is revealed for a minute.
+
+**Talismans and charms** (`Talismans`, `Wards`), sold only in the supernatural world, against the
+unclean (the walking dead, ghosts, the zones' demons and their kings; not Heaven's officials, the
+Dragon Kings, the Kings of Hell and their officers, nor Mount Wuzhuang's Daoists): the
+**demon-quelling talisman** (镇妖符; burned, 3 minutes of +25% damage to them), the **ghost-warding
+talisman** (驱鬼符; 3 minutes of −25% damage from them), the **house-warding talisman** (镇宅符;
+pasted on a block, for a day no monster comes into the world of itself within 24 blocks), **incense**
+(香; for 90 s the lesser unclean will not hunt its burner, and stop hunting them) and the **peace
+charm** (平安符; carried, −15% damage from them).
+
+**The markets of the supernatural world** (`SpiritMarkets`). In Fengdu's lower city the two plots
+either side of the avenue just inside the gate are the ghost market (鬼市): stalls under black
+awnings, candles and soul lanterns on the counters, a dead shopkeeper behind each, placed with the
+city (Fengdu spawns nothing). In Heaven one pavilion of the Immortals in three has a jade counter and
+a merchant-immortal behind it.
+
+**The villages** (`TangVillage`, a blueprint as Fengdu's city is; laid by `TangVillagePiece` chunk
+by chunk, the land smoothed toward it). A structure (`worldgen/structure/tang_village_*`) in a
+structure set of its own (`structure_set/tang_villages`: spacing 34 chunks, separation 12, as vanilla's villages; never
+within 8 chunks of a vanilla village), in three kinds by biome: **plains** (plains, meadows, forests,
+cherry groves: rice paddies, whitewashed walls, grey tiles), **mountain** (taiga and snowy country:
+millet, potatoes and carrots, fieldstone and spruce) and **oasis** (desert and savanna: a caravan
+halt of sandstone and mud brick, a pond, date palms, camels). It stands only on near-level, dry
+ground, and never within a zone's region nor within 108 blocks of one (`VillageSites`, from
+`Zones.MAP` alone: the zones, Fengdu and Kunlun). It is 93 by 70 blocks: a main street from the
+village gate (牌坊, the village's name on it: Gao Village, Chen Village and others of the novel's
+country) north to the **shrine of the Earth God** (土地庙: an altar, candles, an incense burner, the
+keeper's bed); a cross street through the square and its **well**; two **courtyard houses** (四合院:
+a compound wall and gatehouse, the main hall with its family altar, wing rooms, a paved court with a
+water vat); two **cottages**; the **inn and teahouse** (客栈, two storeys, tables, wine jars, a
+balcony); the **herbalist's** (药铺); the **smithy** (铁匠铺: a forge and chimney, anvil,
+grindstone); eight **market stalls** under coloured awnings and a fortune teller's table; lanterns on
+posts; mulberry trees; and **fields** either side. Eleven folk, every calling among them, each with a
+bed. Laid mirrored or not, by its seed.
+
+**Tests and pictures**: `CoinsTest`, `TangTradesTest` (prices payable, no arbitrage, the
+money-changer at par, no mortal sells a talisman and the spirits do, maps priced by distance, mortal
+remedies weaker than Heaven's), `VillageRulesTest` (no village in or beside any zone, the talismans'
+arithmetic, the rumours); `TangVillageGameTests` (trading in copper and silver for the mod's goods,
+karma for a fair deal, the money-changer, talismans by mortals and spirits, the scholar's maps, the
+talismans', incense's and ward's effects, killing a villager, a Tang villager fleeing a Yaoguai,
+vanilla villagers taking one for a hostile, refusal and disguise, the supernatural world trading with
+demons, a village laid whole with every villager's bed, the structure refusing every zone); gallery
+scenes `-Pgallery.only=tang_` (each kind of village from above and through its gate; the plains
+village's market, shrine, square, courtyard, inn, smithy and fields; every look of the folk; the
+ghost market; the merchant-immortal's stall); in a real world `./gradlew runWorldgenBench
+-Pbench.mode=village` (`VillageBench`: the nearest village of each kind, its folk and their beds,
+and pictures).
+
+---
+
 ## Building
 
 Requires **JDK 21** (Gradle downloads one if none is installed).

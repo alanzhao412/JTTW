@@ -44,7 +44,7 @@ final class FengduScenes {
     }
 
     /** The city, its ground (local y 0) the gallery's ground level, the hill's worn top round it and the road down from its gate. */
-    private static void city(ServerPlayer p) {
+    static void city(ServerPlayer p) {
         if (laid) return;
         ServerLevel level = p.serverLevel();
         BlockPos g = new BlockPos(CX, ground(p) - 1, CZ);
@@ -67,7 +67,7 @@ final class FengduScenes {
     }
 
     /** The city's ground, as its gate knows it. */
-    private static BlockPos cityGround(ServerPlayer p) {
+    static BlockPos cityGround(ServerPlayer p) {
         return new BlockPos(CX, ground(p) - 1, CZ);
     }
 

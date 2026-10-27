@@ -115,7 +115,16 @@ final class AbilityScenes {
             java.util.Map.entry("ancient_frame_lit", 80),
             // Mount Kunlun's summit, laid off the stage
             java.util.Map.entry("kunlun_gate", 140), java.util.Map.entry("kunlun_above", 100), java.util.Map.entry("kunlun_jade_pool", 80),
-            java.util.Map.entry("kunlun_palace", 80), java.util.Map.entry("kunlun_palace_inside", 60));
+            java.util.Map.entry("kunlun_palace", 80), java.util.Map.entry("kunlun_palace_inside", 60),
+            // the Tang villages, laid south of the stage; the ghost market, the pavilion of Heaven
+            java.util.Map.entry("tang_village_mountain_view", 160), java.util.Map.entry("tang_village_mountain_approach", 400),
+            java.util.Map.entry("tang_village_oasis_view", 160), java.util.Map.entry("tang_village_oasis_approach", 400),
+            java.util.Map.entry("tang_village_plains_view", 160), java.util.Map.entry("tang_village_plains_courtyard", 80),
+            java.util.Map.entry("tang_village_plains_fields", 80), java.util.Map.entry("tang_village_plains_approach", 400),
+            java.util.Map.entry("tang_village_plains_inn", 80), java.util.Map.entry("tang_village_plains_market", 80),
+            java.util.Map.entry("tang_village_plains_shrine", 80), java.util.Map.entry("tang_village_plains_smithy", 80),
+            java.util.Map.entry("tang_village_plains_square", 80), java.util.Map.entry("tang_ghost_market", 160),
+            java.util.Map.entry("tang_ghost_market_close", 60), java.util.Map.entry("tang_heaven_merchant", 100));
 
         /** Set by a scene that photographs a screen (a furnace's, say), so the gallery leaves it open. */
     static volatile boolean keepScreen;
@@ -129,6 +138,7 @@ final class AbilityScenes {
         all.addAll(LionScenes.all());
         all.addAll(FengduScenes.all());
         all.addAll(KunlunScenes.all());
+        all.addAll(VillageScenes.all());
         return all;
     }
 
@@ -1314,6 +1324,7 @@ final class AbilityScenes {
         FireScenes.clear(p);
         WuzhuangScenes.clear(p);
         LionScenes.clear(p);
+        VillageScenes.clear(p);
         keepScreen = false;
         topSpeed = false;
         com.jttw.engine.client.renderer.GoldenEyesRenderer.setMode(p.getUUID(), 0);

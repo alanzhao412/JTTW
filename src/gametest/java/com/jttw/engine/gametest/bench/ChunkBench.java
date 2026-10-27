@@ -73,6 +73,8 @@ public final class ChunkBench {
     private static final boolean LION = "lion".equals(System.getProperty("jttw.chunkBench.mode", ""));
     /** "kunlun" runs {@link KunlunBench}: where Mount Kunlun was placed, its peak, its stair walked, its summit. */
     private static final boolean KUNLUN = "kunlun".equals(System.getProperty("jttw.chunkBench.mode", ""));
+    /** "village" runs {@link VillageBench}: the nearest Tang village of each kind, and the nearest as built. */
+    private static final boolean VILLAGE = "village".equals(System.getProperty("jttw.chunkBench.mode", ""));
     private static final TicketType<ChunkPos> BENCH = TicketType.create("jttw_bench", Comparator.comparingLong(ChunkPos::toLong));
     private static final int GRID = 12;
     private static final int FLIGHT_TICKS = 400;
@@ -153,6 +155,15 @@ public final class ChunkBench {
             if (p.tickCount < 100) return;
             if (CaveBench.tick(p)) {
                 report.addAll(CaveBench.report());
+                write();
+                next(Step.DONE);
+            }
+            return;
+        }
+        if (VILLAGE) {
+            if (p.tickCount < 100) return;
+            if (VillageBench.tick(p)) {
+                report.addAll(VillageBench.report());
                 write();
                 next(Step.DONE);
             }

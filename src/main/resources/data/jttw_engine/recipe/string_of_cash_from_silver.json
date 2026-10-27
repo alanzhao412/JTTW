@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "jttw_engine:silver_tael"
+    }
+  ],
+  "result": {
+    "id": "jttw_engine:string_of_cash",
+    "count": 8
+  }
+}
