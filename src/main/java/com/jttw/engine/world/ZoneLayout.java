@@ -44,8 +44,11 @@ public record ZoneLayout(int near, int far, int radius, int wobble, long salt, b
      */
     public static final ZoneLayout MYSTICAL_WATERS = new ZoneLayout(3000, 4500, 220, 45, 0x5EA5D4A6L, true);
 
-    /** The Flaming Mountains: a range about 400 blocks across, 4.5-6 km out. */
-    public static final ZoneLayout FIRE_MOUNTAIN = new ZoneLayout(4500, 6000, 200, 40, 0xF1A3E5A7L, false);
+    /**
+     * The Flaming Mountains: a range about 640 blocks across (never under 540), room for the demons'
+     * outposts over it and the ravine up to the Fire Cloud Cave's door; 4.5-6 km out.
+     */
+    public static final ZoneLayout FIRE_MOUNTAIN = new ZoneLayout(4500, 6000, 320, 50, 0xF1A3E5A7L, false);
 
     /**
      * Mount Wuzhuang: a region about 260 blocks across (never under 224), round a floating island about

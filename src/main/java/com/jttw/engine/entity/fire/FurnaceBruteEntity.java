@@ -96,6 +96,7 @@ public class FurnaceBruteEntity extends FireMonster {
     protected void registerGoals() {
         goalSelector.addGoal(0, new FloatGoal(this));
         goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0, true));
+        goalSelector.addGoal(4, new net.minecraft.world.entity.ai.goal.MoveTowardsRestrictionGoal(this, 1.0)); // back to its post, if it has one
         goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 0.7));
         goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 10f));
         goalSelector.addGoal(7, new RandomLookAroundGoal(this));
