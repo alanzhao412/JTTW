@@ -218,10 +218,12 @@ public final class FengduCity {
         return m / PITCH + 1;
     }
 
-    /** What a lower-city plot is: a shrine, a house of the dead, a yard of burning offerings, a graveyard. */
-    public static final int SHRINE = 0, HOUSE = 1, OFFERINGS = 2, GRAVES = 3;
+    /** What a lower-city plot is: a shrine, a house of the dead, a yard of burning offerings, a graveyard, the ghost market. */
+    public static final int SHRINE = 0, HOUSE = 1, OFFERINGS = 2, GRAVES = 3, MARKET = 4;
 
+    /** The two plots either side of the avenue nearest the gate are the ghost market (鬼市); the rest as their place falls. */
     public static int plotKind(int px, int pz) {
+        if (pz == PLOTS && Math.abs(px) == 1) return MARKET;
         int r = hash(px * 17, pz * 13, 5);
         return r < 36 ? SHRINE : r < 64 ? HOUSE : r < 80 ? OFFERINGS : GRAVES;
     }
@@ -395,6 +397,7 @@ public final class FengduCity {
             case SHRINE -> shrine(u, v, x, y, z, front);
             case HOUSE -> house(px, pz, u, v, x, y, z);
             case OFFERINGS -> offerings(u, v, x, y, z);
+            case MARKET -> market(u, v, x, y, z);
             default -> graves(u, v, x, y, z);
         };
     }
@@ -469,6 +472,39 @@ public final class FengduCity {
             if (y == 2) return s(Blocks.LANTERN);
         }
         return null;
+    }
+
+    /** Where the ghost market's merchants keep their stalls (local x, z): behind each stall's counter. */
+    public static final List<int[]> MARKET_STALLS = List.of(new int[]{-(PLOT_FROM + 3), PLOT_FROM_Z + (PLOTS - 1) * PITCH + 3},
+            new int[]{PLOT_FROM + 3, PLOT_FROM_Z + (PLOTS - 1) * PITCH + 3});
+
+    /**
+     * The ghost market (鬼市), where the dead keep shop for the living who dare come: a stall under a
+     * black awning on dark posts, its counter toward the avenue set with candles and a soul lantern,
+     * barrels of paper money and incense behind, a soul lantern hung over the shopkeeper.
+     */
+    private static BlockState market(int u, int v, int x, int y, int z) {
+        boolean in = u >= 1 && u <= 5 && v >= 1 && v <= 5;
+        if (y == 0) return in ? (hash(x, z, 61) < 60 ? s(Blocks.POLISHED_BLACKSTONE_BRICKS) : s(Blocks.DEEPSLATE_TILES)) : s(Blocks.COBBLED_DEEPSLATE);
+        if (!in) {
+            // paper offerings hung on posts before it
+            if (u == 0 && (v == 0 || v == 6)) return y <= 2 ? s(Blocks.DARK_OAK_FENCE) : y == 3 ? s(Blocks.SOUL_LANTERN) : null;
+            return null;
+        }
+        boolean post = (u == 1 || u == 5) && (v == 1 || v == 5);
+        if (post && y <= 3) return s(Blocks.DARK_OAK_FENCE);
+        if (y == 4) return Blocks.DARK_OAK_TRAPDOOR.defaultBlockState().setValue(net.minecraft.world.level.block.TrapDoorBlock.HALF,
+                net.minecraft.world.level.block.state.properties.Half.TOP);
+        if (y == 5) return (u + v) % 2 == 0 ? s(Blocks.BLACK_CARPET) : s(Blocks.GRAY_CARPET);
+        // the counter, toward the avenue
+        if (u == 1 && v >= 2 && v <= 4) {
+            if (y == 1) return slab(Blocks.DARK_OAK_SLAB).setValue(SlabBlock.TYPE, SlabType.TOP);
+            if (y == 2) return v == 3 ? s(Blocks.SOUL_LANTERN) : candles(1 + hash(x, z, 62) % 3);
+            return null;
+        }
+        if (u == 5 && v >= 2 && v <= 4 && y <= 2) return y == 1 ? s(Blocks.BARREL) : v == 3 ? s(Blocks.SKELETON_SKULL) : s(Blocks.WHITE_CANDLE);
+        if (u == 3 && v == 3 && y == 3) return hanging(Blocks.SOUL_LANTERN);
+        return s(Blocks.AIR);
     }
 
     /** A graveyard: two rows of graves, a headstone and a mound each, a soul lantern on a post among them. */

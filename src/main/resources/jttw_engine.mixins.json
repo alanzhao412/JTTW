@@ -20,6 +20,7 @@
     "RangedAttributeAccessor",
     "ServerGamePacketListenerMixin",
     "VanillaRegistriesMixin",
+    "VillagerHostilesSensorMixin",
     "WalkAnimationStateAccessor"
   ],
   "client": [

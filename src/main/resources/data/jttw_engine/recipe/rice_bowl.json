@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "jttw_engine:rice"
+    },
+    {
+      "item": "jttw_engine:rice"
+    },
+    {
+      "item": "jttw_engine:rice"
+    },
+    {
+      "item": "minecraft:bowl"
+    },
+    {
+      "item": "minecraft:water_bucket"
+    }
+  ],
+  "result": {
+    "id": "jttw_engine:rice_bowl",
+    "count": 1
+  }
+}

@@ -175,6 +175,8 @@ public class FengduFeature extends Feature<NoneFeatureConfiguration> {
                 }
             }
         }
+        // the ghost market's shopkeepers, at their stalls in this chunk
+        if (hill) com.jttw.engine.village.SpiritMarkets.ghostMerchants(level, x0, z0, new BlockPos(c[0], floor, c[1]));
         // the trees, once the chunk's ground is all made
         var spruce = level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.CONFIGURED_FEATURE)
                 .getHolder(net.minecraft.data.worldgen.features.TreeFeatures.SPRUCE);

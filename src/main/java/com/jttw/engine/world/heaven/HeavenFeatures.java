@@ -246,8 +246,11 @@ public final class HeavenFeatures {
             int y = level.getHeight(Heightmap.Types.WORLD_SURFACE, island.x(), island.z());
             if (y <= level.getMinBuildHeight() + 1) return false;
             BlockPos at = new BlockPos(island.x(), y, island.z());
-            if (kind == 1) pavilion(level, at, ctx.random());
-            else garden(level, at, ctx.random());
+            if (kind == 1) {
+                pavilion(level, at, ctx.random());
+                // now and then a merchant-immortal keeps a stall in it
+                if (com.jttw.engine.village.SpiritMarkets.heavenlyStall(level.getSeed(), cx, cz)) com.jttw.engine.village.SpiritMarkets.celestialStall(level, at);
+            } else garden(level, at, ctx.random());
             return true;
         }
 

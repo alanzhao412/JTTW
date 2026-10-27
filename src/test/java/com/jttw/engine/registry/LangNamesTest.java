@@ -63,6 +63,13 @@ class LangNamesTest {
     }
 
     @Test
+    void everyTangVillageThingHasAName() throws Exception {
+        allNamed(registered("ModVillages.java", "ITEMS"), "item");
+        allNamed(registered("ModVillages.java", "ENTITIES"), "entity");
+        allNamed(registered("ModVillages.java", "EFFECTS"), "effect");
+    }
+
+    @Test
     void everyEffectHasAName() throws Exception {
         allNamed(registered("ModEffects.java", "EFFECTS"), "effect");
     }

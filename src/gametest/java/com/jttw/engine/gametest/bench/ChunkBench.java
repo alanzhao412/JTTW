@@ -75,6 +75,8 @@ public final class ChunkBench {
     private static final boolean KUNLUN = "kunlun".equals(System.getProperty("jttw.chunkBench.mode", ""));
     /** "void" runs the generation and flight measurements in the Great Void instead of the Overworld. */
     private static final boolean VOID = "void".equals(System.getProperty("jttw.chunkBench.mode", ""));
+    /** "village" runs {@link VillageBench}: the nearest Tang village of each kind, and the nearest as built. */
+    private static final boolean VILLAGE = "village".equals(System.getProperty("jttw.chunkBench.mode", ""));
     private static final TicketType<ChunkPos> BENCH = TicketType.create("jttw_bench", Comparator.comparingLong(ChunkPos::toLong));
     private static final int GRID = 12;
     private static final int FLIGHT_TICKS = 400;
@@ -155,6 +157,15 @@ public final class ChunkBench {
             if (p.tickCount < 100) return;
             if (CaveBench.tick(p)) {
                 report.addAll(CaveBench.report());
+                write();
+                next(Step.DONE);
+            }
+            return;
+        }
+        if (VILLAGE) {
+            if (p.tickCount < 100) return;
+            if (VillageBench.tick(p)) {
+                report.addAll(VillageBench.report());
                 write();
                 next(Step.DONE);
             }
