@@ -7,188 +7,303 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/** The Bottomless Cave's labyrinth: a maze one can get through, and the same from every chunk. */
+/**
+ * The Bottomless Cave's blueprint: eight floors of maze, one under another, each wider and harder;
+ * walked on foot from the great door to her throne and back; the same from every chunk.
+ */
 class LabyrinthTest {
 
     private static final long[] SEEDS = {1L, 42L, 987654321L, -7L, 12345L};
 
+    private static Labyrinth cave(long seed, int region) {
+        return Labyrinth.of(seed, region * 1536 + 500, -region * 1536 - 300, Labyrinth.Land.flat(70 + region * 23));
+    }
+
     @Test
-    void theSameRegionGivesTheSameLabyrinthAndAnotherDoesNot() {
+    void theSameRegionGivesTheSameCaveAndAnotherDoesNot() {
         Labyrinth a = Labyrinth.of(42L, 1000, -2000), b = Labyrinth.of(42L, 1000, -2000), c = Labyrinth.of(43L, 1000, -2000);
+        assertSame(a, b, "kept, once worked out");
         byte[] ca = new byte[Labyrinth.Y_MAX - Labyrinth.Y_MIN + 1], cb = ca.clone(), cc = ca.clone();
         int differ = 0;
-        for (int x = 1000 - 75; x <= 1000 + 75; x += 3) for (int z = -2000 - 75; z <= -2000 + 75; z += 3) {
+        for (int x = 1000 - 100; x <= 1000 + 100; x += 3) for (int z = -2000 - 100; z <= -2000 + 100; z += 3) {
             a.column(x, z, ca);
             b.column(x, z, cb);
             c.column(x, z, cc);
             assertArrayEquals(ca, cb);
             if (!java.util.Arrays.equals(ca, cc)) differ++;
         }
-        assertTrue(differ > 100, "another seed, another maze: " + differ);
+        assertTrue(differ > 1000, "another seed, another cave: " + differ);
     }
 
     @Test
-    void everyCellCanBeReachedFromTheHubAndThePalaceAndShrineAmongThem() {
-        for (long seed : SEEDS) for (int region = 0; region < 6; region++) {
-            Labyrinth l = Labyrinth.of(seed, region * 1536 + 500, -region * 1536 - 300);
-            boolean[][][] seen = l.reachable();
-            int cells = 0;
-            for (int k = 0; k < Labyrinth.LEVELS; k++) {
-                for (int i = 0; i < Labyrinth.GRID; i++) for (int j = 0; j < Labyrinth.GRID; j++) {
-                    if (!l.level(k).in(i, j)) continue;
-                    cells++;
-                    assertTrue(seen[k][i][j], "seed " + seed + " region " + region + ": level " + k + " cell " + i + "," + j + " cut off");
-                }
+    void eightFloorsOneUnderAnotherEachWiderAndTheThroneAtTheBottom() {
+        assertEquals(8, Labyrinth.FLOORS);
+        assertEquals(Labyrinth.FLOORS, Labyrinth.FLOOR.length);
+        for (int k = 1; k < Labyrinth.FLOORS; k++) {
+            assertTrue(Labyrinth.FLOOR[k - 1] - Labyrinth.FLOOR[k] >= 15, "each floor well under the last");
+            assertTrue(Labyrinth.bottom(k - 1) > Labyrinth.top(k), "no floor's heights in another's");
+            assertTrue(Labyrinth.REACH[k] > Labyrinth.REACH[k - 1], "each wider than the last");
+        }
+        assertTrue(Labyrinth.top(Labyrinth.FLOORS) < Labyrinth.bottom(Labyrinth.FLOORS - 1), "the throne level under the last floor");
+        assertTrue(Labyrinth.Y_MIN >= -60, "over the bedrock");
+        assertTrue(Labyrinth.THRONE <= -40, "near the bottom of the world");
+        assertTrue(Labyrinth.Y_MAX <= 300, "under the build limit's last few");
+        assertTrue(Labyrinth.FLOOR[0] - Labyrinth.THRONE >= 140, "super deep: " + (Labyrinth.FLOOR[0] - Labyrinth.THRONE));
+        for (long seed : SEEDS) {
+            Labyrinth l = cave(seed, 1);
+            assertTrue(l.doorY >= Labyrinth.DOOR_MIN && l.doorY >= Labyrinth.FLOOR[0] + Labyrinth.SLAB_ABOVE + 4, "the door over the first floor");
+            int last = 0;
+            for (int k = 0; k < Labyrinth.FLOORS; k++) {
+                int cells = l.level(k).cells(0) + l.level(k).cells(1);
+                assertTrue(cells > last, "floor " + (k + 1) + " larger than the one over it: " + cells);
+                last = cells;
             }
-            assertTrue(cells > 900, "about 300 cells a level: " + cells);
-            Labyrinth.Room p = l.palace(), s = l.shrine();
-            assertTrue(seen[2][p.i0()][p.j0()] && seen[2][s.i0()][s.j0()], "the palace and the shrine are reached");
-            assertFalse(l.trail().isEmpty(), "there is a way from the palace to the shrine");
+            assertTrue(last > 500, "the deepest a great maze: " + last);
         }
     }
 
     @Test
-    void itIsALabyrinthNotAnOpenCave() {
-        for (long seed : SEEDS) {
-            Labyrinth l = Labyrinth.of(seed, 0, 0);
+    void fromTheDoorEveryFloorsWayDownAndHerThroneAreReachedOnFoot() {
+        for (long seed : SEEDS) for (int region = 0; region < 2; region++) {
+            Labyrinth l = cave(seed, region);
+            int[] in = l.beforeDoor(-2);
+            Labyrinth.Walk w = l.walk(in[0], in[1], in[2], 6, true);
+            String where = "seed " + seed + " region " + region + ": ";
             for (int k = 0; k < Labyrinth.LEVELS; k++) {
-                int deadEnds = 0, branches = 0, rooms = 0;
-                for (int i = 0; i < Labyrinth.GRID; i++) for (int j = 0; j < Labyrinth.GRID; j++) {
-                    var level = l.level(k);
-                    if (!level.in(i, j) || level.roomOf(i, j) != null) continue;
+                Labyrinth.Level lv = l.level(k);
+                int[] a = lv.arrival();
+                assertTrue(w.reachedCell(k, a[0], a[1], 0), where + "where one comes into level " + k);
+                int[] x = lv.exit();
+                if (x != null) assertTrue(w.reachedCell(k, x[0], x[1], 0), where + "floor " + (k + 1) + "'s way down");
+            }
+            int[] d = l.dais(), r = l.refuge();
+            assertTrue(w.reached(d[0], d[1], d[2] + 6) || w.reached(d[0] + 6, d[1], d[2]), where + "her palace");
+            assertTrue(w.reached(r[0], r[1], r[2]), where + "her shrine");
+            assertTrue(w.size() > 30_000, where + "a great deal walked: " + w.size());
+        }
+    }
+
+    @Test
+    void andFromHerThroneTheWayBackUpToTheDoor() {
+        for (long seed : new long[]{42L, 12345L}) {
+            Labyrinth l = cave(seed, 0);
+            int[] d = l.dais();
+            int[] a = l.antechamber(), m = l.cellMiddle(a[0], a[1]);
+            Labyrinth.Walk w = l.walk(m[0], Labyrinth.THRONE, m[1], 6, true);
+            int[] in = l.beforeDoor(-2);
+            assertTrue(w.reached(in[0], in[1], in[2]), "seed " + seed + ": no one is trapped below");
+            assertTrue(w.reached(d[0], d[1], d[2] + 6) || w.reached(d[0] + 6, d[1], d[2]), "the palace from its antechamber");
+        }
+    }
+
+    @Test
+    void theDoorIsTheOnlyWayInAndShutItHolds() {
+        for (long seed : SEEDS) {
+            Labyrinth l = cave(seed, 0);
+            int[] dir = Labyrinth.DIRS[l.doorDir];
+            byte[] col = new byte[Labyrinth.Y_MAX - Labyrinth.Y_MIN + 1];
+            int leaves = 0;
+            for (int c = -Labyrinth.HALL_HALF - 2; c <= Labyrinth.HALL_HALF + 2; c++) {
+                int x = l.cx + dir[0] * Labyrinth.DOOR_AT + dir[1] * c, z = l.cz + dir[1] * Labyrinth.DOOR_AT - dir[0] * c;
+                l.column(x, z, col);
+                for (int y = l.doorY - 1; y <= l.doorY + Labyrinth.HALL_HIGH; y++) {
+                    byte b = col[y - Labyrinth.Y_MIN];
+                    assertFalse(Labyrinth.passable(b, false), "seed " + seed + ": the door's plane is shut at " + c + "," + y);
+                    if (b == Labyrinth.GATE) leaves++;
+                }
+            }
+            assertEquals((2 * Labyrinth.DOOR_HALF + 1) * Labyrinth.DOOR_HIGH, leaves, "a giant door: nine wide, eleven high");
+            // shut, the walk from inside never gets out past it
+            int[] in = l.beforeDoor(-2), out = l.beforeDoor(1);
+            assertFalse(l.walk(in[0], in[1], in[2], 6, false).reached(out[0], out[1], out[2]), "shut");
+            assertTrue(l.walk(in[0], in[1], in[2], 6, true).reached(out[0], out[1], out[2]), "open");
+        }
+    }
+
+    @Test
+    void eachFloorIsAHardMazeOfDeadEndsLoopsAndSeveralHeights() {
+        for (long seed : SEEDS) {
+            Labyrinth l = cave(seed, 0);
+            int lastDepth = 0;
+            for (int k = 0; k < Labyrinth.FLOORS; k++) {
+                Labyrinth.Level lv = l.level(k);
+                int deadEnds = 0, branches = 0, tunnels = 0, ramps = 0, drops = 0;
+                for (int i = 0; i < Labyrinth.SIZE; i++) for (int j = 0; j < Labyrinth.SIZE; j++) {
+                    if (lv.ramp(i, j) >= 0) ramps++;
+                    if (lv.drop(i, j)) drops++;
+                    if (!lv.low(i, j) || lv.roomOf(i, j) != null) continue;
+                    tunnels++;
                     int ways = 0;
-                    for (int d = 0; d < 4; d++) if (level.passage(i, j, d)) ways++;
+                    for (int d = 0; d < 4; d++) if (lv.passage(i, j, d)) ways++;
                     if (ways == 1) deadEnds++;
                     if (ways >= 3) branches++;
                 }
-                for (var room : l.level(k).rooms()) if (room.kind() < Labyrinth.HUB) rooms++;
-                assertTrue(deadEnds >= 25, "seed " + seed + " level " + k + ": dead ends " + deadEnds);
-                assertTrue(branches >= 25, "seed " + seed + " level " + k + ": branchings " + branches);
-                assertTrue(rooms >= 4, "seed " + seed + " level " + k + ": chambers " + rooms);
+                String where = "seed " + seed + " floor " + (k + 1) + ": ";
+                assertTrue(deadEnds >= tunnels / 6, where + "dead ends " + deadEnds + " of " + tunnels);
+                assertTrue(branches >= tunnels / 10, where + "branchings " + branches + " of " + tunnels);
+                assertTrue(lv.cells(1) >= 10, where + "galleries over the tunnels: " + lv.cells(1));
+                assertTrue(ramps >= 1, where + "ramps up to them");
+                assertTrue(drops >= 1, where + "holes to drop through");
+                assertTrue(lv.rooms().size() >= 3, where + "halls");
+                // the way down lies deep in it, far by the walk from where one comes in
+                int[] a = lv.arrival(), x = lv.exit();
+                assertTrue(lv.depth() >= 12, where + "the way down " + lv.depth() + " cells' walk in");
+                assertTrue(Math.hypot(a[0] - x[0], a[1] - x[1]) >= 4, where + "not beside where one came in");
+                lastDepth = Math.max(lastDepth, lv.depth());
             }
-            assertEquals(6, l.stairs().size(), "three stairs down from each of the upper two levels");
-            // you have to cross a level to go on: no stair under another
-            for (var a : l.stairs()) for (var b : l.stairs()) {
-                if (a != b) assertTrue(Math.max(Math.abs(a.i() - b.i()), Math.abs(a.j() - b.j())) >= 2, "stairs apart");
-            }
+            assertTrue(lastDepth >= 25, "seed " + seed + ": the deeper floors' ways down are long: " + lastDepth);
         }
     }
 
     @Test
-    void stairsAreEnteredOnceAboveAndOnceBelow() {
+    void eachWayDownIsHeldAndTheDeeperFloorsHoldMore() {
         for (long seed : SEEDS) {
-            Labyrinth l = Labyrinth.of(seed, 3000, 3000);
-            for (var s : l.stairs()) {
-                for (int k : new int[]{s.upper(), s.upper() + 1}) {
-                    int ways = 0;
-                    for (int d = 0; d < 4; d++) if (l.level(k).passage(s.i(), s.j(), d)) ways++;
-                    assertEquals(1, ways, "a stair's cell is a dead end on both its levels");
-                }
-                assertTrue(l.level(s.upper()).passage(s.i(), s.j(), s.dir()), "entered from where it faces");
+            Labyrinth l = cave(seed, 0);
+            int[] held = new int[Labyrinth.FLOORS], guardians = new int[Labyrinth.FLOORS];
+            for (Labyrinth.Post p : l.posts()) {
+                if (p.kind() == Labyrinth.GUARDIAN) {
+                    guardians[p.level()]++;
+                    int[] g = l.level(p.level()).guard(), x = l.level(p.level()).exit();
+                    assertArrayEquals(g, new int[]{p.i(), p.j()}, "the guardian before the way down");
+                    assertEquals(1, Math.abs(g[0] - x[0]) + Math.abs(g[1] - x[1]), "beside it");
+                } else held[p.level()] += p.count();
             }
+            for (int k = 0; k < Labyrinth.FLOORS; k++) {
+                assertEquals(1, guardians[k], "one guardian on floor " + (k + 1));
+                assertTrue(held[k] >= 6, "floor " + (k + 1) + " holds " + held[k]);
+            }
+            assertTrue(held[7] > held[0], "the deepest holds more than the first: " + held[7] + " to " + held[0]);
         }
     }
 
     @Test
-    void theStairClimbsABlockAStepFromTheLowerFloorToTheUpper() {
+    void theStairsBetweenFloorsSpiralDownAStepABlock() {
         Labyrinth l = Labyrinth.of(5L, 0, 0);
         byte[] col = new byte[Labyrinth.Y_MAX - Labyrinth.Y_MIN + 1];
-        for (var s : l.stairs()) {
-            int lower = Labyrinth.FLOOR[s.upper() + 1], upper = Labyrinth.FLOOR[s.upper()];
+        assertEquals(Labyrinth.FLOORS, l.stairs().size(), "one down from each floor, the last to the throne level");
+        for (Labyrinth.Stair s : l.stairs()) {
+            int lower = s.lowerY(), upper = s.upperY();
+            assertEquals(Labyrinth.floorY(s.upper() + 1), lower);
             int[] mid = l.cellMiddle(s.i(), s.j());
-            java.util.Set<Integer> heights = new java.util.TreeSet<>();
+            java.util.List<Integer> heights = new java.util.ArrayList<>();
             for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
                 l.column(mid[0] + dx, mid[1] + dz, col);
-                for (int y = lower; y < upper; y++) {
-                    byte c = col[y - Labyrinth.Y_MIN];
-                    if (c >= Labyrinth.STEP_N && c <= Labyrinth.STEP_W) heights.add(y);
-                }
+                for (int y = lower; y < upper; y++) if (Labyrinth.step(col[y - Labyrinth.Y_MIN])) heights.add(y);
                 if (dx == 0 && dz == 0) assertEquals(Labyrinth.CORE, col[lower + 2 - Labyrinth.Y_MIN], "a light in the pillar");
             }
-            assertEquals(16, heights.size(), "a step at every height between the floors: " + heights);
-            // the top step is on the upper floor, where the stair is entered
+            java.util.Collections.sort(heights);
+            assertEquals(upper - lower, heights.size(), "a step a block of the fall");
+            for (int n = 0; n < heights.size(); n++) assertEquals(lower + n, (int) heights.get(n));
+            // the top step is the upper floor, on the side it is entered from, and open over it
             int[] top = {mid[0] + Labyrinth.DIRS[s.dir()][0], mid[1] + Labyrinth.DIRS[s.dir()][1]};
             l.column(top[0], top[1], col);
-            byte c = col[upper - 1 - Labyrinth.Y_MIN];
-            assertTrue(c >= Labyrinth.STEP_N && c <= Labyrinth.STEP_W, "the top step is the upper floor");
+            assertTrue(Labyrinth.step(col[upper - 1 - Labyrinth.Y_MIN]), "the top step is the upper floor");
             assertTrue(Labyrinth.open(col[upper - Labyrinth.Y_MIN]), "and open over it");
         }
+        assertEquals(Labyrinth.floorY(Labyrinth.FLOORS - 1) - Labyrinth.THRONE, l.stairs().get(Labyrinth.FLOORS - 1).upperY() - l.stairs().get(Labyrinth.FLOORS - 1).lowerY(),
+                "the last descent, the longest");
     }
 
     @Test
-    void theShaftsStairIsWalkedInHalfBlocks() {
-        // round the shaft at any height, neighbouring columns of the stair's surface never differ by more than half a block
-        for (int y0 : new int[]{40, 77, 133}) {
-            double[][] surface = new double[13][13];
-            for (int dx = -6; dx <= 6; dx++) for (int dz = -6; dz <= 6; dz++) {
-                surface[dx + 6][dz + 6] = Double.NaN;
+    void theGreatShaftsStairIsWalkedWithoutAJumpFromTheHallDown() {
+        Labyrinth l = Labyrinth.of(3L, 0, 0);
+        int top = l.doorY;
+        for (int y0 = Labyrinth.FLOOR[0] + Labyrinth.HALL_HEIGHT; y0 + Labyrinth.SHAFT_PITCH <= top; y0 += Labyrinth.SHAFT_PITCH) {
+            double[][] surface = new double[19][19];
+            for (double[] row : surface) java.util.Arrays.fill(row, Double.NaN);
+            for (int dx = -8; dx <= 8; dx++) for (int dz = -8; dz <= 8; dz++) {
                 for (int y = y0; y < y0 + Labyrinth.SHAFT_PITCH; y++) {
-                    byte c = Labyrinth.shaftCode(dx, dz, y);
-                    if (c == Labyrinth.HELIX) surface[dx + 6][dz + 6] = y + 1;
-                    if (c == Labyrinth.HELIX_SLAB) surface[dx + 6][dz + 6] = y + 0.5;
+                    byte c = l.shaftCode(dx, dz, y);
+                    if (c == Labyrinth.HELIX) surface[dx + 9][dz + 9] = y + 1;
+                    if (c == Labyrinth.HELIX_SLAB) surface[dx + 9][dz + 9] = y + 0.5;
                 }
             }
-            int steps = 0;
-            for (int dx = -6; dx <= 6; dx++) for (int dz = -6; dz <= 6; dz++) {
+            for (int dx = -8; dx <= 8; dx++) for (int dz = -8; dz <= 8; dz++) {
+                double s = surface[dx + 9][dz + 9];
                 double r = Math.hypot(dx, dz);
-                if (r < Labyrinth.VOID_RADIUS + 0.8 || r > Labyrinth.SHAFT_RADIUS - 0.4) continue;
-                double s = surface[dx + 6][dz + 6];
-                assertFalse(Double.isNaN(s), "a step in every column of the stair: " + dx + "," + dz);
-                steps++;
+                if (Double.isNaN(s) || r < Labyrinth.VOID_RADIUS + 0.8 || r > Labyrinth.SHAFT_RADIUS - 0.4) continue;
+                double best = 99;
                 for (int[] d : Labyrinth.DIRS) {
-                    double o = surface[dx + d[0] + 6][dz + d[1] + 6];
-                    double ro = Math.hypot(dx + d[0], dz + d[1]);
+                    double o = surface[dx + d[0] + 9][dz + d[1] + 9], ro = Math.hypot(dx + d[0], dz + d[1]);
                     if (Double.isNaN(o) || ro < Labyrinth.VOID_RADIUS + 0.8 || ro > Labyrinth.SHAFT_RADIUS - 0.4) continue;
-                    double diff = Math.abs(s - o);
-                    diff = Math.min(diff, Math.abs(diff - Labyrinth.SHAFT_PITCH)); // across the turn's seam: the next turn up
-                    assertTrue(diff <= 0.5 + 1e-9, "at " + dx + "," + dz + " and its neighbour: " + s + " / " + o);
+                    double diff = Math.abs(o - s);
+                    diff = Math.min(diff, Math.abs(diff - Labyrinth.SHAFT_PITCH));
+                    best = Math.min(best, diff);
                 }
+                assertTrue(best <= 1.0, "a neighbour within a step at " + dx + "," + dz + " y " + y0);
             }
-            assertTrue(steps > 20);
-            assertEquals(Labyrinth.AIR, Labyrinth.shaftCode(0, 0, y0), "the middle is open all the way down");
+        }
+        // its top step is the hall's floor, on the door's side
+        int[] d = Labyrinth.DIRS[l.doorDir];
+        assertEquals(Labyrinth.HELIX, l.shaftCode(d[0] * 5, d[1] * 5, top - 1), "the stair's head at the hall");
+    }
+
+    @Test
+    void theTrailRunsFromThePalaceToTheShrineBehindIt() {
+        for (long seed : SEEDS) {
+            Labyrinth l = cave(seed, 1);
+            List<int[]> trail = l.trail();
+            Labyrinth.Level t = l.level(Labyrinth.FLOORS);
+            assertEquals(l.palace(), t.roomOf(trail.get(0)[0], trail.get(0)[1]));
+            int[] last = trail.get(trail.size() - 1);
+            assertEquals(l.shrine(), t.roomOf(last[0], last[1]));
+            for (int n = 1; n < trail.size(); n++) {
+                int[] a = trail.get(n - 1), b = trail.get(n);
+                assertEquals(1, Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]), "step by step");
+            }
+            int[] refuge = l.refuge();
+            assertEquals(l.shrine(), l.roomAt(Labyrinth.FLOORS, refuge[0], refuge[2]), "the refuge is in the shrine");
+            int[] a = l.antechamber();
+            assertEquals(Labyrinth.PALACE_CELLS + 1, Math.max(Math.abs(a[0] - Labyrinth.N), Math.abs(a[1] - Labyrinth.N)), "the antechamber before a gate");
+            double fled = Math.hypot(refuge[0] - l.cx, refuge[2] - l.cz);
+            assertTrue(fled > 20 && fled < 52, "her shrine behind the palace, near: " + fled);
         }
     }
 
     @Test
-    void theTrailRunsFromThePalaceToTheShrine() {
-        Labyrinth l = Labyrinth.of(77L, -900, 400);
-        List<int[]> trail = l.trail();
-        assertEquals(l.palace(), l.level(2).roomOf(trail.get(0)[0], trail.get(0)[1]));
-        int[] last = trail.get(trail.size() - 1);
-        assertEquals(l.shrine(), l.level(2).roomOf(last[0], last[1]));
-        for (int n = 1; n < trail.size(); n++) {
-            int[] a = trail.get(n - 1), b = trail.get(n);
-            assertEquals(1, Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]), "step by step");
-        }
-        int[] refuge = l.refuge();
-        assertEquals(l.shrine(), l.roomAt(2, refuge[0], refuge[2]), "the refuge is in the shrine");
+    void itIsWorkedOutQuickly() {
+        long start = System.nanoTime();
+        for (int n = 0; n < 6; n++) Labyrinth.of(1000L + n, 0, 0, Labyrinth.Land.flat(64));
+        double each = (System.nanoTime() - start) / 6e6;
+        assertTrue(each < 500, "a cave's plan in " + each + " ms");
+        Labyrinth l = Labyrinth.of(1000L, 0, 0);
+        byte[] col = new byte[Labyrinth.Y_MAX - Labyrinth.Y_MIN + 1];
+        start = System.nanoTime();
+        for (int x = 0; x < 18; x++) for (int z = 0; z < 18; z++) l.column(x + 20, z + 20, col);
+        double chunk = (System.nanoTime() - start) / 1e6;
+        assertTrue(chunk < 200, "a chunk's columns in " + chunk + " ms");
     }
 
-    /** Draws each level's plan (and a cut through the stairs) into build/labyrinth.txt, to look at. */
+    /** Draws each floor's plan into build/labyrinth.txt, to look at. */
     @Test
     void drawsItsPlan() throws java.io.IOException {
         Labyrinth l = Labyrinth.of(42L, 0, 0);
         StringBuilder out = new StringBuilder();
         byte[] col = new byte[Labyrinth.Y_MAX - Labyrinth.Y_MIN + 1];
+        int reach = (Labyrinth.N + 1) * Labyrinth.PITCH;
         for (int k = 0; k < Labyrinth.LEVELS; k++) {
-            int y = Labyrinth.FLOOR[k] + 1;
-            out.append("level ").append(k).append(" (y ").append(y).append(")\n");
-            for (int z = -76; z <= 76; z++) {
-                for (int x = -76; x <= 76; x++) {
-                    l.column(x, z, col);
-                    byte c = col[y - Labyrinth.Y_MIN];
-                    var room = l.roomAt(k, x, z);
-                    char ch = switch (c) {
-                        case Labyrinth.AIR -> room == null ? ' ' : room.kind() == Labyrinth.PALACE ? 'P' : room.kind() == Labyrinth.SHRINE ? 'S' : room.kind() == Labyrinth.HUB ? 'H' : '.';
-                        case Labyrinth.ROCK -> '#';
-                        case Labyrinth.UNTOUCHED -> '~';
-                        case Labyrinth.PILLAR, Labyrinth.CORE -> 'O';
-                        case Labyrinth.LANTERN, Labyrinth.SOUL_LANTERN -> '*';
-                        default -> c >= Labyrinth.STEP_N && c <= Labyrinth.STEP_W ? '^' : '?';
-                    };
-                    out.append(ch);
+            for (int storey = 0; storey < (k < Labyrinth.FLOORS ? 2 : 1); storey++) {
+                int y = Labyrinth.floorY(k) + storey * Labyrinth.STOREY;
+                out.append("level ").append(k).append(storey == 1 ? " galleries" : "").append(" (y ").append(y).append(")\n");
+                for (int z = -reach; z <= reach; z++) {
+                    for (int x = -reach; x <= reach; x++) {
+                        l.column(x, z, col);
+                        byte c = col[y - Labyrinth.Y_MIN];
+                        var room = l.roomAt(k, x, z);
+                        char ch = switch (c) {
+                            case Labyrinth.AIR -> col[y - 1 - Labyrinth.Y_MIN] == Labyrinth.AIR ? 'v' : room == null ? ' '
+                                    : room.kind() == Labyrinth.PALACE ? 'P' : room.kind() == Labyrinth.SHRINE ? 'S' : room.kind() == Labyrinth.HUB ? 'H' : '.';
+                            case Labyrinth.ROCK -> '#';
+                            case Labyrinth.UNTOUCHED -> '~';
+                            case Labyrinth.WATER -> '=';
+                            case Labyrinth.PILLAR, Labyrinth.CORE -> 'O';
+                            case Labyrinth.LANTERN, Labyrinth.SOUL_LANTERN -> '*';
+                            default -> Labyrinth.step(c) ? '^' : '?';
+                        };
+                        out.append(ch);
+                    }
+                    out.append('\n');
                 }
-                out.append('\n');
             }
         }
         java.nio.file.Files.createDirectories(java.nio.file.Path.of("build"));

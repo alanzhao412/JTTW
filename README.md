@@ -402,7 +402,7 @@ west lengthens with the pilgrim: the higher a zone's levels, the farther out its
 | Zone | Levels | Distance from spawn (centre) | Regions |
 |---|---|---|---|
 | White Bone Ridge | 20–36 | 1–2 km | one, ~520 blocks across |
-| Bottomless Cave (under mountains) | 37–46 | 2–3 km | one, ~220 |
+| Bottomless Cave (Pit-Hole Mountain and under it) | 37–46 | 2–3 km | one, ~380 |
 | Mystical Waters (deep ocean) | 47–56 | 3–4.5 km | four, one per sea (within 30° of east, south, west, north), ~440 |
 | Hell (a dimension, entered through Fengdu) | 57–66 | — | the Ten Courts |
 | Flaming Mountains | 67–77 | 4.5–6 km | one, ~400 |
@@ -472,56 +472,181 @@ To add a zone:
 
 #### The Bottomless Cave (levels 37–46)
 
-Mount Xiankong's Bottomless Cave (无底洞, chapters 80–83), home of Lady Earth Flow, the
+Pit-Hole Mountain's Bottomless Cave (陷空山无底洞, chapters 80–83), home of Lady Earth Flow, the
 Golden-Nosed, White-Furred Mouse Spirit. An underground zone (`Zones.BOTTOMLESS`):
 `Vertical.below(40)` under mountain country (peaks, slopes, groves, meadows, cherry groves,
-windswept hills), one region a world 2–3 km from spawn, about 220 blocks across. Its host is judged
-at y 256, above any mountain's top, where a column's biome is always its surface biome (judged lower,
-under a tall peak, it can be a cave biome). Being after White Bone Ridge in `Zones.ALL` and sharing
-its heights, it keeps clear of the ridge's region. Grunt XP 100 (260 a kill there,
-with the band's scaling), against the ridge's 80.
+windswept hills), one region a world 2–3 km from spawn, about 380 blocks across (radius 190, never
+under 330). Its host is judged at y 256, above any mountain's top, where a column's biome is always
+its surface biome (judged lower, under a tall peak, it can be a cave biome). Being after White Bone
+Ridge in `Zones.ALL` and sharing its heights, it keeps clear of the ridge's region. Grunt XP 100 (260
+a kill there, with the band's scaling), against the ridge's 80. Her lair is no longer out in the
+open: the mountain crawls with her household, a giant door in its side opens on the cave, and eight
+floors of maze go down, each wider and harder than the last, to her throne room at the very bottom
+of the world.
 
-- **Terrain** (`world/feature/Labyrinth`, `BottomlessCaveFeature`): at the region's centre a
-  sinkhole and a mouth about ten feet across, then a shaft down from the surface to y 32, open in
-  the middle (a pool at the bottom to fall into) with a spiral mud-brick stair round it, laid in
-  half blocks, a lantern each turn. Below, three levels of labyrinth (walked at y 32, 16 and 0), each
-  a maze on a 21x21 grid within 70 blocks of the centre: a Kruskal spanning tree (it branches and
-  dead-ends often) with a few loops, six chambers a level (nests, larders, bone heaps, flowered
-  grottoes), and three spiral stairs down from each level, out toward the rim and never under one
-  another, so every level must be crossed. The top level's hub takes the shaft. At the bottom, her
-  palace: a 31-block hall of blackstone and gold, red pillars, a carpet from gate to gate up to her
-  dais, flower beds down both sides, smoking censers, candles, lanterns on chains, spore blossoms
-  and shroomlight lamps; and out toward the rim, her shrine, with tablets to her adoptive father and
-  brother (Li Jing and Nezha). The labyrinth is worked out from the seed and the region's centre
-  alone (`Labyrinth.of`, pure Java, unit-tested): each chunk lays its own part, palace included, so
-  nothing laid later undoes it. Its slabs of height are its own (rock where not open), so vanilla
-  caves, water and lava never break in. Tunnels are lit here and there (lanterns, pale soul
-  lanterns), stairs by a light in their pillar, chambers by a lantern, the palace well.
+- **Pit-Hole Mountain** (`world/feature/PitHole`, pure, unit-tested; laid by
+  `BottomlessCaveFeature`): a craggy massif raised out of the land round the region's centre, steep
+  (it falls 1.5 a block), its summit sunk in a hollow 18 deep (as its name says), rising to y 200,
+  with a brow of rock 22 blocks over the door and a talus of rock falling away round the forecourt. A **road** winds up to the door: from the land below,
+  a track of beaten earth, then a shelf cut into the mountain's flank, curling round it and climbing
+  0.42 a block (about 220 blocks of it up on the mountain), lanterns on posts along its outer edge.
+  **Outposts** watch it and the slopes: spruce watchtowers on stilts (a ladder up, a railed deck, a
+  lantern, a banner), burrow mounds with a mouse hole, the mice's camps (a fire, log seats, a pot,
+  hay), guard nooks along the mountain road, and where the road leaves the mountain, a stele
+  (陷空山 Pit-Hole Mountain, 无底洞 ahead). Forecourt and road are laid in ground no tree roots in.
+- **The great door**: in the mountainside, 56 blocks out from the centre on one of the four sides
+  (from the seed), at the height of the land there but never under y 150: a forecourt cut level into
+  the slope and open to the sky (mud-brick way, skulls on stakes, a soul lantern either side), and
+  across its back the gate: leaves of red lacquer banded in iron and studded in gold, **nine wide
+  and eleven high**, in a frame of black stone carved with a gold cloud-scroll; before it two great
+  pillars of blackstone banded in gold with soul fire on their heads, a red beam with the plaque
+  (无底洞 THE BOTTOMLESS CAVE) and a roof of dark tiles with lanterns hung from its eaves. **It is
+  barred from within while its guard stands**: a mouse captain, three of his pack and two maids are
+  posted in the forecourt; use the door with any of them alive within 48 blocks and it will not move
+  (you are told how many still stand); when the last has fallen, it grinds open at a touch (its
+  leaves are gone) and stays open. Its leaves and frame are the cave's own (see below).
+- **The gate hall and the great shaft**: behind the door a hall 11 wide and 13 high runs in to the
+  centre (deepslate and blackstone, lamps in its walls, pillars capped in gold, lanterns, a red
+  carpet), and there **the great shaft** drops to the first floor's hub, some 50 blocks: a void 6
+  across in the middle, a pool at its foot to fall into, and round it a mud-brick stair in a spiral,
+  laid in half blocks (walked without a jump), a lantern each turn.
+- **Eight floors of maze** (`world/feature/Labyrinth`, pure, unit-tested), one under another, each a
+  maze on a grid of cells 7 blocks apart (3-block tunnels, 4 of rock between), wider and harder the
+  deeper:
+
+  | Floor | Walked at | Across | Halls |
+  |---|---|---|---|
+  | 1, the Burrows | y 98 (galleries 103) | ~84 | nests, larders; earth and roots |
+  | 2, the Granaries | y 81 | ~98 | granaries (stolen grain, sacks, barrels), larders; mud brick in courses, planking |
+  | 3, the Bone Warrens | y 64 | ~112 | bone heaps, nests; tuff, cobwebs, skulls |
+  | 4, the Fungus Caverns | y 47 | ~126 | giant mushrooms on moss, grottoes; spore blossoms, glow lichen |
+  | 5, the Underground River | y 30 | ~140 | the river through its halls, grottoes; a run of flooded tunnels across the floor |
+  | 6, the Dark Warren | y 13 | ~154 | bone heaps, nests; blackstone and soul soil (soul sand slows), **unlit** |
+  | 7, the Storerooms | y −4 | ~168 | her storerooms (chests of `chests/bottomless_storeroom`, barrels, gold), granaries |
+  | 8, the Bridal Halls | y −21 | ~182 | her bridal chambers made ready for the Tang monk (red carpet, red candles, flowers), grottoes |
+
+  Each floor is **a hard maze**: a spanning tree of its cells (Kruskal's: it branches and dead-ends
+  everywhere), with a few loops (more the deeper); 3–6 halls merged from several cells; and **two
+  storeys**: tunnels at its floor and galleries five blocks over them (blobs of upper cells, more and
+  larger the deeper), joined to the tunnels by ramps (both ways) and dropped out of by holes in their
+  floors and by balconies over the halls (one way only: what you drop into, you must walk out of).
+  Every cell is reached both ways by the tree; the drops are shortcuts and traps. Lanterns light a
+  share of the tunnels (13% on the first floor, fewer deeper, none on the sixth): long stretches are
+  dark. **The way down is hidden deep in each floor**: a spiral stair in the cell farthest *by the
+  walk* from where one came in (never within four cells of it as the crow flies; 18–49 cells' walk
+  in, the deeper the longer), a step a block of the fall (17 blocks between floors, 29 for the last
+  descent to the throne level), a light in its pillar at each end; its **guardian** stands in the cell
+  before it (see below). Each floor's stair comes out in the next floor's maze, where its way down is
+  again the farthest cell. From the door to her throne the cave falls some 200 blocks, from the mountain's side down
+  nearly to the world's floor.
+- **The throne level** (y −50): **her palace**, a hall 31 blocks square and 20 high (blackstone and
+  gold, red pillars, a carpet from gate to gate up to her dais, flower beds down both sides, censers,
+  candles, lanterns on long chains, spore blossoms, shroomlight lamps in two rows), reached from the
+  last stair's foot by a processional way (red carpet, lanterns) round to its nearer gate; behind it,
+  out of its back gate and down a narrow turning way, **her shrine** (tablets to Li Jing and Nezha,
+  candles, incense, flowers).
+- **The cave's own rock** (`bottomless_earth`, `bottomless_stone`, `bottomless_deep`, the door's
+  `bottomless_gate` and `bottomless_gate_frame`; textures from `assets_source/bottomless_rock.py`):
+  every floor's walls, floors and roofs, the shell round each floor, the stairs' wells, the gate
+  hall, the shaft. **None digs it** (unbreakable), **blasts it** (resistance 3,600,000), **carves
+  it** (`Carving` cost infinite, for every destruction power), **pushes it** (pistons) or **phases
+  through it** (the tag `jttw_engine:unphasable`, which `BlockStateBaseMixin` respects). Where a face
+  of it is backed by more of it, the face is dressed in the floor's own stone or earth (which may be
+  dug, but only to find the cave's rock behind it); ceilings and the one-block slabs between storeys
+  are the cave's rock itself. Chorus fruit does not work inside the fortress. Hitting it tells you so.
+  The mazes must be walked.
+- **The household** (`world/cave/CaveRules`, `CaveHousehold`):
+  - **Outside**: no other monster comes of itself over the cave's region, on the mountain or in the
+    fortress (`MobSpawnEvent.SpawnPlacementCheck`); instead the mountain is kept **crawling**: round
+    anyone climbing it, packs of 3–5 mice and pairs of maids (12% led by a captain with escorts) come
+    up out of sight 22–44 blocks off, every 3 s while fewer than 16 are within 48 blocks; a third of
+    them **patrol** the road, a stretch at a time, up toward the door or down. Each outpost has its
+    watch posted (4–5 mice, a captain at the towers; mixed at the camps; 3 at the nooks), the gate its
+    guard.
+  - **Inside**: each floor's household is **posted** when the land is made: a group in every hall (two
+    in the larger), a few at crossings and in the galleries, more and with more captains the deeper
+    (about 14 on the first floor to 30 on the eighth), and its **guardian** before its way down: a
+    captain of more than a captain's strength (twice its health), named for the floor ("Warden of the
+    Granaries"), mice on odd floors, maids on even (who mend the rest). **Stronger the deeper**:
+    regulars level 38 on the first floor to 44 on the eighth, captains 43 to 49, guardians 40 to 47
+    (the mountain's 37 and 44). The posted are kept (never despawned, even on Peaceful) and keep to
+    their floor: idle and off it (having chased someone up or down a stair, or fallen), they go back
+    to their post. **Respawn**: the posted, the guardians and the gate's guard do not come back once
+    killed; but **the cave breeds**: while someone walks a floor, now and then (every 15 s on the first,
+    11 s on the eighth) a group of that floor's strength comes up out of the tunnels 14–32 blocks off,
+    while fewer than 5–8 are near. The bred are not kept, and one found off its floor with no one to
+    fight slinks away (is gone), so none wanders down into her throne room.
+- **The Earth Gods' landings (checkpoints)**: inside the door, on each floor in the cell one first
+  steps into from the stair (on the first, the hub's edge), and before her palace's gate, an Earth
+  God keeps a niche (his tablet, 土地, and three candles). Step up to one and he will raise you there
+  should you fall: your respawn is set there (forced, no bed needed), and you are told. Dying on the
+  sixth floor sends you back to the sixth floor's landing, not the mountain's foot.
 - **Mouse Spirit** (`entity/cave/MouseSpiritEntity`): 2 hits, a bite of 7% of health; quick
   (0.36), in packs of 3–5 (a captain brings 4). Strike one and the pack turns on you; each darts in,
   bites and scurries back, so a pack circles.
 - **Flower Maid** (`FlowerMaidEntity`): 5 hits, a stab of 15%; every 5 s she mends the most
   wounded of the household near her (a fifth of its health; 3% of her mistress's), and pressed
   close she breathes out pollen (Slowness II and Weakness for 4 s).
-- **Lady Earth Flow** (`LadyEarthFlowEntity`, a `ZoneBoss`, level 43, 80 hits, pink bar): her
-  twin swords cut twice a stroke (12.5% each; the female blade slows). At 60% (phase 1) she calls
-  4 mice and 2 maids and starts to burrow, rising behind whoever she fights. At 30% (phase 2),
-  once, she leaves her embroidered shoe in her likeness (`EarthFlowDecoyEntity`: weak, no XP or
-  karma, a shoe again when struck down or after a minute) and flees to her shrine, strewing petals
-  on the floor along the way; no blow kills her before that. Alone there she mends, up to half her
-  health; found, she fights to the end. Karma +150, captains +5.
+- **Lady Earth Flow** (`LadyEarthFlowEntity`, a `ZoneBoss`, level 43, 80 hits, pink bar), put on her
+  dais once when the land is made, two maids beside her: her twin swords cut twice a stroke (12.5%
+  each; the female blade slows). At 60% (phase 1) she calls 4 mice and 2 maids and starts to burrow,
+  rising behind whoever she fights. At 30% (phase 2), once, she leaves her embroidered shoe in her
+  likeness (`EarthFlowDecoyEntity`: weak, no XP or karma, a shoe again when struck down or after a
+  minute) and flees out of the palace's back gate to her shrine, strewing petals along the way; no
+  blow kills her before that. Alone there she mends, up to half her health; found, she fights to the
+  end. Karma +150, captains +5. **She never leaves her throne room**: bound to her cave, she keeps to
+  her palace (18 blocks round her dais), and fled, to her shrine (8); drawn or carried six blocks
+  past it, or as high or low, she is back where she belongs within a second (`keepToLair`). She is
+  never despawned and, killed, does not come back.
 - **Drops**: her twin swords (`EarthFlowSwordItem`, male and female: +35% damage, a quick sword;
   held as a pair, drawn into both hands like Nezha's Yin-Yang Swords through `PairedBlade`, every cut
   is followed by a second for 40%), the Stolen Candle of Spirit Mountain, sigils, gold; Spirit
   Whiskers from mice, Night-Blooming Petals from maids (and a second True Samadhi Fire recipe from
-  them), the Embroidered Shoe from her likeness.
+  them), the Embroidered Shoe from her likeness; the storerooms' chests (gold, emeralds, bread,
+  wheat, candles, iron, now and then a diamond or a captain's sigil, whiskers and petals).
+- **The Earth God's Luopan** points to the great door (by the seed and the region's centre alone:
+  `Labyrinth.doorOf`), and the Earth God tells of Pit-Hole Mountain's door and the eight floors.
+- **Older worlds**: the cave's region is larger, so in a world made before this its place may have
+  moved (its host is checked farther out). Ground already made keeps what it has: an old three-level
+  labyrinth and its lady stay as they were and work as before (she is not bound to a fortress, so she
+  is not leashed and, fleeing, runs off rather than to a shrine); new ground gets the new design, so
+  a region half made before may have a fortress cut off at the old chunks' edge (closed in by the
+  cave's rock; nothing breaks) or an old lady and, where the new throne room is first made, a new
+  one. The Luopan points to where the new door is or will be. (Both bench seeds moved: 12345's from
+  −1851 −1872 to 1283 2242, 42's from −2668 879 to −2668 1240.)
+- **Cost**: the cave's own feature takes 2.3–3.1 ms a chunk where it lays anything (some 475 chunks
+  round a region, 1.1–1.5 s of worker time all told; the old cave took 0.9–1.0 ms a chunk over about
+  100 chunks), and posting the household about 0.2 s more; the 289 chunks round the centre take some
+  18–20 s to make against 9 s before (`runWorldgenBench -Pbench.mode=cave` reports all three). In
+  the GameTests the fortress is laid a few chunks a tick, its rock set straight into the chunks'
+  sections: laid the ordinary way into the flat test world, its two million blocks of rock queued so
+  much light work that the batch's platforms never came to tick.
 - **Art**: `CaveRenderers` (a box model for the mice; a person's frame with skirt, collar, hair,
   ears, gold nose and tail for the maids and her); skins from `assets_source/mouse_spirit.py`,
-  `flower_maid.py`, `lady_earth_flow.py`, item icons from `cave_items.py` (helpers in `cave_skin.py`).
-- **Seeing it**: `./gradlew runFormGallery -Pgallery.only=cave_` (creatures, her, her likeness,
-  and the labyrinth laid in the gallery's flat world: palace, shrine, tunnel, stair, hub);
-  `./gradlew runWorldgenBench -Pbench.mode=cave` (its region: a plan of each level as
-  built, a cut through the shaft, and pictures, in `run-bench/screenshots/zones/`).
+  `flower_maid.py`, `lady_earth_flow.py`, item icons from `cave_items.py` (helpers in `cave_skin.py`),
+  the cave's blocks from `bottomless_rock.py`.
+- **Tests and pictures**: `LabyrinthTest` (the same cave from every chunk; eight floors, each under
+  the last and wider; a block-by-block walk from inside the door reaches every floor's way in and way
+  down, her palace and her shrine, and from her throne the way back up to the door; shut, the door
+  holds; each floor a maze of dead ends, branchings, galleries, ramps and drops, its way down deep in
+  it; one guardian a floor, more household the deeper; the stairs a step a block; the great shaft
+  walked without a jump; the trail to her shrine), `PitHoleTest` (the mountain over every floor that
+  rises above the land, the door in its cliff, the road down without a break, the outposts),
+  `BottomlessCaveZoneTest` (one region a world, about 380 across, in its ring, its fortress, outposts
+  and door within it, clear of the other zones); GameTests in `CaveFortressGameTests` (the fortress laid
+  in a world and walked block by block from inside the door to every floor's way down and her throne;
+  its walls the cave's own rock; the household posted floor by floor, a guardian before each way
+  down; she stays in her throne room, and her fight there, her flight to her shrine; the door barred
+  while its guard stands and open when they fall; the Earth Gods' landings; the Luopan to the door;
+  no other monster over the cave; the household keeping to its floors) and `CaveGameTests` (the
+  creatures and her fight). `./gradlew runFormGallery -Pgallery.only=cave_` (creatures, her, her
+  likeness, and the fortress laid off the stage: her palace, dais and shrine, a tunnel of the
+  burrows, the fungus caverns, a granary, a storeroom, a bridal hall, a ramp, a stair, a guardian, the
+  hub, the gate hall); `./gradlew runWorldgenBench -Pbench.mode=cave` (its region in a real world: a
+  plan of each floor's storeys as built, a cut through the whole depth, the household as posted,
+  and pictures, from the mountain afar and its road to the door, the gate hall, the shaft, the
+  floors, the last descent and her palace, in `run-bench/screenshots/zones/`).
+
 #### The Mystical Waters (levels 47–56)
 
 The Four Seas and the Dragon Kings' crystal palaces (水晶宫, novel chapter 3), in

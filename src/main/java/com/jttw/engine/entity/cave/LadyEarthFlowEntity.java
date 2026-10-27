@@ -6,6 +6,7 @@ import com.jttw.engine.entity.zone.ZoneMonster;
 import com.jttw.engine.registry.ModEntities;
 import com.jttw.engine.registry.ModItems;
 import com.jttw.engine.world.Zones;
+import com.jttw.engine.world.cave.BottomlessCave;
 import com.jttw.engine.world.feature.BottomlessCaveFeature;
 import com.jttw.engine.world.feature.Labyrinth;
 import net.minecraft.core.BlockPos;
@@ -56,7 +57,8 @@ import java.util.EnumSet;
 /**
  * Lady Earth Flow (地涌夫人), the Golden-Nosed, White-Furred Mouse Spirit of the Bottomless Cave: in
  * the shape of a beautiful woman, white fur at her collar and hem, round white ears in her hair, a
- * nose of gold, and a pair of swords. In her palace at the bottom of the labyrinth she fights:
+ * nose of gold, and a pair of swords. In her palace at the bottom of the Bottomless Cave, under
+ * eight floors of maze, she fights:
  * <ul>
  *   <li><b>the twin swords</b>: every stroke two cuts, the male blade and then the female;</li>
  *   <li><b>her household</b> (from {@value #HOUSEHOLD_AT_PERCENT}% of her health): she calls her mouse
@@ -64,11 +66,14 @@ import java.util.EnumSet;
  *       rising behind whoever she fights;</li>
  *   <li><b>the embroidered shoe</b> (at {@value #ESCAPE_AT_PERCENT}%, once): as in the novel, she
  *       leaves one of her shoes behind in her own likeness to fight on in her place
- *       ({@link EarthFlowDecoyEntity}), and flees deeper into the maze, to her shrine, shedding
- *       petals along the way. No blow kills her before she has fled. While no one is near her
- *       there, she mends, up to half her health; found, she fights to the end.</li>
+ *       ({@link EarthFlowDecoyEntity}), and flees out of the palace's back gate, down the narrow
+ *       way behind it to her shrine, shedding petals along the way. No blow kills her before she
+ *       has fled. While no one is near her there, she mends, up to half her health; found, she
+ *       fights to the end.</li>
  * </ul>
- * A {@link ZoneBoss}: her boss bar, her lair (the palace, then her shrine), her phases.
+ * A {@link ZoneBoss}: her boss bar, her lair (the palace, then her shrine), her phases. In her own
+ * cave she never leaves them: drawn or carried off beyond them, she is back on her dais (or in her
+ * shrine) within a second ({@link #keepToLair}).
  */
 public class LadyEarthFlowEntity extends ZoneBoss {
 
@@ -89,12 +94,17 @@ public class LadyEarthFlowEntity extends ZoneBoss {
     public static final double FLEE_AT_LEAST = 16;
     public static final int MICE = 4, MAIDS = 2;
     public static final String KEY_HOUSEHOLD = "jttw_earth_flow_household";
+    /** How far beyond her ground she may be drawn before she is back on it, across and up or down. */
+    public static final int LEASH = 6;
 
     private static final EntityDataAccessor<Boolean> FLED = SynchedEntityData.defineId(LadyEarthFlowEntity.class, EntityDataSerializers.BOOLEAN);
 
     private int burrow = BURROW_EVERY;
     @Nullable
     private BlockPos refuge;
+    /** The centre of the cave whose palace is her lair, if she was put there when the land was made. */
+    @Nullable
+    private int[] cave;
 
     /** Its level, as its name shows it. */
     @Override
@@ -315,17 +325,45 @@ public class LadyEarthFlowEntity extends ZoneBoss {
         }
     }
 
-    /** The labyrinth whose palace is her lair, or null if her lair is not a palace (summoned elsewhere, in a test). */
+    /** Binds her to the cave whose palace she was put in (as the land is made, or a test builds one). */
+    public void bindCave(Labyrinth lab) {
+        cave = new int[]{lab.cx, lab.cz};
+    }
+
+    /**
+     * The cave whose palace is her lair, or null if her lair is not a palace (summoned elsewhere, in a
+     * test; or a palace of the cave's older making, three levels deep, before it was a fortress).
+     */
     @Nullable
     public Labyrinth labyrinth() {
-        if (!hasRestriction() || !(level() instanceof ServerLevel server)) return null;
+        if (!(level() instanceof ServerLevel server)) return null;
+        if (cave != null) return BottomlessCave.blueprint(server, cave[0], cave[1]);
+        if (!hasRestriction()) return null;
         BlockPos lair = fled() && refuge != null ? null : getRestrictCenter();
         if (lair == null) return null;
         long seed = server.getSeed();
         int[] c = zone().centre(seed, lair.getX(), lair.getZ());
         if (c == null || Math.hypot(lair.getX() - c[0], lair.getZ() - c[1]) > 3
-                || Math.abs(lair.getY() - Labyrinth.FLOOR[Labyrinth.LEVELS - 1]) > 3 || !zone().isAt(server, lair)) return null;
-        return Labyrinth.of(seed, c[0], c[1]);
+                || Math.abs(lair.getY() - Labyrinth.THRONE) > 3 || !zone().isAt(server, lair)) return null;
+        return BottomlessCave.blueprint(server, c[0], c[1]);
+    }
+
+    /**
+     * In her own cave she keeps to her palace (or, fled, to her shrine): drawn or carried beyond it,
+     * {@value #LEASH} blocks past her ground or as high or low, she is back where she belongs. Returns
+     * whether she was brought back.
+     */
+    public boolean keepToLair() {
+        if (!hasRestriction() || labyrinth() == null) return false;
+        BlockPos home = fled() && refuge != null ? refuge : getRestrictCenter();
+        int ground = fled() && refuge != null ? SHRINE_GROUND : PALACE_GROUND;
+        double across = Math.hypot(getX() - (home.getX() + 0.5), getZ() - (home.getZ() + 0.5));
+        if (across <= ground + LEASH && Math.abs(getY() - home.getY()) <= LEASH) return false;
+        dust(position());
+        teleportTo(home.getX() + 0.5, home.getY(), home.getZ() + 0.5);
+        getNavigation().stop();
+        dust(position());
+        return true;
     }
 
     /** Where she fled to, or null if she has not. */
@@ -360,6 +398,7 @@ public class LadyEarthFlowEntity extends ZoneBoss {
     protected void customServerAiStep() {
         super.customServerAiStep();
         if (burrow > 0) burrow--;
+        if (tickCount % 20 == 0) keepToLair();
         LivingEntity t = getTarget();
         if (phase() >= 1 && burrow == 0 && t != null && t.isAlive() && distanceToSqr(t) > 9) burrow(t);
         // fled and alone, she mends
@@ -402,6 +441,7 @@ public class LadyEarthFlowEntity extends ZoneBoss {
         tag.putBoolean("Fled", fled());
         tag.putInt("Burrow", burrow);
         if (refuge != null) tag.put("Refuge", NbtUtils.writeBlockPos(refuge));
+        if (cave != null) tag.putIntArray("Cave", cave);
     }
 
     @Override
@@ -413,6 +453,8 @@ public class LadyEarthFlowEntity extends ZoneBoss {
             refuge = r;
             restrictTo(r, SHRINE_GROUND);
         });
+        int[] c = tag.getIntArray("Cave");
+        cave = c.length == 2 ? c : null;
     }
 
     /** Close in; a stroke of two cuts, the male blade then the female; again. */
