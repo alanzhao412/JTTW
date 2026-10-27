@@ -401,7 +401,7 @@ west lengthens with the pilgrim: the higher a zone's levels, the farther out its
 
 | Zone | Levels | Distance from spawn (centre) | Regions |
 |---|---|---|---|
-| White Bone Ridge | 20–36 | 1–2 km | one, ~520 blocks across |
+| White Bone Ridge | 20–36 | 1–2 km | one, ~840 blocks across (never under 720) |
 | Bottomless Cave (under mountains) | 37–46 | 2–3 km | one, ~220 |
 | Mystical Waters (deep ocean) | 47–56 | 3–4.5 km | four, one per sea (within 30° of east, south, west, north), ~440 |
 | Hell (a dimension, entered through Fengdu) | 57–66 | — | the Ten Courts |
@@ -469,6 +469,75 @@ To add a zone:
    in the Earth Gods' words (`EarthGod`). See where it lands with `./gradlew runWorldgenBench
    -Pbench.mode=zones -Pbench.seed=<seed>` (`ZoneBench`: each zone's place, distance and host, a
    map of the 20 km square round spawn, and a visit to each region: its biome, its bosses, a picture).
+
+#### White Bone Ridge (levels 20–36)
+
+A bleak massif of bleached stone, crags and mesas strewn with bones, its dead (Bone Servants and
+Wraiths, `entity/ridge`) about it in any light, two to four at a time. At its heart stands a great
+bone mountain, and under it the **White Bone Cave** (白骨洞), Lady White Bone's fortress: a blueprint
+(`world/ridge/WhiteBoneCave`) laid chunk by chunk as the land is made (`WhiteBoneCaveFeature`, the
+mountain and the road by `BoneMassifFeature`), so it comes out whole whichever chunk is made first.
+
+- **The approach.** The region is about 840 blocks across. The mountain is some 260 across, a spire
+  at its top and great tusks of bone leaning out of its flanks; the ridge's own crags are worn down
+  toward it so it rises out of them. A paved road winds 130 blocks down its southern face from the
+  forecourt, under a bone arch, past three pairs of watchtowers; five palisaded outposts with a
+  tower and a fire stand 190–260 blocks out round it. Over a hundred of the garrison stand outside: the
+  door's two keepers and their escort in the forecourt, a sentry at each tower's foot and on its
+  top, four patrols on the road (a captain and two), each outpost's captain and four, and sixteen
+  packs of a captain and three roaming the flanks.
+- **The great door.** In the back of a forecourt cut into the mountain, under a skull carved in the
+  cliff with eyes of crying obsidian, a door of bone and iron 13 wide and 16 high in a frame of
+  blackstone, two ribs arched over the court before it. It stays shut while either of its keepers,
+  the **Keepers of the Bone Gate** (level 28 captains), lives; once both are dead it grinds open as
+  someone comes within 12 blocks, its leaves folding back against the passage, and stays open for
+  good (`CaveKeeper`, `CaveState`).
+- **Eight floors**, each 16 blocks under the last, each a hall some 90 blocks across in its own
+  stone, light and dead: the **Ossuary Gate** (a vaulted nave of bone pillars); the **Corpse Halls**
+  (three long halls of biers, the middle one walled across); the **Bone Forge** (a forge chimney in a
+  ring of lava, two lava channels bridged only near their ends); the **Catacombs** (a 12 by 12 maze
+  of burial passages, the world's own); the **Hall of Borrowed Faces** (galleries of plaster, dark
+  wood and smoked glass, her cast-off shapes against the walls, crossed by its inner ring); the
+  **Charnel Pit** (a pit of bones seven deep, a ribbed causeway over it); the **Soul-Fire Crypt** (a
+  low forest of basalt pillars, trenches of soul fire); and the **Bone Bridge** (a chasm, a bridge of
+  bone over it). Each way down is a corridor in the hall's wall behind a **seal** of iron bars, then
+  a stair in the rock; the stairs alternate north and south, so every floor is crossed end to end.
+- **Who holds them.** Each floor has 8 + k regulars and 1 + k/2 captains (k from 0), regulars from
+  level 21 on the first to 33 on the last, captains five over, placed at fixed posts (laid by the
+  seed); and before its seal its **Warden** (a Bone Servant captain six levels over its floor, with
+  60% more health). A Warden's death breaks its seal for good. Every one of them is kept (never
+  despawned) and held near its post. One found off its floor with no one to fight is put back at its
+  post, and none is ever let into the throne room.
+- **Restocking.** A floor no player has been on for 15 minutes is manned again when someone comes
+  back to it: each empty post is filled (the Warden too, though the seal stays broken), never within
+  12 blocks of a player.
+- **Checkpoints: the well of the dead.** A ladder shaft runs in the rock from the first floor to the
+  last, a short corridor to it from each. A grate bars it over each floor's landing until that floor
+  is won (the seal above it broken), so after a death one climbs straight down to the deepest floor
+  reached instead of fighting through again.
+- **The Throne of Bones**, under the last floor: 61 by 69 blocks under a vault 28 high ribbed like a
+  ribcage, two rows of bone pillars, braziers of soul fire, walls of stacked bone set with skulls, a
+  great skull over a stepped dais and a throne of bone. Lady White Bone is put there when the land is
+  made, passing for one of her court of six; her fight is as it was (found out by a blow or by
+  truth-seeing eyes, her blinks, her false deaths, her veil, her boss bar only while she is herself),
+  but she never leaves the room: a blink that would take her out of it is not taken, and if she is
+  ever outside it (thrown, pulled) she is back in its middle at once. She persists and, once killed,
+  does not come back.
+- **Natural spawns** keep to the open ridge (`RidgeRules`): none inside the cave, whose floors hold
+  only their garrison.
+- **The Earth God's Luopan** points the ridge's band to the great door, and in the ridge's country
+  says the door is at the head of the road, that its keepers must fall first, and that eight floors
+  lie under it.
+- **Old worlds.** Whether a world has the cave is decided once, the first time it is loaded with it,
+  and remembered (`CaveSites`, `CaveState`): a world any of whose chunks over the fortress were
+  already made keeps its old open-air lair at the region's centre, Lady White Bone in it, and gets no
+  mountain or cave at all, so nothing is half-built round her. The region's ground already made keeps
+  its old shape; new ground out to the larger radius is the ridge's too, so its edge may show a seam.
+- **Cost.** The ridge bench (`./gradlew runWorldgenBench -Pbench.mode=ridge -Pbench.seed=<seed>`,
+  `RidgeBench`) times the 19 by 19 chunks round the heart and photographs the mountain, the road,
+  the door and every floor: on seeds 12345 and 42, 18–26 s for the 361 chunks (14–20 a second; 14–15
+  s, 24–26 a second, before the cave), the massif 12–14 ms a chunk and the cave 5–8 ms a chunk where it lies. The
+  cave's inside is also laid in the form gallery (`RidgeScenes`).
 
 #### The Bottomless Cave (levels 37–46)
 

@@ -48,6 +48,9 @@ public final class ModWorldgen {
             FEATURES.register("ribcage", () -> new com.jttw.engine.world.feature.RibcageFeature(
                     net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
 
+    public static final DeferredHolder<net.minecraft.world.level.levelgen.feature.Feature<?>, net.minecraft.world.level.levelgen.feature.Feature<?>> WHITE_BONE_CAVE =
+            FEATURES.register("white_bone_cave", () -> new com.jttw.engine.world.feature.WhiteBoneCaveFeature(
+                    net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));
     public static final DeferredHolder<net.minecraft.world.level.levelgen.feature.Feature<?>, net.minecraft.world.level.levelgen.feature.Feature<?>> LADY_LAIR =
             FEATURES.register("lady_lair", () -> new com.jttw.engine.world.feature.LairFeature(
                     net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.CODEC));

@@ -115,7 +115,11 @@ final class AbilityScenes {
             java.util.Map.entry("ancient_frame_lit", 80),
             // Mount Kunlun's summit, laid off the stage
             java.util.Map.entry("kunlun_gate", 140), java.util.Map.entry("kunlun_above", 100), java.util.Map.entry("kunlun_jade_pool", 80),
-            java.util.Map.entry("kunlun_palace", 80), java.util.Map.entry("kunlun_palace_inside", 60));
+            java.util.Map.entry("kunlun_palace", 80), java.util.Map.entry("kunlun_palace_inside", 60),
+            // the White Bone Cave's inside, laid south of the stage
+            java.util.Map.entry("ridge_cave_ossuary", 300), java.util.Map.entry("ridge_cave_bone_forge", 200),
+            java.util.Map.entry("ridge_cave_borrowed_faces", 200), java.util.Map.entry("ridge_cave_seal", 200),
+            java.util.Map.entry("ridge_cave_throne_lady", 200), java.util.Map.entry("ridge_cave_throne_hall", 160));
 
         /** Set by a scene that photographs a screen (a furnace's, say), so the gallery leaves it open. */
     static volatile boolean keepScreen;
@@ -129,6 +133,7 @@ final class AbilityScenes {
         all.addAll(LionScenes.all());
         all.addAll(FengduScenes.all());
         all.addAll(KunlunScenes.all());
+        all.addAll(RidgeScenes.all());
         return all;
     }
 
