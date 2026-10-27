@@ -73,6 +73,8 @@ public final class ChunkBench {
     private static final boolean LION = "lion".equals(System.getProperty("jttw.chunkBench.mode", ""));
     /** "kunlun" runs {@link KunlunBench}: where Mount Kunlun was placed, its peak, its stair walked, its summit. */
     private static final boolean KUNLUN = "kunlun".equals(System.getProperty("jttw.chunkBench.mode", ""));
+    /** "void" runs the generation and flight measurements in the Great Void instead of the Overworld. */
+    private static final boolean VOID = "void".equals(System.getProperty("jttw.chunkBench.mode", ""));
     private static final TicketType<ChunkPos> BENCH = TicketType.create("jttw_bench", Comparator.comparingLong(ChunkPos::toLong));
     private static final int GRID = 12;
     private static final int FLIGHT_TICKS = 400;
@@ -224,6 +226,11 @@ public final class ChunkBench {
         switch (step) {
             case WAIT -> {
                 if (p.tickCount < 100) return;
+                if (VOID && !com.jttw.engine.dimension.GreatVoid.isIn(p)) {
+                    com.jttw.engine.dimension.GreatVoid.enter(p);
+                    report.add("in the Great Void");
+                    return;
+                }
                 int view = Integer.getInteger("jttw.chunkBench.view", 0); // e.g. -Pbench.view=6
                 if (view > 0) server.getPlayerList().setViewDistance(view);
                 report.add("view distance: " + server.getPlayerList().getViewDistance()

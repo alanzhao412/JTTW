@@ -63,6 +63,7 @@ public final class NetworkHandler {
         registrar.playToServer(SetSignTextPacket.TYPE, SetSignTextPacket.STREAM_CODEC, SetSignTextPacket::handle);
         registrar.playToServer(StaffScalePacket.TYPE, StaffScalePacket.STREAM_CODEC, StaffScalePacket::handle);
         registrar.playToServer(com.jttw.engine.network.c2s.StaffTopplePacket.TYPE, com.jttw.engine.network.c2s.StaffTopplePacket.STREAM_CODEC, com.jttw.engine.network.c2s.StaffTopplePacket::handle);
+        registrar.playToServer(com.jttw.engine.network.c2s.GreatVoidPacket.TYPE, com.jttw.engine.network.c2s.GreatVoidPacket.STREAM_CODEC, com.jttw.engine.network.c2s.GreatVoidPacket::handle);
         registrar.playToServer(DimensionSelectPacket.TYPE, DimensionSelectPacket.STREAM_CODEC, DimensionSelectPacket::handle);
         registrar.playToServer(TransmuteItemPacket.TYPE, TransmuteItemPacket.STREAM_CODEC, TransmuteItemPacket::handle);
         registrar.playToClient(SyncLeadHeadPacket.TYPE, SyncLeadHeadPacket.STREAM_CODEC, SyncLeadHeadPacket::handle);

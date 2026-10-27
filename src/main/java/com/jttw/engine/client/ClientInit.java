@@ -60,6 +60,8 @@ public final class ClientInit {
     public static KeyMapping OPEN_ARMORY;
     /** Cycle the next weapon from the armory into hand (R). */
     public static KeyMapping CYCLE_ARMAMENT;
+    /** Into the Great Void, or back out (Y): Wukong's and the Peng's at their top flight. */
+    public static KeyMapping GREAT_VOID;
 
     private ClientInit() {}
 
@@ -102,6 +104,8 @@ public final class ClientInit {
         CYCLE_ARMAMENT = new KeyMapping("key.jttw_engine.cycle_armament", GLFW.GLFW_KEY_R, "key.categories.jttw_engine");
         event.register(OPEN_ARMORY);
         event.register(CYCLE_ARMAMENT);
+        GREAT_VOID = new KeyMapping("key.jttw_engine.great_void", GLFW.GLFW_KEY_Y, "key.categories.jttw_engine");
+        event.register(GREAT_VOID);
     }
 
     // ── Entity model layers (MOD bus) ───────────────────────────────
@@ -379,6 +383,9 @@ public final class ClientInit {
             if (CYCLE_ARMAMENT != null) {
                 while (CYCLE_ARMAMENT.consumeClick()) NetworkHandler.sendToServer(
                         new com.jttw.engine.network.c2s.ArmoryPacket(com.jttw.engine.network.c2s.ArmoryPacket.Action.CYCLE));
+            }
+            if (GREAT_VOID != null) {
+                while (GREAT_VOID.consumeClick()) NetworkHandler.sendToServer(com.jttw.engine.network.c2s.GreatVoidPacket.INSTANCE);
             }
 
             // ── The page: Shift shows the second four, letting go the first ──
