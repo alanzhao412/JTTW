@@ -124,7 +124,7 @@ public class FlameSeamsFeature extends Feature<NoneFeatureConfiguration> {
 
     /** The level of an outpost's paving: the land and the range over it at its middle, the same from every chunk. */
     public static int outpostBase(WorldGenLevel level, DensityFunction shape, long seed, RangeShape.Outpost o) {
-        int land = Math.max(level.getSeaLevel(), ZoneTerrain.landAt(shape, o.x(), o.z(), level.getMinBuildHeight(), level.getMaxBuildHeight()));
+        int land = Math.max(level.getSeaLevel(), ZoneTerrain.landAt(shape, o.x(), o.z(), level.getMinBuildHeight(), ZoneTerrain.landTop(level)));
         return Math.min(level.getMaxBuildHeight() - 20, land + RangeShape.riseAt(seed, o.x(), o.z()));
     }
 

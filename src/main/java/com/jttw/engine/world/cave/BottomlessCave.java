@@ -37,7 +37,7 @@ public final class BottomlessCave {
     /** The land's height at (x, z) in this level, by its broad shape, before the mountain is raised. */
     public static Labyrinth.Land land(ServerLevel level) {
         DensityFunction shape = level.getChunkSource().randomState().router().initialDensityWithoutJaggedness();
-        int minY = level.getMinBuildHeight(), maxY = level.getMaxBuildHeight();
+        int minY = level.getMinBuildHeight(), maxY = ZoneTerrain.landTop(level);
         return (x, z) -> ZoneTerrain.landAt(shape, x, z, minY, maxY);
     }
 

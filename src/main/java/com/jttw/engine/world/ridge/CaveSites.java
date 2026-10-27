@@ -105,7 +105,7 @@ public final class CaveSites {
             for (int i = -1; i < 8; i++) {
                 double a = i * Math.PI / 4, r = i < 0 ? 0 : 90;
                 int x = c[0] + (int) Math.round(Math.cos(a) * r), z = c[1] + (int) Math.round(Math.sin(a) * r);
-                int land = ZoneTerrain.landAt(shape, x, z, level.getMinBuildHeight(), level.getMaxBuildHeight());
+                int land = ZoneTerrain.landAt(shape, x, z, level.getMinBuildHeight(), ZoneTerrain.landTop(level));
                 sum += land;
                 high = Math.max(high, land);
                 int ground = land + BoneMassifFeature.riseAt(level.getSeed(), x, z);
@@ -177,7 +177,7 @@ public final class CaveSites {
     /** The ridge's ground at (x, z) by the land's broad shape and the massif's rise: the walking height. */
     private static int ground(WorldGenLevel level, int x, int z) {
         DensityFunction shape = ZoneTerrain.broadShape(level);
-        int land = ZoneTerrain.landAt(shape, x, z, level.getMinBuildHeight(), level.getMaxBuildHeight());
+        int land = ZoneTerrain.landAt(shape, x, z, level.getMinBuildHeight(), ZoneTerrain.landTop(level));
         return Math.min(level.getMaxBuildHeight() - 40, land + BoneMassifFeature.riseAt(level.getSeed(), x, z) + 1);
     }
 

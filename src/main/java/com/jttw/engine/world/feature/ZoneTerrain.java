@@ -17,6 +17,17 @@ public final class ZoneTerrain {
     /** Where the terrain noise counts as solid: the threshold vanilla's own estimate of the surface uses. */
     private static final double SOLID = 0.390625;
 
+    /**
+     * The land's own ceiling in this level: the top of its terrain noise (y 320 in the Overworld),
+     * or the sky if that is lower. Over it there is only air, in a world of the taller sky too
+     * ({@code TallOverworld}): so the land is looked for from here down, not from the sky, and a
+     * zone that keeps its works under the sky keeps them where it always did.
+     */
+    public static int landTop(WorldGenLevel level) {
+        var generator = level.getLevel().getChunkSource().getGenerator();
+        return Math.min(level.getMaxBuildHeight(), generator.getMinY() + generator.getGenDepth());
+    }
+
     /** The land's broad shape (no caves, canyons or crags) in this level, for {@link #landAt}. */
     public static DensityFunction broadShape(WorldGenLevel level) {
         return level.getLevel().getChunkSource().randomState().router().initialDensityWithoutJaggedness();

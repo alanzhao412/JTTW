@@ -75,11 +75,11 @@ public record ZoneLayout(int near, int far, int radius, int wobble, long salt, b
     public static final ZoneLayout FENGDU = new ZoneLayout(9000, 10500, 120, 16, 0xF3D6D0C1L, false);
 
     /**
-     * Mount Kunlun, the far-western mountain: no band of its own; a region about 380 blocks across
-     * (never under 300) round its peak, 5-8 km out and within 30 degrees of due west, as a sea's
+     * Mount Kunlun, the far-western massif: no band of its own; a region about 930 blocks across
+     * (never under 870) round its range, 5-8 km out and within 30 degrees of due west, as a sea's
      * region keeps to its quarter (widening, it keeps to the west still).
      */
-    public static final ZoneLayout KUNLUN = new ZoneLayout(5000, 8000, 170, 20, 0x6B0A1F5EL, false, WEST);
+    public static final ZoneLayout KUNLUN = new ZoneLayout(5000, 8000, 465, 30, 0x6B0A1F5EL, false, WEST);
 
     /**
      * Each quarter's half-width, in degrees, a sea's region (or one kept to a quarter) is tried in:

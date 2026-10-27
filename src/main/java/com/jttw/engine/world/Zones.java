@@ -303,8 +303,8 @@ public final class Zones {
 
     /**
      * Mount Kunlun (昆仑山), the sacred mountain at the world's western end, where the Queen Mother
-     * of the West keeps her palace and the Jade Pool, and behind which the Banana-Leaf Fan grew: one
-     * towering, snow-capped peak raised out of mountain country (the Bottomless Cave's hosts), the
+     * of the West keeps her palace and the Jade Pool, and behind which the Banana-Leaf Fan grew: a
+     * towering, snow-capped massif raised out of mountain country (the Bottomless Cave's hosts), the
      * whole column, host judged at y 256. Not a zone of a band but a place ({@link Zone#place}): no
      * one is sent there by level, nothing fights there, it pays no XP; the Earth Gods point the way
      * to anyone who asks sneaking ({@code EarthGod}). It lies 5-8 km out and within 30 degrees of

@@ -208,7 +208,7 @@ public class BoneMassifFeature extends Feature<NoneFeatureConfiguration> {
         DensityFunction shape = ZoneTerrain.broadShape(level);
         int[][] made = new int[5][5];
         for (int i = 0; i < 5; i++) for (int j = 0; j < 5; j++) {
-            made[i][j] = ZoneTerrain.landAt(shape, x0 + i * 4, z0 + j * 4, level.getMinBuildHeight(), level.getMaxBuildHeight());
+            made[i][j] = ZoneTerrain.landAt(shape, x0 + i * 4, z0 + j * 4, level.getMinBuildHeight(), ZoneTerrain.landTop(level));
         }
         int[] centre = ZONE.centre(seed, x0 + 8, z0 + 8); // a chunk lies in one cell
         // the old lair's floor: only where the world has no cave
@@ -279,7 +279,7 @@ public class BoneMassifFeature extends Feature<NoneFeatureConfiguration> {
     private static int lairFloorNear(long seed, DensityFunction shape, int[] centre, int x0, int z0, WorldGenLevel level) {
         if (centre == null) return Integer.MIN_VALUE;
         if (Math.hypot(Math.max(Math.abs(centre[0] - x0 - 8) - 8, 0), Math.max(Math.abs(centre[1] - z0 - 8) - 8, 0)) > LAIR_RADIUS + 1) return Integer.MIN_VALUE;
-        return lairFloor(seed, shape, centre[0], centre[1], level.getMinBuildHeight(), level.getMaxBuildHeight());
+        return lairFloor(seed, shape, centre[0], centre[1], level.getMinBuildHeight(), ZoneTerrain.landTop(level));
     }
 
     // ── The White Bone Cave's ground ────────────────────────────────────

@@ -48,7 +48,7 @@ public class FengduFeature extends Feature<NoneFeatureConfiguration> {
     /** The city's floor (its ground's top) in the region centred at (cx, cz) in this level. */
     public static int cityFloor(WorldGenLevel level, int cx, int cz) {
         DensityFunction shape = ZoneTerrain.broadShape(level);
-        int minY = level.getMinBuildHeight(), maxY = level.getMaxBuildHeight();
+        int minY = level.getMinBuildHeight(), maxY = ZoneTerrain.landTop(level);
         return FengduShape.cityFloor(level.getSeed(), cx, cz, (x, z) -> ZoneTerrain.landAt(shape, x, z, minY, maxY),
                 level.getSeaLevel() + FengduShape.ABOVE_SEA, maxY - FengduShape.UNDER_SKY);
     }
