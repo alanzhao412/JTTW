@@ -2,7 +2,7 @@ package com.jttw.engine.world;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.jttw.engine.world.fire.FireCloudCave;
+import com.jttw.engine.world.fire.FortressPlan;
 import com.jttw.engine.world.fire.RangeShape;
 import org.junit.jupiter.api.Test;
 
@@ -52,7 +52,8 @@ class FireMountainPlacementTest {
             int[] c = F.centres(seed)[0];
             double d = Math.hypot(c[0], c[1]);
             assertTrue(d >= 4500 && d <= 6000, "one range a world, 4.5-6 km out: " + d);
-            for (int x = c[0] - 250; x <= c[0] + 250; x += 3) for (int z = c[1] - 250; z <= c[1] + 250; z += 3) {
+            int m = F.layout().margin();
+            for (int x = c[0] - m; x <= c[0] + m; x += 3) for (int z = c[1] - m; z <= c[1] + m; z += 3) {
                 if (!F.covers(seed, x, z)) continue;
                 fire++;
                 for (Zones.Zone other : Zones.MAP.zones()) {
@@ -62,7 +63,26 @@ class FireMountainPlacementTest {
                 }
             }
         }
-        assertTrue(fire > 1000, "it has ground: " + fire);
+        assertTrue(fire > 4 * 25000, "it has ground, a great deal of it: " + fire);
+    }
+
+    @Test
+    void itIsHugeAndStillOneAWorldInItsRing() {
+        assertTrue(F.layout().radius() >= 320 && F.layout().radius() - F.layout().wobble() >= 270, "some 640 blocks across: " + F.layout());
+        assertEquals(1, F.layout().regions());
+        assertEquals(4500, F.layout().near());
+        assertEquals(6000, F.layout().far());
+        for (long seed = 1; seed <= 12; seed++) {
+            int[] c = F.centres(seed)[0];
+            for (Zones.Zone other : Zones.MAP.zones()) {
+                if (other == F || !other.vertical().overlaps(F.vertical())) continue;
+                for (int[] o : other.centres(seed)) {
+                    double d = Math.hypot(o[0] - c[0], o[1] - c[1]);
+                    assertTrue(d >= F.layout().margin() + other.layout().margin() + ZoneMap.GAP,
+                            "seed " + seed + ": clear of " + other.id() + " (" + (int) d + " apart)");
+                }
+            }
+        }
     }
 
     /** The regions of worlds of the first {@code many} seeds, from 1: each {seed, x, z}. */
@@ -83,7 +103,7 @@ class FireMountainPlacementTest {
             int peak = RangeShape.riseAt(seed, c[0], c[1]);
             assertTrue(peak >= RangeShape.BASE + RangeShape.HAOHAO * 0.8, "Mount Haohao over the hall: " + peak);
             int highest = 0, valleys = 0, all = 0;
-            for (int dx = -260; dx <= 260; dx += 4) for (int dz = -260; dz <= 260; dz += 4) {
+            for (int dx = -380; dx <= 380; dx += 4) for (int dz = -380; dz <= 380; dz += 4) {
                 int x = c[0] + dx, z = c[1] + dz;
                 if (F.depth(seed, x, z) <= 0) {
                     assertEquals(0, RangeShape.riseAt(seed, x, z), "nothing raised outside");
@@ -115,15 +135,15 @@ class FireMountainPlacementTest {
                 assertEquals(0, RangeShape.riseAt(seed, c[0], c[1] + dz), "the gorge's floor at " + dz);
             }
             // its forecourt level with the hall, then climbing to the land
-            for (int dz = FireCloudCave.GATE_Z + 2; dz <= RangeShape.GORGE_FROM + RangeShape.FORECOURT; dz++) {
+            for (int dz = FortressPlan.FACE_Z + 1; dz <= RangeShape.GORGE_FROM + RangeShape.FORECOURT; dz++) {
                 assertEquals(0, RangeShape.floorShare(0, dz), 1e-9, "level at " + dz);
                 assertTrue(RangeShape.onForecourt(0, dz));
             }
             assertEquals(1, RangeShape.floorShare(0, RangeShape.GORGE_FROM + RangeShape.FORECOURT + RangeShape.CLIMB), 1e-9);
-            // the mountain stands over the passage and the hall
-            for (int dz = -FireCloudCave.HALL_RZ; dz < FireCloudCave.GATE_Z; dz++) {
-                assertTrue(RangeShape.riseAt(seed, c[0], c[1] + dz) > FireCloudCave.DOME + FireCloudCave.SHELL,
-                        "rock over the cave at " + dz + ": " + RangeShape.riseAt(seed, c[0], c[1] + dz));
+            // the mountain stands over the first floor and the gatehouse, the door in its face
+            for (int dz = -FortressPlan.HALL; dz <= FortressPlan.FACE_Z; dz++) for (int dx = -24; dx <= 24; dx += 8) {
+                assertTrue(RangeShape.riseAt(seed, c[0] + dx, c[1] + dz) > FortressPlan.FLOOR_H[0] + 5,
+                        "rock over the cave at " + dx + " " + dz + ": " + RangeShape.riseAt(seed, c[0] + dx, c[1] + dz));
             }
             // and its walls rise either side
             assertTrue(RangeShape.riseAt(seed, c[0] + RangeShape.GORGE_WALL + 2, c[1] + RangeShape.GORGE_FROM + 4) > 10, "a wall to the east");
@@ -132,18 +152,36 @@ class FireMountainPlacementTest {
     }
 
     @Test
-    void theCaveFitsUnderTheMountainAndInsideTheRegion() {
+    void theCaveFitsInsideTheRegionFarFromItsEdge() {
         for (long[] r : regions(6)) {
             long seed = r[0];
             int[] c = {(int) r[1], (int) r[2]};
-            for (int x = FireCloudCave.MIN_X; x <= FireCloudCave.MAX_X; x++) for (int z = FireCloudCave.MIN_Z; z <= FireCloudCave.MAX_Z; z++) {
-                assertTrue(F.depth(seed, c[0] + x, c[1] + z) > 0, "the cave lies within its region");
+            for (int x = FortressPlan.X_MIN; x <= FortressPlan.X_MAX; x += 2) for (int z = FortressPlan.Z_MIN; z <= FortressPlan.Z_MAX + RangeShape.FORECOURT; z += 2) {
+                assertTrue(F.depth(seed, c[0] + x, c[1] + z) > 0.5, "the cave and its forecourt lie deep in its region");
             }
         }
-        assertTrue(FireCloudCave.hallRadius(0, 0) == 0 && FireCloudCave.ceiling(0) == FireCloudCave.DOME, "its dome highest over the dais");
-        assertEquals(FireCloudCave.DOME_EDGE, FireCloudCave.ceiling(1), "lowest at the wall");
-        // the pillars are clear of the way in and of the dais
-        for (int z = 0; z <= FireCloudCave.HALL_RZ; z++) for (int x = -1; x <= 1; x++) assertFalse(FireCloudCave.pillar(x, z), "the way in at " + x + " " + z);
-        for (int x = -3; x <= 3; x++) for (int z = -3; z <= 3; z++) assertFalse(FireCloudCave.pillar(x, z) || FireCloudCave.pool(x, z), "the dais at " + x + " " + z);
+    }
+
+    @Test
+    void theOutpostsStandOverTheRangeClearOfTheRavine() {
+        for (long[] r : regions(6)) {
+            long seed = r[0];
+            int[] c = {(int) r[1], (int) r[2]};
+            var posts = RangeShape.outposts(seed, c[0], c[1]);
+            long rims = posts.stream().filter(RangeShape.Outpost::rim).count();
+            assertTrue(posts.size() - rims >= 8, "seed " + seed + ": outposts over the range: " + (posts.size() - rims));
+            assertTrue(rims >= 2, "watchtowers on the ravine's rims: " + rims);
+            assertTrue(posts.stream().anyMatch(RangeShape.Outpost::patrol), "some bands roam");
+            for (var o : posts) {
+                int dx = o.x() - c[0], dz = o.z() - c[1];
+                assertTrue(F.depth(seed, o.x(), o.z()) > 0.05, "inside the region");
+                assertFalse(Math.abs(dx) <= FortressPlan.X_MAX + 8 && dz >= FortressPlan.Z_MIN - 8 && dz <= FortressPlan.Z_MAX + 8, "clear of the cave");
+                if (!o.rim()) assertFalse(dz > FortressPlan.FACE_Z - 20 && Math.abs(dx) < RangeShape.GORGE_WALL + 14, "clear of the ravine");
+                else assertTrue(Math.abs(dx) > RangeShape.GORGE_HALF + RangeShape.OUTPOST_REACH, "a rim's tower stands off the ravine's floor");
+                for (var other : posts) {
+                    if (other != o) assertTrue(Math.hypot(other.x() - o.x(), other.z() - o.z()) > 2 * RangeShape.OUTPOST_REACH + 4, "apart");
+                }
+            }
+        }
     }
 }

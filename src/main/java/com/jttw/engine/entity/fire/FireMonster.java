@@ -39,4 +39,26 @@ public abstract class FireMonster extends ZoneMonster {
     public int captainLevel() {
         return CAPTAIN_LEVEL;
     }
+
+    /** Where it is kept (an outpost's band, a floor of the cave's garrison), kept with it: a creature's post is not saved by itself. */
+    @Override
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        if (hasRestriction()) {
+            tag.put("Post", net.minecraft.nbt.NbtUtils.writeBlockPos(getRestrictCenter()));
+            tag.putFloat("PostReach", getRestrictRadius());
+        }
+    }
+
+    @Override
+    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        net.minecraft.nbt.NbtUtils.readBlockPos(tag, "Post").ifPresent(post -> restrictTo(post, (int) tag.getFloat("PostReach")));
+    }
+
+    /** The mountains' bands are led more often than most: one in eight of the world's own is a captain. */
+    @Override
+    public float captainChance() {
+        return 0.125f;
+    }
 }

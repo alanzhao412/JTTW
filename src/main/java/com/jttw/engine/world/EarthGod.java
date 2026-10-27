@@ -139,7 +139,7 @@ public final class EarthGod {
                 case NORTH -> "Beneath the Northern Sea stands the crystal palace of Ao Shun, its Dragon King";
             };
         }
-        if (zone == Zones.FIRE_MOUNTAIN) return "Past the heat of the Flaming Mountains, Red Boy keeps his Fire Cloud Cave";
+        if (zone == Zones.FIRE_MOUNTAIN) return "Past the heat of the Flaming Mountains, at the head of Withered Pine Ravine, a great iron door shuts Red Boy's Fire Cloud Cave; eight floors down he keeps his throne";
         if (zone == Zones.MOUNT_WUZHUANG) return "Over the clouds floats Mount Longevity, where the Great Immortal Zhenyuan tends his ginseng tree";
         if (zone == Zones.LION_CAMEL) return "Lion-Camel Ridge: eight hundred li of demons, and the city they devoured. Its kings sit at the "
                 + "bottom of the Lion-Camel Cave, behind the great door in the mountain north of the city";
@@ -240,9 +240,10 @@ public final class EarthGod {
         return new Answer(GlobalPos.of(Level.OVERWORLD, needle(zone, c)), zone, Component.literal(words.toString()));
     }
 
-    /** Where the needle points for a zone's region centred at {@code c}: its centre; for Lion-Camel Ridge, the fortress's great door. */
+    /** Where the needle points for a zone's region centred at {@code c}: its centre; for Lion-Camel Ridge and the Flaming Mountains, the fortress's great door. */
     public static BlockPos needle(Zones.Zone zone, int[] c) {
         if (zone == Zones.LION_CAMEL) return new BlockPos(c[0], 64, c[1] + com.jttw.engine.world.lion.LionFortress.DOOR_LZ);
+        if (zone == Zones.FIRE_MOUNTAIN) return com.jttw.engine.world.fire.FireFortress.doorTarget(c); // the cave's door
         return new BlockPos(c[0], 64, c[1]);
     }
 

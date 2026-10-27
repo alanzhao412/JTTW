@@ -423,7 +423,7 @@ west lengthens with the pilgrim: the higher a zone's levels, the farther out its
 | Bottomless Cave (Pit-Hole Mountain and under it) | 37–46 | 2–3 km | one, ~380 |
 | Mystical Waters (deep ocean) | 47–56 | 3–4.5 km | four, one per sea (within 30° of east, south, west, north), ~440 |
 | Hell (a dimension, entered through Fengdu) | 57–66 | — | the Ten Courts |
-| Flaming Mountains | 67–77 | 4.5–6 km | one, ~400 |
+| Flaming Mountains | 67–77 | 4.5–6 km | one, ~640 |
 | Mount Wuzhuang (over the clouds) | 78–88 | 6–7.5 km | one, ~260 |
 | Lion-Camel Ridge | 89–100 | 7.5–9 km | one, ~680 |
 | Fengdu, the Ghost City (river and hill country) | none: the way to Hell | 9–10.5 km | one, ~240 |
@@ -937,16 +937,23 @@ Boy's Fire Cloud Cave on Mount Haohao (火云洞, chapters 40–42), in
 
 - **Where** (`Zones.FIRE_MOUNTAIN`): over hot, dry country (desert, badlands, eroded and wooded
   badlands, savanna, savanna plateau, windswept savanna; White Bone Ridge's hosts and plain savanna),
-  the whole column. One range a world, about 400 blocks across, 4.5–6 km from spawn, on hot, dry
-  ground and clear of every zone before it.
+  the whole column. One range a world, about 640 blocks across (never under 540), 4.5–6 km from
+  spawn, on hot, dry ground and clear of every zone before it.
 - **The range** (`RangeShape`, `FlamingRangeFeature`, pure and unit-tested): from the region's edge
   the ground climbs over the outer fifth into long chains of red mountains (ridged noise, rounded
-  summits, up to some 90 blocks over the land), valleys between them; Mount Haohao rises 45 more
-  at the heart, and a gorge is cut through it from the cave's gate to the region's edge. Faces show
+  summits, up to some 90 blocks over the land), valleys between them; Mount Haohao rises 55 more
+  over 140 blocks round the heart, and **Withered Pine Ravine** (枯松涧) is cut through it, 37 blocks
+  wide, from the cave's great door to the region's edge, withered black pines along its floor. Faces show
   banded flame rock, red, orange and brown terracotta with seams of magma; high ground is flame
   rock and cinder ash; valley floors (about a quarter of it) are **burning earth**. Fire on the
   burning earth in patches, seams of lava in level valley floors, smoking vents, charred basalt
   spires (`FlameSeamsFeature`). Orange sky and fog, falling ash, no rain; nothing grows.
+- **The outposts** (`RangeShape.outposts`, laid by `FlameSeamsFeature`): watchtowers of red brick in
+  rings of black stone, a signal fire smoking on top and braziers round them, one tried every 72
+  blocks over the range (some 20–35 a region) and three on the ravine's rims looking down on the way
+  to the door. Each has its band, put there once and kept: a captain and three or four imps and
+  brutes; about one band in three is a patrol that roams 40 blocks round its tower. The mountains'
+  own creatures come in bigger packs than before (imps 3–5, brutes 1–2) and one in eight is a captain.
 - **The heat** (`FireMountain`, `BurningEarthBlock`): lit burning earth scorches whatever stands on
   it once a second, **4% of its health** (magma's hot-floor damage, so armour softens it) and sets it
   alight for 3 s; **Fire Resistance**, or being fire-proof, keeps it off entirely (as it does the
@@ -964,8 +971,8 @@ Boy's Fire Cloud Cave on Mount Haohao (火云洞, chapters 40–42), in
   armoured, blows of 30%; when close they raise both fists for 0.8 s and slam the ground: 22%, thrown
   up and set alight within 4 blocks).
 - **Red Boy's Six Strong Generals** (六健将, `StrongGeneralEntity`, one model, six skins): always of a
-  captain's strength (level 74, 25 hits, blows of 29%), alone, posted at the cave (the two Winds at
-  the gate, four in the hall), kept even on Peaceful. Each has his trick every 5 s: **Cloud-Soaring
+  captain's strength (25 hits, blows of 29%), each the guardian of one of the cave's first six
+  floors (below), kept even on Peaceful. Each has his trick every 5 s: **Cloud-Soaring
   Sprite** (云里雾) leaps high and lands in a burst of blinding cloud; **Fog-Diving Monster** (雾里云)
   vanishes into fog and comes out behind his foe; **Mad-Hurrying Wind** (急如火) charges, fire springing
   up in his track; **Swift-Rushing Wind** (快如风), the fastest, hurls all near him away; **Flame-Head
@@ -989,11 +996,62 @@ Boy's Fire Cloud Cave on Mount Haohao (火云洞, chapters 40–42), in
   the burning). On the ground it burns out after 5–8 s and only so: no water flows into it or can be
   poured on it, a splash of water does not douse it, no hand beats it out, the fan passes over it.
   It spares Red Boy's household. His breath lights the Eight Trigrams Furnace in its line.
-- **The Fire Cloud Cave** (`FireCloudCave`, a blueprint each chunk lays its share of): a stone gate of
-  polished blackstone with a gilded plaque, red pillars and braziers, at the head of the gorge; a
-  lantern-hung passage into the mountain; the inner hall, a domed cavern of red brick, six pillars
-  with fire-lamps, four pools of lava, a gilded dais where Red Boy stands, a red carpet to it, his
-  throne between two braziers. Red Boy and his generals are put there once (`FireCloudCaveFeature`).
+- **The Fire Cloud Cave** (`FortressPlan`, a plan of the whole fortress worked out once, the same in
+  every world, pure and unit-tested; `FortressBlocks` says what each of its codes is, and the range
+  lays it column by column so it comes out whole across its chunks; `FireFortress` keeps it). Red Boy
+  is no longer in the open: the cave goes eight floors down into Mount Haohao, under the region's
+  centre, and he sits at the very bottom.
+  - **The great door**, at the head of Withered Pine Ravine: a facade of black stone in the cliff,
+    two red pillars with braziers on them, two crouching demons with eyes of fire, a gilded plaque
+    and a tiered roof; the door two leaves of bronze banded with black iron and studded with gold,
+    **13 blocks wide and 14 high**. Before it a forecourt of standing braziers and **its two
+    wardens** (Furnace-Brick Brutes of a captain's strength) with four imps. **The rule**: while the
+    wardens live the door is barred from within (knock on it, that is use it, and they turn on you);
+    kill them and knock again and it grinds open from the middle out over two seconds, and stays
+    open. It does not yield to picks (nor do the floors' grates). A player in creative opens it
+    regardless.
+  - **Eight floors**, each a great hall of its own (at least 1,200 open columns, none a corridor),
+    each 13 blocks under the last, reached down a stair cut in the rock round the halls (on a
+    different side each time); each floor's way down is shut by an iron grate its **guardian**
+    holds, and his death throws it open: (1) **the Outer Court**, a pillared nave with aisles, the
+    flame idol on its dais; (2) **the Forges**, nine bays round a great furnace, lava hearths under
+    hoods, anvils; (3) **the Lava Channels**, a rough cavern crossed by three channels of lava, a
+    bridge over each; (4) **the Barracks of the Six Generals**, a round yard and six walled
+    barracks round it, their standards; (5) **the Kitchen of the Captives**, the great steamer over
+    its fire pit, cages along the wall, cauldrons; (6) **the Smoke Galleries**, a maze of narrow
+    brick galleries, smoke in the dead ends, dim; (7) **the Hall of the Five Carts**, a round hall,
+    the five-element pentagon in its floor round a well of fire, the five carts on their daises;
+    (8) **the Magma Cistern**, a lake of lava, a causeway winding over it from island to island.
+    Guardians: the six generals on floors 1–6 (the two Winds, Flame-Head, Eye-Spark, Fog-Diving,
+    Cloud-Soaring), a warden on 7 and 8.
+  - **The garrisons**: 15–17 a floor besides the guardian, placed by the plan on open floor (not on
+    fire). Levels step up: regulars 68 on the first floor to 75 on the eighth, captains four over
+    (no more than 77), guardians 71 to 77; captains grow from one or two on the first floors to
+    three to five lower down. A floor is **mustered** when someone comes near it (the forecourt
+    when near the cave, the first floor at the door, each floor below when someone is on the floor
+    over it). Each member is kept to its floor: one that strays up or down a stair (or anywhere off
+    it) is taken back to its post, so nothing walks down into the throne room. Nothing of the
+    world's own is born inside the cave. **Respawn**: a floor whose garrison is all dead stays
+    empty for **20 minutes**; after that it is mustered again the next time someone comes near
+    while no one is on it. A grate once opened stays open.
+  - **Checkpoints**: coming down a stair onto a floor's landing marks it; the **return brazier** by
+    the door (use it) then brings you straight back down to the deepest landing you have reached, so
+    a death does not mean the whole descent again. It works only once the door is open.
+  - **The throne room**, at the bottom (113 blocks under the door): a hall 53 by 59, its nave 18
+    high, two rows of great red pillars, a moat of lava down each side, lamps in the floor round the
+    open arena of his gilded dais (room for his five carts and his ring of fire), a red carpet from
+    his doors, and behind, his throne of gold on its steps before a wall of flame; **his treasury**
+    chest beside it (True Samadhi Fire, gold, ember cores, furnace bricks). Red Boy is put on his
+    dais once, when the land is made (`FireCloudCaveFeature`), and is kept to the throne room:
+    should anything bring him off it he is taken back to his dais. His fight (phases, bar, carts,
+    breath) is as it was.
+  - **Old worlds**: chunks already made keep what they have. Where the region's centre was made
+    before (the old cave, its hall at the gorge's level, Red Boy in it), the old cave is left as it
+    is and none of this applies there. Where the centre is new but some of the fortress's chunks
+    were made before, the fortress is finished over each of them when it is first loaded with someone
+    near (a chunk most of whose sampled blocks are not the plan's is laid over whole; one changed a
+    little by players since is left alone), so the way down is whole and Red Boy is never shut away.
+  - **Where it is**: the Earth Gods' luopan points to the great door, and says so.
 - **What they leave**: Red Boy **2–3 True Samadhi Fire** (the furnace's fuel; a real source of it at
   last), **his own spear** one time in two (55% with Looting I, +5% a level after), ember cores,
   furnace bricks, gold, sigils. **Red Boy's Fire-Tipped Spear** (火尖枪, `RedBoySpearItem`): a slim
@@ -1012,9 +1070,14 @@ Boy's Fire Cloud Cave on Mount Haohao (火云洞, chapters 40–42), in
   blocks and items (Red Boy's spear among them) from `assets_source/fire_items.py`.
 - **Tests and pictures**: `FireGameTests` (heat, fan, Samadhi fire and water, Red Boy's breath,
   carts and phases, that he says nothing through a whole fight (to a Bull Demon too), his spear's
-  bare stats, creatures, generals, drops, XP, karma, the cave's blueprint),
-  `FireMountainPlacementTest`; gallery scenes `-Pgallery.only=fire_`; the range in a real world with
-  `./gradlew runWorldgenBench -Pbench.mode=fire`.
+  bare stats, creatures, generals, drops, XP, karma), `FireFortressGameTests` (the whole fortress laid
+  off the grid: the door's rule, every floor's way down walked by a zombie from the door to the dais,
+  the musters, a guardian's death opening his grate, a cleared floor staying empty, the garrisons and
+  Red Boy kept to their floors, his fight in the throne room, the landings and the brazier, the
+  luopan), `FireFortressPlanTest` (eight floors, a way on foot from door to throne that each grate
+  shuts, hall sizes, garrisons, the throne room's arena), `FireMountainPlacementTest` (the bigger
+  region, its outposts); gallery scenes `-Pgallery.only=fire_`; the range, the outposts and every
+  floor in a real world with `./gradlew runWorldgenBench -Pbench.mode=fire`.
 
 #### Mount Wuzhuang (levels 78–88)
 

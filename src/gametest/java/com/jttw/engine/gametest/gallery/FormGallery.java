@@ -281,7 +281,7 @@ public final class FormGallery {
         mc.setCameraEntity(mc.player);
         boolean firstPerson = shot.kind() == Kind.SCENE && scene(shot).firstPerson();
         mc.options.hideGui = !firstPerson; // first-person scenes show the HUD
-        if (firstPerson) cameraId = null;
+        cameraId = null; // the last shot's camera may still stand: wait for this one's (a slow setup is still running when the client looks)
         UUID playerId = mc.player.getUUID();
         mc.getSingleplayerServer().execute(() -> {
             ServerPlayer sp = mc.getSingleplayerServer().getPlayerList().getPlayer(playerId);
