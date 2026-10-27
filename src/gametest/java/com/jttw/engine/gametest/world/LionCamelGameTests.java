@@ -881,24 +881,22 @@ public class LionCamelGameTests {
     }
 
     @GameTest(template = PLATFORM)
-    public static void theCityHasOneTreasuryChestAndItHoldsTheVase(GameTestHelper h) {
-        // the blueprint: one chest in all the city, on the dais beside the Peng's empty throne
-        int[] t = LionCamelCity.TREASURY;
-        int chests = 0;
+    public static void theTreasuryIsInTheThroneRoomAndHoldsTheVase(GameTestHelper h) {
+        // the city keeps no chest now: the hoard went down into the Lion-Camel Cave
         for (int x = -LionCamelCity.OUTER; x <= LionCamelCity.OUTER; x++) for (int z = -LionCamelCity.OUTER; z <= LionCamelCity.OUTER; z++)
             for (int y = LionCamelCity.BOTTOM; y <= LionCamelCity.TOP; y++) {
                 BlockState s = LionCamelCity.at(x, y, z);
-                if (s != null && s.is(Blocks.CHEST)) {
-                    chests++;
-                    check(h, x == t[0] && y == t[1] && z == t[2], "the chest at the treasury: " + x + " " + y + " " + z);
-                }
+                check(h, s == null || !s.is(Blocks.CHEST), "no chest in the city: " + x + " " + y + " " + z);
             }
-        eq(h, 1, chests, "one chest in the city");
-        BlockState under = LionCamelCity.at(t[0], t[1] - 1, t[2]);
+        // the fortress's one chest, by the Peng's empty throne
+        int[] t = com.jttw.engine.world.lion.LionFortress.TREASURY;
+        BlockState chestState = com.jttw.engine.world.lion.LionFortress.at(t[0], t[1], com.jttw.engine.world.lion.LionFortress.FZ + t[2]);
+        check(h, chestState != null && chestState.is(Blocks.CHEST), "the treasury's chest: " + chestState);
+        BlockState under = com.jttw.engine.world.lion.LionFortress.at(t[0], t[1] - 1, com.jttw.engine.world.lion.LionFortress.FZ + t[2]);
         check(h, under != null && under.blocksMotion(), "on the dais: " + under);
         // laid as the ridge lays it: the chest, its loot the vase's
         BlockPos at = h.absolutePos(new BlockPos(2, 2, 2));
-        LionCamelCity.lay(h.getLevel(), at, LionCamelCity.at(t[0], t[1], t[2]), h.getLevel().getRandom());
+        com.jttw.engine.world.lion.LionFortress.lay(h.getLevel(), at, chestState, h.getLevel().getRandom());
         var chest = (net.minecraft.world.level.block.entity.ChestBlockEntity) h.getLevel().getBlockEntity(at);
         check(h, chest != null && LionCamelCity.TREASURY_LOOT.equals(chest.getLootTable()), "its loot table set");
         chest.unpackLootTable(null);

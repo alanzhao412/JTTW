@@ -208,10 +208,10 @@ Abilities and items are drawn from the source material rather than invented:
   - **Bell of Taiyi** (太乙钟): in the Jade Palace, one in all Heaven: the east one of the two
     treasury chests beside the throne (`chests/jade_palace_treasury`, the palace's loot and the bell,
     always). One palace a world, so one bell.
-  - **Yin-Yang Vase** (阴阳二气瓶, the Great Peng's): in Lion-Camel City alone, in the demon kings'
-    treasury, a chest on the throne-hall dais beside the Great Peng's empty throne
-    (`chests/lion_camel_treasury`: the vase, always, among gold, gems, bones and the ridge's
-    spoils). One city a world, so one vase.
+  - **Yin-Yang Vase** (阴阳二气瓶, the Great Peng's): at the bottom of the Lion-Camel Cave alone, in
+    the demon kings' treasury, a chest on the throne room's dais beside the Great Peng's empty
+    throne (`chests/lion_camel_treasury`: the vase, always, among gold, gems, bones and the ridge's
+    spoils). One fortress a world, so one vase.
   - **Banana-Leaf Fan**: one a world, in the treasure chest of the palace on Mount Kunlun's summit (see Mount Kunlun).
 - **Wu Clones** — Wukong's hair-clone technique, implemented as summoned entities with their own
   pathfinding goals ([`WuCloneManager`](src/main/java/com/jttw/engine/character/wukong/WuCloneManager.java))
@@ -407,7 +407,7 @@ west lengthens with the pilgrim: the higher a zone's levels, the farther out its
 | Hell (a dimension, entered through Fengdu) | 57–66 | — | the Ten Courts |
 | Flaming Mountains | 67–77 | 4.5–6 km | one, ~400 |
 | Mount Wuzhuang (over the clouds) | 78–88 | 6–7.5 km | one, ~260 |
-| Lion-Camel Ridge | 89–100 | 7.5–9 km | one, ~380 |
+| Lion-Camel Ridge | 89–100 | 7.5–9 km | one, ~680 |
 | Fengdu, the Ghost City (river and hill country) | none: the way to Hell | 9–10.5 km | one, ~240 |
 | Mount Kunlun (mountain country, to the west) | none: the Banana-Leaf Fan | 5–8 km, within 30° of west | one, ~380 |
 
@@ -947,24 +947,24 @@ left to its host.
 
 Lion-Camel Ridge (狮驼岭, chapters 74–77: eight hundred li of mountains swarming with demons, forty-seven
 thousand little demons on the ridge alone) and Lion-Camel City (狮驼国), the walled kingdom the demons
-took after eating its king, his court and all its people, where the Azure Lion and the White Elephant
-hold court. The last band, to the levels' cap. In [`world/lion/`](src/main/java/com/jttw/engine/world/lion/)
+took after eating its king, his court and all its people; and behind the city the Lion-Camel Cave
+(狮驼洞), the demon kings' fortress sunk deep in the mountain, where the Azure Lion and the White
+Elephant hold court at the bottom. The last band, to the levels' cap. In [`world/lion/`](src/main/java/com/jttw/engine/world/lion/)
 and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
 
 - **Where** (`Zones.LION_CAMEL`): over mountain country (the Bottomless Cave's hosts: peaks, slopes,
   groves, meadows, cherry groves, windswept hills) and the rugged savanna highlands (plateaus,
-  windswept savanna), host judged at y 256, **from y 40 up**
-  (`Vertical.above(40)`). The Bottomless Cave takes the same mountains below y 40, so the two share no
-  heights and may lie in the same columns: the ridge over the labyrinth (its shaft is left alone where
-  it comes up through the ridge). It keeps clear of every zone before it that takes the surface. One
-  region a world, about 380 blocks across, the farthest out: 7.5–9 km from spawn, the end of the
-  road west.
+  windswept savanna), host judged at y 256, **the whole column** (`Vertical.WHOLE_COLUMN`): the
+  fortress goes some 130 blocks down under the city, so the ridge no longer lies over the Bottomless
+  Cave's labyrinth but keeps clear of it, as of every zone before it (its ground is still reshaped
+  only from y 40 up). One region a world, **about 680 blocks across** (radius 340, never under 600:
+  `ZoneLayout.LION_CAMEL`), the farthest out: 7.5–9 km from spawn, the end of the road west.
 - **The ridge** (`RidgeShape`, `LionCamelRidgeFeature`, pure and unit-tested): the mountains are broken
   into grim crags (ridged noise, up to 30 blocks more), climbing out of the land over the outer fifth;
   faces bare stone banded with tuff, andesite and deepslate; ground of coarse dirt, gravel, podzol and
   stone, a little yellowed grass, snow over y 196; skulls on stakes and bones about, great ribcages
   (`RidgeBonesFeature`, never on the city's ground) and dead shrubs. A grey sky and haze, a little ash
-  in the air. Nothing under y 40 is touched.
+  in the air. Nothing under y 40 is touched but the cave.
 - **Lion-Camel City** (`LionCamelCity`, a blueprint each chunk lays its share of): on a level apron cut
   into (or built up on) the mountain round the centre, the ground climbing back to the ridge's over
   40 blocks. Walls of grim deepslate brick 11 high and three thick, 113 blocks square, crenellated,
@@ -982,9 +982,75 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   high, and a demon king walks from the hall to the court (round the terrace, through the palace's
   north gate and into his court); the court has room for the elephant he truly is. Its court and
   garrison are put there once, each by the chunk its post lies in (`LionCamelCityFeature`), and kept
-  (even on Peaceful): the Azure Lion on the terrace, the White Elephant in his court, lion-demon
-  captains at the palace gate, lion- and peng-demons in the hall, elephant-demons at the main gate
-  and in the court, a Little Wind-Driller at each gate.
+  (even on Peaceful): lion-demon captains on the terrace where the Lion held court and at the palace
+  gate, an elephant-demon captain in the Elephant's court, lion- and peng-demons in the hall,
+  elephant-demons at the main gate and in the court, a Little Wind-Driller at each gate. The kings
+  themselves have gone down into the mountain: the thrones in the hall stand empty, and the court's
+  north gate and the city's lead on to the forecourt of the cave.
+- **The ways up** (`RidgeApproach`, pure and unit-tested): three winding roads, south, east and west,
+  from the region's edge to the city's gates, cut through the crags and built up over the hollows,
+  paved down the middle, skulls on stakes along them; **nine outposts** beside them (a watch tower of
+  dark brick 14 high with a beacon of soul fire on its railed platform, a ladder within, a ring of
+  stakes open to the road, a cooking fire), each kept by a lion-demon captain, a lion-demon, an
+  elephant-demon, a Little Wind-Driller and a peng-demon up on the tower; and **twelve patrols** of
+  three out on the roads (a captain with the farthest). Some 100 demons are kept out on the ridge and
+  in the city; the ridge's own spawning comes in bigger packs (lion-demons 3–6, peng-demons 2–4,
+  elephant-demons 2–3, Wind-Drillers 1–2). Demons put at a post keep to it (they wander 12–20 blocks
+  and are back at it if drawn 40–72 away).
+- **The Lion-Camel Cave** (`LionFortress`, a blueprint each chunk lays its share of, pure and
+  unit-tested; `LionGates`): north of the city a **mountain** rises (`RidgeShape.massifAt`, some 48
+  blocks over the city, a cliff across its front), and in its cliff, past a forecourt of black stone
+  lit by soul braziers between skulls on stakes, stands the **great door**: two leaves of dark wood
+  15 wide and 17 high, banded with iron and studded with gold, knockers on them, between pillars of
+  black stone and red under a lintel with the cave's name in gold (狮驼洞), crouching stone lions at
+  its sides, a tower with a beacon at each end of the wall. **It holds while its six wardens stand**
+  (two elephant-demon captains, two lion-demons, two peng-demons in the forecourt): try it and it
+  will not move; once they have fallen it **opens to a hand** (use it), its leaves grinding back from
+  the middle. The Great Peng's kin open it to him at once. Behind it the **gate hall** (63 blocks
+  square, 20 high, two rows of red pillars, braziers), and under it **eight floors**, each 13 blocks
+  under the last, each a hall 63 blocks square and 10 high in its own stone and look:
+  1. **the Barracks**: dark timber, rows of straw pallets under red cloth, mess tables, the armoury;
+  2. **the Drill Yard**: an open yard of sand with straw men on posts, a colonnade, the reviewing stands;
+  3. **the Steaming Kitchens**: great cauldrons on fires over magma hearths, the steamers stacked,
+     the pens where they kept the pilgrims they meant to eat;
+  4. **the Bone Pits**: deepslate and bone, pits heaped with bones under cobwebs;
+  5. **the Menagerie**: mossy pens of iron bars, hay and troughs;
+  6. **the Vault**: black stone and gold, the hoard on plinths, pools of lava;
+  7. **the Great Peng's Halls**: terracotta and gold, perches and fallen golden feathers;
+  8. **the Generals' Hall**: nether brick and red pillars, moats of lava, the generals' standards.
+
+  Side halls open off some through wide doorways under lintels. Each floor's **way down is a stair
+  against a wall behind a portcullis**, coming down on the next floor at the other side (so every
+  floor is crossed); the portcullis **rises of itself when the floor's warden falls** (a captain's
+  level and half again a captain's health, before it). The generals' hall's way down is a grand
+  stair, balustraded, into the **throne room** at the bottom, some 127 blocks under the city: 63 by
+  67 blocks and 20 high, great pillars banded with gold, braziers down the nave, bones heaped in the
+  corners, a red carpet to a dais with the three thrones (a gold lion's face over the Lion's; the
+  Great Peng's empty, his treasury beside it), the Azure Lion and the White Elephant before theirs.
+  Its walls, floors, stairs and gates are proof against picks and blasts (the furnishings are not).
+- **Who keeps the cave**: each floor's keepers are put there once (`LionCamelCityFeature`), kept and
+  never despawned: 5 in the gate hall, then 7, 8, … 14 on the eighth floor, more captains the deeper
+  (1 to 3), stronger the deeper (regulars level 89 in the gate hall up to 97 on the eighth floor,
+  captains 93–100, wardens 94–100), and the warden before the gate. Each keeps to its floor: it is
+  back at its post if it strays 40 blocks or off its floor's heights, so none follows a foe down the
+  stairs, and none comes into the throne room. **Respawn**: what is put there is put once (a fallen
+  keeper is not replaced, a fallen warden's gate stays open), but the ridge's demons rise of
+  themselves in the halls as anywhere in the zone (any light, as their mob cap allows) and keep to the
+  hall they rose in; none rises in the throne room. **Checkpoints**: as a floor's way down opens,
+  every player in its hall will rise again, should he fall, on its landing at the head of the stair
+  down (whatever bed he had); and the gates once opened never close, so he walks back down through
+  the floors he won. The Earth God's Luopan points to the great door.
+- **The kings in their throne room**: they are put there once, as the land is made, their lairs
+  before their thrones, and keep to them: drawn more than 16 blocks past their lairs (up the grand
+  stair after a foe) they let go whatever they hold and are back before their thrones. Their fight is
+  as before, phases, bars, true forms and all; the room is high and wide enough for the true forms.
+- **Old worlds**: ground already made keeps what it had (no migration); new ground gets the new
+  design. A king of a world made before (in the city) stays there until his region's throne room has
+  been made and is loaded, then goes down to it, his lair with him; if a king of his kind was put
+  there already, the city's is gone (`DemonKingEntity.goDownToHisThrone`). A cave laid half on ground
+  made before is broken where the old ground is (it can be dug through: only the blueprint's own
+  blocks are proof against picks), never sealed. A world whose city was made before keeps its old
+  treasury chest on the hall's dais, so there the throne room's makes a second vase.
 - **Creatures** (`LionCamelMonster`: level 89, captains 96, any light, in numbers): **Lion-Demons**
   (狮子精, the Azure Lion's kin: 9 hits, sabre cuts of 22%; they pounce from 4–11 blocks for 26% and
   a stagger; strike one and the pride turns), **Elephant-Demons** (象精, the White Elephant's
@@ -1005,7 +1071,7 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   let go), then the beast stands in his place, in another model and a larger body, and the players
   near are told what he is. The true form is synced and saved; the fight goes on in it.
 - **The Azure Lion** (青狮, Manjushri's lion; `AzureLionEntity`, a `ZoneBoss`, level 100, 90 hits,
-  an azure bar, in the throne hall): a hulking demon king in dark lacquered armour, a wild green-blue
+  an azure bar, in the throne room): a hulking demon king in dark lacquered armour, a wild green-blue
   mane bristling about a snarling maw, clawed hands, a giant's broadsword: blows of 26%. Every 9 s he throws back his head
   and **roars**: a cone 12 blocks long, 12%, Slowness II and Weakness, thrown back. Every 13 s, a foe
   within 4.5 blocks before him, his jaws gape for a second, and he **swallows the foe whole**: inside
@@ -1020,7 +1086,7 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   reach the foe as he lands, it is swallowed (inside the lion as inside the demon king, and fought
   out of him the same way).
 - **The White Elephant** (白象, Samantabhadra's six-tusked elephant; `WhiteElephantEntity`, level 98,
-  85 hits, a white bar, in the elephant court): a giant in ivory-and-gold plate, a great domed
+  85 hits, a white bar, in the throne room): a giant in ivory-and-gold plate, a great domed
   elephant's head under a gold war-frontlet, ears like sails, a heavy trunk, six tusks, a giant's
   lance held upright: thrusts of 24%. Every 10 s, a foe within 6
   blocks before him, his trunk rears and **coils round the foe, lifting him high**: it crushes him
@@ -1032,7 +1098,7 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   the Bodhisattva's empty seat on his back. He **charges** at foes 5–14 blocks off, goring for 22% and
   trampling (Slowness III); his stamping becomes a **trampling** up on his hind legs that strikes
   within 7 blocks; his trunk reaches 8 blocks, comes quicker and lifts its catch high over his head.
-  The two kings' lairs are 38 blocks apart: each is its own fight.
+  The two kings stand 14 blocks apart before their thrones, so the two fights are as one.
 - **The Peng rule** (`ZoneAllies.PENG`, for the whole zone, both kings included): a player who is the
   Gold-Winged Peng, the third brother, is **never targeted and never fought back**, whatever he does:
   no demon, captain, Wind-Driller, the Azure Lion nor the White Elephant sets on him, nor swallows,
@@ -1068,10 +1134,17 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   lift, crush, hurl and breaking free; roar, stamp, charge, phases; the true forms' reveal at a third,
   their bodies, their keeping; the lion's swallowing and pounce, the elephant's lift, trampling and
   goring; the alarm; the creatures' tricks; captains; drops and the Peng's empty hands; the band's XP
-  to the cap; karma; the city's blueprint, built for its giants), `LionCamelPlacementTest`; gallery
-  scenes `-Pgallery.only=lion_` (the kings from the front, the side, close and beside the player, in
-  both shapes; the reveal; the swallow, the pounce, the trunk and the trampling; the hall and the
-  court with the kings in them, and the kings' way between); the ridge and the city in a real world
+  to the cap; karma; the city's blueprint, built for its giants), `LionFortressGameTests` (the way on
+  foot from the door to the throne room, every floor's stair; who keeps each floor; the great door
+  holding while its wardens stand, opening to a hand, at once to the Peng; a portcullis rising as
+  its warden falls; the fabric against picks; the checkpoints; the kings kept to the throne room,
+  an old world's king going down to it; the Lion's fight and true form in the throne room; the
+  needle to the door), `LionCamelPlacementTest`, `LionFortressTest` (eight floors, their stairs, the
+  walk from the door to the kings with the gates open and barred with them shut, the keepers, the
+  treasury, where it lies, the roads and outposts); gallery scenes `-Pgallery.only=lion_` (the kings
+  from the front, the side, close and beside the player, in both shapes; the reveal; the swallow, the
+  pounce, the trunk and the trampling; the city; the throne room with the kings, in both shapes, and
+  the generals' hall); the ridge, the city, the door, every floor and the throne room in a real world
   with `./gradlew runWorldgenBench -Pbench.mode=lion` (and every zone's place with `zones`).
 
 #### Fengdu, the Ghost City (the way to Hell)

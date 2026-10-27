@@ -13,6 +13,7 @@ import com.jttw.engine.reincarnation.AlignmentData;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
 import com.jttw.engine.world.feature.LionCamelCityFeature;
 import com.jttw.engine.world.lion.LionCamelCity;
+import com.jttw.engine.world.lion.LionFortress;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -42,9 +43,11 @@ import java.util.List;
  * and his swallowing; the White Elephant's trunk holding a foe aloft, in both his shapes, and his
  * trampling; a Peng player walking among the demons, who bow to him; and Lion-Camel City laid whole
  * a way off, seen from over its main gate, inside the throne hall, in the elephant court, along the
- * kings' way between them, down a street, and the hall and the court again with the kings in their
- * true forms. The patch is cleared before the next shot ({@link #clear}); the city,
- * off the stage behind the usual cameras, is laid once and left, its shots among the gallery's last.
+ * kings' way between them, down a street (the kings no longer in it); and the bottom of the
+ * Lion-Camel Cave, laid high in the sky over the city: its throne room with the two kings before
+ * their thrones, in both their shapes, and the generals' hall over it. The patch is cleared before
+ * the next shot ({@link #clear}); the city and the cave, off the stage behind the usual cameras,
+ * are laid once and left, their shots among the gallery's last.
  * The ridge itself is seen in a real world: the zone bench's lion mode.
  */
 final class LionScenes {
@@ -384,18 +387,57 @@ final class LionScenes {
                     city(p);
                     AbilityScenes.sceneCam = new double[]{CITY_X + 25.5, 3.2, CITY_Z + 50.5, CITY_X + 25.5, 1.5, CITY_Z + 8.0};
                 }, p -> {}, 1, false),
-                // the kings in their true forms, where they hold court
-                new AbilityScenes.Scene("lion_city_hall_true", p -> {
-                    city(p);
-                    p.serverLevel().getEntitiesOfClass(AzureLionEntity.class, new AABB(CITY_X - 30, -80, CITY_Z - 30, CITY_X + 30, 400, CITY_Z + 30)).forEach(AzureLionEntity::revealTrueForm);
-                    int h = LionCamelCity.TERRACE_H;
-                    AbilityScenes.sceneCam = new double[]{CITY_X + 0.5, h + 4.5, CITY_Z + 10.0, CITY_X + 0.5, h + 2.0, CITY_Z + LionCamelCity.THRONE_Z};
+                // the Lion-Camel Cave, laid high over the city (its throne room and the generals' hall over it)
+                new AbilityScenes.Scene("lion_cave_throne_room", p -> {
+                    fortress(p);
+                    int t = FORT_UP, fz = FORT_Z + LionFortress.FZ;
+                    AbilityScenes.sceneCam = new double[]{CITY_X + 0.5, t + 13.0, fz - 33.5, CITY_X + 0.5, t + 4.0, fz - 68.0};
                 }, p -> {}, 1, false),
-                new AbilityScenes.Scene("lion_city_court_true", p -> {
-                    city(p);
-                    p.serverLevel().getEntitiesOfClass(WhiteElephantEntity.class, new AABB(CITY_X - 30, -80, CITY_Z - 70, CITY_X + 30, 400, CITY_Z - 10)).forEach(WhiteElephantEntity::revealTrueForm);
-                    AbilityScenes.sceneCam = new double[]{CITY_X + 7.0, 6.5, CITY_Z + LionCamelCity.COURT_S - 2.0, CITY_X + 0.5, 2.5, CITY_Z + LionCamelCity.COURT_Z};
+                new AbilityScenes.Scene("lion_cave_throne_kings", p -> {
+                    fortress(p);
+                    int t = FORT_UP, fz = FORT_Z + LionFortress.FZ;
+                    AbilityScenes.sceneCam = new double[]{CITY_X + 10.5, t + 6.0, fz - 38.5, CITY_X - 5.0, t + 3.0, fz - 54.0};
+                }, p -> {}, 1, false),
+                new AbilityScenes.Scene("lion_cave_throne_kings_true", p -> {
+                    fortress(p);
+                    p.serverLevel().getEntitiesOfClass(DemonKingEntity.class, new AABB(CITY_X - 40, -80, FORT_Z - 200, CITY_X + 40, 400, FORT_Z))
+                            .forEach(DemonKingEntity::revealTrueForm);
+                    int t = FORT_UP, fz = FORT_Z + LionFortress.FZ;
+                    AbilityScenes.sceneCam = new double[]{CITY_X + 14.5, t + 8.0, fz - 34.5, CITY_X - 5.0, t + 4.0, fz - 54.0};
+                }, p -> {}, 1, false),
+                new AbilityScenes.Scene("lion_cave_generals_hall", p -> {
+                    fortress(p);
+                    int y = FORT_UP + LionFortress.floorY(LionFortress.FLOORS) - LionFortress.THRONE_Y, fz = FORT_Z + LionFortress.FZ;
+                    AbilityScenes.sceneCam = new double[]{CITY_X + 22.5, y + 8.0, fz + 22.5, CITY_X - 6.0, y + 2.0, fz - 6.0};
                 }, p -> {}, 1, false));
+    }
+
+    /** How high over the stage's ground the gallery lays the Lion-Camel Cave's throne room's floor: in the sky, where nothing else is. */
+    private static final int FORT_UP = 100;
+
+    /** Where the gallery's cave is laid from (as a region's centre): south of the city's, so its bottom is over the city, near enough the stage for the camera. */
+    private static final int FORT_Z = CITY_Z + 140;
+
+    private static boolean fortress;
+
+    /**
+     * The bottom of the Lion-Camel Cave (the throne room, and the generals' hall over it), as the
+     * city's region would have it, but high in the sky over the city (its region's centre put south of it); the kings at their posts and
+     * the generals' hall's keepers at theirs (still, for the pictures).
+     */
+    private static void fortress(ServerPlayer p) {
+        if (fortress) return; // laid once
+        ServerLevel level = p.serverLevel();
+        int floorY = ground(p) - 1 + FORT_UP;
+        BlockPos origin = new BlockPos(CITY_X, floorY - LionFortress.THRONE_Y, FORT_Z);
+        LionFortress.layWhole(level, origin, LionFortress.BOTTOM, LionFortress.floorY(LionFortress.FLOORS - 1));
+        for (LionFortress.Post post : LionFortress.POSTS) {
+            if (post.floor() != LionFortress.THRONE && post.floor() != LionFortress.FLOORS) continue;
+            double y = origin.getY() + post.ly() - ground(p);
+            Mob m = put(p, post.who().type(), CITY_X + post.u() + 0.5, y, FORT_Z + post.lz() + 0.5, 180f, false);
+            if (m instanceof LionCamelMonster z) z.become(LionFortress.levelOf(post.floor(), post.role()), post.role() != LionFortress.REGULAR);
+        }
+        fortress = true;
     }
 
     /** Lion-Camel City, its ground at the stage's ground level, its court and garrison at their posts (still, for the pictures). */
@@ -411,7 +453,6 @@ final class LionScenes {
             level.setBlock(at.set(CITY_X + x, ground.getY(), CITY_Z + z), (r < 5 ? Blocks.COARSE_DIRT : r < 8 ? Blocks.GRAVEL : Blocks.PACKED_MUD).defaultBlockState(), Block.UPDATE_CLIENTS);
         }
         LionCamelCity.layWhole(level, ground);
-        put(p, ModEntities.AZURE_LION.get(), CITY_X + 0.5, LionCamelCity.TERRACE_H, CITY_Z + 0.5, 0f, false);
         for (var post : LionCamelCityFeature.POSTS) {
             Mob m = put(p, post.who().get(), CITY_X + post.x() + 0.5, post.y() - 1, CITY_Z + post.z() + 0.5, 0f, false);
             if (m instanceof ZoneMonster z) z.become(post.captain() ? z.captainLevel() : z.regularLevel(), post.captain());

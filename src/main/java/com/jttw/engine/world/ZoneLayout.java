@@ -53,8 +53,12 @@ public record ZoneLayout(int near, int far, int radius, int wobble, long salt, b
      */
     public static final ZoneLayout MOUNT_WUZHUANG = new ZoneLayout(6000, 7500, 128, 16, 0x3A1FC10DL, false);
 
-    /** Lion-Camel Ridge, the last band: a region about 380 blocks across (the city and the ridge round it), 7.5-9 km out. */
-    public static final ZoneLayout LION_CAMEL = new ZoneLayout(7500, 9000, 190, 30, 0x11C0CA3EL, false);
+    /**
+     * Lion-Camel Ridge, the last band: a region about 680 blocks across (never under 600): the city,
+     * the mountain behind it with the demon kings' fortress in it, and the ridge round them crawling
+     * with their hordes, its roads and outposts; 7.5-9 km out.
+     */
+    public static final ZoneLayout LION_CAMEL = new ZoneLayout(7500, 9000, 340, 40, 0x11C0CA3EL, false);
 
     /**
      * Fengdu, the Ghost City, the gateway to Hell: no band of its own; a region about 240 blocks

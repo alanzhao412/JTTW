@@ -17,9 +17,9 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Where Lion-Camel Ridge lies (mountain country, from y 40 up: over the Bottomless Cave's heights,
- * never on a surface zone's ground), its band at the levels' cap, its allies, and the ridge's shape
- * round Lion-Camel City.
+ * Where Lion-Camel Ridge lies (mountain country, the whole column: its fortress goes deep, so it
+ * keeps clear of the Bottomless Cave as of every surface zone), its band at the levels' cap, its
+ * allies, and the ridge's shape round Lion-Camel City.
  */
 class LionCamelPlacementTest {
 
@@ -65,14 +65,14 @@ class LionCamelPlacementTest {
     }
 
     @Test
-    void itSparesThePengAndTakesTheColumnFromForty() {
+    void itSparesThePengAndTakesTheWholeColumn() {
         assertSame(ZoneAllies.PENG, L.allies(), "allied to the Peng: the ridge is his brothers'");
-        assertEquals(Zones.Vertical.above(Zones.LION_CAMEL_FLOOR), L.vertical());
-        assertEquals(Zones.BOTTOMLESS_CAVE_TOP, Zones.LION_CAMEL_FLOOR);
-        assertFalse(L.vertical().overlaps(Zones.BOTTOMLESS.vertical()), "no heights shared with the Bottomless Cave");
+        assertEquals(Zones.Vertical.WHOLE_COLUMN, L.vertical(), "its fortress goes deep under the city");
+        assertTrue(L.vertical().overlaps(Zones.BOTTOMLESS.vertical()), "so it keeps clear of the Bottomless Cave's ground too");
         assertTrue(L.vertical().overlaps(Zones.WHITE_BONE.vertical()) && L.vertical().overlaps(Zones.FIRE_MOUNTAIN.vertical())
-                && L.vertical().overlaps(Zones.MYSTICAL_WATERS.vertical()), "but the surface zones' it does");
-        assertTrue(L.vertical().contains(40) && !L.vertical().contains(39));
+                && L.vertical().overlaps(Zones.MYSTICAL_WATERS.vertical()), "and the surface zones'");
+        assertTrue(L.vertical().contains(-60) && L.vertical().contains(300));
+        assertEquals(Zones.BOTTOMLESS_CAVE_TOP, Zones.LION_CAMEL_FLOOR, "its ground reshaped from y 40 up, as before");
     }
 
     @Test
@@ -80,7 +80,7 @@ class LionCamelPlacementTest {
         int ridge = 0;
         for (long seed : new long[]{1L, 42L, 12345L, -7L}) {
             int[] c = L.centres(seed)[0];
-            for (int x = c[0] - 230; x <= c[0] + 230; x += 3) for (int z = c[1] - 230; z <= c[1] + 230; z += 3) {
+            for (int x = c[0] - 390; x <= c[0] + 390; x += 4) for (int z = c[1] - 390; z <= c[1] + 390; z += 4) {
                 if (!L.covers(seed, x, z)) continue;
                 ridge++;
                 for (Zones.Zone other : Zones.MAP.zones()) {
@@ -90,7 +90,9 @@ class LionCamelPlacementTest {
                 }
             }
         }
-        assertTrue(ridge > 1000, "it has ground: " + ridge);
+        assertTrue(ridge > 4 * 20000, "it has ground, a great deal of it: " + ridge);
+        // a huge region: never under 600 blocks across, round the city, the mountain behind it and the ridge
+        assertTrue(L.layout().radius() - L.layout().wobble() >= 300, "at least 300 blocks out from the city every way");
     }
 
     /** The regions of worlds of the first {@code many} seeds, from 1: each {seed, x, z}. */

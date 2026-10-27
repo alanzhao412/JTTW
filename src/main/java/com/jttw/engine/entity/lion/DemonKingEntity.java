@@ -3,6 +3,9 @@ package com.jttw.engine.entity.lion;
 import com.jttw.engine.entity.zone.ZoneBoss;
 import com.jttw.engine.world.Zones;
 import com.jttw.engine.world.lion.LionCamelRidge;
+import com.jttw.engine.world.lion.LionFortress;
+import com.jttw.engine.world.lion.LionGates;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -20,6 +23,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
@@ -45,6 +50,11 @@ import java.util.UUID;
  *
  * <p>Like everything of the ridge, a king spares the Great Peng; and he hails a Peng player once as
  * his third brother ({@code entity.jttw_engine.<id>.brother}).
+ *
+ * <p>He keeps to the throne room he was put in: drawn more than {@value #LEASH} blocks past his lair
+ * (up the grand stair after a foe, say), he lets go whatever he holds and is back before his throne
+ * ({@link #backToLair}). In a world made before the Lion-Camel Cave was, he sits in the city as he
+ * did, until his throne room is made, and then goes down to it ({@link #goDownToHisThrone}).
  */
 public abstract class DemonKingEntity extends ZoneBoss {
 
@@ -56,6 +66,8 @@ public abstract class DemonKingEntity extends ZoneBoss {
     public static final int REVEAL = 40;
     /** How near the players must be to be told what he is. */
     public static final double REVEAL_HEARD = 48;
+    /** How far past his lair's bounds he may be drawn before he is back in it. */
+    public static final int LEASH = 16;
 
     @Nullable
     private UUID captiveId;
@@ -336,6 +348,75 @@ public abstract class DemonKingEntity extends ZoneBoss {
             if (revealing >= REVEAL) revealTrueForm();
         }
         if (tickCount % 20 == 0) hailBrother();
+        if (tickCount % 20 == 3 && strayed()) backToLair();
+        if (tickCount % 100 == 51 && level() instanceof ServerLevel server) goDownToHisThrone(server);
+    }
+
+    /** His place before his throne in the Lion-Camel Cave's throne room ({u, v} of {@link LionFortress}). */
+    public int[] thronePost() {
+        return this instanceof AzureLionEntity ? LionFortress.LION_POST : LionFortress.ELEPHANT_POST;
+    }
+
+    /**
+     * A king of a world made before the Lion-Camel Cave was (put in the city, his lair there) goes
+     * down to his throne once the throne room of his region has been made and is loaded: he is
+     * there at once, his lair with him. If a king of his kind already sits there (put there as the
+     * throne room was made), he is that king, and the one in the city is gone. Until then he keeps
+     * the city, as before, so a world half old and half new never leaves the kings where no one can
+     * come at them.
+     */
+    private void goDownToHisThrone(ServerLevel level) {
+        if (!hasRestriction() || isDeadOrDying() || captiveId != null || revealing >= 0) return;
+        if (Zones.LION_CAMEL.depth(level.getSeed(), getBlockX(), getBlockZ()) <= 0) return;
+        if (LionGates.inThroneRoom(level, getRestrictCenter())) return;
+        LionGates.Fortress f = LionGates.of(level, getBlockX(), getBlockZ());
+        if (f != null) goDownToHisThrone(level, f);
+    }
+
+    /**
+     * Goes down to his throne in fortress {@code f}, if its throne room is there at his place (made,
+     * loaded, its floor the blueprint's): returns whether he went (or, a king of his kind being there
+     * already, gave way to him).
+     */
+    public boolean goDownToHisThrone(ServerLevel level, LionGates.Fortress f) {
+        int[] post = thronePost();
+        int ly = LionFortress.THRONE_Y + 1, lz = LionFortress.FZ + post[1];
+        BlockPos at = f.world(post[0], ly, lz);
+        if (!level.isLoaded(at)) return false;
+        BlockState floor = LionFortress.at(post[0], ly - 1, lz);
+        if (floor == null || !level.getBlockState(at.below()).is(floor.getBlock()) || level.getBlockState(at).blocksMotion()) return false;
+        AABB room = new AABB(f.world(-LionFortress.HALF, LionFortress.THRONE_Y, LionFortress.FZ + LionFortress.THRONE_N))
+                .minmax(new AABB(f.world(LionFortress.HALF + 1, LionFortress.THRONE_Y + LionFortress.THRONE_AIR + 1, LionFortress.FZ + LionFortress.THRONE_S + 1)));
+        boolean there = !level.getEntitiesOfClass(getClass(), room, k -> k != this && k.isAlive()).isEmpty();
+        if (there) {
+            discard();
+            return true;
+        }
+        getNavigation().stop();
+        if (isPassenger()) stopRiding();
+        teleportTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
+        setDeltaMovement(Vec3.ZERO);
+        restrictTo(at, lairRadius());
+        return true;
+    }
+
+    /** Whether he has been drawn too far from his lair (more than {@value #LEASH} past its bounds). */
+    public boolean strayed() {
+        if (!hasRestriction() || revealing >= 0) return false;
+        double reach = lairRadius() + LEASH;
+        return distanceToSqr(net.minecraft.world.phys.Vec3.atBottomCenterOf(getRestrictCenter())) > reach * reach;
+    }
+
+    /** Back before his throne, at once: whatever he holds let go first. */
+    public void backToLair() {
+        if (!hasRestriction()) return;
+        if (captiveId != null) letGo(false);
+        if (isPassenger()) stopRiding();
+        getNavigation().stop();
+        net.minecraft.core.BlockPos lair = getRestrictCenter();
+        teleportTo(lair.getX() + 0.5, lair.getY(), lair.getZ() + 0.5);
+        setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+        fallDistance = 0;
     }
 
     /** Hails a Peng player near him, once, as his third brother. */
