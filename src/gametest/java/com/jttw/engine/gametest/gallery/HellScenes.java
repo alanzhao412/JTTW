@@ -24,6 +24,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -40,8 +41,8 @@ final class HellScenes {
 
     private HellScenes() {}
 
-    /** The patch: x -8..8, z 1..16. */
-    private static final int X0 = -8, X1 = 8, Z0 = 1, Z1 = 16;
+    /** The patch: x -13..13, z 1..16. */
+    private static final int X0 = -13, X1 = 13, Z0 = 1, Z1 = 16;
 
     private static boolean patch, court, yama, wheel, bridge, gate;
 
@@ -100,7 +101,7 @@ final class HellScenes {
             LINEUP = {0.5, 5.0, -0.5, 0.5, 1.8, 10.5};
 
     static List<AbilityScenes.Scene> all() {
-        return List.of(
+        List<AbilityScenes.Scene> scenes = List.of(
                 scene("hell_ox", p -> {
                     creature(p, ModEntities.OX_HEAD.get(), -2.0, 8.0, 200f, false);
                     creature(p, ModEntities.OX_HEAD.get(), 2.5, 10.0, 160f, true);
@@ -160,6 +161,26 @@ final class HellScenes {
                         put(p, HellKings.type(n), -5.5 + col * 3, n <= 5 ? 12.5 : 8.5, 180f);
                     }
                 }, LINEUP),
+                // the nine kings but King Yama in one line, the First to the Tenth from left to right, each with his emblem
+                scene("hell_kings_nine", p -> {
+                    int col = 0;
+                    for (int n = 1; n <= 10; n++) {
+                        if (n == 5) continue;
+                        put(p, HellKings.type(n), 10.5 - col * 2.5, 13.0 - Math.abs(col - 4) * 0.45, 180f);
+                        col++;
+                    }
+                }, new double[]{0.5, 4.6, -0.5, 0.5, 1.9, 12.0}),
+                // three at a time, nearer: the First to the Fourth's emblems and colours, then the Sixth to the Tenth's
+                scene("hell_king_trio_1", p -> {
+                    for (int c = 0; c < 3; c++) put(p, HellKings.type(1 + c), 3.5 - c * 3, 8.0, 180f);
+                }, new double[]{0.5, 3.2, 0.0, 0.5, 2.0, 8.0}),
+                scene("hell_king_trio_2", p -> {
+                    int[] n = {4, 6, 7};
+                    for (int c = 0; c < 3; c++) put(p, HellKings.type(n[c]), 3.5 - c * 3, 8.0, 180f);
+                }, new double[]{0.5, 3.2, 0.0, 0.5, 2.0, 8.0}),
+                scene("hell_king_trio_3", p -> {
+                    for (int c = 0; c < 3; c++) put(p, HellKings.type(8 + c), 3.5 - c * 3, 8.0, 180f);
+                }, new double[]{0.5, 3.2, 0.0, 0.5, 2.0, 8.0}),
                 scene("hell_king_close", p -> put(p, ModEntities.KING_QINGUANG.get(), 0.5, 7.0, 170f), CLOSE),
                 scene("hell_king_side", p -> put(p, ModEntities.KING_CHUJIANG.get(), 0.5, 7.0, 90f), CLOSE),
                 scene("hell_king_judging", p -> put(p, ModEntities.KING_TAISHAN.get(), 0.5, 7.0, 170f), p -> {
@@ -247,6 +268,15 @@ final class HellScenes {
                     int[] b = HellTerrain.bridgeEnds();
                     AbilityScenes.sceneCam = cam(0, b[0] - 14, HellTerrain.GROUND + 5, BRIDGE_O, -9, b[0] - 6, HellTerrain.GROUND + 2);
                 }, p -> {}, 1, false));
+        List<AbilityScenes.Scene> out = new ArrayList<>(scenes);
+        // each of the nine kings but King Yama close, three-quarters on: his face, his badge, his emblem
+        for (int n = 1; n <= 10; n++) {
+            if (n == 5) continue;
+            EntityType<? extends KingOfHellEntity> type = HellKings.type(n);
+            out.add(scene("hell_king_close_" + HellKings.IDS.get(n - 1).substring("king_".length()),
+                    p -> put(p, type, 0.5, 7.0, 165f), new double[]{-0.6, 3.1, 3.4, 0.9, 2.2, 7.0}));
+        }
+        return out;
     }
 
     // ── The works, laid off the stage ───────────────────────────────────
