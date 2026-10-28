@@ -41,8 +41,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * How Hell's creatures look: Ox-Head and Horse-Face (a big armoured frame, a beast's head, a steel
- * fork or a hooked spear), the Judge-Clerk (a red robe, a winged black cap, brush and ledger), the
+ * How Hell's creatures look: Ox-Head and Horse-Face (a matched pair of towering guards in black-and-gold
+ * lamellar armour and tattered red cloaks, an ox's and a horse's head, hooves; a steel trident and a
+ * halberd), the Judge-Clerk (a red robe, a winged black cap, brush and ledger), the
  * Black and White Impermanence (long robes, tall hats; the White's long red tongue), the wandering
  * ghosts (pale, legless, trailing away, half there), and the Ten Kings (nine of them on one frame,
  * lesser kings in King Yama's likeness: his tiered judge's robe, great sleeves and mian crown, plainer
@@ -77,7 +78,511 @@ public final class HellRenderers {
 
     // ── Ox-Head and Horse-Face ──────────────────────────────────────────
 
-    /** The guards' common frame (128x64): a person's, in a black cuirass and armoured skirt, pauldrons on the shoulders. */
+    /**
+     * Ox-Head (256x256): hell's enforcer, half again a man's height, in black lamellar armour edged in
+     * gold and laced in red (two round mirror plates on the breast, shoulder guards in three tiers
+     * bitten by gold beasts' heads, a belt with a gold demon's-face buckle, tassets over a red apron,
+     * greaves and knee guards), a tattered red cloak, bare hide arms and an ox's legs and cloven
+     * hooves; an ox's head on a thick humped neck: a curly brow, a broad snout with a gold nose ring,
+     * burning eyes, long ivory horns ringed and black-tipped, curving out, up and forward; a steel
+     * trident in his right hand, a chain and shackle at his hip. Model and skins: {@code assets_source/hell_guards.py}.
+     */
+    public static LayerDefinition oxLayer() {
+        // GENERATED ox: begin
+        MeshDefinition mesh = new MeshDefinition();
+        PartDefinition root = mesh.getRoot();
+        PartDefinition waist = root.addOrReplaceChild("waist", CubeListBuilder.create()
+                .texOffs(175, 67).mirror(false).addBox(-6.2f, -2, -4, 12.4f, 4, 8)
+                .texOffs(170, 49).mirror(false).addBox(-7, -3.6f, -4.6f, 14, 3.2f, 9.2f)
+                .texOffs(213, 95).mirror(false).addBox(-2.8f, -4.8f, -5.7f, 5.6f, 5.2f, 1.4f)
+                .texOffs(122, 116).mirror(false).addBox(-3.7f, -5.8f, -5.4f, 1.2f, 1.8f, 1)
+                .texOffs(122, 116).mirror(false).addBox(2.5f, -5.8f, -5.4f, 1.2f, 1.8f, 1), PartPose.offsetAndRotation(0, 2, 0, 0, 0, 0));
+        PartDefinition apron = waist.addOrReplaceChild("apron", CubeListBuilder.create()
+                .texOffs(219, 49).mirror(false).addBox(-2.4f, 0, -0.4f, 4.8f, 12.5f, 0.8f), PartPose.offsetAndRotation(0, -0.2f, -4.9f, -0.06f, 0, 0));
+        PartDefinition rightTasset = waist.addOrReplaceChild("right_tasset", CubeListBuilder.create()
+                .texOffs(218, 67).mirror(false).addBox(-3.2f, 0, -0.6f, 6.4f, 10, 1.2f), PartPose.offsetAndRotation(-4, -0.6f, -4.7f, -0.1f, 0.12f, 0.08f));
+        PartDefinition leftTasset = waist.addOrReplaceChild("left_tasset", CubeListBuilder.create()
+                .texOffs(218, 67).mirror(true).addBox(-3.2f, 0, -0.6f, 6.4f, 10, 1.2f), PartPose.offsetAndRotation(4, -0.6f, -4.7f, -0.1f, -0.12f, -0.08f));
+        PartDefinition rightSideTasset = waist.addOrReplaceChild("right_side_tasset", CubeListBuilder.create()
+                .texOffs(66, 0).mirror(false).addBox(-1.2f, 0, -4.2f, 1.2f, 9.5f, 8.4f), PartPose.offsetAndRotation(-7.1f, -0.6f, 0, 0, 0, 0.18f));
+        PartDefinition leftSideTasset = waist.addOrReplaceChild("left_side_tasset", CubeListBuilder.create()
+                .texOffs(66, 0).mirror(true).addBox(0, 0, -4.2f, 1.2f, 9.5f, 8.4f), PartPose.offsetAndRotation(7.1f, -0.6f, 0, 0, 0, -0.18f));
+        PartDefinition backTasset = waist.addOrReplaceChild("back_tasset", CubeListBuilder.create()
+                .texOffs(25, 67).mirror(false).addBox(-6.2f, 0, -0.6f, 12.4f, 10.5f, 1.2f), PartPose.offsetAndRotation(0, -0.6f, 4.7f, 0.12f, 0, 0));
+        PartDefinition rightSash = waist.addOrReplaceChild("right_sash", CubeListBuilder.create()
+                .texOffs(237, 67).mirror(false).addBox(-0.9f, 0, -0.4f, 1.8f, 11, 0.8f)
+                .texOffs(35, 95).mirror(false).addBox(-0.4f, 0.5f, 0.6f, 1.8f, 8.5f, 0.8f), PartPose.offsetAndRotation(-6.4f, -2.6f, -3.8f, 0.02f, 0, 0.1f));
+        PartDefinition leftSash = waist.addOrReplaceChild("left_sash", CubeListBuilder.create()
+                .texOffs(237, 67).mirror(true).addBox(-0.9f, 0, -0.4f, 1.8f, 11, 0.8f)
+                .texOffs(35, 95).mirror(true).addBox(-1.4f, 0.5f, 0.6f, 1.8f, 8.5f, 0.8f), PartPose.offsetAndRotation(6.4f, -2.6f, -3.8f, 0.02f, 0, -0.1f));
+        PartDefinition rightLeg = root.addOrReplaceChild("right_leg", CubeListBuilder.create()
+                .texOffs(230, 0).mirror(false).addBox(-2.9f, 0, -2.9f, 5.8f, 10.5f, 5.8f), PartPose.offsetAndRotation(-4.3f, 2, 0.4f, 0, 0, 0));
+        PartDefinition leftLeg = root.addOrReplaceChild("left_leg", CubeListBuilder.create()
+                .texOffs(230, 0).mirror(true).addBox(-2.9f, 0, -2.9f, 5.8f, 10.5f, 5.8f), PartPose.offsetAndRotation(4.3f, 2, 0.4f, 0, 0, 0));
+        PartDefinition rightShin = rightLeg.addOrReplaceChild("right_shin", CubeListBuilder.create()
+                .texOffs(232, 49).mirror(false).addBox(-2.4f, 0, -2.4f, 4.8f, 8.5f, 4.8f)
+                .texOffs(186, 82).mirror(false).addBox(-2.9f, 0.4f, -3.1f, 5.8f, 7, 3.4f)
+                .texOffs(99, 107).mirror(false).addBox(-2.7f, -1.6f, -3.6f, 5.4f, 3.4f, 1.4f)
+                .texOffs(148, 95).mirror(false).addBox(-2.7f, 7, -2.7f, 5.4f, 2.2f, 5.4f)
+                .texOffs(42, 95).mirror(false).addBox(-2.6f, 8.4f, -3.4f, 2.5f, 3.6f, 5.6f)
+                .texOffs(42, 95).mirror(false).addBox(0.1f, 8.4f, -3.4f, 2.5f, 3.6f, 5.6f), PartPose.offsetAndRotation(0, 10, 0, 0, 0, 0));
+        PartDefinition leftShin = leftLeg.addOrReplaceChild("left_shin", CubeListBuilder.create()
+                .texOffs(232, 49).mirror(true).addBox(-2.4f, 0, -2.4f, 4.8f, 8.5f, 4.8f)
+                .texOffs(186, 82).mirror(true).addBox(-2.9f, 0.4f, -3.1f, 5.8f, 7, 3.4f)
+                .texOffs(99, 107).mirror(true).addBox(-2.7f, -1.6f, -3.6f, 5.4f, 3.4f, 1.4f)
+                .texOffs(148, 95).mirror(true).addBox(-2.7f, 7, -2.7f, 5.4f, 2.2f, 5.4f)
+                .texOffs(42, 95).mirror(true).addBox(0.1f, 8.4f, -3.4f, 2.5f, 3.6f, 5.6f)
+                .texOffs(42, 95).mirror(true).addBox(-2.6f, 8.4f, -3.4f, 2.5f, 3.6f, 5.6f), PartPose.offsetAndRotation(0, 10, 0, 0, 0, 0));
+        PartDefinition body = waist.addOrReplaceChild("body", CubeListBuilder.create()
+                .texOffs(134, 0).mirror(false).addBox(-7.6f, -15, -4.8f, 15.2f, 8, 9.6f)
+                .texOffs(0, 49).mirror(false).addBox(-6.6f, -7.4f, -4.3f, 13.2f, 7.4f, 8.6f)
+                .texOffs(9, 0).mirror(false).addBox(-8.2f, -15.4f, -5.5f, 16.4f, 8.4f, 11)
+                .texOffs(47, 49).mirror(false).addBox(-7.1f, -7.4f, -4.9f, 14.2f, 6.2f, 9.8f)
+                .texOffs(56, 67).mirror(false).addBox(-7.3f, -1.8f, -5.1f, 14.6f, 1.8f, 10.2f)
+                .texOffs(0, 116).mirror(false).addBox(-1.5f, -2.4f, -5.7f, 3, 2.4f, 1)
+                .texOffs(116, 107).mirror(false).addBox(-7, -14, -6, 4.6f, 4.6f, 0.6f)
+                .texOffs(116, 107).mirror(false).addBox(2.4f, -14, -6, 4.6f, 4.6f, 0.6f)
+                .texOffs(155, 116).mirror(false).addBox(-2.2f, -13.6f, -5.8f, 4.4f, 1, 0.4f)
+                .texOffs(0, 82).mirror(false).addBox(-5, -17, -4.4f, 10, 2.2f, 8.8f)
+                .texOffs(39, 82).mirror(false).addBox(-8.4f, -15.8f, -5, 16.8f, 1.2f, 10), PartPose.offsetAndRotation(0, -3, 0, 0, 0, 0));
+        PartDefinition cape = body.addOrReplaceChild("cape", CubeListBuilder.create()
+                .texOffs(98, 49).mirror(false).addBox(-8, 0, -0.5f, 16, 14, 1), PartPose.offsetAndRotation(0, -15.6f, 5.8f, 0.1f, 0, 0));
+        PartDefinition capeLower = cape.addOrReplaceChild("cape_lower", CubeListBuilder.create()
+                .texOffs(133, 49).mirror(false).addBox(-8.4f, 0, -0.5f, 16.8f, 13.5f, 1), PartPose.offsetAndRotation(0, 13.6f, 0, 0.08f, 0, 0));
+        PartDefinition rightArm = body.addOrReplaceChild("right_arm", CubeListBuilder.create()
+                .texOffs(0, 67).mirror(false).addBox(-2.7f, -1.4f, -2.7f, 5.4f, 8, 5.4f)
+                .texOffs(230, 95).mirror(false).addBox(-3, 4, -3, 6, 1.4f, 6), PartPose.offsetAndRotation(-10.2f, -13.6f, 0, -0.1f, 0, 0.14f));
+        PartDefinition leftArm = body.addOrReplaceChild("left_arm", CubeListBuilder.create()
+                .texOffs(0, 67).mirror(true).addBox(-2.7f, -1.4f, -2.7f, 5.4f, 8, 5.4f)
+                .texOffs(230, 95).mirror(true).addBox(-3, 4, -3, 6, 1.4f, 6), PartPose.offsetAndRotation(10.2f, -13.6f, 0, -0.1f, 0, -0.14f));
+        PartDefinition rightPauldron = rightArm.addOrReplaceChild("right_pauldron", CubeListBuilder.create()
+                .texOffs(61, 95).mirror(false).addBox(-4.2f, -1.2f, -3.9f, 6.6f, 1.6f, 7.8f)
+                .texOffs(207, 82).mirror(false).addBox(-4.8f, 0.3f, -4.3f, 7, 1.6f, 8.6f)
+                .texOffs(94, 82).mirror(false).addBox(-5.4f, 1.8f, -4.7f, 7.4f, 2, 9.4f)
+                .texOffs(173, 95).mirror(false).addBox(-2.8f, -2.4f, -3.4f, 1.2f, 1.4f, 6.8f)
+                .texOffs(92, 95).mirror(false).addBox(-6.1f, -0.2f, -2.1f, 1, 4.2f, 4.2f)
+                .texOffs(219, 107).mirror(false).addBox(-6.6f, 1.6f, -1.4f, 0.5f, 1.2f, 2.8f), PartPose.offsetAndRotation(-0.4f, -1.4f, 0, 0, 0, 0.4f));
+        PartDefinition leftPauldron = leftArm.addOrReplaceChild("left_pauldron", CubeListBuilder.create()
+                .texOffs(61, 95).mirror(true).addBox(-2.4f, -1.2f, -3.9f, 6.6f, 1.6f, 7.8f)
+                .texOffs(207, 82).mirror(true).addBox(-2.2f, 0.3f, -4.3f, 7, 1.6f, 8.6f)
+                .texOffs(94, 82).mirror(true).addBox(-2, 1.8f, -4.7f, 7.4f, 2, 9.4f)
+                .texOffs(173, 95).mirror(true).addBox(1.6f, -2.4f, -3.4f, 1.2f, 1.4f, 6.8f)
+                .texOffs(92, 95).mirror(true).addBox(5.1f, -0.2f, -2.1f, 1, 4.2f, 4.2f)
+                .texOffs(219, 107).mirror(true).addBox(6.1f, 1.6f, -1.4f, 0.5f, 1.2f, 2.8f), PartPose.offsetAndRotation(0.4f, -1.4f, 0, 0, 0, -0.4f));
+        PartDefinition rightForearm = rightArm.addOrReplaceChild("right_forearm", CubeListBuilder.create()
+                .texOffs(131, 82).mirror(false).addBox(-2.3f, 0, -2.3f, 4.6f, 7, 4.6f)
+                .texOffs(152, 82).mirror(false).addBox(-2.8f, 0.6f, -2.8f, 5.6f, 5.4f, 5.6f), PartPose.offsetAndRotation(0, 6.4f, 0, -0.62f, -0.18f, 0));
+        PartDefinition leftForearm = leftArm.addOrReplaceChild("left_forearm", CubeListBuilder.create()
+                .texOffs(131, 82).mirror(true).addBox(-2.3f, 0, -2.3f, 4.6f, 7, 4.6f)
+                .texOffs(152, 82).mirror(true).addBox(-2.8f, 0.6f, -2.8f, 5.6f, 5.4f, 5.6f), PartPose.offsetAndRotation(0, 6.4f, 0, -0.62f, 0.18f, 0));
+        PartDefinition rightHand = rightForearm.addOrReplaceChild("right_hand", CubeListBuilder.create()
+                .texOffs(192, 95).mirror(false).addBox(-2.1f, 0, -2.1f, 4.2f, 4, 4.2f), PartPose.offsetAndRotation(0, 7, 0, 0, 0, 0));
+        PartDefinition leftHand = leftForearm.addOrReplaceChild("left_hand", CubeListBuilder.create()
+                .texOffs(192, 95).mirror(true).addBox(-2.1f, 0, -2.1f, 4.2f, 4, 4.2f), PartPose.offsetAndRotation(0, 7, 0, 0, 0, 0));
+        PartDefinition neck = body.addOrReplaceChild("neck", CubeListBuilder.create()
+                .texOffs(187, 0).mirror(false).addBox(-5.4f, -6.4f, -4.6f, 10.8f, 7.2f, 9.2f)
+                .texOffs(109, 67).mirror(false).addBox(-5, -7.6f, 0.6f, 10, 6.8f, 6)
+                .texOffs(105, 95).mirror(false).addBox(-3, -4, -6, 6, 7, 2.2f), PartPose.offsetAndRotation(0, -15.6f, -0.8f, 0.15f, 0, 0));
+        PartDefinition head = neck.addOrReplaceChild("head", CubeListBuilder.create()
+                .texOffs(89, 0).mirror(false).addBox(-5.6f, -7.6f, -5.2f, 11.2f, 9, 9.4f)
+                .texOffs(0, 107).mirror(false).addBox(-5.9f, -8.2f, -5.8f, 11.8f, 2.6f, 4.6f)
+                .texOffs(142, 67).mirror(false).addBox(-4.6f, -3, -10.6f, 9.2f, 6.4f, 5.6f)
+                .texOffs(129, 107).mirror(false).addBox(-4, -2.6f, -11.4f, 8, 4.4f, 0.9f)
+                .texOffs(148, 107).mirror(false).addBox(-4.9f, -2, -10.9f, 1.4f, 2.6f, 2.6f)
+                .texOffs(148, 107).mirror(false).addBox(3.5f, -2, -10.9f, 1.4f, 2.6f, 2.6f)
+                .texOffs(35, 107).mirror(false).addBox(-3, -10, -4.8f, 6, 2.8f, 5)
+                .texOffs(9, 116).mirror(false).addBox(-1.6f, -7.9f, -6.3f, 3.2f, 2.6f, 0.6f)
+                .texOffs(129, 116).mirror(false).addBox(-1.8f, 3.2f, -10.2f, 0.7f, 1.8f, 0.9f)
+                .texOffs(129, 116).mirror(false).addBox(1.1f, 3.2f, -10.2f, 0.7f, 1.8f, 0.9f), PartPose.offsetAndRotation(0, -6.2f, -1.6f, -0.05f, 0, 0));
+        PartDefinition jaw = head.addOrReplaceChild("jaw", CubeListBuilder.create()
+                .texOffs(0, 95).mirror(false).addBox(-4.1f, 0, -5.4f, 8.2f, 2.6f, 7.2f), PartPose.offsetAndRotation(0, 3.2f, -5, 0.06f, 0, 0));
+        PartDefinition noseRing = head.addOrReplaceChild("nose_ring", CubeListBuilder.create()
+                .texOffs(90, 107).mirror(false).addBox(-3.1f, 0, -0.6f, 1.2f, 5, 1.2f)
+                .texOffs(90, 107).mirror(false).addBox(1.9f, 0, -0.6f, 1.2f, 5, 1.2f)
+                .texOffs(20, 116).mirror(false).addBox(-3.1f, 5, -0.6f, 6.2f, 1.2f, 1.2f)
+                .texOffs(39, 116).mirror(false).addBox(-1, 4.8f, -0.9f, 2, 2, 1.8f), PartPose.offsetAndRotation(0, 0.6f, -11.9f, -0.15f, 0, 0));
+        PartDefinition rightEye = head.addOrReplaceChild("right_eye", CubeListBuilder.create()
+                .texOffs(134, 116).mirror(false).addBox(-1.4f, -0.8f, -0.4f, 2.8f, 1.6f, 0.6f), PartPose.offsetAndRotation(-3.5f, -4.6f, -5.3f, 0, 0.22f, 0));
+        PartDefinition leftEye = head.addOrReplaceChild("left_eye", CubeListBuilder.create()
+                .texOffs(134, 116).mirror(true).addBox(-1.4f, -0.8f, -0.4f, 2.8f, 1.6f, 0.6f), PartPose.offsetAndRotation(3.5f, -4.6f, -5.3f, 0, -0.22f, 0));
+        PartDefinition rightBrow = head.addOrReplaceChild("right_brow", CubeListBuilder.create()
+                .texOffs(48, 116).mirror(false).addBox(-2.4f, -0.9f, -0.9f, 4.4f, 1.6f, 1.8f), PartPose.offsetAndRotation(-3.4f, -5.7f, -5.6f, 0, 0.2f, 0.3f));
+        PartDefinition leftBrow = head.addOrReplaceChild("left_brow", CubeListBuilder.create()
+                .texOffs(48, 116).mirror(true).addBox(-2, -0.9f, -0.9f, 4.4f, 1.6f, 1.8f), PartPose.offsetAndRotation(3.4f, -5.7f, -5.6f, 0, -0.2f, -0.3f));
+        PartDefinition rightEar = head.addOrReplaceChild("right_ear", CubeListBuilder.create()
+                .texOffs(228, 107).mirror(false).addBox(-4.8f, -0.9f, -1.4f, 4.8f, 1.8f, 2.8f), PartPose.offsetAndRotation(-5.6f, -4.8f, -0.2f, 0.1f, 0.25f, -0.35f));
+        PartDefinition leftEar = head.addOrReplaceChild("left_ear", CubeListBuilder.create()
+                .texOffs(228, 107).mirror(true).addBox(0, -0.9f, -1.4f, 4.8f, 1.8f, 2.8f), PartPose.offsetAndRotation(5.6f, -4.8f, -0.2f, 0.1f, -0.25f, 0.35f));
+        PartDefinition rightHorn = head.addOrReplaceChild("right_horn", CubeListBuilder.create()
+                .texOffs(58, 107).mirror(false).addBox(-5, -1.9f, -1.9f, 5, 3.8f, 3.8f)
+                .texOffs(124, 95).mirror(false).addBox(-2.4f, -2.2f, -2.2f, 1.6f, 4.4f, 4.4f), PartPose.offsetAndRotation(-5.2f, -6.6f, -1, 0.1f, -0.1f, 0.08f));
+        PartDefinition leftHorn = head.addOrReplaceChild("left_horn", CubeListBuilder.create()
+                .texOffs(58, 107).mirror(true).addBox(0, -1.9f, -1.9f, 5, 3.8f, 3.8f)
+                .texOffs(124, 95).mirror(true).addBox(0.8f, -2.2f, -2.2f, 1.6f, 4.4f, 4.4f), PartPose.offsetAndRotation(5.2f, -6.6f, -1, 0.1f, 0.1f, -0.08f));
+        PartDefinition rightHorn2 = rightHorn.addOrReplaceChild("right_horn_2", CubeListBuilder.create()
+                .texOffs(159, 107).mirror(false).addBox(-4.8f, -1.5f, -1.5f, 4.8f, 3, 3), PartPose.offsetAndRotation(-4.7f, 0, 0, 0, -0.12f, 0.45f));
+        PartDefinition leftHorn2 = leftHorn.addOrReplaceChild("left_horn_2", CubeListBuilder.create()
+                .texOffs(159, 107).mirror(true).addBox(0, -1.5f, -1.5f, 4.8f, 3, 3), PartPose.offsetAndRotation(4.7f, 0, 0, 0, 0.12f, -0.45f));
+        PartDefinition rightHorn3 = rightHorn2.addOrReplaceChild("right_horn_3", CubeListBuilder.create()
+                .texOffs(176, 107).mirror(false).addBox(-4.2f, -1.1f, -1.1f, 4.2f, 2.2f, 2.2f), PartPose.offsetAndRotation(-4.5f, 0, 0, 0, -0.16f, 0.6f));
+        PartDefinition leftHorn3 = leftHorn2.addOrReplaceChild("left_horn_3", CubeListBuilder.create()
+                .texOffs(176, 107).mirror(true).addBox(0, -1.1f, -1.1f, 4.2f, 2.2f, 2.2f), PartPose.offsetAndRotation(4.5f, 0, 0, 0, 0.16f, -0.6f));
+        PartDefinition rightHorn4 = rightHorn3.addOrReplaceChild("right_horn_4", CubeListBuilder.create()
+                .texOffs(63, 116).mirror(false).addBox(-3.6f, -0.7f, -0.7f, 3.6f, 1.4f, 1.4f), PartPose.offsetAndRotation(-3.9f, 0, 0, 0, -0.2f, 0.55f));
+        PartDefinition leftHorn4 = leftHorn3.addOrReplaceChild("left_horn_4", CubeListBuilder.create()
+                .texOffs(63, 116).mirror(true).addBox(0, -0.7f, -0.7f, 3.6f, 1.4f, 1.4f), PartPose.offsetAndRotation(3.9f, 0, 0, 0, 0.2f, -0.55f));
+        PartDefinition trident = rightHand.addOrReplaceChild("trident", CubeListBuilder.create()
+                .texOffs(0, 0).mirror(false).addBox(-0.6f, -31, -0.6f, 1.2f, 46, 1.2f)
+                .texOffs(76, 116).mirror(false).addBox(-4.6f, -33.2f, -0.8f, 9.2f, 1.6f, 1.6f)
+                .texOffs(193, 107).mirror(false).addBox(-1.4f, -32.4f, -1.4f, 2.8f, 2.8f, 2.8f)
+                .texOffs(177, 82).mirror(false).addBox(-0.65f, -42.4f, -0.65f, 1.3f, 9.4f, 1.3f)
+                .texOffs(101, 116).mirror(false).addBox(-0.45f, -44.6f, -0.45f, 0.9f, 2.2f, 0.9f)
+                .texOffs(106, 116).mirror(false).addBox(-0.7f, -31.2f, -0.7f, 1.4f, 1.4f, 1.4f)
+                .texOffs(77, 107).mirror(false).addBox(-1.5f, -29.6f, -1.5f, 3, 4.8f, 3)
+                .texOffs(245, 107).mirror(false).addBox(-0.6f, 15, -0.6f, 1.2f, 3, 1.2f)
+                .texOffs(106, 116).mirror(false).addBox(-0.75f, 2, -0.75f, 1.5f, 1.2f, 1.5f), PartPose.offsetAndRotation(0, 2.2f, 0, 0.7471f, 0.2384f, -0.0021f));
+        PartDefinition prongR = trident.addOrReplaceChild("prong_r", CubeListBuilder.create()
+                .texOffs(139, 95).mirror(false).addBox(-0.6f, -8, -0.6f, 1.2f, 8, 1.2f)
+                .texOffs(143, 116).mirror(false).addBox(-0.4f, -10, -0.4f, 0.8f, 2, 0.8f), PartPose.offsetAndRotation(-4, -33, 0, 0, 0, -0.18f));
+        PartDefinition prongL = trident.addOrReplaceChild("prong_l", CubeListBuilder.create()
+                .texOffs(139, 95).mirror(false).addBox(-0.6f, -8, -0.6f, 1.2f, 8, 1.2f)
+                .texOffs(143, 116).mirror(false).addBox(-0.4f, -10, -0.4f, 0.8f, 2, 0.8f), PartPose.offsetAndRotation(4, -33, 0, 0, 0, 0.18f));
+        PartDefinition chain = waist.addOrReplaceChild("chain", CubeListBuilder.create()
+                .texOffs(115, 116).mirror(false).addBox(-0.35f, 0, -0.75f, 0.7f, 2, 1.5f)
+                .texOffs(148, 116).mirror(false).addBox(-0.75f, 1.8f, -0.35f, 1.5f, 2, 0.7f)
+                .texOffs(115, 116).mirror(false).addBox(-0.35f, 3.6f, -0.75f, 0.7f, 2, 1.5f)
+                .texOffs(148, 116).mirror(false).addBox(-0.75f, 5.4f, -0.35f, 1.5f, 2, 0.7f)
+                .texOffs(115, 116).mirror(false).addBox(-0.35f, 7.2f, -0.75f, 0.7f, 2, 1.5f)
+                .texOffs(148, 116).mirror(false).addBox(-0.75f, 9, -0.35f, 1.5f, 2, 0.7f)
+                .texOffs(206, 107).mirror(false).addBox(-1.5f, 10.6f, -1.5f, 3, 2.2f, 3), PartPose.offsetAndRotation(7, -2.2f, -2.6f, 0, 0, -0.1f));
+        return LayerDefinition.create(mesh, 256, 256);
+        // GENERATED ox: end
+    }
+
+    /**
+     * Horse-Face (256x256): Ox-Head's match in the same armour, leaner; a dark bay horse's head on a
+     * long neck: a long face with a pale blaze, flared nostrils, lips drawn back off his teeth, ears
+     * laid back, burning eyes under a scowling brow, a black mane down his neck and back over the
+     * cloak; a halberd (a spear-point, a crescent blade, a back hook, a red tassel) in his right hand,
+     * the chain and soul-hook he hauls the dead in with in his left. Model and skins: {@code assets_source/hell_guards.py}.
+     */
+    public static LayerDefinition horseLayer() {
+        // GENERATED horse: begin
+        MeshDefinition mesh = new MeshDefinition();
+        PartDefinition root = mesh.getRoot();
+        PartDefinition waist = root.addOrReplaceChild("waist", CubeListBuilder.create()
+                .texOffs(175, 67).mirror(false).addBox(-5.4f, -2, -3.6f, 10.8f, 4, 7.2f)
+                .texOffs(59, 67).mirror(false).addBox(-6.2f, -3.6f, -4.2f, 12.4f, 3.2f, 8.4f)
+                .texOffs(45, 107).mirror(false).addBox(-2.8f, -4.8f, -5.3f, 5.6f, 5.2f, 1.4f)
+                .texOffs(99, 117).mirror(false).addBox(-3.7f, -5.8f, -5, 1.2f, 1.8f, 1)
+                .texOffs(99, 117).mirror(false).addBox(2.5f, -5.8f, -5, 1.2f, 1.8f, 1), PartPose.offsetAndRotation(0, 2, 0, 0, 0, 0));
+        PartDefinition apron = waist.addOrReplaceChild("apron", CubeListBuilder.create()
+                .texOffs(0, 67).mirror(false).addBox(-2.4f, 0, -0.4f, 4.8f, 12.5f, 0.8f), PartPose.offsetAndRotation(0, -0.2f, -4.5f, -0.06f, 0, 0));
+        PartDefinition rightTasset = waist.addOrReplaceChild("right_tasset", CubeListBuilder.create()
+                .texOffs(214, 67).mirror(false).addBox(-3.2f, 0, -0.6f, 6.4f, 10, 1.2f), PartPose.offsetAndRotation(-3.6f, -0.6f, -4.3f, -0.1f, 0.12f, 0.08f));
+        PartDefinition leftTasset = waist.addOrReplaceChild("left_tasset", CubeListBuilder.create()
+                .texOffs(214, 67).mirror(true).addBox(-3.2f, 0, -0.6f, 6.4f, 10, 1.2f), PartPose.offsetAndRotation(3.6f, -0.6f, -4.3f, -0.1f, -0.12f, -0.08f));
+        PartDefinition rightSideTasset = waist.addOrReplaceChild("right_side_tasset", CubeListBuilder.create()
+                .texOffs(93, 0).mirror(false).addBox(-1.2f, 0, -3.8f, 1.2f, 9.5f, 7.6f), PartPose.offsetAndRotation(-6.3f, -0.6f, 0, 0, 0, 0.18f));
+        PartDefinition leftSideTasset = waist.addOrReplaceChild("left_side_tasset", CubeListBuilder.create()
+                .texOffs(93, 0).mirror(true).addBox(0, 0, -3.8f, 1.2f, 9.5f, 7.6f), PartPose.offsetAndRotation(6.3f, -0.6f, 0, 0, 0, -0.18f));
+        PartDefinition backTasset = waist.addOrReplaceChild("back_tasset", CubeListBuilder.create()
+                .texOffs(104, 67).mirror(false).addBox(-5.4f, 0, -0.6f, 10.8f, 10.5f, 1.2f), PartPose.offsetAndRotation(0, -0.6f, 4.3f, 0.12f, 0, 0));
+        PartDefinition rightSash = waist.addOrReplaceChild("right_sash", CubeListBuilder.create()
+                .texOffs(233, 67).mirror(false).addBox(-0.9f, 0, -0.4f, 1.8f, 11, 0.8f)
+                .texOffs(114, 95).mirror(false).addBox(-0.4f, 0.5f, 0.6f, 1.8f, 8.5f, 0.8f), PartPose.offsetAndRotation(-5.6f, -2.6f, -3.4f, 0.02f, 0, 0.1f));
+        PartDefinition leftSash = waist.addOrReplaceChild("left_sash", CubeListBuilder.create()
+                .texOffs(233, 67).mirror(true).addBox(-0.9f, 0, -0.4f, 1.8f, 11, 0.8f)
+                .texOffs(114, 95).mirror(true).addBox(-1.4f, 0.5f, 0.6f, 1.8f, 8.5f, 0.8f), PartPose.offsetAndRotation(5.6f, -2.6f, -3.4f, 0.02f, 0, -0.1f));
+        PartDefinition rightLeg = root.addOrReplaceChild("right_leg", CubeListBuilder.create()
+                .texOffs(136, 0).mirror(false).addBox(-2.9f, 0, -2.9f, 5.8f, 10.5f, 5.8f), PartPose.offsetAndRotation(-3.9f, 2, 0.4f, 0, 0, 0));
+        PartDefinition leftLeg = root.addOrReplaceChild("left_leg", CubeListBuilder.create()
+                .texOffs(136, 0).mirror(true).addBox(-2.9f, 0, -2.9f, 5.8f, 10.5f, 5.8f), PartPose.offsetAndRotation(3.9f, 2, 0.4f, 0, 0, 0));
+        PartDefinition rightShin = rightLeg.addOrReplaceChild("right_shin", CubeListBuilder.create()
+                .texOffs(13, 67).mirror(false).addBox(-2.4f, 0, -2.4f, 4.8f, 8.5f, 4.8f)
+                .texOffs(209, 82).mirror(false).addBox(-2.9f, 0.4f, -3.1f, 5.8f, 7, 3.4f)
+                .texOffs(171, 107).mirror(false).addBox(-2.7f, -1.6f, -3.6f, 5.4f, 3.4f, 1.4f)
+                .texOffs(201, 95).mirror(false).addBox(-2.7f, 7, -2.7f, 5.4f, 2.2f, 5.4f)
+                .texOffs(121, 95).mirror(false).addBox(-2.6f, 8.4f, -3.2f, 5.2f, 3.6f, 5.6f), PartPose.offsetAndRotation(0, 10, 0, 0, 0, 0));
+        PartDefinition leftShin = leftLeg.addOrReplaceChild("left_shin", CubeListBuilder.create()
+                .texOffs(13, 67).mirror(true).addBox(-2.4f, 0, -2.4f, 4.8f, 8.5f, 4.8f)
+                .texOffs(209, 82).mirror(true).addBox(-2.9f, 0.4f, -3.1f, 5.8f, 7, 3.4f)
+                .texOffs(171, 107).mirror(true).addBox(-2.7f, -1.6f, -3.6f, 5.4f, 3.4f, 1.4f)
+                .texOffs(201, 95).mirror(true).addBox(-2.7f, 7, -2.7f, 5.4f, 2.2f, 5.4f)
+                .texOffs(121, 95).mirror(true).addBox(-2.6f, 8.4f, -3.2f, 5.2f, 3.6f, 5.6f), PartPose.offsetAndRotation(0, 10, 0, 0, 0, 0));
+        PartDefinition body = waist.addOrReplaceChild("body", CubeListBuilder.create()
+                .texOffs(161, 0).mirror(false).addBox(-6.8f, -15, -4.4f, 13.6f, 8, 8.8f)
+                .texOffs(35, 49).mirror(false).addBox(-5.8f, -7.4f, -3.9f, 11.6f, 7.4f, 7.8f)
+                .texOffs(40, 0).mirror(false).addBox(-7.4f, -15.4f, -5.1f, 14.8f, 8.4f, 10.2f)
+                .texOffs(76, 49).mirror(false).addBox(-6.3f, -7.4f, -4.5f, 12.6f, 6.2f, 9)
+                .texOffs(0, 82).mirror(false).addBox(-6.5f, -1.8f, -4.7f, 13, 1.8f, 9.4f)
+                .texOffs(48, 117).mirror(false).addBox(-1.5f, -2.4f, -5.3f, 3, 2.4f, 1)
+                .texOffs(188, 107).mirror(false).addBox(-6.2f, -14, -5.6f, 4.6f, 4.6f, 0.6f)
+                .texOffs(188, 107).mirror(false).addBox(1.6f, -14, -5.6f, 4.6f, 4.6f, 0.6f)
+                .texOffs(113, 117).mirror(false).addBox(-2.2f, -13.6f, -5.4f, 4.4f, 1, 0.4f)
+                .texOffs(0, 95).mirror(false).addBox(-5, -17, -4, 10, 2.2f, 8)
+                .texOffs(47, 82).mirror(false).addBox(-7.6f, -15.8f, -4.6f, 15.2f, 1.2f, 9.2f), PartPose.offsetAndRotation(0, -3, 0, 0, 0, 0));
+        PartDefinition cape = body.addOrReplaceChild("cape", CubeListBuilder.create()
+                .texOffs(169, 49).mirror(false).addBox(-7.2f, 0, -0.5f, 14.4f, 14, 1), PartPose.offsetAndRotation(0, -15.6f, 5.4f, 0.1f, 0, 0));
+        PartDefinition capeLower = cape.addOrReplaceChild("cape_lower", CubeListBuilder.create()
+                .texOffs(202, 49).mirror(false).addBox(-7.6f, 0, -0.5f, 15.2f, 13.5f, 1), PartPose.offsetAndRotation(0, 13.6f, 0, 0.08f, 0, 0));
+        PartDefinition rightArm = body.addOrReplaceChild("right_arm", CubeListBuilder.create()
+                .texOffs(34, 67).mirror(false).addBox(-2.7f, -1.4f, -2.7f, 5.4f, 8, 5.4f)
+                .texOffs(62, 107).mirror(false).addBox(-3, 4, -3, 6, 1.4f, 6), PartPose.offsetAndRotation(-9.4f, -13.6f, 0, -0.1f, 0, 0.14f));
+        PartDefinition leftArm = body.addOrReplaceChild("left_arm", CubeListBuilder.create()
+                .texOffs(34, 67).mirror(true).addBox(-2.7f, -1.4f, -2.7f, 5.4f, 8, 5.4f)
+                .texOffs(62, 107).mirror(true).addBox(-3, 4, -3, 6, 1.4f, 6), PartPose.offsetAndRotation(9.4f, -13.6f, 0, -0.1f, 0, -0.14f));
+        PartDefinition rightPauldron = rightArm.addOrReplaceChild("right_pauldron", CubeListBuilder.create()
+                .texOffs(146, 95).mirror(false).addBox(-4.2f, -1.2f, -3.9f, 6.6f, 1.6f, 7.8f)
+                .texOffs(37, 95).mirror(false).addBox(-4.8f, 0.3f, -4.3f, 7, 1.6f, 8.6f)
+                .texOffs(100, 82).mirror(false).addBox(-5.4f, 1.8f, -4.7f, 7.4f, 2, 9.4f)
+                .texOffs(226, 95).mirror(false).addBox(-2.8f, -2.4f, -3.4f, 1.2f, 1.4f, 6.8f)
+                .texOffs(177, 95).mirror(false).addBox(-6.1f, -0.2f, -2.1f, 1, 4.2f, 4.2f)
+                .texOffs(235, 107).mirror(false).addBox(-6.6f, 1.6f, -1.4f, 0.5f, 1.2f, 2.8f), PartPose.offsetAndRotation(-0.4f, -1.4f, 0, 0, 0, 0.4f));
+        PartDefinition leftPauldron = leftArm.addOrReplaceChild("left_pauldron", CubeListBuilder.create()
+                .texOffs(146, 95).mirror(true).addBox(-2.4f, -1.2f, -3.9f, 6.6f, 1.6f, 7.8f)
+                .texOffs(37, 95).mirror(true).addBox(-2.2f, 0.3f, -4.3f, 7, 1.6f, 8.6f)
+                .texOffs(100, 82).mirror(true).addBox(-2, 1.8f, -4.7f, 7.4f, 2, 9.4f)
+                .texOffs(226, 95).mirror(true).addBox(1.6f, -2.4f, -3.4f, 1.2f, 1.4f, 6.8f)
+                .texOffs(177, 95).mirror(true).addBox(5.1f, -0.2f, -2.1f, 1, 4.2f, 4.2f)
+                .texOffs(235, 107).mirror(true).addBox(6.1f, 1.6f, -1.4f, 0.5f, 1.2f, 2.8f), PartPose.offsetAndRotation(0.4f, -1.4f, 0, 0, 0, -0.4f));
+        PartDefinition rightForearm = rightArm.addOrReplaceChild("right_forearm", CubeListBuilder.create()
+                .texOffs(137, 82).mirror(false).addBox(-2.3f, 0, -2.3f, 4.6f, 7, 4.6f)
+                .texOffs(158, 82).mirror(false).addBox(-2.8f, 0.6f, -2.8f, 5.6f, 5.4f, 5.6f), PartPose.offsetAndRotation(0, 6.4f, 0, -0.62f, -0.18f, 0));
+        PartDefinition leftForearm = leftArm.addOrReplaceChild("left_forearm", CubeListBuilder.create()
+                .texOffs(137, 82).mirror(true).addBox(-2.3f, 0, -2.3f, 4.6f, 7, 4.6f)
+                .texOffs(158, 82).mirror(true).addBox(-2.8f, 0.6f, -2.8f, 5.6f, 5.4f, 5.6f), PartPose.offsetAndRotation(0, 6.4f, 0, -0.62f, 0.18f, 0));
+        PartDefinition rightHand = rightForearm.addOrReplaceChild("right_hand", CubeListBuilder.create()
+                .texOffs(0, 107).mirror(false).addBox(-2.1f, 0, -2.1f, 4.2f, 4, 4.2f), PartPose.offsetAndRotation(0, 7, 0, 0, 0, 0));
+        PartDefinition leftHand = leftForearm.addOrReplaceChild("left_hand", CubeListBuilder.create()
+                .texOffs(0, 107).mirror(true).addBox(-2.1f, 0, -2.1f, 4.2f, 4, 4.2f), PartPose.offsetAndRotation(0, 7, 0, 0, 0, 0));
+        PartDefinition neck = body.addOrReplaceChild("neck", CubeListBuilder.create()
+                .texOffs(9, 0).mirror(false).addBox(-3.2f, -12.6f, -3.6f, 6.4f, 13.4f, 7.2f)
+                .texOffs(183, 82).mirror(false).addBox(-2.6f, -12, -4.3f, 5.2f, 11, 1), PartPose.offsetAndRotation(0, -15.6f, -0.4f, 0.2f, 0, 0));
+        PartDefinition mane0 = neck.addOrReplaceChild("mane_0", CubeListBuilder.create()
+                .texOffs(87, 107).mirror(false).addBox(-1.2f, 0, -1, 2.4f, 6, 2), PartPose.offsetAndRotation(0, -12.2f, 3.4f, 0.75f, 0, 0));
+        PartDefinition mane1 = neck.addOrReplaceChild("mane_1", CubeListBuilder.create()
+                .texOffs(21, 107).mirror(false).addBox(-1.2f, 0, -1, 2.4f, 7, 2), PartPose.offsetAndRotation(-0.8f, -10.6f, 3.4f, 0.6f, 0, 0.12f));
+        PartDefinition mane2 = neck.addOrReplaceChild("mane_2", CubeListBuilder.create()
+                .texOffs(190, 95).mirror(false).addBox(-1.2f, 0, -1, 2.4f, 8, 2), PartPose.offsetAndRotation(0.8f, -9, 3.4f, 0.5f, 0, -0.12f));
+        PartDefinition mane3 = neck.addOrReplaceChild("mane_3", CubeListBuilder.create()
+                .texOffs(198, 82).mirror(false).addBox(-1.2f, 0, -1, 2.4f, 9.5f, 2), PartPose.offsetAndRotation(-0.6f, -7.4f, 3.4f, 0.4f, 0, 0.12f));
+        PartDefinition mane4 = neck.addOrReplaceChild("mane_4", CubeListBuilder.create()
+                .texOffs(131, 67).mirror(false).addBox(-1.2f, 0, -1, 2.4f, 11, 2), PartPose.offsetAndRotation(0.6f, -5.8f, 3.4f, 0.32f, 0, -0.12f));
+        PartDefinition mane5 = neck.addOrReplaceChild("mane_5", CubeListBuilder.create()
+                .texOffs(237, 49).mirror(false).addBox(-1.2f, 0, -1, 2.4f, 12.5f, 2), PartPose.offsetAndRotation(-0.2f, -4.2f, 3.4f, 0.24f, 0, 0.12f));
+        PartDefinition mane6 = neck.addOrReplaceChild("mane_6", CubeListBuilder.create()
+                .texOffs(121, 49).mirror(false).addBox(-1.2f, 0, -1, 2.4f, 14, 2), PartPose.offsetAndRotation(0.7f, -2.6f, 3.4f, 0.16f, 0, -0.12f));
+        PartDefinition mane7 = neck.addOrReplaceChild("mane_7", CubeListBuilder.create()
+                .texOffs(114, 0).mirror(false).addBox(-1.2f, 0, -1, 2.4f, 15.5f, 2), PartPose.offsetAndRotation(-0.8f, -1, 3.4f, 0.1f, 0, 0.12f));
+        PartDefinition mane8 = neck.addOrReplaceChild("mane_8", CubeListBuilder.create()
+                .texOffs(125, 0).mirror(false).addBox(-1.2f, 0, -1, 2.4f, 16, 2), PartPose.offsetAndRotation(0.2f, 0.4f, 3.4f, 0.06f, 0, -0.12f));
+        PartDefinition head = neck.addOrReplaceChild("head", CubeListBuilder.create()
+                .texOffs(208, 0).mirror(false).addBox(-3.8f, -5.2f, -4.6f, 7.6f, 7.4f, 8.2f)
+                .texOffs(142, 67).mirror(false).addBox(-4.2f, -1.6f, -3.8f, 8.4f, 5.2f, 6.2f)
+                .texOffs(0, 49).mirror(false).addBox(-2.9f, -4.6f, -15.4f, 5.8f, 5.4f, 10.8f)
+                .texOffs(98, 107).mirror(false).addBox(-3.2f, -3.6f, -17.2f, 6.4f, 4.4f, 2.8f)
+                .texOffs(201, 107).mirror(false).addBox(-2.6f, 0.8f, -16.6f, 5.2f, 1, 5)
+                .texOffs(70, 95).mirror(false).addBox(-4.1f, -4.4f, -5, 8.2f, 1.5f, 8.8f)
+                .texOffs(57, 117).mirror(false).addBox(-1.6f, -4.8f, -5.4f, 3.2f, 2.4f, 0.6f), PartPose.offsetAndRotation(0, -12.2f, -0.6f, 0.5f, 0, 0));
+        PartDefinition jaw = head.addOrReplaceChild("jaw", CubeListBuilder.create()
+                .texOffs(132, 49).mirror(false).addBox(-2.5f, 0, -12.6f, 5, 2.6f, 12.6f)
+                .texOffs(0, 117).mirror(false).addBox(-2.3f, -0.7f, -12.4f, 4.6f, 0.8f, 3.6f), PartPose.offsetAndRotation(0, 1.8f, -4, 0.14f, 0, 0));
+        PartDefinition rightEye = head.addOrReplaceChild("right_eye", CubeListBuilder.create()
+                .texOffs(19, 117).mirror(false).addBox(-0.6f, -1, -1.4f, 0.9f, 2, 2.8f), PartPose.offsetAndRotation(-3.75f, -3.2f, -4.8f, 0, -0.3f, 0));
+        PartDefinition leftEye = head.addOrReplaceChild("left_eye", CubeListBuilder.create()
+                .texOffs(19, 117).mirror(true).addBox(-0.3f, -1, -1.4f, 0.9f, 2, 2.8f), PartPose.offsetAndRotation(3.75f, -3.2f, -4.8f, 0, 0.3f, 0));
+        PartDefinition rightBrow = head.addOrReplaceChild("right_brow", CubeListBuilder.create()
+                .texOffs(156, 107).mirror(false).addBox(-1, -0.7f, -2.1f, 2, 1.4f, 4.4f), PartPose.offsetAndRotation(-3.6f, -4.6f, -4.6f, 0, -0.3f, -0.35f));
+        PartDefinition leftBrow = head.addOrReplaceChild("left_brow", CubeListBuilder.create()
+                .texOffs(156, 107).mirror(true).addBox(-1, -0.7f, -2.1f, 2, 1.4f, 4.4f), PartPose.offsetAndRotation(3.6f, -4.6f, -4.6f, 0, 0.3f, 0.35f));
+        PartDefinition rightNostril = head.addOrReplaceChild("right_nostril", CubeListBuilder.create()
+                .texOffs(224, 107).mirror(false).addBox(-0.8f, -1, -1, 1.1f, 2.3f, 2.6f), PartPose.offsetAndRotation(-3, -2.6f, -16.6f, 0, 0, 0.2f));
+        PartDefinition leftNostril = head.addOrReplaceChild("left_nostril", CubeListBuilder.create()
+                .texOffs(224, 107).mirror(true).addBox(-0.3f, -1, -1, 1.1f, 2.3f, 2.6f), PartPose.offsetAndRotation(3, -2.6f, -16.6f, 0, 0, -0.2f));
+        PartDefinition rightEar = head.addOrReplaceChild("right_ear", CubeListBuilder.create()
+                .texOffs(119, 107).mirror(false).addBox(-1.1f, -5.8f, -0.8f, 2.2f, 5.8f, 1.6f), PartPose.offsetAndRotation(-2.6f, -5, -0.4f, 0.5f, 0, -0.3f));
+        PartDefinition leftEar = head.addOrReplaceChild("left_ear", CubeListBuilder.create()
+                .texOffs(119, 107).mirror(true).addBox(-1.1f, -5.8f, -0.8f, 2.2f, 5.8f, 1.6f), PartPose.offsetAndRotation(2.6f, -5, -0.4f, 0.5f, 0, 0.3f));
+        PartDefinition forelock = head.addOrReplaceChild("forelock", CubeListBuilder.create()
+                .texOffs(130, 107).mirror(false).addBox(-1.7f, 0, -0.8f, 3.4f, 6, 1.6f), PartPose.offsetAndRotation(0, -5.2f, -3.2f, -0.9f, 0, 0));
+        PartDefinition pollMane = head.addOrReplaceChild("poll_mane", CubeListBuilder.create()
+                .texOffs(21, 107).mirror(false).addBox(-1.4f, 0, -0.9f, 2.8f, 7, 1.8f), PartPose.offsetAndRotation(0, -5, 1, 0.6f, 0, 0));
+        PartDefinition halberd = rightHand.addOrReplaceChild("halberd", CubeListBuilder.create()
+                .texOffs(0, 0).mirror(false).addBox(-0.55f, -31, -0.55f, 1.1f, 46, 1.1f)
+                .texOffs(28, 117).mirror(false).addBox(-1, -32.6f, -1, 2, 2.2f, 2)
+                .texOffs(107, 95).mirror(false).addBox(-0.9f, -42, -0.35f, 1.8f, 9.6f, 0.7f)
+                .texOffs(68, 117).mirror(false).addBox(-0.7f, -31.6f, -0.7f, 1.4f, 1.4f, 1.4f)
+                .texOffs(143, 107).mirror(false).addBox(-1.4f, -30.6f, -1.4f, 2.8f, 4.4f, 2.8f)
+                .texOffs(77, 117).mirror(false).addBox(-0.5f, 15, -0.5f, 1, 3, 1)
+                .texOffs(68, 117).mirror(false).addBox(-0.7f, 2, -0.7f, 1.4f, 1.2f, 1.4f), PartPose.offsetAndRotation(0, 2.2f, 0, 0.7471f, 0.2384f, -0.0021f));
+        PartDefinition crescent = halberd.addOrReplaceChild("crescent", CubeListBuilder.create()
+                .texOffs(32, 107).mirror(false).addBox(0, -4, -0.3f, 4.4f, 8, 0.6f), PartPose.offsetAndRotation(0.8f, -36, 0, 0, 0, 0));
+        PartDefinition backHook = halberd.addOrReplaceChild("back_hook", CubeListBuilder.create()
+                .texOffs(126, 117).mirror(false).addBox(-3.6f, -0.5f, -0.3f, 3.6f, 1, 0.6f)
+                .texOffs(82, 117).mirror(false).addBox(-3.6f, -3, -0.3f, 1, 2.6f, 0.6f), PartPose.offsetAndRotation(-0.8f, -36.2f, 0, 0, 0, 0));
+        PartDefinition chain = leftHand.addOrReplaceChild("chain", CubeListBuilder.create()
+                .texOffs(87, 117).mirror(false).addBox(-0.35f, 0, -0.75f, 0.7f, 2, 1.5f)
+                .texOffs(106, 117).mirror(false).addBox(-0.75f, 1.8f, -0.35f, 1.5f, 2, 0.7f)
+                .texOffs(87, 117).mirror(false).addBox(-0.35f, 3.6f, -0.75f, 0.7f, 2, 1.5f)
+                .texOffs(106, 117).mirror(false).addBox(-0.75f, 5.4f, -0.35f, 1.5f, 2, 0.7f)
+                .texOffs(87, 117).mirror(false).addBox(-0.35f, 7.2f, -0.75f, 0.7f, 2, 1.5f)
+                .texOffs(106, 117).mirror(false).addBox(-0.75f, 9, -0.35f, 1.5f, 2, 0.7f)
+                .texOffs(87, 117).mirror(false).addBox(-0.35f, 10.8f, -0.75f, 0.7f, 2, 1.5f)
+                .texOffs(106, 117).mirror(false).addBox(-0.75f, 12.6f, -0.35f, 1.5f, 2, 0.7f)
+                .texOffs(87, 117).mirror(false).addBox(-0.35f, 14.4f, -0.75f, 0.7f, 2, 1.5f)
+                .texOffs(37, 117).mirror(false).addBox(-0.4f, 16.2f, -2.6f, 0.8f, 1, 3.4f)
+                .texOffs(94, 117).mirror(false).addBox(-0.4f, 13.8f, -3, 0.8f, 2.6f, 1), PartPose.offsetAndRotation(0, 3, 0, 0.7071f, -0.2384f, 0.0021f));
+        return LayerDefinition.create(mesh, 256, 256);
+        // GENERATED horse: end
+    }
+
+    /**
+     * A guard's frame in motion: the hooves stride, knees bending; the tassets swing with the thighs,
+     * the cloak and mane stream behind; the weapon held upright, thrust down on a blow; the head turns
+     * on its neck. Ox-Head charging leans in, horns lowered; Horse-Face's lips draw back as he strikes.
+     */
+    public static final class BeastGuardModel<T extends Mob> extends EntityModel<T> {
+        private final ModelPart root, body, neck, head, jaw, rightLeg, leftLeg, rightShin, leftShin, rightArm, leftArm,
+                rightForearm, cape, capeLower, apron, rightTasset, leftTasset, backTasset, rightSash, leftSash, chain;
+        private final List<ModelPart> mane = new ArrayList<>();
+
+        public BeastGuardModel(ModelPart root) {
+            this.root = root;
+            ModelPart waist = root.getChild("waist");
+            body = waist.getChild("body");
+            neck = body.getChild("neck");
+            head = neck.getChild("head");
+            jaw = head.getChild("jaw");
+            rightLeg = root.getChild("right_leg");
+            leftLeg = root.getChild("left_leg");
+            rightShin = rightLeg.getChild("right_shin");
+            leftShin = leftLeg.getChild("left_shin");
+            rightArm = body.getChild("right_arm");
+            leftArm = body.getChild("left_arm");
+            rightForearm = rightArm.getChild("right_forearm");
+            cape = body.getChild("cape");
+            capeLower = cape.getChild("cape_lower");
+            apron = waist.getChild("apron");
+            rightTasset = waist.getChild("right_tasset");
+            leftTasset = waist.getChild("left_tasset");
+            backTasset = waist.getChild("back_tasset");
+            rightSash = waist.getChild("right_sash");
+            leftSash = waist.getChild("left_sash");
+            ModelPart leftHand = leftArm.getChild("left_forearm").getChild("left_hand");
+            chain = waist.hasChild("chain") ? waist.getChild("chain") : leftHand.getChild("chain");
+            for (int k = 0; neck.hasChild("mane_" + k); k++) mane.add(neck.getChild("mane_" + k));
+        }
+
+        private static void turn(ModelPart p, float x, float y, float z) {
+            p.xRot = p.getInitialPose().xRot + x;
+            p.yRot = p.getInitialPose().yRot + y;
+            p.zRot = p.getInitialPose().zRot + z;
+        }
+
+        @Override
+        public void setupAnim(T e, float swing, float amount, float age, float yaw, float pitch) {
+            float strike = attackTime > 0 ? Mth.sin(attackTime * Mth.PI) : 0;
+            boolean charging = e instanceof OxHeadEntity ox && ox.isCharging();
+            float w = swing * 0.6662f, stride = Mth.cos(w) * 0.8f * amount;
+            // the legs stride, the knee bending as each comes through
+            turn(rightLeg, stride, 0, 0);
+            turn(leftLeg, -stride, 0, 0);
+            turn(rightShin, Math.max(0, Mth.sin(w)) * 0.9f * amount, 0, 0);
+            turn(leftShin, Math.max(0, -Mth.sin(w)) * 0.9f * amount, 0, 0);
+            // the tassets ride up on the thigh that comes forward; the apron and sash ends swing
+            turn(rightTasset, Math.min(0, stride) * 0.8f, 0, 0);
+            turn(leftTasset, Math.min(0, -stride) * 0.8f, 0, 0);
+            turn(backTasset, Math.abs(stride) * 0.35f, 0, 0);
+            turn(apron, -amount * 0.3f + Mth.sin(age * 0.07f) * 0.03f, 0, 0);
+            turn(rightSash, amount * 0.3f + Mth.sin(age * 0.06f) * 0.05f, 0, 0);
+            turn(leftSash, amount * 0.3f + Mth.sin(age * 0.06f + 1) * 0.05f, 0, 0);
+            // breathing; the body rocks a little as he strides; charging, he leans into it
+            float breath = Mth.sin(age * 0.07f);
+            body.y = body.getInitialPose().y + breath * 0.25f;
+            turn(body, charging ? 0.4f : 0, Mth.cos(w) * 0.06f * amount, 0);
+            // the left arm swings; the weapon arm steadier; a blow thrusts the weapon down and forward
+            turn(leftArm, Mth.cos(w) * 0.45f * amount + breath * 0.02f, 0, 0);
+            turn(rightArm, -Mth.cos(w) * 0.15f * amount - strike * 1.2f, 0, 0);
+            turn(rightForearm, strike * 0.4f, 0, 0);
+            if (charging) {
+                turn(rightArm, -0.6f, 0, 0);
+                turn(leftArm, -0.6f, 0, 0);
+            }
+            // the head turns on its neck; Ox-Head charging lowers his horns
+            float y = yaw * Mth.DEG_TO_RAD, x = pitch * Mth.DEG_TO_RAD;
+            turn(neck, charging ? 0.35f : 0, y * 0.4f, 0);
+            turn(head, x + (charging ? 0.25f : 0) + breath * 0.02f, y * 0.6f, 0);
+            turn(jaw, strike * 0.35f + Math.max(0, Mth.sin(age * 0.045f)) * 0.06f, 0, 0);
+            // the cloak and mane stream back as he walks; the chain sways
+            turn(cape, amount * 0.45f + breath * 0.03f, 0, 0);
+            turn(capeLower, amount * 0.3f + Mth.sin(age * 0.09f) * 0.05f, 0, 0);
+            for (int k = 0; k < mane.size(); k++) turn(mane.get(k), amount * 0.25f + Mth.sin(age * 0.08f + k * 0.7f) * 0.04f, 0, 0);
+            turn(chain, amount * 0.3f + Mth.sin(age * 0.07f) * 0.05f, 0, Mth.sin(age * 0.05f) * 0.06f);
+        }
+
+        @Override
+        public void renderToBuffer(PoseStack pose, VertexConsumer vc, int light, int overlay, int color) {
+            root.render(pose, vc, light, overlay, color);
+        }
+    }
+
+    /** A guard's renderer: his skin (his captain's), his eyes burning over it full-bright. */
+    abstract static class GuardRenderer<T extends Mob> extends MobRenderer<T, BeastGuardModel<T>> {
+        private final ResourceLocation skin, captain;
+        private final float size;
+
+        GuardRenderer(EntityRendererProvider.Context ctx, ModelLayerLocation layer, String name, float size) {
+            super(ctx, new BeastGuardModel<>(ctx.bakeLayer(layer)), 0.8f);
+            this.skin = tex(name);
+            this.captain = tex(name + "_captain");
+            this.size = size;
+            RenderType eyes = RenderType.eyes(tex(name + "_eyes"));
+            addLayer(new EyesLayer<>(this) {
+                @Override
+                public RenderType renderType() {
+                    return eyes;
+                }
+            });
+        }
+
+        @Override
+        protected void scale(T e, PoseStack pose, float partial) {
+            pose.scale(size, size, size);
+        }
+
+        @Override
+        public ResourceLocation getTextureLocation(T e) {
+            return captain(e) ? captain : skin;
+        }
+
+        @Override
+        protected boolean shouldShowName(T e) {
+            return super.shouldShowName(e) && entityRenderDispatcher.distanceToSqr(e) < 24 * 24;
+        }
+    }
+
+    public static final class OxRenderer extends GuardRenderer<OxHeadEntity> {
+        /** How much larger than his pixels he is drawn (hell_guards.py prints his reach). */
+        public static final float SIZE = 0.78f;
+
+        public OxRenderer(EntityRendererProvider.Context ctx) {
+            super(ctx, OX_LAYER, "ox_head", SIZE);
+        }
+    }
+
+    public static final class HorseRenderer extends GuardRenderer<HorseFaceEntity> {
+        /** How much larger than his pixels he is drawn (hell_guards.py prints his reach). */
+        public static final float SIZE = 0.78f;
+
+        public HorseRenderer(EntityRendererProvider.Context ctx) {
+            super(ctx, HORSE_LAYER, "horse_face", SIZE);
+        }
+    }
+
+    // ── The Yin soldiers' frame ────────────────────────────────────────
+
+    /** The Yin soldiers' frame (128x64): a person's, in a black cuirass and armoured skirt, pauldrons on the shoulders. */
     private static MeshDefinition guardMesh() {
         MeshDefinition mesh = HumanoidModel.createMesh(CubeDeformation.NONE, 0f);
         PartDefinition root = mesh.getRoot();
@@ -89,50 +594,7 @@ public final class HellRenderers {
         return mesh;
     }
 
-    /** Ox-Head: a broad ox's head, a heavy muzzle, horns out to the sides and up; a steel fork, upright in his hand. */
-    public static LayerDefinition oxLayer() {
-        MeshDefinition mesh = guardMesh();
-        PartDefinition root = mesh.getRoot();
-        PartDefinition head = root.getChild("head");
-        head.addOrReplaceChild("muzzle", CubeListBuilder.create().texOffs(64, 24).addBox(-3, -4.5f, -6.5f, 6, 4, 3), PartPose.ZERO);
-        for (int side : new int[]{-1, 1}) {
-            String n = side < 0 ? "right" : "left";
-            PartDefinition horn = head.addOrReplaceChild(n + "_horn", CubeListBuilder.create().texOffs(84, 24).mirror(side > 0)
-                    .addBox(side < 0 ? -4 : 0, -1, -1, 4, 2, 2), PartPose.offset(side * 4, -6.5f, -1));
-            horn.addOrReplaceChild(n + "_tip", CubeListBuilder.create().texOffs(84, 28).mirror(side > 0).addBox(-0.75f, -4, -0.75f, 1.5f, 4, 1.5f),
-                    PartPose.offsetAndRotation(side * 3.5f, -0.5f, 0, -0.2f, 0, side * 0.25f));
-            head.addOrReplaceChild(n + "_ear", CubeListBuilder.create().texOffs(96, 24).mirror(side > 0)
-                    .addBox(side < 0 ? -3 : 0, -0.5f, -0.5f, 3, 2, 1), PartPose.offsetAndRotation(side * 4, -4.5f, 0.5f, 0, 0, side * 0.3f));
-        }
-        PartDefinition fork = root.getChild("right_arm").addOrReplaceChild("fork", CubeListBuilder.create().texOffs(120, 0)
-                .addBox(-0.5f, -20, -0.5f, 1, 30, 1), PartPose.offset(-1, 10, 0));
-        fork.addOrReplaceChild("crossbar", steel().addBox(-2.5f, -21, -0.5f, 5, 1, 1), PartPose.ZERO);
-        fork.addOrReplaceChild("prong_l", steel().addBox(-2.5f, -25, -0.5f, 1, 4, 1), PartPose.ZERO);
-        fork.addOrReplaceChild("prong_m", steel().addBox(-0.5f, -26, -0.5f, 1, 5, 1), PartPose.ZERO);
-        fork.addOrReplaceChild("prong_r", steel().addBox(1.5f, -25, -0.5f, 1, 4, 1), PartPose.ZERO);
-        return LayerDefinition.create(mesh, 128, 64);
-    }
-
-    /** Horse-Face: a long horse's face, a dark mane down the back of his head, ears up; a spear with a hook below its head. */
-    public static LayerDefinition horseLayer() {
-        MeshDefinition mesh = guardMesh();
-        PartDefinition root = mesh.getRoot();
-        PartDefinition head = root.getChild("head");
-        head.addOrReplaceChild("muzzle", CubeListBuilder.create().texOffs(64, 24).addBox(-2.5f, -6, -10, 5, 6, 6), PartPose.ZERO);
-        head.addOrReplaceChild("mane", CubeListBuilder.create().texOffs(64, 40).addBox(-1, -9, -3, 2, 3, 8), PartPose.ZERO);
-        for (int side : new int[]{-1, 1}) {
-            head.addOrReplaceChild((side < 0 ? "right" : "left") + "_ear", CubeListBuilder.create().texOffs(88, 36)
-                    .addBox(-0.5f, -3, -0.5f, 1.5f, 3, 1), PartPose.offsetAndRotation(side * 2.5f, -8, 0, 0, 0, side * 0.2f));
-        }
-        PartDefinition spear = root.getChild("right_arm").addOrReplaceChild("spear", CubeListBuilder.create().texOffs(120, 0)
-                .addBox(-0.5f, -20, -0.5f, 1, 30, 1), PartPose.offset(-1, 10, 0));
-        spear.addOrReplaceChild("head", steel().addBox(-1, -26, -0.5f, 2, 6, 1), PartPose.ZERO);
-        spear.addOrReplaceChild("hook", steel().addBox(1, -21, -0.5f, 2, 1, 1), PartPose.ZERO);
-        spear.addOrReplaceChild("hook_tip", steel().addBox(2, -23, -0.5f, 1, 2, 1), PartPose.ZERO);
-        return LayerDefinition.create(mesh, 128, 64);
-    }
-
-    /** A guard's frame: his weapon held upright; Ox-Head's horns lowered as he charges. */
+    /** A Yin soldier's frame: his halberd held upright. */
     public static final class GuardModel<T extends Mob> extends HumanoidModel<T> {
         public GuardModel(ModelPart root) {
             super(root);
@@ -143,74 +605,6 @@ public final class HellRenderers {
             super.setupAnim(e, swing, amount, age, yaw, pitch);
             // the weapon arm held a little forward, steady
             if (attackTime <= 0) rightArm.xRot = rightArm.xRot * 0.3f - 0.35f;
-            if (e instanceof OxHeadEntity ox && ox.isCharging()) {
-                head.xRot = 0.7f;
-                body.xRot = 0.3f;
-                rightArm.xRot = -0.2f;
-                leftArm.xRot = -0.2f;
-            }
-        }
-    }
-
-    public static final class OxRenderer extends HumanoidMobRenderer<OxHeadEntity, GuardModel<OxHeadEntity>> {
-        public static final float SIZE = 1.33f;
-        private static final ResourceLocation SKIN = tex("ox_head"), CAPTAIN = tex("ox_head_captain");
-        private static final RenderType EYES = RenderType.eyes(tex("ox_head_eyes"));
-
-        public OxRenderer(EntityRendererProvider.Context ctx) {
-            super(ctx, new GuardModel<>(ctx.bakeLayer(OX_LAYER)), 0.6f);
-            addLayer(new EyesLayer<>(this) {
-                @Override
-                public RenderType renderType() {
-                    return EYES;
-                }
-            });
-        }
-
-        @Override
-        protected void scale(OxHeadEntity e, PoseStack pose, float partial) {
-            pose.scale(SIZE, SIZE, SIZE);
-        }
-
-        @Override
-        public ResourceLocation getTextureLocation(OxHeadEntity e) {
-            return e.isCaptain() ? CAPTAIN : SKIN;
-        }
-
-        @Override
-        protected boolean shouldShowName(OxHeadEntity e) {
-            return super.shouldShowName(e) && entityRenderDispatcher.distanceToSqr(e) < 24 * 24;
-        }
-    }
-
-    public static final class HorseRenderer extends HumanoidMobRenderer<HorseFaceEntity, GuardModel<HorseFaceEntity>> {
-        public static final float SIZE = 1.28f;
-        private static final ResourceLocation SKIN = tex("horse_face"), CAPTAIN = tex("horse_face_captain");
-        private static final RenderType EYES = RenderType.eyes(tex("horse_face_eyes"));
-
-        public HorseRenderer(EntityRendererProvider.Context ctx) {
-            super(ctx, new GuardModel<>(ctx.bakeLayer(HORSE_LAYER)), 0.6f);
-            addLayer(new EyesLayer<>(this) {
-                @Override
-                public RenderType renderType() {
-                    return EYES;
-                }
-            });
-        }
-
-        @Override
-        protected void scale(HorseFaceEntity e, PoseStack pose, float partial) {
-            pose.scale(SIZE, SIZE, SIZE);
-        }
-
-        @Override
-        public ResourceLocation getTextureLocation(HorseFaceEntity e) {
-            return e.isCaptain() ? CAPTAIN : SKIN;
-        }
-
-        @Override
-        protected boolean shouldShowName(HorseFaceEntity e) {
-            return super.shouldShowName(e) && entityRenderDispatcher.distanceToSqr(e) < 24 * 24;
         }
     }
 

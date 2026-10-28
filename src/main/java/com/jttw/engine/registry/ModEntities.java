@@ -188,14 +188,14 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.hell.OxHeadEntity>> OX_HEAD =
             ENTITIES.register("ox_head", () ->
                     EntityType.Builder.<com.jttw.engine.entity.hell.OxHeadEntity>of(com.jttw.engine.entity.hell.OxHeadEntity::new, MobCategory.MONSTER)
-                            .sized(0.9F, 2.6F)
+                            .sized(0.95F, 2.7F)
                             .clientTrackingRange(10)
                             .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "ox_head").toString()));
 
     public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.hell.HorseFaceEntity>> HORSE_FACE =
             ENTITIES.register("horse_face", () ->
                     EntityType.Builder.<com.jttw.engine.entity.hell.HorseFaceEntity>of(com.jttw.engine.entity.hell.HorseFaceEntity::new, MobCategory.MONSTER)
-                            .sized(0.8F, 2.5F)
+                            .sized(0.95F, 2.7F)
                             .clientTrackingRange(10)
                             .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "horse_face").toString()));
 
