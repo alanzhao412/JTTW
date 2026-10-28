@@ -158,6 +158,11 @@ public final class ClientInit {
         event.registerLayerDefinition(com.jttw.engine.client.renderer.AzureLionRenderer.TRUE_LAYER, com.jttw.engine.client.renderer.AzureLionRenderer::trueLayer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.WhiteElephantRenderer.LAYER, com.jttw.engine.client.renderer.WhiteElephantRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.WhiteElephantRenderer.TRUE_LAYER, com.jttw.engine.client.renderer.WhiteElephantRenderer::trueLayer);
+        // the open world's yaoguai
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.WildRenderers.GOBLIN_LAYER, com.jttw.engine.client.renderer.WildRenderers::goblinLayer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.WildRenderers.KOBOLD_LAYER, com.jttw.engine.client.renderer.WildRenderers::koboldLayer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.WildRenderers.WOLFMAN_LAYER, com.jttw.engine.client.renderer.WildRenderers::wolfmanLayer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.WildRenderers.OGRE_LAYER, com.jttw.engine.client.renderer.WildRenderers::ogreLayer);
     }
 
     // ── Entity renderers (MOD bus) ─────────────────────────────────
@@ -245,6 +250,10 @@ public final class ClientInit {
         event.registerEntityRenderer(ModEntities.LITTLE_WIND_DRILLER.get(), com.jttw.engine.client.renderer.LittleWindDrillerRenderer::new);
         event.registerEntityRenderer(ModEntities.AZURE_LION.get(), com.jttw.engine.client.renderer.AzureLionRenderer::new);
         event.registerEntityRenderer(ModEntities.WHITE_ELEPHANT.get(), com.jttw.engine.client.renderer.WhiteElephantRenderer::new);
+        event.registerEntityRenderer(ModEntities.GOBLIN.get(), com.jttw.engine.client.renderer.WildRenderers.GoblinRenderer::new);
+        event.registerEntityRenderer(ModEntities.KOBOLD.get(), com.jttw.engine.client.renderer.WildRenderers.KoboldRenderer::new);
+        event.registerEntityRenderer(ModEntities.WOLFMAN.get(), com.jttw.engine.client.renderer.WildRenderers.WolfmanRenderer::new);
+        event.registerEntityRenderer(ModEntities.OGRE.get(), com.jttw.engine.client.renderer.WildRenderers.OgreRenderer::new);
         event.registerEntityRenderer(ModEntities.THROWN_SPEAR.get(),
                 com.jttw.engine.client.renderer.ThrownSpearRenderer::new);
         // the qi wave: a translucent golden crescent as wide as what it strikes

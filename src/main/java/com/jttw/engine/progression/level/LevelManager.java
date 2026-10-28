@@ -49,6 +49,11 @@ import java.util.List;
  *       (ritual completions, boss events, etc.).</li>
  * </ul>
  *
+ * <p><b>Vanilla XP:</b> below level 20 a monster's kill pays by its weight ({@link #vanillaMobWeight})
+ * and the killer's level; the open world's yaoguai (goblins, kobolds, wolfmen, ogres:
+ * {@code WildYaoguai}) weigh what each says ({@code vanillaXpShare}). They carry no tier, so from 20
+ * they pay nothing.
+ *
  * <p><b>Biome XP:</b> from level 20 a kill pays only if the creature carries an enemy tier
  * ({@code jttw_enemy_tier}, an {@link EnemyTier}) and, as every zone's creature and boss does, its
  * zone ({@code jttw_enemy_zone}); {@link #onEntityKilled} pays it by that zone's
@@ -195,7 +200,7 @@ public final class LevelManager {
 
         // ── Phase 1: Vanilla mobs (levels 1–19) ─────────────────────────────
         if (killerLevel < LevelConstants.VANILLA_CAP_LEVEL) {
-            long xp = vanillaMobXp(event.getEntity().getType(), killerLevel);
+            long xp = vanillaMobXp(event.getEntity(), killerLevel);
             if (xp > 0) grantXp(killer, xp, "vanilla_mob");
             return;
         }
@@ -418,6 +423,15 @@ public final class LevelManager {
         int weight = vanillaMobWeight(type);
         if (weight == 0) return 0;
         return Math.max(1, Math.round(weight * VANILLA_XP_PER_LEVEL * level));
+    }
+
+    /**
+     * XP for killing {@code victim} below level 20 at {@code level}: as {@link #vanillaMobXp(EntityType, int)},
+     * an open-world yaoguai weighing its own {@code vanillaXpShare} (a goblin a zombie's 1, an ogre 5).
+     */
+    public static long vanillaMobXp(net.minecraft.world.entity.LivingEntity victim, int level) {
+        if (!(victim instanceof com.jttw.engine.entity.wild.WildYaoguai wild)) return vanillaMobXp(victim.getType(), level);
+        return Math.max(1, Math.round(wild.vanillaXpShare() * VANILLA_XP_PER_LEVEL * level));
     }
 
     /**

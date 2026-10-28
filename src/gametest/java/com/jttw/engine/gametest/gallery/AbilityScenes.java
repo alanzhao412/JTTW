@@ -146,6 +146,7 @@ final class AbilityScenes {
         all.addAll(FengduScenes.all());
         all.addAll(KunlunScenes.all());
         all.addAll(VillageScenes.all());
+        all.addAll(WildScenes.all());
         all.addAll(CaveScenes.all());
         all.addAll(RidgeScenes.all());
         return all;
@@ -1225,6 +1226,7 @@ final class AbilityScenes {
         WuzhuangScenes.clear(p);
         LionScenes.clear(p);
         VillageScenes.clear(p);
+        WildScenes.clear(p);
         keepScreen = false;
         topSpeed = false;
         com.jttw.engine.client.renderer.GoldenEyesRenderer.setMode(p.getUUID(), 0);

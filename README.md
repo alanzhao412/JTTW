@@ -1740,6 +1740,32 @@ the axis of the world, the reason the Overworld's sky was raised (see **The tall
 
 ---
 
+## The open world's yaoguai
+
+Outside the zones the overworld has yaoguai of its own (`entity/wild`): the early road's monsters,
+met before level 20. Each has a level in a low range, shown with its name, and its health and blow
+are set against a typical character of that level (`MobScaling`), as a zone creature's are. They
+carry no enemy tier and no zone, so their kills pay as vanilla monsters' do: below level 20 by the
+killer's level and their weight (`WildYaoguai.vanillaXpShare`, as `LevelManager.vanillaMobWeight` is
+a vanilla mob's: a goblin a zombie's 1, an ogre 5), from 20 nothing; the zones are where a character
+grows from then on.
+
+| Kind | Levels | Looks | Ways | Where, when | Weight (below 20) | Leaves |
+|---|---|---|---|---|---|---|
+| Goblin (山魈小妖) | 1–6 | a hunched moss-green mountain imp, huge ears, hooked nose, a patched robe, prayer beads and stolen talismans, a sack of thefts, a bronze dagger and a sling | quick; gangs of 3–5; loses its nerve and runs, cowering, when hurt below half or with fewer than two of its gang about it | hills, forests, plains; on the surface, by night | 1x | copper cash, flint, paper; now and then a string of cash |
+| Kobold (穴居小妖) | 3–10 | a little dog-faced, slate-scaled cave miner, a pot helmet with a candle on it, scrap-iron armour, strings of cash, a pick, a red lantern swinging over its basket of ore | swarms of 3–6; raises the alarm (every kobold within 16 blocks comes); its pick costs a foe its footing | under any dry land, in the caves, well below the sea | 1x | ore (copper, iron, coal), copper cash; now and then raw gold, rarely a diamond |
+| Wolfman (狼妖) | 10–17 | a tall wolf soldier in black lamellae laced red, a war cloak and a back banner, a long glaive | packs of 2–4; howls when it sights a foe and calls every wolfman within 32 blocks | forests and taiga; on the surface, by night | 2x | wolf pelts (2 leather each), bones, iron nuggets; now and then a string of cash |
+| Ogre (山夜叉) | 15–20 | a red mountain yaksha over 3 blocks tall, horns and tusks, a tiger-skin loincloth, spiked iron bracers, a necklace of skulls, an iron wolf-tooth club | alone, rare; slow, every blow heavy and throwing its foe back, hardly moved itself; now and then heaves its club up and slams the ground (everything within 4 blocks hurt and flung) | mountains and swamps; on the surface, by night | 5x | tusks (bone meal), iron, leather, bones; now and then a tael of silver |
+
+Their biomes are data: a NeoForge biome modifier each (`data/jttw_engine/neoforge/biome_modifier/`)
+adds them to the monster spawns of the vanilla biomes in their tag (`tags/worldgen/biome/<kind>_haunts`),
+so a zone, whose biome takes the ground's place, never has them; `WildSpawns`, their spawn
+placements, keeps three of them to the open surface at night and the kobolds to the caves. Their
+models and skins come from `assets_source/goblin.py`, `kobold.py`, `wolfman.py` and `ogre.py`
+(sharing `wild_paint.py`), written into `client/renderer/WildRenderers`.
+
+---
+
 ## Tang villages
 
 Villages of the Tang (唐朝, the seventh century of the novel) generate in the overworld alongside

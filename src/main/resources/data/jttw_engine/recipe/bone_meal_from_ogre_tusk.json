@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "jttw_engine:ogre_tusk"
+    }
+  ],
+  "result": {
+    "id": "minecraft:bone_meal",
+    "count": 6
+  }
+}

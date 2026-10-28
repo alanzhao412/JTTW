@@ -439,6 +439,38 @@ public final class ModEntities {
                             .clientTrackingRange(10)
                             .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "white_elephant").toString()));
 
+    // ── The open world's yaoguai (see WildYaoguai) ───────────────
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.wild.GoblinEntity>> GOBLIN =
+            ENTITIES.register("goblin", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.wild.GoblinEntity>of(com.jttw.engine.entity.wild.GoblinEntity::new, MobCategory.MONSTER)
+                            .sized(0.6F, 1.4F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "goblin").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.wild.KoboldEntity>> KOBOLD =
+            ENTITIES.register("kobold", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.wild.KoboldEntity>of(com.jttw.engine.entity.wild.KoboldEntity::new, MobCategory.MONSTER)
+                            .sized(0.6F, 1.2F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "kobold").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.wild.WolfmanEntity>> WOLFMAN =
+            ENTITIES.register("wolfman", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.wild.WolfmanEntity>of(com.jttw.engine.entity.wild.WolfmanEntity::new, MobCategory.MONSTER)
+                            .sized(0.8F, 2.5F)
+                            .eyeHeight(2.25F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "wolfman").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.wild.OgreEntity>> OGRE =
+            ENTITIES.register("ogre", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.wild.OgreEntity>of(com.jttw.engine.entity.wild.OgreEntity::new, MobCategory.MONSTER)
+                            .sized(1.6F, 3.3F)
+                            .eyeHeight(2.9F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "ogre").toString()));
+
     // ── Forms ──────────────────────────────────────────────────────
 
     /** The other divine beasts' true forms, never spawned: only taken (see TrueForm). */
@@ -590,9 +622,31 @@ public final class ModEntities {
                 net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 com.jttw.engine.entity.waters.SeaMonster::checkSeaSpawnRules,
                 net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        // the open world's yaoguai: goblins, wolfmen and ogres on the surface by night, kobolds deep in the caves (WildSpawns)
+        event.register(GOBLIN.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                com.jttw.engine.entity.wild.WildSpawns::surfaceAtNight,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(WOLFMAN.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                com.jttw.engine.entity.wild.WildSpawns::surfaceAtNight,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(OGRE.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                com.jttw.engine.entity.wild.WildSpawns::surfaceAtNight,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(KOBOLD.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                com.jttw.engine.entity.wild.WildSpawns::underground,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
     }
 
     private static void onAttributeCreate(EntityAttributeCreationEvent event) {
+        event.put(GOBLIN.get(), com.jttw.engine.entity.wild.GoblinEntity.createAttributes().build());
+        event.put(KOBOLD.get(), com.jttw.engine.entity.wild.KoboldEntity.createAttributes().build());
+        event.put(WOLFMAN.get(), com.jttw.engine.entity.wild.WolfmanEntity.createAttributes().build());
+        event.put(OGRE.get(), com.jttw.engine.entity.wild.OgreEntity.createAttributes().build());
+
         event.put(OX_HEAD.get(), com.jttw.engine.entity.hell.OxHeadEntity.createAttributes().build());
         event.put(HORSE_FACE.get(), com.jttw.engine.entity.hell.HorseFaceEntity.createAttributes().build());
         event.put(JUDGE_CLERK.get(), com.jttw.engine.entity.hell.JudgeClerkEntity.createAttributes().build());

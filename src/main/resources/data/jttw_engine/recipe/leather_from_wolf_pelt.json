@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "jttw_engine:wolf_pelt"
+    }
+  ],
+  "result": {
+    "id": "minecraft:leather",
+    "count": 2
+  }
+}
