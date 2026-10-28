@@ -29,7 +29,7 @@ import javax.annotation.Nullable;
 /**
  * A Yaksha (夜叉) of the sea patrol, the Dragon Kings' watchmen, who go the rounds of the sea in
  * bands: a blue-skinned demon with a shock of red hair, horns and tusks, armed with a trident. It
- * swims fastest of the sea's creatures; at a distance it hurls bolts of the tide that throw what
+ * swims fast (only the Fish Soldiers are quicker in the water); at a distance it hurls bolts of the tide that throw what
  * they strike back, close in it thrusts with its trident; and when it finds a foe it raises the
  * alarm, and every creature of the sea near by turns on that foe too.
  */

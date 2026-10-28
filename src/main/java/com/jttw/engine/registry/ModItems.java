@@ -196,6 +196,10 @@ public final class ModItems {
             () -> new com.jttw.engine.item.DragonRegaliaItem(net.minecraft.world.item.ArmorItem.Type.BOOTS));
     public static final DeferredHolder<Item, Item> SHRIMP_SOLDIER_SPAWN_EGG = ITEMS.register("shrimp_soldier_spawn_egg",
             () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.SHRIMP_SOLDIER, 0xE0603A, 0xF2C8A0, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> FISH_SOLDIER_SPAWN_EGG = ITEMS.register("fish_soldier_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.FISH_SOLDIER, 0xE8782A, 0x2A7C78, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> TURTLE_SOLDIER_SPAWN_EGG = ITEMS.register("turtle_soldier_spawn_egg",
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.TURTLE_SOLDIER, 0xB07A34, 0x6E7650, new Item.Properties()));
     public static final DeferredHolder<Item, Item> CRAB_GENERAL_SPAWN_EGG = ITEMS.register("crab_general_spawn_egg",
             () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.CRAB_GENERAL, 0xA8322A, 0xD9A441, new Item.Properties()));
     public static final DeferredHolder<Item, Item> YAKSHA_SPAWN_EGG = ITEMS.register("yaksha_spawn_egg",

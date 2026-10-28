@@ -70,11 +70,12 @@ final class WatersScenes {
         return m;
     }
 
-    private static void sea(ServerPlayer p, EntityType<? extends SeaMonster> type, double x, double y, double z, float yaw, boolean captain) {
+    private static SeaMonster sea(ServerPlayer p, EntityType<? extends SeaMonster> type, double x, double y, double z, float yaw, boolean captain) {
         SeaMonster m = put(p, type, x, y, z, yaw);
-        if (m == null) return;
+        if (m == null) return null;
         m.become(captain ? m.captainLevel() : m.regularLevel(), captain);
         if (m instanceof com.jttw.engine.entity.waters.YakshaEntity) m.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.TRIDENT));
+        return m;
     }
 
     private static AbilityScenes.Scene creature(String name, java.util.function.Consumer<ServerPlayer> cast, double[] cam) {
@@ -110,6 +111,41 @@ final class WatersScenes {
                 }, new double[]{0.5, 3.0, 4.0, 0.5, 2.5, 11.0}),
                 creature("waters_shrimp_side", p -> sea(p, ModEntities.SHRIMP_SOLDIER.get(), 0.5, 1.5, 10.5, 90f, false),
                         new double[]{0.5, 2.6, 5.0, 0.5, 2.4, 10.5}),
+                // the Fish Soldier: a pair (one a captain), its profile, its head close
+                creature("waters_fish", p -> {
+                    sea(p, ModEntities.FISH_SOLDIER.get(), -0.9, 1.0, 10.5, 195f, false);
+                    sea(p, ModEntities.FISH_SOLDIER.get(), 2.2, 1.4, 12.0, 160f, true);
+                }, new double[]{0.6, 2.4, 7.8, 0.6, 2.3, 11.0}),
+                creature("waters_fish_side", p -> sea(p, ModEntities.FISH_SOLDIER.get(), 0.5, 1.0, 10.5, 90f, false),
+                        new double[]{0.5, 2.1, 8.0, 0.5, 2.0, 10.5}),
+                creature("waters_fish_close", p -> sea(p, ModEntities.FISH_SOLDIER.get(), 0.5, 1.0, 9.5, 205f, false),
+                        new double[]{-0.5, 2.8, 7.4, 0.1, 2.6, 9.5}),
+                // the Turtle Soldier: a pair (one a captain), its side, its shell from behind, its head and shield
+                // close, and one drawn into its shell beside one that is not
+                creature("waters_turtle", p -> {
+                    sea(p, ModEntities.TURTLE_SOLDIER.get(), -0.9, 0, 10.5, 195f, false);
+                    sea(p, ModEntities.TURTLE_SOLDIER.get(), 2.2, 0, 12.0, 160f, true);
+                }, new double[]{0.6, 1.6, 7.8, 0.6, 1.3, 11.0}),
+                creature("waters_turtle_side", p -> sea(p, ModEntities.TURTLE_SOLDIER.get(), 0.5, 0, 10.5, 70f, false),
+                        new double[]{0.5, 1.3, 7.9, 0.5, 1.2, 10.5}),
+                creature("waters_turtle_back", p -> sea(p, ModEntities.TURTLE_SOLDIER.get(), 0.5, 0, 10.5, 20f, false),
+                        new double[]{0.5, 1.9, 8.0, 0.5, 1.3, 10.5}),
+                creature("waters_turtle_close", p -> sea(p, ModEntities.TURTLE_SOLDIER.get(), 0.5, 0, 9.5, 200f, false),
+                        new double[]{-0.2, 1.8, 7.6, 0.5, 1.6, 9.5}),
+                creature("waters_turtle_shell", p -> {
+                    sea(p, ModEntities.TURTLE_SOLDIER.get(), -0.9, 0, 10.5, 200f, false);
+                    if (sea(p, ModEntities.TURTLE_SOLDIER.get(), 1.5, 0, 10.5, 160f, false) instanceof com.jttw.engine.entity.waters.TurtleSoldierEntity t) t.withdraw();
+                }, new double[]{0.3, 1.4, 7.6, 0.3, 1.0, 10.5}),
+                // the host together: shrimp, fish and turtle soldiers about their Crab General
+                creature("waters_army", p -> {
+                    sea(p, ModEntities.CRAB_GENERAL.get(), 0.5, 0, 15.0, 180f, false);
+                    sea(p, ModEntities.TURTLE_SOLDIER.get(), -2.6, 0, 12.0, 190f, false);
+                    sea(p, ModEntities.TURTLE_SOLDIER.get(), 3.6, 0, 12.0, 170f, false);
+                    sea(p, ModEntities.FISH_SOLDIER.get(), -5.2, 1.0, 14.0, 200f, false);
+                    sea(p, ModEntities.FISH_SOLDIER.get(), 6.2, 1.0, 14.5, 160f, false);
+                    sea(p, ModEntities.SHRIMP_SOLDIER.get(), -2.0, 1.4, 16.0, 185f, false);
+                    sea(p, ModEntities.SHRIMP_SOLDIER.get(), 3.0, 1.2, 16.3, 175f, false);
+                }, new double[]{0.5, 2.4, 7.4, 0.5, 1.6, 13.5}),
                 creature("waters_crab", p -> {
                     sea(p, ModEntities.CRAB_GENERAL.get(), 0.5, 0, 11.5, 170f, false);
                     sea(p, ModEntities.CRAB_GENERAL.get(), -4.5, 0, 15.5, 210f, true);

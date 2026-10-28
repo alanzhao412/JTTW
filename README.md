@@ -808,15 +808,22 @@ The Four Seas and the Dragon Kings' crystal palaces (水晶宫, novel chapter 3)
   and crystal under a stepped, gilded roof, quartz columns, sea lanterns, the king's gold throne on a
   dais at the region's centre, a runner in his colour; behind it his treasury, four chests
   (`chests/dragon_treasury`) and heaps of gold; coral gardens, lantern towers at the gate, a road of
-  lanterns out across the floor. Its king and a guard of six are put there once
+  lanterns out across the floor. Its king and a guard of eight are put there once
   (`DragonPalaceFeature`, the framework's `ZoneLairFeature`, which now lets a zone choose the boss by
   region).
 - **Creatures** (`SeaMonster`: level 47, captains 54; they breathe water, are not pushed by the
   current, and come in any light in water at least 24 blocks deep):
   **Shrimp Soldiers** (虾兵: swim, spear thrust from further than a sword's reach, dart backward when
-  struck), **Crab Generals** (蟹将: walk the floor and sink, heavy pinch that holds, spring up at
-  what swims above), **Yaksha** (夜叉, the sea patrol: the fastest swimmers, hurl bolts of the tide,
-  raise the alarm so every sea creature near turns on their foe).
+  struck), **Fish Soldiers** (鱼兵: carp-men with a sky-piercer halberd; frailest and quickest, they
+  swim fastest of all and lunge at a foe from a few blocks off), **Turtle Soldiers** (龟兵: heavy
+  infantry under a domed tortoiseshell, slow, armoured, a melon-headed mace; a round shield takes
+  most of a blow from in front, and badly hurt they draw into their shells a while, all but unhurt
+  and unmoved but striking nothing), **Crab Generals** (蟹将: walk the floor and sink, heavy pinch
+  that holds, spring up at what swims above), **Yaksha** (夜叉, the sea patrol: fast swimmers, hurl
+  bolts of the tide, raise the alarm so every sea creature near turns on their foe). The shrimp,
+  fish and turtle soldiers share one kit (teal-and-gold lacquer, red plumes, sea-blue sashes);
+  their models are drawn by `assets_source/shrimp_soldier.py`, `fish_soldier.py` and
+  `turtle_soldier.py`.
 - **The Dragon Kings** (`DragonKingEntity`, a `ZoneBoss`, level 55, sixty ordinary hits): a dragon in
   a man's shape, robed and crowned, swimming freely; half again a man's height, a long antlered
   dragon's head with trailing barbels, an emperor's dragon robe with its sea-and-cliff hem, wide
@@ -828,7 +835,8 @@ The Four Seas and the Dragon Kings' crystal palaces (水晶宫, novel chapter 3)
   (East, blue-green robes) a tidal surge that hurls all near him away; **Ao Qin** (South, red) the
   boiling sea that scalds and saps strength; **Ao Run** (West, white) a whirlpool round his foe that
   drags all near it to its grinding heart; **Ao Shun** (North, black) the frozen abyss that freezes and
-  slows. At two thirds he calls Shrimp Soldiers and a Crab General, at a third his Yaksha.
+  slows. At two thirds he calls a Shrimp Soldier, a Fish Soldier and a Crab General, at a third two
+  Yaksha and a Turtle Soldier.
 - **What they give** (what each gave the Monkey King): Ao Run the **Phoenix-Plume Purple-Gold Cap**
   (+20 magic resistance), Ao Qin the **Golden Chain Mail** (+24 physical resistance), Ao Shun the
   **Lotus-Fibre Cloud-Stepping Boots** (+10 of each, +10% speed, swifter in water, softer falls); each

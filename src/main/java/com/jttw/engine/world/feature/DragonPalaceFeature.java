@@ -49,15 +49,17 @@ public class DragonPalaceFeature extends ZoneLairFeature {
         return TrenchFeature.floorY(level.getMinBuildHeight()) + DragonPalace.THRONE_Y - 1;
     }
 
-    /** His guard in his hall: Shrimp Soldiers down its sides, a Crab General and a Yaksha at its gate. */
+    /** His guard in his hall: Shrimp and Fish Soldiers down its sides, a Crab General between two Turtle Soldiers, a Yaksha at its gate. */
     @Override
     protected void build(WorldGenLevel level, BlockPos centre, RandomSource random) {
         Sea sea = Sea.of(centre.getX(), centre.getZ());
         BlockPos floor = centre.below(DragonPalace.THRONE_Y - 1); // the floor's top
         guard(level, ModEntities.SHRIMP_SOLDIER.get(), floor, sea, -3, 8, random);
         guard(level, ModEntities.SHRIMP_SOLDIER.get(), floor, sea, 3, 8, random);
-        guard(level, ModEntities.SHRIMP_SOLDIER.get(), floor, sea, -3, 13, random);
-        guard(level, ModEntities.SHRIMP_SOLDIER.get(), floor, sea, 3, 13, random);
+        guard(level, ModEntities.FISH_SOLDIER.get(), floor, sea, -3, 13, random);
+        guard(level, ModEntities.FISH_SOLDIER.get(), floor, sea, 3, 13, random);
+        guard(level, ModEntities.TURTLE_SOLDIER.get(), floor, sea, -3, 17, random);
+        guard(level, ModEntities.TURTLE_SOLDIER.get(), floor, sea, 3, 17, random);
         guard(level, ModEntities.CRAB_GENERAL.get(), floor, sea, 0, 17, random);
         guard(level, ModEntities.YAKSHA.get(), floor, sea, 0, 23, random);
     }
