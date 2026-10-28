@@ -52,6 +52,7 @@ final class GateSites {
         ServerLevel overworld = h.getLevel().getServer().overworld();
         BlockPos ground = layFengdu(overworld);
         hold(h, overworld, FengduGate.arrival(ground));
+        overworld.getChunk(FengduGate.arrival(ground)); // loaded now (the ticket loads it only later), so the reset lays its gate sealed
         FengduGate.reset(overworld, ground);
         onEnd(h, () -> FengduGate.reset(overworld, ground));
         return ground;

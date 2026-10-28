@@ -218,6 +218,9 @@ public class PengGameTests {
         Zombie front = mob(h, EntityType.ZOMBIE, 2, 4);
         Zombie behind = mob(h, EntityType.ZOMBIE, 2, 0);
         front.setTarget(p);
+        // none but its two in its reach: the world's own creatures (a pig of a freshly made chunk) would count too
+        h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, p.getBoundingBox().inflate(PengAbilityHandler.eclipseRadius(2) + 1),
+                e -> e != p && e != front && e != behind && !(e instanceof net.minecraft.world.entity.player.Player)).forEach(net.minecraft.world.entity.Entity::discard);
         eq(h, 2, PengAbilityHandler.eclipse(p), "everything around, front and back");
         for (Zombie z : List.of(front, behind)) {
             eq(h, 1, amp(z, MobEffects.WEAKNESS), "weakened");
