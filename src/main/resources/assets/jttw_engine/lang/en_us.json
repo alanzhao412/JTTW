@@ -374,5 +374,15 @@
   "entity.jttw_engine.tang_villager.asleep": "§7The %s is asleep.",
   "entity.jttw_engine.spirit_merchant.refuse_outlaw": "§6The merchant-immortal turns away: Heaven does not trade with its outlaws.",
   "item.jttw_engine.tang_villager_spawn_egg": "Tang Villager Spawn Egg",
-  "item.jttw_engine.spirit_merchant_spawn_egg": "Spirit Merchant Spawn Egg"
+  "item.jttw_engine.spirit_merchant_spawn_egg": "Spirit Merchant Spawn Egg",
+  "entity.jttw_engine.goblin": "Goblin",
+  "entity.jttw_engine.kobold": "Kobold",
+  "entity.jttw_engine.wolfman": "Wolfman",
+  "entity.jttw_engine.ogre": "Ogre",
+  "item.jttw_engine.goblin_spawn_egg": "Goblin Spawn Egg",
+  "item.jttw_engine.kobold_spawn_egg": "Kobold Spawn Egg",
+  "item.jttw_engine.wolfman_spawn_egg": "Wolfman Spawn Egg",
+  "item.jttw_engine.ogre_spawn_egg": "Ogre Spawn Egg",
+  "item.jttw_engine.wolf_pelt": "Wolf Pelt",
+  "item.jttw_engine.ogre_tusk": "Ogre Tusk"
 }

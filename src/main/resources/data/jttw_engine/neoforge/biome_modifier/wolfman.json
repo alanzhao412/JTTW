@@ -1,0 +1,12 @@
+{
+  "type": "neoforge:add_spawns",
+  "biomes": "#jttw_engine:wolfman_haunts",
+  "spawners": [
+    {
+      "type": "jttw_engine:wolfman",
+      "weight": 25,
+      "minCount": 2,
+      "maxCount": 4
+    }
+  ]
+}

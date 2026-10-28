@@ -1,0 +1,12 @@
+{
+  "type": "neoforge:add_spawns",
+  "biomes": "#jttw_engine:kobold_haunts",
+  "spawners": [
+    {
+      "type": "jttw_engine:kobold",
+      "weight": 50,
+      "minCount": 3,
+      "maxCount": 6
+    }
+  ]
+}

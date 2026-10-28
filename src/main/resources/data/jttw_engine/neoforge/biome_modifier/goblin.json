@@ -1,0 +1,12 @@
+{
+  "type": "neoforge:add_spawns",
+  "biomes": "#jttw_engine:goblin_haunts",
+  "spawners": [
+    {
+      "type": "jttw_engine:goblin",
+      "weight": 40,
+      "minCount": 3,
+      "maxCount": 5
+    }
+  ]
+}

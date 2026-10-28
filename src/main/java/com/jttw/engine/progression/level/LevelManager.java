@@ -49,6 +49,10 @@ import java.util.List;
  *       (ritual completions, boss events, etc.).</li>
  * </ul>
  *
+ * <p><b>Vanilla XP:</b> below level 20 any kill pays a vanilla mob's XP (bosses and the strongest
+ * mobs more), and the open world's yaoguai (goblins, kobolds, wolfmen, ogres: {@code WildYaoguai})
+ * so many vanilla mobs' worth as each says; they carry no tier, so from 20 they pay nothing.
+ *
  * <p><b>Biome XP:</b> from level 20 a kill pays only if the creature carries an enemy tier
  * ({@code jttw_enemy_tier}, an {@link EnemyTier}) and, as every zone's creature and boss does, its
  * zone ({@code jttw_enemy_zone}); {@link #onEntityKilled} pays it by that zone's
@@ -188,7 +192,9 @@ public final class LevelManager {
 
         // ── Phase 1: Vanilla mobs (levels 1–19) ─────────────────────────────
         if (killerLevel < LevelConstants.VANILLA_CAP_LEVEL) {
-            long xp = vanillaMobXp(event.getEntity().getType());
+            // the open world's yaoguai belong to this phase: each pays so many vanilla mobs' worth
+            long xp = event.getEntity() instanceof com.jttw.engine.entity.wild.WildYaoguai wild
+                    ? VANILLA_BASE_XP * wild.vanillaXpShare() : vanillaMobXp(event.getEntity().getType());
             if (xp > 0) grantXp(killer, xp, "vanilla_mob");
             return;
         }

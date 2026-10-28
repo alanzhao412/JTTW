@@ -169,7 +169,13 @@ public class ModItemsGameTests {
             Map.entry("peng_demon_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
             Map.entry("little_wind_driller_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
             Map.entry("azure_lion_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
-            Map.entry("white_elephant_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class));
+            Map.entry("white_elephant_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("wolf_pelt", Item.class),
+            Map.entry("ogre_tusk", Item.class),
+            Map.entry("goblin_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("kobold_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("wolfman_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("ogre_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class));
 
     @GameTest(template = PLATFORM)
     public static void everyModItemIsRegisteredUnderItsIdAsTheRightClass(GameTestHelper h) {
