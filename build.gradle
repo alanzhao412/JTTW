@@ -116,7 +116,7 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 // The dev clients that run on their own open in the background (see WindowMixin): NeoForge's early
 // loading window would be made, and take focus, before the mod could say otherwise, so it is off in
-// their run directories.
+// their run directories. They are muted there too.
 ['runFormGallery': 'run-gallery', 'runWorldgenBench': 'run-bench', 'runPlaytestPass': 'run-playtest'].each { task, dir ->
     tasks.matching { it.name == task }.configureEach {
         doFirst {
@@ -129,6 +129,15 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
                 text = 'earlyWindowControl = false\n' + text
             }
             toml.text = text
+            // and they make no sound
+            def opts = project.file("${dir}/options.txt")
+            def o = opts.exists() ? opts.text : ''
+            if (o =~ /(?m)^soundCategory_master:/) {
+                o = o.replaceAll(/(?m)^soundCategory_master:.*$/, 'soundCategory_master:0.0')
+            } else {
+                o = o + (o.isEmpty() || o.endsWith('\n') ? '' : '\n') + 'soundCategory_master:0.0\n'
+            }
+            opts.text = o
         }
     }
 }
