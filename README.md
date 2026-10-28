@@ -948,8 +948,11 @@ XP 125, stepped up from the Mystical Waters' 110 (575 a grunt kill at the band's
 - **Art**: `client/renderer/HellRenderers` (guards: a big armoured frame, a beast's head, a fork or
   a hooked spear, burning eyes; the clerk: robe, winged cap, brush and ledger; the Impermanence:
   long robes, three-tier hats, the White's tongue; ghosts: legless, translucent, trailing; the
-  kings: robe, wide sleeves, jade belt, mian crown with bead strings, beard, ivory tablet, each his
-  colours; King Yama a frame of his own, 256px, a head taller than the rest (some 3.3 blocks, his
+  nine kings: one frame in King Yama's likeness, plainer and a head shorter (some 2.7 blocks), a
+  man's stern face and a three-lock beard, each in his own colour, the ivory tablet in his right
+  hand and his court's emblem held up in his left and worked on the badge on his breast (the Karma
+  Mirror, ice, an iron hook, the scales, the bell, the cauldron of boiling oil, a cart wheel, 平,
+  the Wheel of Reincarnation); King Yama a frame of his own, 256px, a head taller than the rest (some 3.3 blocks, his
   hitbox 1.2×3.3): a dark oxblood face, bulging eyes smouldering like coals under brows knit into a
   V, tusks, a wild black beard and moustache flaring out, the mian crown with its 王 plaque and red
   and gold bead strings, a dragon robe of crimson and black in tiers worked with gold dragons,
@@ -957,13 +960,15 @@ XP 125, stepped up from the Mystical Waters' 110 (575 a grunt kill at the band's
   jade belt with a skull buckle and a soul-chain at his hip, great sleeves, the vermilion brush and
   the Book of Life and Death, and behind his head a ring of hellfire set with skulls, embers
   drifting from it; in his wrath its flames flare, his eyes blaze, his jaws gape and fire runs
-  round his hem); skins from `assets_source/hell_guards.py`, `hell_officials.py`, `hell_kings.py`
-  (helpers in `hell_skin.py`), `king_yama.py` (his model and skins), icons from `hell_items.py`.
+  round his hem); skins from `assets_source/hell_guards.py`, `hell_officials.py` (helpers in
+  `hell_skin.py`), `hell_kings.py` (the nine kings' model and skins), `king_yama.py` (his model
+  and skins), icons from `hell_items.py`.
 - **Tests and pictures**: `HellGameTests` (creatures, captains, XP, each king's judgement and relic,
   Yama's phases and sentence, karma and alignment, the arrival in the real Hell: level, the one
   Book, nothing near, the sanctuary; the kings on their thrones), `HellZoneTest` (the land, the
   plan, the arrival's distance and spawn rules); gallery scenes `-Pgallery.only=hell_` (creatures,
-  the kings' lineup, Yama close, side, back, beside a man and beside two kings, and in his wrath,
+  the kings' lineup, the nine in a line with their emblems and each of them close, Yama close,
+  side, back, beside a man and beside two kings, and in his wrath,
   and pieces of the works laid off the stage: a court hall, Yama's hall and his throne, the Tenth
   Court and the Wheel, the bridge and Meng Po's pavilion); Hell as it is
   with `./gradlew runWorldgenBench -Pbench.mode=hell` (a map of it from the arrival to the north

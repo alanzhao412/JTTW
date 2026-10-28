@@ -1,4 +1,4 @@
-"""Shared painting for Hell's skins (hell_guards.py, hell_officials.py, hell_kings.py): on top of
+"""Shared painting for Hell's skins (hell_guards.py, hell_officials.py): on top of
 cave_skin's canvas and box faces, the parts of a robed person on the standard humanoid layout
 (head 0,0; body 16,16; arm 40,16; leg 0,16; the hat layer 32,0), as HellRenderers' layers use it.
 

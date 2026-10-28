@@ -44,13 +44,14 @@ import java.util.List;
  * How Hell's creatures look: Ox-Head and Horse-Face (a big armoured frame, a beast's head, a steel
  * fork or a hooked spear), the Judge-Clerk (a red robe, a winged black cap, brush and ledger), the
  * Black and White Impermanence (long robes, tall hats; the White's long red tongue), the wandering
- * ghosts (pale, legless, trailing away, half there), and the Ten Kings (a judge's robe and wide
- * sleeves, a jade belt, the flat crown with its strings of beads, the ivory tablet held before
- * him; one frame, each king his own colours; King Yama, the Fifth, a towering frame of his own:
+ * ghosts (pale, legless, trailing away, half there), and the Ten Kings (nine of them on one frame,
+ * lesser kings in King Yama's likeness: his tiered judge's robe, great sleeves and mian crown, plainer
+ * and a head shorter, each in his own colour with the ivory tablet in one hand and his court's
+ * emblem held up in the other; King Yama, the Fifth, a towering frame of his own:
  * a judge-emperor of the dead in a crimson-and-black dragon robe, a ring of hellfire and skulls
  * behind his head), and the Yin soldiers (dark lamellar armour, a crested helmet, a halberd, a grey
  * face and burning eyes). Skins painted by {@code assets_source/hell_guards.py},
- * {@code hell_officials.py}, {@code hell_kings.py}, {@code king_yama.py} (his model too) and
+ * {@code hell_officials.py}, {@code hell_kings.py} (the nine kings' model too), {@code king_yama.py} (his model too) and
  * {@code yin_soldier.py}.
  */
 public final class HellRenderers {
@@ -486,13 +487,13 @@ public final class HellRenderers {
                 .texOffs(0, 0).mirror(false).addBox(-6, -15, -5, 12, 15, 10)
                 .texOffs(44, 96).mirror(false).addBox(-3.8f, -16.2f, -3.2f, 7.6f, 1.6f, 6.4f)
                 .texOffs(75, 96).mirror(false).addBox(-2.2f, -18.4f, -2.2f, 4.4f, 3.6f, 4.4f)
-                .texOffs(174, 66).mirror(false).addBox(-7.4f, -15.6f, -6, 14.8f, 0.8f, 12)
-                .texOffs(120, 107).mirror(false).addBox(-6.6f, -15.2f, -6.1f, 13.2f, 5, 0.5f)
+                .texOffs(178, 66).mirror(false).addBox(-7.4f, -15.6f, -6, 14.8f, 0.8f, 12)
+                .texOffs(99, 107).mirror(false).addBox(-6.6f, -15.2f, -6.1f, 13.2f, 5, 0.5f)
                 .texOffs(0, 107).mirror(false).addBox(-6.6f, -15.2f, 5.6f, 13.2f, 6, 0.5f)
                 .texOffs(0, 66).mirror(false).addBox(-6.8f, -4.4f, -5.9f, 13.6f, 2.2f, 11.8f)
-                .texOffs(99, 115).mirror(false).addBox(-2, -5, -6.6f, 4, 3, 0.8f), PartPose.offsetAndRotation(0, 4, 0, 0, 0, 0));
+                .texOffs(78, 115).mirror(false).addBox(-2, -5, -6.6f, 4, 3, 0.8f), PartPose.offsetAndRotation(0, 4, 0, 0, 0, 0));
         PartDefinition skirt = body.addOrReplaceChild("skirt", CubeListBuilder.create()
-                .texOffs(76, 26).mirror(false).addBox(-6.6f, 0, -5.9f, 13.2f, 7, 11.8f)
+                .texOffs(117, 26).mirror(false).addBox(-6.6f, 0, -5.9f, 13.2f, 7, 11.8f)
                 .texOffs(174, 0).mirror(false).addBox(-7.6f, 6.5f, -6.6f, 15.2f, 7, 13.2f)
                 .texOffs(45, 0).mirror(false).addBox(-9, 13, -7.6f, 18, 7, 15.2f), PartPose.offsetAndRotation(0, 0, 0, 0, 0, 0));
         PartDefinition apron = skirt.addOrReplaceChild("apron", CubeListBuilder.create()
@@ -505,10 +506,10 @@ public final class HellRenderers {
                 .texOffs(153, 0).mirror(false).addBox(-4.5f, 0, 0, 9, 21, 0.6f), PartPose.offsetAndRotation(0, -1.5f, 6.2f, 0.12f, 0, 0));
         PartDefinition rightBoot = root.addOrReplaceChild("right_boot", CubeListBuilder.create()
                 .texOffs(31, 107).mirror(false).addBox(-1.7f, 0, -2.4f, 3.4f, 1.6f, 4.2f)
-                .texOffs(172, 115).mirror(false).addBox(-1.2f, -0.9f, -3.2f, 2.4f, 1.4f, 1), PartPose.offsetAndRotation(-3.2f, 22.4f, -7, 0, 0.12f, 0));
+                .texOffs(153, 115).mirror(false).addBox(-1.2f, -0.9f, -3.2f, 2.4f, 1.4f, 1), PartPose.offsetAndRotation(-3.2f, 22.4f, -7, 0, 0.12f, 0));
         PartDefinition leftBoot = root.addOrReplaceChild("left_boot", CubeListBuilder.create()
                 .texOffs(31, 107).mirror(true).addBox(-1.7f, 0, -2.4f, 3.4f, 1.6f, 4.2f)
-                .texOffs(172, 115).mirror(true).addBox(-1.2f, -0.9f, -3.2f, 2.4f, 1.4f, 1), PartPose.offsetAndRotation(3.2f, 22.4f, -7, 0, -0.12f, 0));
+                .texOffs(153, 115).mirror(true).addBox(-1.2f, -0.9f, -3.2f, 2.4f, 1.4f, 1), PartPose.offsetAndRotation(3.2f, 22.4f, -7, 0, -0.12f, 0));
         PartDefinition rightArm = body.addOrReplaceChild("right_arm", CubeListBuilder.create()
                 .texOffs(53, 66).mirror(false).addBox(-3.4f, -2, -2.8f, 4.8f, 9, 5.6f), PartPose.offsetAndRotation(-7.8f, -13.4f, 0, -0.08f, 0, 0.16f));
         PartDefinition leftArm = body.addOrReplaceChild("left_arm", CubeListBuilder.create()
@@ -519,32 +520,32 @@ public final class HellRenderers {
                 .texOffs(200, 82).mirror(true).addBox(-1.4f, -1.2f, -3.9f, 5.8f, 2, 7.8f), PartPose.offsetAndRotation(1.2f, -2.2f, 0, 0, 0, -0.06f));
         PartDefinition rightForearm = rightArm.addOrReplaceChild("right_forearm", CubeListBuilder.create()
                 .texOffs(44, 82).mirror(false).addBox(-2.3f, 0, -2.3f, 4.6f, 7, 4.6f)
-                .texOffs(163, 96).mirror(false).addBox(-2.7f, 5, -2.7f, 5.4f, 2, 5.4f), PartPose.offsetAndRotation(-1, 6.6f, 0, -1.05f, -0.5f, 0));
+                .texOffs(134, 96).mirror(false).addBox(-2.7f, 5, -2.7f, 5.4f, 2, 5.4f), PartPose.offsetAndRotation(-1, 6.6f, 0, -1.05f, -0.5f, 0));
         PartDefinition leftForearm = leftArm.addOrReplaceChild("left_forearm", CubeListBuilder.create()
                 .texOffs(44, 82).mirror(true).addBox(-2.3f, 0, -2.3f, 4.6f, 7, 4.6f)
-                .texOffs(163, 96).mirror(true).addBox(-2.7f, 5, -2.7f, 5.4f, 2, 5.4f), PartPose.offsetAndRotation(1, 6.6f, 0, -2.2f, -0.35f, 0));
+                .texOffs(134, 96).mirror(true).addBox(-2.7f, 5, -2.7f, 5.4f, 2, 5.4f), PartPose.offsetAndRotation(1, 6.6f, 0, -2.2f, -0.35f, 0));
         PartDefinition rightSleeve = rightForearm.addOrReplaceChild("right_sleeve", CubeListBuilder.create()
                 .texOffs(0, 26).mirror(false).addBox(-3.2f, -1, -9, 6.4f, 12, 9), PartPose.offsetAndRotation(0, 0.4f, 2.1f, 1.1769f, 0.1373f, 0.155f));
         PartDefinition leftSleeve = leftForearm.addOrReplaceChild("left_sleeve", CubeListBuilder.create()
                 .texOffs(0, 26).mirror(true).addBox(-3.2f, -1, -9, 6.4f, 12, 9), PartPose.offsetAndRotation(0, 0.4f, 2.1f, 2.2488f, -0.5904f, 0.3688f));
         PartDefinition rightHand = rightForearm.addOrReplaceChild("right_hand", CubeListBuilder.create()
-                .texOffs(151, 107).mirror(false).addBox(-1.5f, 0, -1.5f, 3, 3, 3), PartPose.offsetAndRotation(0, 7.2f, 0, 0, 0, 0));
+                .texOffs(130, 107).mirror(false).addBox(-1.5f, 0, -1.5f, 3, 3, 3), PartPose.offsetAndRotation(0, 7.2f, 0, 0, 0, 0));
         PartDefinition leftHand = leftForearm.addOrReplaceChild("left_hand", CubeListBuilder.create()
-                .texOffs(151, 107).mirror(true).addBox(-1.5f, 0, -1.5f, 3, 3, 3), PartPose.offsetAndRotation(0, 7.2f, 0, 0, 0, 0));
+                .texOffs(130, 107).mirror(true).addBox(-1.5f, 0, -1.5f, 3, 3, 3), PartPose.offsetAndRotation(0, 7.2f, 0, 0, 0, 0));
         PartDefinition tablet = rightHand.addOrReplaceChild("tablet", CubeListBuilder.create()
                 .texOffs(76, 66).mirror(false).addBox(-1.3f, -12, -0.35f, 2.6f, 14, 0.7f), PartPose.offsetAndRotation(0, 1.6f, -0.2f, 1.2955f, 0.48f, 0.3331f));
         PartDefinition head = body.addOrReplaceChild("head", CubeListBuilder.create()
                 .texOffs(66, 48).mirror(false).addBox(-4.4f, -9, -4, 8.8f, 7.4f, 8)
-                .texOffs(110, 115).mirror(false).addBox(-1, -5.8f, -4.8f, 2, 2.4f, 0.9f)
+                .texOffs(89, 115).mirror(false).addBox(-1, -5.8f, -4.8f, 2, 2.4f, 0.9f)
                 .texOffs(0, 82).mirror(false).addBox(-4.6f, -9.3f, -0.6f, 9.2f, 8, 5), PartPose.offsetAndRotation(0, -18.4f, -0.8f, 0, 0, 0));
         PartDefinition rightBrow = head.addOrReplaceChild("right_brow", CubeListBuilder.create()
-                .texOffs(181, 115).mirror(false).addBox(-3.8f, -0.9f, -0.5f, 3.8f, 1.1f, 1), PartPose.offsetAndRotation(-0.4f, -6.5f, -4.3f, 0, 0.1f, 0.24f));
+                .texOffs(162, 115).mirror(false).addBox(-3.8f, -0.9f, -0.5f, 3.8f, 1.1f, 1), PartPose.offsetAndRotation(-0.4f, -6.5f, -4.3f, 0, 0.1f, 0.24f));
         PartDefinition leftBrow = head.addOrReplaceChild("left_brow", CubeListBuilder.create()
-                .texOffs(181, 115).mirror(true).addBox(0, -0.9f, -0.5f, 3.8f, 1.1f, 1), PartPose.offsetAndRotation(0.4f, -6.5f, -4.3f, 0, -0.1f, -0.24f));
+                .texOffs(162, 115).mirror(true).addBox(0, -0.9f, -0.5f, 3.8f, 1.1f, 1), PartPose.offsetAndRotation(0.4f, -6.5f, -4.3f, 0, -0.1f, -0.24f));
         PartDefinition rightMoustache = head.addOrReplaceChild("right_moustache", CubeListBuilder.create()
-                .texOffs(192, 115).mirror(false).addBox(-3.2f, -0.5f, -0.5f, 3.2f, 1, 1), PartPose.offsetAndRotation(-0.5f, -3.3f, -4.5f, 0, 0.2f, -0.55f));
+                .texOffs(173, 115).mirror(false).addBox(-3.2f, -0.5f, -0.5f, 3.2f, 1, 1), PartPose.offsetAndRotation(-0.5f, -3.3f, -4.5f, 0, 0.2f, -0.55f));
         PartDefinition leftMoustache = head.addOrReplaceChild("left_moustache", CubeListBuilder.create()
-                .texOffs(192, 115).mirror(true).addBox(0, -0.5f, -0.5f, 3.2f, 1, 1), PartPose.offsetAndRotation(0.5f, -3.3f, -4.5f, 0, -0.2f, 0.55f));
+                .texOffs(173, 115).mirror(true).addBox(0, -0.5f, -0.5f, 3.2f, 1, 1), PartPose.offsetAndRotation(0.5f, -3.3f, -4.5f, 0, -0.2f, 0.55f));
         PartDefinition jaw = head.addOrReplaceChild("jaw", CubeListBuilder.create()
                 .texOffs(0, 96).mirror(false).addBox(-4.1f, 0, -3.4f, 8.2f, 2.6f, 6.8f), PartPose.offsetAndRotation(0, -2, -0.6f, 0, 0, 0));
         PartDefinition beard = jaw.addOrReplaceChild("beard", CubeListBuilder.create()
@@ -558,29 +559,29 @@ public final class HellRenderers {
         PartDefinition crown = head.addOrReplaceChild("crown", CubeListBuilder.create()
                 .texOffs(65, 82).mirror(false).addBox(-3.6f, -4, -3.4f, 7.2f, 4.2f, 6.8f)
                 .texOffs(107, 82).mirror(false).addBox(-4.7f, -0.9f, -4.3f, 9.4f, 1.4f, 8.6f)
-                .texOffs(117, 115).mirror(false).addBox(-2, -3.7f, -3.9f, 4, 3, 0.6f)
-                .texOffs(203, 115).mirror(false).addBox(-6, -3.3f, -0.35f, 12, 0.7f, 0.7f), PartPose.offsetAndRotation(0, -9, 0, 0, 0, 0));
+                .texOffs(96, 115).mirror(false).addBox(-2, -3.7f, -3.9f, 4, 3, 0.6f)
+                .texOffs(184, 115).mirror(false).addBox(-6, -3.3f, -0.35f, 12, 0.7f, 0.7f), PartPose.offsetAndRotation(0, -9, 0, 0, 0, 0));
         PartDefinition board = crown.addOrReplaceChild("board", CubeListBuilder.create()
                 .texOffs(101, 48).mirror(false).addBox(-5.8f, -1.4f, -7.6f, 11.6f, 1.4f, 14)
                 .texOffs(154, 48).mirror(false).addBox(-6, -0.4f, -7.8f, 12, 0.4f, 14.4f)
-                .texOffs(250, 107).mirror(false).addBox(-4.25f, 0, -7.3f, 0.5f, 3.6f, 0.5f)
-                .texOffs(250, 107).mirror(false).addBox(-2.25f, 0, -7.3f, 0.5f, 3.6f, 0.5f)
-                .texOffs(250, 107).mirror(false).addBox(-0.25f, 0, -7.3f, 0.5f, 3.6f, 0.5f)
-                .texOffs(250, 107).mirror(false).addBox(1.75f, 0, -7.3f, 0.5f, 3.6f, 0.5f)
-                .texOffs(250, 107).mirror(false).addBox(3.75f, 0, -7.3f, 0.5f, 3.6f, 0.5f)
-                .texOffs(250, 107).mirror(false).addBox(-4.25f, 0, 5.8f, 0.5f, 3.6f, 0.5f)
-                .texOffs(250, 107).mirror(false).addBox(-2.25f, 0, 5.8f, 0.5f, 3.6f, 0.5f)
-                .texOffs(250, 107).mirror(false).addBox(-0.25f, 0, 5.8f, 0.5f, 3.6f, 0.5f)
-                .texOffs(250, 107).mirror(false).addBox(1.75f, 0, 5.8f, 0.5f, 3.6f, 0.5f)
-                .texOffs(250, 107).mirror(false).addBox(3.75f, 0, 5.8f, 0.5f, 3.6f, 0.5f), PartPose.offsetAndRotation(0, -4, 0, 0.07f, 0, 0));
+                .texOffs(229, 107).mirror(false).addBox(-4.25f, 0, -7.3f, 0.5f, 3.6f, 0.5f)
+                .texOffs(229, 107).mirror(false).addBox(-2.25f, 0, -7.3f, 0.5f, 3.6f, 0.5f)
+                .texOffs(229, 107).mirror(false).addBox(-0.25f, 0, -7.3f, 0.5f, 3.6f, 0.5f)
+                .texOffs(229, 107).mirror(false).addBox(1.75f, 0, -7.3f, 0.5f, 3.6f, 0.5f)
+                .texOffs(229, 107).mirror(false).addBox(3.75f, 0, -7.3f, 0.5f, 3.6f, 0.5f)
+                .texOffs(229, 107).mirror(false).addBox(-4.25f, 0, 5.8f, 0.5f, 3.6f, 0.5f)
+                .texOffs(229, 107).mirror(false).addBox(-2.25f, 0, 5.8f, 0.5f, 3.6f, 0.5f)
+                .texOffs(229, 107).mirror(false).addBox(-0.25f, 0, 5.8f, 0.5f, 3.6f, 0.5f)
+                .texOffs(229, 107).mirror(false).addBox(1.75f, 0, 5.8f, 0.5f, 3.6f, 0.5f)
+                .texOffs(229, 107).mirror(false).addBox(3.75f, 0, 5.8f, 0.5f, 3.6f, 0.5f), PartPose.offsetAndRotation(0, -4, 0, 0.07f, 0, 0));
         PartDefinition emblemQinguang = leftHand.addOrReplaceChild("emblem_qinguang", CubeListBuilder.create()
-                .texOffs(188, 96).mirror(false).addBox(-0.91f, -4.42f, -0.91f, 1.82f, 5.72f, 1.82f)
-                .texOffs(0, 115).mirror(false).addBox(-3.12f, -5.98f, -1.3f, 6.24f, 1.82f, 2.6f)
+                .texOffs(159, 96).mirror(false).addBox(-0.91f, -4.42f, -0.91f, 1.82f, 5.72f, 1.82f)
+                .texOffs(234, 107).mirror(false).addBox(-3.12f, -5.98f, -1.3f, 6.24f, 1.82f, 2.6f)
                 .texOffs(0, 48).mirror(false).addBox(-7.15f, -20.28f, -0.78f, 14.3f, 14.3f, 1.56f), PartPose.offsetAndRotation(0.4f, 1.6f, -1.2f, 2.4327f, -0.3499f, -0.1503f));
         PartDefinition emblemChujiang = leftHand.addOrReplaceChild("emblem_chujiang", CubeListBuilder.create()
-                .texOffs(197, 96).mirror(false).addBox(-0.78f, -2.6f, -0.78f, 1.56f, 5.2f, 1.56f)
-                .texOffs(206, 96).mirror(false).addBox(-2.47f, -4.42f, -2.47f, 4.94f, 2.08f, 4.94f)
-                .texOffs(129, 26).mirror(false).addBox(-1.82f, -18.2f, -1.82f, 3.64f, 14.04f, 3.64f), PartPose.offsetAndRotation(0.4f, 1.6f, -1.2f, 2.4327f, -0.3499f, -0.1503f));
+                .texOffs(168, 96).mirror(false).addBox(-0.78f, -2.6f, -0.78f, 1.56f, 5.2f, 1.56f)
+                .texOffs(177, 96).mirror(false).addBox(-2.47f, -4.42f, -2.47f, 4.94f, 2.08f, 4.94f)
+                .texOffs(170, 26).mirror(false).addBox(-1.82f, -18.2f, -1.82f, 3.64f, 14.04f, 3.64f), PartPose.offsetAndRotation(0.4f, 1.6f, -1.2f, 2.4327f, -0.3499f, -0.1503f));
         PartDefinition emblemChujiangL = emblemChujiang.addOrReplaceChild("emblem_chujiang_l", CubeListBuilder.create()
                 .texOffs(31, 82).mirror(false).addBox(-1.3f, -9.75f, -1.3f, 2.6f, 9.75f, 2.6f), PartPose.offsetAndRotation(1.04f, -4.68f, 0, 0, 0, 0.5f));
         PartDefinition emblemChujiangR = emblemChujiang.addOrReplaceChild("emblem_chujiang_r", CubeListBuilder.create()
@@ -589,70 +590,69 @@ public final class HellRenderers {
                 .texOffs(146, 82).mirror(false).addBox(-1.04f, -7.15f, -1.04f, 2.08f, 7.15f, 2.08f), PartPose.offsetAndRotation(0, -4.68f, -1.04f, -0.45f, 0, 0));
         PartDefinition emblemSongdi = leftHand.addOrReplaceChild("emblem_songdi", CubeListBuilder.create()
                 .texOffs(114, 0).mirror(false).addBox(-0.975f, -17.42f, -0.975f, 1.95f, 20.02f, 1.95f)
-                .texOffs(21, 115).mirror(false).addBox(-1.43f, -1.3f, -1.43f, 2.86f, 1.3f, 2.86f)
-                .texOffs(34, 115).mirror(false).addBox(-0.39f, 2.6f, -0.91f, 0.78f, 2.34f, 1.82f)
-                .texOffs(128, 115).mirror(false).addBox(-0.91f, 4.55f, -0.39f, 1.82f, 2.34f, 0.78f)
-                .texOffs(34, 115).mirror(false).addBox(-0.39f, 6.5f, -0.91f, 0.78f, 2.34f, 1.82f)
-                .texOffs(164, 107).mirror(false).addBox(-1.43f, 8.58f, -1.43f, 2.86f, 2.86f, 2.86f), PartPose.offsetAndRotation(0.4f, 1.6f, -1.2f, 2.4327f, -0.3499f, -0.1503f));
+                .texOffs(0, 115).mirror(false).addBox(-1.43f, -1.3f, -1.43f, 2.86f, 1.3f, 2.86f)
+                .texOffs(13, 115).mirror(false).addBox(-0.39f, 2.6f, -0.91f, 0.78f, 2.34f, 1.82f)
+                .texOffs(107, 115).mirror(false).addBox(-0.91f, 4.55f, -0.39f, 1.82f, 2.34f, 0.78f)
+                .texOffs(13, 115).mirror(false).addBox(-0.39f, 6.5f, -0.91f, 0.78f, 2.34f, 1.82f)
+                .texOffs(143, 107).mirror(false).addBox(-1.43f, 8.58f, -1.43f, 2.86f, 2.86f, 2.86f), PartPose.offsetAndRotation(0.4f, 1.6f, -1.2f, 2.4327f, -0.3499f, -0.1503f));
         PartDefinition emblemSongdiArc0 = emblemSongdi.addOrReplaceChild("emblem_songdi_arc_0", CubeListBuilder.create()
-                .texOffs(177, 107).mirror(false).addBox(-1.8969f, -1.235f, -1.04f, 3.7938f, 2.47f, 2.08f), PartPose.offsetAndRotation(0.1938f, -18.3419f, 0, 0, 0, 4.9796f));
+                .texOffs(156, 107).mirror(false).addBox(-1.8969f, -1.235f, -1.04f, 3.7938f, 2.47f, 2.08f), PartPose.offsetAndRotation(0.1938f, -18.3419f, 0, 0, 0, 4.9796f));
         PartDefinition emblemSongdiArc1 = emblemSongdi.addOrReplaceChild("emblem_songdi_arc_1", CubeListBuilder.create()
-                .texOffs(177, 107).mirror(false).addBox(-1.8969f, -1.17f, -1.04f, 3.7938f, 2.34f, 2.08f), PartPose.offsetAndRotation(1.6629f, -20.8235f, 0, 0, 0, 5.5141f));
+                .texOffs(156, 107).mirror(false).addBox(-1.8969f, -1.17f, -1.04f, 3.7938f, 2.34f, 2.08f), PartPose.offsetAndRotation(1.6629f, -20.8235f, 0, 0, 0, 5.5141f));
         PartDefinition emblemSongdiArc2 = emblemSongdi.addOrReplaceChild("emblem_songdi_arc_2", CubeListBuilder.create()
-                .texOffs(177, 107).mirror(false).addBox(-1.8969f, -1.105f, -1.04f, 3.7938f, 2.21f, 2.08f), PartPose.offsetAndRotation(4.1912f, -22.2105f, 0, 0, 0, 6.0487f));
+                .texOffs(156, 107).mirror(false).addBox(-1.8969f, -1.105f, -1.04f, 3.7938f, 2.21f, 2.08f), PartPose.offsetAndRotation(4.1912f, -22.2105f, 0, 0, 0, 6.0487f));
         PartDefinition emblemSongdiArc3 = emblemSongdi.addOrReplaceChild("emblem_songdi_arc_3", CubeListBuilder.create()
-                .texOffs(177, 107).mirror(false).addBox(-1.8969f, -1.04f, -1.04f, 3.7938f, 2.08f, 2.08f), PartPose.offsetAndRotation(7.0734f, -22.1162f, 0, 0, 0, 6.5832f));
+                .texOffs(156, 107).mirror(false).addBox(-1.8969f, -1.04f, -1.04f, 3.7938f, 2.08f, 2.08f), PartPose.offsetAndRotation(7.0734f, -22.1162f, 0, 0, 0, 6.5832f));
         PartDefinition emblemSongdiArc4 = emblemSongdi.addOrReplaceChild("emblem_songdi_arc_4", CubeListBuilder.create()
-                .texOffs(41, 115).mirror(false).addBox(-1.8969f, -0.975f, -1.04f, 3.7938f, 1.95f, 2.08f), PartPose.offsetAndRotation(9.5056f, -20.5667f, 0, 0, 0, 7.1177f));
+                .texOffs(20, 115).mirror(false).addBox(-1.8969f, -0.975f, -1.04f, 3.7938f, 1.95f, 2.08f), PartPose.offsetAndRotation(9.5056f, -20.5667f, 0, 0, 0, 7.1177f));
         PartDefinition emblemSongdiArc5 = emblemSongdi.addOrReplaceChild("emblem_songdi_arc_5", CubeListBuilder.create()
-                .texOffs(41, 115).mirror(false).addBox(-1.8969f, -0.91f, -1.04f, 3.7938f, 1.82f, 2.08f), PartPose.offsetAndRotation(10.8092f, -17.9944f, 0, 0, 0, 7.6522f));
+                .texOffs(20, 115).mirror(false).addBox(-1.8969f, -0.91f, -1.04f, 3.7938f, 1.82f, 2.08f), PartPose.offsetAndRotation(10.8092f, -17.9944f, 0, 0, 0, 7.6522f));
         PartDefinition emblemSongdiArc6 = emblemSongdi.addOrReplaceChild("emblem_songdi_arc_6", CubeListBuilder.create()
-                .texOffs(41, 115).mirror(false).addBox(-1.8969f, -0.845f, -1.04f, 3.7938f, 1.69f, 2.08f), PartPose.offsetAndRotation(10.6206f, -15.1168f, 0, 0, 0, 8.1867f));
+                .texOffs(20, 115).mirror(false).addBox(-1.8969f, -0.845f, -1.04f, 3.7938f, 1.69f, 2.08f), PartPose.offsetAndRotation(10.6206f, -15.1168f, 0, 0, 0, 8.1867f));
         PartDefinition emblemSongdiArc7 = emblemSongdi.addOrReplaceChild("emblem_songdi_arc_7", CubeListBuilder.create()
-                .texOffs(41, 115).mirror(false).addBox(-1.8969f, -0.78f, -1.04f, 3.7938f, 1.56f, 2.08f), PartPose.offsetAndRotation(8.9924f, -12.7366f, 0, 0, 0, 8.7212f));
+                .texOffs(20, 115).mirror(false).addBox(-1.8969f, -0.78f, -1.04f, 3.7938f, 1.56f, 2.08f), PartPose.offsetAndRotation(8.9924f, -12.7366f, 0, 0, 0, 8.7212f));
         PartDefinition emblemSongdiPoint = emblemSongdi.addOrReplaceChild("emblem_songdi_point", CubeListBuilder.create()
-                .texOffs(227, 96).mirror(false).addBox(-0.78f, -5.46f, -0.78f, 1.56f, 5.98f, 1.56f), PartPose.offsetAndRotation(7.7675f, -11.9516f, 0, 0, 0, 10.5592f));
+                .texOffs(198, 96).mirror(false).addBox(-0.78f, -5.46f, -0.78f, 1.56f, 5.98f, 1.56f), PartPose.offsetAndRotation(7.7675f, -11.9516f, 0, 0, 0, 10.5592f));
         PartDefinition emblemSongdiSpur = emblemSongdi.addOrReplaceChild("emblem_songdi_spur", CubeListBuilder.create()
                 .texOffs(59, 107).mirror(false).addBox(-0.78f, -3.9f, -0.78f, 1.56f, 4.16f, 1.56f), PartPose.offsetAndRotation(8.58f, -22.304f, 0, 0, 0, 6.8068f));
         PartDefinition emblemWuguan = leftHand.addOrReplaceChild("emblem_wuguan", CubeListBuilder.create()
-                .texOffs(146, 26).mirror(false).addBox(-0.65f, -15.6f, -0.65f, 1.3f, 16.9f, 1.3f)
-                .texOffs(135, 115).mirror(false).addBox(-7.8f, -16.64f, -0.65f, 15.6f, 1.3f, 1.3f)
-                .texOffs(192, 107).mirror(false).addBox(-1.3f, -19.5f, -0.52f, 2.6f, 3.12f, 1.04f)
-                .texOffs(68, 107).mirror(false).addBox(-7.41f, -15.34f, -0.195f, 0.39f, 5.98f, 0.39f)
-                .texOffs(68, 107).mirror(false).addBox(7.02f, -15.34f, -0.195f, 0.39f, 5.98f, 0.39f)
-                .texOffs(73, 107).mirror(false).addBox(-9.62f, -9.36f, -2.47f, 4.94f, 1.04f, 4.94f)
-                .texOffs(73, 107).mirror(false).addBox(4.68f, -9.36f, -2.47f, 4.94f, 1.04f, 4.94f)
-                .texOffs(203, 107).mirror(false).addBox(-1.82f, 1.04f, -1.82f, 3.64f, 1.3f, 3.64f), PartPose.offsetAndRotation(2.6f, 1.6f, -1.2f, 2.4327f, -0.3499f, -0.1503f));
+                .texOffs(187, 26).mirror(false).addBox(-0.78f, -15.6f, -0.78f, 1.56f, 16.9f, 1.56f)
+                .texOffs(114, 115).mirror(false).addBox(-8.06f, -17.03f, -0.845f, 16.12f, 1.69f, 1.69f)
+                .texOffs(171, 107).mirror(false).addBox(-1.43f, -20.28f, -0.585f, 2.86f, 3.38f, 1.17f)
+                .texOffs(68, 107).mirror(false).addBox(-7.54f, -15.34f, -0.26f, 0.52f, 5.72f, 0.52f)
+                .texOffs(68, 107).mirror(false).addBox(7.02f, -15.34f, -0.26f, 0.52f, 5.72f, 0.52f)
+                .texOffs(207, 96).mirror(false).addBox(-10.14f, -9.62f, -2.86f, 5.72f, 1.3f, 5.72f)
+                .texOffs(207, 96).mirror(false).addBox(4.42f, -9.62f, -2.86f, 5.72f, 1.3f, 5.72f)
+                .texOffs(182, 107).mirror(false).addBox(-1.82f, 1.04f, -1.82f, 3.64f, 1.3f, 3.64f), PartPose.offsetAndRotation(2.6f, 1.6f, -1.2f, 2.4327f, -0.3499f, -0.1503f));
         PartDefinition emblemBiancheng = leftHand.addOrReplaceChild("emblem_biancheng", CubeListBuilder.create()
-                .texOffs(94, 107).mirror(false).addBox(-0.91f, -4.42f, -0.91f, 1.82f, 4.94f, 1.82f)
-                .texOffs(103, 107).mirror(false).addBox(-1.56f, -6.24f, -1.56f, 3.12f, 2.08f, 3.12f)
-                .texOffs(96, 96).mirror(false).addBox(-3.38f, 0.52f, -3.38f, 6.76f, 1.56f, 6.76f)
-                .texOffs(155, 26).mirror(false).addBox(-4.42f, 1.82f, -4.42f, 8.84f, 8.32f, 8.84f)
-                .texOffs(85, 66).mirror(false).addBox(-5.33f, 9.88f, -5.33f, 10.66f, 2.08f, 10.66f)
-                .texOffs(220, 107).mirror(false).addBox(-1.04f, 11.7f, -1.04f, 2.08f, 2.6f, 2.08f), PartPose.offsetAndRotation(0.4f, 2.6f, -1.2f, 2.4327f, -0.3499f, -0.1503f));
+                .texOffs(73, 107).mirror(false).addBox(-0.91f, -4.42f, -0.91f, 1.82f, 4.94f, 1.82f)
+                .texOffs(82, 107).mirror(false).addBox(-1.56f, -6.24f, -1.56f, 3.12f, 2.08f, 3.12f)
+                .texOffs(33, 26).mirror(false).addBox(-4.94f, 0.26f, -4.94f, 9.88f, 10.92f, 9.88f)
+                .texOffs(85, 66).mirror(false).addBox(-5.72f, 10.92f, -5.72f, 11.44f, 1.56f, 11.44f)
+                .texOffs(199, 107).mirror(false).addBox(-1.04f, 12.22f, -1.04f, 2.08f, 2.86f, 2.08f), PartPose.offsetAndRotation(0.4f, 2.6f, -1.2f, 2.4327f, -0.3499f, -0.1503f));
         PartDefinition emblemTaishan = leftHand.addOrReplaceChild("emblem_taishan", CubeListBuilder.create()
-                .texOffs(130, 66).mirror(false).addBox(-4.42f, -7.02f, -3.64f, 8.84f, 5.46f, 7.28f)
+                .texOffs(134, 66).mirror(false).addBox(-4.42f, -7.02f, -3.64f, 8.84f, 5.46f, 7.28f)
                 .texOffs(159, 82).mirror(false).addBox(-5.07f, -8.32f, -4.29f, 10.14f, 1.3f, 8.58f)
-                .texOffs(56, 115).mirror(false).addBox(-4.16f, -11.18f, -0.78f, 1.56f, 2.86f, 1.56f)
-                .texOffs(56, 115).mirror(false).addBox(2.6f, -11.18f, -0.78f, 1.56f, 2.86f, 1.56f)
-                .texOffs(65, 115).mirror(false).addBox(-3.77f, -1.56f, -3.12f, 1.56f, 2.34f, 1.56f)
-                .texOffs(65, 115).mirror(false).addBox(2.21f, -1.56f, -3.12f, 1.56f, 2.34f, 1.56f)
-                .texOffs(65, 115).mirror(false).addBox(-3.77f, -1.56f, 1.56f, 1.56f, 2.34f, 1.56f)
-                .texOffs(65, 115).mirror(false).addBox(2.21f, -1.56f, 1.56f, 1.56f, 2.34f, 1.56f), PartPose.offsetAndRotation(0.4f, -0.6f, -1.2f, 2.4327f, -0.3499f, -0.1503f));
+                .texOffs(35, 115).mirror(false).addBox(-4.16f, -11.18f, -0.78f, 1.56f, 2.86f, 1.56f)
+                .texOffs(35, 115).mirror(false).addBox(2.6f, -11.18f, -0.78f, 1.56f, 2.86f, 1.56f)
+                .texOffs(44, 115).mirror(false).addBox(-3.77f, -1.56f, -3.12f, 1.56f, 2.34f, 1.56f)
+                .texOffs(44, 115).mirror(false).addBox(2.21f, -1.56f, -3.12f, 1.56f, 2.34f, 1.56f)
+                .texOffs(44, 115).mirror(false).addBox(-3.77f, -1.56f, 1.56f, 1.56f, 2.34f, 1.56f)
+                .texOffs(44, 115).mirror(false).addBox(2.21f, -1.56f, 1.56f, 1.56f, 2.34f, 1.56f), PartPose.offsetAndRotation(0.4f, -0.6f, -1.2f, 2.4327f, -0.3499f, -0.1503f));
         PartDefinition emblemTaishanFire = emblemTaishan.addOrReplaceChild("emblem_taishan_fire", CubeListBuilder.create()
-                .texOffs(125, 96).mirror(false).addBox(-3.64f, -7.8f, -0.325f, 7.28f, 7.8f, 0.65f)
+                .texOffs(96, 96).mirror(false).addBox(-3.64f, -7.8f, -0.325f, 7.28f, 7.8f, 0.65f)
                 .texOffs(209, 48).mirror(false).addBox(-0.325f, -7.8f, -3.64f, 0.65f, 7.8f, 7.28f), PartPose.offsetAndRotation(0, -8.32f, 0, 0, 0.4f, 0));
         PartDefinition emblemDushi = leftHand.addOrReplaceChild("emblem_dushi", CubeListBuilder.create()
-                .texOffs(192, 26).mirror(false).addBox(-7.8f, -16.38f, -0.91f, 15.6f, 15.6f, 1.82f)
-                .texOffs(144, 96).mirror(false).addBox(-1.56f, -10.14f, -2.08f, 3.12f, 3.12f, 4.16f), PartPose.offsetAndRotation(0.4f, 1.4f, -1.2f, 2.4327f, -0.3499f, -0.1503f));
+                .texOffs(196, 26).mirror(false).addBox(-7.8f, -16.38f, -0.91f, 15.6f, 15.6f, 1.82f)
+                .texOffs(115, 96).mirror(false).addBox(-1.56f, -10.14f, -2.08f, 3.12f, 3.12f, 4.16f), PartPose.offsetAndRotation(0.4f, 1.4f, -1.2f, 2.4327f, -0.3499f, -0.1503f));
         PartDefinition emblemPingdeng = leftHand.addOrReplaceChild("emblem_pingdeng", CubeListBuilder.create()
-                .texOffs(165, 66).mirror(false).addBox(-0.78f, -8.45f, -0.78f, 1.56f, 11.05f, 1.56f)
+                .texOffs(169, 66).mirror(false).addBox(-0.78f, -8.45f, -0.78f, 1.56f, 11.05f, 1.56f)
                 .texOffs(35, 48).mirror(false).addBox(-6.24f, -23.4f, -0.78f, 12.48f, 14.95f, 1.56f)
-                .texOffs(74, 115).mirror(false).addBox(-4.68f, -25.74f, -0.65f, 9.36f, 2.34f, 1.3f)
-                .texOffs(233, 107).mirror(false).addBox(-1.82f, 1.56f, -1.82f, 3.64f, 1.56f, 3.64f), PartPose.offsetAndRotation(0.4f, 1.6f, -1.2f, 2.4327f, -0.3499f, -0.1503f));
+                .texOffs(53, 115).mirror(false).addBox(-4.68f, -25.74f, -0.65f, 9.36f, 2.34f, 1.3f)
+                .texOffs(212, 107).mirror(false).addBox(-1.82f, 1.56f, -1.82f, 3.64f, 1.56f, 3.64f), PartPose.offsetAndRotation(0.4f, 1.6f, -1.2f, 2.4327f, -0.3499f, -0.1503f));
         PartDefinition emblemZhuanlun = leftHand.addOrReplaceChild("emblem_zhuanlun", CubeListBuilder.create()
-                .texOffs(33, 26).mirror(false).addBox(-9.1f, -19.5f, -0.65f, 18.2f, 18.2f, 1.3f)
-                .texOffs(236, 96).mirror(false).addBox(-1.82f, -12.22f, -1.95f, 3.64f, 3.64f, 3.9f), PartPose.offsetAndRotation(0.4f, 1.4f, -1.2f, 2.4327f, -0.3499f, -0.1503f));
+                .texOffs(74, 26).mirror(false).addBox(-9.1f, -19.5f, -0.65f, 18.2f, 18.2f, 1.3f)
+                .texOffs(232, 96).mirror(false).addBox(-1.82f, -12.22f, -1.95f, 3.64f, 3.64f, 3.9f), PartPose.offsetAndRotation(0.4f, 1.4f, -1.2f, 2.4327f, -0.3499f, -0.1503f));
         return LayerDefinition.create(mesh, 256, 256);
         // GENERATED kings: end
     }
@@ -712,8 +712,8 @@ public final class HellRenderers {
             // the tablet before him, the emblem in his left; judging, the emblem thrust up and the tablet raised; a blow, the tablet brought down
             float rx = Mth.cos(age * 0.05f) * 0.03f, lx = -rx;
             if (e.isJudging()) {
-                rx = -0.8f;
-                lx = -1.2f;
+                rx = -0.9f;
+                lx = -0.5f;
             }
             rx -= strike * 1.4f;
             turn(rightArm, rx, 0);

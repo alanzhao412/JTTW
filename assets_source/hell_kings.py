@@ -147,13 +147,13 @@ def emblems():
     ], children=arc)
     # 4 the scales: a post up from his fist, the beam level across its top, a pan hanging at each end
     out += held('wuguan', [
-        (-0.5, -12, -0.5, 1, 13, 1, 's_post'),
-        (-6, -12.8, -0.5, 12, 1, 1, 's_beam'),
-        (-1, -15, -0.4, 2, 2.4, 0.8, 's_pointer'),
-        (-5.7, -11.8, -0.15, 0.3, 4.6, 0.3, 's_cord'),
-        (5.4, -11.8, -0.15, 0.3, 4.6, 0.3, 's_cord'),
-        (-7.4, -7.2, -1.9, 3.8, 0.8, 3.8, 's_pan'),
-        (3.6, -7.2, -1.9, 3.8, 0.8, 3.8, 's_pan'),
+        (-0.6, -12, -0.6, 1.2, 13, 1.2, 's_post'),
+        (-6.2, -13.1, -0.65, 12.4, 1.3, 1.3, 's_beam'),
+        (-1.1, -15.6, -0.45, 2.2, 2.6, 0.9, 's_pointer'),
+        (-5.8, -11.8, -0.2, 0.4, 4.4, 0.4, 's_cord'),
+        (5.4, -11.8, -0.2, 0.4, 4.4, 0.4, 's_cord'),
+        (-7.8, -7.4, -2.2, 4.4, 1, 4.4, 's_pan'),
+        (3.4, -7.4, -2.2, 4.4, 1, 4.4, 's_pan'),
         (-1.4, 0.8, -1.4, 2.8, 1, 2.8, 's_foot'),
     ], pivot=(2.6, 1.6, -1.2))
     # 6 the bell of the Wailing City: a great handbell, its handle in his fist, the bell under it, round-shouldered,
@@ -161,10 +161,9 @@ def emblems():
     out += held('biancheng', [
         (-0.7, -3.4, -0.7, 1.4, 3.8, 1.4, 'b_handle'),
         (-1.2, -4.8, -1.2, 2.4, 1.6, 2.4, 'b_knob'),
-        (-2.6, 0.4, -2.6, 5.2, 1.2, 5.2, 'b_crown'),
-        (-3.4, 1.4, -3.4, 6.8, 6.4, 6.8, 'b_body'),
-        (-4.1, 7.6, -4.1, 8.2, 1.6, 8.2, 'b_lip'),
-        (-0.8, 9.0, -0.8, 1.6, 2, 1.6, 'b_clapper'),
+        (-3.8, 0.2, -3.8, 7.6, 8.4, 7.6, 'b_bell'),
+        (-4.4, 8.4, -4.4, 8.8, 1.2, 8.8, 'b_lip'),
+        (-0.8, 9.4, -0.8, 1.6, 2.2, 1.6, 'b_clapper'),
     ], pivot=(0.4, 2.6, -1.2))
     # 7 a bronze cauldron (鼎) of boiling oil on his palm: four legs, two ears, fire licking up out of it
     out += held('taishan', [
@@ -938,19 +937,66 @@ def paint_emblem(p, style, f, sides):
     # 6 the bell
     if style in ('b_handle', 'b_knob'):
         metal(p, f, BRONZE, BRONZE_DEEP)
-    if style in ('b_crown', 'b_shoulder', 'b_body', 'b_lower', 'b_lip'):   # bronze, banded in gold, verdigris in its hollows
+    if style == 'b_bell':                                          # the bell, cut to its shape: a round crown, its sides swelling to the lip
+        def half(t):                                               # its half-breadth, a share of the box's, t 0 at the top .. 1 at the foot
+            return 0.5 + 0.5 * t ** 0.8 if t > 0.12 else 0.56 * math.sqrt(t / 0.12) + 0.02
+        for s in sides:
+            fx, fy, fw, fh = f[s]
+            for j in range(fh):
+                t = (j + 0.5) / fh
+                hw = half(t)
+                for i in range(fw):
+                    u = abs((i + 0.5) / fw - 0.5) * 2
+                    if u > hw:
+                        p.clear((fx + i, fy + j))
+                        continue
+                    shade = abs((i + 0.5) / fw - 0.42) * 2 / max(0.3, hw)
+                    c = mixc(mixc(BRONZE, (236, 190, 120), 0.35), BRONZE_DEEP, min(1, shade * 0.9))
+                    if abs(t - 0.36) < 0.03 or abs(t - 0.74) < 0.03:
+                        c = GOLD                                   # its bands
+                    elif 0.42 < t < 0.68 and (i % 4 == 1) and (j % 3 == 0) and u < hw - 0.15:
+                        c = GOLD                                   # its studs (枚)
+                    elif 0.8 < t < 0.95 and abs(i + 0.5 - fw / 2) < 2.5:
+                        c = GOLD_DEEP                              # the striking boss
+                    elif t > 0.78 and (i // 2) % 3 == 0:
+                        c = BRONZE_GREEN
+                    p.px((fx + i, fy + j), noisy(p, c, 3))
+        fx, fy, fw, fh = f['top']                                  # its crown, round
+        for j in range(fh):
+            for i in range(fw):
+                d = math.hypot((i + 0.5) / fw - 0.5, (j + 0.5) / fh - 0.5) * 2
+                if d > 0.58:
+                    p.clear((fx + i, fy + j))
+                else:
+                    p.px((fx + i, fy + j), GOLD if d > 0.46 else BRONZE)
+        fx, fy, fw, fh = f['bottom']
+        for j in range(fh):
+            for i in range(fw):
+                p.px((fx + i, fy + j), (26, 16, 10))
+    if style in ('b_crown', 'b_shoulder', 'b_body', 'b_lip'):      # bronze, rounded, banded in gold, studded, verdigris in its hollows
         metal(p, f, BRONZE, BRONZE_DEEP)
         for s in sides:
             fx, fy, fw, fh = f[s]
+            for j in range(fh):                                    # rounded: dark toward its edges, a highlight down it
+                for i in range(fw):
+                    t = abs((i + 0.5) / fw - 0.42) * 2
+                    p.px((fx + i, fy + j), noisy(p, mixc(mixc(BRONZE, (236, 190, 120), 0.35), BRONZE_DEEP, min(1, t * 1.1)), 3))
             for i in range(fw):
                 p.px((fx + i, fy + fh - 1), GOLD)
-            if style == 'b_body':
-                for i in range(2, fw - 1, 4):                      # the studs (枚)
-                    for j in (2, 4):
+            if style == 'b_shoulder':
+                for i in range(2, fw - 2, 4):                      # the studs (枚), in rows
+                    for j in range(2, fh - 2, 3):
                         p.px((fx + i, fy + j), GOLD)
+                        p.px((fx + i + 1, fy + j), GOLD_DEEP)
+            if style == 'b_body':
                 for i in range(fw):
+                    p.px((fx + i, fy + 1), GOLD)
                     if (i // 2) % 3 == 0:
-                        p.px((fx + i, fy + fh - 2), BRONZE_GREEN)
+                        p.px((fx + i, fy + fh - 3), BRONZE_GREEN)
+                for j in range(2, fh - 1):                         # the striking boss
+                    for i in range(fw // 2 - 2, fw // 2 + 2):
+                        if abs(j - fh // 2) < 2:
+                            p.px((fx + i, fy + j), GOLD_DEEP)
         if style == 'b_lip':
             fx, fy, fw, fh = f['bottom']                           # the mouth: dark within
             for j in range(fh):

@@ -166,10 +166,10 @@ final class HellScenes {
                     int col = 0;
                     for (int n = 1; n <= 10; n++) {
                         if (n == 5) continue;
-                        put(p, HellKings.type(n), 10.5 - col * 2.5, 13.0 - Math.abs(col - 4) * 0.45, 180f);
+                        put(p, HellKings.type(n), 10.3 - col * 2.45, 9.8, 180f);
                         col++;
                     }
-                }, new double[]{0.5, 4.6, -0.5, 0.5, 1.9, 12.0}),
+                }, new double[]{0.5, 3.4, -0.5, 0.5, 1.9, 9.8}),
                 // three at a time, nearer: the First to the Fourth's emblems and colours, then the Sixth to the Tenth's
                 scene("hell_king_trio_1", p -> {
                     for (int c = 0; c < 3; c++) put(p, HellKings.type(1 + c), 3.5 - c * 3, 8.0, 180f);
@@ -183,6 +183,7 @@ final class HellScenes {
                 }, new double[]{0.5, 3.2, 0.0, 0.5, 2.0, 8.0}),
                 scene("hell_king_close", p -> put(p, ModEntities.KING_QINGUANG.get(), 0.5, 7.0, 170f), CLOSE),
                 scene("hell_king_side", p -> put(p, ModEntities.KING_CHUJIANG.get(), 0.5, 7.0, 90f), CLOSE),
+                scene("hell_king_back", p -> put(p, ModEntities.KING_ZHUANLUN.get(), 0.5, 7.0, 20f), CLOSE),
                 scene("hell_king_judging", p -> put(p, ModEntities.KING_TAISHAN.get(), 0.5, 7.0, 170f), p -> {
                     p.serverLevel().getEntitiesOfClass(KingOfHellEntity.class, new AABB(p.blockPosition()).inflate(12)).forEach(KingOfHellEntity::showJudging);
                 }, CLOSE),
