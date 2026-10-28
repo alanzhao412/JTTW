@@ -1,17 +1,20 @@
-"""The goblin (山魈小妖), a mountain imp of the open world. As wild_paint.py says: its model is written
-into WildRenderers' goblinLayer() between its GENERATED markers, its skin (textures/entity/goblin.png)
-painted to the same box-UV layout, its eyes glowing (goblin_glow.png).
+"""The goblin (山魈), a demon of the mountains of the open world. As wild_paint.py says: its model is
+written into WildRenderers' goblinLayer() between its GENERATED markers, its skin
+(textures/entity/goblin.png) painted to the same box-UV layout, its eyes glowing (goblin_glow.png).
 
-A small, wiry, hunched imp, all elbows and knees: moss-green skin blotched darker and warty, ribs
-showing over a little pot belly; a big head thrust forward with long drooping ears (a bronze ring in
-the right one), a hooked nose ruddy at its tip, a heavy brow over yellow glaring eyes, a wide grin of
-crooked teeth, two horn-nubs and a black topknot tied with red cord, ragged black hair behind. A
-patched hemp robe hanging open, torn at its hem and sleeves, a rope belt, a loin-wrap; a string of
-wooden prayer beads (red ones among them) with a stolen talisman hanging from it, another stuck
-askew on its head; a strap across its chest to a sack of thefts on its back, a scroll and a stick
-poking out of it; a gourd at its hip; its shins and forearms bound in rags; long clawed hands and
-feet. A crude bronze dagger, green with age and notched, in its right fist; a sling and its stone
-dangling from its left.
+A feral mountain demon as tall as a man, hunched and long-limbed: a pack hunter of the high
+forests. Soot-indigo skin, darker in its hollows and lighter over the swell of its muscles, its ribs
+and spine showing; long arms hanging nearly to its shins, ending in hooked black claws; bony
+digitigrade legs on clawed feet. A demon's face thrust forward under a heavy furrowed brow: deep
+sockets with eyes burning amber in them, a flat snarling nose, a wide mouth hanging open full of
+fangs, two tusks jutting up from its lower jaw, streaks of red ochre under its eyes. A great ridged
+horn curling back from the right of its brow, the left one broken off short. A wild ash-white mane
+from its crown down over its shoulders and back, small pointed ears in it. A necklace of bone beads
+and fangs with a little skull hung from it, a jawbone tied on its left shoulder for a pauldron, bone
+bangles; tattered dark wraps across its chest and about its forearms and shins, a dark loincloth
+torn to rags on a rope belt, and torn Daoist talismans worn as trophies (two hanging from its belt,
+one bound on its arm). In its right fist a crude jagged blade, a sawtoothed, hooked chopper of
+black iron, its grip wound in rag.
 
 Run from the repository root: python assets_source/goblin.py"""
 import math
@@ -20,563 +23,664 @@ import beastgen as bg
 import wild_paint as w
 from wild_paint import part, mirrored, aim, paint, Painter, k, mix
 
-bg.UNITS = 128
+bg.UNITS = 256
 bg.TEX = bg.UNITS * bg.S
 
-SIZE = 0.68          # GoblinRenderer.SIZE
+SIZE = 0.86          # GoblinRenderer.SIZE
 
-SKIN = (104, 134, 58)
-SKIN_SHADE = (52, 76, 36)
-SKIN_LIGHT = (164, 184, 92)
-BELLY = (150, 160, 92)
-RUDDY = (168, 96, 70)
-ROBE = (134, 98, 56)
-ROBE_DEEP = (72, 50, 30)
-PATCHES = ((88, 72, 86), (70, 90, 96), (156, 128, 76), (112, 64, 44), (84, 96, 62))
-STITCH = (216, 196, 150)
-ROPE = (174, 146, 92)
-WRAP = (176, 160, 124)
-WRAP_DEEP = (112, 98, 74)
-BEAD = (112, 66, 34)
-BEAD_RED = (156, 32, 26)
-BRONZE = (172, 124, 58)
-BRONZE_DEEP = (92, 60, 30)
-VERDIGRIS = (74, 138, 108)
-EYE = (255, 206, 52)
-TOOTH = (226, 212, 164)
-GUM = (96, 26, 30)
-HAIR = (44, 38, 38)
-HAIR_GREY = (118, 110, 102)
-CORD = (176, 34, 28)
-SACK = (150, 128, 88)
-LEATHER = (96, 64, 40)
-CLAW = (40, 34, 26)
+SKIN = (72, 78, 108)
+SKIN_SHADE = (34, 36, 58)
+SKIN_LIGHT = (120, 128, 166)
+MANE = (214, 208, 196)
+MANE_SHADE = (120, 114, 110)
+MANE_ROOT = (70, 66, 70)
+OCHRE = (168, 46, 30)
+BONE = (222, 210, 176)
+BONE_SHADE = (140, 126, 96)
+WRAP = (52, 44, 44)
+WRAP_DEEP = (24, 20, 22)
+ROPE = (132, 106, 70)
+IRON = (58, 56, 62)
+IRON_EDGE = (176, 176, 182)
+RAG = (110, 92, 70)
+EYE = (255, 178, 40)
+TOOTH = (232, 222, 192)
+GUM = (82, 18, 26)
+MAW = (40, 8, 12)
+CLAW = (22, 20, 24)
+HORN = (60, 50, 44)
+HORN_TIP = (196, 182, 150)
 
-BODY = (0.32, 0, 0)
-HEAD = (-0.3, 0, 0)
-ARM, FOREARM, HAND = (-0.3, 0, 0.2), (-0.75, 0, 0), (0.1, 0, 0)
-LARM, LFOREARM, LHAND = (-0.15, 0, -0.22), (-0.45, 0, 0), (0, 0, 0)
+BODY = (0.78, 0, 0)
+HEAD = (-0.8, 0, 0)
+ARM, FOREARM, HAND = (-0.92, 0, 0.16), (-0.42, 0, 0), (0.15, 0, 0)
+LARM, LFOREARM, LHAND = (-0.7, 0, -0.2), (-0.3, 0, 0), (0.1, 0, 0)
 
 
-def beads():
-    """The string of prayer beads round its neck, down over its chest: wooden, a red one every third."""
+def necklace():
+    """Bone beads and fangs on a cord about its neck, hanging over its chest; a little skull at its foot."""
     out = []
     n = 11
     for i in range(n):
-        a = -1.25 + 2.5 * i / (n - 1)
-        x, y = 3.0 * math.sin(a), -11.4 + 3.2 * math.cos(a) ** 0.6 * (1 - abs(a) / 1.6)
-        out.append((x - 0.55, y - 0.55, -2.95 - 0.25 * math.cos(a), 1.1, 1.1, 1.1, 'bead_red' if i % 3 == 1 else 'bead'))
+        a = -1.3 + 2.6 * i / (n - 1)
+        x, y = 3.4 * math.sin(a), -13.0 + 3.0 * math.cos(a) ** 0.7
+        z = -2.95 - 0.2 * math.cos(a)
+        if i % 2:
+            out.append((x - 0.35, y - 0.3, z, 0.7, 1.5, 0.5, 'fangbead'))
+        else:
+            out.append((x - 0.5, y - 0.5, z - 0.1, 1.0, 1.0, 0.8, 'bead'))
+    out.append((-1.0, -10.6, -3.6, 2.0, 2.0, 1.4, 'skullbead'))
     return out
 
 
+def spine():
+    """The knobs of its spine down its hunched back."""
+    return [(-0.45, y, 2.5 + (0.25 if y < -9 else 0) - (0.35 if y > -6 else 0), 0.9, 0.9, 0.7, 'knob')
+            for y in (-12.5, -10.6, -8.7, -6.8, -5.0)]
+
+
 GOBLIN = mirrored([
-    # the legs: a knobbly thigh, a shin bound in rags, a long clawed foot; crouched, the knee forward
-    part('right_leg', 'root', (-2.3, 12.6, 0.4), (-0.42, 0, 0.06), [
-        (-1.35, -0.6, -1.4, 2.7, 5.8, 2.8, 'thigh'),
-        (-1.55, 4.1, -1.75, 3.1, 1.9, 2.6, 'knee')]),
-    part('right_shin', 'right_leg', (0, 5.4, 0.1), (0.78, 0, 0), [
-        (-1.05, 0, -1.05, 2.1, 5.6, 2.1, 'shin'),
-        (-1.35, 0.8, -1.35, 2.7, 3.4, 2.7, 'legwrap')]),
-    part('right_foot', 'right_shin', (0, 5.4, 0), (-0.36, 0, 0), [
-        (-1.5, -0.2, -3.4, 3, 1.5, 4.6, 'foot'),
-        (-1.55, 0.35, -4.6, 0.8, 1.0, 1.4, 'toe'),
-        (-0.4, 0.35, -4.8, 0.8, 1.0, 1.5, 'toe'),
-        (0.75, 0.35, -4.5, 0.8, 1.0, 1.3, 'toe'),
-        (-0.6, 0.6, 0.9, 1.2, 0.8, 1.2, 'heel')]),
+    # bony digitigrade legs: a long thigh, a shin bound in rags, a long ankle, a clawed foot
+    part('right_leg', 'root', (-2.4, 13.0, 0.6), (-0.6, 0, 0.1), [
+        (-1.6, -1.0, -1.7, 3.2, 7.6, 3.4, 'thigh'),
+        (-1.2, 5.8, -2.1, 2.4, 1.8, 1.0, 'knee')]),
+    part('right_shin', 'right_leg', (0, 6.9, 0.1), (1.25, 0, 0), [
+        (-1.15, 0, -1.15, 2.3, 7.2, 2.3, 'shin'),
+        (-1.45, 1.2, -1.45, 2.9, 3.6, 2.9, 'legwrap')]),
+    part('right_ankle', 'right_shin', (0, 6.9, 0), (-1.05, 0, 0), [
+        (-0.9, 0, -0.9, 1.8, 5.4, 1.8, 'ankle'),
+        (-1.1, 0.4, -1.1, 2.2, 0.8, 2.2, 'anklet')]),
+    part('right_foot', 'right_ankle', (0, 5.0, 0), (0.4, 0, 0), [
+        (-1.5, -0.5, -2.8, 3.0, 1.5, 3.6, 'foot'),
+        (-1.55, 0.0, -4.5, 0.85, 1.0, 1.9, 'toe'),
+        (-0.42, 0.0, -4.8, 0.85, 1.0, 2.2, 'toe'),
+        (0.7, 0.0, -4.5, 0.85, 1.0, 1.9, 'toe'),
+        (-0.4, -0.3, 0.6, 0.8, 0.8, 1.4, 'spur')]),
 
-    # the body from the hips up, hunched forward over its belly; its pivot the hips
-    part('body', 'root', (0, 12.6, 0.4), BODY, [
-        (-3.2, -2.4, -2.3, 6.4, 3.4, 4.6, 'loinwrap'),
-        (-3.0, -7.0, -2.65, 6.0, 4.9, 5.0, 'belly'),
-        (-3.7, -11.4, -2.3, 7.4, 4.8, 4.6, 'chest'),
-        (-4.3, -11.9, -2.1, 8.6, 1.6, 4.3, 'yoke'),
-        (-4.0, -11.6, 1.9, 8.0, 10.8, 0.9, 'robe_back'),
-        (-3.55, -3.3, -2.95, 7.1, 1.3, 5.6, 'rope'),
-        (-1.4, -12.6, -1.7, 2.8, 1.6, 2.8, 'neck'),
-        (-1.0, -12.1, -3.25, 2.0, 1.6, 0.5, 'pendant'),
-    ] + beads()),
-    # the robe hanging open down its front and at its sides, torn at the hem
-    part('right_robe', 'body', (-3.95, -11.6, -2.35), (-0.06, 0.1, 0.07), [(-0.2, 0, -0.5, 2.7, 10.9, 0.6, 'robe_front')]),
-    part('right_robe_side', 'body', (-3.95, -11.6, -0.2), (0, 0, 0.09), [(-0.6, 0, -2.1, 0.6, 10.6, 4.2, 'robe_side')]),
-    part('loin_front', 'body', (0, -2.2, -2.6), (-0.12, 0, 0), [(-1.8, 0, -0.3, 3.6, 6.0, 0.5, 'loinflap')]),
-    part('loin_back', 'body', (0, -2.2, 2.4), (0.14, 0, 0), [(-2.2, 0, -0.2, 4.4, 5.0, 0.5, 'loinflap_back')]),
-    # the talisman hanging from its beads, and the strap across its chest to its sack
-    part('talisman', 'body', (0.1, -8.5, -3.15), (-0.2, 0, 0.12), [(-1.0, 0, -0.1, 2.0, 4.2, 0.2, 'talisman')]),
-    part('strap', 'body', (-3.4, -11.6, -2.55), (0, 0, -0.62), [(-0.55, 0, -0.25, 1.1, 12.5, 0.4, 'strap')]),
-    part('sack', 'body', (0, -10.4, 2.8), (0.25, 0, 0.12), [
-        (-3.2, 0, 0, 6.4, 6.6, 3.9, 'sack'),
-        (-1.3, -1.1, 0.8, 2.6, 1.3, 2.3, 'sacktie'),
-        (-2.6, -3.6, 1.2, 1.2, 4.2, 1.2, 'scroll'),
-        (1.3, -4.4, 1.6, 0.7, 5.0, 0.7, 'stick'),
-        (-2.2, 2.2, 3.85, 2.2, 2.8, 0.15, 'sack_talisman')]),
-    part('gourd', 'body', (3.5, -3.0, -1.3), (0.1, 0, -0.25), [
-        (-0.25, -0.5, -0.25, 0.5, 0.8, 0.5, 'cork'),
-        (-0.85, 0.2, -0.85, 1.7, 1.5, 1.7, 'gourd_top'),
-        (-1.3, 1.5, -1.3, 2.6, 2.6, 2.6, 'gourd')]),
+    # the body from the hips up, hunched far forward; its pivot the hips
+    part('body', 'root', (0, 13.0, 0.6), BODY, [
+        (-3.2, -2.6, -2.2, 6.4, 3.4, 4.4, 'pelvis'),
+        (-2.8, -7.4, -2.0, 5.6, 5.0, 4.0, 'waist'),
+        (-4.3, -13.6, -2.7, 8.6, 6.6, 5.4, 'chest'),
+        (-3.7, -15.0, -0.9, 7.4, 2.6, 4.2, 'traps'),
+        (-1.5, -15.6, -2.2, 3.0, 2.4, 3.0, 'neck'),
+        (-3.45, -3.5, -2.45, 6.9, 1.1, 4.9, 'rope'),
+    ] + necklace() + spine()),
+    # a tattered dark rag slung from its left shoulder across its chest and back to its right hip
+    part('sash', 'body', (3.4, -13.4, -2.95), (0, 0, 0.6), [(-0.9, 0, -0.2, 1.8, 13.0, 0.4, 'sash')]),
+    part('sash_back', 'body', (3.4, -13.4, 2.95), (0, 0, 0.6), [(-0.9, 0, -0.2, 1.8, 13.0, 0.4, 'sash')]),
+    part('sash_end', 'body', (-3.2, -3.6, -2.7), (-0.1, 0, 0.15), [(-0.7, 0, -0.2, 1.4, 5.0, 0.4, 'sash_end')]),
+    # the loincloth, torn to rags, before and behind
+    part('loin_front', 'body', (0, -2.6, -2.5), (-0.1, 0, 0), [(-2.2, 0, -0.25, 4.4, 7.2, 0.5, 'loinflap')]),
+    part('loin_back', 'body', (0, -2.6, 2.3), (0.12, 0, 0), [(-2.6, 0, -0.25, 5.2, 6.4, 0.5, 'loinflap')]),
+    part('right_loin_side', 'body', (-3.2, -2.6, 0.1), (0, 0, 0.1), [(-0.25, 0, -1.8, 0.5, 5.4, 3.6, 'loinside')]),
+    # torn talismans hanging from its belt, trophies
+    part('right_talisman', 'body', (-2.0, -3.0, -2.6), (-0.15, 0.1, 0.18), [(-0.9, 0, -0.1, 1.8, 4.6, 0.2, 'talisman')]),
+    part('talisman_back', 'body', (1.8, -3.0, 2.5), (0.2, 0, -0.1), [(-0.9, 0, -0.1, 1.8, 3.8, 0.2, 'talisman_torn')]),
+    # its mane, falling from its nape over its shoulders and down its back
+    part('mane', 'body', (0, -15.2, 1.6), (0.25, 0, 0), [
+        (-4.2, 0, -0.6, 8.4, 8.8, 2.4, 'mane_back'),
+        (-3.2, 7.2, 0.2, 6.4, 3.4, 1.4, 'mane_tail')]),
+    part('right_mane_shoulder', 'body', (-3.4, -15.0, -0.2), (0, 0, 0.35), [(-1.8, 0, -1.8, 2.6, 5.2, 3.6, 'mane_side')]),
 
-    # the head, thrust forward on its neck, tipped back to look ahead
-    part('head', 'body', (0, -12.2, -1.6), HEAD, [
-        (-3.9, -8.2, -4.2, 7.8, 6.4, 7.4, 'skull'),
-        (-3.2, -9.4, -3.4, 6.4, 1.4, 6.0, 'crown'),
-        (-4.6, -4.4, -3.9, 9.2, 2.2, 4.6, 'cheeks'),
-        (-4.2, -6.0, -4.9, 8.4, 1.5, 1.4, 'brow'),
-        (-3.6, -2.5, -5.3, 7.2, 1.5, 4.4, 'lip'),
-        (-1.45, -10.9, -0.1, 2.9, 1.9, 2.9, 'topknot'),
-        (-1.6, -9.4, -0.25, 3.2, 0.7, 3.2, 'cord'),
-        (-2.9, -10.4, 1.15, 5.8, 0.5, 0.5, 'hairpin'),
-        (-3.8, -8.0, 2.4, 7.6, 7.4, 1.8, 'hair'),
+    # the head, thrust forward on its neck, turned up to look ahead
+    part('head', 'body', (0, -15.2, -1.2), HEAD, [
+        (-3.0, -6.6, -3.6, 6.0, 5.8, 5.8, 'cranium'),
+        (-3.3, -3.0, -4.1, 6.6, 1.5, 3.0, 'cheeks'),
+        (-2.4, -2.5, -5.3, 4.8, 2.0, 2.4, 'muzzle'),
+        (-1.0, -3.7, -4.9, 2.0, 1.3, 1.0, 'nosebridge'),
+        (-1.2, -2.9, -5.65, 2.4, 1.2, 0.9, 'nose'),
+        (-3.4, -7.4, -3.2, 6.8, 1.6, 6.4, 'mane_top'),
+        (-3.6, -6.6, 1.6, 7.2, 6.2, 2.2, 'mane_nape'),
+        (-1.9, -1.0, -4.2, 3.8, 1.2, 3.0, 'maw'),
     ]),
-    # its grin: the jaw hangs a little open, fangs jutting up from it
-    part('jaw', 'head', (0, -1.3, -1.2), (0.16, 0, 0), [
-        (-3.1, 0, -4.1, 6.2, 1.9, 5.0, 'jaw'),
-        (-1.4, 1.5, -3.9, 2.8, 1.0, 2.0, 'chin'),
-        (-2.6, -1.1, -4.0, 0.7, 1.2, 0.7, 'fang'),
-        (1.9, -1.1, -4.0, 0.7, 1.2, 0.7, 'fang')]),
-    # a long nose hooking down over the grin, ruddy at its tip
-    part('nose', 'head', (0, -5.7, -4.7), (0.55, 0, 0), [(-0.85, -0.2, -3.0, 1.7, 1.9, 3.1, 'nose')]),
-    part('nose_tip', 'nose', (0, 0.4, -2.7), (0.5, 0, 0), [(-0.8, -0.3, -1.1, 1.6, 2.2, 1.4, 'nosetip')]),
-    part('right_eye', 'head', (-2.05, -4.75, -4.75), (0, 0.15, 0), [(-1.3, -0.7, -0.4, 2.6, 1.5, 0.5, 'eye')]),
-    # long ears, swept out and up, their tips drooping
-    part('right_ear', 'head', (-3.8, -5.2, -0.2), (0.05, 0.3, 0.22), [(-7.4, -2.2, -0.3, 7.4, 4.4, 0.6, 'ear')]),
-    part('right_ear_tip', 'right_ear', (-7.2, -0.4, 0), (0, 0.1, -0.4), [(-4.0, -1.2, -0.25, 4.0, 2.4, 0.5, 'eartip')]),
-    part('earring', 'right_ear', (-5.0, 1.8, 0), (0, 0, 0), [(-0.25, 0, -0.8, 0.5, 1.8, 1.6, 'ring')]),
-    part('right_horn', 'head', (-2.2, -8.6, -2.2), (-0.75, 0, -0.3), [(-0.6, -2.3, -0.6, 1.2, 2.5, 1.2, 'horn')]),
-    part('right_horn_tip', 'right_horn', (0, -2.2, 0), (-0.5, 0, 0), [(-0.4, -1.5, -0.4, 0.8, 1.6, 0.8, 'horntip')]),
-    part('right_tuft', 'head', (-3.9, -7.6, 1.0), (0.1, 0, 0.42), [(-1.0, 0, -1.6, 1.0, 5.4, 3.2, 'hairtuft')]),
-    part('head_talisman', 'head', (2.4, -8.4, -3.7), (-0.25, 0.25, 0.42), [(-0.95, 0, -0.1, 1.9, 3.8, 0.2, 'talisman_small')]),
+    # the jaw hanging open, fangs along it, two tusks jutting up from its corners
+    part('jaw', 'head', (0, -0.6, -1.4), (0.36, 0, 0), [
+        (-2.3, 0, -4.4, 4.6, 1.4, 4.4, 'jaw'),
+        (-1.6, 1.2, -4.0, 3.2, 1.0, 3.4, 'chin')]),
+    part('right_tusk', 'jaw', (-1.85, 0.2, -3.95), (-0.25, 0, -0.18), [(-0.45, -2.6, -0.45, 0.9, 2.8, 0.9, 'tusk')]),
+    part('right_fang', 'head', (-1.55, -0.6, -4.95), (0, 0, 0), [(-0.3, 0, -0.3, 0.6, 1.5, 0.6, 'fang')]),
+    part('right_brow', 'head', (-1.55, -4.55, -3.75), (0.1, 0.12, 0.32), [(-2.1, -0.75, -0.8, 4.0, 1.5, 1.9, 'brow')]),
+    part('right_eye', 'head', (-1.65, -3.5, -3.75), (0, 0.18, 0), [(-1.1, -0.5, -0.3, 2.2, 1.0, 0.4, 'eye')]),
+    part('right_ear', 'head', (-2.9, -4.4, -0.8), (0.1, -0.55, -0.2), [(-0.3, -1.3, 0, 0.6, 2.4, 3.4, 'ear')]),
+    part('right_lock', 'head', (-3.1, -5.6, -1.6), (0.1, 0, 0.12), [(-1.0, 0, -1.4, 1.4, 7.2, 3.0, 'lock')]),
 
-    # the arms: long, thin, a ragged sleeve over the shoulder, the forearm bound, a big clawed hand
-    part('right_arm', 'body', (-4.5, -10.8, -0.2), ARM, [
-        (-1.2, -0.6, -1.1, 2.2, 6.0, 2.2, 'arm'),
-        (-1.85, -1.3, -1.75, 3.4, 4.4, 3.5, 'sleeve')]),
-    part('right_forearm', 'right_arm', (-0.1, 5.6, 0), FOREARM, [
-        (-1.0, 0, -1.0, 2.0, 5.8, 2.0, 'forearm'),
-        (-1.25, 3.2, -1.25, 2.5, 2.4, 2.5, 'armwrap')]),
-    part('right_hand', 'right_forearm', (0, 5.7, 0), HAND, [
-        (-1.3, 0, -1.4, 2.6, 2.0, 2.8, 'hand'),
-        (-1.25, 1.7, -1.35, 0.7, 1.7, 0.7, 'finger'),
-        (-0.35, 1.7, -1.35, 0.7, 1.9, 0.7, 'finger'),
-        (0.55, 1.7, -1.35, 0.7, 1.6, 0.7, 'finger'),
-        (-1.4, 0.6, -1.9, 0.8, 1.4, 0.8, 'thumb')]),
+    # the long arms: a gaunt upper arm, a forearm wound in rags, a big clawed hand
+    part('right_arm', 'body', (-4.9, -12.6, 0.2), ARM, [
+        (-1.4, -1.0, -1.4, 2.8, 8.6, 2.8, 'upperarm'),
+        (-1.55, 3.8, -1.55, 3.1, 1.0, 3.1, 'bangle')]),
+    part('right_forearm', 'right_arm', (0, 7.8, 0), FOREARM, [
+        (-1.2, 0, -1.2, 2.4, 8.2, 2.4, 'forearm'),
+        (-1.45, 3.4, -1.45, 2.9, 4.2, 2.9, 'armwrap')]),
+    part('right_hand', 'right_forearm', (0, 8.0, 0), HAND, [
+        (-1.5, 0, -1.6, 3.0, 2.4, 3.2, 'hand'),
+        (-1.5, 2.1, -1.55, 0.7, 2.9, 0.7, 'claw'),
+        (-0.62, 2.1, -1.55, 0.7, 3.2, 0.7, 'claw'),
+        (0.26, 2.1, -1.55, 0.7, 3.0, 0.7, 'claw'),
+        (1.0, 2.0, -1.35, 0.6, 2.4, 0.6, 'claw_small'),
+        (-1.75, 0.8, -2.1, 0.75, 2.0, 0.75, 'claw_small')]),
 ])
 
-# the dagger in its right fist, pointing ahead; the sling hanging from its left
+# the great horn on the right of its brow, curling up and back; the left broken off short
 GOBLIN += [
-    part('dagger', 'right_hand', (0, 1.3, -0.3), aim([BODY, ARM, FOREARM, HAND], (1.25, 0, 0)), [
-        (-0.45, -1.6, -0.45, 0.9, 2.9, 0.9, 'grip'),
-        (-0.5, 1.2, -0.5, 1.0, 0.8, 1.0, 'pommel'),
-        (-1.35, -2.1, -0.45, 2.7, 0.55, 0.9, 'guard'),
-        (-0.85, -7.0, -0.25, 1.7, 5.0, 0.5, 'blade')]),
-    part('blade_tip', 'dagger', (0, -6.8, 0), (0, 0, 0.28), [(-0.75, -2.6, -0.25, 1.5, 2.7, 0.5, 'bladetip')]),
-    part('sling', 'left_hand', (0, 1.6, -0.3), aim([BODY, LARM, LFOREARM, LHAND], (0.05, 0, 0)), [
-        (-0.75, 0, -0.15, 0.3, 5.0, 0.3, 'slingcord'),
-        (0.45, 0, -0.15, 0.3, 5.0, 0.3, 'slingcord'),
-        (-0.95, 4.8, -0.6, 1.9, 1.0, 1.2, 'pouch'),
-        (-0.45, 4.3, -0.45, 0.9, 0.9, 0.9, 'stone')]),
+    part('horn', 'head', (-2.0, -6.3, -2.4), (-0.35, 0, -0.45), [(-0.95, -2.6, -0.95, 1.9, 2.9, 1.9, 'horn1')]),
+    part('horn_mid', 'horn', (0, -2.4, 0), (-0.55, 0, 0.12), [(-0.7, -2.6, -0.7, 1.4, 2.8, 1.4, 'horn2')]),
+    part('horn_tip', 'horn_mid', (0, -2.4, 0), (-0.75, 0, 0.1), [(-0.45, -2.4, -0.45, 0.9, 2.6, 0.9, 'horn3')]),
+    part('horn_broken', 'head', (2.0, -6.3, -2.4), (-0.35, 0, 0.45), [(-0.95, -2.2, -0.95, 1.9, 2.5, 1.9, 'hornbroken')]),
+    # a jawbone tied on its left shoulder, and a torn talisman bound on its left arm
+    part('shoulder_bone', 'left_arm', (0.6, -1.2, 0), (0, 0, -0.25), [
+        (-1.0, -0.6, -2.2, 3.0, 1.0, 4.4, 'jawbone'),
+        (-0.6, 0.3, -2.0, 2.4, 1.4, 0.6, 'jawteeth'),
+        (-0.6, 0.3, 1.4, 2.4, 1.4, 0.6, 'jawteeth')]),
+    part('arm_talisman', 'left_arm', (1.42, 2.0, 0), (0, 0, 0.05), [(-0.1, 0, -0.9, 0.2, 4.2, 1.8, 'talisman_side')]),
+    # the jagged blade in its right fist, held low and forward
+    part('blade', 'right_hand', (0, 1.2, -0.2), aim([BODY, ARM, FOREARM, HAND], (1.15, 0, 0)), [
+        (-0.5, -1.6, -0.5, 1.0, 3.6, 1.0, 'grip'),
+        (-0.6, 1.8, -0.6, 1.2, 0.9, 1.2, 'pommel'),
+        (-0.8, -2.3, -1.3, 1.6, 0.8, 2.6, 'guard'),
+        (-0.25, -12.0, -1.2, 0.5, 9.8, 2.9, 'chopper')]),
+    part('grip_rag', 'blade', (0, 1.6, 0.5), (0.4, 0, 0), [(-0.4, 0, -0.1, 0.8, 3.2, 0.2, 'ragtail')]),
 ]
 GOBLIN = w.settle(GOBLIN, ('right_foot', 'left_foot'))
 
 
 # ── The skin ─────────────────────────────────────────────────────────────────
 
-def skin(p, f, faces=None, warts=0.5, belly=None):
-    w.hide(p, f, SKIN, SKIN_SHADE, SKIN_LIGHT, mottle=0.55, warts=warts, belly=belly, faces=faces)
+def skin(p, f, faces=None, fall=0.28):
+    w.hide(p, f, SKIN, SKIN_SHADE, SKIN_LIGHT, mottle=0.3, warts=0.0, faces=faces, fall=fall, seed=5)
 
 
-def claws(p, f):
-    """Its fingers' and toes' ends: black hooked claws."""
-    for s in w.SIDES:
+def swell(p, rect, cx, cy, rx, ry, k_=1.16, rim=0.68):
+    """A swell of muscle or bone under the skin: lit at its crown, a shadowed rim under it."""
+    fx, fy, fw, fh = rect
+    for i, j, xy in w.each(p, rect):
+        dx, dy = (i - cx) / rx, (j - cy) / ry
+        d = dx * dx + dy * dy
+        if d < 1:
+            p.px(xy, k(p.get(xy), 1 + (k_ - 1) * (1 - d) * (1 - max(0, dy) * 0.7)))
+        elif d < 1.45 and dy > 0.15:
+            p.px(xy, k(p.get(xy), rim))
+
+
+def mane(p, f, faces=None, tuft=4, lean=0.15):
+    """Coarse ash-white hair, dark at its roots, in locks; its ends cut into tufts."""
+    for s in faces or f:
+        lv = w.LIGHT[s]
+        w.strands(p, f[s], k(MANE, lv * 0.92), k(MANE_SHADE, lv), k((240, 236, 226), lv), density=0.5, lean=lean, root_dark=0.35)
         fx, fy, fw, fh = f[s]
-        for j in range(max(1, fh // 3)):
-            for i in range(fw):
-                p.px((fx + i, fy + fh - 1 - j), k(CLAW, 1.0 + 0.3 * (j == max(1, fh // 3) - 1)))
+        for i in range(fw):                                       # dark partings between the locks
+            if i % 4 == 3:
+                for j in range(fh):
+                    if p.rnd.random() < 0.8:
+                        p.px((fx + i, fy + j), k(MANE_ROOT, lv * (1 + 0.4 * j / max(1, fh))))
+    if tuft:
+        for s in w.SIDES:
+            if s in (faces or f):
+                w.tufts(p, f[s], depth=tuft, every=3)
 
 
-def wraps(p, f, base=WRAP, deep=WRAP_DEEP):
-    """Rag bandages wound round: slanting turns, each lit at its upper edge, frayed."""
-    for s in f:
+def bone(p, f, faces=None, base=BONE, cracks=True):
+    for s in faces or f:
         fx, fy, fw, fh = f[s]
         for i, j, xy in w.each(p, f[s]):
-            t = ((j + i * 0.45) % 3) / 3
-            c = mix(deep, base, 1 - t * 0.8)
-            if (i * 7 + j * 3) % 11 == 0:
-                c = k(c, 0.75)
-            p.px(xy, [v * w.LIGHT[s] + p.rnd.randint(-5, 5) for v in c])
+            t = j / max(1, fh - 1)
+            c = mix(base, BONE_SHADE, 0.35 * t + 0.25 * w.vnoise(fx + i, fy + j, 3, 9))
+            p.px(xy, [v * w.LIGHT[s] + p.rnd.randint(-3, 3) for v in c])
+        if cracks and fw * fh > 12 and s in w.SIDES:
+            x = fx + p.rnd.randrange(fw)
+            for j in range(min(fh, 3)):
+                p.px((x + (j % 2), fy + j), k(BONE_SHADE, 0.7))
 
 
-def robe(p, f, faces=None, hem=True):
-    w.cloth(p, f, ROBE, ROBE_DEEP, fold=5, faces=faces)
+def claws(p, f, length=0.55):
+    """A finger's or toe's end: a hooked black claw, glossy at its curve."""
+    for s in w.SIDES + ('bottom',):
+        fx, fy, fw, fh = f[s]
+        for i, j, xy in w.each(p, f[s]):
+            if j >= fh * (1 - length) or s == 'bottom':
+                c = CLAW
+                if s == 'front' and j < fh * (1 - length) + 2:
+                    c = (92, 90, 100)
+                p.px(xy, k(c, w.LIGHT[s]))
+    for s in w.SIDES:
+        w.point(p, f[s], down=True, keep=0.3, sharp=0.55)
+
+
+def rags(p, f, base=WRAP, deep=WRAP_DEEP, faces=None):
+    """Dark rag wound round: slanting turns lit along their upper edge, frayed."""
+    for s in faces or f:
+        fx, fy, fw, fh = f[s]
+        for i, j, xy in w.each(p, f[s]):
+            t = ((j + i * 0.5) % 4) / 4
+            c = mix(base, deep, t * 0.8)
+            if t < 0.22:
+                c = k(base, 1.35)
+            p.px(xy, [v * w.LIGHT[s] + p.rnd.randint(-4, 4) for v in c])
+
+
+def torn_talisman(p, rect, burnt=True, tear=3):
+    """A talisman torn from a shrine: yellowed paper, its red spell, its foot ripped away, singed."""
+    w.talisman(p, rect, paper=(206, 180, 100), ink=(150, 24, 20))
+    fx, fy, fw, fh = rect
+    for i in range(fw):                                           # the ripped foot
+        cut = tear if (i * 7) % 5 < 2 else tear // 2
+        cut += p.rnd.randint(0, 1)
+        for j in range(cut):
+            p.clear((fx + i, fy + fh - 1 - j))
+        if burnt and fh - cut - 1 > 0:
+            p.px((fx + i, fy + fh - cut - 1), (60, 40, 24))
 
 
 def paint_goblin(p, style, f, dims):
     S = w.SIDES
 
-    if style in ('thigh', 'knee', 'arm', 'forearm', 'neck'):
-        skin(p, f, warts=0.6 if style in ('knee', 'arm') else 0.3)
-        if style == 'knee':
-            for s in ('front',):
+    if style in ('thigh', 'shin', 'ankle', 'upperarm', 'forearm', 'neck'):
+        skin(p, f)
+        if style in ('thigh', 'upperarm'):                        # the long muscle down it, the bone at its ends
+            for s in ('front', 'right', 'left'):
                 fx, fy, fw, fh = f[s]
-                for i in range(1, fw - 1):
-                    p.px((fx + i, fy + fh // 2), k(SKIN_SHADE, 0.9))
+                swell(p, f[s], fw / 2, fh * 0.35, fw * 0.42, fh * 0.32)
+        if style in ('shin', 'ankle', 'forearm'):                 # a sharp bony ridge down its front
+            fx, fy, fw, fh = f['front']
+            w.vline(p, f['front'], fw // 2, k(SKIN_LIGHT, 1.0))
+            w.vline(p, f['front'], fw // 2 + 1, k(SKIN_SHADE, 1.0))
 
-    if style == 'shin':
-        skin(p, f, warts=0.2)
+    if style == 'knee':
+        skin(p, f)
+        bone(p, f, faces=('front',), base=mix(SKIN_LIGHT, BONE, 0.2), cracks=False)
 
     if style in ('legwrap', 'armwrap'):
-        wraps(p, f)
-        w.ragged(p, f['front'], teeth=2, depth=1)
+        rags(p, f)
+        for s in S:
+            w.ragged(p, f[s], teeth=2, depth=2)
 
-    if style == 'foot':
-        skin(p, f, warts=0.4, belly=k(SKIN_SHADE, 0.8))
-        fx, fy, fw, fh = f['top']                                  # tendons along its top
-        for i in (1, fw // 2, fw - 2):
-            for j in range(fh):
-                if j % 2 == 0:
-                    p.px((fx + i, fy + j), k(SKIN_LIGHT, 0.95))
-
-    if style in ('toe', 'finger', 'thumb'):
-        skin(p, f, warts=0)
-        claws(p, f)
-        for s in ('bottom',):
-            w.flat(p, f, CLAW, faces=('bottom',))
-
-    if style == 'heel':
-        skin(p, f, warts=0)
-
-    if style == 'hand':
-        skin(p, f, warts=0.3)
-        fx, fy, fw, fh = f['front']
-        for i in range(0, fw, 2):                                  # knuckles
-            p.px((fx + i, fy + 1), k(SKIN_LIGHT, 1.05))
-
-    if style == 'belly':                                           # a little pot belly, pale, a navel
-        skin(p, f, warts=0.2)
-        fx, fy, fw, fh = f['front']                                # 12x10
-        for i, j, xy in w.each(p, f['front']):
-            d = math.hypot((i - fw / 2 + 0.5) / (fw / 2), (j - fh * 0.45) / (fh * 0.6))
-            if d < 1:
-                p.px(xy, [v * (1.05 - 0.25 * d) + p.rnd.randint(-3, 3) for v in mix(BELLY, SKIN, d * 0.6)])
-        p.px((fx + fw // 2, fy + fh // 2 + 1), k(SKIN_SHADE, 0.6))
-        p.px((fx + fw // 2 - 1, fy + fh // 2 + 1), k(SKIN_SHADE, 0.8))
-
-    if style == 'chest':                                           # a narrow chest, every rib showing
-        skin(p, f, warts=0.25)
-        fx, fy, fw, fh = f['front']                                # 15x10
-        for j in range(1, fh - 1, 2):
-            for i in range(1, fw - 1):
-                if abs(i - fw / 2 + 0.5) > 1:
-                    p.px((fx + i, fy + j + (abs(i - fw / 2) > fw / 3)), k(SKIN_SHADE, 0.95))
-                    p.px((fx + i, fy + j - 1), k(SKIN_LIGHT, 0.95))
-        for j in range(fh):
-            p.px((fx + fw // 2, fy + j), k(SKIN_SHADE, 0.8))
-        for s in ('right', 'left', 'back'):
+    if style in ('anklet', 'bangle'):                             # bone bangles: rings of little bones
+        bone(p, f, cracks=False)
+        for s in S:
             fx, fy, fw, fh = f[s]
-            for j in range(1, fh, 2):
-                w.hline(p, f[s], j, k(SKIN_SHADE, 0.9 * w.LIGHT[s]))
+            for i in range(0, fw, 3):
+                for j in range(fh):
+                    p.px((fx + i, fy + j), k(BONE_SHADE, 0.6 * w.LIGHT[s]))
 
-    if style == 'yoke':                                            # the robe over its shoulders
-        robe(p, f)
-        w.border(p, f, k(ROBE_DEEP, 0.9), top=False)
-
-    if style in ('robe_back', 'robe_front', 'robe_side'):
-        robe(p, f)
-        broad = 'front' if style != 'robe_side' else 'right'
-        other = 'back' if style != 'robe_side' else 'left'
-        rnd_patch = p.rnd
-        for s in (broad, other, 'front', 'back', 'right', 'left'):
+    if style in ('foot', 'hand'):
+        skin(p, f, fall=0.15)
+        for s in ('front', 'top'):                                # knuckles
             fx, fy, fw, fh = f[s]
-            if fw >= 5 and fh >= 8:
-                for _ in range(2 if fw > 8 else 1):
-                    pw, ph = rnd_patch.randint(4, min(8, fw - 1)), rnd_patch.randint(4, 7)
-                    w.patch(p, f[s], rnd_patch.choice(PATCHES), ROBE_DEEP, STITCH,
-                            rnd_patch.randrange(0, max(1, fw - pw)), rnd_patch.randrange(2, max(3, fh - ph - 4)), pw, ph)
-            w.ragged(p, f[s], teeth=3, depth=4)
-        if style == 'robe_back':
-            w.tear_holes(p, f['back'], n=2)
-        if style == 'robe_front':                                  # its edge, hemmed darker
-            for s in ('front',):
-                w.vline(p, f[s], f[s][2] - 1, k(ROBE_DEEP, 0.9))
+            for i in range(1, fw - 1, 3):
+                p.px((fx + i, fy + (1 if s == 'front' else fh - 2)), k(SKIN_LIGHT, 1.1))
+                p.px((fx + i, fy + (2 if s == 'front' else fh - 1)), k(SKIN_SHADE, 1.0))
+        w.flat(p, f, k(SKIN_SHADE, 0.8), faces=('bottom',))
 
-    if style == 'loinwrap':
-        w.cloth(p, f, (120, 84, 50), (64, 44, 28), fold=3)
+    if style in ('toe', 'claw', 'claw_small'):
+        skin(p, f, fall=0)
+        claws(p, f, length=0.6 if style != 'toe' else 0.5)
 
-    if style in ('loinflap', 'loinflap_back'):
-        w.cloth(p, f, (108, 74, 46), (58, 38, 24), fold=3)
-        for s in ('front', 'back'):
-            w.ragged(p, f[s], teeth=2, depth=4)
+    if style == 'spur':
+        skin(p, f)
+        claws(p, f, length=0.7)
 
-    if style == 'rope':
-        w.rope(p, f, ROPE)
+    if style == 'pelvis':
+        skin(p, f)
 
-    if style in ('bead', 'bead_red'):                             # wooden prayer beads, a red one every third
-        c = BEAD if style == 'bead' else BEAD_RED
-        w.flat(p, f, c, noise=4)
-        for s in ('front', 'top'):
+    if style == 'waist':                                          # a gaunt belly, its ribs and its hollow
+        skin(p, f, fall=0.15)
+        for s in ('front', 'right', 'left'):
             fx, fy, fw, fh = f[s]
-            p.px((fx, fy), k(c, 1.7))
+            for r in range(2):                                    # the lowest ribs, curving down to the sides
+                for i in range(fw):
+                    u = abs(i - (fw - 1) / 2) / (fw / 2) if s == 'front' else 0.6
+                    if s == 'front' and u < 0.3:
+                        continue
+                    j = 1 + r * 3 + int(u * 2)
+                    if j < fh - 1:
+                        p.px((fx + i, fy + j + 1), k(mix(SKIN, SKIN_SHADE, 0.5), w.LIGHT[s]))
+            if s == 'front':                                      # the hard muscle of its belly
+                for side in (-1, 1):
+                    swell(p, f[s], fw / 2 + side * fw * 0.17, fh * 0.6, fw * 0.17, fh * 0.35, k_=1.1, rim=0.85)
+            if s == 'front':                                      # the hollow under them, a line down its middle
+                w.vline(p, f[s], fw // 2, k(SKIN_SHADE, 0.85), fh // 2, fh)
 
-    if style == 'pendant':                                        # a bronze coin, square-holed
-        w.iron(p, f, BRONZE, rivets=0, dents=0.05)
-        fx, fy, fw, fh = f['front']
-        for i, j, xy in w.each(p, f['front']):
-            if abs(i - fw / 2 + 0.5) < 1 and abs(j - fh / 2 + 0.5) < 1:
-                p.px(xy, (20, 14, 10))
-            elif (i + j) % 3 == 0:
-                p.px(xy, VERDIGRIS)
-
-    if style in ('talisman', 'talisman_small', 'sack_talisman'):  # stolen talismans: yellow paper, red spells
-        w.cut_all(p, f, ('right', 'left', 'top', 'bottom'))
-        for s in ('front', 'back'):
-            w.talisman(p, f[s])
-            if style != 'sack_talisman':
-                w.ragged(p, f[s], teeth=1, depth=1)
-
-    if style == 'strap':
-        w.leather(p, f, LEATHER, stitch=(180, 150, 100))
-
-    if style in ('sack', 'sacktie'):                              # a sack of its thefts, bulging
-        w.cloth(p, f, SACK if style == 'sack' else ROPE, k(SACK, 0.55), fold=4)
-        if style == 'sack':
-            fx, fy, fw, fh = f['back']
-            w.patch(p, f['back'], PATCHES[1], ROBE_DEEP, STITCH, 2, 3, 5, 5)
-            for s in w.SIDES:
-                fx, fy, fw, fh = f[s]
-                for i in range(fw):                               # the bulge's creases
-                    if (i * 5) % 7 == 0:
-                        for j in range(2, fh - 2):
-                            if p.rnd.random() < 0.6:
-                                p.px((fx + i, fy + j), k(SACK, 0.6 * w.LIGHT[s]))
-
-    if style == 'scroll':                                         # a stolen scroll: paper, red ends
-        w.flat(p, f, (222, 208, 170))
-        w.border(p, f, (150, 30, 24))
-        w.flat(p, f, (150, 30, 24), faces=('top', 'bottom'))
-
-    if style == 'stick':
-        w.wood(p, f, (120, 84, 50))
-
-    if style in ('cork',):
-        w.wood(p, f, (150, 112, 70))
-
-    if style in ('gourd', 'gourd_top'):                           # a calabash, yellowed and lacquered
-        w.hide(p, f, (196, 152, 64), (128, 86, 34), (236, 204, 120), mottle=0.4)
-        if style == 'gourd':
-            w.hline(p, f['front'], 1, (150, 30, 24))
-            w.hline(p, f['right'], 1, (150, 30, 24))
-
-    if style == 'skull':                                          # its big head: skin, the face painted on its front
-        skin(p, f, warts=0.5)
-        fx, fy, fw, fh = f['front']                               # 16x13: brow wrinkles over the brow ridge
-        for j in (fh - 9, fh - 7):                                # two furrows over its brow, broken
-            for i in range(4, fw - 4):
-                if (i * 5 + j) % 7 > 2:
-                    p.px((fx + i, fy + j), k(SKIN_SHADE, 1.1))
-        fx, fy, fw, fh = f['top']
-        for i, j, xy in w.each(p, f['top']):                      # hair over the crown, but its front
-            if j < fh - 3 or p.rnd.random() < 0.4:
-                p.px(xy, k(mix(HAIR, HAIR_GREY, 0.25 * p.rnd.random()), 1.1))
-
-    if style == 'cheeks':                                         # cheeks, ruddy; deep creases down from the nose
-        skin(p, f, warts=0.4)
-        fx, fy, fw, fh = f['front']                               # 18x5
-        for i in range(2, 6):
-            for j in range(fh):
-                p.px((fx + i, fy + j), mix(p.get((fx + i, fy + j)), RUDDY, 0.35))
-                p.px((fx + fw - 1 - i, fy + j), mix(p.get((fx + fw - 1 - i, fy + j)), RUDDY, 0.35))
-        for j in range(fh):
-            p.px((fx + 6 + j // 2, fy + j), k(SKIN_SHADE, 0.7))
-            p.px((fx + fw - 7 - j // 2, fy + j), k(SKIN_SHADE, 0.7))
-
-    if style == 'brow':                                           # a heavy, scowling brow ridge
-        skin(p, f, warts=0.2)
-        fx, fy, fw, fh = f['front']
-        w.hline(p, f['front'], fh - 1, k(SKIN_SHADE, 0.6))
-        for i in range(fw):
-            p.px((fx + i, fy), k(SKIN_LIGHT, 1.0))
-        fx, fy, fw, fh = f['bottom']
-        w.flat(p, f, k(SKIN_SHADE, 0.6), faces=('bottom',))
-
-    if style == 'lip':                                            # the upper lip and the grin's top: teeth along its foot
-        skin(p, f, warts=0.1)
-        fx, fy, fw, fh = f['front']                               # 13x3
-        for i in range(fw):
-            p.px((fx + i, fy + fh - 1), GUM)
-        for i in range(1, fw - 1):
-            if i % 2 == 1 or p.rnd.random() < 0.3:
-                p.px((fx + i, fy + fh - 1), TOOTH if (i * 7) % 5 else k(TOOTH, 0.8))
+    if style == 'chest':                                          # a lean, hard chest; the ribs under it; its back
+        skin(p, f)
+        fx, fy, fw, fh = f['front']                               # 17x13
+        for side in (-1, 1):                                      # the pectorals
+            swell(p, f['front'], fw / 2 + side * fw * 0.23, fh * 0.3, fw * 0.24, fh * 0.26, k_=1.22)
+        w.vline(p, f['front'], fw // 2, k(SKIN_SHADE, 0.8), 1, fh)
+        for n in range(3):                                        # three slashes of red ochre over its left breast
+            for t in range(5):
+                p.px((fx + fw - 3 - n * 2 - t // 2, fy + 2 + t), k(OCHRE, 1.0 - 0.06 * t))
+        for r in range(2):                                        # ribs below the pectorals, at its sides
+            for i in range(fw):
+                u = abs(i - (fw - 1) / 2) / (fw / 2)
+                if u > 0.5:
+                    j = int(fh * 0.66) + r * 2 + int(u * 2)
+                    if j < fh:
+                        p.px((fx + i, fy + j), k(mix(SKIN, SKIN_SHADE, 0.6), 1.0))
         for s in ('right', 'left'):
             fx, fy, fw, fh = f[s]
-            w.hline(p, f[s], fh - 1, GUM)
-        w.flat(p, f, GUM, faces=('bottom',))
-        fx, fy, fw, fh = f['bottom']                              # its upper teeth, seen from below
-        for i in range(fw):
-            for j in range(fh - 2, fh):
-                if i % 2 == 0:
-                    p.px((fx + i, fy + j), TOOTH)
-
-    if style in ('jaw', 'chin'):                                  # the jaw, a row of crooked fangs along its top
-        skin(p, f, warts=0.4)
-        if style == 'jaw':
-            fx, fy, fw, fh = f['front']                           # 14x4
-            for i in range(fw):
-                p.px((fx + i, fy), GUM)
-                p.px((fx + i, fy + 1), k(SKIN, 0.85))
-            for i in range(0, fw, 2):
-                tall = 2 if i in (2, fw - 4) else 1
-                for j in range(tall):
-                    p.px((fx + i + (i > fw // 2), fy + j), TOOTH)
-            fx, fy, fw, fh = f['top']                             # its lower teeth, seen from above, and the mouth's dark
-            for i, j, xy in w.each(p, f['top']):
-                p.px(xy, GUM if j < fh - 2 else (TOOTH if i % 2 == 0 else k(GUM, 0.6)))
-            for s in ('right', 'left'):
-                w.hline(p, f[s], 0, GUM)
-
-    if style == 'nose':                                           # the long bridge of its nose, warty, reddening toward its end
-        skin(p, f, warts=0.5)
-        for s_ in ('top', 'right', 'left', 'bottom'):
-            fx, fy, fw, fh = f[s_]
-            for i, j, xy in w.each(p, f[s_]):
-                along = (1 - j / max(1, fh - 1)) if s_ == 'top' else (1 - i / max(1, fw - 1)) if s_ == 'right' else (i / max(1, fw - 1)) if s_ == 'left' else j / max(1, fh - 1)
-                p.px(xy, mix(p.get(xy), RUDDY, 0.55 * along))
-        w.flat(p, f, RUDDY, faces=('front',))
-        fx, fy, fw, fh = f['top']                                 # a ridge of light down it
-        for j in range(fh):
-            p.px((fx + fw // 2, fy + j), k(SKIN_LIGHT, 1.05))
-
-    if style == 'nosetip':                                        # the hooked tip, ruddy and shining, nostrils under it
-        w.hide(p, f, RUDDY, k(RUDDY, 0.6), k(RUDDY, 1.35), mottle=0.3, warts=0.5)
-        fx, fy, fw, fh = f['bottom']
-        p.px((fx, fy + fh - 1), (40, 14, 12))
-        p.px((fx + fw - 1, fy + fh - 1), (40, 14, 12))
-        fx, fy, fw, fh = f['front']
-        p.px((fx + 1, fy + 1), (230, 170, 150))
-
-    if style == 'eye':                                            # bulging yellow eyes, a slit pupil, a heavy lid
-        skin(p, f, warts=0)
-        fx, fy, fw, fh = f['front']                               # 5x3
-        for i, j, xy in w.each(p, f['front']):
-            if j == 0:
-                p.px(xy, k(SKIN_SHADE, 0.8))
-            else:
-                p.lit(xy, mix(EYE, (255, 250, 200), 0.3 if j == 1 else 0) if i not in (0, fw - 1) else k(EYE, 0.75))
-        for j in (1, 2):
-            p.px((fx + fw // 2, fy + j), (20, 12, 8))
-            p.glow.putpixel((fx + fw // 2, fy + j), (0, 0, 0, 0))
-        p.lit((fx + fw // 2 - 1, fy + 1), (255, 255, 230))
-
-    if style in ('ear', 'eartip'):                                # long pointed ears: green, a ruddy hollow inside, tapering to a point
-        skin(p, f, warts=0.15)
-        fx, fy, fw, fh = f['front']                               # the hollow, facing forward
-        for i, j, xy in w.each(p, f['front']):
-            t = i / max(1, fw - 1)                                # 0 at the tip end .. 1 at the root
-            if abs(j - fh / 2 + 0.5) < fh * (0.06 + 0.14 * t) and (style == 'ear' and 0.1 < t < 0.92 or style == 'eartip' and t > 0.35):
-                p.px(xy, mix(p.get(xy), (196, 128, 104), 0.55))
-        for i in range(fw):                                       # its rim lit along the top
-            p.px((fx + i, fy + 1), k(SKIN_LIGHT, 1.0))
-        for s_ in ('front', 'back'):                              # a leaf's shape: broad at the root, to a point at the tip
-            fx, fy, fw, fh = f[s_]
-            for i in range(fw):
-                t = i / max(1, fw - 1)
-                if s_ == 'back':
-                    t = 1 - t
-                keep = (0.55 + 0.45 * t) if style == 'ear' else (0.12 + 0.88 * t ** 0.8)
-                for j in range(fh):
-                    if abs(j - fh / 2 + 0.5) > keep * fh / 2:
-                        p.clear((fx + i, fy + j))
-        w.cut_all(p, f, ('top', 'bottom', 'right', 'left'))     # (its thin edges would outline the uncut shape)
-
-    if style == 'ring':                                           # a bronze earring
-        w.iron(p, f, BRONZE, rivets=0, rim=False, dents=0)
-
-    if style in ('horn', 'horntip'):                              # horn-nubs curling back: dark at the root, bone above, dark at the point
-        for s_ in f:
-            fx, fy, fw, fh = f[s_]
-            for i, j, xy in w.each(p, f[s_]):
-                t = 1 - j / max(1, fh - 1)                        # 0 at its root .. 1 at its end
-                c = mix((70, 56, 44), (214, 196, 148), t) if style == 'horn' else mix((214, 196, 148), (54, 44, 36), t)
-                if j % 2 == 0:
-                    c = k(c, 0.85)
-                p.px(xy, k(c, w.LIGHT[s_]))
-        if style == 'horntip':
-            for s_ in w.SIDES:
-                w.point(p, f[s_], down=False, keep=0.3, sharp=0.5)
-
-    if style == 'crown':                                          # the top of its skull, under its hair
-        skin(p, f, warts=0.3)
-        for i, j, xy in w.each(p, f['top']):
-            p.px(xy, k(mix(HAIR, HAIR_GREY, 0.35 * p.rnd.random()), 1.0))
-        for s_ in ('back', 'right', 'left'):
-            fx, fy, fw, fh = f[s_]
-            for i in range(fw):
-                p.px((fx + i, fy), k(HAIR, 1.2))
-
-    if style == 'fang':
-        for s_ in f:
-            fx, fy, fw, fh = f[s_]
-            for i, j, xy in w.each(p, f[s_]):
-                p.px(xy, k(mix(TOOTH, (170, 150, 110), j / max(1, fh)), w.LIGHT[s_]))
-        for s_ in w.SIDES:
-            w.point(p, f[s_], down=False, keep=0.4, sharp=0.6)
-
-    if style == 'hairpin':                                        # a bone pin through its topknot
-        w.flat(p, f, (222, 210, 176))
-        fx, fy, fw, fh = f['front']
-        p.px((fx, fy), (150, 30, 24))
-        p.px((fx + fw - 1, fy), (150, 30, 24))
-
-    if style in ('topknot', 'hair', 'hairtuft'):                  # coarse black hair, greying, lit along its strands
-        for s_ in f:
-            w.strands(p, f[s_], k(HAIR, w.LIGHT[s_] * 1.15), k(HAIR, 0.55), k(HAIR_GREY, w.LIGHT[s_]), density=0.5, lean=0.3)
-        if style == 'topknot':                                    # a bun: its strands wound round it
-            for s_ in w.SIDES:
-                fx, fy, fw, fh = f[s_]
+            for r in range(3):
                 for i in range(fw):
-                    p.px((fx + i, fy + (i // 2) % fh), k(HAIR_GREY, 0.95 * w.LIGHT[s_]))
-            fx, fy, fw, fh = f['top']
-            w.disc(p, fx + fw / 2, fy + fh / 2, 1.5, k(HAIR_GREY, 1.05))
-            p.px((fx + fw // 2, fy + fh // 2), k(HAIR, 0.6))
-        else:
-            for s_ in ('back', 'front', 'right', 'left'):
-                w.tufts(p, f[s_], depth=3, every=3)
+                    j = 5 + r * 3 + i // 4
+                    if j < fh:
+                        p.px((fx + i, fy + j), k(mix(SKIN, SKIN_SHADE, 0.6), w.LIGHT[s]))
+        fx, fy, fw, fh = f['back']                                # shoulder blades
+        for side in (-1, 1):
+            swell(p, f['back'], fw / 2 + side * fw * 0.26, fh * 0.3, fw * 0.2, fh * 0.3, k_=1.2)
 
-    if style == 'cord':
-        w.rope(p, f, CORD)
+    if style == 'traps':                                          # the hump of muscle over its shoulders
+        skin(p, f)
+        for s in ('front', 'back', 'top'):
+            fx, fy, fw, fh = f[s]
+            swell(p, f[s], fw / 2, fh / 2, fw * 0.48, fh * 0.6, k_=1.15, rim=0.8)
 
-    if style == 'sleeve':                                         # a ragged sleeve over the shoulder
-        robe(p, f)
-        for s in w.SIDES:
-            w.ragged(p, f[s], teeth=2, depth=3)
-        w.patch(p, f['right'], PATCHES[0], ROBE_DEEP, STITCH, 1, 1, 4, 4)
+    if style == 'knob':                                           # its spine's knobs
+        skin(p, f, fall=0)
+        w.flat(p, f, k(SKIN_LIGHT, 1.05), faces=('top', 'back'))
 
-    if style == 'grip':
-        wraps(p, f, (90, 40, 30), (50, 22, 18))
+    if style == 'rope':                                           # a rope belt, knotted
+        w.rope(p, f, ROPE)
 
-    if style in ('pommel', 'guard'):
-        w.iron(p, f, BRONZE, rust=0.35, rustc=VERDIGRIS, rivets=0, dents=0.2)
-
-    if style in ('blade', 'bladetip'):                            # crude bronze, green with age, its edge notched and bright
-        w.iron(p, f, (150, 112, 60), rust=0.3, rustc=VERDIGRIS, rivets=0, dents=0.3, rim=False)
+    if style in ('sash', 'sash_end'):                             # a dark rag, frayed at its edges, holed
+        for s in f:
+            w.weave(p, f[s], WRAP, WRAP_DEEP, light=w.LIGHT[s], fold=3, fall=0.1)
         for s in ('front', 'back'):
             fx, fy, fw, fh = f[s]
-            for j in range(fh):
-                p.px((fx, fy + j), (226, 196, 130))
-                if (j * 3) % 7 == 0:
+            for j in range(fh):                                   # frayed edges
+                if (j * 7) % 5 == 0:
                     p.clear((fx, fy + j))
-            if style == 'bladetip':
-                w.point(p, f[s], down=False, keep=0.3, sharp=0.5)
+                if (j * 3) % 4 == 0:
+                    p.clear((fx + fw - 1, fy + j))
+            if style == 'sash':
+                w.tear_holes(p, f[s], n=2, size_=2)
+            else:
+                w.ragged(p, f[s], teeth=1, depth=4)
 
-    if style == 'slingcord':
-        w.rope(p, f, (150, 120, 80))
+    if style in ('loinflap', 'loinside'):                         # the loincloth: dark, worn, torn to rags
+        for s in f:
+            w.weave(p, f[s], WRAP, WRAP_DEEP, light=w.LIGHT[s], fold=4, fall=0.4)
+        for s in S:
+            w.ragged(p, f[s], teeth=2, depth=6)
+            w.tear_holes(p, f[s], n=2, size_=2)
+        for s in ('front', 'back'):                               # a red-ochre band of its tribe near the top
+            fx, fy, fw, fh = f[s]
+            if fh > 6:
+                w.hline(p, f[s], 2, k(OCHRE, 0.8 * w.LIGHT[s]))
 
-    if style == 'pouch':
-        w.leather(p, f, LEATHER)
+    if style == 'talisman':
+        w.cut_all(p, f, ('right', 'left', 'top', 'bottom'))
+        for s in ('front', 'back'):
+            torn_talisman(p, f[s], tear=3)
+    if style == 'talisman_torn':                                  # half of one, torn on the slant
+        w.cut_all(p, f, ('right', 'left', 'top', 'bottom'))
+        for s in ('front', 'back'):
+            torn_talisman(p, f[s], tear=2)
+            fx, fy, fw, fh = f[s]
+            for i, j, xy in w.each(p, f[s]):
+                if j > fh * 0.45 + i * 0.8:
+                    p.clear(xy)
+    if style == 'talisman_side':
+        w.cut_all(p, f, ('front', 'back', 'top', 'bottom'))
+        for s in ('right', 'left'):
+            torn_talisman(p, f[s], tear=2)
+            fx, fy, fw, fh = f[s]
+            w.hline(p, f[s], 2, ROPE)                             # the cord binding it on
 
-    if style == 'stone':
-        w.hide(p, f, (120, 118, 112), (70, 68, 66), mottle=0.5)
+    if style in ('mane_back', 'mane_tail', 'mane_side', 'lock', 'mane_nape'):
+        mane(p, f, tuft=5 if style in ('mane_back', 'mane_tail', 'lock') else 3)
+    if style == 'mane_top':                                       # its crown: the hair parted and swept back
+        mane(p, f, tuft=0, lean=0.0)
+        fx, fy, fw, fh = f['top']
+        for i, j, xy in w.each(p, f['top']):
+            if i % 3 == 0:
+                p.px(xy, k(MANE_SHADE, 0.9))
+        for s in ('front',):                                      # its fringe over the brow, ragged
+            w.tufts(p, f[s], depth=2, every=2)
+
+    if style == 'bead':
+        bone(p, f, cracks=False)
+        for s in S:
+            fx, fy, fw, fh = f[s]
+            p.px((fx + fw // 2, fy + fh // 2), k(BONE_SHADE, 0.5))
+    if style == 'fangbead':                                       # a beast's fang strung on its necklace
+        bone(p, f, base=(236, 226, 200), cracks=False)
+        for s in S:
+            w.point(p, f[s], down=True, keep=0.3, sharp=0.5)
+            w.hline(p, f[s], 0, (40, 30, 24))
+    if style == 'skullbead':                                      # a little skull: sockets, a nose-hole, its teeth
+        bone(p, f, cracks=False)
+        fx, fy, fw, fh = f['front']                               # 4x4
+        for i, j in ((0, 1), (fw - 1, 1), (0, 2), (fw - 1, 2)):
+            p.px((fx + i, fy + j), (26, 18, 16))
+        p.px((fx + fw // 2 - 1, fy + 2), (60, 44, 36))
+        p.px((fx + fw // 2, fy + 2), (60, 44, 36))
+        for i in range(fw):
+            p.px((fx + i, fy + fh - 1), (40, 30, 26) if i % 2 else BONE)
+
+    if style == 'cranium':                                        # its skull, under the mane: furrowed, the brow knotted
+        skin(p, f)
+        fx, fy, fw, fh = f['front']                               # 12x11
+        for j in (3, 5):                                          # forehead furrows, bending down to the middle
+            for i in range(2, fw - 2):
+                p.px((fx + i, fy + j + (1 if abs(i - fw / 2 + 0.5) < 2 else 0)), k(SKIN_SHADE, 1.0))
+        for i, j, xy in w.each(p, f['front']):                    # the deep shadow of the sockets under the brow
+            if j >= fh - 6:
+                p.px(xy, k(SKIN_SHADE, 0.45 + 0.1 * (j - fh + 6) / 6))
+
+    if style == 'brow':                                           # a heavy brow, scowling down to a V between its eyes
+        skin(p, f, fall=0)
+        fx, fy, fw, fh = f['front']                               # 8x3
+        for i in range(fw):
+            for j in range(fh):
+                p.px((fx + i, fy + j), k(SKIN_LIGHT, 1.05 - 0.2 * j))
+            p.px((fx + i, fy + fh - 1), k(SKIN_SHADE, 0.5))
+        for j in range(fh):                                       # knotted where the two meet
+            p.px((fx + fw - 1, fy + j), k(SKIN_SHADE, 0.8))
+        w.flat(p, f, k(SKIN_SHADE, 0.35), faces=('bottom',))
+        for s in ('top',):
+            fx, fy, fw, fh = f[s]
+            for i in range(fw):                                   # bristling white brows over it
+                if i % 2 == 0 and abs(i - fw / 2) > 2:
+                    p.px((fx + i, fy + fh - 1), MANE)
+
+    if style == 'cheeks':                                         # gaunt cheekbones; red ochre streaked under its eyes
+        skin(p, f)
+        fx, fy, fw, fh = f['front']                               # 13x3
+        for i, j, xy in w.each(p, f['front']):
+            if j == 0:
+                p.px(xy, k(SKIN_LIGHT, 1.0))
+        for x in (1, 3, fw - 2, fw - 4):                          # the ochre streaks: three claw marks each side
+            for j in range(fh):
+                p.px((fx + x, fy + j), k(OCHRE, 1.0 - 0.15 * j))
+        for s in ('right', 'left'):
+            fx, fy, fw, fh = f[s]
+            for i in range(fw):
+                p.px((fx + i, fy), k(SKIN_LIGHT, 0.9))
+            for j in range(fh):
+                p.px((fx + (2 if s == 'left' else fw - 3), fy + j), k(OCHRE, 0.75))
+
+    if style == 'muzzle':                                         # the snarling upper lip, wrinkled back from its fangs
+        skin(p, f, fall=0.1)
+        for s in ('front', 'right', 'left'):
+            fx, fy, fw, fh = f[s]
+            for i in range(fw):                                   # snarl wrinkles
+                if i % 3 == 1:
+                    p.px((fx + i, fy + 1), k(SKIN_SHADE, 0.9))
+            for i in range(fw):                                   # the lip's edge, its teeth below it
+                p.px((fx + i, fy + fh - 2), k(GUM, 1.1))
+                p.px((fx + i, fy + fh - 1), TOOTH if i % 2 == 0 else (60, 40, 40))
+        w.flat(p, f, MAW, faces=('bottom',))
+        fx, fy, fw, fh = f['bottom']
+        for i in range(fw):
+            p.px((fx + i, fy + fh - 1), TOOTH if i % 2 == 0 else GUM)
+        for j in range(fh):
+            p.px((fx, fy + j), TOOTH if j % 2 == 0 else GUM)
+            p.px((fx + fw - 1, fy + j), TOOTH if j % 2 == 0 else GUM)
+
+    if style == 'nosebridge':                                     # the bridge between its eyes, knotted into the scowl
+        skin(p, f, fall=0)
+        fx, fy, fw, fh = f['front']
+        for j in range(0, fh, 2):
+            w.hline(p, f['front'], j, k(SKIN_SHADE, 1.0))
+
+    if style == 'nose':                                           # a flat demon's nose, its nostrils flared
+        skin(p, f, fall=0)
+        fx, fy, fw, fh = f['front']
+        for i in range(fw):
+            p.px((fx + i, fy), k(SKIN_LIGHT, 1.0))
+        p.px((fx, fy + fh - 1), (14, 8, 12))
+        p.px((fx + fw - 1, fy + fh - 1), (14, 8, 12))
+        p.px((fx + 1, fy + fh - 1), (30, 18, 24))
+        p.px((fx + fw - 2, fy + fh - 1), (30, 18, 24))
+        fx, fy, fw, fh = f['bottom']
+        for j in range(fh):
+            p.px((fx, fy + j), (14, 8, 12))
+            p.px((fx + fw - 1, fy + j), (14, 8, 12))
+
+    if style == 'maw':                                            # the dark of its open mouth, its tongue
+        w.flat(p, f, MAW)
+        fx, fy, fw, fh = f['bottom']
+        for i, j, xy in w.each(p, f['bottom']):
+            if 1 < i < fw - 2:
+                p.px(xy, (110, 34, 44))
+        fx, fy, fw, fh = f['front']
+        for i, j, xy in w.each(p, f['front']):
+            p.px(xy, (14, 4, 6))
+
+    if style in ('jaw', 'chin'):                                  # the lower jaw: skin without, fangs along its top
+        skin(p, f, fall=0.15)
+        if style == 'jaw':
+            fx, fy, fw, fh = f['top']                             # its gum and tongue, ringed with teeth
+            for i, j, xy in w.each(p, f['top']):
+                edge = i in (0, 1, fw - 2, fw - 1) or j <= 1
+                p.px(xy, (TOOTH if (i + j) % 2 == 0 else (70, 40, 40)) if edge else (120, 36, 46))
+            for s in ('front', 'right', 'left'):
+                fx, fy, fw, fh = f[s]
+                for i in range(fw):
+                    p.px((fx + i, fy), k(GUM, 1.0))
+        fx, fy, fw, fh = f['front']                               # ochre on its chin
+        if style == 'chin':
+            w.vline(p, f['front'], fw // 2, k(OCHRE, 0.9))
+
+    if style == 'tusk':                                           # tusks jutting up from its jaw: ivory, darker at the root
+        for s in f:
+            fx, fy, fw, fh = f[s]
+            for i, j, xy in w.each(p, f[s]):
+                p.px(xy, k(mix(TOOTH, (170, 150, 110), j / max(1, fh - 1)), w.LIGHT[s]))
+        for s in S:
+            w.point(p, f[s], down=False, keep=0.3, sharp=0.6)
+    if style == 'fang':
+        for s in f:
+            fx, fy, fw, fh = f[s]
+            for i, j, xy in w.each(p, f[s]):
+                p.px(xy, k(mix(TOOTH, (180, 160, 120), 0.3 * j / max(1, fh - 1)), w.LIGHT[s]))
+        for s in S:
+            w.point(p, f[s], down=True, keep=0.3, sharp=0.6)
+
+    if style == 'eye':                                            # eyes burning amber deep in their sockets
+        w.flat(p, f, (20, 12, 14))
+        fx, fy, fw, fh = f['front']                               # 4x2: slanting down to its inner corner, a lid over it
+        for i, j, xy in w.each(p, f['front']):
+            u = i / max(1, fw - 1)                                # 0 at its outer corner .. 1 at its inner
+            if (j == 0 and u > 0.6) or (j == fh - 1 and u < 0.2):
+                p.px(xy, (20, 12, 14))
+                continue
+            p.lit(xy, mix((255, 240, 150), EYE, abs(u - 0.5) * 2))
+        p.px((fx + fw // 2, fy + fh - 1), (40, 10, 4))
+        p.glow.putpixel((fx + fw // 2, fy + fh - 1), (0, 0, 0, 0))
+
+    if style == 'ear':                                            # small pointed ears swept back through the mane
+        skin(p, f)
+        for s in ('right', 'left'):
+            fx, fy, fw, fh = f[s]
+            for i, j, xy in w.each(p, f[s]):
+                if 1 < j < fh - 1 and 0 < i < fw - 2:
+                    p.px(xy, k((96, 52, 70), w.LIGHT[s]))
+            w.point(p, (fx, fy, fw, fh), down=False, keep=0.6, sharp=0.5) if False else None
+            for i, j, xy in w.each(p, f[s]):                      # tapering to its tip, behind
+                u = i / max(1, fw - 1) if s == 'right' else 1 - i / max(1, fw - 1)
+                if abs(j - fh / 2) > fh * 0.5 * (0.25 + 0.75 * u):
+                    p.clear(xy)
+
+    if style in ('horn1', 'horn2', 'horn3', 'hornbroken'):        # ridged horn: dark at its root, pale toward its tip
+        t0 = {'horn1': 0.0, 'horn2': 0.33, 'horn3': 0.66, 'hornbroken': 0.0}[style]
+        for s in f:
+            fx, fy, fw, fh = f[s]
+            for i, j, xy in w.each(p, f[s]):
+                t = t0 + 0.33 * (1 - j / max(1, fh - 1))
+                c = mix(HORN, HORN_TIP, t ** 1.4)
+                if j % 3 == 0:                                    # its rings
+                    c = k(c, 0.72)
+                p.px(xy, [v * w.LIGHT[s] + p.rnd.randint(-3, 3) for v in c])
+        if style == 'horn3':
+            for s in S:
+                w.point(p, f[s], down=False, keep=0.25, sharp=0.5)
+            w.cut_all(p, f, ('top',))
+        if style == 'hornbroken':                                 # snapped off: a jagged, splintered top
+            for s in S:
+                fx, fy, fw, fh = f[s]
+                for i in range(fw):
+                    cut = (i * 5) % 3
+                    for j in range(cut):
+                        p.clear((fx + i, fy + j))
+                    p.px((fx + i, fy + cut), (190, 176, 140))
+            fx, fy, fw, fh = f['top']
+            for i, j, xy in w.each(p, f['top']):
+                p.px(xy, (176, 160, 124) if (i + j) % 3 else (120, 100, 80))
+
+    if style == 'jawbone':                                        # a great beast's jawbone, lashed on
+        bone(p, f)
+        for s in S:
+            fx, fy, fw, fh = f[s]
+            for i in range(fw):
+                if i % 4 == 1:
+                    for j in range(fh):
+                        p.px((fx + i, fy + j), k(ROPE, w.LIGHT[s]))
+    if style == 'jawteeth':
+        bone(p, f, base=TOOTH, cracks=False)
+        for s in S:
+            fx, fy, fw, fh = f[s]
+            for i, j, xy in w.each(p, f[s]):
+                if i % 2 == 1 and j > 0:
+                    p.clear(xy)
+
+    if style == 'grip':                                           # its grip wound in rag
+        rags(p, f, base=RAG, deep=k(RAG, 0.5))
+    if style in ('pommel', 'guard'):                              # a lump of bone for a pommel, a crossbar of bone
+        bone(p, f, cracks=False)
+    if style == 'ragtail':
+        for s in f:
+            w.weave(p, f[s], RAG, k(RAG, 0.5), light=w.LIGHT[s], fold=3)
+        for s in S:
+            w.ragged(p, f[s], teeth=1, depth=2)
+    if style == 'chopper':                                        # black iron, hammered crude: a sawtoothed back, a hooked point, a bright notched edge
+        w.iron(p, f, IRON, rust=0.25, rivets=0, rim=False, dents=0.3, rustc=(98, 46, 26))
+        for s in ('right', 'left'):
+            fx, fy, fw, fh = f[s]                                 # depth 2.9 -> 6 wide; height 9.8 -> 20
+            for i, j, xy in w.each(p, f[s]):
+                u = i / max(1, fw - 1)                            # across the blade: 0 .. 1
+                if s == 'right':
+                    u = 1 - u                                     # 0 at its front edge .. 1 at its back
+                v = j / max(1, fh - 1)                            # 0 at its tip .. 1 at its root
+                width = 0.55 + 0.45 * min(1, v * 2.2)             # it widens from its point
+                if u > width:
+                    p.clear(xy)
+                    continue
+                if v < 0.12 and u < 0.45 - v * 2:                 # the hook curling forward at its point
+                    p.clear(xy)
+                    continue
+                if u > width - 0.2 and (j % 3 == 0) and v > 0.15:
+                    p.clear(xy)                                   # the saw teeth along its back
+                    continue
+                if u < 0.14:
+                    p.px(xy, k(IRON_EDGE, w.LIGHT[s] * (0.9 + 0.1 * (j % 2))))   # the bright ground edge
+            for n in (5, 11, 15):                                 # notches in its edge
+                if n < fh:
+                    p.px((fx + (0 if s == 'left' else fw - 1), fy + n), (0, 0, 0)) if False else None
+                    p.clear((fx + (0 if s == 'left' else fw - 1), fy + n))
 
 
 if __name__ == '__main__':
-    p = Painter(31)
+    p = Painter(37)
     slots = paint(GOBLIN, p, paint_goblin)
     p.save('goblin')
     w.emit(GOBLIN, slots, w.JAVA, 'goblin')

@@ -269,9 +269,9 @@ public final class ModItems {
     /** An ogre's tusk: bone meal. */
     public static final DeferredHolder<Item, Item> OGRE_TUSK = ITEMS.register("ogre_tusk", () -> new Item(new Item.Properties()));
     public static final DeferredHolder<Item, Item> GOBLIN_SPAWN_EGG = ITEMS.register("goblin_spawn_egg",
-            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.GOBLIN, 0x6E8A3A, 0x8A5A2A, new Item.Properties()));
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.GOBLIN, 0x484E6C, 0xD6D0C4, new Item.Properties()));
     public static final DeferredHolder<Item, Item> KOBOLD_SPAWN_EGG = ITEMS.register("kobold_spawn_egg",
-            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.KOBOLD, 0x3E5A64, 0xC84A2A, new Item.Properties()));
+            () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.KOBOLD, 0x3E5832, 0xE2D092, new Item.Properties()));
     public static final DeferredHolder<Item, Item> WOLFMAN_SPAWN_EGG = ITEMS.register("wolfman_spawn_egg",
             () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.WOLFMAN, 0x8A8C90, 0x2A2228, new Item.Properties()));
     public static final DeferredHolder<Item, Item> OGRE_SPAWN_EGG = ITEMS.register("ogre_spawn_egg",

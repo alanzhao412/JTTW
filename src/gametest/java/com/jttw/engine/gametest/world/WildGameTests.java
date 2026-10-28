@@ -48,7 +48,7 @@ import static com.jttw.engine.gametest.character.CharTest.as;
 
 /**
  * The open world's yaoguai (goblins, kobolds, wolfmen, ogres): each comes with its stats at its
- * level, fights, and leaves its loot; each one's own ways (a goblin losing its nerve, a kobold's
+ * level, fights, and leaves its loot; each one's own ways (a goblin falling back, a kobold's
  * alarm, a wolfman's howl calling its pack, an ogre's slam); where they come (their biomes' spawn
  * lists); and what their kills pay (as vanilla mobs do below level 20, nothing from 20).
  *
@@ -119,7 +119,7 @@ public class WildGameTests {
 
     @GameTest(batch = "wild", template = PLATFORM)
     public static void aGoblinHasItsStats(GameTestHelper h) {
-        stats(h, ModEntities.GOBLIN.get(), GoblinEntity.HITS, GoblinEntity.BLOW, 1, 6, 1);
+        stats(h, ModEntities.GOBLIN.get(), GoblinEntity.HITS, GoblinEntity.BLOW, 2, 8, 1);
         h.succeed();
     }
 
@@ -214,19 +214,23 @@ public class WildGameTests {
     // ── Their own ways ──────────────────────────────────────────────────
 
     @GameTest(batch = "wild_goblin_nerve", template = PLATFORM, timeoutTicks = 120)
-    public static void aGoblinLosesItsNerveAloneOrHurt(GameTestHelper h) {
+    public static void aGoblinFallsBackAloneOrBadlyHurt(GameTestHelper h) {
         GoblinEntity m = wild(h, ModEntities.GOBLIN.get(), new BlockPos(2, 2, 2));
         check(h, m.afraid(), "alone, it is afraid");
         GoblinEntity a = wild(h, ModEntities.GOBLIN.get(), new BlockPos(3, 2, 3));
         GoblinEntity b = wild(h, ModEntities.GOBLIN.get(), new BlockPos(1, 2, 3));
         a.setNoAi(true);
         b.setNoAi(true);
-        check(h, !m.afraid(), "with its gang about it, it keeps its nerve");
+        check(h, !m.afraid(), "with its pack about it, it presses on");
         m.setHealth(m.getMaxHealth() * 0.4f);
-        check(h, m.afraid(), "hurt below half, it loses it");
+        check(h, !m.afraid(), "hurt, but not badly, it presses on");
+        b.discard();
+        check(h, !m.afraid(), "with one of its pack left, it presses on");
+        m.setHealth(m.getMaxHealth() * 0.25f);
+        check(h, m.afraid(), "hurt below a third, it falls back");
         IronGolem g = golem(h, new BlockPos(3, 2, 1));
         m.setTarget(g);
-        h.succeedWhen(() -> check(h, m.isFleeing(), "afraid of its foe, it runs"));
+        h.succeedWhen(() -> check(h, m.isFleeing(), "afraid of its foe, it falls back"));
     }
 
     @GameTest(batch = "wild_alarm", template = PLATFORM)

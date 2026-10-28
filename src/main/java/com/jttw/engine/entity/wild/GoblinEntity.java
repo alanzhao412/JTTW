@@ -28,25 +28,26 @@ import net.minecraft.world.phys.Vec3;
 import java.util.EnumSet;
 
 /**
- * A goblin (山魈小妖), a mountain imp: a small, wiry, moss-skinned yaoguai with huge ears, a hooked
- * nose and a mouthful of crooked teeth, in a patched hemp robe and a string of wooden beads, a
- * stolen Daoist talisman or two on it, a sack of its thefts on its back, a crude bronze dagger in
- * its fist and a sling at its belt. They come out at night on the hills, in the forests and over
- * the plains, in gangs of three to five, quick on their feet.
+ * A goblin (山魈), a demon of the mountains: as tall as a man but hunched, long-limbed and lean, with
+ * soot-indigo skin and a wild white mane, a demon's face with tusks and a gaping mouth of fangs, eyes
+ * burning amber under a heavy brow, one great horn (the other broken), bone ornaments and torn
+ * talismans worn as trophies, and a jagged iron chopper in its fist. They hunt at night on the hills,
+ * in the forests and over the plains, in packs of three to five, quick on their feet.
  *
- * <p>They are cowards. One that is hurt below {@value #NERVE_PERCENT}% of its health, or finds
- * fewer than {@value #COURAGE} of its fellows about it, runs from its foe, cowering (and comes
- * back once its gang is round it again). Strike one and the gang turns on you.
+ * <p>They are pack hunters, and fight as a pack. One that is hurt below {@value #NERVE_PERCENT}% of
+ * its health, or finds fewer than {@value #COURAGE} of its pack about it, falls back from its foe:
+ * crouched, hissing, its claws up, its eyes on it (and comes on again once the pack is round it).
+ * Strike one and the pack turns on you.
  */
 public class GoblinEntity extends WildYaoguai {
 
-    /** Three ordinary hits; a dagger stab of 9% of a same-level character's health. Very quick. */
-    public static final double HITS = 3, BLOW = 0.09, SPEED = 0.34;
-    public static final int MIN_LEVEL = 1, MAX_LEVEL = 6;
-    /** Hurt below this share of its health, it runs. */
-    public static final int NERVE_PERCENT = 50;
-    /** How many other goblins it needs within {@value #GANG_RANGE} blocks to keep its nerve. */
-    public static final int COURAGE = 2;
+    /** Four ordinary hits; a hack of its chopper of 11% of a same-level character's health. Quick. */
+    public static final double HITS = 4, BLOW = 0.11, SPEED = 0.31;
+    public static final int MIN_LEVEL = 2, MAX_LEVEL = 8;
+    /** Hurt below this share of its health, it falls back. */
+    public static final int NERVE_PERCENT = 30;
+    /** How many other goblins it needs within {@value #GANG_RANGE} blocks to keep pressing on. */
+    public static final int COURAGE = 1;
     public static final double GANG_RANGE = 10;
 
     private static final EntityDataAccessor<Boolean> FLEEING = SynchedEntityData.defineId(GoblinEntity.class, EntityDataSerializers.BOOLEAN);
@@ -75,12 +76,12 @@ public class GoblinEntity extends WildYaoguai {
         builder.define(FLEEING, false);
     }
 
-    /** Whether it is running from its foe (and cowering as it runs). */
+    /** Whether it is falling back from its foe (crouched and hissing as it goes). */
     public boolean isFleeing() {
         return entityData.get(FLEEING);
     }
 
-    /** For the gallery: shown cowering. */
+    /** For the gallery: shown falling back. */
     public void showFleeing(boolean on) {
         entityData.set(FLEEING, on);
     }
@@ -97,17 +98,17 @@ public class GoblinEntity extends WildYaoguai {
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
     }
 
-    /** How many other goblins are about it. */
+    /** How many others of its pack are about it. */
     public int gangAround() {
         return level().getEntitiesOfClass(GoblinEntity.class, getBoundingBox().inflate(GANG_RANGE), g -> g != this && g.isAlive()).size();
     }
 
-    /** Whether it has lost its nerve: hurt too far, or too few of its gang about it. */
+    /** Whether it would fall back: hurt too far, or too few of its pack about it. */
     public boolean afraid() {
         return getHealth() < getMaxHealth() * NERVE_PERCENT / 100f || gangAround() < COURAGE;
     }
 
-    /** Runs from its foe while it is afraid of it. */
+    /** Falls back from its foe while it is afraid of it: backing off, its eyes on it, hissing. */
     static final class LoseNerveGoal extends Goal {
         private final GoblinEntity goblin;
         private int recheck;
@@ -137,20 +138,23 @@ public class GoblinEntity extends WildYaoguai {
         @Override
         public void start() {
             goblin.entityData.set(FLEEING, true);
+            goblin.playSound(SoundEvents.CAT_HISS, 1.0f, 0.55f);
             recheck = 20;
             run();
         }
 
         @Override
         public void tick() {
+            LivingEntity t = goblin.getTarget();
+            if (t != null) goblin.getLookControl().setLookAt(t, 30f, 30f);
             if (goblin.getNavigation().isDone()) run();
         }
 
         private void run() {
             LivingEntity t = goblin.getTarget();
             if (t == null) return;
-            Vec3 away = DefaultRandomPos.getPosAway(goblin, 12, 6, t.position());
-            if (away != null) goblin.getNavigation().moveTo(away.x, away.y, away.z, 1.45);
+            Vec3 away = DefaultRandomPos.getPosAway(goblin, 9, 5, t.position());
+            if (away != null) goblin.getNavigation().moveTo(away.x, away.y, away.z, 1.2);
         }
 
         @Override
@@ -160,30 +164,30 @@ public class GoblinEntity extends WildYaoguai {
         }
     }
 
-    // ── Its voice: a cackle ─────────────────────────────────────────────
+    // ── Its voice: a growl ──────────────────────────────────────────────
 
     @Override
     public float getVoicePitch() {
-        return 1.55f + (random.nextFloat() - 0.5f) * 0.25f;
+        return 1.15f + (random.nextFloat() - 0.5f) * 0.2f;
     }
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.WITCH_CELEBRATE;
+        return SoundEvents.PIGLIN_BRUTE_ANGRY;
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.WITCH_HURT;
+        return SoundEvents.PIGLIN_BRUTE_HURT;
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.WITCH_DEATH;
+        return SoundEvents.PIGLIN_BRUTE_DEATH;
     }
 
     @Override
     protected float getSoundVolume() {
-        return 0.6f;
+        return 0.8f;
     }
 }

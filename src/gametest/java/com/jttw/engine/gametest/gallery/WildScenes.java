@@ -23,8 +23,8 @@ import java.util.function.Consumer;
 /**
  * The open world's yaoguai in the form gallery, on a patch of wild ground (grass, coarse dirt,
  * podzol and moss) before the stage: for each of the goblin, the kobold, the wolfman and the ogre,
- * a group, a close look at one, one side-on, and one in action (a goblin cowering as another stabs,
- * a kobold swinging its pick, a wolfman howling, an ogre heaving its club up to slam).
+ * a group, a close look at one, one side-on, and one in action (a goblin falling back, hissing, as
+ * another hacks, a kobold swinging its pick, a wolfman howling, an ogre heaving its club up to slam).
  */
 final class WildScenes {
 
@@ -90,40 +90,41 @@ final class WildScenes {
 
     static List<AbilityScenes.Scene> all() {
         return List.of(
-                // ── goblins: a gang of five, one close, one side-on, one cowering as another stabs
+                // ── goblins: a pack of five, one close, its face, one side-on, one hacking while another falls back hissing
                 scene("wild_goblins", p -> {
-                    put(p, ModEntities.GOBLIN.get(), -2.2, 7.6, 205f);
-                    put(p, ModEntities.GOBLIN.get(), -0.4, 9.2, 185f);
-                    put(p, ModEntities.GOBLIN.get(), 1.4, 7.2, 165f);
-                    put(p, ModEntities.GOBLIN.get(), 3.0, 9.0, 150f);
-                    put(p, ModEntities.GOBLIN.get(), 0.6, 6.0, 175f);
-                }, cam(0.5, 2.4, 1.2, 0.5, 0.7, 7.8)),
-                scene("wild_goblin_close", p -> put(p, ModEntities.GOBLIN.get(), 0.5, 5.5, 165f), cam(0.1, 1.2, 3.85, 0.5, 0.8, 5.5)),
-                scene("wild_goblin_face", p -> put(p, ModEntities.GOBLIN.get(), 0.5, 5.5, 175f), cam(0.4, 1.15, 4.4, 0.5, 1.05, 5.5)),
-                scene("wild_goblin_side", p -> put(p, ModEntities.GOBLIN.get(), 0.5, 5.5, 90f), cam(0.5, 1.1, 3.4, 0.5, 0.7, 5.5)),
-                scene("wild_goblin_back", p -> put(p, ModEntities.GOBLIN.get(), 0.5, 5.5, 20f), cam(0.5, 1.3, 3.5, 0.5, 0.7, 5.5)),
+                    put(p, ModEntities.GOBLIN.get(), -2.6, 8.4, 205f);
+                    put(p, ModEntities.GOBLIN.get(), -0.6, 10.2, 185f);
+                    put(p, ModEntities.GOBLIN.get(), 1.4, 8.0, 168f);
+                    put(p, ModEntities.GOBLIN.get(), 3.4, 9.8, 150f);
+                    put(p, ModEntities.GOBLIN.get(), 0.4, 6.6, 178f);
+                }, cam(0.5, 2.5, 3.0, 0.5, 1.0, 8.8)),
+                scene("wild_goblin_close", p -> put(p, ModEntities.GOBLIN.get(), 0.5, 6.5, 160f), cam(-0.1, 1.6, 4.1, 0.5, 1.05, 6.5)),
+                scene("wild_goblin_face", p -> put(p, ModEntities.GOBLIN.get(), 0.5, 6.5, 172f), cam(0.35, 1.85, 5.1, 0.5, 1.65, 6.5)),
+                scene("wild_goblin_side", p -> put(p, ModEntities.GOBLIN.get(), 0.5, 6.5, 90f), cam(0.5, 1.25, 3.8, 0.5, 1.0, 6.5)),
+                scene("wild_goblin_back", p -> put(p, ModEntities.GOBLIN.get(), 0.5, 6.5, 20f), cam(0.5, 1.6, 3.9, 0.5, 1.0, 6.5)),
                 swinging("wild_goblin_action", p -> {
-                    GoblinEntity a = put(p, ModEntities.GOBLIN.get(), -0.6, 6.0, 150f);
-                    GoblinEntity b = put(p, ModEntities.GOBLIN.get(), 1.8, 6.6, 215f);
+                    put(p, ModEntities.GOBLIN.get(), -0.7, 6.6, 150f);
+                    GoblinEntity b = put(p, ModEntities.GOBLIN.get(), 1.9, 7.2, 215f);
                     if (b != null) b.showFleeing(true);
-                }, cam(0.5, 1.5, 2.6, 0.5, 0.7, 6.2), GoblinEntity.class),
+                }, cam(0.5, 1.6, 3.4, 0.5, 1.0, 6.8), GoblinEntity.class),
 
-                // ── kobolds: a swarm of six, one close, one side-on, a pair swinging their picks
+                // ── kobolds: a swarm of six, one close, its face, one side-on, a pair swinging their picks
                 scene("wild_kobolds", p -> {
-                    put(p, ModEntities.KOBOLD.get(), -2.6, 7.4, 210f);
-                    put(p, ModEntities.KOBOLD.get(), -1.0, 9.0, 190f);
-                    put(p, ModEntities.KOBOLD.get(), 0.8, 7.0, 175f);
-                    put(p, ModEntities.KOBOLD.get(), 2.4, 8.6, 160f);
-                    put(p, ModEntities.KOBOLD.get(), 3.6, 6.8, 145f);
-                    put(p, ModEntities.KOBOLD.get(), 0.4, 5.6, 180f);
-                }, cam(0.5, 2.3, 1.2, 0.5, 0.6, 7.6)),
-                scene("wild_kobold_close", p -> put(p, ModEntities.KOBOLD.get(), 0.5, 5.0, 165f), cam(0.3, 1.2, 3.4, 0.5, 0.65, 5.0)),
-                scene("wild_kobold_side", p -> put(p, ModEntities.KOBOLD.get(), 0.5, 5.0, 90f), cam(0.5, 1.1, 2.9, 0.5, 0.6, 5.0)),
-                scene("wild_kobold_back", p -> put(p, ModEntities.KOBOLD.get(), 0.5, 5.0, 20f), cam(0.5, 1.3, 3.0, 0.5, 0.6, 5.0)),
+                    put(p, ModEntities.KOBOLD.get(), -3.0, 8.4, 210f);
+                    put(p, ModEntities.KOBOLD.get(), -1.0, 10.4, 192f);
+                    put(p, ModEntities.KOBOLD.get(), 1.0, 8.2, 175f);
+                    put(p, ModEntities.KOBOLD.get(), 2.9, 10.0, 160f);
+                    put(p, ModEntities.KOBOLD.get(), 4.2, 7.8, 145f);
+                    put(p, ModEntities.KOBOLD.get(), 0.2, 6.6, 182f);
+                }, cam(0.5, 2.5, 2.8, 0.5, 1.0, 8.8)),
+                scene("wild_kobold_close", p -> put(p, ModEntities.KOBOLD.get(), 0.5, 6.5, 155f), cam(-0.3, 1.6, 4.0, 0.5, 1.05, 6.5)),
+                scene("wild_kobold_face", p -> put(p, ModEntities.KOBOLD.get(), 0.5, 6.5, 135f), cam(-0.2, 1.95, 4.4, -0.25, 1.72, 6.1)),
+                scene("wild_kobold_side", p -> put(p, ModEntities.KOBOLD.get(), 0.5, 6.5, 90f), cam(0.6, 1.25, 3.4, 0.6, 1.0, 6.5)),
+                scene("wild_kobold_back", p -> put(p, ModEntities.KOBOLD.get(), 0.5, 6.5, 20f), cam(0.5, 1.6, 3.7, 0.5, 1.0, 6.5)),
                 swinging("wild_kobold_action", p -> {
-                    put(p, ModEntities.KOBOLD.get(), -0.5, 5.4, 140f);
-                    put(p, ModEntities.KOBOLD.get(), 1.6, 5.8, 215f);
-                }, cam(0.5, 1.4, 2.6, 0.5, 0.7, 5.6), KoboldEntity.class),
+                    put(p, ModEntities.KOBOLD.get(), -0.7, 6.4, 140f);
+                    put(p, ModEntities.KOBOLD.get(), 1.8, 6.9, 215f);
+                }, cam(0.5, 1.6, 3.3, 0.5, 1.0, 6.6), KoboldEntity.class),
 
                 // ── wolfmen: a pack of four, one close, one side-on, one howling while another strikes
                 scene("wild_wolfmen", p -> {
@@ -146,8 +147,8 @@ final class WildScenes {
                 scene("wild_ogre", p -> {
                     put(p, ModEntities.OGRE.get(), 0.5, 10.0, 180f);
                     put(p, ModEntities.WOLFMAN.get(), -3.2, 8.6, 200f);
-                    put(p, ModEntities.GOBLIN.get(), 3.4, 8.0, 160f);
-                    put(p, ModEntities.KOBOLD.get(), 2.0, 7.0, 175f);
+                    put(p, ModEntities.GOBLIN.get(), 4.2, 8.8, 160f);
+                    put(p, ModEntities.KOBOLD.get(), 2.2, 7.2, 172f);
                 }, cam(0.5, 3.2, 0.4, 0.5, 2.0, 10.0)),
                 scene("wild_ogre_close", p -> put(p, ModEntities.OGRE.get(), 0.5, 8.0, 165f), cam(-0.6, 2.8, 2.6, 0.5, 2.1, 8.0)),
                 scene("wild_ogre_face", p -> put(p, ModEntities.OGRE.get(), 0.5, 8.0, 175f), cam(0.2, 3.0, 4.8, 0.5, 2.75, 8.0)),
@@ -162,11 +163,11 @@ final class WildScenes {
                     WolfmanEntity w = put(p, ModEntities.WOLFMAN.get(), 0.5, 7.0, 150f);
                     if (w != null) w.showHowling();
                 }, cam(-1.6, 2.0, 3.6, 0.5, 1.9, 7.0)),
-                // a goblin cowering, arms over its head
-                scene("wild_goblin_cower", p -> {
-                    GoblinEntity g = put(p, ModEntities.GOBLIN.get(), 0.5, 5.5, 160f);
+                // a goblin falling back: crouched, claws up, hissing
+                scene("wild_goblin_hiss", p -> {
+                    GoblinEntity g = put(p, ModEntities.GOBLIN.get(), 0.5, 6.5, 160f);
                     if (g != null) g.showFleeing(true);
-                }, cam(-0.4, 1.2, 3.7, 0.5, 0.75, 5.5))
+                }, cam(-0.3, 1.5, 4.2, 0.5, 1.05, 6.5))
         );
     }
 
