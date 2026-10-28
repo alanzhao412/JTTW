@@ -26,6 +26,15 @@ different numbers:
 | **Yaoguai** | 1030 | Fluctuating | Lower stat floor, strong transformation mechanics. Power comes from abilities, not raw stats. |
 | **Heavenly** | 1000 | Medium | Widest utility toolkit. Ability-expansion focused: power comes from each character's own skill tree. |
 
+Up to level 20, XP comes from ordinary Minecraft mobs, paid as in Pokémon by the level the kill
+is won at ([`LevelManager.vanillaMobXp`](src/main/java/com/jttw/engine/progression/level/LevelManager.java)):
+weight × 3 × level / 5, at least 1. Animals, villagers and anything else that is no monster pay
+nothing; a common hostile (zombie, skeleton, spider, slime) weighs 1; a tougher one (creeper,
+enderman, witch, phantom, raiders, guardian) 2; a strong one (blaze, wither skeleton, ghast, ravager,
+evoker, piglin brute, breeze) 3; a boss 20. Level 20 takes about 170 common kills for a Heavenly,
+210 for a Divine Beast, 260 for a Yaoguai and 370 for a Primordial; from 20 on, only the mod's own
+enemies pay, by their zone's band.
+
 ### Class passives
 
 Besides each character's own skill tree there is one shared class layer
@@ -307,7 +316,7 @@ is what makes the rest possible:
   ([`FlightMomentum`](src/main/java/com/jttw/engine/flight/FlightMomentum.java)): Sun Wukong and
   Erlang Shen 150 blocks a second; Nezha 120; the Dragon, the Phoenix, Heaven's other beings and
   everyone else 100; the great bulky ones (the Bull Demon King, the Saurian Demon King, the Turtle,
-  the Grand Saint of Nine Spirits) 65. The Gold-Winged Peng builds to 150 his own way, by his
+  the Grand Saint of Nine Spirits, the Marshal of the Heavenly Canopy, Yuan Di) 65. The Gold-Winged Peng builds to 150 his own way, by his
   Ninety-Thousand-Li wingbeats.
 - **The Great Void.** Wukong and the Peng fly faster than the world can be generated (about 80
   blocks a second over new land on a 16-core machine), so they also have a key (Y) into
@@ -1736,11 +1745,12 @@ the axis of the world, the reason the Overworld's sky was raised (see **The tall
 Outside the zones the overworld has yaoguai of its own (`entity/wild`): the early road's monsters,
 met before level 20. Each has a level in a low range, shown with its name, and its health and blow
 are set against a typical character of that level (`MobScaling`), as a zone creature's are. They
-carry no enemy tier and no zone, so their kills pay as vanilla mobs' do: below level 20 a vanilla
-mob's XP times their share (`WildYaoguai.vanillaXpShare`), from 20 nothing; the zones are where a
-character grows from then on.
+carry no enemy tier and no zone, so their kills pay as vanilla monsters' do: below level 20 by the
+killer's level and their weight (`WildYaoguai.vanillaXpShare`, as `LevelManager.vanillaMobWeight` is
+a vanilla mob's: a goblin a zombie's 1, an ogre 5), from 20 nothing; the zones are where a character
+grows from then on.
 
-| Kind | Levels | Looks | Ways | Where, when | Pays (below 20) | Leaves |
+| Kind | Levels | Looks | Ways | Where, when | Weight (below 20) | Leaves |
 |---|---|---|---|---|---|---|
 | Goblin (山魈小妖) | 1–6 | a hunched moss-green mountain imp, huge ears, hooked nose, a patched robe, prayer beads and stolen talismans, a sack of thefts, a bronze dagger and a sling | quick; gangs of 3–5; loses its nerve and runs, cowering, when hurt below half or with fewer than two of its gang about it | hills, forests, plains; on the surface, by night | 1x | copper cash, flint, paper; now and then a string of cash |
 | Kobold (穴居小妖) | 3–10 | a little dog-faced, slate-scaled cave miner, a pot helmet with a candle on it, scrap-iron armour, strings of cash, a pick, a red lantern swinging over its basket of ore | swarms of 3–6; raises the alarm (every kobold within 16 blocks comes); its pick costs a foe its footing | under any dry land, in the caves, well below the sea | 1x | ore (copper, iron, coal), copper cash; now and then raw gold, rarely a diamond |

@@ -20,8 +20,8 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
  *   <li>Sun Wukong, Erlang Shen: 150 (Wukong, in the Great Void, 1000).</li>
  *   <li>Nezha: 120.</li>
  *   <li>The Dragon, the Phoenix, Heaven's other beings and everyone else: 100.</li>
- *   <li>The great bulky ones, the Bull Demon King, the Saurian Demon King, the Turtle and the
- *       Grand Saint of Nine Spirits: 65.</li>
+ *   <li>The great bulky ones, the Bull Demon King, the Saurian Demon King, the Turtle, the
+ *       Grand Saint of Nine Spirits, the Marshal of the Heavenly Canopy and Yuan Di: 65.</li>
  * </ul>
  * The highest flight is the top tier of a flight line (Somersault Cloud, Celestial Gale, the
  * Dragon's third, Rising Ember II, Nezha's Blazing Trail), or flight with no tier at all: a form's
@@ -51,7 +51,8 @@ public final class FlightMomentum {
         if (ReincarnationOutcome.EYE_OF_HEAVEN.id.equals(who)) return ERLANG_TOP;
         if (ReincarnationOutcome.THIRD_LOTUS_PRINCE.id.equals(who)) return NEZHA_TOP;
         if (ReincarnationOutcome.BULL_DEMON_KING.id.equals(who) || ReincarnationOutcome.SAURIAN_DEMON_KING.id.equals(who)
-                || ReincarnationOutcome.TURTLE.id.equals(who) || ReincarnationOutcome.GRAND_SAINT_NINE_SPIRITS.id.equals(who)) {
+                || ReincarnationOutcome.TURTLE.id.equals(who) || ReincarnationOutcome.GRAND_SAINT_NINE_SPIRITS.id.equals(who)
+                || ReincarnationOutcome.MARSHAL_HEAVENLY_CANOPY.id.equals(who) || ReincarnationOutcome.YUAN_DI.id.equals(who)) {
             return BULKY_TOP;
         }
         return COMMON_TOP;

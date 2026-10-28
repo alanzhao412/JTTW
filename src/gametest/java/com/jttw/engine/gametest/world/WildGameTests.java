@@ -376,15 +376,17 @@ public class WildGameTests {
     public static void belowTwentyTheyPayAsVanillaMobsDoFromTwentyNothing(GameTestHelper h) {
         sweep(h);
         ServerPlayer p = as(h, ReincarnationOutcome.EYE_OF_HEAVEN);
+        PlayerLevel.setLevel(p, 10);                              // (paced by level: a zombie pays 3/5 of it, 6 at 10)
         long xp = PlayerLevel.getXp(p);
+        eq(h, 6L, LevelManager.vanillaMobXp(EntityType.ZOMBIE, 10), "a zombie at 10");
         killedBy(h, p, ModEntities.GOBLIN.get());
-        eq(h, xp += 15, PlayerLevel.getXp(p), "a goblin: one vanilla mob's worth");
+        eq(h, xp += 6, PlayerLevel.getXp(p), "a goblin: a zombie's worth");
         killedBy(h, p, ModEntities.KOBOLD.get());
-        eq(h, xp += 15, PlayerLevel.getXp(p), "a kobold: one");
+        eq(h, xp += 6, PlayerLevel.getXp(p), "a kobold: one");
         killedBy(h, p, ModEntities.WOLFMAN.get());
-        eq(h, xp += 30, PlayerLevel.getXp(p), "a wolfman: two");
+        eq(h, xp += 12, PlayerLevel.getXp(p), "a wolfman: two");
         killedBy(h, p, ModEntities.OGRE.get());
-        eq(h, xp += 75, PlayerLevel.getXp(p), "an ogre: five");
+        eq(h, xp += 30, PlayerLevel.getXp(p), "an ogre: five");
         PlayerLevel.setLevel(p, 20);
         long at20 = PlayerLevel.getXp(p);
         for (EntityType<? extends WildYaoguai> type : List.of(ModEntities.GOBLIN.get(), ModEntities.KOBOLD.get(),
