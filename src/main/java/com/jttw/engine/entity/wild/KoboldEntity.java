@@ -22,11 +22,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 
 /**
- * A kobold (穴居小妖), a little dog-faced, scaly cave yaoguai that mines the dark under the
- * mountains: a long snout full of teeth, a crest of spines, slate scales and a pale scaled belly, a
- * battered iron pot of a helmet with a candle stuck on it, a cuirass of scrap iron riveted over a
- * leather jerkin, strings of copper cash about its neck, a pick in its hands and a red paper lantern
- * swinging from a pole over its pack of ore. They swarm in the caves, in fives and sixes.
+ * A kobold (穴居蜥妖), a lizard yaoguai that mines the dark under the mountains: as tall as a man, a
+ * crocodile's head with teeth all along its jaws and slit-pupilled amber eyes, a crest of spines
+ * down its neck, back and thick tail, glossy olive scales over a cream belly, a leather harness and a
+ * scrap-iron pauldron, a pick in its fist, a satchel of ore and a burning lantern at its belt. They
+ * swarm in the caves, in fives and sixes.
  *
  * <p>When one finds a foe it gives the alarm: every kobold within {@value #ALARM_RANGE} blocks that
  * has no foe of its own comes running (so a swarm is met as one). Its pick bites through armour a
@@ -34,8 +34,8 @@ import net.minecraft.world.phys.AABB;
  */
 public class KoboldEntity extends WildYaoguai {
 
-    /** Four ordinary hits; a pick's blow of 11% of a same-level character's health. */
-    public static final double HITS = 4, BLOW = 0.11, SPEED = 0.27;
+    /** Five ordinary hits; a pick's blow of 13% of a same-level character's health. */
+    public static final double HITS = 5, BLOW = 0.13, SPEED = 0.26;
     public static final int MIN_LEVEL = 3, MAX_LEVEL = 10;
     /** How far its alarm carries, in blocks. */
     public static final double ALARM_RANGE = 16;
@@ -51,7 +51,7 @@ public class KoboldEntity extends WildYaoguai {
                 .add(Attributes.MAX_HEALTH, HITS * MobScaling.typicalHit(MIN_LEVEL))
                 .add(Attributes.ATTACK_DAMAGE, BLOW * MobScaling.typicalHealth(MIN_LEVEL))
                 .add(Attributes.MOVEMENT_SPEED, SPEED)
-                .add(Attributes.ARMOR, 4)
+                .add(Attributes.ARMOR, 5)
                 .add(Attributes.FOLLOW_RANGE, 20);
     }
 
@@ -80,7 +80,7 @@ public class KoboldEntity extends WildYaoguai {
             k.setTarget(foe);
             n++;
         }
-        playSound(SoundEvents.FOX_SCREECH, 1.0f, 1.3f);
+        playSound(SoundEvents.FOX_SCREECH, 1.0f, 0.75f);
         return n;
     }
 
@@ -109,22 +109,22 @@ public class KoboldEntity extends WildYaoguai {
 
     @Override
     public float getVoicePitch() {
-        return 1.25f + (random.nextFloat() - 0.5f) * 0.2f;
+        return 0.8f + (random.nextFloat() - 0.5f) * 0.15f;
     }
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.FOX_AMBIENT;
+        return SoundEvents.SNIFFER_IDLE;
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.FOX_HURT;
+        return SoundEvents.TURTLE_HURT;
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.FOX_DEATH;
+        return SoundEvents.TURTLE_DEATH;
     }
 
     @Override

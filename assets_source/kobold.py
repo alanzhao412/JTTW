@@ -1,16 +1,21 @@
-"""The kobold (穴居小妖), a cave yaoguai of the open world. As wild_paint.py says: its model is written
-into WildRenderers' koboldLayer() between its GENERATED markers, its skin (textures/entity/kobold.png)
-painted to the same box-UV layout, its eyes, its candle and its lantern glowing (kobold_glow.png).
+"""The kobold (穴居蜥妖), a lizard yaoguai of the caves of the open world. As wild_paint.py says: its model
+is written into WildRenderers' koboldLayer() between its GENERATED markers, its skin
+(textures/entity/kobold.png) painted to the same box-UV layout, its eyes and its lantern glowing
+(kobold_glow.png).
 
-A little dog-faced, lizard-scaled miner of the dark under the mountains, crouched on long-footed
-digitigrade legs, a heavy tail behind it: slate-teal scales, a cream scaled belly, a long snout full
-of teeth, amber slit eyes under scaly brows, orange webbed frills at its cheeks, two horns swept back
-and a crest of spines down its neck and tail. On its head a battered iron pot for a helmet, worn
-askew, a stub of candle stuck on it and burning; over its leather jerkin a cuirass of scrap iron
-riveted together, a scrap-iron shoulder and greaves, a belt with a pouch, and strings of copper cash
-about its neck. On its back a wooden pack-frame (背架) holding a wicker basket of ore (copper, iron,
-a glowing jade crystal), and arching up from it over its head a pole with a red paper lantern
-swinging from its end. A miner's pick in its right fist; in its left, a chunk of jade it has dug.
+A lizard warrior as tall as a man that mines the dark under the mountains, standing on heavy
+digitigrade legs, a thick tail tapering behind it to the ground. A crocodile's head: a long snout,
+teeth showing all along its jaw line, raised nostrils at its tip, a bony brow ridge over each
+slit-pupilled amber eye, a crest of spines from its crown down its neck, its back and its tail.
+Healthy, glossy scales in clean rows, each lit at its upper edge and shadowed at its lower one: deep
+olive-green over its back and limbs, shading to a pale cream-yellow belly of broad scutes; rows of
+bony osteoderm plates down its back and tail; finer scales on its head. Clawed hands and feet.
+
+Its gear is light, so its body shows: a leather harness across its chest, a belt with a leather
+flap before it, a scrap-iron pauldron riveted over its left shoulder and a scrap plate over its
+right thigh, leather bracers; a satchel of ore at its left hip (copper and iron, a glowing jade), an
+iron miner's lantern hanging at its right, burning. In its right fist a miner's pick, its iron head
+lashed on with rawhide.
 
 Run from the repository root: python assets_source/kobold.py"""
 import math
@@ -19,498 +24,538 @@ import beastgen as bg
 import wild_paint as w
 from wild_paint import part, mirrored, aim, paint, Painter, k, mix
 
-bg.UNITS = 128
+bg.UNITS = 256
 bg.TEX = bg.UNITS * bg.S
 
-SIZE = 0.68          # KoboldRenderer.SIZE
+SIZE = 0.9           # KoboldRenderer.SIZE
 
-SCALE = (78, 126, 120)
-SCALE_DARK = (44, 74, 74)
-SCALE_EDGE = (24, 42, 44)
-SCALE_HI = (150, 196, 170)
-BELLY = (210, 192, 132)
-BELLY_EDGE = (150, 128, 80)
-FRILL = (220, 112, 40)
-FRILL_DEEP = (150, 56, 24)
-IRON = (96, 94, 98)
-IRON_DARK = (54, 52, 56)
-RUST = (138, 70, 32)
-LEATHER = (112, 74, 44)
-WOOD = (128, 90, 52)
-WICKER = (176, 140, 84)
-LANTERN = (206, 44, 30)
-LANTERN_GLOW = (255, 132, 60)
-GOLD = (220, 170, 60)
-COPPER = (186, 114, 60)
-EYE = (255, 168, 36)
-TOOTH = (232, 222, 190)
-GUM = (90, 24, 28)
-WAX = (232, 224, 200)
-FLAME = (255, 196, 80)
-JADE = (100, 220, 150)
-CLAW = (34, 30, 28)
+DORSAL = (62, 88, 50)          # deep olive-green
+DORSAL_EDGE = (34, 50, 28)
+PLATE = (56, 78, 42)           # the osteoderms: a shade darker, raised
+BELLY = (226, 208, 146)        # pale cream-yellow
+BELLY_EDGE = (156, 136, 88)
+GLOSS = (214, 230, 190)
+EYE = (255, 176, 34)
+TOOTH = (238, 230, 204)
+GUM = (120, 46, 50)
+MOUTH = (60, 18, 22)
+CLAW = (36, 32, 28)
+LEATHER = (110, 72, 42)
+LEATHER_DEEP = (62, 40, 24)
+IRON = (92, 90, 96)
+RUST = (130, 66, 30)
+WOOD = (122, 86, 50)
+RAWHIDE = (196, 170, 120)
+COPPER = (190, 112, 58)
+JADE = (100, 226, 150)
+FLAME = (255, 200, 90)
 
-BODY = (0.28, 0, 0)
-HEAD = (-0.3, 0, 0)
-ARM, FOREARM, HAND = (-0.75, 0, 0.12), (-0.95, 0, 0), (0, 0, 0)
-LARM, LFOREARM, LHAND = (-0.35, 0, -0.18), (-0.9, 0, 0), (0, 0, 0)
-POLE = (0.5, 0, -0.42)
-HOOK = (-0.5, 0, 0.42)
+BODY = (0.3, 0, 0)
+HEAD = (-0.2, 0, 0)
+ARM, FOREARM, HAND = (-0.3, 0, 0.12), (-0.85, 0, 0), (0, 0, 0)
+LARM, LFOREARM, LHAND = (-0.1, 0, -0.14), (-0.5, 0, 0), (0, 0, 0)
 
 
-def cash():
-    """Strings of copper cash slung round its neck: two loops of coins over its breast."""
+def back_spines(y0, y1, z, n, h, style='spine'):
+    """A row of spines down its back."""
     out = []
-    for loop, (r, y0, z) in enumerate(((2.4, -8.9, -3.05), (3.0, -9.0, -3.15))):
-        n = 6 if loop == 0 else 8
-        for i in range(n):
-            a = -1.2 + 2.4 * i / (n - 1)
-            x, y = r * math.sin(a), y0 + r * 0.9 * math.cos(a)
-            out.append((x - 0.6, y - 0.6, z, 1.2, 1.2, 0.3, 'coin'))
+    for i in range(n):
+        y = y0 + (y1 - y0) * i / max(1, n - 1)
+        out.append((-0.35, y, z, 0.7, h, 2.0, style))
     return out
 
 
+def teeth(x, y, z0, length, up):
+    """A row of teeth along a jaw's edge, as a thin strip (cut into teeth on the skin)."""
+    return (x, y - (0.8 if up else 0), z0, 0.3, 0.8, length, 'teeth_up' if up else 'teeth_down')
+
+
 KOBOLD = mirrored([
-    # digitigrade legs: a thick thigh, a shin with a scrap greave, a long ankle, a clawed foot
-    part('right_leg', 'root', (-2.2, 13.0, 1.0), (-0.8, 0, 0.08), [
-        (-1.55, -0.8, -1.6, 3.1, 5.0, 3.2, 'thigh')]),
-    part('right_shin', 'right_leg', (0, 3.9, 0.2), (1.5, 0, 0), [
-        (-1.1, 0, -1.1, 2.2, 4.4, 2.2, 'shin'),
-        (-1.4, 0.4, -1.6, 2.8, 3.0, 1.0, 'greave')]),
-    part('right_ankle', 'right_shin', (0, 4.2, 0), (-1.35, 0, 0), [(-0.9, 0, -0.9, 1.8, 3.6, 1.8, 'ankle')]),
-    part('right_foot', 'right_ankle', (0, 3.4, 0), (0.62, 0, 0), [
-        (-1.4, -0.4, -3.0, 2.8, 1.2, 3.6, 'foot'),
-        (-1.45, 0.0, -4.0, 0.7, 0.8, 1.2, 'toe'),
-        (-0.35, 0.0, -4.2, 0.7, 0.8, 1.4, 'toe'),
-        (0.75, 0.0, -4.0, 0.7, 0.8, 1.2, 'toe')]),
+    # heavy digitigrade legs: a thick thigh, a shin, a long ankle, a broad clawed foot
+    part('right_leg', 'root', (-2.6, 12.0, 1.2), (-0.55, 0, 0.06), [
+        (-1.9, -1.2, -2.0, 3.8, 7.0, 4.0, 'thigh')]),
+    part('right_shin', 'right_leg', (0, 6.2, 0.2), (1.15, 0, 0), [
+        (-1.4, 0, -1.4, 2.8, 6.0, 2.8, 'shin')]),
+    part('right_ankle', 'right_shin', (0, 5.8, 0), (-0.95, 0, 0), [
+        (-1.1, 0, -1.1, 2.2, 4.8, 2.2, 'ankle')]),
+    part('right_foot', 'right_ankle', (0, 4.5, 0), (0.35, 0, 0), [
+        (-1.7, -0.5, -2.8, 3.4, 1.5, 3.8, 'foot'),
+        (-1.75, -0.1, -4.6, 1.0, 1.1, 2.0, 'toe'),
+        (-0.5, -0.1, -4.9, 1.0, 1.1, 2.3, 'toe'),
+        (0.75, -0.1, -4.6, 1.0, 1.1, 2.0, 'toe'),
+        (-0.4, -0.2, 0.7, 0.8, 0.8, 1.4, 'dewclaw')]),
 
-    part('body', 'root', (0, 13.0, 1.0), BODY, [
-        (-3.0, -2.6, -2.5, 6.0, 3.4, 5.0, 'hips'),
-        (-3.2, -9.0, -2.6, 6.4, 6.8, 5.0, 'torso'),
-        (-3.6, -9.5, -2.95, 7.2, 3.3, 5.7, 'cuirass'),
-        (-3.5, -3.3, -2.95, 7.0, 1.2, 5.6, 'belt'),
-        (1.6, -3.0, -3.4, 1.8, 2.0, 1.2, 'pouch'),
-        (-1.3, -10.6, -1.6, 2.6, 2.0, 2.8, 'neck'),
-    ] + cash()),
-    part('right_tasset', 'body', (-1.6, -2.3, -2.7), (-0.08, 0.1, 0.05), [(-1.4, 0, -0.3, 2.8, 4.2, 0.6, 'tasset')]),
-    part('right_tasset_side', 'body', (-3.0, -2.3, 0), (0, 0, 0.12), [(-0.4, 0, -2.0, 0.6, 3.6, 4.0, 'tasset_side')]),
-    # the tail, heavy, curving down to the ground behind; spines along it
-    part('tail', 'body', (0, -1.0, 2.2), (-0.7, 0, 0), [
-        (-1.5, -1.5, 0, 3.0, 3.0, 4.6, 'tail1'),
-        (-0.3, -2.4, 0.6, 0.6, 1.0, 1.4, 'spine'),
-        (-0.3, -2.3, 2.6, 0.6, 0.9, 1.2, 'spine')]),
-    part('tail_mid', 'tail', (0, 0, 4.3), (-0.35, 0.1, 0), [
-        (-1.1, -1.1, 0, 2.2, 2.2, 4.4, 'tail2'),
-        (-0.25, -1.9, 0.8, 0.5, 0.9, 1.2, 'spine_small'),
-        (-0.25, -1.8, 2.6, 0.5, 0.8, 1.0, 'spine_small')]),
-    part('tail_tip', 'tail_mid', (0, 0, 4.2), (0.25, 0.15, 0), [
-        (-0.7, -0.7, 0, 1.4, 1.4, 4.0, 'tail3'),
-        (-0.2, -1.3, 1.0, 0.4, 0.7, 1.0, 'spine_small')]),
+    # the body from the hips up, leaning a little forward; its pivot the hips
+    part('body', 'root', (0, 12.0, 1.2), BODY, [
+        (-3.3, -2.8, -2.4, 6.6, 3.6, 5.0, 'hips'),
+        (-3.1, -7.8, -2.5, 6.2, 5.2, 4.8, 'belly'),
+        (-3.9, -13.8, -2.8, 7.8, 6.2, 5.6, 'chest'),
+        (-3.5, -3.7, -2.7, 7.0, 1.2, 5.4, 'belt'),
+        (-0.9, -4.0, -2.95, 1.8, 1.6, 0.4, 'buckle'),
+    ] + back_spines(-13.0, -4.0, 2.6, 6, 2.0)),
+    part('neck', 'body', (0, -13.2, -0.6), (0.05, 0, 0), [
+        (-2.0, -3.6, -2.0, 4.0, 4.2, 3.8, 'neck'),
+        (-0.3, -3.6, 1.6, 0.6, 1.4, 1.6, 'spine'),
+        (-0.3, -1.8, 1.6, 0.6, 1.4, 1.6, 'spine')]),
+    part('flap', 'body', (0, -2.6, -2.6), (-0.1, 0, 0), [(-1.8, 0, -0.25, 3.6, 4.6, 0.5, 'flap')]),
+    # the harness: a strap from its right shoulder down across its chest to its left hip
+    part('strap', 'body', (-3.0, -13.6, -2.95), (0, 0, -0.62), [(-0.6, 0, -0.2, 1.2, 12.4, 0.4, 'strap')]),
+    part('strap_back', 'body', (-3.0, -13.6, 2.95), (0, 0, -0.62), [(-0.6, 0, -0.2, 1.2, 12.4, 0.4, 'strap')]),
+    # the satchel of ore at its left hip
+    part('satchel', 'body', (3.6, -4.0, 0.2), (0.05, 0, -0.08), [
+        (-0.4, 0, -2.0, 2.4, 3.4, 4.0, 'satchel'),
+        (-0.5, -0.3, -2.1, 2.6, 1.3, 4.2, 'satchelflap'),
+        (0.0, -1.0, -1.4, 1.2, 1.0, 1.2, 'ore_copper'),
+        (0.3, -1.4, 0.0, 1.0, 1.4, 1.0, 'ore_jade'),
+        (0.1, -0.9, 0.9, 1.2, 0.9, 1.0, 'ore_iron')]),
+    # the lantern hanging from its belt at its right
+    part('lantern', 'body', (-3.7, -3.0, -1.0), (-0.3, 0, 0.05), [
+        (-0.15, 0, -0.15, 0.3, 1.0, 0.3, 'lanterncord'),
+        (-1.1, 0.9, -1.1, 2.2, 0.5, 2.2, 'lanterncap'),
+        (-0.9, 1.4, -0.9, 1.8, 2.4, 1.8, 'lanterncage'),
+        (-0.55, 1.75, -0.55, 1.1, 1.7, 1.1, 'lanternfire'),
+        (-1.1, 3.8, -1.1, 2.2, 0.5, 2.2, 'lanterncap')]),
 
-    # the pack-frame on its back, a wicker basket of ore in it
-    part('frame', 'body', (0, -9.6, 2.6), (0.08, 0, 0), [
-        (-3.0, -3.0, 0, 0.8, 12.0, 0.8, 'pole_v'),
-        (2.2, -3.0, 0, 0.8, 12.0, 0.8, 'pole_v'),
-        (-3.0, -2.4, 0.05, 6.0, 0.7, 0.7, 'crossbar'),
-        (-3.0, 7.6, 0.05, 6.0, 0.7, 0.7, 'crossbar'),
-        (-2.8, -1.4, 0.8, 5.6, 6.2, 3.6, 'basket'),
-        (-2.2, -2.6, 1.2, 1.6, 1.4, 1.6, 'ore_copper'),
-        (-0.5, -2.9, 1.8, 1.4, 1.6, 1.4, 'ore_jade'),
-        (0.9, -2.4, 1.0, 1.6, 1.2, 1.8, 'ore_iron'),
-        (-1.9, -2.0, 2.8, 1.3, 0.9, 1.2, 'ore_copper')]),
-    # and from it, a pole arching up over its head, a red lantern swinging from its end
-    part('pole', 'frame', (-2.6, -2.6, 0.4), POLE, [(-0.35, -11.0, -0.35, 0.7, 11.4, 0.7, 'pole')]),
-    part('pole_hook', 'pole', (0, -10.8, 0), HOOK, [(-0.25, -0.2, -1.8, 0.5, 0.5, 2.0, 'hook')]),
+    # the tail: heavy at its root, tapering to the ground behind; spines down it
+    part('tail', 'body', (0, -1.6, 2.2), (-0.85, 0, 0), [
+        (-2.1, -2.0, -0.6, 4.2, 4.0, 6.6, 'tail1'),
+        (-0.3, -3.4, 0.6, 0.6, 1.4, 1.6, 'spine'),
+        (-0.3, -3.4, 3.4, 0.6, 1.4, 1.6, 'spine')]),
+    part('tail_mid', 'tail', (0, 0.1, 5.6), (-0.3, 0, 0), [
+        (-1.6, -1.6, 0, 3.2, 3.2, 6.0, 'tail2'),
+        (-0.25, -2.8, 0.8, 0.5, 1.2, 1.4, 'spine_small'),
+        (-0.25, -2.8, 3.6, 0.5, 1.2, 1.4, 'spine_small')]),
+    part('tail_end', 'tail_mid', (0, 0.2, 5.6), (0.2, 0, 0), [
+        (-1.15, -1.15, 0, 2.3, 2.3, 5.4, 'tail3'),
+        (-0.2, -2.1, 1.2, 0.4, 1.0, 1.2, 'spine_small')]),
+    part('tail_tip', 'tail_end', (0, 0.1, 5.0), (0.22, 0, 0), [
+        (-0.7, -0.7, 0, 1.4, 1.4, 4.4, 'tail4')]),
 
-    # the head: a long dog's snout, scaly; under a battered iron pot with a candle on it
-    part('head', 'body', (0, -10.4, -1.0), HEAD, [
-        (-3.0, -5.0, -3.0, 6.0, 5.0, 5.6, 'cranium'),
-        (-2.0, -2.9, -8.2, 4.0, 2.5, 5.4, 'snout'),
-        (-1.0, -3.5, -7.8, 2.0, 0.8, 4.6, 'snout_ridge'),
-        (-0.7, -2.9, -8.6, 1.4, 1.0, 0.5, 'noseleather'),
-        (-1.2, -0.6, 1.8, 2.4, 1.6, 1.4, 'nape')]),
-    part('jaw', 'head', (0, -0.5, -2.6), (0.18, 0, 0), [(-1.9, 0, -5.5, 3.8, 1.3, 5.4, 'jaw')]),
-    part('right_eye', 'head', (-2.3, -3.25, -2.9), (0, 0.35, 0), [(-1.0, -0.7, -0.35, 2.0, 1.4, 0.5, 'eye')]),
-    part('right_brow', 'head', (-1.7, -4.25, -3.25), (0, 0.2, -0.32), [(-1.3, -0.45, -0.7, 2.6, 0.9, 1.4, 'brow')]),
-    part('right_frill', 'head', (-2.6, -2.2, -0.2), (0.1, 0.7, 0.35), [(-3.8, -1.8, -0.2, 3.8, 3.6, 0.4, 'frill')]),
-    part('right_horn', 'head', (-1.7, -4.3, 0.2), (-1.2, 0, -0.3), [(-0.5, -3.2, -0.5, 1.0, 3.4, 1.0, 'horn')]),
-    part('crest', 'head', (0, -4.4, 1.4), (0.3, 0, 0), [
-        (-0.2, -1.4, -0.6, 0.4, 1.6, 1.2, 'crest'),
-        (-0.2, -1.1, 0.8, 0.4, 1.3, 1.1, 'crest'),
-        (-0.2, -0.8, 2.0, 0.4, 1.0, 1.0, 'crest')]),
-    part('helmet', 'head', (0, -4.7, -0.1), (0.12, 0, 0.14), [
-        (-3.1, -2.6, -3.1, 6.2, 2.8, 6.2, 'pot'),
-        (-3.6, -0.1, -3.6, 7.2, 0.6, 7.2, 'potrim'),
-        (-0.6, -3.3, -0.6, 1.2, 0.8, 1.2, 'drip'),
-        (-0.45, -4.9, -0.45, 0.9, 1.7, 0.9, 'candle')]),
-    part('flame', 'helmet', (0, -4.9, 0), (0, 0, 0), [
-        (-0.4, -1.3, -0.05, 0.8, 1.3, 0.1, 'flame'),
-        (-0.05, -1.3, -0.4, 0.1, 1.3, 0.8, 'flame_x')]),
+    # the head: a crocodile's
+    part('head', 'neck', (0, -3.0, -0.6), HEAD, [
+        (-2.6, -4.4, -3.0, 5.2, 4.4, 5.0, 'cranium'),
+        (-2.15, -3.5, -7.2, 4.3, 2.5, 4.4, 'snout'),
+        (-1.45, -3.2, -10.4, 2.9, 2.1, 3.3, 'snouttip'),
+        (-1.05, -3.75, -10.2, 2.1, 0.7, 1.5, 'nostrils'),
+        (-0.3, -5.4, -1.6, 0.6, 1.2, 1.4, 'spine_small'),
+        (-0.3, -5.2, 0.2, 0.6, 1.4, 1.6, 'spine'),
+        teeth(-2.2, -1.0, -6.9, 4.0, False),
+        teeth(-1.5, -1.1, -10.1, 3.0, False),
+    ]),
+    part('jaw', 'head', (0, -0.9, -2.4), (0.05, 0, 0), [
+        (-2.05, 0, -4.8, 4.1, 1.4, 5.2, 'jaw'),
+        (-1.4, 0.05, -8.0, 2.8, 1.2, 3.3, 'jawtip'),
+        (-1.7, 1.2, -4.0, 3.4, 1.3, 4.2, 'throat'),
+        teeth(-1.95, 0.1, -4.6, 4.0, True),
+        teeth(-1.3, 0.1, -7.7, 3.0, True)]),
+    part('right_jowl', 'head', (-2.35, -1.6, -1.6), (0, 0.12, 0), [(-0.5, -0.9, -1.6, 0.9, 2.0, 3.0, 'jowl')]),
+    part('right_brow', 'head', (-1.75, -4.15, -2.0), (0.15, 0.1, 0.25), [(-0.85, -0.6, -1.9, 1.7, 1.2, 3.2, 'brow')]),
+    part('right_eye', 'head', (-2.5, -3.3, -2.0), (0, 0.1, 0), [(-0.3, -0.55, -0.85, 0.5, 1.1, 1.7, 'eye')]),
 
-    # the arms: a scrap pauldron over the shoulder, a leather bracer, clawed hands
-    part('right_arm', 'body', (-3.6, -8.2, -0.4), ARM, [
-        (-1.2, -0.6, -1.2, 2.4, 4.2, 2.4, 'arm'),
-        (-1.9, -1.5, -1.8, 2.9, 2.3, 3.6, 'pauldron')]),
-    part('right_forearm', 'right_arm', (-0.1, 3.8, 0), FOREARM, [
-        (-1.0, 0, -1.0, 2.0, 4.0, 2.0, 'forearm'),
-        (-1.25, 1.2, -1.25, 2.5, 2.4, 2.5, 'bracer')]),
-    part('right_hand', 'right_forearm', (0, 4.0, 0), HAND, [
-        (-1.1, 0, -1.2, 2.2, 1.6, 2.4, 'hand'),
-        (-1.05, 1.4, -1.1, 0.6, 1.2, 0.6, 'claw'),
-        (-0.3, 1.4, -1.1, 0.6, 1.3, 0.6, 'claw'),
-        (0.45, 1.4, -1.1, 0.6, 1.2, 0.6, 'claw')]),
+    # the arms: a scaled upper arm, a forearm in a leather bracer, a clawed hand
+    part('right_arm', 'body', (-4.5, -12.8, 0.1), ARM, [
+        (-1.5, -1.1, -1.5, 3.0, 6.8, 3.0, 'upperarm')]),
+    part('right_forearm', 'right_arm', (0, 6.0, 0), FOREARM, [
+        (-1.3, 0, -1.3, 2.6, 6.0, 2.6, 'forearm'),
+        (-1.5, 2.4, -1.5, 3.0, 3.0, 3.0, 'bracer')]),
+    part('right_hand', 'right_forearm', (0, 5.9, 0), HAND, [
+        (-1.45, 0, -1.55, 2.9, 2.0, 3.1, 'hand'),
+        (-1.45, 1.8, -1.5, 0.8, 2.4, 0.8, 'finger'),
+        (-0.4, 1.8, -1.5, 0.8, 2.6, 0.8, 'finger'),
+        (0.65, 1.8, -1.5, 0.8, 2.4, 0.8, 'finger'),
+        (-1.7, 0.6, -2.05, 0.8, 1.8, 0.8, 'finger')]),
 ])
 
 KOBOLD += [
-    # the pick, held up in its right fist, its head forward
-    part('pick', 'right_hand', (0, 0.9, -0.1), aim([BODY, ARM, FOREARM, HAND], (-0.35, 0, 0)), [
-        (-0.4, -9.0, -0.4, 0.8, 10.4, 0.8, 'haft'),
-        (-0.55, -9.4, -0.55, 1.1, 1.6, 1.1, 'socket'),
-        (-0.5, -9.2, -4.6, 1.0, 1.1, 4.1, 'pick_point'),
-        (-0.6, -9.3, 0.5, 1.2, 1.3, 2.4, 'pick_blade')]),
-    # a chunk of jade in its left
-    part('jade', 'left_hand', (0, 1.6, -0.3), (0.3, 0.4, 0.2), [(-0.9, -0.6, -0.9, 1.8, 2.0, 1.8, 'jade')]),
-    # the lantern, hanging straight down from the hook whatever the pole does
-    part('lantern', 'pole_hook', (0, 0.1, -1.6), aim([BODY, (0.08, 0, 0), POLE, HOOK], (0, 0, 0)), [
-        (-0.1, 0, -0.1, 0.2, 1.4, 0.2, 'lantern_cord'),
-        (-1.0, 1.3, -1.0, 2.0, 0.5, 2.0, 'lantern_cap'),
-        (-1.6, 1.8, -1.6, 3.2, 3.6, 3.2, 'lantern'),
-        (-1.0, 5.4, -1.0, 2.0, 0.5, 2.0, 'lantern_cap'),
-        (-0.3, 5.9, -0.3, 0.6, 2.0, 0.6, 'lantern_tassel')]),
+    # a scrap-iron pauldron riveted over its left shoulder, a scrap plate over its right thigh
+    part('pauldron', 'left_arm', (0.3, -0.6, 0), (0, 0, -0.3), [
+        (-1.4, -1.6, -2.1, 3.6, 2.4, 4.2, 'pauldron'),
+        (-0.9, 0.7, -1.9, 3.3, 1.8, 3.8, 'pauldron2')]),
+    part('thigh_plate', 'right_leg', (-1.95, 1.0, 0), (0, 0, 0.05), [(-0.4, 0, -2.0, 0.6, 4.2, 4.0, 'tasset')]),
+    # the pick in its right fist, its head up and forward
+    part('pick', 'right_hand', (0, 1.0, -0.2), aim([BODY, ARM, FOREARM, HAND], (-0.25, 0, 0)), [
+        (-0.45, -11.0, -0.45, 0.9, 13.0, 0.9, 'haft'),
+        (-0.6, -11.8, -0.6, 1.2, 1.8, 1.2, 'lashing'),
+        (-0.5, -11.5, -5.4, 1.0, 1.2, 4.9, 'pickpoint'),
+        (-0.6, -11.6, 0.5, 1.2, 1.4, 2.8, 'pickblade')]),
 ]
+
+
+def enlarge(parts, top, f):
+    """`top` and everything under it drawn `f` times larger, about `top`'s pivot."""
+    under = {top}
+    out = []
+    for n, par, pv, r, boxes, m in parts:
+        if n == top or par in under:
+            under.add(n)
+            if n != top:
+                pv = tuple(c * f for c in pv)
+            boxes = [tuple(c * f for c in b[:6]) + (b[6],) for b in boxes]
+        out.append((n, par, pv, r, boxes, m))
+    return out
+
+
+KOBOLD = enlarge(KOBOLD, 'head', 1.15)
 KOBOLD = w.settle(KOBOLD, ('right_foot', 'left_foot'))
 
 
-# ── The skin ─────────────────────────────────────────────────────────────────
+# ── The skin: clean, glossy reptile scales ───────────────────────────────────
 
-def scaly(p, f, faces=None, belly_face=None, cell=4):
-    """Slate-teal scales over every face, each its own shade, lit on top, darker beneath; a darker
-    stripe down its back; a cream scaled belly on `belly_face`."""
+def tone_side(s, i, fw, belly_from=0.62):
+    """How far toward the belly's colour a column of a side face is: none behind, up toward the front."""
+    t = i / max(1, fw - 1)
+    if s == 'left':
+        t = 1 - t                                                 # 0 at the back .. 1 at the front
+    return w.clamp((t - belly_from) / (1 - belly_from)) if belly_from < 1 else 0.0
+
+
+def scale_rows(p, rect, colour_at, cw=4, ch=3, light=1.0, gloss=True, fall=0.12):
+    """Overlapping scales in clean, regular rows, offset by half a scale each row: every scale lit
+    along its upper edge, shading down to a dark rim at its lower edge (the scale below it tucked
+    under), a narrow shadow at its side, and a glint of light near its upper corner. One colour for
+    the whole face (`colour_at(i, j)`, which may shade smoothly across it); no noise, no blotches."""
+    fx, fy, fw, fh = rect
+    for j in range(fh):
+        row = j // ch
+        off = (cw // 2) if row % 2 else 0
+        cy = j % ch
+        for i in range(fw):
+            cx = (i + off) % cw
+            base = colour_at(i, j)
+            kk = 1.1 - 0.2 * cy / max(1, ch - 1)
+            c = base
+            if cy == 0:
+                c = mix(base, (255, 255, 240), 0.06)
+            if cy == ch - 1:
+                kk = 0.76 if 0 < cx < cw - 1 else 0.68
+            elif cx == cw - 1:
+                kk *= 0.84
+            elif cx == 0 and cy == ch - 2:
+                kk *= 0.92
+            if gloss and cy == 0 and cx == 1 and cw >= 3:
+                c = mix(base, GLOSS, 0.3)
+                kk = 1.12
+            kk *= light * (1 - fall * j / max(1, fh - 1))
+            p.px((fx + i, fy + j), [v * kk for v in c])
+
+
+def scutes(p, rect, light=1.0, cols=2, ch=3, base=BELLY, edge=BELLY_EDGE):
+    """The belly's broad scutes: wide plates in rows, `cols` across, lit above, a seam beneath each."""
+    fx, fy, fw, fh = rect
+    cw = max(2, fw // cols)
+    for j in range(fh):
+        cy = j % ch
+        for i in range(fw):
+            cx = i % cw
+            c = base
+            kk = 1.08 - 0.16 * cy / max(1, ch - 1)
+            if cy == ch - 1:
+                c, kk = edge, 1.0
+            elif cx == cw - 1 and i != fw - 1:
+                c, kk = mix(base, edge, 0.6), 1.0
+            if cy == 0 and cx == 1:
+                c = mix(base, (255, 252, 236), 0.4)
+            p.px((fx + i, fy + j), [v * kk * light for v in c])
+
+
+def osteoderms(p, rect, light=1.0, pw=4, ph=4, base=PLATE, between=None):
+    """The back's bony plates in rows: raised ovals, a lit ridge down each one's middle, a dark rim."""
+    fx, fy, fw, fh = rect
+    between = between or k(DORSAL, 0.7)
+    for j in range(fh):
+        row = j // ph
+        off = (pw // 2) if row % 2 else 0
+        cy = j % ph
+        for i in range(fw):
+            cx = (i + off) % pw
+            dx = (cx - (pw - 1) / 2) / (pw / 2)
+            dy = (cy - (ph - 1) / 2) / (ph / 2)
+            d = dx * dx + dy * dy
+            if d > 1.05:
+                c = between
+            else:
+                c = k(base, 1.2 - 0.45 * max(0, dy) - 0.15 * abs(dx))
+                if abs(dx) < 0.3 and dy < 0.2:
+                    c = mix(c, GLOSS, 0.25)                       # its keel, catching the light
+                if dy > 0.55:
+                    c = k(base, 0.6)
+            p.px((fx + i, fy + j), [v * light for v in c])
+
+
+def scaly(p, f, back='scales', belly_faces=('bottom',), inner_pale=0.35, cw=4, ch=3, side_belly=1.0, faces=None):
+    """A box in scales: olive on its outer faces, paling on its inner side, scutes beneath."""
     for s in faces or f:
-        if s == belly_face:
-            w.plates(p, f[s], k(BELLY, w.LIGHT[s]), k(BELLY_EDGE, w.LIGHT[s]), rows=3)
-            continue
-        base = SCALE if s != 'bottom' else mix(SCALE, BELLY, 0.5)
-        fx, fy, fw, fh = f[s]
-        w.scale_tiles(p, f[s], base, mix(SCALE_EDGE, base, 0.45), w.LIGHT[s], cw=max(3, cell), ch=2, hi=SCALE_HI, seed=fx * 7 + fy, vary=0.16)
-        for i, j, xy in w.each(p, f[s]):                          # a darker stripe down its back
-            if s in ('top', 'back') and abs(i - fw / 2 + 0.5) < fw * 0.18:
-                p.px(xy, k(p.get(xy), 0.72))
+        rect = f[s]
+        fx, fy, fw, fh = rect
+        lv = w.LIGHT[s]
+        if s in belly_faces and s == 'front' and fw >= 10:          # the scutes down its middle, olive scales at its flanks
+            scale_rows(p, rect, lambda i, j: DORSAL, cw=cw, ch=ch, light=lv)
+            m = max(2, fw // 5)
+            scutes(p, (fx + m, fy, fw - 2 * m, fh), light=lv, cols=2)
+            for j in range(fh):                                   # the scales lapping onto it at its edges
+                p.px((fx + m, fy + j), k(mix(DORSAL, BELLY, 0.5), lv * 0.8))
+                p.px((fx + fw - m - 1, fy + j), k(mix(DORSAL, BELLY, 0.5), lv * 0.8))
+        elif s in belly_faces:
+            scutes(p, rect, light=lv)
+        elif s == 'back' and back == 'plates':
+            osteoderms(p, rect, light=lv)
+        else:
+            if s == 'left' and inner_pale:
+                col = lambda i, j: mix(DORSAL, BELLY, inner_pale)
+            elif s in ('right', 'left') and side_belly < 1:
+                col = lambda i, j, s=s, fw=fw: mix(DORSAL, BELLY, tone_side(s, i, fw, side_belly) ** 1.2)
+            else:
+                col = lambda i, j: DORSAL
+            scale_rows(p, rect, col, cw=cw, ch=ch, light=lv)
 
 
-def claws(p, f):
+def clawed(p, f, length=0.5):
     for s in w.SIDES + ('bottom',):
         fx, fy, fw, fh = f[s]
         for i, j, xy in w.each(p, f[s]):
-            if j >= fh * 0.45 or s == 'bottom':
-                p.px(xy, k(mix(CLAW, (120, 110, 96), 0.3 * (j < fh * 0.6)), w.LIGHT[s]))
-
-
-def scrap(p, f, faces=None, rivets=3):
-    """Scrap iron: mismatched plates, some rusty, riveted at their seams."""
-    w.iron(p, f, IRON, rust=0.4, rivets=rivets, dents=0.4, faces=faces, rustc=RUST)
-    for s in faces or w.SIDES:
-        fx, fy, fw, fh = f[s]
-        if fw > 6:
-            x = fw // 2 + p.rnd.randint(-2, 2)
-            w.vline(p, f[s], x, k(IRON_DARK, 0.7))
-            for j in range(1, fh - 1, 3):
-                w.rivet(p, fx + x + 1, fy + j, IRON)
+            if j >= fh * (1 - length) or s == 'bottom':
+                c = CLAW if j > fh * (1 - length) + 1 else (110, 104, 92)
+                p.px(xy, k(c, w.LIGHT[s]))
+    for s in w.SIDES:
+        w.point(p, f[s], down=True, keep=0.3, sharp=0.55)
 
 
 def paint_kobold(p, style, f, dims):
-    if style in ('thigh', 'shin', 'ankle', 'arm', 'forearm', 'neck', 'nape'):
-        scaly(p, f, cell=4 if style in ('thigh', 'arm') else 3)
+    S = w.SIDES
 
-    if style in ('tail1', 'tail2', 'tail3'):
-        scaly(p, f, belly_face='bottom', cell=4 if style == 'tail1' else 3)
-        if style == 'tail3':
-            for s in w.SIDES:
-                pass
+    if style in ('thigh', 'upperarm', 'shin', 'ankle', 'forearm'):
+        scaly(p, f, back='plates' if style == 'thigh' else 'scales')
 
-    if style in ('foot',):
-        scaly(p, f, cell=3)
-
-    if style in ('toe', 'claw'):
-        scaly(p, f, cell=2)
-        claws(p, f)
-
-    if style == 'hand':
-        scaly(p, f, cell=3)
-
-    if style == 'torso':                                          # its chest: a pale scaled belly down the front
-        scaly(p, f, belly_face='front')
+    if style in ('foot', 'hand'):
+        scaly(p, f, cw=3, ch=2)
+        w.flat(p, f, k(BELLY_EDGE, 0.8), faces=('bottom',))
+    if style in ('toe', 'finger'):
+        scaly(p, f, cw=3, ch=2)
+        clawed(p, f, length=0.45 if style == 'toe' else 0.4)
+    if style == 'dewclaw':
+        scaly(p, f, cw=3, ch=2)
+        clawed(p, f, length=0.7)
 
     if style == 'hips':
-        w.leather(p, f, LEATHER, stitch=(170, 140, 96))
+        scaly(p, f, back='plates', belly_faces=('front', 'bottom'), side_belly=0.6)
+    if style == 'belly':                                          # the belly: broad scutes before, olive behind
+        scaly(p, f, back='plates', belly_faces=('front', 'bottom'), side_belly=0.55)
+    if style == 'chest':                                          # the chest: scutes before, rows of plates behind
+        scaly(p, f, back='plates', belly_faces=('front',), side_belly=0.6)
+    if style == 'neck':
+        scaly(p, f, back='plates', belly_faces=('front', 'bottom'), cw=3, ch=2, side_belly=0.55)
 
-    if style == 'cuirass':                                        # scrap iron riveted together over the breast
-        scrap(p, f)
-        w.leather(p, f, LEATHER, faces=('top', 'bottom'))
-        fx, fy, fw, fh = f['front']                               # a plate of copper patched onto it
-        for j in range(2, 6):
-            for i in range(fw - 7, fw - 3):
-                p.px((fx + i, fy + j), k(COPPER, 0.95 + 0.1 * (j == 2)))
-        w.rivet(p, fx + fw - 7, fy + 2, COPPER)
-        w.rivet(p, fx + fw - 4, fy + 5, COPPER)
-
-    if style == 'belt':
-        w.leather(p, f, k(LEATHER, 0.85), stitch=(170, 140, 96))
-        fx, fy, fw, fh = f['front']
-        for j in range(fh):                                       # an iron buckle
-            for i in range(fw // 2 - 2, fw // 2 + 2):
-                p.px((fx + i, fy + j), IRON if j in (0, fh - 1) or i in (fw // 2 - 2, fw // 2 + 1) else k(LEATHER, 0.6))
-
-    if style == 'pouch':
-        w.leather(p, f, (130, 88, 54), stitch=(190, 160, 110))
-        w.flat(p, f, k(LEATHER, 0.7), faces=('top',))
-
-    if style == 'coin':                                           # copper cash, square-holed, green at the edges
-        w.flat(p, f, COPPER, noise=6)
-        for s in ('front', 'back'):
-            fx, fy, fw, fh = f[s]
-            for i, j, xy in w.each(p, f[s]):
-                if i in (0, fw - 1) or j in (0, fh - 1):
-                    p.px(xy, mix(COPPER, (80, 140, 110), 0.4))
-            p.px((fx + fw // 2, fy + fh // 2), (24, 16, 12))
-            p.px((fx + fw // 2 - 1, fy + fh // 2), (24, 16, 12))
-            p.px((fx + 1, fy + 1), (240, 190, 130))
-
-    if style in ('tasset', 'tasset_side'):                        # leather flaps, iron-plated, frayed
-        w.leather(p, f, LEATHER)
-        for s in w.SIDES:
-            fx, fy, fw, fh = f[s]
-            for j in range(0, fh - 2, 3):
-                w.hline(p, f[s], j, k(IRON, w.LIGHT[s]))
-                w.hline(p, f[s], j + 1, k(IRON_DARK, w.LIGHT[s]))
-            w.ragged(p, f[s], teeth=2, depth=2)
-
-    if style in ('spine', 'spine_small', 'crest'):                # spines: orange, darker at the root, pointed
+    if style in ('tail1', 'tail2', 'tail3', 'tail4'):             # the tail: plates along its top, scutes under it
+        cw = 4 if style in ('tail1', 'tail2') else 3
         for s in f:
-            fx, fy, fw, fh = f[s]
-            for i, j, xy in w.each(p, f[s]):
-                p.px(xy, k(mix(FRILL, FRILL_DEEP, j / max(1, fh - 1)), w.LIGHT[s]))
-        for s in ('right', 'left'):
-            w.point(p, f[s], down=False, keep=0.4, sharp=0.6)
+            rect = f[s]
+            lv = w.LIGHT[s]
+            if s == 'top':
+                osteoderms(p, rect, light=lv, pw=4, ph=4)
+            elif s == 'bottom':
+                scutes(p, rect, light=lv, cols=1, ch=3)
+            elif s in ('right', 'left'):                          # its sides: olive above, paling to cream below
+                fx, fy, fw, fh = rect
+                scale_rows(p, rect, lambda i, j, fh=fh: mix(DORSAL, BELLY, w.clamp((j / max(1, fh - 1) - 0.55) / 0.45) ** 1.3),
+                           cw=cw, ch=3, light=lv, fall=0)
+            else:
+                scale_rows(p, rect, lambda i, j: DORSAL, cw=cw, ch=3, light=lv)
 
-    if style in ('pole_v', 'crossbar', 'pole', 'haft'):
-        w.wood(p, f, WOOD if style != 'haft' else (140, 100, 60), along='y' if style != 'crossbar' else 'x')
-        if style == 'crossbar':                                   # bound with cord at its ends
-            for s in w.SIDES:
-                w.vline(p, f[s], 0, (170, 140, 90))
-                w.vline(p, f[s], f[s][2] - 1, (170, 140, 90))
-        if style == 'haft':
-            for s in w.SIDES:
-                fx, fy, fw, fh = f[s]
-                for j in range(fh - 8, fh - 2):                   # its grip, bound in leather
-                    w.hline(p, f[s], j, k(LEATHER, w.LIGHT[s] * (0.8 + 0.2 * (j % 2))))
-
-    if style == 'hook':
-        w.iron(p, f, IRON_DARK, rivets=0, rim=False)
-
-    if style == 'basket':                                         # wicker, woven over and under
-        for s in f:
-            fx, fy, fw, fh = f[s]
-            for i, j, xy in w.each(p, f[s]):
-                over = ((i // 2) + (j // 2)) % 2
-                c = k(WICKER, (1.05 if over else 0.72) * w.LIGHT[s])
-                if j % 2 == 1 and not over:
-                    c = k(c, 0.85)
-                p.px(xy, [v + p.rnd.randint(-5, 5) for v in c])
-        w.flat(p, f, (50, 44, 40), faces=('top',))                 # (its mouth: dark, the ore in it)
-        w.border(p, f, k(WICKER, 0.6), top=True, bottom=True)
-
-    if style == 'ore_copper':
-        w.hide(p, f, (96, 88, 80), (60, 54, 50), mottle=0.6)
-        for s in f:
-            fx, fy, fw, fh = f[s]
-            for _ in range(fw * fh // 4):
-                p.px((fx + p.rnd.randrange(fw), fy + p.rnd.randrange(fh)), (214, 128, 72))
-    if style == 'ore_iron':
-        w.hide(p, f, (110, 104, 98), (64, 60, 58), mottle=0.6)
-        for s in f:
-            fx, fy, fw, fh = f[s]
-            for _ in range(fw * fh // 4):
-                p.px((fx + p.rnd.randrange(fw), fy + p.rnd.randrange(fh)), (226, 192, 160))
-    if style in ('ore_jade', 'jade'):                             # jade crystal, glowing a little from within
-        for s in f:
-            fx, fy, fw, fh = f[s]
-            for i, j, xy in w.each(p, f[s]):
-                t = ((i + j) % 4) / 3
-                c = mix(JADE, (40, 120, 90), t * 0.7)
-                p.lit(xy, k(c, w.LIGHT[s]), 0.55)
-            p.lit((fx, fy), (220, 255, 230), 0.9)
-
-    if style == 'cranium':                                        # its skull, scaled; its face scaled finer
-        scaly(p, f, cell=3)
-        fx, fy, fw, fh = f['front']
-        for i, j, xy in w.each(p, f['front']):
-            if j > fh - 4:
-                p.px(xy, k(SCALE_DARK, 1.0))
-
-    if style in ('snout', 'snout_ridge'):                         # the snout: scales, a black nose at its end, a lip of teeth
-        scaly(p, f, cell=3)
-        if style == 'snout':
-            for s in ('right', 'left'):                           # its upper teeth along its lip
-                fx, fy, fw, fh = f[s]
-                for i in range(fw):
-                    p.px((fx + i, fy + fh - 1), GUM)
-                    if i % 2 == 0:
-                        p.px((fx + i, fy + fh - 1), TOOTH)
-                        if i % 4 == 0 and fh > 3:
-                            p.px((fx + i, fy + fh - 2), TOOTH)
-            fx, fy, fw, fh = f['bottom']
-            for i, j, xy in w.each(p, f['bottom']):
-                p.px(xy, GUM if 0 < i < fw - 1 else TOOTH)
-
-    if style == 'noseleather':                                    # a black dog's nose, wet-lit, its nostrils
-        w.flat(p, f, (30, 26, 30))
-        fx, fy, fw, fh = f['front']
-        p.px((fx, fy + fh - 1), (6, 4, 6))
-        p.px((fx + fw - 1, fy + fh - 1), (6, 4, 6))
-        p.px((fx + 1, fy), (120, 116, 126))
-
-    if style == 'jaw':                                            # the lower jaw: a row of teeth along its top, a pale throat
-        scaly(p, f, cell=2, belly_face='bottom')
-        fx, fy, fw, fh = f['top']
-        for i, j, xy in w.each(p, f['top']):
-            p.px(xy, (60, 16, 20) if 0 < i < fw - 1 else (TOOTH if j % 2 == 0 else GUM))
-        for s in ('right', 'left', 'front'):
-            fx, fy, fw, fh = f[s]
-            for i in range(fw):
-                if i % 2 == 1:
-                    p.px((fx + i, fy), TOOTH)
-
-    if style == 'eye':                                            # amber eyes, a slit pupil
-        scaly(p, f, cell=2)
-        w.eye(p, f['front'], 0, 0, f['front'][2], f['front'][3], EYE, slit=True, glow=1.0)
-
-    if style == 'brow':
-        scaly(p, f, cell=2)
-        w.flat(p, f, SCALE_EDGE, faces=('bottom',))
-
-    if style == 'frill':                                          # a webbed frill: orange skin between dark spines, a ragged edge
-        for s in ('front', 'back'):
-            fx, fy, fw, fh = f[s]
-            for i, j, xy in w.each(p, f[s]):
-                spine = (i % 3 == 0)
-                c = FRILL_DEEP if spine else mix(FRILL, (255, 180, 90), 0.3 * (1 - j / fh))
-                p.px(xy, [v + p.rnd.randint(-5, 5) for v in c])
-            for i in range(fw):                                   # cut to a fan, wider at its edge
-                t = 1 - i / max(1, fw - 1) if s == 'front' else i / max(1, fw - 1)  # 1 at the root .. 0 at the edge
-                half = fh / 2 * (0.45 + 0.55 * (1 - t))
-                for j in range(fh):
-                    if abs(j - fh / 2 + 0.5) > half or (t < 0.2 and i % 3 == 1 and j in (0, fh - 1)):
-                        p.clear((fx + i, fy + j))
-        w.flat(p, f, FRILL_DEEP, faces=('right', 'left', 'top', 'bottom'))
-
-    if style == 'horn':
+    if style in ('spine', 'spine_small'):                         # the crest's spines: horn-dark, pale at their points
         for s in f:
             fx, fy, fw, fh = f[s]
             for i, j, xy in w.each(p, f[s]):
                 t = 1 - j / max(1, fh - 1)
-                p.px(xy, k(mix((60, 54, 50), (210, 196, 160), t), w.LIGHT[s] * (0.9 if j % 2 else 1)))
-        for s in w.SIDES:
-            w.point(p, f[s], down=False, keep=0.3, sharp=0.45)
-
-    if style == 'pot':                                            # a battered iron pot for a helmet, dented, rusted
-        w.iron(p, f, IRON, rust=0.45, rivets=0, dents=0.6, rustc=RUST)
-        fx, fy, fw, fh = f['front']                               # a dent, a patch
-        for i in range(3, 6):
-            p.px((fx + i, fy + 2), k(IRON, 0.5))
-        fx, fy, fw, fh = f['top']
-        for i, j, xy in w.each(p, f['top']):                      # wax run down over its top
-            if math.hypot(i - fw / 2 + 0.5, j - fh / 2 + 0.5) < 2.2:
-                p.px(xy, WAX)
-
-    if style == 'potrim':
-        w.iron(p, f, IRON_DARK, rust=0.3, rivets=0, rim=False, rustc=RUST)
-
-    if style == 'drip':
-        w.flat(p, f, WAX, noise=6)
-
-    if style == 'candle':                                         # a stub of candle, dripping, its wick black
-        w.flat(p, f, WAX, noise=5)
-        for s in w.SIDES:
-            fx, fy, fw, fh = f[s]
-            for i in range(fw):
-                for j in range(p.rnd.randint(0, fh)):
-                    p.px((fx + i, fy + j), k(WAX, 1.05))
-        w.flat(p, f, (40, 34, 30), faces=('top',))
-
-    if style in ('flame', 'flame_x'):                             # the candle's flame: a teardrop of fire
-        flat_ = ('right', 'left') if style == 'flame_x' else ('front', 'back')
-        w.cut_all(p, f, [s for s in f if s not in flat_])
-        for s in flat_:
+                p.px(xy, k(mix(k(DORSAL, 0.55), (196, 186, 140), t ** 1.5), w.LIGHT[s]))
+        for s in ('right', 'left'):                               # cut to a back-swept point
             fx, fy, fw, fh = f[s]
             for i, j, xy in w.each(p, f[s]):
-                t = j / max(1, fh - 1)
-                half = (fw / 2) * (0.25 + 0.75 * t)
-                if abs(i - fw / 2 + 0.5) > half:
+                u = i / max(1, fw - 1)
+                if s == 'left':
+                    u = 1 - u                                     # 0 at its back .. 1 at its front
+                if j < fh * u * 0.95:
+                    p.clear(xy)
+        w.cut_all(p, f, ('top', 'front', 'back'))
+
+    if style == 'cranium':                                        # the head: fine scales; a crest of plates down the crown
+        scaly(p, f, cw=3, ch=2, inner_pale=0, belly_faces=('bottom',))
+        fx, fy, fw, fh = f['top']
+        osteoderms(p, (fx + fw // 2 - 2, fy, 4, fh), light=w.LIGHT['top'], pw=4, ph=3)
+        fx, fy, fw, fh = f['front']
+        scale_rows(p, f['front'], lambda i, j: k(DORSAL, 0.85), cw=3, ch=2, light=w.LIGHT['front'])
+
+    if style in ('snout', 'snouttip'):                            # the long snout: fine scales above, paling to its lip, its lip line dark
+        for s in f:
+            rect = f[s]
+            fx, fy, fw, fh = rect
+            lv = w.LIGHT[s]
+            if s == 'bottom':                                     # its palate
+                w.flat(p, {s: rect}, MOUTH, noise=2)
+            elif s in ('right', 'left', 'front'):
+                scale_rows(p, rect, lambda i, j, fh=fh: mix(DORSAL, BELLY, w.clamp((j / max(1, fh - 1) - 0.5) / 0.5) * 0.55),
+                           cw=3, ch=2, light=lv, fall=0)
+                w.hline(p, rect, fh - 1, k((30, 26, 22), lv))     # the lip line
+            else:
+                fx, fy, fw, fh = rect                             # its top: rows of small bony scutes across it
+                for i, j, xy in w.each(p, rect):
+                    cy = j % 3
+                    cx = (i + (j // 3) % 2) % 3
+                    c = k(DORSAL, 1.1 if cy == 0 else (0.62 if cy == 2 else 0.95))
+                    if cx == 2 and cy < 2:
+                        c = k(c, 0.82)
+                    if cy == 0 and cx == 0:
+                        c = mix(c, GLOSS, 0.35)
+                    p.px(xy, [v * lv for v in c])
+
+    if style == 'nostrils':                                       # the raised nostrils at its tip
+        scaly(p, f, cw=3, ch=2, inner_pale=0)
+        fx, fy, fw, fh = f['top']
+        for x in (1, fw - 2):
+            for j in range(1, fh - 1):
+                p.px((fx + x, fy + j), (16, 14, 12))
+
+    if style in ('teeth_down', 'teeth_up'):                       # teeth all along its jaw line, interlocking
+        w.cut_all(p, f, ('top', 'bottom', 'front', 'back'))
+        for s in ('right', 'left'):
+            fx, fy, fw, fh = f[s]
+            for i, j, xy in w.each(p, f[s]):
+                u = i if s == 'left' else fw - 1 - i
+                ph = (u + (1 if style == 'teeth_up' else 0)) % 3
+                tip = (j >= fh - 1) if style == 'teeth_up' else (j == 0)
+                if ph == 2 or (ph == 1 and tip):
                     p.clear(xy)
                 else:
-                    p.lit(xy, mix((255, 250, 210), FLAME, 1 - t) if t > 0.5 else mix((255, 120, 40), FLAME, t * 2), 1.0)
+                    p.px(xy, k(mix(TOOTH, (200, 186, 150), 0.4 * (j / max(1, fh - 1) if style == 'teeth_down' else 1 - j / max(1, fh - 1))), w.LIGHT[s]))
+            p.clear((fx, fy)) if False else None
 
-    if style == 'pauldron':
-        scrap(p, f, rivets=2)
+    if style in ('jaw', 'jawtip'):                                # the lower jaw: olive on its sides, cream beneath; its mouth within
+        for s in f:
+            rect = f[s]
+            fx, fy, fw, fh = rect
+            lv = w.LIGHT[s]
+            if s == 'top':                                        # within: a dark tongue, ringed with teeth
+                for i, j, xy in w.each(p, rect):
+                    edge = i in (0, fw - 1) or j >= fh - 1
+                    p.px(xy, (TOOTH if (i + j) % 2 == 0 else (60, 30, 30)) if edge else (86, 40, 44))
+            elif s == 'bottom':
+                scutes(p, rect, light=lv, cols=2, ch=2)
+            else:
+                scale_rows(p, rect, lambda i, j, fh=fh: mix(DORSAL, BELLY, 0.25 + 0.5 * j / max(1, fh - 1)), cw=3, ch=2, light=lv, fall=0)
+                w.hline(p, rect, 0, k((30, 26, 22), lv))
 
-    if style == 'greave':
-        scrap(p, f, rivets=2)
+    if style == 'throat':
+        for s in f:
+            scutes(p, f[s], light=w.LIGHT[s], cols=1, ch=2)
 
-    if style == 'bracer':
-        w.leather(p, f, LEATHER, stitch=(170, 140, 96))
-        for s in w.SIDES:
-            w.hline(p, f[s], 1, k(IRON, w.LIGHT[s]))
-            w.hline(p, f[s], f[s][3] - 2, k(IRON, w.LIGHT[s]))
+    if style == 'jowl':                                           # the swell of muscle behind its jaw, in larger scales
+        scaly(p, f, cw=4, ch=3, inner_pale=0)
 
-    if style == 'socket':
-        w.iron(p, f, IRON_DARK, rivets=0)
+    if style == 'brow':                                           # the bony brow ridge over its eye
+        for s in f:
+            lv = w.LIGHT[s]
+            if s == 'bottom':
+                w.flat(p, {s: f[s]}, k(DORSAL, 0.35), noise=1)
+            else:
+                osteoderms(p, f[s], light=lv, pw=3, ph=3)
 
-    if style in ('pick_point', 'pick_blade'):                     # the pick's iron head: a long point before, a blade behind
-        w.iron(p, f, IRON, rust=0.25, rivets=0, dents=0.3, rustc=RUST)
-        for s in ('top',):
-            fx, fy, fw, fh = f[s]
+    if style == 'eye':                                            # an amber eye, a black slit pupil, set in a dark lid
+        w.flat(p, f, k(DORSAL, 0.4), noise=1)
+        for s in ('right', 'left'):
+            fx, fy, fw, fh = f[s]                                 # 3x2
+            for i, j, xy in w.each(p, f[s]):
+                p.lit(xy, mix((255, 226, 120), EYE, j / max(1, fh - 1)))
+            px_ = fx + fw // 2
             for j in range(fh):
-                p.px((fx + fw // 2, fy + j), (196, 196, 200))
-        for s in ('right', 'left'):                               # tapered to its point (the box's front end)
-            fx, fy, fw, fh = f[s]
-            for i in range(fw):
-                t = i / max(1, fw - 1)
-                tip = (1 - t) if s == 'right' else t              # 'right' face: its front end at the left of the texture
-                if style == 'pick_blade':
-                    tip = 1 - tip
-                keep = 0.25 + 0.75 * min(1, tip * 1.6)
-                for j in range(fh):
-                    if abs(j - fh / 2 + 0.5) > keep * fh / 2:
-                        p.clear((fx + i, fy + j))
+                p.px((px_, fy + j), (12, 8, 6))
+                p.glow.putpixel((px_, fy + j), (0, 0, 0, 0))
+            p.lit((fx + (0 if s == 'left' else fw - 1), fy), (255, 250, 230))
 
-    if style == 'lantern':                                        # a red paper lantern: ribbed, glowing, a gold 福 on it
+    if style == 'belt':
+        w.leather(p, f, LEATHER, LEATHER_DEEP, stitch=(190, 150, 100))
+    if style == 'buckle':
+        w.iron(p, f, IRON, rivets=0, rim=False, dents=0)
+        fx, fy, fw, fh = f['front']
+        for i, j, xy in w.each(p, f['front']):
+            if 0 < i < fw - 1 and 0 < j < fh - 1:
+                p.px(xy, LEATHER_DEEP)
+    if style == 'flap':
+        w.leather(p, f, LEATHER, LEATHER_DEEP, stitch=(190, 150, 100))
+        for s in ('front', 'back'):
+            w.ragged(p, f[s], teeth=2, depth=1)
+    if style == 'strap':
+        w.leather(p, f, LEATHER, LEATHER_DEEP)
+        fx, fy, fw, fh = f['front']
+        for j in range(3, fh, 7):                                 # brass studs along it
+            p.px((fx + fw // 2, fy + j), (210, 170, 80))
+    if style in ('satchel', 'satchelflap'):
+        w.leather(p, f, k(LEATHER, 0.9), LEATHER_DEEP, stitch=(190, 150, 100))
+    if style == 'ore_copper':
+        w.hide(p, f, (96, 88, 84), (60, 56, 54), mottle=0.4)
+        for s in f:
+            fx, fy, fw, fh = f[s]
+            p.px((fx + 1, fy + 1), COPPER)
+            p.px((fx + fw - 1, fy + fh - 1), k(COPPER, 1.2))
+    if style == 'ore_iron':
+        w.hide(p, f, (100, 96, 92), (66, 62, 60), mottle=0.4)
+        for s in f:
+            fx, fy, fw, fh = f[s]
+            p.px((fx + 1, fy), (216, 176, 150))
+    if style == 'ore_jade':
+        for s in f:
+            for i, j, xy in w.each(p, f[s]):
+                p.lit(xy, k(JADE, 0.8 + 0.3 * ((i + j) % 2)), glow=0.7)
+
+    if style in ('lanterncap', 'lanterncord'):
+        w.iron(p, f, (64, 62, 66), rivets=0, dents=0.1)
+    if style == 'lanterncage':                                    # an iron cage, its panes of horn glowing
         for s in f:
             fx, fy, fw, fh = f[s]
             for i, j, xy in w.each(p, f[s]):
-                rib = i % 3 == 0 if s in w.SIDES else False
-                t = abs(j - fh / 2 + 0.5) / (fh / 2)
-                c = mix(LANTERN_GLOW, LANTERN, 0.35 + 0.65 * t)
-                if rib:
-                    c = k(LANTERN, 0.6)
-                p.lit(xy, c, 0.85, skin=c)
-        for s in ('front', 'back'):
-            fx, fy, fw, fh = f[s]
-            w.glyph(p, fx + fw // 2 - 2, fy + fh // 2 - 2, ['.##.', '####', '.##.', '#..#'], GOLD, 0.9)
-    if style == 'lantern_cap':
-        w.wood(p, f, (60, 36, 26))
-        w.border(p, f, GOLD)
-    if style == 'lantern_cord':
-        w.flat(p, f, (40, 30, 26))
-    if style == 'lantern_tassel':                                 # a red tassel, gold-bound
+                if s in ('top', 'bottom') or i in (0, fw - 1) or j in (0, fh - 1) or i == fw // 2:
+                    p.px(xy, k((54, 52, 56), w.LIGHT[s]))
+                else:
+                    p.lit(xy, mix((255, 210, 120), (255, 150, 60), j / max(1, fh - 1)), glow=0.9)
+    if style == 'lanternfire':
         for s in f:
-            w.strands(p, f[s], k(LANTERN, w.LIGHT[s]), k(LANTERN, 0.6), k((240, 90, 60), w.LIGHT[s]))
-            w.hline(p, f[s], 0, GOLD) if s in w.SIDES else None
-            w.hline(p, f[s], 1, GOLD) if s in w.SIDES else None
+            for i, j, xy in w.each(p, f[s]):
+                p.lit(xy, FLAME)
+
+    if style == 'bracer':
+        w.leather(p, f, LEATHER, LEATHER_DEEP, stitch=(190, 150, 100))
+        for s in S:
+            fx, fy, fw, fh = f[s]
+            for j in range(1, fh - 1, 2):                         # laced
+                p.px((fx + fw // 2, fy + j), RAWHIDE)
+
+    if style in ('pauldron', 'pauldron2', 'tasset'):              # scrap iron, rust gathering at its edges, riveted along its rim
+        w.iron(p, f, IRON, rust=0.35, rivets=0, dents=0.3, rustc=RUST)
+        for sd in S:
+            fx, fy, fw, fh = f[sd]
+            for i in range(1, fw - 1, 4):
+                w.rivet(p, fx + i, fy + 1, IRON)
+
+    if style == 'haft':
+        w.wood(p, f, WOOD, along='y')
+        for s in S:
+            fx, fy, fw, fh = f[s]
+            for j in range(int(fh * 0.75), fh - 2):
+                if j % 2 == 0:
+                    w.hline(p, f[s], j, k(RAWHIDE, 0.7 * w.LIGHT[s]))
+    if style == 'lashing':
+        w.rope(p, f, RAWHIDE)
+    if style in ('pickpoint', 'pickblade'):
+        w.iron(p, f, IRON, rust=0.15, rivets=0, dents=0.2, rustc=RUST)
+        for s in ('right', 'left', 'top', 'bottom'):
+            fx, fy, fw, fh = f[s]
+            for i, j, xy in w.each(p, f[s]):
+                u = i / max(1, fw - 1)
+                end = (u < 0.2) if (s == 'right') == (style == 'pickpoint') else (u > 0.8)
+                if end:
+                    p.px(xy, k((200, 200, 206), w.LIGHT[s]))
 
 
 if __name__ == '__main__':
-    p = Painter(47)
+    p = Painter(43)
     slots = paint(KOBOLD, p, paint_kobold)
     p.save('kobold')
     w.emit(KOBOLD, slots, w.JAVA, 'kobold')

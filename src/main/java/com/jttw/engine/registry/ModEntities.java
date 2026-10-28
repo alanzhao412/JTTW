@@ -444,14 +444,14 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.wild.GoblinEntity>> GOBLIN =
             ENTITIES.register("goblin", () ->
                     EntityType.Builder.<com.jttw.engine.entity.wild.GoblinEntity>of(com.jttw.engine.entity.wild.GoblinEntity::new, MobCategory.MONSTER)
-                            .sized(0.6F, 1.4F)
+                            .sized(0.7F, 1.9F)
                             .clientTrackingRange(10)
                             .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "goblin").toString()));
 
     public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.wild.KoboldEntity>> KOBOLD =
             ENTITIES.register("kobold", () ->
                     EntityType.Builder.<com.jttw.engine.entity.wild.KoboldEntity>of(com.jttw.engine.entity.wild.KoboldEntity::new, MobCategory.MONSTER)
-                            .sized(0.6F, 1.2F)
+                            .sized(0.75F, 1.85F)
                             .clientTrackingRange(10)
                             .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "kobold").toString()));
 
