@@ -61,8 +61,8 @@ import java.util.List;
  *         <li>the North's Ao Shun, the <b>frozen abyss</b>: the sea round him turns to ice,
  *             freezing and slowing all near him;</li>
  *       </ul></li>
- *   <li><b>his guard</b>: at two thirds of his health he calls Shrimp Soldiers and a Crab General, at a
- *       third his Yaksha patrol.</li>
+ *   <li><b>his guard</b>: at two thirds of his health he calls his soldiers (a Shrimp Soldier, a Fish
+ *       Soldier) and a Crab General, at a third his Yaksha patrol and a Turtle Soldier.</li>
  * </ul>
  * One to each palace ({@link com.jttw.engine.world.feature.DragonPalaceFeature}); a {@link ZoneBoss}:
  * his bar in his robe's colour, his kill a Boss's of the waters.
@@ -156,18 +156,18 @@ public abstract class DragonKingEntity extends ZoneBoss implements RangedAttackM
     @Override
     protected void onPhase(int phase) {
         playSound(SoundEvents.ENDER_DRAGON_GROWL, 2f, 1.3f);
-        if (phase == 1) callGuard(ModEntities.SHRIMP_SOLDIER.get(), 2, ModEntities.CRAB_GENERAL.get(), 1);
-        else callGuard(ModEntities.YAKSHA.get(), 2, ModEntities.SHRIMP_SOLDIER.get(), 1);
+        if (phase == 1) callGuard(List.of(ModEntities.SHRIMP_SOLDIER.get(), ModEntities.FISH_SOLDIER.get(), ModEntities.CRAB_GENERAL.get()));
+        else callGuard(List.of(ModEntities.YAKSHA.get(), ModEntities.YAKSHA.get(), ModEntities.TURTLE_SOLDIER.get()));
     }
 
-    /** Calls his guard round him: regulars, never captains, his foe theirs. Returns those who came. */
-    public List<SeaMonster> callGuard(EntityType<? extends SeaMonster> first, int many, EntityType<? extends SeaMonster> second, int more) {
+    /** Calls his guard round him, one of each type listed: regulars, never captains, his foe theirs. Returns those who came. */
+    public List<SeaMonster> callGuard(List<? extends EntityType<? extends SeaMonster>> guard) {
         List<SeaMonster> came = new java.util.ArrayList<>();
         if (!(level() instanceof ServerLevel server)) return came;
-        for (int i = 0; i < many + more; i++) {
+        for (EntityType<? extends SeaMonster> type : guard) {
             double a = random.nextDouble() * Math.PI * 2;
             BlockPos at = BlockPos.containing(getX() + Math.cos(a) * 3, getY() + 0.5, getZ() + Math.sin(a) * 3);
-            SeaMonster m = ZoneMonster.summon(server, i < many ? first : second, at, false);
+            SeaMonster m = ZoneMonster.summon(server, type, at, false);
             if (m == null) continue;
             if (getTarget() != null) m.setTarget(getTarget());
             server.sendParticles(ParticleTypes.BUBBLE_COLUMN_UP, m.getX(), m.getY() + 1, m.getZ(), 20, 0.4, 0.8, 0.4, 0.05);

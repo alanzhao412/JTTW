@@ -4,9 +4,11 @@ import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.entity.MobScaling;
 import com.jttw.engine.entity.waters.CrabGeneralEntity;
 import com.jttw.engine.entity.waters.DragonKingEntity;
+import com.jttw.engine.entity.waters.FishSoldierEntity;
 import com.jttw.engine.entity.waters.SeaBoltEntity;
 import com.jttw.engine.entity.waters.SeaMonster;
 import com.jttw.engine.entity.waters.ShrimpSoldierEntity;
+import com.jttw.engine.entity.waters.TurtleSoldierEntity;
 import com.jttw.engine.entity.waters.YakshaEntity;
 import com.jttw.engine.gametest.character.CharTest;
 import com.jttw.engine.item.DragonRegaliaItem;
@@ -208,6 +210,115 @@ public class WatersGameTests {
         shrimp.setNoAi(true);
         yaksha.setTarget(p);
         check(h, shrimp.getTarget() == p, "the patrol's alarm turns the sea on its foe");
+        h.succeed();
+    }
+
+    // ── The Fish and Turtle Soldiers ────────────────────────────────────
+
+    @GameTest(template = PLATFORM, timeoutTicks = 60)
+    public static void aFishSoldierIsQuickFrailAndLungesThroughTheWater(GameTestHelper h) {
+        flood(h);
+        FishSoldierEntity fish = sea(h, ModEntities.FISH_SOLDIER.get(), 47, false, new BlockPos(0, 2, 0));
+        ShrimpSoldierEntity shrimp = sea(h, ModEntities.SHRIMP_SOLDIER.get(), 47, false, new BlockPos(4, 2, 0));
+        fish.goalSelector.removeAllGoals(g -> true);
+        fish.targetSelector.removeAllGoals(g -> true);
+        shrimp.setNoAi(true);
+        check(h, fish.getNavigation() instanceof AmphibiousPathNavigation && fish.swims(), "it swims");
+        check(h, !fish.canDrownInFluidType(net.neoforged.neoforge.common.NeoForgeMod.WATER_TYPE.value()), "it breathes water");
+        close(h, FishSoldierEntity.HITS * MobScaling.typicalHit(47), fish.getMaxHealth(), "its health: four hits");
+        check(h, fish.getMaxHealth() < shrimp.getMaxHealth(), "frailer than a shrimp");
+        check(h, fish.getAttributeValue(Attributes.MOVEMENT_SPEED) > shrimp.getAttributeValue(Attributes.MOVEMENT_SPEED), "quicker than a shrimp");
+        check(h, FishSoldierEntity.FAST_SWIM > SeaMonster.SWIM, "and quicker still in the water");
+        eq(h, EnemyTier.GRUNT.name(), fish.getPersistentData().getString(SeaMonster.KEY_TIER), "a grunt");
+        eq(h, Zones.MYSTICAL_WATERS.id(), fish.getPersistentData().getString(SeaMonster.KEY_ZONE), "of the waters");
+        LivingEntity g = golem(h, new BlockPos(4, 2, 4));
+        h.runAfterDelay(FishSoldierEntity.LUNGE_EVERY / 2 + 5, () -> {
+            check(h, fish.isInWater(), "in the water");
+            check(h, fish.lungeReady(), "its lunge is ready");
+            // its lunge: a burst toward its foe, then it must gather itself
+            Vec3 to = g.position().subtract(fish.position());
+            check(h, fish.lungeAt(g), "it lunges");
+            near(h, FishSoldierEntity.LUNGE, fish.getDeltaMovement().length(), "with a beat of its tail");
+            check(h, fish.getDeltaMovement().x * to.x + fish.getDeltaMovement().z * to.z > 0, "toward its foe");
+            check(h, !fish.lungeAt(g), "and must gather itself before the next");
+            float hp = g.getHealth();
+            fish.doHurtTarget(g);
+            close(h, fish.blowAt(47, false), hp - g.getHealth(), "its thrust: 12% of a same-level character's health");
+            h.succeed();
+        });
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void aTurtleSoldiersShieldTakesBlowsFromBeforeIt(GameTestHelper h) {
+        ServerPlayer p = player(h);
+        TurtleSoldierEntity front = sea(h, ModEntities.TURTLE_SOLDIER.get(), 47, false, new BlockPos(1, 2, 1));
+        TurtleSoldierEntity back = sea(h, ModEntities.TURTLE_SOLDIER.get(), 47, false, new BlockPos(3, 2, 3));
+        for (TurtleSoldierEntity t : List.of(front, back)) {
+            t.setNoAi(true);
+            t.setYRot(0);
+            t.setYBodyRot(0);                                    // facing +z (south)
+        }
+        check(h, front.getArmorValue() > ModEntities.SHRIMP_SOLDIER.get().create(h.getLevel()).getArmorValue(), "more armour than a shrimp");
+        close(h, TurtleSoldierEntity.HITS * MobScaling.typicalHit(47), front.getMaxHealth(), "its health: ten hits");
+        // a blow from in front of it, and one from behind
+        p.moveTo(front.getX(), front.getY(), front.getZ() + 2);
+        var fromFront = p.damageSources().playerAttack(p);
+        check(h, front.blocks(fromFront), "its shield takes a blow from before it");
+        float a = front.getHealth();
+        front.hurt(fromFront, 20);
+        float frontHurt = a - front.getHealth();
+        p.moveTo(back.getX(), back.getY(), back.getZ() - 2);
+        var fromBehind = p.damageSources().playerAttack(p);
+        check(h, !back.blocks(fromBehind), "not one from behind");
+        float b = back.getHealth();
+        back.hurt(fromBehind, 20);
+        float backHurt = b - back.getHealth();
+        check(h, frontHurt > 0 && frontHurt < backHurt * 0.6f, "a blow on its shield does far less: " + frontHurt + " against " + backHurt);
+        check(h, !front.blocks(h.getLevel().damageSources().magic()), "no shield stops magic");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM, timeoutTicks = 120)
+    public static void aTurtleSoldierBadlyHurtWithdrawsIntoItsShell(GameTestHelper h) {
+        ServerPlayer p = player(h);
+        TurtleSoldierEntity turtle = sea(h, ModEntities.TURTLE_SOLDIER.get(), 47, false, new BlockPos(2, 2, 2));
+        turtle.goalSelector.removeAllGoals(g -> true);
+        turtle.targetSelector.removeAllGoals(g -> true);
+        turtle.setYBodyRot(0);
+        var magic = h.getLevel().damageSources().magic();
+        turtle.hurt(magic, turtle.getMaxHealth() * 0.3f);
+        check(h, !turtle.isWithdrawn(), "lightly hurt, it stands");
+        turtle.invulnerableTime = 0;
+        turtle.hurt(magic, turtle.getMaxHealth() * 0.3f);
+        check(h, turtle.isWithdrawn(), "badly hurt, it draws into its shell");
+        float hp = turtle.getHealth();
+        turtle.invulnerableTime = 0;
+        turtle.hurt(magic, 10);
+        near(h, 10 * (1 - TurtleSoldierEntity.SHELL), hp - turtle.getHealth(), "in its shell almost nothing hurts it");
+        LivingEntity g = golem(h, new BlockPos(4, 2, 4));
+        float ghp = g.getHealth();
+        check(h, !turtle.doHurtTarget(g) && g.getHealth() == ghp, "nor does it strike");
+        Vec3 v = turtle.getDeltaMovement();
+        turtle.knockback(2, 1, 0);
+        check(h, turtle.getDeltaMovement().equals(v), "nor is it moved");
+        h.runAfterDelay(TurtleSoldierEntity.SHELL_TICKS + 5, () -> {
+            check(h, !turtle.isWithdrawn(), "after a while it comes out again");
+            turtle.invulnerableTime = 0;
+            turtle.hurt(magic, 1);
+            check(h, !turtle.isWithdrawn(), "and cannot withdraw again at once");
+            h.succeed();
+        });
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void theFishAndTurtleSoldiersServeTheCourt(GameTestHelper h) {
+        // they come where the sea's creatures come, and below level 20 a turtle is worth two of a zombie
+        var spawns = h.getLevel().registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.BIOME)
+                .getOrThrow(Zones.MYSTICAL_WATERS_BIOME).getMobSettings().getMobs(net.minecraft.world.entity.MobCategory.MONSTER).unwrap();
+        check(h, spawns.stream().anyMatch(d -> d.type == ModEntities.FISH_SOLDIER.get()), "fish soldiers spawn in the waters");
+        check(h, spawns.stream().anyMatch(d -> d.type == ModEntities.TURTLE_SOLDIER.get()), "turtle soldiers spawn in the waters");
+        eq(h, 1, LevelManager.vanillaMobWeight(ModEntities.FISH_SOLDIER.get()), "a fish soldier, below level 20");
+        eq(h, 2, LevelManager.vanillaMobWeight(ModEntities.TURTLE_SOLDIER.get()), "a turtle soldier, below level 20");
         h.succeed();
     }
 

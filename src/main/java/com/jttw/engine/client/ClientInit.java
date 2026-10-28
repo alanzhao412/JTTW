@@ -126,6 +126,8 @@ public final class ClientInit {
         event.registerLayerDefinition(com.jttw.engine.client.renderer.CaveRenderers.LADY_LAYER, com.jttw.engine.client.renderer.CaveRenderers::ladyLayer);
         // the Mystical Waters
         event.registerLayerDefinition(com.jttw.engine.client.renderer.ShrimpSoldierRenderer.LAYER, com.jttw.engine.client.renderer.ShrimpSoldierRenderer::layer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.FishSoldierRenderer.LAYER, com.jttw.engine.client.renderer.FishSoldierRenderer::layer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.TurtleSoldierRenderer.LAYER, com.jttw.engine.client.renderer.TurtleSoldierRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.CrabGeneralRenderer.LAYER, com.jttw.engine.client.renderer.CrabGeneralRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.YakshaRenderer.LAYER, com.jttw.engine.client.renderer.YakshaRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.DragonKingRenderer.LAYER, com.jttw.engine.client.renderer.DragonKingRenderer::layer);
@@ -207,6 +209,8 @@ public final class ClientInit {
         event.registerEntityRenderer(ModEntities.BONE_SHARD.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         // the Mystical Waters
         event.registerEntityRenderer(ModEntities.SHRIMP_SOLDIER.get(), com.jttw.engine.client.renderer.ShrimpSoldierRenderer::new);
+        event.registerEntityRenderer(ModEntities.FISH_SOLDIER.get(), com.jttw.engine.client.renderer.FishSoldierRenderer::new);
+        event.registerEntityRenderer(ModEntities.TURTLE_SOLDIER.get(), com.jttw.engine.client.renderer.TurtleSoldierRenderer::new);
         event.registerEntityRenderer(ModEntities.CRAB_GENERAL.get(), com.jttw.engine.client.renderer.CrabGeneralRenderer::new);
         event.registerEntityRenderer(ModEntities.YAKSHA.get(), com.jttw.engine.client.renderer.YakshaRenderer::new);
         event.registerEntityRenderer(ModEntities.AO_GUANG.get(), com.jttw.engine.client.renderer.DragonKingRenderer::new);

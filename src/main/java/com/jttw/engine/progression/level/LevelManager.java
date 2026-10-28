@@ -449,7 +449,9 @@ public final class LevelManager {
         if (type == EntityType.CREEPER || type == EntityType.ENDERMAN || type == EntityType.WITCH
                 || type == EntityType.PHANTOM || type == EntityType.PILLAGER || type == EntityType.VINDICATOR
                 || type == EntityType.CAVE_SPIDER || type == EntityType.GUARDIAN || type == EntityType.HOGLIN
-                || type == EntityType.ZOGLIN || type == EntityType.SHULKER || type == EntityType.VEX) return 2;
+                || type == EntityType.ZOGLIN || type == EntityType.SHULKER || type == EntityType.VEX
+                // the sea's Turtle Soldier is a heavy, shielded one (its Fish Soldier the common 1)
+                || type == com.jttw.engine.registry.ModEntities.TURTLE_SOLDIER.get()) return 2;
         return type.getCategory() == net.minecraft.world.entity.MobCategory.MONSTER ? 1 : 0;
     }
 

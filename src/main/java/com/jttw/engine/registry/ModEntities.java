@@ -147,6 +147,20 @@ public final class ModEntities {
                             .clientTrackingRange(10)
                             .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "shrimp_soldier").toString()));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.waters.FishSoldierEntity>> FISH_SOLDIER =
+            ENTITIES.register("fish_soldier", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.waters.FishSoldierEntity>of(com.jttw.engine.entity.waters.FishSoldierEntity::new, MobCategory.MONSTER)
+                            .sized(0.75F, 1.95F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "fish_soldier").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.waters.TurtleSoldierEntity>> TURTLE_SOLDIER =
+            ENTITIES.register("turtle_soldier", () ->
+                    EntityType.Builder.<com.jttw.engine.entity.waters.TurtleSoldierEntity>of(com.jttw.engine.entity.waters.TurtleSoldierEntity::new, MobCategory.MONSTER)
+                            .sized(1.0F, 1.9F)
+                            .clientTrackingRange(10)
+                            .build(ResourceLocation.fromNamespaceAndPath(JTTWEngine.MOD_ID, "turtle_soldier").toString()));
+
     public static final DeferredHolder<EntityType<?>, EntityType<com.jttw.engine.entity.waters.CrabGeneralEntity>> CRAB_GENERAL =
             ENTITIES.register("crab_general", () ->
                     EntityType.Builder.<com.jttw.engine.entity.waters.CrabGeneralEntity>of(com.jttw.engine.entity.waters.CrabGeneralEntity::new, MobCategory.MONSTER)
@@ -614,6 +628,14 @@ public final class ModEntities {
                 net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 com.jttw.engine.entity.waters.SeaMonster::checkSeaSpawnRules,
                 net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(FISH_SOLDIER.get(), net.minecraft.world.entity.SpawnPlacementTypes.IN_WATER,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                com.jttw.engine.entity.waters.SeaMonster::checkSeaSpawnRules,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(TURTLE_SOLDIER.get(), net.minecraft.world.entity.SpawnPlacementTypes.IN_WATER,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                com.jttw.engine.entity.waters.SeaMonster::checkSeaSpawnRules,
+                net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
         event.register(CRAB_GENERAL.get(), net.minecraft.world.entity.SpawnPlacementTypes.IN_WATER,
                 net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 com.jttw.engine.entity.waters.SeaMonster::checkSeaSpawnRules,
@@ -685,6 +707,8 @@ public final class ModEntities {
         event.put(LADY_EARTH_FLOW.get(), com.jttw.engine.entity.cave.LadyEarthFlowEntity.createAttributes().build());
         event.put(EARTH_FLOW_DECOY.get(), com.jttw.engine.entity.cave.EarthFlowDecoyEntity.createAttributes().build());
         event.put(SHRIMP_SOLDIER.get(), com.jttw.engine.entity.waters.ShrimpSoldierEntity.createAttributes().build());
+        event.put(FISH_SOLDIER.get(), com.jttw.engine.entity.waters.FishSoldierEntity.createAttributes().build());
+        event.put(TURTLE_SOLDIER.get(), com.jttw.engine.entity.waters.TurtleSoldierEntity.createAttributes().build());
         event.put(CRAB_GENERAL.get(), com.jttw.engine.entity.waters.CrabGeneralEntity.createAttributes().build());
         event.put(YAKSHA.get(), com.jttw.engine.entity.waters.YakshaEntity.createAttributes().build());
         for (var king : java.util.List.of(AO_GUANG.get(), AO_QIN.get(), AO_RUN.get(), AO_SHUN.get())) {

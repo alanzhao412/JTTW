@@ -107,6 +107,8 @@ public class ModItemsGameTests {
             Map.entry("golden_chain_mail", com.jttw.engine.item.DragonRegaliaItem.class),
             Map.entry("cloud_stepping_boots", com.jttw.engine.item.DragonRegaliaItem.class),
             Map.entry("shrimp_soldier_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("fish_soldier_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
+            Map.entry("turtle_soldier_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
             Map.entry("crab_general_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
             Map.entry("yaksha_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
             Map.entry("ao_guang_spawn_egg", net.neoforged.neoforge.common.DeferredSpawnEggItem.class),
