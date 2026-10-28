@@ -1,6 +1,7 @@
-"""The Mystical Waters' creatures: the Shrimp Soldier, the Crab General, the Yaksha and the four
-Dragon Kings. Each one's model and skin come from one list of parts (beastgen): the model is written
-into its renderer's layer() between its GENERATED markers, and the skin painted to the same box-UV
+"""The Mystical Waters' creatures: the Crab General, the Yaksha and the four Dragon Kings (the
+Shrimp Soldier has a script of its own, shrimp_soldier.py). Each one's model and skin come from one
+list of parts (beastgen): the model is written into its renderer's layer() between its GENERATED
+markers, and the skin painted to the same box-UV
 layout at twice the model's resolution, with a second, glowing skin for eyes and pearls.
 
 The four Dragon Kings share one model, drawn finer (a 256-pixel skin): each has his own skin, his
@@ -55,84 +56,6 @@ def bands(p, rect, base, every=3, k=0.72, horizontal=True):
 
 def all_faces(p, f, base, noise=5):
     p.shaded(f, base)
-
-
-# ── Shrimp Soldier ───────────────────────────────────────────────────────────
-SHELL = (214, 92, 58)
-SHELL_PALE = (240, 168, 120)
-BELLY = (246, 206, 168)
-SHAFT = (110, 74, 44)
-STEEL = (200, 206, 214)
-
-SHRIMP = [
-    part('body', 'root', (0, 0, 0), (0, 0, 0), [
-        (-4, 0, -2.5, 8, 12, 5, 'shell'),
-        (-3.5, 1, -3, 7, 10, 0.6, 'belly'),
-    ]),
-    part('head', 'root', (0, 0, 0), (0, 0, 0), [
-        (-3.5, -7, -5, 7, 7, 8, 'carapace'),
-        (-0.5, -5.5, -11, 1, 1.5, 6, 'rostrum'),
-        (-2, -1, -5.5, 4, 1.5, 2, 'mandible'),
-    ]),
-    part('right_eye', 'head', (-2.6, -6.5, -4.5), (0, 0.3, 0), [(-1.8, -0.9, -0.9, 1.8, 1.8, 1.8, 'eye')]),
-    part('left_eye', 'head', (2.6, -6.5, -4.5), (0, -0.3, 0), [(0, -0.9, -0.9, 1.8, 1.8, 1.8, 'eye')], True),
-    part('right_antenna', 'head', (-1.5, -6.5, -5), (0.3, 0.35, 0), [(-0.3, -0.3, 0, 0.6, 0.6, 18, 'antenna')]),
-    part('left_antenna', 'head', (1.5, -6.5, -5), (0.3, -0.35, 0), [(-0.3, -0.3, 0, 0.6, 0.6, 18, 'antenna')], True),
-    part('right_arm', 'root', (-5, 2, 0), (0, 0, 0), [(-2, -2, -1.5, 3, 12, 3, 'limb')]),
-    part('spear', 'right_arm', (-0.5, 9, 0), (1.5708, 0, 0), [
-        (-0.5, -18, -0.5, 1, 30, 1, 'shaft'),
-        (-1, -23, -0.5, 2, 5, 1, 'blade'),
-        (-1.5, -18.5, -1, 3, 1, 2, 'gold'),
-    ]),
-    part('left_arm', 'root', (5, 2, 0), (0, 0, 0), [(-1, -2, -1.5, 3, 12, 3, 'limb')], True),
-    part('right_leg', 'root', (-2, 12, 0), (0, 0, 0), [(-2, 0, -2, 4, 12, 4, 'limb')]),
-    part('left_leg', 'root', (2, 12, 0), (0, 0, 0), [(-2, 0, -2, 4, 12, 4, 'limb')], True),
-    part('tail', 'root', (0, 9, 2.5), (0.7, 0, 0), [
-        (-3, -2, 0, 6, 4, 4, 'shell'),
-        (-2.5, -1.5, 3.5, 5, 3, 4, 'shell'),
-        (-2, -1, 7, 4, 2, 3, 'shell'),
-    ]),
-    part('tail_fan', 'tail', (0, 0, 9.5), (0.4, 0, 0), [(-4, -0.5, 0, 8, 1, 4, 'fan')]),
-]
-
-
-def paint_shrimp(p, style, f, dims):
-    if style in ('shell', 'carapace', 'limb'):
-        p.shaded(f, SHELL, belly=SHELL_PALE)
-        for k in ('right', 'left', 'front', 'back', 'top'):
-            bands(p, f[k], SHELL, every=3 if style != 'limb' else 4, horizontal=style != 'carapace' or k in ('front', 'back'))
-    if style == 'carapace':
-        fx, fy, fw, fh = f['top']
-        for j in range(fh):                      # a pale ridge along the top
-            p.px((fx + fw // 2, fy + j), SHELL_PALE)
-            p.px((fx + fw // 2 - 1, fy + j), SHELL_PALE)
-    if style == 'belly':
-        for r in f.values():
-            p.face(r, BELLY, 1.0, noise=4)
-        bands(p, f['front'], BELLY, every=3, k=0.8)
-    if style == 'rostrum':
-        for r in f.values():
-            p.gradient(r, SHELL, SHELL_PALE, horizontal=True)
-    if style == 'mandible':
-        p.shaded(f, (150, 60, 40))
-    if style == 'eye':
-        for r in f.values():
-            p.face(r, (12, 10, 14), 1.0, noise=2)
-        fx, fy, fw, fh = f['front']
-        p.px((fx + 1, fy + 1), (200, 200, 210))      # a glint
-    if style == 'antenna':
-        for r in f.values():
-            p.face(r, SHELL_PALE, 1.0, noise=10)
-    if style == 'fan':
-        for k, r in f.items():
-            p.gradient(r, SHELL, SHELL_PALE, horizontal=k not in ('top', 'bottom'))
-        bands(p, f['top'], SHELL, every=4, k=0.75, horizontal=False)
-    if style == 'shaft':
-        p.shaded(f, SHAFT)
-    if style == 'blade':
-        p.shaded(f, STEEL)
-    if style == 'gold':
-        p.shaded(f, GOLD)
 
 
 # ── Crab General ─────────────────────────────────────────────────────────────
@@ -1336,7 +1259,6 @@ def king_painter(c):
 
 if __name__ == '__main__':
     for name, parts, painter_fn, java, seed in (
-            ('shrimp_soldier', SHRIMP, paint_shrimp, 'ShrimpSoldierRenderer.java', 3),
             ('crab_general', CRAB_PARTS, paint_crab, 'CrabGeneralRenderer.java', 5),
             ('yaksha', YAKSHA, paint_yaksha, 'YakshaRenderer.java', 7)):
         p = Painter(seed)
