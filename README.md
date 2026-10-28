@@ -26,6 +26,15 @@ different numbers:
 | **Yaoguai** | 1030 | Fluctuating | Lower stat floor, strong transformation mechanics. Power comes from abilities, not raw stats. |
 | **Heavenly** | 1000 | Medium | Widest utility toolkit. Ability-expansion focused: power comes from each character's own skill tree. |
 
+Up to level 20, XP comes from ordinary Minecraft mobs, paid as in Pokémon by the level the kill
+is won at ([`LevelManager.vanillaMobXp`](src/main/java/com/jttw/engine/progression/level/LevelManager.java)):
+weight × 3 × level / 5, at least 1. Animals, villagers and anything else that is no monster pay
+nothing; a common hostile (zombie, skeleton, spider, slime) weighs 1; a tougher one (creeper,
+enderman, witch, phantom, raiders, guardian) 2; a strong one (blaze, wither skeleton, ghast, ravager,
+evoker, piglin brute, breeze) 3; a boss 20. Level 20 takes about 170 common kills for a Heavenly,
+210 for a Divine Beast, 260 for a Yaoguai and 370 for a Primordial; from 20 on, only the mod's own
+enemies pay, by their zone's band.
+
 ### Class passives
 
 Besides each character's own skill tree there is one shared class layer
@@ -307,7 +316,7 @@ is what makes the rest possible:
   ([`FlightMomentum`](src/main/java/com/jttw/engine/flight/FlightMomentum.java)): Sun Wukong and
   Erlang Shen 150 blocks a second; Nezha 120; the Dragon, the Phoenix, Heaven's other beings and
   everyone else 100; the great bulky ones (the Bull Demon King, the Saurian Demon King, the Turtle,
-  the Grand Saint of Nine Spirits) 65. The Gold-Winged Peng builds to 150 his own way, by his
+  the Grand Saint of Nine Spirits, the Marshal of the Heavenly Canopy, Yuan Di) 65. The Gold-Winged Peng builds to 150 his own way, by his
   Ninety-Thousand-Li wingbeats.
 - **The Great Void.** Wukong and the Peng fly faster than the world can be generated (about 80
   blocks a second over new land on a 16-core machine), so they also have a key (Y) into

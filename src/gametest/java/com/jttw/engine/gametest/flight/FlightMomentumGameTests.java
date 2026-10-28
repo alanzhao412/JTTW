@@ -32,11 +32,10 @@ public class FlightMomentumGameTests {
         near(h, 120, top(h, ReincarnationOutcome.THIRD_LOTUS_PRINCE), "Nezha");
         near(h, 100, top(h, ReincarnationOutcome.DRAGON), "the Dragon");
         near(h, 100, top(h, ReincarnationOutcome.PHOENIX), "the Phoenix");
-        near(h, 100, top(h, ReincarnationOutcome.MARSHAL_HEAVENLY_CANOPY), "Heaven's Marshal");
-        near(h, 100, top(h, ReincarnationOutcome.YUAN_DI), "Yuan Di");
         near(h, 100, top(h, ReincarnationOutcome.WHITE_TIGER), "the White Tiger");
         for (ReincarnationOutcome bulky : new ReincarnationOutcome[] {ReincarnationOutcome.BULL_DEMON_KING,
-                ReincarnationOutcome.SAURIAN_DEMON_KING, ReincarnationOutcome.TURTLE, ReincarnationOutcome.GRAND_SAINT_NINE_SPIRITS}) {
+                ReincarnationOutcome.SAURIAN_DEMON_KING, ReincarnationOutcome.TURTLE, ReincarnationOutcome.GRAND_SAINT_NINE_SPIRITS,
+                ReincarnationOutcome.MARSHAL_HEAVENLY_CANOPY, ReincarnationOutcome.YUAN_DI}) {
             near(h, 65, top(h, bulky), bulky.id + ", great and heavy");
         }
         h.succeed();

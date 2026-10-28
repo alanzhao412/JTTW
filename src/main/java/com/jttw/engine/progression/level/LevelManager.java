@@ -68,8 +68,15 @@ public final class LevelManager {
     // Base XP values for vanilla phase (levels 1–20)
     // -----------------------------------------------------------------------
 
-    /** Default XP for a generic vanilla mob kill in the pre-20 phase. */
+    /** A tagged enemy's flat XP when no zone band pays it (× its tier's multiplier × 3). */
     private static final long VANILLA_BASE_XP = 15L;
+
+    /**
+     * Below level 20 a kill pays as in Pokémon, by the level it is won at: {@code weight × 3 × level / 5}
+     * (at least 1). A weak mob is worth 1 at level 1 and 11 at level 19, so the first levels come in a
+     * kill or two and the last before 20 take twenty or so (more for the slower classes).
+     */
+    static final double VANILLA_XP_PER_LEVEL = 3.0 / 5.0;
 
     // -----------------------------------------------------------------------
     // External API
@@ -188,7 +195,7 @@ public final class LevelManager {
 
         // ── Phase 1: Vanilla mobs (levels 1–19) ─────────────────────────────
         if (killerLevel < LevelConstants.VANILLA_CAP_LEVEL) {
-            long xp = vanillaMobXp(event.getEntity().getType());
+            long xp = vanillaMobXp(event.getEntity().getType(), killerLevel);
             if (xp > 0) grantXp(killer, xp, "vanilla_mob");
             return;
         }
@@ -404,27 +411,32 @@ public final class LevelManager {
     // -----------------------------------------------------------------------
 
     /**
-     * XP awarded for killing a vanilla mob during the pre-20 phase.
-     *
-     * <p>TODO: Expand to a full table once the vanilla mob roster is finalised.
-     * Consider data-driving this (e.g. JSON config) for easy tuning.
+     * XP for a kill below level 20 at {@code level}: {@link #vanillaMobWeight} × 3 × level / 5, at
+     * least 1; nothing for a creature that is no monster.
      */
-    private static long vanillaMobXp(EntityType<?> type) {
-        // Vanilla boss mobs — worth a big chunk of the level-20 bar
-        if (type == EntityType.ENDER_DRAGON
-                || type == EntityType.WITHER
-                || type == EntityType.ELDER_GUARDIAN) {
-            return VANILLA_BASE_XP * 20;
-        }
-        // Strong overworld / nether mobs
-        if (type == EntityType.WITHER_SKELETON
-                || type == EntityType.BLAZE
-                || type == EntityType.GHAST
-                || type == EntityType.RAVAGER) {
-            return VANILLA_BASE_XP * 3;
-        }
-        // Standard hostile mobs
-        return VANILLA_BASE_XP;
+    public static long vanillaMobXp(EntityType<?> type, int level) {
+        int weight = vanillaMobWeight(type);
+        if (weight == 0) return 0;
+        return Math.max(1, Math.round(weight * VANILLA_XP_PER_LEVEL * level));
+    }
+
+    /**
+     * How much a kill below level 20 is worth: 0 for animals, villagers and anything else that is no
+     * monster; 1 for the common hostile (zombie, skeleton, spider, slime, any of the mod's own); 2 for
+     * the tougher (creeper, enderman, witch, phantom, raiders, guardian); 3 for the strong (blaze,
+     * wither skeleton, ghast, ravager, evoker, piglin brute, breeze); 20 for a boss.
+     */
+    public static int vanillaMobWeight(EntityType<?> type) {
+        if (type == EntityType.ENDER_DRAGON || type == EntityType.WITHER
+                || type == EntityType.ELDER_GUARDIAN || type == EntityType.WARDEN) return 20;
+        if (type == EntityType.WITHER_SKELETON || type == EntityType.BLAZE || type == EntityType.GHAST
+                || type == EntityType.RAVAGER || type == EntityType.EVOKER || type == EntityType.PIGLIN_BRUTE
+                || type == EntityType.BREEZE) return 3;
+        if (type == EntityType.CREEPER || type == EntityType.ENDERMAN || type == EntityType.WITCH
+                || type == EntityType.PHANTOM || type == EntityType.PILLAGER || type == EntityType.VINDICATOR
+                || type == EntityType.CAVE_SPIDER || type == EntityType.GUARDIAN || type == EntityType.HOGLIN
+                || type == EntityType.ZOGLIN || type == EntityType.SHULKER || type == EntityType.VEX) return 2;
+        return type.getCategory() == net.minecraft.world.entity.MobCategory.MONSTER ? 1 : 0;
     }
 
     // -----------------------------------------------------------------------

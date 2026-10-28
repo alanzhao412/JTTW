@@ -177,13 +177,19 @@ public class LevelingGameTests {
     }
 
     @GameTest(template = PLATFORM)
-    public static void belowTwentyEveryKillPaysVanillaXp(GameTestHelper h) {
+    public static void belowTwentyKillsPayByLevelAsInPokemon(GameTestHelper h) {
         ServerPlayer p = player(h);
         LevelManager.initClass(p, ReincarnationOutcome.EYE_OF_HEAVEN);
+        kill(h, p, EntityType.COW, null);
+        eq(h, 0L, PlayerLevel.getXp(p), "an animal pays nothing");
         kill(h, p, EntityType.ZOMBIE, null);
-        eq(h, 15L, PlayerLevel.getXp(p), "standard mob (VANILLA_BASE_XP)");
+        eq(h, 1L, PlayerLevel.getXp(p), "a common mob at level 1");
         kill(h, p, EntityType.WITHER_SKELETON, null);
-        eq(h, 60L, PlayerLevel.getXp(p), "plus a strong mob at 3x");
+        eq(h, 5L, PlayerLevel.getXp(p), "the first kill made him level 2: a strong one there, 3 x 3 x 2 / 5");
+        eq(h, 11L, LevelManager.vanillaMobXp(EntityType.ZOMBIE, 19), "a common mob at 19");
+        eq(h, 23L, LevelManager.vanillaMobXp(EntityType.CREEPER, 19), "a tougher one at 19");
+        eq(h, 228L, LevelManager.vanillaMobXp(EntityType.WITHER, 19), "a boss at 19");
+        eq(h, 0L, LevelManager.vanillaMobXp(EntityType.VILLAGER, 19), "a villager, never");
         h.succeed();
     }
 
