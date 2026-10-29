@@ -14,14 +14,16 @@ mouthparts. Four pairs of jointed walking legs, each segment spined, ending in d
 huge claws, the right a crusher larger than the left, their palms knobbed, their fingers serrated
 with blunt teeth and tipped black.
 
-Its regalia, the army's teal and gold made a general's: a gilded general's helmet on its crown,
-embossed with waves and clouds, a flame-shaped frontlet with a red jewel, gold fin-wings and red
-pompoms, a tall red plume, and two long pheasant-tail plumes (翎子) arching back over it; a saddle of
-teal lamellar plates over the rear of its shell, edged in gold, a gold mirror at its middle; teal and
-gold plates over its claws' arms and a gold ring at each wrist; a red cape, gold-bordered with a wave
-at its hem, falling from the saddle behind; and four back flags (靠旗) rising from a socket behind the
-saddle, red fields in toothed teal-and-gold borders, a gold wave across each, on red staffs with gold
-spear-tips and red tassels.
+Its regalia, the army's teal and gold made a general's, set so that its sculpted shell still shows: a
+gilded general's helmet on the front of its crown, warm gold embossed with waves and clouds, its
+highlights glinting, a flame-shaped frontlet with a red jewel, gold fin-wings and red pompoms, a tall
+red plume, and two long pheasant-tail plumes (翎子) arching back over it; a small seat of teal lamellar
+plates behind the helmet, edged in gold, a gold mirror on it and a raised cantle; teal and gold plates
+over its claws' arms and a gold ring at each wrist; and at the shell's rear a narrow post, from which
+four back flags (靠旗) rise close-set, high over the shell, red fields in toothed teal-and-gold borders,
+their top edges and staff sides gilt-hemmed, a gold wave across each, on red staffs with gold
+spear-tips and red tassels, and from whose foot a red cape, gold-bordered with a wave at its hem,
+hangs over the shell's rear edge.
 
 Run from the repository root: python assets_source/crab_general.py"""
 import math
@@ -52,9 +54,10 @@ UNDER = (240, 210, 170)         # its underside
 UNDER_DEEP = (196, 150, 112)
 TIP = (30, 18, 20)              # the black tips of its claws
 TOOTH = (250, 236, 206)
-GILT_HI = (255, 230, 112)       # the helmet's gilding: bright,
-GILT = (250, 176, 30)
-GILT_DEEP = (168, 92, 8)
+GILT_HI = (255, 236, 138)       # the helmet's gilding: bright and warm (a cold or greenish gold reads olive in the sea),
+GILT = (255, 176, 36)
+GILT_DEEP = (198, 96, 12)
+GILT_SHINE = (255, 246, 196)    # its highlights, glinting (a touch of them drawn full-bright)
 PHEASANT = (226, 150, 66)       # the pheasant plumes: barred tawny,
 PHEASANT_DARK = (74, 40, 22)    # dark bars,
 PHEASANT_PALE = (246, 228, 190)  # pale between
@@ -226,29 +229,35 @@ def claw(side, s, mirror):
 
 # ── The regalia ──────────────────────────────────────────────────────────────
 
+HS = 0.74                       # the helmet's size: a general's, but small enough on the crown to leave the shell to be seen
+HZ = -5.6                       # where it sits: on the front of the crown, over the brow
+
+
 def helmet():
-    y = top_at(0, -4.6)
+    y = TIERS[-1][0]
+    S = lambda *b: tuple(v * HS for v in b[:6]) + tuple(b[6:])
+    P = lambda *v: tuple(c * HS for c in v)
     return [
-        part('helmet', 'body', (0, y + 0.3, -4.6), (-0.08, 0, 0), [
-            (-6.2, -1.6, -6.2, 12.4, 1.8, 12.4, 'ghelmbrim'),
-            (-5.2, -7.2, -5.2, 10.4, 5.8, 10.4, 'ghelmbowl'),
-            (-3.8, -8.9, -3.8, 7.6, 1.8, 7.6, 'ghelmtop'),
-            (-0.8, -11.8, -0.8, 1.6, 3.0, 1.6, 'gcollar'),
-            (-1.4, -13.6, -1.4, 2.8, 2.0, 2.8, 'gknob'),
-            (-5.6, -1.6, 4.6, 11.2, 4.0, 1.2, 'gneckguard'),
-            (-1.2, -2.9, -7.0, 2.4, 2.4, 1.2, 'pompom'),
+        part('helmet', 'body', (0, y + 0.3, HZ), (-0.08, 0, 0), [
+            S(-6.2, -1.6, -6.2, 12.4, 1.8, 12.4, 'ghelmbrim'),
+            S(-5.2, -7.2, -5.2, 10.4, 5.8, 10.4, 'ghelmbowl'),
+            S(-3.8, -8.9, -3.8, 7.6, 1.8, 7.6, 'ghelmtop'),
+            S(-0.8, -11.8, -0.8, 1.6, 3.0, 1.6, 'gcollar'),
+            S(-1.4, -13.6, -1.4, 2.8, 2.0, 2.8, 'gknob'),
+            S(-5.6, -1.6, 4.6, 11.2, 4.0, 1.2, 'gneckguard'),
+            S(-1.2, -2.9, -7.0, 2.4, 2.4, 1.2, 'pompom'),
         ]),
-        part('frontlet', 'helmet', (0, -6.8, -5.5), (-0.12, 0, 0), [(-4.0, -6.6, -0.3, 8.0, 7.6, 0.6, 'frontlet')]),
-        part('jewel', 'frontlet', (0, -2.8, -0.4), (0, 0, 0), [(-1.0, -1.0, -0.5, 2.0, 2.0, 0.6, 'jewel')]),
-        part('plume', 'helmet', (0, -13.4, 0), (0, 0, 0), [
-            (-2.3, -7.6, -2.3, 4.6, 7.8, 4.6, 'gplume'),
-            (-1.6, -11.2, -1.6, 3.2, 3.8, 3.2, 'gplume_top')]),
-        part('plume_tail', 'plume', (0, -6.4, 1.6), (1.05, 0, 0), [(-1.8, 0, -0.9, 3.6, 8.4, 1.8, 'plumetail')]),
-        part('right_helmwing', 'helmet', (-5.0, -3.4, 0.6), (0, 0.3, 0.55), [(-0.3, -7.2, 0, 0.6, 7.2, 5.0, 'helmwing')]),
-        part('right_pompom', 'helmet', (-6.0, -2.0, -3.0), (0, 0, 0), [(-1.2, -1.2, -1.2, 2.4, 2.4, 2.4, 'pompom')]),
-        part('right_pompom_back', 'helmet', (-4.6, -2.0, 4.0), (0, 0, 0), [(-1.0, -1.0, -1.0, 2.0, 2.0, 2.0, 'pompom')]),
+        part('frontlet', 'helmet', P(0, -6.8, -5.5), (-0.12, 0, 0), [S(-4.0, -6.6, -0.3, 8.0, 7.6, 0.6, 'frontlet')]),
+        part('jewel', 'frontlet', P(0, -2.8, -0.4), (0, 0, 0), [S(-1.0, -1.0, -0.5, 2.0, 2.0, 0.6, 'jewel')]),
+        part('plume', 'helmet', P(0, -13.4, 0), (0, 0, 0), [
+            (-2.0, -7.0, -2.0, 4.0, 7.2, 4.0, 'gplume'),
+            (-1.4, -10.4, -1.4, 2.8, 3.6, 2.8, 'gplume_top')]),
+        part('plume_tail', 'plume', (0, -6.0, 1.4), (1.05, 0, 0), [(-1.6, 0, -0.8, 3.2, 7.6, 1.6, 'plumetail')]),
+        part('right_helmwing', 'helmet', P(-5.0, -3.4, 0.6), (0, 0.3, 0.55), [S(-0.3, -7.2, 0, 0.6, 7.2, 5.0, 'helmwing')]),
+        part('right_pompom', 'helmet', P(-6.0, -2.0, -3.0), (0, 0, 0), [S(-1.2, -1.2, -1.2, 2.4, 2.4, 2.4, 'pompom')]),
+        part('right_pompom_back', 'helmet', P(-4.6, -2.0, 4.0), (0, 0, 0), [S(-1.0, -1.0, -1.0, 2.0, 2.0, 2.0, 'pompom')]),
         # the pheasant plumes (翎子): two long tail feathers rising from the helmet's back, flaring apart and arching back
-        part('right_feather', 'helmet', (-2.2, -8.0, 2.2), (0.1, 0, -0.3), [(-1.0, -8.0, -0.3, 2.0, 8.2, 0.6, 'feather')]),
+        part('right_feather', 'helmet', P(-2.2, -8.0, 2.2), (0.1, 0, -0.3), [(-1.0, -8.0, -0.3, 2.0, 8.2, 0.6, 'feather')]),
         part('right_feather_2', 'right_feather', (0, -7.8, 0), (-0.16, 0, -0.06), [(-0.95, -8.0, -0.3, 1.9, 8.2, 0.6, 'feather')]),
         part('right_feather_3', 'right_feather_2', (0, -7.8, 0), (-0.26, 0, -0.05), [(-0.85, -8.0, -0.3, 1.7, 8.2, 0.6, 'feather')]),
         part('right_feather_4', 'right_feather_3', (0, -7.8, 0), (-0.34, 0, -0.04), [(-0.75, -7.4, -0.25, 1.5, 7.6, 0.5, 'feather')]),
@@ -256,30 +265,39 @@ def helmet():
     ]
 
 
+POST_Z = 8.4                    # the flags' post: at the rear of the shell, behind the seat
+
+
 def saddle():
-    """The saddle of lamellar plates over the shell's rear, its mirror; the socket of the flags behind it;
-    the flags; the cape."""
-    y = top_at(0, 3.5)
+    """A small seat of lamellar plates on the crown behind the helmet, its mirror, a raised cantle; behind it,
+    on the shell's rear, the post the flags rise from, and the cape hanging from its foot over the rear edge."""
+    y = TIERS[-1][0]
+    py = top_at(0, POST_Z)
     out = [
-        part('saddle', 'body', (0, y - 0.2, 3.2), (0.24, 0, 0), [
-            (-5.6, -0.6, 0, 11.2, 1.2, 6.8, 'saddle'),
-            (-3.8, -1.2, 0.8, 7.6, 0.8, 4.8, 'saddle2'),
-            (-1.6, -1.8, 1.6, 3.2, 0.8, 3.2, 'mirror'),
-            (-2.4, -4.2, 5.6, 4.8, 4.4, 2.6, 'socket')]),
-        part('right_saddle_flap', 'saddle', (-5.4, 0, 3.4), (0, 0, 0.62), [(-0.5, 0, -3.2, 0.8, 4.2, 6.4, 'saddleflap')]),
-        part('cape', 'saddle', (0, 0.2, 7.0), (1.1, 0, 0), [(-6.0, 0, -0.3, 12.0, 6.2, 0.6, 'cape')]),
-        part('cape_2', 'cape', (0, 5.6, 0), (-0.95, 0, 0), [(-6.8, 0, -0.3, 13.6, 6.6, 0.6, 'cape_hem')]),
+        part('saddle', 'body', (0, y - 0.2, 0.4), (0.08, 0, 0), [
+            (-3.6, -0.6, 0, 7.2, 1.2, 4.6, 'saddle'),
+            (-2.7, -1.3, 0.5, 5.4, 0.8, 3.0, 'saddle2'),
+            (-1.2, -1.8, 1.0, 2.4, 0.6, 2.0, 'mirror'),
+            (-2.7, -3.2, 3.5, 5.4, 2.6, 0.9, 'saddle2')]),
+        part('right_saddle_flap', 'saddle', (-3.4, 0, 2.3), (0, 0, 0.62), [(-0.5, 0, -2.0, 0.8, 3.0, 4.0, 'saddleflap')]),
+        # the post: a narrow cluster of sockets at the shell's rear, the flags rising close from it
+        part('flag_post', 'body', (0, py + 0.2, POST_Z), (0, 0, 0), [
+            (-1.6, -4.4, -1.1, 3.2, 4.8, 2.2, 'socket'),
+            (-2.0, -0.6, -1.5, 4.0, 1.0, 3.0, 'mirror')]),
+        # the cape: from a gold bar at the post's foot, over the shell's rear edge and down behind
+        part('cape', 'flag_post', (0, 0.2, 1.4), (0.42, 0, 0), [(-4.4, 0, -0.3, 8.8, 5.6, 0.6, 'cape')]),
+        part('cape_2', 'cape', (0, 5.2, 0), (0.55, 0, 0), [(-5.0, 0, -0.3, 10.0, 5.2, 0.6, 'cape_hem')]),
     ]
-    # the four back flags (靠旗), fanned out behind
-    for i, (x, lean, spread) in enumerate(((-1.0, -0.14, -0.24), (-1.9, -0.22, -0.66))):
+    # the four back flags (靠旗): close-set in the post, fanned a little outward and back, high over the shell
+    for i, (x, lean, spread) in enumerate(((-0.6, -0.1, -0.12), (-1.2, -0.16, -0.36))):
         n = 'right_flag_%d' % (i + 1)
         out += [
-            part(n, 'saddle', (x, -4.0, 6.8), (lean, 0, spread), [
+            part(n, 'flag_post', (x, -4.2, -0.2 + 0.5 * i), (lean, 0, spread), [
                 (-0.45, -27.0, -0.45, 0.9, 27.4, 0.9, 'flagstaff'),
                 (-0.65, -30.4, -0.3, 1.3, 3.6, 0.6, 'flagtip'),
                 (-0.7, -27.4, -0.7, 1.4, 1.0, 1.4, 'gcollar'),
                 (-1.2, -26.6, -1.2, 2.4, 3.6, 2.4, 'tassel')]),
-            part(n + '_cloth', n, (-0.4, -22.6, 0), (0, 0.1, 0), [(-11.0, 0, -0.1, 11.0, 15.0, 0.2, 'flag')]),
+            part(n + '_cloth', n, (-0.4, -22.6, 0), (0, 0.1, 0), [(-10.0, 0, -0.3, 10.0, 13.6, 0.6, 'flag')]),
         ]
     return out
 
@@ -463,10 +481,12 @@ def taper(p, rect, toward='left', keep=0.35):
 
 def gold_relief(p, rect, light=1.0, pattern='cloud'):
     """Gilding, embossed: lit bright toward its top, ribbed (each rib lit on one edge, shadowed on the
-    other), with a band of waves or of cloud scrolls raised across it, catching the light."""
+    other), with a band of waves or of cloud scrolls raised across it, catching the light; its highlights
+    glint (a little of them full-bright, so the gold stays gold in the sea's blue light)."""
     fx, fy, fw, fh = rect
     for j in range(fh):
         for i in range(fw):
+            shine = 0.0
             t = j / max(1, fh - 1)
             c = mixc(GILT_HI, GILT, min(1, t * 1.8)) if t < 0.55 else mixc(GILT, GILT_DEEP, (t - 0.55) * 1.6)
             if pattern == 'wave':
@@ -474,20 +494,25 @@ def gold_relief(p, rect, light=1.0, pattern='cloud'):
                 if yy < 1:
                     c = mixc(c, GILT_DEEP, 0.6)
                 elif yy < 2:
-                    c = mixc(c, (255, 248, 200), 0.45)
+                    c = mixc(c, GILT_SHINE, 0.55)
+                    shine = 0.3
             elif pattern == 'cloud':
                 if 0.3 < t < 0.75:                                # the band of scrolls
                     cx, cy = (i % 8) - 3.5, ((j - fh * 0.3) % 7) - 3
                     r = math.hypot(cx, cy)
                     if abs(r - 2.2) < 0.45 and math.atan2(cy, cx) > -2.2:
-                        c = mixc(c, (255, 248, 200), 0.6)
+                        c = mixc(c, GILT_SHINE, 0.7)
+                        shine = 0.35
                     elif abs(r - 2.2) < 0.9 and math.atan2(cy, cx) > -2.2 and cy > 0:
                         c = mixc(c, GILT_DEEP, 0.45)
                 if i % 6 == 0:
-                    c = mixc(c, (255, 248, 200), 0.4)
+                    c = mixc(c, GILT_SHINE, 0.5)
+                    shine = max(shine, 0.25)
                 elif i % 6 == 1:
                     c = mixc(c, GILT_DEEP, 0.35)
-            p.px((fx + i, fy + j), noisy(p, k(c, light), 3))
+            c = noisy(p, k(c, light), 3)
+            # the gold glows a little throughout (the sea's blue light would sour it to olive), its highlights more
+            p.lit((fx + i, fy + j), c, (0.5 if shine else 0.22) * min(1.0, light + 0.1))
 
 
 def paint_crab(p, style, f, dims):
@@ -712,6 +737,7 @@ def paint_crab(p, style, f, dims):
                 for i in range(fw):
                     for j in range(1, fh - 1):
                         p.px((fx + i, fy + j), noisy(p, k(TEAL, LIGHTS[s]), 3))
+                        p.glow.putpixel((fx + i, fy + j), (0, 0, 0, 0))
                     if i % 3 == 1:
                         p.px((fx + i, fy + fh // 2), RED)
                     p.px((fx + i, fy), (255, 236, 160))
@@ -721,11 +747,14 @@ def paint_crab(p, style, f, dims):
                 fx, fy, fw, fh = f[s]
                 for i in range(0, fw, 5):
                     for j in range(fh):
-                        p.px((fx + i, fy + j), (255, 240, 170) if j % 2 else GOLD)
-                        p.px((fx + i + 1, fy + j), GOLD_DEEP)
+                        if j % 2:
+                            p.lit((fx + i, fy + j), GILT_SHINE, 0.5)
+                        else:
+                            p.lit((fx + i, fy + j), GILT, 0.22)
+                        p.px((fx + i + 1, fy + j), GILT_DEEP)
                 for i in range(fw):
-                    p.px((fx + i, fy + fh - 1), GOLD_DEEP)
-                    p.px((fx + i, fy), (255, 240, 170))
+                    p.px((fx + i, fy + fh - 1), GILT_DEEP)
+                    p.lit((fx + i, fy), GILT_SHINE, 0.5)
         if style == 'gknob':
             for s in SIDES:
                 circle(p, f[s][0] + f[s][2] / 2, f[s][1] + f[s][3] / 2, 0, 1.1, (255, 250, 220))
@@ -749,7 +778,7 @@ def paint_crab(p, style, f, dims):
                     if u > edge:
                         p.clear((fx + i, fy + j))
                     elif u > edge - 0.22 or v > 0.88:
-                        p.px((fx + i, fy + j), noisy(p, mixc(GILT_HI, GILT, v), 3))
+                        p.lit((fx + i, fy + j), noisy(p, mixc(GILT_HI, GILT, v), 3), 0.3)
                     elif u > edge - 0.3:
                         p.px((fx + i, fy + j), GILT_DEEP)
                     else:
@@ -881,7 +910,22 @@ def paint_crab(p, style, f, dims):
     if style == 'flag':                                           # a back flag (靠旗): a red field, a toothed teal-and-gold border, a gold wave
         for s, (fx, fy, fw, fh) in f.items():
             if s not in ('front', 'back'):
-                clear_face(p, (fx, fy, fw, fh))                # its edges: nothing (the triangle's are cut in its faces)
+                # its edges, so that edge-on it reads as a cloth with a gilt hem, not a dotted line: its top
+                # edge gold, its edge along the staff (left: at x max, the staff's side) a gold binding, a red
+                # pole-sleeve line in it; the fly's end and its slanting lower edge cut away but at the staff
+                for j in range(fh):
+                    for i in range(fw):
+                        xy = (fx + i, fy + j)
+                        if s == 'top':
+                            p.px(xy, noisy(p, GOLD if (i // 3) % 2 else (255, 214, 110), 3))
+                        elif s == 'left':
+                            p.px(xy, noisy(p, RED_DEEP if (j % 6 == 3) else GOLD_DEEP if i == 0 else GOLD, 3))
+                        elif s == 'bottom' and i >= fw - 2:
+                            p.px(xy, GOLD_DEEP)
+                        elif s == 'right' and j < max(1, fh * 0.08):
+                            p.px(xy, GOLD)
+                        else:
+                            p.clear(xy)
                 continue
             for j in range(fh):
                 for i in range(fw):

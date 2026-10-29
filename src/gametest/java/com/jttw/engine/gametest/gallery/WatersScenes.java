@@ -160,8 +160,8 @@ final class WatersScenes {
                     sea(p, ModEntities.CRAB_GENERAL.get(), 0.5, 0, 11.5, 170f, false);
                     sea(p, ModEntities.CRAB_GENERAL.get(), -4.5, 0, 15.5, 210f, true);
                 }, new double[]{3.0, 3.5, 5.0, -1.0, 0.8, 12.5}),
-                // the Crab General close: its helmet, eyes and claws; its profile; its back, the saddle,
-                // cape and flags; its shell from above; and snapping its claws
+                // the Crab General close: its helmet, eyes and claws; its profile; its back, the seat,
+                // flag post, cape and flags; its shell from high and from straight above; and snapping its claws
                 creature("waters_crab_close", p -> sea(p, ModEntities.CRAB_GENERAL.get(), 0.5, 0, 11.0, 200f, false),
                         new double[]{-1.0, 3.0, 6.6, 0.5, 1.0, 11.0}),
                 creature("waters_crab_side", p -> sea(p, ModEntities.CRAB_GENERAL.get(), 0.5, 0, 11.5, 90f, false),
@@ -170,6 +170,9 @@ final class WatersScenes {
                         new double[]{1.8, 3.2, 5.2, 0.5, 1.3, 11.0}),
                 creature("waters_crab_top", p -> sea(p, ModEntities.CRAB_GENERAL.get(), 0.5, 0, 10.5, 150f, false),
                         new double[]{3.2, 5.0, 7.4, 0.5, 0.4, 10.5}),
+                // straight down on it, from over its back: its shell clear between the helmet, the seat and the flag post
+                creature("waters_crab_above", p -> sea(p, ModEntities.CRAB_GENERAL.get(), 0.5, 0, 10.0, 180f, false),
+                        new double[]{0.6, 5.4, 11.9, 0.5, 0.2, 9.9}),
                 new AbilityScenes.Scene("waters_crab_snap", p -> {
                     pool(p);
                     sea(p, ModEntities.CRAB_GENERAL.get(), 0.5, 0, 11.0, 160f, false);
@@ -184,7 +187,7 @@ final class WatersScenes {
                 creature("waters_yaksha_close", p -> sea(p, ModEntities.YAKSHA.get(), 0.5, 1.0, 10.0, 200f, false),
                         new double[]{-0.6, 3.0, 6.4, 0.5, 2.6, 10.0}),
                 creature("waters_yaksha_face", p -> sea(p, ModEntities.YAKSHA.get(), 0.5, 1.0, 9.5, 195f, false),
-                        new double[]{0.0, 3.0, 7.2, 0.5, 2.9, 9.5}),
+                        new double[]{0.15, 3.0, 7.9, 0.5, 2.95, 9.5}),
                 creature("waters_yaksha_side", p -> sea(p, ModEntities.YAKSHA.get(), 0.5, 1.0, 10.5, 90f, false),
                         new double[]{0.5, 2.4, 5.2, 0.5, 2.2, 10.5}),
                 creature("waters_yaksha_back", p -> sea(p, ModEntities.YAKSHA.get(), 0.5, 1.0, 10.5, 25f, false),
@@ -193,6 +196,12 @@ final class WatersScenes {
                     pool(p);
                     sea(p, ModEntities.YAKSHA.get(), 0.5, 1.0, 10.5, 160f, false);
                     AbilityScenes.sceneCam = new double[]{2.6, 2.6, 5.6, 0.5, 2.2, 10.5};
+                }, p -> swingAll(p), 5, false),
+                // the thrust from above and behind, the yaksha facing straight away: the trident must run dead ahead
+                new AbilityScenes.Scene("waters_yaksha_thrust_above", p -> {
+                    pool(p);
+                    sea(p, ModEntities.YAKSHA.get(), 0.5, 1.0, 12.0, 180f, false);
+                    AbilityScenes.sceneCam = new double[]{0.6, 7.4, 15.2, 0.5, 2.0, 10.2};
                 }, p -> swingAll(p), 5, false),
                 king(Sea.EAST), king(Sea.SOUTH), king(Sea.WEST), king(Sea.NORTH),
                 kingClose(Sea.EAST), kingClose(Sea.SOUTH), kingClose(Sea.WEST), kingClose(Sea.NORTH),
