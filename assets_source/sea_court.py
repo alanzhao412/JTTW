@@ -1,8 +1,8 @@
-"""The Mystical Waters' creatures: the Crab General, the Yaksha and the four Dragon Kings (the
-Shrimp Soldier has a script of its own, shrimp_soldier.py). Each one's model and skin come from one
-list of parts (beastgen): the model is written into its renderer's layer() between its GENERATED
-markers, and the skin painted to the same box-UV
-layout at twice the model's resolution, with a second, glowing skin for eyes and pearls.
+"""The Mystical Waters' four Dragon Kings (the Dragon King's host have scripts of their own:
+shrimp_soldier.py, fish_soldier.py, turtle_soldier.py, crab_general.py and yaksha.py). Their model and
+skins come from one list of parts (beastgen): the model is written into DragonKingRenderer's layer()
+between its GENERATED markers, and the skins painted to the same box-UV layout at twice the model's
+resolution, with a second, glowing skin for eyes and pearls.
 
 The four Dragon Kings share one model, drawn finer (a 256-pixel skin): each has his own skin, his
 robe in his sea's colour (East blue-green, South red, West white, North black) and his scales to
@@ -56,153 +56,6 @@ def bands(p, rect, base, every=3, k=0.72, horizontal=True):
 
 def all_faces(p, f, base, noise=5):
     p.shaded(f, base)
-
-
-# ── Crab General ─────────────────────────────────────────────────────────────
-CRAB = (178, 54, 40)
-CRAB_DARK = (120, 30, 26)
-CRAB_UNDER = (232, 196, 160)
-PLUME = (196, 30, 36)
-LEGS = []
-for side, sx in ((-1, 'right'), (1, 'left')):
-    for i, z in enumerate((-3.5, 1.5, 6.5)):
-        n = '%s_leg%d' % (sx, i)
-        if side < 0:
-            LEGS.append(part(n, 'root', (-11, 15, z), (0, 0, 0.4), [(-8, -1, -1, 8, 2, 2, 'leg')]))
-            LEGS.append(part(n + '_low', 'root', (-18.4, 12, z), (0, 0, 0.15), [(-1, 0, -1, 2, 12, 2, 'legtip')]))
-        else:
-            LEGS.append(part(n, 'root', (11, 15, z), (0, 0, -0.4), [(0, -1, -1, 8, 2, 2, 'leg')], True))
-            LEGS.append(part(n + '_low', 'root', (18.4, 12, z), (0, 0, -0.15), [(-1, 0, -1, 2, 12, 2, 'legtip')], True))
-
-CRAB_PARTS = [
-    part('body', 'root', (0, 14, 0), (0, 0, 0), [
-        (-12, -6, -9, 24, 7, 18, 'carapace'),
-        (-9, 1, -7, 18, 3, 14, 'under'),
-        (-3, -3, -9.6, 6, 3, 1, 'mouth'),
-        (-4, -10, -5, 8, 4, 8, 'helm'),
-        (-5, -7, -6, 10, 1, 10, 'helmgold'),
-        (-0.5, -15, -2, 1, 5, 6, 'plume'),
-    ]),
-    part('right_eye', 'body', (-3.5, -6, -8), (0, 0, 0), [(-0.75, -4, -0.75, 1.5, 4, 1.5, 'stalk'), (-1.25, -6, -1.25, 2.5, 2, 2.5, 'eye')]),
-    part('left_eye', 'body', (3.5, -6, -8), (0, 0, 0), [(-0.75, -4, -0.75, 1.5, 4, 1.5, 'stalk'), (-1.25, -6, -1.25, 2.5, 2, 2.5, 'eye')], True),
-    part('right_claw', 'root', (-9, 15, -8), (0, 0.5, 0), [(-1.5, -1.5, -8, 3, 3, 8, 'arm')]),
-    part('right_pincer', 'right_claw', (0, 0, -8), (0, -0.7, 0), [(-3.5, -3, -9, 7, 6, 9, 'claw')]),
-    part('right_finger', 'right_pincer', (0, 3, -1), (0.3, 0, 0), [(-2.5, 0, -8, 5, 2, 8, 'clawtip')]),
-    part('left_claw', 'root', (9, 15, -8), (0, -0.5, 0), [(-1.5, -1.5, -8, 3, 3, 8, 'arm')], True),
-    part('left_pincer', 'left_claw', (0, 0, -8), (0, 0.7, 0), [(-3.5, -3, -9, 7, 6, 9, 'claw')], True),
-    part('left_finger', 'left_pincer', (0, 3, -1), (0.3, 0, 0), [(-2.5, 0, -8, 5, 2, 8, 'clawtip')], True),
-] + LEGS
-
-
-def paint_crab(p, style, f, dims):
-    if style == 'carapace':
-        p.shaded(f, CRAB, belly=CRAB_UNDER)
-        fx, fy, fw, fh = f['top']                # knobs and a darker saddle across the shell
-        for _ in range(60):
-            x, y = fx + p.rnd.randrange(fw), fy + p.rnd.randrange(fh)
-            p.px((x, y), [v * 1.25 for v in CRAB])
-        for i in range(fw):
-            for j in range(fh // 3, fh // 3 + 3):
-                p.px((fx + i, fy + j), [v * 0.8 for v in CRAB])
-        fx, fy, fw, fh = f['front']              # a toothed front rim
-        for i in range(0, fw, 4):
-            p.px((fx + i, fy + fh - 1), CRAB_UNDER)
-    if style in ('under', 'mouth'):
-        p.shaded(f, CRAB_UNDER if style == 'under' else CRAB_DARK)
-    if style in ('arm', 'leg', 'legtip'):
-        p.shaded(f, CRAB, belly=CRAB_UNDER)
-        for k in ('top', 'right', 'left'):
-            bands(p, f[k], CRAB, every=6, k=0.7, horizontal=False)
-    if style == 'claw':
-        p.shaded(f, CRAB, belly=CRAB_UNDER)
-        for _ in range(40):
-            k = p.rnd.choice(('top', 'right', 'left'))
-            fx, fy, fw, fh = f[k]
-            p.px((fx + p.rnd.randrange(fw), fy + p.rnd.randrange(fh)), [v * 1.3 for v in CRAB])
-    if style == 'clawtip':
-        for k, r in f.items():
-            p.gradient(r, CRAB, (40, 30, 30), horizontal=k in ('top', 'bottom', 'right', 'left'))
-    if style == 'helm':
-        p.shaded(f, GOLD)
-        bands(p, f['front'], GOLD, every=3, k=0.75)
-    if style == 'helmgold':
-        p.shaded(f, GOLD_DEEP)
-    if style == 'plume':
-        for r in f.values():
-            p.face(r, PLUME, 1.0, noise=10, fall=0.3)
-    if style == 'stalk':
-        p.shaded(f, CRAB)
-    if style == 'eye':
-        for r in f.values():
-            p.face(r, (14, 12, 16), 1.0, noise=2)
-        fx, fy, fw, fh = f['front']
-        p.px((fx + 1, fy + 1), (220, 180, 60), glow=True)
-
-
-# ── Yaksha ───────────────────────────────────────────────────────────────────
-BLUE = (58, 104, 168)
-BLUE_DARK = (34, 62, 110)
-HAIR = (196, 40, 30)
-CLOTH = (60, 120, 80)
-
-YAKSHA = [
-    part('head', 'root', (0, 0, 0), (0, 0, 0), [
-        (-4, -8, -4, 8, 8, 8, 'face'),
-        (-4.5, -10, -2, 9, 4, 7, 'hair'),
-        (-4.5, -8, 2.5, 9, 10, 2.5, 'hair'),
-        (-1.5, -1, -4.6, 1, 2.5, 1, 'tusk'),
-        (0.5, -1, -4.6, 1, 2.5, 1, 'tusk'),
-    ]),
-    part('right_horn', 'head', (-2.5, -8, -2), (-0.4, 0, -0.35), [(-0.75, -4, -0.75, 1.5, 4, 1.5, 'horn')]),
-    part('left_horn', 'head', (2.5, -8, -2), (-0.4, 0, 0.35), [(-0.75, -4, -0.75, 1.5, 4, 1.5, 'horn')], True),
-    part('body', 'root', (0, 0, 0), (0, 0, 0), [
-        (-4, 0, -2, 8, 12, 4, 'skin'),
-        (-4.5, 9, -2.5, 9, 1.5, 5, 'gold'),
-        (-4.5, 10.5, -2.5, 9, 6, 5, 'cloth'),
-    ]),
-    part('right_arm', 'root', (-5, 2, 0), (0, 0, 0), [(-3, -2, -2, 4, 12, 4, 'skin'), (-3.4, 6, -2.4, 4.8, 2, 4.8, 'gold')]),
-    part('left_arm', 'root', (5, 2, 0), (0, 0, 0), [(-1, -2, -2, 4, 12, 4, 'skin'), (-1.4, 6, -2.4, 4.8, 2, 4.8, 'gold')], True),
-    part('right_leg', 'root', (-1.9, 12, 0), (0, 0, 0), [(-2, 0, -2, 4, 12, 4, 'leg'), (-2.3, 9, -2.3, 4.6, 1.5, 4.6, 'gold')]),
-    part('left_leg', 'root', (1.9, 12, 0), (0, 0, 0), [(-2, 0, -2, 4, 12, 4, 'leg'), (-2.3, 9, -2.3, 4.6, 1.5, 4.6, 'gold')], True),
-]
-
-
-def paint_yaksha(p, style, f, dims):
-    if style in ('skin', 'leg', 'face'):
-        p.shaded(f, BLUE, belly=BLUE_DARK)
-    if style == 'face':
-        fx, fy, fw, fh = f['front']                # 16x16: a scowl, burning eyes, a wide mouth
-        for i in range(2, 14):
-            p.px((fx + i, fy + 5 - (1 if i in (6, 7, 8, 9) else 0)), BLUE_DARK)
-        for ex in (3, 10):
-            for i in range(3):
-                p.px((fx + ex + i, fy + 7), (250, 60, 30), glow=True)
-                p.px((fx + ex + i, fy + 8), (200, 30, 20), glow=True)
-        for i in range(4, 12):
-            p.px((fx + i, fy + 12), (40, 10, 18))
-            p.px((fx + i, fy + 13), (90, 20, 30))
-        for i in (5, 7, 8, 10):
-            p.px((fx + i, fy + 12), IVORY)
-    if style == 'hair':
-        for k, r in f.items():
-            p.face(r, HAIR, 1.0 if k == 'top' else 0.9, noise=12, fall=0.3)
-            fx, fy, fw, fh = r
-            for i in range(0, fw, 2):
-                for j in range(fh):
-                    if p.rnd.random() < 0.3:
-                        p.px((fx + i, fy + j), [v * 0.7 for v in HAIR])
-    if style == 'tusk':
-        for r in f.values():
-            p.face(r, IVORY, 1.0, noise=3)
-    if style == 'horn':
-        for r in f.values():
-            p.gradient(r, (60, 50, 40), IVORY)
-    if style == 'gold':
-        p.shaded(f, GOLD)
-    if style == 'cloth':
-        p.shaded(f, CLOTH)
-        for k in ('front', 'back', 'right', 'left'):
-            bands(p, f[k], CLOTH, every=3, k=0.75, horizontal=False)
 
 
 # ── The Dragon Kings ─────────────────────────────────────────────────────────
@@ -1258,14 +1111,6 @@ def king_painter(c):
 
 
 if __name__ == '__main__':
-    for name, parts, painter_fn, java, seed in (
-            ('crab_general', CRAB_PARTS, paint_crab, 'CrabGeneralRenderer.java', 5),
-            ('yaksha', YAKSHA, paint_yaksha, 'YakshaRenderer.java', 7)):
-        p = Painter(seed)
-        slots = paint(parts, p, painter_fn)
-        p.save(name)
-        emit(parts, slots, R + java)
-        print(name, len(parts), 'parts,', len(slots), 'boxes')
     bg.UNITS = 256                        # the kings drawn finer
     bg.TEX = bg.UNITS * bg.S
     slots = None
