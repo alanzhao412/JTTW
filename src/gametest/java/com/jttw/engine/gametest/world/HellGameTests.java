@@ -248,7 +248,7 @@ public class HellGameTests {
         // one falls; the other rages
         white.hurt(h.getLevel().damageSources().mobAttack(golem), white.getMaxHealth() * 10);
         check(h, white.isDeadOrDying(), "the White falls");
-        check(h, black.enraged() && black.hasEffect(MobEffects.DAMAGE_BOOST), "the Black is enraged");
+        check(h, black.enraged() && black.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE) > black.getAttributeBaseValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE) * 1.19, "the Black is enraged");
         h.succeed();
     }
 

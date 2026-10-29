@@ -33,8 +33,8 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public class WraithEntity extends RidgeMonster {
 
-    /** Two of a same-level character's ordinary hits to kill; a touch of 12% of their health, before resistance. */
-    public static final double HITS = 2, TOUCH = 0.12;
+    /** Two of a same-level character's ordinary hits to kill; a touch of 7% of their health, before resistance. */
+    public static final double HITS = 2, TOUCH = 0.07;
     /** How long its touch slows, in ticks. */
     public static final int CHILL = 60;
 

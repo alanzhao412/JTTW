@@ -36,8 +36,8 @@ import net.minecraft.world.phys.Vec3;
  */
 public class TurtleSoldierEntity extends SeaMonster {
 
-    /** Ten of a same-level character's ordinary hits to kill; a blow of 22% of their health, before resistance. */
-    public static final double HITS = 10, BLOW = 0.22;
+    /** Ten of a same-level character's ordinary hits to kill; a blow of 12% of their health, before resistance. */
+    public static final double HITS = 10, BLOW = 0.12;
     /** The share of a frontal blow its shield stops, and how far in front a blow must come from (the cosine of the angle off its facing). */
     public static final float BLOCK = 0.6f;
     public static final double FRONT = 0.35;

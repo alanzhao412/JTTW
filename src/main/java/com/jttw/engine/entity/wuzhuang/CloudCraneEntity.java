@@ -48,8 +48,8 @@ import java.util.EnumSet;
  */
 public class CloudCraneEntity extends WuzhuangMonster {
 
-    /** Four of a same-level character's ordinary hits; a beak of 11% of their health. */
-    public static final double HITS = 4, BLOW = 0.11;
+    /** Four of a same-level character's ordinary hits; a beak of 7% of their health (its swoop half again). */
+    public static final double HITS = 4, BLOW = 0.07;
     public static final int LEVEL = 80, RANGE = 40;
     /** The swoop: from how high over its quarry, how far off, how fast; how much harder it strikes, how far it throws; how often. */
     public static final double SWOOP_OVER = 3, SWOOP_WITHIN = 16, SWOOP_SPEED = 0.9, SWOOP_HIT = 1.5, THROW = 1.2;
@@ -87,6 +87,11 @@ public class CloudCraneEntity extends WuzhuangMonster {
     @Override
     protected double blowShare() {
         return BLOW;
+    }
+
+    @Override
+    protected double[] specialShares() {
+        return new double[]{BLOW * SWOOP_HIT};
     }
 
     @Override

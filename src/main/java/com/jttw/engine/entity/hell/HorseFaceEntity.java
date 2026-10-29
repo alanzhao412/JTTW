@@ -32,8 +32,8 @@ import net.minecraft.world.phys.Vec3;
  */
 public class HorseFaceEntity extends HellMonster {
 
-    /** Six of a same-level character's ordinary hits to kill; a blow of 14% of their health. */
-    public static final double HITS = 6, BLOW = 0.14;
+    /** Six of a same-level character's ordinary hits to kill; a blow of 9% of their health. */
+    public static final double HITS = 6, BLOW = 0.09;
     public static final int LEVEL = 58;
     /** His hook: how far it reaches, the nearest he bothers with it, how hard it hauls; how often, how long it slows. */
     public static final double HOOK_REACH = 12, HOOK_FROM = 4, HAUL = 0.32;

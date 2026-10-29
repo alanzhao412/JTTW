@@ -10,7 +10,6 @@ import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.ServerLevelAccessor;
 
 import javax.annotation.Nullable;
@@ -27,7 +26,7 @@ public final class CaveHousehold {
 
     private CaveHousehold() {}
 
-    /** A guardian's health over a captain's. */
+    /** A guardian's health over a captain's (it is a miniboss: see ZoneMonster#becomeMiniboss). */
     public static final double GUARDIAN_HEALTH = 2.0;
     /** How far from its post a kept group strays, a guardian, the gate's guard. */
     public static final int POST_RANGE = 10, GUARDIAN_RANGE = 4, GATE_RANGE = 10;
@@ -52,16 +51,14 @@ public final class CaveHousehold {
         return out;
     }
 
-    /** Floor k's guardian, holding the cell before its way down: a captain of more than a captain's strength, named for the floor. */
+    /** Floor k's guardian, holding the cell before its way down: a miniboss, of more than a captain's health, named for the floor. */
     @Nullable
     public static CaveMonster guardian(ServerLevelAccessor level, BlockPos at, int k, RandomSource random) {
         EntityType<? extends CaveMonster> type = k % 2 == 0 ? ModEntities.MOUSE_SPIRIT.get() : ModEntities.FLOWER_MAID.get();
         CaveMonster m = put(level, type, at, at, true, k, GUARDIAN_RANGE, random);
         if (m == null) return null;
         int lv = CaveMonster.guardianOn(k);
-        m.become(lv, true);
-        m.getAttribute(Attributes.MAX_HEALTH).setBaseValue(m.getMaxHealth() * GUARDIAN_HEALTH);
-        m.setHealth(m.getMaxHealth());
+        m.becomeMiniboss(lv, GUARDIAN_HEALTH);
         m.getPersistentData().putBoolean(BottomlessCave.KEY_GUARDIAN, true);
         m.setCustomName(Component.literal("Warden of " + Labyrinth.FLOOR_NAMES[k] + " · Lv " + lv)
                 .withStyle(s -> s.withColor(TextColor.fromRgb(ZoneMonster.PURPLE))));

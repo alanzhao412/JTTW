@@ -36,9 +36,9 @@ import java.util.List;
  */
 public class ElephantDemonEntity extends LionCamelMonster {
 
-    public static final int GORE_PERCENT = 26;
-    /** Fourteen ordinary hits; a blow of 30% of a same-level character's health. */
-    public static final double HITS = 14, BLOW = 0.30, GORE = GORE_PERCENT / 100.0, SPEED = 0.22;
+    public static final int GORE_PERCENT = 12;
+    /** Twelve ordinary hits; a blow of 11% of a same-level character's health, the gore 12%. */
+    public static final double HITS = 12, BLOW = 0.11, GORE = GORE_PERCENT / 100.0, SPEED = 0.22;
     public static final int CHARGE_EVERY = 120, CHARGE_TICKS = 18;
     public static final double CHARGE_NEAR = 4, CHARGE_FAR = 12;
 
@@ -73,6 +73,11 @@ public class ElephantDemonEntity extends LionCamelMonster {
     }
 
     @Override
+    protected double[] specialShares() {
+        return new double[]{GORE};
+    }
+
+    @Override
     public int escorts() {
         return 2;
     }
@@ -90,7 +95,7 @@ public class ElephantDemonEntity extends LionCamelMonster {
 
     /** The gore's hurt. */
     public float goreDamage() {
-        return (float) (blowAt(mobLevel(), isCaptain()) * GORE / BLOW);
+        return hitOf(GORE);
     }
 
     /** Whether it is charging. */

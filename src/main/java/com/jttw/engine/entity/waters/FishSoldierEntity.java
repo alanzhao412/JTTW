@@ -29,8 +29,8 @@ import net.minecraft.world.phys.Vec3;
  */
 public class FishSoldierEntity extends SeaMonster {
 
-    /** Four of a same-level character's ordinary hits to kill; a thrust of 12% of their health, before resistance. */
-    public static final double HITS = 4, THRUST = 0.12;
+    /** Four of a same-level character's ordinary hits to kill; a thrust of 7% of their health, before resistance. */
+    public static final double HITS = 4, THRUST = 0.07;
     /** How much further than arm's length its halberd reaches. */
     public static final double HALBERD = 1.1;
     /** How much of its walking speed it swims at: more than the others' {@link SeaMonster#SWIM}. */

@@ -35,9 +35,9 @@ import net.minecraft.world.phys.Vec3;
  */
 public class LionDemonEntity extends LionCamelMonster {
 
-    public static final int POUNCE_PERCENT = 26;
-    /** Nine ordinary hits; a sabre cut of 22% of a same-level character's health. */
-    public static final double HITS = 9, BLOW = 0.22, POUNCE = POUNCE_PERCENT / 100.0, SPEED = 0.31;
+    public static final int POUNCE_PERCENT = 12;
+    /** Ten ordinary hits; a sabre cut of 11% of a same-level character's health, the pounce 12%. */
+    public static final double HITS = 10, BLOW = 0.11, POUNCE = POUNCE_PERCENT / 100.0, SPEED = 0.31;
     public static final int POUNCE_EVERY = 90;
     public static final double POUNCE_NEAR = 4, POUNCE_FAR = 11;
 
@@ -69,6 +69,11 @@ public class LionDemonEntity extends LionCamelMonster {
     }
 
     @Override
+    protected double[] specialShares() {
+        return new double[]{POUNCE};
+    }
+
+    @Override
     protected void registerGoals() {
         goalSelector.addGoal(0, new FloatGoal(this));
         goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.15, true));
@@ -81,7 +86,7 @@ public class LionDemonEntity extends LionCamelMonster {
 
     /** The pounce's hurt. */
     public float pounceDamage() {
-        return (float) (blowAt(mobLevel(), isCaptain()) * POUNCE / BLOW);
+        return hitOf(POUNCE);
     }
 
     /** Bounds at {@code target}. Returns whether it did (only from the ground). */

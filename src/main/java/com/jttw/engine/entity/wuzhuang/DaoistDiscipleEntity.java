@@ -50,8 +50,8 @@ import javax.annotation.Nullable;
  */
 public class DaoistDiscipleEntity extends WuzhuangMonster implements TempleFolk {
 
-    /** Six of a same-level character's ordinary hits; a blow of 13% of their health. */
-    public static final double HITS = 6, BLOW = 0.13;
+    /** Six of a same-level character's ordinary hits; a blow of 9% of their health. */
+    public static final double HITS = 6, BLOW = 0.09;
     public static final int LEVEL = 78;
     /** The talisman: how far it is thrown, how long its mark is bound, how often. */
     public static final double TALISMAN_FROM = 3, TALISMAN_TO = 10;

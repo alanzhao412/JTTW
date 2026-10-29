@@ -45,8 +45,8 @@ import java.util.List;
 
 /**
  * One of Red Boy's Six Strong Generals (六健将, chapters 40–42), who keep the Fire Cloud Cave and
- * whom he sent to fetch his father. Demon officers in lacquered armour, level 74, always of a
- * captain's strength (purple-named, with a captain's sigil to leave), never coming in packs: they
+ * whom he sent to fetch his father. Demon officers in lacquered armour, level 74, always minibosses
+ * (a captain's health, a miniboss's hits, purple-named, a captain's sigil to leave), never in packs: they
  * stand at the cave's gate and in its hall. All six share one shape; each has his own colours and
  * his own trick, every {@value #TRICK_EVERY} ticks or so while he fights:
  * <ol start="0">
@@ -69,8 +69,8 @@ public class StrongGeneralEntity extends FireMonster {
             "swift_rushing_wind", "flame_head_general", "eye_spark_officer"};
     public static final int CLOUD = 0, FOG = 1, MAD_WIND = 2, SWIFT_WIND = 3, FLAME_HEAD = 4, EYE_SPARK = 5;
 
-    /** Ten ordinary hits (twenty-five at a captain's strength); a blow of 24% of health; his trick 60% of a blow. */
-    public static final double HITS = 10, BLOW = 0.24, TRICK = 0.6, SPEED = 0.27;
+    /** Ten ordinary hits (twenty-five at a captain's strength); a blow of 12% of health as a regular's, which as a miniboss lands at {@link #MINIBOSS_HIT}; his trick 60% of a blow. */
+    public static final double HITS = 10, BLOW = 0.12, TRICK = 0.6, SPEED = 0.27;
     public static final int TRICK_EVERY = 100;
     /** How far his cloud, his gust and his flame reach. */
     public static final double BURST = 4.0;
@@ -91,7 +91,7 @@ public class StrongGeneralEntity extends FireMonster {
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, HITS * MobScaling.typicalHit(CAPTAIN_LEVEL) * CAPTAIN_HEALTH)
-                .add(Attributes.ATTACK_DAMAGE, BLOW * MobScaling.typicalHealth(CAPTAIN_LEVEL))
+                .add(Attributes.ATTACK_DAMAGE, MINIBOSS_HIT * MobScaling.typicalHealth(CAPTAIN_LEVEL))
                 .add(Attributes.MOVEMENT_SPEED, SPEED)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.6)
                 .add(Attributes.ARMOR, 12)
@@ -118,6 +118,18 @@ public class StrongGeneralEntity extends FireMonster {
     @Override
     public float captainChance() {
         return 1f;
+    }
+
+    /** Always a miniboss. */
+    @Override
+    public boolean isMiniboss() {
+        return true;
+    }
+
+    /** Always of a captain's strength and level, whoever brings him (a summons too). */
+    @Override
+    public void become(int level, boolean captain) {
+        super.become(captain ? level : rollCaptainLevel(random), true);
     }
 
     @Override
@@ -175,7 +187,7 @@ public class StrongGeneralEntity extends FireMonster {
 
     /** His trick's hurt. */
     public float trickDamage() {
-        return (float) (blowAt(mobLevel(), true) * TRICK);
+        return hitOf(BLOW * TRICK);
     }
 
     /** Whom a burst round {@code at} may touch: the living near it, but never the mountain's own. */

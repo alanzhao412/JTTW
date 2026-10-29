@@ -33,8 +33,8 @@ import net.minecraft.world.phys.Vec3;
  */
 public class CrabGeneralEntity extends SeaMonster {
 
-    /** Fourteen of a same-level character's ordinary hits to kill; a pinch of 28% of their health, before resistance. */
-    public static final double HITS = 14, PINCH = 0.28;
+    /** Twelve of a same-level character's ordinary hits to kill; a pinch of 12% of their health, before resistance. */
+    public static final double HITS = 12, PINCH = 0.12;
     /** How long its pinch holds what it catches, in ticks. */
     public static final int HELD = 50;
     /** How far over it its foe must be for it to spring, how hard it springs, and how often. */

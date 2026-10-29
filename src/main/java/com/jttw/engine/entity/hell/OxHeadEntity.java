@@ -36,8 +36,8 @@ import java.util.EnumSet;
  */
 public class OxHeadEntity extends HellMonster {
 
-    /** Seven of a same-level character's ordinary hits to kill; a blow of 16% of their health. */
-    public static final double HITS = 7, BLOW = 0.16;
+    /** Ten of a same-level character's ordinary hits to kill; a blow of 8% of their health (his goring 12%). */
+    public static final double HITS = 10, BLOW = 0.08;
     public static final int LEVEL = 58;
     /** His charge: how far off his quarry must be, how fast he runs. */
     public static final double CHARGE_FROM = 4.5, CHARGE_TO = 16, CHARGE_SPEED = 0.85;
@@ -79,6 +79,11 @@ public class OxHeadEntity extends HellMonster {
     @Override
     protected double blowShare() {
         return BLOW;
+    }
+
+    @Override
+    protected double[] specialShares() {
+        return new double[]{BLOW * GORE};
     }
 
     @Override

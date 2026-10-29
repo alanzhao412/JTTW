@@ -243,7 +243,8 @@ public class WatersGameTests {
             check(h, !fish.lungeAt(g), "and must gather itself before the next");
             float hp = g.getHealth();
             fish.doHurtTarget(g);
-            close(h, fish.blowAt(47, false), hp - g.getHealth(), "its thrust: 12% of a same-level character's health");
+            double taken = hp - g.getHealth(); // to a float health's precision
+            check(h, Math.abs(fish.blowAt(47, false) - taken) <= 2 * Math.ulp(hp) + 1e-3, "its thrust: 7% of a same-level character's health: " + taken);
             h.succeed();
         });
     }

@@ -41,8 +41,8 @@ import java.util.EnumSet;
  */
 public class GoblinEntity extends WildYaoguai {
 
-    /** Four ordinary hits; a hack of its chopper of 11% of a same-level character's health. Quick. */
-    public static final double HITS = 4, BLOW = 0.11, SPEED = 0.31;
+    /** Four ordinary hits; a hack of its chopper of 6% of a same-level character's health. Quick. */
+    public static final double HITS = 4, BLOW = 0.06, SPEED = 0.31;
     public static final int MIN_LEVEL = 2, MAX_LEVEL = 8;
     /** Hurt below this share of its health, it falls back. */
     public static final int NERVE_PERCENT = 30;

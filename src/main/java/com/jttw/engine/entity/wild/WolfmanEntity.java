@@ -42,8 +42,8 @@ import java.util.List;
  */
 public class WolfmanEntity extends WildYaoguai {
 
-    /** Eight ordinary hits; a glaive's cut of 20% of a same-level character's health. Quick. */
-    public static final double HITS = 8, BLOW = 0.20, SPEED = 0.32;
+    /** Eight ordinary hits; a glaive's cut of 10% of a same-level character's health. Quick. */
+    public static final double HITS = 8, BLOW = 0.10, SPEED = 0.32;
     public static final int MIN_LEVEL = 10, MAX_LEVEL = 17;
     public static final int HOWL_TICKS = 30, HOWL_EVERY = 400;
     public static final double HOWL_RANGE = 32;

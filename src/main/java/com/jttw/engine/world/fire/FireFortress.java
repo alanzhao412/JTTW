@@ -390,7 +390,8 @@ public final class FireFortress {
                 || s.kind() == FortressPlan.WARDEN;
         int lvl = s.kind() == FortressPlan.GENERAL || s.kind() == FortressPlan.WARDEN ? FortressPlan.guardianLevel(Math.max(floor, 1))
                 : captain ? FortressPlan.captainLevel(floor) : FortressPlan.regularLevel(floor);
-        m.become(lvl, captain);
+        if (s.kind() == FortressPlan.WARDEN) m.becomeMiniboss(lvl, 1); // a gate's warden, a floor's guardian: minibosses (as the generals always are)
+        else m.become(lvl, captain);
         m.setPersistenceRequired();
         m.restrictTo(p, guard ? (floor == 0 ? WARDEN_ROAM : GUARD_ROAM) : ROAM);
         CompoundTag t = new CompoundTag();

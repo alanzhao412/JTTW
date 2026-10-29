@@ -56,13 +56,16 @@ public class ImpermanenceEntity extends HellMonster {
 
     public static final int LEVEL = 59;
     /** The Black: hits to kill, blow; the White's. */
-    public static final double BLACK_HITS = 6, BLACK_BLOW = 0.15, WHITE_HITS = 4.5, WHITE_BLOW = 0.12;
+    public static final double BLACK_HITS = 6, BLACK_BLOW = 0.10, WHITE_HITS = 4.5, WHITE_BLOW = 0.09;
     /** The Black's shackles: how long, how hard; the White's draught: the share of his blow he drinks. */
     public static final int SHACKLED = 40, SHACKLE_LEVEL = 2;
     public static final double DRINK = 0.5;
     /** Near each other (within this), each takes this share of a blow. */
     public static final double TOGETHER = 16, GUARDED = 0.75;
     public static final String KEY_PAIR = "jttw_impermanence_pair";
+    /** Enraged, how much harder it strikes: a fifth more, so still within a regular's (or a captain's) most. */
+    public static final double ENRAGED_POWER = 0.2;
+    private static final net.minecraft.resources.ResourceLocation ENRAGED_POWER_ID = com.jttw.engine.JTTWEngine.id("impermanence_enraged");
 
     private static final EntityDataAccessor<Boolean> ENRAGED = SynchedEntityData.defineId(ImpermanenceEntity.class, EntityDataSerializers.BOOLEAN);
 
@@ -100,6 +103,12 @@ public class ImpermanenceEntity extends HellMonster {
     @Override
     protected double blowShare() {
         return white() ? WHITE_BLOW : BLACK_BLOW;
+    }
+
+    /** Enraged, its blow is a fifth harder. */
+    @Override
+    protected double[] specialShares() {
+        return new double[]{blowShare() * (1 + ENRAGED_POWER)};
     }
 
     /** A captain brings none of its own kind: only its partner. */
@@ -196,7 +205,9 @@ public class ImpermanenceEntity extends HellMonster {
     public void enrage() {
         if (enraged()) return;
         entityData.set(ENRAGED, true);
-        addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, -1, 1, false, true));
+        var power = getAttribute(Attributes.ATTACK_DAMAGE);
+        if (power != null && power.getModifier(ENRAGED_POWER_ID) == null) power.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(
+                ENRAGED_POWER_ID, ENRAGED_POWER, net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
         addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, -1, 1, false, true));
         playSound(SoundEvents.VEX_CHARGE, 1.5f, white() ? 1.2f : 0.7f);
         if (level() instanceof ServerLevel server) {

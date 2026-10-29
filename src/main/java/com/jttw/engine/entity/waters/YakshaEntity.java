@@ -35,8 +35,8 @@ import javax.annotation.Nullable;
  */
 public class YakshaEntity extends SeaMonster {
 
-    /** Five of a same-level character's ordinary hits to kill; a thrust of 16% of their health, a bolt of 10%. */
-    public static final double HITS = 5, THRUST = 0.16, BOLT = 0.10;
+    /** Five of a same-level character's ordinary hits to kill; a thrust of 10% of their health, a bolt of 8%. */
+    public static final double HITS = 5, THRUST = 0.10, BOLT = 0.08;
     /** Within this it thrusts; beyond, up to its reach, it hurls bolts, one each so many ticks. */
     public static final double CLOSE = 4, BOLT_REACH = 18;
     public static final int BOLT_EVERY = 50;
@@ -68,9 +68,14 @@ public class YakshaEntity extends SeaMonster {
         return THRUST;
     }
 
+    @Override
+    protected double[] specialShares() {
+        return new double[]{BOLT};
+    }
+
     /** Its bolt: a share of a same-level character's health, as its blow is. */
     public float boltDamage() {
-        return (float) (BOLT * MobScaling.typicalHealth(mobLevel()) * (isCaptain() ? CAPTAIN_DAMAGE : 1));
+        return hitOf(BOLT);
     }
 
     @Override

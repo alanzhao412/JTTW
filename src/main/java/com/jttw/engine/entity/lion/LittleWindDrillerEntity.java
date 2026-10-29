@@ -45,8 +45,8 @@ import java.util.List;
  */
 public class LittleWindDrillerEntity extends LionCamelMonster {
 
-    /** Three ordinary hits; a blow of 8% of a same-level character's health. */
-    public static final double HITS = 3, BLOW = 0.08, SPEED = 0.34;
+    /** Three ordinary hits; a blow of 6% of a same-level character's health. */
+    public static final double HITS = 3, BLOW = 0.06, SPEED = 0.34;
     public static final int ALARM_EVERY = 600, ANSWER = 3, CROWD = 16, FLEE = 100;
     public static final double ALARM_RANGE = 32, SIGHT = 16;
 

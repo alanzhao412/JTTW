@@ -477,7 +477,7 @@ public class FireGameTests {
         List<LivingEntity> caught = brute.slam();
         check(h, caught.contains(g), "what is near is struck");
         close(h, brute.slamDamage(), hp - g.getHealth(), "for the slam's hurt");
-        close(h, FurnaceBruteEntity.SLAM * MobScaling.typicalHealth(67), brute.slamDamage(), "22% of a level-67 character's health");
+        close(h, FurnaceBruteEntity.SLAM * MobScaling.typicalHealth(67), brute.slamDamage(), "10% of a level-67 character's health");
         check(h, g.isOnFire(), "and set alight");
         // fighting, it telegraphs the slam
         brute.setTarget(g);

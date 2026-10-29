@@ -123,6 +123,8 @@ public final class HellKings {
     public static class Chujiang extends KingOfHellEntity {
         public static final double REACH = 8;
         public static final int FROZEN = 100;
+        /** His frost's bite, of his blow: no less than the heaviest of Hell's creatures' hits. */
+        public static final double FROST = 0.6;
 
         public Chujiang(EntityType<? extends Chujiang> type, Level level) {
             super(type, level);
@@ -141,7 +143,7 @@ public final class HellKings {
                 e.setTicksFrozen(e.getTicksRequiredToFreeze() + FROZEN);
                 e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, FROZEN, 2), this);
                 e.invulnerableTime = 0;
-                e.hurt(damageSources().freeze(), blow() * 0.4f);
+                e.hurt(damageSources().freeze(), (float) (blow() * FROST));
                 n++;
             }
             playSound(SoundEvents.POWDER_SNOW_BREAK, 2f, 0.6f);
@@ -281,6 +283,8 @@ public final class HellKings {
     public static class Taishan extends KingOfHellEntity {
         public static final double REACH = 7;
         public static final int BURNS = 100;
+        /** The oil's scald, of his blow: no less than the heaviest of Hell's creatures' hits. */
+        public static final double SCALD = 0.6;
 
         public Taishan(EntityType<? extends Taishan> type, Level level) {
             super(type, level);
@@ -303,7 +307,7 @@ public final class HellKings {
                 if (e.distanceTo(this) > REACH) continue;
                 e.igniteForTicks(BURNS);
                 e.invulnerableTime = 0;
-                e.hurt(damageSources().inFire(), blow() * 0.5f);
+                e.hurt(damageSources().inFire(), (float) (blow() * SCALD));
                 n++;
             }
             playSound(SoundEvents.LAVA_POP, 2f, 0.6f);
