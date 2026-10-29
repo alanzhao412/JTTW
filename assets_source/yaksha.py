@@ -9,8 +9,10 @@ hollows and lit cyan over its muscles, the slabs of its chest, its ridged belly,
 and arms; patches of blue-green scales over its shoulders and down its forearms; a spined fin down its
 back, fins on its forearms and calves, fin-ears, webbed and clawed hands and feet. Its head thrust
 forward: wild hair standing up off it like flames, red at the root to yellow at the tips, a flaming
-beard under its jaw; a heavy brow over bulging, burning gold eyes; a broad flat nose; its jaws open on
-fangs, two tusks jutting up from its lower jaw; two ridged horns curving up and back from its temples.
+beard under its jaw; a heavy brow, knotted and scowling, shadowing bulging, burning gold eyes; jutting
+cheekbones; a broad flat nose, its nostrils flared; a snarl of dark lips drawn back off dark red gums,
+its mouth open dark into its throat, two great fangs hanging from its upper jaw and two tusks jutting up
+from its lower, yellowed and shaded; two ridged horns curving up and back from its temples.
 
 Its ornaments: gold armlets and anklets, gold hoops in its ears, a necklace of pearls and little
 skulls; a long red silk scarf (披帛) over its shoulders, its ends flowing behind; a wrap of sea-green
@@ -50,8 +52,13 @@ FLAME_ROOT = (150, 18, 24)      # its hair: red at the root,
 FLAME = (240, 70, 24)           # orange,
 FLAME_TIP = (255, 206, 80)      # yellow at the tips
 EYE = (255, 214, 60)
-TOOTH = (244, 236, 210)
-GUM = (90, 16, 30)
+TOOTH = (232, 222, 194)         # its fangs and tusks: an off-white, yellowed,
+TOOTH_SHADE = (150, 126, 96)    # shaded down their sides,
+TOOTH_ROOT = (104, 70, 58)      # stained where they leave the gum
+GUM = (96, 18, 36)              # its gums: dark red,
+LIP = (36, 20, 66)              # its lips: a dark indigo-violet,
+THROAT = (22, 4, 12)            # its mouth: dark into its throat,
+TONGUE = (140, 34, 58)
 HORN = (226, 210, 168)
 HORN_DEEP = (96, 76, 56)
 NAIL = (24, 22, 30)
@@ -141,20 +148,27 @@ def head():
             (-3.6, -7.4, -3.2, 7.2, 6.6, 6.6, 'skull'),
             (-3.9, -5.6, -4.3, 7.8, 1.7, 1.8, 'brow'),
             (-3.7, -4.0, -4.0, 7.4, 2.8, 3.6, 'cheeks'),
+            (-3.9, -3.25, -4.35, 2.2, 1.1, 1.0, 'cheekbone'),
+            (1.7, -3.25, -4.35, 2.2, 1.1, 1.0, 'cheekbone'),
             (-1.7, -4.6, -5.0, 3.4, 2.5, 1.2, 'nose'),
-            (-3.0, -2.0, -4.5, 6.0, 1.2, 2.2, 'upperlip'),
-            (-2.4, -1.0, -4.3, 0.8, 1.6, 0.8, 'fang'),
-            (1.6, -1.0, -4.3, 0.8, 1.6, 0.8, 'fang'),
+            (-2.5, -3.0, -4.75, 1.0, 1.0, 1.1, 'nostril'),
+            (1.5, -3.0, -4.75, 1.0, 1.0, 1.1, 'nostril'),
+            (-3.0, -2.3, -4.5, 6.0, 1.5, 2.2, 'upperlip'),
+            (-2.6, -0.9, -4.0, 5.2, 1.3, 2.8, 'maw'),
+            (-2.35, -1.0, -4.3, 1.1, 1.4, 1.0, 'fang'),
+            (1.25, -1.0, -4.3, 1.1, 1.4, 1.0, 'fang'),
+            (-2.1, 0.3, -4.15, 0.6, 1.3, 0.6, 'fangtip'),
+            (1.5, 0.3, -4.15, 0.6, 1.3, 0.6, 'fangtip'),
             (-3.0, -7.0, 2.6, 6.0, 6.6, 1.6, 'nape'),
         ]),
         part('jaw', 'head', (0, -1.2, -0.4), (0.26, 0, 0), [
             (-3.2, 0, -4.0, 6.4, 2.4, 4.4, 'jaw'),
             (-2.2, 2.1, -3.6, 4.4, 0.9, 2.8, 'chin')]),
         part('beard', 'jaw', (0, 2.6, -2.6), (0.2, 0, 0), [(-2.4, 0, -1.0, 4.8, 4.4, 2.2, 'flamebeard')]),
-        part('right_tusk', 'jaw', (-2.7, 0.6, -3.9), (-0.42, 0.2, -0.42), [(-0.65, -3.0, -0.65, 1.3, 3.3, 1.3, 'tusk')]),
-        part('right_tusk_tip', 'right_tusk', (0, -2.9, 0), (-0.4, 0, 0.15), [(-0.45, -1.8, -0.45, 0.9, 2.0, 0.9, 'tusktip')]),
+        part('right_tusk', 'jaw', (-2.6, 0.5, -3.7), (-0.3, 0.25, -0.38), [(-0.45, -2.0, -0.45, 0.9, 2.3, 0.9, 'tusk')]),
+        part('right_tusk_tip', 'right_tusk', (0, -1.9, 0), (-0.5, 0, 0.2), [(-0.35, -1.5, -0.35, 0.7, 1.7, 0.7, 'tusktip')]),
         # bulging eyes, burning gold
-        part('right_eye', 'head', (-1.85, -4.35, -4.3), (0, 0.18, 0), [(-1.35, -1.1, -1.0, 2.7, 2.3, 1.5, 'eyeball')]),
+        part('right_eye', 'head', (-1.85, -4.35, -4.3), (0, 0.18, 0), [(-1.15, -1.0, -0.9, 2.3, 2.0, 1.4, 'eyeball')]),
         # fin-ears, gold hoops in them
         part('right_ear', 'head', (-3.6, -4.4, -0.6), (0.1, 0.6, -0.35), [(-0.25, -3.4, 0, 0.5, 4.8, 4.0, 'earfin')]),
         part('right_hoop', 'head', (-3.7, -1.6, -1.0), (0, 0, 0.1), [
@@ -545,56 +559,157 @@ def paint_yaksha(p, style, f, dims):
         skin(p, f, warts=0.4)
         fx, fy, fw, fh = f['front']
         for i in range(fw):
-            d = abs(i + 0.5 - fw / 2) / (fw / 2)
+            d = abs(i + 0.5 - fw / 2) / (fw / 2)                  # 0 its middle .. 1 its ends
             for j in range(fh):
+                c = p.get((fx + i, fy + j))
+                if j == 0:
+                    c = mixc(c, SKIN_HI, 0.45)                    # lit along its ridge
+                c = k(c, 1 - 0.35 * j / max(1, fh - 1))           # shadowing down to the eyes
                 if j >= fh - 1 - int(1.5 * (1 - d)):
-                    p.px((fx + i, fy + j), k(SKIN_DEEP, 0.9))
-        w.flat(p, f, k(SKIN_DEEP, 0.5), faces=('bottom',))
+                    c = k(SKIN_DEEP, 0.8)
+                if d < 0.14 and j > 0:                            # the scowl's furrow down to the nose
+                    c = k(SKIN_DEEP, 0.7)
+                p.px((fx + i, fy + j), c)
+        w.flat(p, f, k(SKIN_DEEP, 0.45), faces=('bottom',))
         for i, j, xy in w.each(p, f['top']):                      # bristling brows of flame
             if p.rnd.random() < 0.55:
                 p.px(xy, mixc(FLAME, FLAME_ROOT, p.rnd.random()))
-    if style == 'cheeks':
+    if style == 'cheeks':                                         # the flesh of its face: shadowed under the eyes, creased by the snarl
         skin(p, f, warts=0.2)
         fx, fy, fw, fh = f['front']
+        for i, j, xy in w.each(p, f['front']):
+            if j < 1:
+                p.px(xy, k(p.get(xy), 0.78))                      # the shadow under the eyes
+            elif j >= fh - 2:
+                p.px(xy, k(p.get(xy), 0.85))
+        for side in (-1, 1):                                      # the swell of each cheek, lit at its crown
+            muscle(p, f['front'], fw / 2 + side * fw * 0.3, fh * 0.45, fw * 0.2, fh * 0.5, k_=1.6, rim=0.7)
         for j in range(fh):                                       # the snarl's creases from the nose
-            p.px((fx + fw // 2 - 3 - j // 2, fy + j), k(SKIN_DEEP, 0.9))
-            p.px((fx + fw // 2 + 2 + j // 2, fy + j), k(SKIN_DEEP, 0.9))
-    if style == 'nose':                                           # broad and flat, its nostrils flared
-        skin(p, f, warts=0.2)
+            for x in (fw // 2 - 4 - j // 2, fw // 2 + 3 + j // 2):
+                p.px((fx + x, fy + j), k(SKIN_DEEP, 0.75))
+                p.px((fx + x + (1 if x > fw // 2 else -1), fy + j), k(SKIN, 1.12))
+        w.flat(p, f, k(SKIN_DEEP, 0.7), faces=('top',))
+    if style == 'cheekbone':                                      # a jutting cheekbone: lit along its crest, shadowed under
+        skin(p, f, fall=0.4)
+        for s in ('front', 'top', 'right', 'left'):
+            fx, fy, fw, fh = f[s]
+            for i, j, xy in w.each(p, f[s]):
+                if s == 'top' or j == 0:
+                    p.px(xy, mixc(p.get(xy), (190, 236, 255), 0.75))
+                elif j < fh - 1:
+                    p.px(xy, mixc(p.get(xy), SKIN_HI, 0.5))
+                elif j >= fh - 1:
+                    p.px(xy, k(SKIN_DEEP, 0.9))
+        w.flat(p, f, k(SKIN_DEEP, 0.55), faces=('bottom',))
+    if style == 'nose':                                           # broad and flat: a lit bridge, a bulbous tip, shadowed below
+        skin(p, f, warts=0.15, fall=0.1)
         fx, fy, fw, fh = f['front']
-        for i in (1, 2, fw - 3, fw - 2):
-            p.px((fx + i, fy + fh - 1), (8, 6, 20))
-            p.px((fx + i, fy + fh - 2), k(SKIN_DEEP, 0.7))
-        p.px((fx + fw // 2, fy + 1), SKIN_HI)
-        fx, fy, fw, fh = f['bottom']
-        for i in (1, 2, fw - 3, fw - 2):
+        for i, j, xy in w.each(p, f['front']):
+            d = abs(i + 0.5 - fw / 2) / (fw / 2)
+            c = mixc(p.get(xy), SKIN_HI, 0.4)
+            if d < 0.35 and j < fh - 2:
+                c = mixc(c, (190, 236, 255), 0.6 * (1 - d / 0.35))      # the bridge, lit
+            if d > 0.75:
+                c = k(c, 0.8)
+            if j >= fh - 1:
+                c = k(c, 0.75)
+            p.px(xy, c)
+        for i in range(fw // 2 - 1, fw // 2 + 1):                 # a lit tip
+            p.px((fx + i, fy + fh - 3), mixc(SKIN_HI, (200, 236, 255), 0.3))
+        fx, fy, fw, fh = f['bottom']                              # its nostrils, from beneath: two dark holes, a septum between
+        for i, j, xy in w.each(p, f['bottom']):
+            p.px(xy, k(SKIN_DEEP, 0.8))
+        for i in list(range(0, 3)) + list(range(fw - 3, fw)):
             for j in range(fh):
-                p.px((fx + i, fy + j), (8, 6, 20))
-    if style == 'upperlip':                                       # its lip curled back off a row of fangs
-        skin(p, f, warts=0.1)
+                p.px((fx + i, fy + j), (8, 4, 16))
+    if style == 'nostril':                                        # a flared nostril's wing: a round of flesh, its hole dark beneath and within
+        skin(p, f, fall=0.2)
+        for s in ('front', 'top'):
+            fx, fy, fw, fh = f[s]
+            for i in range(fw):
+                p.px((fx + i, fy), mixc(p.get((fx + i, fy)), SKIN_HI, 0.4))
         fx, fy, fw, fh = f['front']
-        w.teeth_row(p, f['front'], fh - 2, TOOTH, GUM, every=2, rows=2)
-        w.flat(p, f, GUM, faces=('bottom',))
-    if style == 'fang':
+        for i in range(fw):
+            p.px((fx + i, fy + fh - 1), k(SKIN_DEEP, 0.6))
+        w.flat(p, f, (8, 4, 16), faces=('bottom',))
+        for s in ('right', 'left'):                               # the inner side, toward the nose: the hole's dark rim
+            fx, fy, fw, fh = f[s]
+            for i, j, xy in w.each(p, f[s]):
+                if j >= fh // 2:
+                    p.px(xy, (14, 6, 24))
+    if style == 'upperlip':                                       # its upper lip: indigo flesh, drawn up in a snarl, dark-lipped, the gum bared
+        skin(p, f, warts=0.1, fall=0.1)
+        fx, fy, fw, fh = f['front']
+        for i, j, xy in w.each(p, f['front']):
+            d = abs(i + 0.5 - fw / 2) / (fw / 2)
+            c = p.get(xy)
+            if j < fh - 2 and 0.15 < d < 0.8:
+                c = mixc(c, SKIN_HI, 0.55 * (1 - abs(d - 0.45) / 0.35))  # the muzzle's swell either side
+            if d < 0.1 and j < fh - 2:
+                c = k(c, 0.78)                                    # the groove under the nose
+            if j == fh - 2:
+                c = mixc(LIP, SKIN_DEEP, 0.3) if d < 0.85 else k(SKIN_DEEP, 0.9)
+            elif j == fh - 1:
+                c = k(GUM, 0.9 + 0.2 * (1 - d)) if d < 0.85 else LIP   # the gum bared under the lip
+            p.px(xy, noisy(p, c, 3))
+        for s in ('right', 'left'):                               # the mouth's corners: the lips meeting, dark
+            fx, fy, fw, fh = f[s]
+            for i, j, xy in w.each(p, f[s]):
+                if j >= fh - 2:
+                    p.px(xy, LIP)
+        fx, fy, fw, fh = f['bottom']                              # its palate, seen as its jaws gape: gum at the front, dark behind
+        for i, j, xy in w.each(p, f['bottom']):
+            t = j / max(1, fh - 1)                                # 0 behind .. 1 at its lip (the bottom face runs back to front)
+            p.px(xy, noisy(p, mixc(THROAT, GUM, t ** 1.5), 3))
+    if style == 'maw':                                            # the inside of its mouth: deep, dark into the throat
         for s, (fx, fy, fw, fh) in f.items():
-            for j in range(fh):
-                for i in range(fw):
-                    p.px((fx + i, fy + j), noisy(p, k(mixc(TOOTH, (200, 190, 160), j / max(1, fh)), LIGHTS[s]), 3))
-            if s in S:
-                w.point(p, (fx, fy, fw, fh), down=True, keep=0.3, sharp=0.5)
-    if style == 'jaw':                                            # its lower jaw: teeth jutting over the lip, the mouth dark inside
+            for i, j, xy in w.each(p, (fx, fy, fw, fh)):
+                c = THROAT
+                if s == 'front':
+                    d = abs(i + 0.5 - fw / 2) / (fw / 2)
+                    c = mixc(THROAT, (70, 12, 30), 0.6 * d)       # darkest at its middle: the throat
+                    if j == 0:
+                        c = k(GUM, 0.7)
+                p.px(xy, noisy(p, c, 2))
+    if style in ('fang', 'fangtip'):                              # a great fang: off-white, shaded, stained at the gum, narrowing to a point
+        for s, (fx, fy, fw, fh) in f.items():
+            for i, j, xy in w.each(p, (fx, fy, fw, fh)):
+                t = j / max(1, fh - 1)                            # 0 its root .. 1 its point
+                c = mixc(TOOTH_ROOT, TOOTH, min(1, t * 3)) if style == 'fang' else mixc(TOOTH, (244, 238, 220), t)
+                if s in ('right', 'left', 'back'):
+                    c = mixc(c, TOOTH_SHADE, 0.45)
+                elif s == 'front' and i == fw - 1:
+                    c = mixc(c, TOOTH_SHADE, 0.5)                 # its edge, rounding away
+                elif s == 'front' and i == 0 and 0.3 < t < 0.8:
+                    c = mixc(c, (250, 244, 226), 0.5)             # a glint down it
+                p.px(xy, noisy(p, k(c, LIGHTS[s]), 3))
+            if s in S and style == 'fangtip':
+                w.point(p, (fx, fy, fw, fh), down=True, keep=0.25, sharp=0.55)
+    if style == 'jaw':                                            # its lower jaw: indigo flesh, a dark lower lip, the mouth dark inside
         skin(p, f, warts=0.2)
         fx, fy, fw, fh = f['front']
         for i in range(fw):
-            p.px((fx + i, fy), TOOTH if i % 2 == 0 else GUM)
-            if i % 4 == 0:
-                p.px((fx + i, fy + 1), TOOTH)
-        fx, fy, fw, fh = f['top']
+            d = abs(i + 0.5 - fw / 2) / (fw / 2)
+            p.px((fx + i, fy), k(GUM, 0.85) if d < 0.75 else LIP)
+            p.px((fx + i, fy + 1), LIP if d < 0.85 else k(SKIN_DEEP, 0.9))
+            p.px((fx + i, fy + 2), k(p.get((fx + i, fy + 2)), 0.8))
+        for s in ('right', 'left'):
+            sx, sy, sw, sh = f[s]
+            for i in range(sw):
+                p.px((sx + i, sy), LIP)
+        fx, fy, fw, fh = f['top']                                 # inside: the gum along its front and sides, the tongue, the throat behind
         for i, j, xy in w.each(p, f['top']):
-            c = (40, 6, 16) if 1 < i < fw - 2 and j < fh - 2 else TOOTH if i % 2 == 0 else GUM
-            if 3 < i < fw - 4 and 2 < j < fh - 3:
-                c = (176, 46, 70)                                 # its tongue
-            p.px(xy, c)
+            back = 1 - j / max(1, fh - 1)                         # the top face's first row is its back
+            edge = min(i, fw - 1 - i, fh - 1 - j)
+            c = mixc(THROAT, (60, 10, 24), 0.4 * (1 - back))
+            if edge < 1:
+                c = GUM
+            elif 2 < i < fw - 3 and 1 < j < fh - 2:
+                d = abs(i + 0.5 - fw / 2) / (fw / 2 - 2)
+                c = mixc(k(TONGUE, 0.55 + 0.45 * (1 - back)), THROAT, d * 0.6)   # its tongue, lit at its tip
+                if abs(i + 0.5 - fw / 2) < 0.6:
+                    c = k(c, 0.7)
+            p.px(xy, noisy(p, c, 3))
     if style == 'chin':
         skin(p, f, warts=0.2)
     if style == 'flamebeard':                                     # a beard of flame hanging under its jaw
@@ -603,13 +718,20 @@ def paint_yaksha(p, style, f, dims):
                 clear_face(p, r)
             else:
                 flame_face(p, r, up=False, tongues=3, seed=3, keep=0.25)
-    if style in ('tusk', 'tusktip'):                              # tusks, yellowed ivory, dark at the root
+    if style in ('tusk', 'tusktip'):                              # tusks: yellowed off-white, stained at the root, shaded round, lit down one edge
         for s in f:
             fx, fy, fw, fh = f[s]
             for i, j, xy in w.each(p, f[s]):
-                t = 1 - j / max(1, fh - 1)
-                c = mixc((170, 150, 110), TOOTH, min(1, t * 1.5)) if style == 'tusk' else mixc(TOOTH, (255, 252, 236), t)
-                p.px(xy, k(c, w.LIGHT[s]))
+                t = 1 - j / max(1, fh - 1)                        # 0 its root .. 1 its point
+                if style == 'tusk':
+                    c = mixc(TOOTH_ROOT, TOOTH, min(1, t * 3))
+                else:
+                    c = mixc(TOOTH, (240, 232, 210), t)
+                if s in ('back', 'left'):
+                    c = mixc(c, TOOTH_SHADE, 0.45)
+                elif s in ('front', 'right') and i == 0:
+                    c = mixc(c, (248, 242, 224), 0.4)
+                p.px(xy, noisy(p, k(c, w.LIGHT[s]), 3))
         if style == 'tusktip':
             for s in S:
                 w.point(p, f[s], down=False, keep=0.25, sharp=0.5)
