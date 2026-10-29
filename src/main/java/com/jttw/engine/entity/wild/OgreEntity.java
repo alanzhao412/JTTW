@@ -48,8 +48,8 @@ import java.util.List;
  */
 public class OgreEntity extends WildYaoguai {
 
-    /** Eighteen ordinary hits; a club's blow of 38% of a same-level character's health. Slow. */
-    public static final double HITS = 18, BLOW = 0.38, SPEED = 0.21;
+    /** Twelve ordinary hits; a club's blow of 12% of a same-level character's health. Slow. */
+    public static final double HITS = 12, BLOW = 0.12, SPEED = 0.21;
     public static final int MIN_LEVEL = 15, MAX_LEVEL = 20;
     public static final int SLAM_EVERY = 140, SLAM_WINDUP = 20, SLAM_PERCENT = 75;
     public static final double SLAM_REACH = 4.0;
@@ -79,6 +79,7 @@ public class OgreEntity extends WildYaoguai {
     @Override public int maxLevel() { return MAX_LEVEL; }
     @Override protected double hitsToKill() { return HITS; }
     @Override protected double blowShare() { return BLOW; }
+    @Override public double hardestShare() { return Math.max(BLOW, BLOW * SLAM_PERCENT / 100.0); }
     @Override public int vanillaXpShare() { return 5; }
 
     @Override

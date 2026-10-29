@@ -36,9 +36,9 @@ import net.minecraft.world.phys.Vec3;
  */
 public class PengDemonEntity extends LionCamelMonster {
 
-    public static final int SWOOP_PERCENT = 24;
-    /** Six ordinary hits; a spear thrust of 16% of a same-level character's health. */
-    public static final double HITS = 6, BLOW = 0.16, SWOOP = SWOOP_PERCENT / 100.0, SPEED = 0.32;
+    public static final int SWOOP_PERCENT = 11;
+    /** Six ordinary hits; a spear thrust of 10% of a same-level character's health, the swoop 11%. */
+    public static final double HITS = 6, BLOW = 0.10, SWOOP = SWOOP_PERCENT / 100.0, SPEED = 0.32;
     public static final int SWOOP_EVERY = 100;
     public static final double SWOOP_NEAR = 3, SWOOP_FAR = 14;
 
@@ -71,6 +71,11 @@ public class PengDemonEntity extends LionCamelMonster {
     }
 
     @Override
+    protected double[] specialShares() {
+        return new double[]{SWOOP};
+    }
+
+    @Override
     public int escorts() {
         return 4;
     }
@@ -99,7 +104,7 @@ public class PengDemonEntity extends LionCamelMonster {
 
     /** The swoop's hurt. */
     public float swoopDamage() {
-        return (float) (blowAt(mobLevel(), isCaptain()) * SWOOP / BLOW);
+        return hitOf(SWOOP);
     }
 
     /** Spreads its pinions as on the wing, or folds them (as it lands; the gallery shows them spread). */

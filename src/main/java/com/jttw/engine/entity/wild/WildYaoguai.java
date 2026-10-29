@@ -55,6 +55,16 @@ public abstract class WildYaoguai extends Monster implements MobLevel {
     /** Its blow, as a share of a typical same-level character's health (before their resistance). */
     protected abstract double blowShare();
 
+    /** Its blow, as a share of a same-level character's health (for the pecking order's checks). */
+    public double regularBlowShare() {
+        return blowShare();
+    }
+
+    /** Its hardest single hit (its blow, unless a special is harder), as a share of a same-level character's health. */
+    public double hardestShare() {
+        return blowShare();
+    }
+
     /** What its kill pays a character below level 20, in vanilla mobs' XP (a zombie's is 1). */
     public abstract int vanillaXpShare();
 

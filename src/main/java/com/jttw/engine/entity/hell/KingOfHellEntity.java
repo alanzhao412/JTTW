@@ -45,8 +45,8 @@ import java.util.EnumSet;
  */
 public abstract class KingOfHellEntity extends ZoneBoss {
 
-    /** Fifty of his level's ordinary hits to kill; his tablet strikes for 14% of their health. */
-    public static final double HITS = 50, BLOW = 0.14;
+    /** Fifty of his level's ordinary hits to kill; his tablet strikes for a fifth of their health. */
+    public static final double HITS = 50, BLOW = 0.20;
     /** How far he keeps from his throne, how close one must be for his judgement, how often he strikes. */
     public static final int HALL = 13, STRIKE_EVERY = 30;
     public static final double JUDGES_WITHIN = 14;

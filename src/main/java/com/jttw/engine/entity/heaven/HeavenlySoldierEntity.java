@@ -48,10 +48,10 @@ import java.util.UUID;
  */
 public class HeavenlySoldierEntity extends Monster implements com.jttw.engine.entity.zone.MobLevel {
 
-    /** Four of a same-level character's ordinary hits to kill; a blow of 12% of their health, before resistance. */
-    public static final double HITS = 4, BLOW = 0.12;
-    /** A general's health and blow over a soldier's of its level. */
-    public static final double GENERAL_HEALTH = 3, GENERAL_DAMAGE = 1.4;
+    /** Four of a same-level character's ordinary hits to kill; a blow of 9% of their health, before resistance. */
+    public static final double HITS = 4, BLOW = 0.09;
+    /** A general's health and blow over a soldier's of its level: a miniboss's blow, 18% of a character's health. */
+    public static final double GENERAL_HEALTH = 3, GENERAL_DAMAGE = 2.0;
     public static final float GENERAL_SCALE = 1.2f;
     /** Ticks with no one to fight before it returns to Heaven: 10 s. */
     public static final int IDLE_TICKS = 200;

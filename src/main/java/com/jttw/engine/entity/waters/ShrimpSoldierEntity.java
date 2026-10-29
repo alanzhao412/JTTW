@@ -28,8 +28,8 @@ import net.minecraft.world.phys.Vec3;
  */
 public class ShrimpSoldierEntity extends SeaMonster {
 
-    /** Six of a same-level character's ordinary hits to kill; a thrust of 14% of their health, before resistance. */
-    public static final double HITS = 6, THRUST = 0.14;
+    /** Six of a same-level character's ordinary hits to kill; a thrust of 9% of their health, before resistance. */
+    public static final double HITS = 6, THRUST = 0.09;
     /** How much further than arm's length its spear reaches. */
     public static final double SPEAR = 1.3;
     /** The chance a blow sends it darting back, and how hard. */

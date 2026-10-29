@@ -42,8 +42,16 @@ import java.util.function.Predicate;
  * them, never fight back against them, and are passed over by their area attacks; and one such a
  * player strikes down leaves him nothing (no loot, XP or karma: it never fought him).
  *
- * <p>A subclass names its {@link #zone()}, its {@link #hitsToKill()} and {@link #blowShare()}, and
- * may change its levels, captains, escorts and drops by overriding the methods here.
+ * <p>Some are <b>minibosses</b>: a lair's floor wardens and gate keepers, the Six Strong Generals.
+ * A miniboss is a captain (purple-named, larger, a sigil to leave) whose hardest hit is
+ * {@link #MINIBOSS_HIT} of a character's health whatever its kind, and whose health may be more
+ * than a captain's ({@link #becomeMiniboss}). So the pecking order holds hit for hit: a regular's
+ * hardest is at most {@link #MOB_HIT_CAP}, a captain's that times {@link #CAPTAIN_DAMAGE}, a
+ * miniboss's {@link #MINIBOSS_HIT}, and every boss's blow more.
+ *
+ * <p>A subclass names its {@link #zone()}, its {@link #hitsToKill()} and {@link #blowShare()}, any
+ * special hits in {@link #specialShares()} (each struck with {@link #hitOf}), and may change its
+ * levels, captains, escorts and drops by overriding the methods here.
  */
 public abstract class ZoneMonster extends Monster implements MobLevel {
 
@@ -53,6 +61,10 @@ public abstract class ZoneMonster extends Monster implements MobLevel {
     public static final int ESCORTS = 3;
     /** A captain's health and blow over a regular one's of its level. */
     public static final double CAPTAIN_HEALTH = 2.5, CAPTAIN_DAMAGE = 1.2;
+    /** The most a regular one's hardest single hit may be, as a share of a same-level character's health. */
+    public static final double MOB_HIT_CAP = 0.12;
+    /** A miniboss's hardest single hit, as a share of a same-level character's health: over any captain's, under any boss's blow. */
+    public static final double MINIBOSS_HIT = 0.19;
     /** How much larger a captain is. */
     public static final float CAPTAIN_SCALE = 1.15f;
     /** How many levels over its zone's regulars a captain is, unless it says otherwise. */
@@ -65,6 +77,9 @@ public abstract class ZoneMonster extends Monster implements MobLevel {
 
     private static final EntityDataAccessor<Boolean> CAPTAIN = SynchedEntityData.defineId(ZoneMonster.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> MOB_LEVEL = SynchedEntityData.defineId(ZoneMonster.class, EntityDataSerializers.INT);
+
+    /** Whether it is a miniboss (only its hits need it, on the server: to all eyes it is a captain). */
+    private boolean miniboss;
 
     protected ZoneMonster(EntityType<? extends ZoneMonster> type, Level level) {
         super(type, level);
@@ -81,6 +96,23 @@ public abstract class ZoneMonster extends Monster implements MobLevel {
 
     /** Its blow, as a share of a typical same-level character's health (before their resistance). */
     protected abstract double blowShare();
+
+    /** Its special hits (a slam, a gore, an ember...), each as a regular's share of a same-level character's health; none by default. */
+    protected double[] specialShares() {
+        return new double[0];
+    }
+
+    /** Its blow as a regular, as a share of a same-level character's health. */
+    public double regularBlowShare() {
+        return blowShare();
+    }
+
+    /** Its hardest single hit as a regular, its blow or its hardest special, as a share of a same-level character's health. */
+    public double hardestShare() {
+        double most = blowShare();
+        for (double s : specialShares()) most = Math.max(most, s);
+        return most;
+    }
 
     /** The level a regular one is about: its zone's lowest. A constant. */
     public int regularLevel() {
@@ -125,6 +157,11 @@ public abstract class ZoneMonster extends Monster implements MobLevel {
         return entityData.get(CAPTAIN);
     }
 
+    /** Whether it is a miniboss: a captain whose hardest hit is {@link #MINIBOSS_HIT}. */
+    public boolean isMiniboss() {
+        return miniboss;
+    }
+
     @Override
     public int mobLevel() {
         return entityData.get(MOB_LEVEL);
@@ -140,12 +177,43 @@ public abstract class ZoneMonster extends Monster implements MobLevel {
         return blowShare() * MobScaling.typicalHealth(level) * (captain ? CAPTAIN_DAMAGE : 1);
     }
 
+    /** How much harder than a regular's its hits are now: 1, a captain's, or a miniboss's (its hardest made {@link #MINIBOSS_HIT}). */
+    public double damageScale() {
+        if (isMiniboss()) return MINIBOSS_HIT / hardestShare();
+        return isCaptain() ? CAPTAIN_DAMAGE : 1;
+    }
+
+    /** A hit of {@code share} (a regular's, of a same-level character's health) as it lands from it now, at its level and rank. */
+    public float hitOf(double share) {
+        return (float) hitAt(share);
+    }
+
+    private double hitAt(double share) {
+        return share * MobScaling.typicalHealth(mobLevel()) * damageScale();
+    }
+
     /** Sets what it is: its level, whether a captain, and the health and damage and XP that go with them. */
     public void become(int level, boolean captain) {
+        miniboss = false;
+        set(level, captain);
+    }
+
+    /**
+     * Makes it a miniboss of {@code level}: a captain whose hardest hit is {@link #MINIBOSS_HIT} of a
+     * same-level character's health, with {@code overCaptain} times a captain's health.
+     */
+    public void becomeMiniboss(int level, double overCaptain) {
+        miniboss = true;
+        set(level, true);
+        getAttribute(Attributes.MAX_HEALTH).setBaseValue(healthAt(level, true) * overCaptain);
+        setHealth(getMaxHealth());
+    }
+
+    private void set(int level, boolean captain) {
         entityData.set(CAPTAIN, captain);
         entityData.set(MOB_LEVEL, level);
         getAttribute(Attributes.MAX_HEALTH).setBaseValue(healthAt(level, captain));
-        getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(blowAt(level, captain));
+        getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(hitAt(blowShare()));
         setHealth(getMaxHealth());
         getPersistentData().putString(KEY_TIER, (captain ? EnemyTier.GENERAL : EnemyTier.GRUNT).name());
         getPersistentData().putString(KEY_ZONE, zone().id());
@@ -306,6 +374,7 @@ public abstract class ZoneMonster extends Monster implements MobLevel {
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putBoolean("Captain", isCaptain());
+        tag.putBoolean("Miniboss", miniboss);
         tag.putInt("MobLevel", mobLevel());
     }
 
@@ -315,6 +384,7 @@ public abstract class ZoneMonster extends Monster implements MobLevel {
         if (tag.contains("MobLevel")) {
             entityData.set(CAPTAIN, tag.getBoolean("Captain"));
             entityData.set(MOB_LEVEL, tag.getInt("MobLevel"));
+            miniboss = tag.getBoolean("Miniboss");
             refreshDimensions();
         }
     }

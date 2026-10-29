@@ -49,8 +49,8 @@ import java.util.List;
 public class KingYamaEntity extends KingOfHellEntity {
 
     public static final int LEVEL = 66;
-    /** A hundred and forty of a level-66 character's ordinary hits to kill; his blows a sixth of their health. */
-    public static final double YAMA_HITS = 140, YAMA_BLOW = 0.17;
+    /** A hundred and forty of a level-66 character's ordinary hits to kill; his blows 24% of their health. */
+    public static final double YAMA_HITS = 140, YAMA_BLOW = 0.24;
     public static final int COURT_AT_PERCENT = 66, WRATH_AT_PERCENT = 33;
     /** His hall: he keeps within this of his throne. */
     public static final int GREAT_HALL = 18;

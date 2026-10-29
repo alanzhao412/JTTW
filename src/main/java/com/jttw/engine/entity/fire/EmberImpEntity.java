@@ -34,8 +34,8 @@ import java.util.List;
  */
 public class EmberImpEntity extends FireMonster {
 
-    /** Four of a same-level character's ordinary hits to kill; a claw of a tenth of their health, an ember of 12%. */
-    public static final double HITS = 4, CLAW = 0.10, EMBER = 0.12, SPEED = 0.33;
+    /** Four of a same-level character's ordinary hits to kill; a claw of 7% of their health, an ember of 8%. */
+    public static final double HITS = 4, CLAW = 0.07, EMBER = 0.08, SPEED = 0.33;
     /** How often it flings an ember, in ticks, and from how near to how far. */
     public static final int EMBER_EVERY = 50;
     public static final double EMBER_NEAR = 3, EMBER_FAR = 16;
@@ -65,6 +65,11 @@ public class EmberImpEntity extends FireMonster {
     }
 
     @Override
+    protected double[] specialShares() {
+        return new double[]{EMBER};
+    }
+
+    @Override
     public int escorts() {
         return 4;
     }
@@ -81,9 +86,9 @@ public class EmberImpEntity extends FireMonster {
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
     }
 
-    /** An ember's hurt: its claw's, scaled as an ember is to a claw. */
+    /** An ember's hurt. */
     public float emberDamage() {
-        return (float) (blowAt(mobLevel(), isCaptain()) * EMBER / CLAW);
+        return hitOf(EMBER);
     }
 
     /** Flings an ember at {@code target}; a captain three, fanned. Returns them. */

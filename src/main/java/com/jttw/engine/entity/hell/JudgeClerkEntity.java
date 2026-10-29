@@ -50,8 +50,8 @@ import java.util.UUID;
  */
 public class JudgeClerkEntity extends HellMonster {
 
-    /** Four of a same-level character's ordinary hits to kill; a brush stroke of 9% of their health. */
-    public static final double HITS = 4, BLOW = 0.09;
+    /** Four of a same-level character's ordinary hits to kill; a brush stroke of 6% of their health. */
+    public static final double HITS = 4, BLOW = 0.06;
     public static final int LEVEL = 58;
     /** His writ: how often, how far he can see to write it, how long the mark lasts, how far it is heard. */
     public static final int WRIT_EVERY = 100, MARKED = 200;

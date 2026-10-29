@@ -49,8 +49,8 @@ import javax.annotation.Nullable;
 public abstract class TempleYouthEntity extends TempleImmortal {
 
     public static final int LEVEL = 84;
-    /** Seventy of a level-84 character's ordinary hits; a sword stroke of 12% of their health. */
-    public static final double HITS = 70, BLOW = 0.12;
+    /** Seventy of a level-84 character's ordinary hits; a sword stroke of 18% of their health: a miniboss's. */
+    public static final double HITS = 70, BLOW = 0.18;
     /** How far they keep from the tree; how often their art; how near the partner must be to come. */
     public static final int GARDEN = 12, ART_EVERY = 120, CURSE_EVERY = 200;
     public static final double PARTNER_WITHIN = 24;

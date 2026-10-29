@@ -34,8 +34,8 @@ import net.minecraft.world.phys.AABB;
  */
 public class KoboldEntity extends WildYaoguai {
 
-    /** Five ordinary hits; a pick's blow of 13% of a same-level character's health. */
-    public static final double HITS = 5, BLOW = 0.13, SPEED = 0.26;
+    /** Five ordinary hits; a pick's blow of 8% of a same-level character's health. */
+    public static final double HITS = 5, BLOW = 0.08, SPEED = 0.26;
     public static final int MIN_LEVEL = 3, MAX_LEVEL = 10;
     /** How far its alarm carries, in blocks. */
     public static final double ALARM_RANGE = 16;

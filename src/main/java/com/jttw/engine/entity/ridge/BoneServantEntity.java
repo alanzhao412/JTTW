@@ -42,8 +42,8 @@ import java.util.EnumSet;
 /**
  * A Bone Servant: a skeleton four blocks tall, clumsy and slow, that swings a great bone like a
  * club. Each blow is telegraphed: it stops, raises the club over its head for most of a second,
- * then brings it down, and whatever is still in reach takes a hit that can take a third to half of
- * a level-20 character's health and throws them back. Then it must lift the club again.
+ * then brings it down, and whatever is still in reach takes the heaviest hit of any of the ridge's
+ * dead and is thrown back. Then it must lift the club again.
  */
 public class BoneServantEntity extends RidgeMonster {
 
@@ -54,8 +54,8 @@ public class BoneServantEntity extends RidgeMonster {
     /** How far its blow reaches from its edge. */
     public static final double REACH = 2.6;
 
-    /** Eight of a same-level character's ordinary hits to kill; a blow of half their health, before resistance. */
-    public static final double HITS = 8, BLOW = 0.5, SPEED = 0.17;
+    /** Ten of a same-level character's ordinary hits to kill; a blow of 12% of their health, before resistance. */
+    public static final double HITS = 10, BLOW = 0.12, SPEED = 0.17;
 
     private static final EntityDataAccessor<Boolean> RAISING = SynchedEntityData.defineId(BoneServantEntity.class, EntityDataSerializers.BOOLEAN);
 

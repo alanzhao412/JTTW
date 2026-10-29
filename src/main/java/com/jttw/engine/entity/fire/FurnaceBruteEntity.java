@@ -41,8 +41,8 @@ import java.util.List;
  */
 public class FurnaceBruteEntity extends FireMonster {
 
-    /** Twelve ordinary hits to kill; a blow of 30% of a same-level character's health, the slam 22%. */
-    public static final double HITS = 12, BLOW = 0.30, SLAM = 0.22, SPEED = 0.2;
+    /** Twelve ordinary hits to kill; a blow of 12% of a same-level character's health, the slam 10%. */
+    public static final double HITS = 12, BLOW = 0.12, SLAM = 0.10, SPEED = 0.2;
     public static final int WINDUP = 16, SLAM_EVERY = 90;
     public static final double SLAM_RANGE = 4.0;
 
@@ -77,6 +77,11 @@ public class FurnaceBruteEntity extends FireMonster {
     }
 
     @Override
+    protected double[] specialShares() {
+        return new double[]{SLAM};
+    }
+
+    @Override
     public int escorts() {
         return 2;
     }
@@ -106,7 +111,7 @@ public class FurnaceBruteEntity extends FireMonster {
 
     /** The slam's hurt. */
     public float slamDamage() {
-        return (float) (blowAt(mobLevel(), isCaptain()) * SLAM / BLOW);
+        return hitOf(SLAM);
     }
 
     /** Brings its fists down: all near it (but the mountain's own) struck, thrown up, set alight. Returns who. */

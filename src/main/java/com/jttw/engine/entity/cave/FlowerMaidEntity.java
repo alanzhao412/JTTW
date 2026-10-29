@@ -43,8 +43,8 @@ import java.util.Collection;
  */
 public class FlowerMaidEntity extends CaveMonster {
 
-    /** Five of a same-level character's ordinary hits to kill; a stab of 15% of their health, before resistance. */
-    public static final double HITS = 5, STAB = 0.15;
+    /** Five of a same-level character's ordinary hits to kill; a stab of 9% of their health, before resistance. */
+    public static final double HITS = 5, STAB = 0.09;
     /** How often she tends, how far, and how much she mends: of a creature's health, of her mistress's. */
     public static final int TEND_EVERY = 100;
     public static final double TEND_RANGE = 10, MEND = 0.2, MEND_MISTRESS = 0.03;

@@ -514,6 +514,25 @@ the way to Mount Kunlun instead, and the needle points to its summit; every othe
 ends with a grey word on how to ask it, so the guidance by level is otherwise unchanged.
 In the Nether, the End or Heaven no Earth God hears, and it spins.
 
+**The pecking order.** Every creature's strength is set against a typical character of its level
+(`entity/MobScaling`): its health in that character's ordinary hits ("HITS"), each of its blows a
+share of that character's health ("BLOW"). By blow, mobs are much weaker than their bosses:
+
+| Rank | Blow (share of health, before resistance) | Hits to kill | Who |
+|---|---|---|---|
+| Light mobs | 6–7% (15–20 hits kill you) | 2–4 | wraiths, mouse spirits, ember imps, fish soldiers, yin soldiers, wandering ghosts, judge-clerks, cloud cranes, Wind-Drillers, goblins |
+| Normal mobs | 8–10% | 4–8 | flower maids, shrimp soldiers, yaksha, Horse-Face, the Impermanence, peng-demons, Daoist disciples, kobolds, wolfmen, heavenly soldiers |
+| Heavy mobs | 11–12%, no single hit (slam, gore, pounce, swoop) over 12% | 10–12 | Bone Servants, Furnace-Brick Brutes, ogres, elephant-demons, lion-demons, turtle soldiers, Crab Generals, Ox-Head |
+| Captains | a regular's ×1.2: at most 14.4% | a regular's ×2.5 | any of the above, purple-named |
+| Minibosses | 17–19%: a miniboss's hardest hit is 19% whatever its kind | a captain's, or more | the floor wardens and gate keepers of every lair (White Bone's Wardens and Keepers of the Bone Gate, the Bottomless Cave's guardians, the Fire Cloud Cave's door wardens and floor guardians, Lion-Camel's floor wardens), the Six Strong Generals, Clear Wind and Bright Moon, Heavenly Generals |
+| Bosses | 20–32% | 25–160 | every `ZoneBoss` |
+
+A miniboss is a captain made one by `ZoneMonster.becomeMiniboss(level, health over a captain's)`;
+its hits are scaled so its hardest is `MINIBOSS_HIT` (19%). A mob's special hits are declared in
+`specialShares()` and struck with `hitOf(share)`, so its rank scales them with its blow.
+`PeckingOrderGameTests` makes every creature of the mod in each of its ranks and fails if any hits
+out of its place.
+
 To add a zone:
 
 1. **Biome**: `data/jttw_engine/worldgen/biome/<zone>.json` (its features) and a hosts tag in
@@ -524,8 +543,9 @@ To add a zone:
    zone of another dimension (Hell) is `Zone.dimension(biome, ...)`: a level band, no regions; a
    place of no band (Fengdu) is `Zone.place(biome, hosts, layout, vertical)`: a region, no band.
    Level bands are registered from `Zones.ALL`; the biome source places the biome by itself.
-3. **Monsters**: extend `entity/zone/ZoneMonster` (`zone()`, `hitsToKill()`, `blowShare()`;
-   override levels, captain chance, escorts, captain loot, `allies()` as needed).
+3. **Monsters**: extend `entity/zone/ZoneMonster` (`zone()`, `hitsToKill()`, `blowShare()`, any
+   special hits in `specialShares()`, within the pecking order above; override levels, captain
+   chance, escorts, captain loot, `allies()` as needed).
 4. **Boss**: extend `entity/zone/ZoneBoss` (`zone()`, `lairRadius()`; a boss bar, persistence,
    Boss tier, phases through `phaseThresholds()` / `onPhase()`).
 5. **Worldgen**: features read `zone.depth(...)`, `zone.centre(...)` (its nearest region's),
@@ -557,7 +577,7 @@ mountain and the road by `BoneMassifFeature`), so it comes out whole whichever c
 - **The great door.** In the back of a forecourt cut into the mountain, under a skull carved in the
   cliff with eyes of crying obsidian, a door of bone and iron 13 wide and 16 high in a frame of
   blackstone, two ribs arched over the court before it. It stays shut while either of its keepers,
-  the **Keepers of the Bone Gate** (level 28 captains), lives; once both are dead it grinds open as
+  the **Keepers of the Bone Gate** (level 28 minibosses), lives; once both are dead it grinds open as
   someone comes within 12 blocks, its leaves folding back against the passage, and stays open for
   good (`CaveKeeper`, `CaveState`).
 - **Eight floors**, each 16 blocks under the last, each a hall some 90 blocks across in its own
@@ -572,7 +592,7 @@ mountain and the road by `BoneMassifFeature`), so it comes out whole whichever c
   a stair in the rock; the stairs alternate north and south, so every floor is crossed end to end.
 - **Who holds them.** Each floor has 8 + k regulars and 1 + k/2 captains (k from 0), regulars from
   level 21 on the first to 33 on the last, captains five over, placed at fixed posts (laid by the
-  seed); and before its seal its **Warden** (a Bone Servant captain six levels over its floor, with
+  seed); and before its seal its **Warden** (a Bone Servant miniboss six levels over its floor, with
   60% more health). A Warden's death breaks its seal for good. Every one of them is kept (never
   despawned) and held near its post. One found off its floor with no one to fight is put back at its
   post, and none is ever let into the throne room.
@@ -703,7 +723,7 @@ of the world.
   - **Inside**: each floor's household is **posted** when the land is made: a group in every hall (two
     in the larger), a few at crossings and in the galleries, more and with more captains the deeper
     (about 14 on the first floor to 30 on the eighth), and its **guardian** before its way down: a
-    captain of more than a captain's strength (twice its health), named for the floor ("Warden of the
+    miniboss (twice a captain's health, a miniboss's bite), named for the floor ("Warden of the
     Granaries"), mice on odd floors, maids on even (who mend the rest). **Stronger the deeper**:
     regulars level 38 on the first floor to 44 on the eighth, captains 43 to 49, guardians 40 to 47
     (the mountain's 37 and 44). The posted are kept (never despawned, even on Peaceful) and keep to
@@ -721,7 +741,7 @@ of the world.
 - **Mouse Spirit** (`entity/cave/MouseSpiritEntity`): 2 hits, a bite of 7% of health; quick
   (0.36), in packs of 3–5 (a captain brings 4). Strike one and the pack turns on you; each darts in,
   bites and scurries back, so a pack circles.
-- **Flower Maid** (`FlowerMaidEntity`): 5 hits, a stab of 15%; every 5 s she mends the most
+- **Flower Maid** (`FlowerMaidEntity`): 5 hits, a stab of 9%; every 5 s she mends the most
   wounded of the household near her (a fifth of its health; 3% of her mistress's), and pressed
   close she breathes out pollen (Slowness II and Weakness for 4 s).
 - **Lady Earth Flow** (`LadyEarthFlowEntity`, a `ZoneBoss`, level 43, 80 hits, pink bar), put on her
@@ -908,39 +928,39 @@ XP 125, stepped up from the Mystical Waters' 110 (575 a grunt kill at the band's
   no creature or king of Hell attacks anyone in it, and one that chased someone in gives up.
   `JTTWDimensions.findSafeSpawn` now makes a chunk before it reads its height (it used to read an
   unmade chunk's as the world's floor, and set the Book's dais in the air at y 64).
-- **Ox-Head** (牛头, `entity/hell/OxHeadEntity`, level 58): 7 hits, a blow of 16%; kept at a
-  distance he lowers his horns and **charges**, goring (his blow and a half) and throwing what he
-  runs down. **Horse-Face** (马面, `HorseFaceEntity`, 58): 6 hits, 14%; casts his **hook on a
+- **Ox-Head** (牛头, `entity/hell/OxHeadEntity`, level 58): 10 hits, a blow of 8%; kept at a
+  distance he lowers his horns and **charges**, goring (his blow and a half, 12%) and throwing what he
+  runs down. **Horse-Face** (马面, `HorseFaceEntity`, 58): 6 hits, 9%; casts his **hook on a
   chain** at whoever keeps off (4–12 blocks) and hauls them in, slowed.
-- **Judge-Clerk** (判官, `JudgeClerkEntity`, 58): 4 hits, 9%; every 5 s he **writes his quarry's
+- **Judge-Clerk** (判官, `JudgeClerkEntity`, 58): 4 hits, 6%; every 5 s he **writes his quarry's
   name** in his ledger: marked (glowing, 10 s), and every creature of Hell near them that is idle
   comes for them; every second writ **summons** a guard, Ox-Head and Horse-Face by turns, two of his
   at most.
 - **Black and White Impermanence** (黑白无常, `ImpermanenceEntity`, 59): met in the world, one comes
-  with the other. The Black (6 hits, 15%) **shackles** (Slowness III 2 s); the White (4.5 hits, 12%,
+  with the other. The Black (6 hits, 10%) **shackles** (Slowness III 2 s); the White (4.5 hits, 9%,
   a longer reach) **drinks** half of what his tongue takes and weakens. Near each other each takes a
-  quarter less from every blow; when one falls the other is **enraged** (Strength II, Speed II).
+  quarter less from every blow; when one falls the other is **enraged** (blows a fifth harder, Speed II).
 - **Wandering ghosts** (游魂, `WanderingGhostEntity`, 57): 2.5 hits, 7%, in twos to fours on the
   plains; their touch **chills** (slowed, hungry); they drift, never take falls; restless dead
   (healing harms them).
 - Captains as in every zone (purple, larger, stronger, with escorts; the Impermanence's captain
   brings only its partner), never past level 66.
 - **The Ten Kings** (`KingOfHellEntity`, `HellKings`, ZoneBosses on their thrones, 50 hits, a
-  tablet blow of 14%, red bars; levels 57–65 from the First to the Tenth, King Yama passed over),
+  tablet blow of 20%, red bars; levels 57–65 from the First to the Tenth, King Yama passed over),
   each passing his court's **judgement** every 7 s on whoever fights him within 14 blocks:
   1. **Qinguang** (秦广王), the **Karma Mirror**: a beam for his blow, ×0.6 for the good (karma 100+),
      up to ×3 for the wicked (1 + |karma|/500);
-  2. **Chujiang** (楚江王), the cold hell: all within 8 **frozen** (frost, Slowness III 5 s);
+  2. **Chujiang** (楚江王), the cold hell: all within 8 **frozen** (12%, frost, Slowness III 5 s);
   3. **Songdi** (宋帝王), the **iron hooks**: hauls his foe from up to 14 blocks to his feet and strikes;
   4. **Wuguan** (五官王), the **scales**: takes half the difference of their health shares from a
      healthier foe;
   6. **Biancheng** (卞城王), the **bell** of the Wailing City: all within 7 **kneel** (pinned: cannot move) 2 s;
-  7. **Taishan** (泰山王), **boiling oil**: all within 7 scalded and burning (he does not burn);
+  7. **Taishan** (泰山王), **boiling oil**: all within 7 scalded (12%) and burning (he does not burn);
   8. **Dushi** (都市王), the **crushing carts**: charges, crushing (×1.6) and flinging what he meets;
   9. **Pingdeng** (平等王), "Equal": **equal measure**, a third of every blow struck him struck back;
   10. **Zhuanlun** (转轮王), the **Wheel**: struck down the first time he is **born again** at half
       health; his judgement is **Meng Po's soup** (his foe's good effects forgotten; nausea).
-- **King Yama** (阎罗王, `KingYamaEntity`, the Fifth Court, level 66, 140 hits, 17%, purple bar,
+- **King Yama** (阎罗王, `KingYamaEntity`, the Fifth Court, level 66, 140 hits, 24%, purple bar,
   the climax): phase 0, his blows and **the Writ** every 10 s (marked; Hell's creatures near come);
   at 66% **his court rises** (Ox-Head, Horse-Face, a clerk) and he passes **sentence**: a ring of
   soul fire where his foe stands, and 1.5 s later judgement falls there (a third of the health of
@@ -1028,13 +1048,13 @@ Boy's Fire Cloud Cave on Mount Haohao (火云洞, chapters 40–42), in
   in its sweep (60° either side) out to **12 blocks** (20 in the Bull Demon King's hand) for **a
   minute**, after which the earth kindles again by itself. It does nothing to the Samadhi fire.
 - **Creatures** (`FireMonster`: level 67, captains 74, fire-proof, any light): **Ember Imps**
-  (火焰小妖: quick and frail, 4 hits; claws 10% that set alight; fling an ember for 12% every 2.5 s
+  (火焰小妖: quick and frail, 4 hits; claws 7% that set alight; fling an ember for 8% every 2.5 s
   from 3–16 blocks, a captain three at once; strike one and the rest turn; water hurts them) and
   **Furnace-Brick Brutes** (炉砖怪, bricks of the Eight Trigrams Furnace that stood up: 12 hits,
-  armoured, blows of 30%; when close they raise both fists for 0.8 s and slam the ground: 22%, thrown
+  armoured, blows of 12%; when close they raise both fists for 0.8 s and slam the ground: 10%, thrown
   up and set alight within 4 blocks).
-- **Red Boy's Six Strong Generals** (六健将, `StrongGeneralEntity`, one model, six skins): always of a
-  captain's strength (25 hits, blows of 29%), each the guardian of one of the cave's first six
+- **Red Boy's Six Strong Generals** (六健将, `StrongGeneralEntity`, one model, six skins): always
+  minibosses (25 hits, blows of 19%; their tricks 60% of that), each the guardian of one of the cave's first six
   floors (below), kept even on Peaceful. Each has his trick every 5 s: **Cloud-Soaring
   Sprite** (云里雾) leaps high and lands in a burst of blinding cloud; **Fog-Diving Monster** (雾里云)
   vanishes into fog and comes out behind his foe; **Mad-Hurrying Wind** (急如火) charges, fire springing
@@ -1068,7 +1088,7 @@ Boy's Fire Cloud Cave on Mount Haohao (火云洞, chapters 40–42), in
     two red pillars with braziers on them, two crouching demons with eyes of fire, a gilded plaque
     and a tiered roof; the door two leaves of bronze banded with black iron and studded with gold,
     **13 blocks wide and 14 high**. Before it a forecourt of standing braziers and **its two
-    wardens** (Furnace-Brick Brutes of a captain's strength) with four imps. **The rule**: while the
+    wardens** (Furnace-Brick Brute minibosses) with four imps. **The rule**: while the
     wardens live the door is barred from within (knock on it, that is use it, and they turn on you);
     kill them and knock again and it grinds open from the middle out over two seconds, and stays
     open. It does not yield to picks (nor do the floors' grates). A player in creative opens it
@@ -1086,7 +1106,7 @@ Boy's Fire Cloud Cave on Mount Haohao (火云洞, chapters 40–42), in
     the five-element pentagon in its floor round a well of fire, the five carts on their daises;
     (8) **the Magma Cistern**, a lake of lava, a causeway winding over it from island to island.
     Guardians: the six generals on floors 1–6 (the two Winds, Flame-Head, Eye-Spark, Fog-Diving,
-    Cloud-Soaring), a warden on 7 and 8.
+    Cloud-Soaring), a warden (a Furnace-Brick Brute miniboss) on 7 and 8.
   - **The garrisons**: 15–17 a floor besides the guardian, placed by the plan on open floor (not on
     fire). Levels step up: regulars 68 on the first floor to 75 on the eighth, captains four over
     (no more than 77), guardians 71 to 77; captains grow from one or two on the first floors to
@@ -1196,7 +1216,7 @@ left to its host.
     modifier, kept through death and into a new life). And whoever has eaten one is **the temple's
     enemy for good** (`Wuzhuang.isTempleEnemy`, kept by the soul through death, relogs and new lives):
     every disciple, Clear Wind and Bright Moon fight them on sight.
-- **Daoist disciples** (`DaoistDiscipleEntity`, level 78): 6 hits, a sword stroke of 13%; at 3–10
+- **Daoist disciples** (`DaoistDiscipleEntity`, level 78): 6 hits, a sword stroke of 9%; at 3–10
   blocks a **binding talisman** (定身符: pinned 1.5 s, weakened). Righteous: they fight no one
   unprovoked, except a thief of the fruit and whoever has eaten one; strike one and those near come.
   **Finite**: each temple's household is the **24** put there as the land is made (22 disciples
@@ -1206,18 +1226,18 @@ left to its host.
 - **Cloud cranes** (`CloudCraneEntity`, level 80): white, black-tipped wings, red crowns; they fly
   (never fall) within 40 blocks of where they came into the world and harry anyone who comes up;
   from 3+ blocks above they **swoop**: a dive, the beak for its blow and a half,
-  and whoever is struck is thrown back (mind the edge). 4 hits, 11%.
+  and whoever is struck is thrown back (mind the edge). 4 hits, 7% (the swoop 10.5%).
 - Captains as in every zone (purple, larger, stronger, escorts of two), never past level 88.
   Spawned on the island in any light: cranes only (weight 100, in twos and threes).
 - **Clear Wind and Bright Moon** (清风, 明月; `TempleYouthEntity`, mini-bosses, level 84, 70 hits,
-  12%, a blow takes at most 6% of their health), by the tree, fighting as a pair (strike one and the
+  18%, a blow takes at most 6% of their health), by the tree, fighting as a pair (strike one and the
   other comes): Clear Wind's **gust** hurls his foe away; Bright Moon's **moonlight** blinds and slows
   and mends his partner by a tenth; both **curse** a thief roundly (it weakens). They count among the
   temple's disciples and fight to the death; struck down, Clear Wind always leaves the **Golden
   Striker**, Bright Moon the **Silk-Lined Tray**: the two things it takes to bring a fruit down whole.
   Each pays as a General.
 - **The Great Immortal Zhenyuan** (镇元大仙, `ZhenyuanEntity`, a `ZoneBoss`, level 88, 160 hits,
-  15%, yellow bar). **Not at his temple**: as in the novel, he is away (hearing the Primordial Lord
+  20%, yellow bar). **Not at his temple**: as in the novel, he is away (hearing the Primordial Lord
   lecture), and no lair puts him there. **He comes back for whoever kills the last of his
   disciples** (`TempleRecord`, saved data of the overworld keyed by the temple's region centre, so it
   holds with the temple's chunks unloaded and through restarts): each of the 24 is marked as its
@@ -1360,7 +1380,7 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   Side halls open off some through wide doorways under lintels. Each floor's **way down is a stair
   against a wall behind a portcullis**, coming down on the next floor at the other side (so every
   floor is crossed); the portcullis **rises of itself when the floor's warden falls** (a captain's
-  level and half again a captain's health, before it). The generals' hall's way down is a grand
+  level, half again a captain's health and a miniboss's blows, before it). The generals' hall's way down is a grand
   stair, balustraded, into the **throne room** at the bottom, some 127 blocks under the city: 63 by
   67 blocks and 20 high, great pillars banded with gold, braziers down the nave, bones heaped in the
   corners, a red carpet to a dais with the three thrones (a gold lion's face over the Lion's; the
@@ -1390,15 +1410,15 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   blocks are proof against picks), never sealed. A world whose city was made before keeps its old
   treasury chest on the hall's dais, so there the throne room's makes a second vase.
 - **Creatures** (`LionCamelMonster`: level 89, captains 96, any light, in numbers): **Lion-Demons**
-  (狮子精, the Azure Lion's kin: 9 hits, sabre cuts of 22%; they pounce from 4–11 blocks for 26% and
+  (狮子精, the Azure Lion's kin: 10 hits, sabre cuts of 11%; they pounce from 4–11 blocks for 12% and
   a stagger; strike one and the pride turns), **Elephant-Demons** (象精, the White Elephant's
-  followers: 14 hits, armoured, blows of 30%; they charge, tusks down, goring for 26% and flinging
-  aside), **Peng-Demons** (鹏精, the Great Peng's followers: 6 hits, spear thrusts of 16%; they beat
-  up into the air and swoop for 24%, glide rather than fall). Captains as everywhere (8%, purple,
+  followers: 12 hits, armoured, blows of 11%; they charge, tusks down, goring for 12% and flinging
+  aside), **Peng-Demons** (鹏精, the Great Peng's followers: 6 hits, spear thrusts of 10%; they beat
+  up into the air and swoop for 11%, glide rather than fall). Captains as everywhere (8%, purple,
   2.5x health, with escorts: three, two, four).
 - **The Little Wind-Driller** (小钻风, `LittleWindDrillerEntity`): the ridge's patrol demon in his
   pointed cap with the patrol token at his sash (the one Sun Wukong took to pass for him) and a
-  clapper-bell. No fighter (3 hits, never a captain); but let him see a foe within 16 blocks, or be
+  clapper-bell. No fighter (3 hits, a blow of 6%, never a captain); but let him see a foe within 16 blocks, or be
   struck, and he **raises the alarm**: he rings his bell, every demon of the ridge within 32 blocks is
   set on the foe, three more come running (while fewer than 16 are about), and he runs off; then 30 s
   before he can raise it again. A Wind-Driller is posted at each of the city's gates.
@@ -1756,7 +1776,9 @@ are set against a typical character of that level (`MobScaling`), as a zone crea
 carry no enemy tier and no zone, so their kills pay as vanilla monsters' do: below level 20 by the
 killer's level and their weight (`WildYaoguai.vanillaXpShare`, as `LevelManager.vanillaMobWeight` is
 a vanilla mob's: a goblin a zombie's 1, an ogre 5), from 20 nothing; the zones are where a character
-grows from then on.
+grows from then on. They keep the zones' pecking order (see Zones): a goblin takes 4 hits and its
+blow is 6% of a same-level character's health, a kobold 5 and 8%, a wolfman 8 and 10%, an ogre 12
+and 12% (its slam three quarters of that).
 
 | Kind | Levels | Looks | Ways | Where, when | Weight (below 20) | Leaves |
 |---|---|---|---|---|---|---|

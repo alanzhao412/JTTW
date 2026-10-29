@@ -637,7 +637,7 @@ public class LionCamelGameTests {
         float hp = g.getHealth();
         check(h, lion.landOn(g), "a lion-demon's pounce lands");
         close(h, lion.pounceDamage(), hp - g.getHealth(), "for its blow");
-        close(h, LionDemonEntity.POUNCE * MobScaling.typicalHealth(89), lion.pounceDamage(), "26% of a level-89 character's health");
+        close(h, LionDemonEntity.POUNCE * MobScaling.typicalHealth(89), lion.pounceDamage(), "12% of a level-89 character's health");
         check(h, g.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "staggering");
         lion.discard();
         PengDemonEntity peng = demon(h, ModEntities.PENG_DEMON.get(), 89, false, new BlockPos(2, 2, 2));

@@ -13,7 +13,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
@@ -73,7 +72,7 @@ public class LionCamelCityFeature extends ZoneLairFeature {
 
     /** How far a guard wanders from its post in the city and out on the ridge; how far one of the ridge strays before it is back. */
     public static final int CITY_WANDER = 12, RIDGE_WANDER = 20, RIDGE_LEASH = 72;
-    /** A floor's warden's health, over a captain's. */
+    /** A floor's warden's health, over a captain's (it is a miniboss: see ZoneMonster#becomeMiniboss). */
     public static final double WARDEN_HEALTH = 1.5;
 
     public LionCamelCityFeature(Codec<NoneFeatureConfiguration> codec) {
@@ -161,12 +160,10 @@ public class LionCamelCityFeature extends ZoneLairFeature {
             }
             LionCamelMonster m = keeper(level, post.who().type(), at, random);
             if (m == null) continue;
-            m.become(LionFortress.levelOf(post.floor(), post.role()), post.role() != LionFortress.REGULAR);
-            if (post.role() == LionFortress.WARDEN) {
-                var health = m.getAttribute(Attributes.MAX_HEALTH);
-                health.setBaseValue(health.getBaseValue() * WARDEN_HEALTH);
-                m.setHealth(m.getMaxHealth());
-            }
+            int lv = LionFortress.levelOf(post.floor(), post.role());
+            // a floor's warden is a miniboss; the door's six are regulars and captains
+            if (post.role() == LionFortress.WARDEN) m.becomeMiniboss(lv, WARDEN_HEALTH);
+            else m.become(lv, post.role() != LionFortress.REGULAR);
             if (post.role() == LionFortress.WARDEN || post.floor() < 0) {
                 LionGates.makeWarden(m, new LionGates.Fortress(c[0], c[1], floor), post.floor() < 0 ? LionGates.DOOR : post.floor());
             }

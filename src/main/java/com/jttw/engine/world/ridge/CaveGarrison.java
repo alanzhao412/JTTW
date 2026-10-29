@@ -1,6 +1,5 @@
 package com.jttw.engine.world.ridge;
 
-import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.entity.ridge.LadyWhiteBoneEntity;
 import com.jttw.engine.entity.ridge.RidgeMonster;
 import com.jttw.engine.entity.zone.ZoneMonster;
@@ -12,8 +11,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -76,19 +73,15 @@ public final class CaveGarrison {
         BlockPos stand = level instanceof ServerLevel server ? ZoneMonster.standingSpot(server, mob, at) : at;
         mob.moveTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, random.nextFloat() * 360f, 0f);
         mob.finalizeSpawn(level, level.getCurrentDifficultyAt(stand), reason, null);
-        boolean captain = post.rank() != WhiteBoneCave.REGULAR;
-        mob.become(post.level(), captain);
+        // a seal's guardian and the gate's keepers are minibosses; the rest regulars and captains
+        if (post.rank() == WhiteBoneCave.GUARDIAN) mob.becomeMiniboss(post.level(), GUARDIAN_HEALTH);
+        else if (post.rank() == WhiteBoneCave.WARDEN) mob.becomeMiniboss(post.level(), 1);
+        else mob.become(post.level(), post.rank() != WhiteBoneCave.REGULAR);
         CompoundTag tag = mob.getPersistentData();
         tag.putInt(KEY_FLOOR, post.floor());
         tag.putInt(KEY_POST, index);
         tag.putInt(KEY_RANK, post.rank());
         if (post.rank() == WhiteBoneCave.GUARDIAN) {
-            var health = mob.getAttribute(Attributes.MAX_HEALTH);
-            if (health != null) {
-                health.addPermanentModifier(new AttributeModifier(JTTWEngine.id("cave_guardian"), GUARDIAN_HEALTH - 1,
-                        AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
-                mob.setHealth(mob.getMaxHealth());
-            }
             mob.setCustomName(ZoneMonster.nameWithLevel(Component.literal("Warden of the " + ORDINALS[post.floor()] + " Seal"), post.level(), true));
         } else if (post.rank() == WhiteBoneCave.WARDEN) {
             mob.setCustomName(ZoneMonster.nameWithLevel(Component.literal("Keeper of the Bone Gate"), post.level(), true));

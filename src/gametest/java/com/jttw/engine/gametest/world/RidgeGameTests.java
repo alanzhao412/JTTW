@@ -130,7 +130,7 @@ public class RidgeGameTests {
     // ── The Bone Servant ────────────────────────────────────────────────
 
     @GameTest(template = PLATFORM)
-    public static void aServantsBlowHitsLikeATruck(GameTestHelper h) {
+    public static void aServantsBlowIsTheHeaviestOfTheMobs(GameTestHelper h) {
         BoneServantEntity servant = ridge(h, ModEntities.BONE_SERVANT.get(), 20, false, new BlockPos(1, 2, 1));
         var golem = h.spawn(EntityType.IRON_GOLEM, new BlockPos(3, 2, 3));
         float before = golem.getHealth();
@@ -141,8 +141,8 @@ public class RidgeGameTests {
         for (ProgressionClass cls : ProgressionClass.values()) {
             StatBlock s = StatBlock.compute(cls, 20);
             double taken = ResistanceHandler.damageAfter(blow, s.physicalResistance());
-            check(h, taken >= s.maxHealth() / 5 && taken < s.maxHealth() * 0.6,
-                    cls + " at 20 loses a fifth to (for the frailest) over half its health to one blow: " + taken + " of " + s.maxHealth());
+            check(h, taken >= s.maxHealth() / 25 && taken <= s.maxHealth() * RidgeMonster.MOB_HIT_CAP + 1e-6,
+                    cls + " at 20 loses a twenty-fifth to (for the frailest) 12% of its health to one blow: " + taken + " of " + s.maxHealth());
         }
         h.succeed();
     }
