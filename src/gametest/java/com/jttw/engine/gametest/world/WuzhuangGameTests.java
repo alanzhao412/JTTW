@@ -119,8 +119,8 @@ public class WuzhuangGameTests {
     private static IronGolem dummy(GameTestHelper h, BlockPos at) {
         IronGolem golem = h.spawn(EntityType.IRON_GOLEM, at);
         golem.setNoAi(true);
-        golem.getAttribute(Attributes.MAX_HEALTH).setBaseValue(10_000);
-        golem.setHealth(10_000);
+        golem.getAttribute(Attributes.MAX_HEALTH).setBaseValue(100_000_000);
+        golem.setHealth(100_000_000);
         sweepAround(h, golem);
         return golem;
     }
@@ -701,7 +701,7 @@ public class WuzhuangGameTests {
                 far = dummy(h, new BlockPos(5, 2, 5));
         for (IronGolem g : List.of(a, b, steps, far)) {
             g.setTarget(zh);
-            g.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1_000_000); // a level-88 blow is more than a golem
+            g.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1_000_000); // a level-103 blow is more than a golem
             g.setHealth(1_000_000);
         }
         zh.setTarget(a);
@@ -745,9 +745,9 @@ public class WuzhuangGameTests {
         openAir(h);
         ServerPlayer p = player(h);
         ZhenyuanEntity zh = immortal(h, ModEntities.ZHENYUAN.get(), new BlockPos(2, 2, 2), false);
-        close(h, ZhenyuanEntity.HITS * MobScaling.typicalHit(ZhenyuanEntity.LEVEL), zh.getMaxHealth(), "280 hits of a level-88 character");
+        close(h, ZhenyuanEntity.HITS * MobScaling.typicalHit(ZhenyuanEntity.LEVEL), zh.getMaxHealth(), "280 hits of a character of his level");
         eq(h, BossEvent.BossBarColor.YELLOW, zh.bossBar().getColor(), "his bar");
-        check(h, zh.getDisplayName().getString().endsWith("· Lv 88"), "named: " + zh.getDisplayName().getString());
+        check(h, zh.getDisplayName().getString().endsWith("· Lv 103"), "named: " + zh.getDisplayName().getString());
         zh.stagger();
         float full = zh.getHealth();
         zh.hurt(h.getLevel().damageSources().playerAttack(p), 1e9f);

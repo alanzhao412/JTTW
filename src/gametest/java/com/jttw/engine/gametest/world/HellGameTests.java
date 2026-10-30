@@ -103,8 +103,8 @@ public class HellGameTests {
     private static IronGolem dummy(GameTestHelper h, BlockPos at) {
         IronGolem golem = h.spawn(EntityType.IRON_GOLEM, at);
         golem.setNoAi(true);
-        golem.getAttribute(Attributes.MAX_HEALTH).setBaseValue(10_000);
-        golem.setHealth(10_000);
+        golem.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1_000_000);
+        golem.setHealth(1_000_000);
         sweepAround(h, golem);
         return golem;
     }
@@ -277,7 +277,7 @@ public class HellGameTests {
             KingOfHellEntity k = king(h, HellKings.type(n), new BlockPos(2, 2, 2));
             eq(h, n, k.court(), "court");
             int level = KingOfHellEntity.levelOf(n);
-            eq(h, n == 5 ? 66 : n < 5 ? 56 + n : 55 + n, level, "his level: 57 to 65, Yama 66");
+            eq(h, n == 5 ? 81 : n < 5 ? 71 + n : 70 + n, level, "his level: 72 to 80, Yama 81");
             check(h, k.getDisplayName().getString().endsWith(" · Lv " + level), "named: " + k.getDisplayName().getString());
             eq(h, EnemyTier.BOSS.name(), k.getPersistentData().getString(ZoneMonster.KEY_TIER), "pays as a Boss");
             eq(h, Zones.HELL.id(), k.getPersistentData().getString(ZoneMonster.KEY_ZONE), "of Hell");
@@ -501,6 +501,8 @@ public class HellGameTests {
         oil.discard();
         var equal = king(h, ModEntities.KING_PINGDENG.get(), new BlockPos(1, 2, 1));
         IronGolem zombie = dummy(h, new BlockPos(3, 2, 1));
+        zombie.getAttribute(Attributes.MAX_HEALTH).setBaseValue(10_000); // fine enough to measure a few points by
+        zombie.setHealth(10_000);
         float zFull = zombie.getHealth(), kFull = equal.getHealth();
         equal.hurt(h.getLevel().damageSources().mobAttack(zombie), 12);
         float taken = kFull - equal.getHealth();

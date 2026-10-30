@@ -66,9 +66,9 @@ import java.util.UUID;
  */
 public class LadyWhiteBoneEntity extends ZoneBoss implements RangedAttackMob {
 
-    public static final int LEVEL = 33;
+    public static final int LEVEL = ZoneBoss.levelOver(Zones.WHITE_BONE);
     /**
-     * Ordinary hits of a level-33 character to bring down each of her four lives (her three
+     * Ordinary hits of a level-51 character to bring down each of her four lives (her three
      * disguises' deaths, then hers): three hundred in all, a group's fight, each life more than any
      * miniboss's; each shard a quarter of their health, her claw 28%, before resistance.
      */

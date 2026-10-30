@@ -49,7 +49,8 @@ import java.util.function.Predicate;
  *       leaves them nothing if they strike it down.</li>
  * </ul>
  *
- * <p>A boss is a group's fight, not one character's: all its lives together it takes at least
+ * <p>A boss stands {@link #LEVELS_ABOVE_BAND} levels over the top of its zone's band ({@link #levelOver}).
+ * A boss is a group's fight, not one character's: all its lives together it takes at least
  * {@link #LEAST_HITS} of a same-level character's ordinary hits to kill (three or four of them,
  * some sixty to ninety hits each), and its main blow takes {@link #LEAST_BLOW} to {@link #MOST_BLOW}
  * of that character's health, so three or four of them kill; its special hits ({@link #specialShares()},
@@ -57,6 +58,18 @@ import java.util.function.Predicate;
  * of its lives ({@link #lives()}) is more than any miniboss's health (see the README's pecking order).
  */
 public abstract class ZoneBoss extends Monster implements MobLevel {
+
+    /**
+     * How far over its zone's level band a boss stands: a zone's boss is of the band's top level and
+     * this many more ({@link #levelOver}), far beyond anything else of its zone (its minions,
+     * captains and minibosses keep within the band). Past the players' cap of 100 as need be.
+     */
+    public static final int LEVELS_ABOVE_BAND = 15;
+
+    /** A boss's level in {@code zone}: the top of its band and {@link #LEVELS_ABOVE_BAND} more. */
+    public static int levelOver(Zones.Zone zone) {
+        return zone.maxLevel() + LEVELS_ABOVE_BAND;
+    }
 
     /** The least ordinary hits of a same-level character a boss takes to kill, all its lives together. */
     public static final double LEAST_HITS = 250;

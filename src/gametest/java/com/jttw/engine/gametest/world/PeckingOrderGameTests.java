@@ -127,6 +127,38 @@ public class PeckingOrderGameTests {
     }
 
     @GameTest(template = PLATFORM)
+    public static void bossesStandFarAboveTheirZonesInLevel(GameTestHelper h) {
+        // the highest level anything of a zone but its bosses comes at: its band's top, its captains and minibosses, the temple youths
+        java.util.Map<String, Integer> minions = new java.util.HashMap<>(), head = new java.util.HashMap<>();
+        java.util.Map<String, com.jttw.engine.world.Zones.Zone> zones = new java.util.HashMap<>();
+        List<ZoneBoss> bosses = new ArrayList<>();
+        for (Entity e : every(h)) {
+            if (e instanceof TempleYouthEntity y) minions.merge(y.zone().id(), y.mobLevel(), Math::max);
+            else if (e instanceof ZoneBoss b) bosses.add(b);
+            else if (e instanceof ZoneMonster m) minions.merge(m.zone().id(), Math.max(m.zone().maxLevel(), m.captainLevel()), Math::max);
+            if (!(e instanceof ZoneBoss) || e instanceof TempleYouthEntity) e.discard();
+        }
+        for (ZoneBoss b : bosses) {
+            com.jttw.engine.world.Zones.Zone z = b.zone();
+            zones.put(z.id(), z);
+            int top = Math.max(z.maxLevel(), minions.getOrDefault(z.id(), 0));
+            check(h, b.mobLevel() > top, name(b) + " (Lv " + b.mobLevel() + ") above everything else of its zone (Lv " + top + ")");
+            check(h, b.mobLevel() <= ZoneBoss.levelOver(z), name(b) + " no higher than its zone's head: " + b.mobLevel());
+            head.merge(z.id(), b.mobLevel(), Math::max);
+            b.discard();
+        }
+        for (var entry : head.entrySet()) {
+            com.jttw.engine.world.Zones.Zone z = zones.get(entry.getKey());
+            int top = Math.max(z.maxLevel(), minions.getOrDefault(z.id(), 0));
+            eq(h, ZoneBoss.levelOver(z), entry.getValue(), z.id() + "'s head boss: its band's top and " + ZoneBoss.LEVELS_ABOVE_BAND);
+            check(h, entry.getValue() >= top + ZoneBoss.LEVELS_ABOVE_BAND,
+                    z.id() + "'s head boss (Lv " + entry.getValue() + ") " + ZoneBoss.LEVELS_ABOVE_BAND + " over everything else of it (Lv " + top + ")");
+        }
+        check(h, head.size() >= 7, "every zone's bosses measured: " + head.keySet());
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
     public static void mobsHitFarLessThanTheirBosses(GameTestHelper h) {
         int zone = 0, wild = 0, bosses = 0;
         for (Entity e : every(h)) {

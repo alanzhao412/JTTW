@@ -45,19 +45,19 @@ import java.util.List;
  * green-maned lion the Bodhisattva Manjushri rides (chapters 74–77). A giant lion-headed demon king,
  * two and a half times a man's height, hulking in dark armour, his green-blue mane wild about a
  * snarling maw, clawed hands, a giant's broadsword; he holds court in the throne hall of Lion-Camel
- * City. Level 100, the last band's cap: 350 ordinary hits of a level-100 character (a group's
+ * City. Level 115, fifteen over the last band's cap: 350 ordinary hits of a level-115 character (a group's
  * fight), an azure bar.
  * In the novel he opened his mouth as wide as a city gate and swallowed the Monkey King whole, and
  * Sun Wukong, inside him, made him suffer until he let him out.
  * <ul>
- *   <li>his <b>broadsword</b>: blows of {@value #SWORD_PERCENT}% of a level-100 character's health;</li>
+ *   <li>his <b>broadsword</b>: blows of {@value #SWORD_PERCENT}% of a level-115 character's health;</li>
  *   <li>the <b>roar</b> (every {@value #ROAR_EVERY} ticks; his head thrown back {@value #ROAR_WINDUP}
  *       ticks first): before him in a cone {@value #ROAR_RANGE} blocks long, a blow of
  *       {@value #ROAR_PERCENT}%, Slowness and Weakness, and thrown back;</li>
  *   <li><b>he swallows his foe whole</b> (every {@value #SWALLOW_EVERY} ticks, a foe within
  *       {@value #SWALLOW_REACH} blocks before him; his jaws gape {@value #GAPE} ticks first: step
  *       away!). Inside him the foe is unseen and in the dark, and his belly takes
- *       {@value #BELLY_PERCENT}% of a level-100 character's health each second, armour or none. Blows
+ *       {@value #BELLY_PERCENT}% of a level-115 character's health each second, armour or none. Blows
  *       struck from inside count half again, and once they come to {@value #ESCAPE_HITS} ordinary
  *       hits of his health he retches the foe up and reels; else after {@value #MAX_HOLD} ticks he spits him
  *       out anyway;</li>
@@ -72,9 +72,9 @@ import java.util.List;
  */
 public class AzureLionEntity extends DemonKingEntity {
 
-    public static final int LEVEL = 100;
+    public static final int LEVEL = com.jttw.engine.entity.zone.ZoneBoss.levelOver(com.jttw.engine.world.Zones.LION_CAMEL);
     public static final int SWORD_PERCENT = 30, ROAR_PERCENT = 12, BELLY_PERCENT = 5;
-    /** His health, in ordinary hits of a level-100 character; what a captive must deal from inside him (counted half again) to be retched up. */
+    /** His health, in ordinary hits of a level-115 character; what a captive must deal from inside him (counted half again) to be retched up. */
     public static final double HITS = 350, ESCAPE_HITS = 5.4;
     public static final double SWORD = SWORD_PERCENT / 100.0, ROAR = ROAR_PERCENT / 100.0, BELLY = BELLY_PERCENT / 100.0;
     public static final double HEALTH = HITS * MobScaling.typicalHit(LEVEL);

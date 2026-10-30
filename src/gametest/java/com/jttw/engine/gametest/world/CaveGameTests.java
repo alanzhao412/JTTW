@@ -87,8 +87,8 @@ public class CaveGameTests {
     private static net.minecraft.world.entity.animal.IronGolem dummy(GameTestHelper h, BlockPos at) {
         var golem = h.spawn(EntityType.IRON_GOLEM, at);
         golem.setNoAi(true);
-        golem.getAttribute(Attributes.MAX_HEALTH).setBaseValue(10_000);
-        golem.setHealth(10_000);
+        golem.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1_000_000);
+        golem.setHealth(1_000_000);
         sweepAround(h, golem);
         return golem;
     }
@@ -288,8 +288,8 @@ public class CaveGameTests {
         check(h, lady.getMainHandItem().is(ModItems.EARTH_FLOW_SWORD_MALE.get()) && lady.getOffhandItem().is(ModItems.EARTH_FLOW_SWORD_FEMALE.get()),
                 "the male blade in her right hand, the female in her left");
         check(h, PairedBlade.paired(lady), "a pair");
-        close(h, LadyEarthFlowEntity.HEALTH, lady.getMaxHealth(), "270 hits of a level-43 character");
-        check(h, lady.getDisplayName().getString().equals("Lady Earth Flow · Lv 43"), "named: " + lady.getDisplayName().getString());
+        close(h, LadyEarthFlowEntity.HEALTH, lady.getMaxHealth(), "270 hits of a character of her level");
+        check(h, lady.getDisplayName().getString().equals("Lady Earth Flow · Lv " + LadyEarthFlowEntity.LEVEL), "named: " + lady.getDisplayName().getString());
         eq(h, EnemyTier.BOSS.name(), lady.getPersistentData().getString(ZoneMonster.KEY_TIER), "pays as a Boss");
         check(h, !lady.removeWhenFarAway(10_000) && lady.isPersistenceRequired(), "never despawned");
         h.succeed();

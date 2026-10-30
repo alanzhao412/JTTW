@@ -83,8 +83,8 @@ import java.util.List;
  */
 public class LadyEarthFlowEntity extends ZoneBoss {
 
-    public static final int LEVEL = 43;
-    /** 270 of a level-43 character's ordinary hits to kill, a group's fight; each cut 14% of their health (a stroke 28%), before resistance. */
+    public static final int LEVEL = ZoneBoss.levelOver(Zones.BOTTOMLESS);
+    /** 270 of a level-61 character's ordinary hits to kill, a group's fight; each cut 14% of their health (a stroke 28%), before resistance. */
     public static final double HITS = 270, CUT = 0.14;
     public static final double HEALTH = HITS * MobScaling.typicalHit(LEVEL), CUT_DAMAGE = CUT * MobScaling.typicalHealth(LEVEL);
     public static final int HOUSEHOLD_AT_PERCENT = 60, ESCAPE_AT_PERCENT = 30;
@@ -102,7 +102,7 @@ public class LadyEarthFlowEntity extends ZoneBoss {
     public static final String KEY_HOUSEHOLD = "jttw_earth_flow_household";
     /** How far beyond her ground she may be drawn before she is back on it, across and up or down. */
     public static final int LEASH = 6;
-    /** The whirl: how often; how long she winds up, how long she spins; how far it reaches, how hard it cuts (of a level-43 character's health). */
+    /** The whirl: how often; how long she winds up, how long she spins; how far it reaches, how hard it cuts (of a level-61 character's health). */
     public static final int WHIRL_EVERY = 180, WHIRL_WIND_UP = 20, WHIRL_SPIN = 10;
     public static final double WHIRL_REACH = 4.5, WHIRL = 0.22;
 

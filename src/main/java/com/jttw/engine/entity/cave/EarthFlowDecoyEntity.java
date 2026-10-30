@@ -32,7 +32,7 @@ import net.minecraft.world.level.Level;
  */
 public class EarthFlowDecoyEntity extends PathfinderMob implements com.jttw.engine.entity.zone.MobLevel {
 
-    /** Six of a level-43 character's ordinary hits to fell; a cut of a twentieth of their health. */
+    /** Six of a level-61 character's ordinary hits to fell; a cut of a twentieth of their health. */
     public static final double HITS = 6, CUT = 0.05;
     /** How long the likeness holds, in ticks. */
     public static final int LASTS = 1200;

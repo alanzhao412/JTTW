@@ -48,8 +48,8 @@ import java.util.List;
  * for {@value #AREA_WIND_UP} ticks (his court's sign gathering round him, a sound rising), and then
  * brings it down on everyone within {@link #areaReach()} at once ({@link #release}).
  *
- * <p>The First Court's king is level 57, and each after one more, King Yama passed over (the Sixth
- * 61, the Tenth 65); King Yama is 66.
+ * <p>The First Court's king is level 72, and each after one more, King Yama passed over (the Sixth
+ * 76, the Tenth 80); King Yama is 81, the top of Hell's band and {@link ZoneBoss#LEVELS_ABOVE_BAND}.
  */
 public abstract class KingOfHellEntity extends ZoneBoss {
 
@@ -93,9 +93,13 @@ public abstract class KingOfHellEntity extends ZoneBoss {
         return kingLevel();
     }
 
-    /** The level of a king of this court: 57 to 65 from the First to the Tenth, King Yama passed over: he is 66, the strongest. */
+    /**
+     * The level of a king of this court: King Yama's ({@link ZoneBoss#levelOver} Hell: 81, the
+     * strongest), and the others under him, 72 to 80 from the First to the Tenth, Yama passed over.
+     */
     public static int levelOf(int court) {
-        return court == 5 ? KingYamaEntity.LEVEL : court < 5 ? 56 + court : 55 + court;
+        int yama = KingYamaEntity.LEVEL;
+        return court == 5 ? yama : court < 5 ? yama - 10 + court : yama - 11 + court;
     }
 
     /** The ordinary hits of his level a king of this court takes to kill (his first life, for the Tenth). */

@@ -73,9 +73,9 @@ import java.util.UUID;
  */
 public class ZhenyuanEntity extends TempleImmortal {
 
-    public static final int LEVEL = 88;
+    public static final int LEVEL = com.jttw.engine.entity.zone.ZoneBoss.levelOver(com.jttw.engine.world.Zones.MOUNT_WUZHUANG);
     /**
-     * 280 of a level-88 character's ordinary hits, a group's fight (more, hand to hand: he brushes
+     * 280 of a level-103 character's ordinary hits, a group's fight (more, hand to hand: he brushes
      * one blow in four aside); a whisk stroke of 28% of their health. No blow takes more than
      * {@value #HIT_CAP_PERMILLE}‰ of his health: some four ordinary hits.
      */
@@ -88,7 +88,7 @@ public class ZhenyuanEntity extends TempleImmortal {
     /** How far from the one he comes for he arrives (at least, at most), and how far he will go on hunting them. */
     public static final int ARRIVE_NEAR = 4, ARRIVE_FAR = 8, HUNT = 64;
     public static final float DISCIPLES_AT = 0.6f, ALL_AT = 0.3f;
-    /** The sweep of the whisk: how often, how long its wind-up, how long the sweep is shown; how far, how hard (of a level-88 character's health), how far it blows one back. */
+    /** The sweep of the whisk: how often, how long its wind-up, how long the sweep is shown; how far, how hard (of a level-103 character's health), how far it blows one back. */
     public static final int SWEEP_EVERY = 220, SWEEP_WIND_UP = 25, SWEEP_SHOWN = 8;
     public static final double SWEEP_REACH = 6, SWEEP = 0.25, GALE = 1.2;
 

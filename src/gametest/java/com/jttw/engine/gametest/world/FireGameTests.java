@@ -97,7 +97,7 @@ public class FireGameTests {
         return b;
     }
 
-    /** A still iron golem, its health raised so no level-77 blow ends it: a target to measure blows on. */
+    /** A still iron golem, its health raised so no blow of Red Boy's ends it: a target to measure blows on. */
     private static LivingEntity golem(GameTestHelper h, BlockPos at) {
         var g = h.spawn(EntityType.IRON_GOLEM, at);
         g.goalSelector.removeAllGoals(x -> true);
@@ -278,7 +278,7 @@ public class FireGameTests {
     public static void redBoyIsTheHolyChildKing(GameTestHelper h) {
         RedBoyEntity boy = boy(h, new BlockPos(2, 2, 2));
         check(h, boy.getDisplayName().getString().contains("Lv " + RedBoyEntity.LEVEL), boy.getDisplayName().getString());
-        close(h, RedBoyEntity.HEALTH, boy.getMaxHealth(), "320 ordinary hits of a level-77 character");
+        close(h, RedBoyEntity.HEALTH, boy.getMaxHealth(), "320 ordinary hits of a character of his level");
         eq(h, EnemyTier.BOSS.name(), boy.getPersistentData().getString(ZoneMonster.KEY_TIER), "a Boss");
         eq(h, Zones.FIRE_MOUNTAIN.id(), boy.getPersistentData().getString(ZoneMonster.KEY_ZONE), "of the mountains");
         eq(h, BossEvent.BossBarColor.RED, boy.bossBar().getColor(), "a red bar");
