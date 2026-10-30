@@ -23,8 +23,8 @@ import java.util.List;
  * The Ten Kings of Hell but King Yama ({@link KingYamaEntity}), each with his court's judgement:
  * <ol>
  *   <li><b>Qinguang</b> (秦广王) and the <b>Karma Mirror</b>: it shows a soul its deeds and strikes
- *       it for them: a light blow for the good, up to three times as heavy for the wicked (by
- *       karma, {@link Qinguang#mirrorFactor});</li>
+ *       it for them: a light blow for the good, up to {@link Qinguang#AT_WORST} times as heavy for
+ *       the wicked (by karma, {@link Qinguang#mirrorFactor}; no heavier than a boss's hardest blow);</li>
  *   <li><b>Chujiang</b> (楚江王), the cold hell: everyone near him is <b>frozen</b>, slowed hard;</li>
  *   <li><b>Songdi</b> (宋帝王), the iron <b>hooks</b>: he hauls whoever he fights to his feet;</li>
  *   <li><b>Wuguan</b> (五官王), the <b>scales</b>: he weighs his health against his foe's, and takes
@@ -76,8 +76,8 @@ public final class HellKings {
     // ── 1 ───────────────────────────────────────────────────────────────
 
     public static class Qinguang extends KingOfHellEntity {
-        /** The mirror's blow, of his: for the good (karma 100 and up), and at most for the wicked. */
-        public static final double FOR_THE_GOOD = 0.6, AT_WORST = 3;
+        /** The mirror's blow, of his: for the good (karma 100 and up), and at most for the wicked (at -1000 and below: a third of their health). */
+        public static final double FOR_THE_GOOD = 0.6, AT_WORST = 1.3;
 
         public Qinguang(EntityType<? extends Qinguang> type, Level level) {
             super(type, level);
@@ -88,11 +88,11 @@ public final class HellKings {
             return 1;
         }
 
-        /** How heavily the mirror strikes a soul of this karma: lightly the good, more the worse they are, up to three times. */
+        /** How heavily the mirror strikes a soul of this karma: lightly the good, more the worse they are, up to {@link #AT_WORST} at -1000. */
         public static double mirrorFactor(int karma) {
             if (karma >= 100) return FOR_THE_GOOD;
             if (karma >= 0) return 1;
-            return Math.min(AT_WORST, 1 + -karma / 500.0);
+            return 1 + (AT_WORST - 1) * Math.min(1, -karma / 1000.0);
         }
 
         /** The mirror's blow on {@code target}, as it would fall. */
@@ -329,7 +329,8 @@ public final class HellKings {
     // ── 8 ───────────────────────────────────────────────────────────────
 
     public static class Dushi extends KingOfHellEntity {
-        public static final double SPEED = 0.95, CRUSH = 1.6, FLING = 2.0;
+        /** His charge's speed; the crush, of his blow (no heavier than a boss's hardest blow); how far it flings. */
+        public static final double SPEED = 0.95, CRUSH = 1.3, FLING = 2.0;
         public static final int RUN = 14;
         private int run;
         private Vec3 heading = Vec3.ZERO;
@@ -348,7 +349,7 @@ public final class HellKings {
             return run > 0;
         }
 
-        /** Crushes {@code target} under the cart: his blow and a half and more, and it is flung. */
+        /** Crushes {@code target} under the cart: his blow and a third, and it is flung. */
         public boolean crush(LivingEntity target) {
             target.invulnerableTime = 0;
             boolean hit = target.hurt(damageSources().mobAttack(this), (float) (blow() * CRUSH));
@@ -474,6 +475,12 @@ public final class HellKings {
         public boolean judge(LivingEntity target) {
             soup(target);
             return true;
+        }
+
+        /** Two lives: his own, then, the Wheel turned, half of it again. */
+        @Override
+        public double[] lives() {
+            return new double[]{1, REBORN_AT};
         }
 
         /** Struck down the first time, the Wheel turns and he is born again. */

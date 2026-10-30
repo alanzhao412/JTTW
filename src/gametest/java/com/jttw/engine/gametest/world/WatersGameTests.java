@@ -383,7 +383,7 @@ public class WatersGameTests {
             eq(h, k[3], king.bossBar().getColor(), king.sea() + "'s bar");
             eq(h, k[0], DragonKingEntity.typeOf(king.sea()), "his type");
             check(h, king.getDisplayName().getString().contains("Lv " + DragonKingEntity.LEVEL), king.getDisplayName().getString());
-            close(h, DragonKingEntity.HEALTH, king.getMaxHealth(), "sixty ordinary hits of a level-55 character");
+            close(h, DragonKingEntity.HEALTH, king.getMaxHealth(), "270 ordinary hits of a level-55 character");
             eq(h, EnemyTier.BOSS.name(), king.getPersistentData().getString(SeaMonster.KEY_TIER), "a Boss of the waters");
             check(h, !king.canDrownInFluidType(net.neoforged.neoforge.common.NeoForgeMod.WATER_TYPE.value()), "he breathes water");
             check(h, king.getNavigation() instanceof AmphibiousPathNavigation, "he swims");

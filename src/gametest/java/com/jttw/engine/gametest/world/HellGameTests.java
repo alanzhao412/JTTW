@@ -281,7 +281,8 @@ public class HellGameTests {
             check(h, k.getDisplayName().getString().endsWith(" · Lv " + level), "named: " + k.getDisplayName().getString());
             eq(h, EnemyTier.BOSS.name(), k.getPersistentData().getString(ZoneMonster.KEY_TIER), "pays as a Boss");
             eq(h, Zones.HELL.id(), k.getPersistentData().getString(ZoneMonster.KEY_ZONE), "of Hell");
-            double hits = n == 5 ? KingYamaEntity.YAMA_HITS : KingOfHellEntity.HITS;
+            double hits = KingOfHellEntity.hitsOf(n);
+            eq(h, n == 5 ? KingYamaEntity.YAMA_HITS : n == 10 ? KingOfHellEntity.ZHUANLUN_HITS : KingOfHellEntity.HITS, hits, "his hits");
             close(h, hits * MobScaling.typicalHit(level), k.getMaxHealth(), "his health");
             eq(h, n == 5 ? BossEvent.BossBarColor.PURPLE : BossEvent.BossBarColor.RED, k.bossBar().getColor(), "his bar");
             // struck down (the Tenth twice: the Wheel turns once)
@@ -304,14 +305,15 @@ public class HellGameTests {
     public static void qinguangsMirrorStrikesTheWickedHarder(GameTestHelper h) {
         eq(h, HellKings.Qinguang.FOR_THE_GOOD, HellKings.Qinguang.mirrorFactor(300), "lightly the good");
         eq(h, 1.0, HellKings.Qinguang.mirrorFactor(0), "the plain");
-        eq(h, 2.0, HellKings.Qinguang.mirrorFactor(-500), "the wicked");
-        eq(h, HellKings.Qinguang.AT_WORST, HellKings.Qinguang.mirrorFactor(-9000), "at worst three times");
+        close(h, (1 + HellKings.Qinguang.AT_WORST) / 2, HellKings.Qinguang.mirrorFactor(-500), "the wicked");
+        close(h, HellKings.Qinguang.AT_WORST, HellKings.Qinguang.mirrorFactor(-9000), "at worst");
+        check(h, HellKings.Qinguang.AT_WORST * KingOfHellEntity.BLOW <= com.jttw.engine.entity.zone.ZoneBoss.MOST_BLOW + 1e-6, "at worst no harder than a boss's hardest blow");
         var k = king(h, ModEntities.KING_QINGUANG.get(), new BlockPos(1, 2, 1));
         ServerPlayer good = player(h), wicked = player(h);
         Morality.set(good, 400);
         Morality.set(wicked, -1000);
         close(h, k.blow() * HellKings.Qinguang.FOR_THE_GOOD, k.mirrorBlow(good), "the good's");
-        close(h, k.blow() * 3, k.mirrorBlow(wicked), "the wicked's");
+        close(h, k.blow() * HellKings.Qinguang.AT_WORST, k.mirrorBlow(wicked), "the wicked's");
         IronGolem golem = dummy(h, new BlockPos(3, 2, 3));
         float full = golem.getHealth();
         check(h, k.judge(golem), "the mirror judges");

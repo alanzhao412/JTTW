@@ -287,7 +287,7 @@ public class CaveGameTests {
         check(h, lady.getMainHandItem().is(ModItems.EARTH_FLOW_SWORD_MALE.get()) && lady.getOffhandItem().is(ModItems.EARTH_FLOW_SWORD_FEMALE.get()),
                 "the male blade in her right hand, the female in her left");
         check(h, PairedBlade.paired(lady), "a pair");
-        close(h, LadyEarthFlowEntity.HEALTH, lady.getMaxHealth(), "eighty hits of a level-43 character");
+        close(h, LadyEarthFlowEntity.HEALTH, lady.getMaxHealth(), "270 hits of a level-43 character");
         check(h, lady.getDisplayName().getString().equals("Lady Earth Flow · Lv 43"), "named: " + lady.getDisplayName().getString());
         eq(h, EnemyTier.BOSS.name(), lady.getPersistentData().getString(ZoneMonster.KEY_TIER), "pays as a Boss");
         check(h, !lady.removeWhenFarAway(10_000) && lady.isPersistenceRequired(), "never despawned");

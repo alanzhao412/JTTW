@@ -42,8 +42,8 @@ import java.util.List;
  * six-tusked white elephant the Bodhisattva Samantabhadra rides (chapters 74–77). A giant
  * elephant-headed demon king, two and a half times a man's height, in ivory-and-gold armour, his
  * great tusks capped in gold, a long heavy trunk, ears like shields, a giant's lance in his hands;
- * he keeps the elephant court behind the palace. Level 98: eighty-five ordinary hits of a level-98
- * character, a white bar. In the novel his trunk caught Zhu Bajie and the Monkey King alike, and
+ * he keeps the elephant court behind the palace. Level 98: 330 ordinary hits of a level-98
+ * character (a group's fight), a white bar. In the novel his trunk caught Zhu Bajie and the Monkey King alike, and
  * Wukong got free by driving his staff up it.
  * <ul>
  *   <li>his <b>lance</b>: thrusts of {@value #LANCE_PERCENT}% of a level-98 character's health;</li>
@@ -52,7 +52,7 @@ import java.util.List;
  *       lifts him high, crushing him every {@value #SQUEEZE_EVERY} ticks for
  *       {@value #CRUSH_PERCENT}% of a level-98 character's health; after {@value #MAX_HOLD} ticks
  *       he hurls the foe away. Blows on the trunk from where one is held, once they come to
- *       {@value #ESCAPE_PERCENT}% of his health, make him drop the foe and recoil;</li>
+ *       {@value #ESCAPE_HITS} ordinary hits of his health, make him drop the foe and recoil;</li>
  *   <li>from two thirds (phase 1) he trumpets for his followers ({@value #FOLLOWERS} elephant-demons
  *       come) and <b>stamps</b> (every {@value #STAMP_EVERY} ticks when close): all within
  *       {@value #STAMP_RANGE} blocks struck for {@value #STAMP_PERCENT}% and thrown up;</li>
@@ -68,8 +68,10 @@ import java.util.List;
 public class WhiteElephantEntity extends DemonKingEntity {
 
     public static final int LEVEL = 98;
-    public static final int LANCE_PERCENT = 24, CRUSH_PERCENT = 8, ESCAPE_PERCENT = 4, STAMP_PERCENT = 16, GORE_PERCENT = 22;
-    public static final double HITS = 85, LANCE = LANCE_PERCENT / 100.0, CRUSH = CRUSH_PERCENT / 100.0,
+    public static final int LANCE_PERCENT = 28, CRUSH_PERCENT = 8, STAMP_PERCENT = 16, GORE_PERCENT = 22;
+    /** What a held foe must deal his trunk, in ordinary hits of a level-98 character, to be dropped. */
+    public static final double ESCAPE_HITS = 3.4;
+    public static final double HITS = 330, LANCE = LANCE_PERCENT / 100.0, CRUSH = CRUSH_PERCENT / 100.0,
             STAMP = STAMP_PERCENT / 100.0, GORE = GORE_PERCENT / 100.0;
     public static final double HEALTH = HITS * MobScaling.typicalHit(LEVEL);
     public static final int GRAB_EVERY = 200, GRAB_ENRAGED = 130, TRUNK_WINDUP = 15, SQUEEZE_EVERY = 15, MAX_HOLD = 60;
@@ -138,7 +140,7 @@ public class WhiteElephantEntity extends DemonKingEntity {
 
     @Override
     public float escapeShare() {
-        return ESCAPE_PERCENT / 100f;
+        return (float) (ESCAPE_HITS / HITS);
     }
 
     /** Lifted high before him in his trunk's coil: over the demon king's shoulder, over the elephant's brow. */

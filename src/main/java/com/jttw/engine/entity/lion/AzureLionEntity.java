@@ -45,7 +45,8 @@ import java.util.List;
  * green-maned lion the Bodhisattva Manjushri rides (chapters 74–77). A giant lion-headed demon king,
  * two and a half times a man's height, hulking in dark armour, his green-blue mane wild about a
  * snarling maw, clawed hands, a giant's broadsword; he holds court in the throne hall of Lion-Camel
- * City. Level 100, the last band's cap: ninety ordinary hits of a level-100 character, an azure bar.
+ * City. Level 100, the last band's cap: 350 ordinary hits of a level-100 character (a group's
+ * fight), an azure bar.
  * In the novel he opened his mouth as wide as a city gate and swallowed the Monkey King whole, and
  * Sun Wukong, inside him, made him suffer until he let him out.
  * <ul>
@@ -57,8 +58,8 @@ import java.util.List;
  *       {@value #SWALLOW_REACH} blocks before him; his jaws gape {@value #GAPE} ticks first: step
  *       away!). Inside him the foe is unseen and in the dark, and his belly takes
  *       {@value #BELLY_PERCENT}% of a level-100 character's health each second, armour or none. Blows
- *       struck from inside count half again, and once they come to {@value #ESCAPE_PERCENT}% of his
- *       health he retches the foe up and reels; else after {@value #MAX_HOLD} ticks he spits him
+ *       struck from inside count half again, and once they come to {@value #ESCAPE_HITS} ordinary
+ *       hits of his health he retches the foe up and reels; else after {@value #MAX_HOLD} ticks he spits him
  *       out anyway;</li>
  *   <li>at two thirds (phase 1) he roars for his kin, and lion-demons come running
  *       ({@value #KIN});</li>
@@ -72,8 +73,10 @@ import java.util.List;
 public class AzureLionEntity extends DemonKingEntity {
 
     public static final int LEVEL = 100;
-    public static final int SWORD_PERCENT = 26, ROAR_PERCENT = 12, BELLY_PERCENT = 5, ESCAPE_PERCENT = 6;
-    public static final double HITS = 90, SWORD = SWORD_PERCENT / 100.0, ROAR = ROAR_PERCENT / 100.0, BELLY = BELLY_PERCENT / 100.0;
+    public static final int SWORD_PERCENT = 30, ROAR_PERCENT = 12, BELLY_PERCENT = 5;
+    /** His health, in ordinary hits of a level-100 character; what a captive must deal from inside him (counted half again) to be retched up. */
+    public static final double HITS = 350, ESCAPE_HITS = 5.4;
+    public static final double SWORD = SWORD_PERCENT / 100.0, ROAR = ROAR_PERCENT / 100.0, BELLY = BELLY_PERCENT / 100.0;
     public static final double HEALTH = HITS * MobScaling.typicalHit(LEVEL);
     public static final int ROAR_EVERY = 180, ROAR_WINDUP = 15, SWALLOW_EVERY = 260, SWALLOW_ENRAGED = 130, GAPE = 20, MAX_HOLD = 200, KIN = 3;
     public static final double ROAR_RANGE = 12, ROAR_ANGLE = 55, SWALLOW_REACH = 4.5, TRUE_SWALLOW_REACH = 6;
@@ -142,7 +145,7 @@ public class AzureLionEntity extends DemonKingEntity {
 
     @Override
     public float escapeShare() {
-        return ESCAPE_PERCENT / 100f;
+        return (float) (ESCAPE_HITS / HITS);
     }
 
     @Override

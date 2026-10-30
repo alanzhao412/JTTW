@@ -300,7 +300,7 @@ public class LionCamelGameTests {
     public static void theAzureLionIsAKingAtTheCap(GameTestHelper h) {
         AzureLionEntity lion = king(h, ModEntities.AZURE_LION.get(), new BlockPos(2, 2, 2));
         check(h, lion.getDisplayName().getString().contains("Lv 100"), lion.getDisplayName().getString());
-        close(h, AzureLionEntity.HEALTH, lion.getMaxHealth(), "ninety ordinary hits of a level-100 character");
+        close(h, AzureLionEntity.HEALTH, lion.getMaxHealth(), "350 ordinary hits of a level-100 character");
         eq(h, EnemyTier.BOSS.name(), lion.getPersistentData().getString(ZoneMonster.KEY_TIER), "a Boss");
         eq(h, Zones.LION_CAMEL.id(), lion.getPersistentData().getString(ZoneMonster.KEY_ZONE), "of the ridge");
         eq(h, BossEvent.BossBarColor.BLUE, lion.bossBar().getColor(), "an azure bar");
@@ -473,7 +473,7 @@ public class LionCamelGameTests {
     public static void theWhiteElephantIsAKing(GameTestHelper h) {
         WhiteElephantEntity e = king(h, ModEntities.WHITE_ELEPHANT.get(), new BlockPos(2, 2, 2));
         check(h, e.getDisplayName().getString().contains("Lv 98"), e.getDisplayName().getString());
-        close(h, WhiteElephantEntity.HEALTH, e.getMaxHealth(), "eighty-five ordinary hits of a level-98 character");
+        close(h, WhiteElephantEntity.HEALTH, e.getMaxHealth(), "330 ordinary hits of a level-98 character");
         eq(h, EnemyTier.BOSS.name(), e.getPersistentData().getString(ZoneMonster.KEY_TIER), "a Boss");
         eq(h, BossEvent.BossBarColor.WHITE, e.bossBar().getColor(), "a white bar");
         h.succeed();

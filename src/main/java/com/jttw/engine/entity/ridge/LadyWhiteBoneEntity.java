@@ -67,9 +67,12 @@ import java.util.UUID;
 public class LadyWhiteBoneEntity extends ZoneBoss implements RangedAttackMob {
 
     public static final int LEVEL = 33;
-    /** Sixty of a level-33 character's ordinary hits to kill; each shard a sixth of their health, before resistance. */
-    /** Ordinary hits to bring down each of her four lives (her three disguises' deaths, then hers). */
-    public static final double HITS = 25, SHARD = 1.0 / 6, CLAW = 0.25;
+    /**
+     * Ordinary hits of a level-33 character to bring down each of her four lives (her three
+     * disguises' deaths, then hers): three hundred in all, a group's fight, each life more than any
+     * miniboss's; each shard a quarter of their health, her claw 28%, before resistance.
+     */
+    public static final double HITS = 75, SHARD = 0.25, CLAW = 0.28;
     /** How many times she rises again before she dies for good: the girl, the old woman, the old man. */
     public static final int FALSE_DEATHS = 3;
     /** How far she wanders from her lair while she passes for one of her dead. */
@@ -104,6 +107,14 @@ public class LadyWhiteBoneEntity extends ZoneBoss implements RangedAttackMob {
     @Override
     public int mobLevel() {
         return LEVEL;
+    }
+
+    /** Four lives, whole each time: the girl's, the old woman's, the old man's, then her own. */
+    @Override
+    public double[] lives() {
+        double[] lives = new double[FALSE_DEATHS + 1];
+        java.util.Arrays.fill(lives, 1);
+        return lives;
     }
 
     public LadyWhiteBoneEntity(EntityType<? extends LadyWhiteBoneEntity> type, Level level) {
