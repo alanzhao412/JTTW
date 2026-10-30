@@ -45,8 +45,19 @@ import java.util.function.Predicate;
  *   <li>like the zone's monsters, it spares its zone's allies ({@link Zones.Zone#allies()}), and
  *       leaves them nothing if they strike it down.</li>
  * </ul>
+ *
+ * <p>A boss is a group's fight, not one character's: all its lives together it takes at least
+ * {@link #LEAST_HITS} of a same-level character's ordinary hits to kill (three or four of them,
+ * some sixty to ninety hits each), and its main blow takes {@link #LEAST_BLOW} to {@link #MOST_BLOW}
+ * of that character's health, so three or four of them kill; its special hits are no harder. Each
+ * of its lives ({@link #lives()}) is more than any miniboss's health (see the README's pecking order).
  */
 public abstract class ZoneBoss extends Monster implements MobLevel {
+
+    /** The least ordinary hits of a same-level character a boss takes to kill, all its lives together. */
+    public static final double LEAST_HITS = 250;
+    /** A boss's main blow, at least and at most, as a share of a same-level character's health: three or four kill. */
+    public static final double LEAST_BLOW = 0.25, MOST_BLOW = 0.33;
 
     /** How long a player who struck it keeps seeing its bar, wherever they are, in ticks. */
     public static final int FIGHTER_MEMORY = 600;
@@ -101,6 +112,14 @@ public abstract class ZoneBoss extends Monster implements MobLevel {
     /** The players it is allied to: its zone's, unless it says otherwise. */
     public Predicate<Player> allies() {
         return zone().allies();
+    }
+
+    /**
+     * Its lives, each as a share of its health it must be brought through: one by default; more for
+     * one that rises again (Lady White Bone's four, whole each time; the Wheel's king, born again at half).
+     */
+    public double[] lives() {
+        return new double[]{1};
     }
 
     // ── The boss bar ────────────────────────────────────────────────────

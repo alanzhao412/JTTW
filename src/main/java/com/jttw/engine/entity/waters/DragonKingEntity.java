@@ -70,8 +70,8 @@ import java.util.List;
 public abstract class DragonKingEntity extends ZoneBoss implements RangedAttackMob {
 
     public static final int LEVEL = 55;
-    /** Sixty of a level-55 character's ordinary hits to kill; a bolt a sixth of their health, a claw 30%, his sea's wrath 22%. */
-    public static final double HITS = 60, BOLT = 1.0 / 6, CLAW = 0.30, WRATH = 0.22;
+    /** 270 of a level-55 character's ordinary hits to kill, a group's fight; a bolt a quarter of their health, a claw 30%, his sea's wrath 22%. */
+    public static final double HITS = 270, BOLT = 0.25, CLAW = 0.30, WRATH = 0.22;
     public static final double HEALTH = HITS * MobScaling.typicalHit(LEVEL);
     /** How often his sea's wrath comes, in ticks (and, from a third of his health, how often then). */
     public static final int SIGNATURE_EVERY = 160, SIGNATURE_ENRAGED = 100;

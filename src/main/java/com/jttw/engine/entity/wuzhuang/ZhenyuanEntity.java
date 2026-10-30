@@ -67,9 +67,13 @@ import java.util.UUID;
 public class ZhenyuanEntity extends TempleImmortal {
 
     public static final int LEVEL = 88;
-    /** A hundred and sixty of a level-88 character's ordinary hits; a whisk stroke of a fifth of their health. */
-    public static final double HITS = 160, BLOW = 0.20;
-    public static final int HIT_CAP_PERMILLE = 25;
+    /**
+     * 280 of a level-88 character's ordinary hits, a group's fight (more, hand to hand: he brushes
+     * one blow in four aside); a whisk stroke of 28% of their health. No blow takes more than
+     * {@value #HIT_CAP_PERMILLE}‰ of his health: some four ordinary hits.
+     */
+    public static final double HITS = 280, BLOW = 0.28;
+    public static final int HIT_CAP_PERMILLE = 14;
     public static final float PARRY = 0.25f;
     public static final int HALL = 18;
     public static final int SLEEVE_EVERY = 240, SLEEVE_EVERY_LATE = 140, SLEEVE_WIND_UP = 20;

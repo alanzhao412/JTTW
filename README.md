@@ -516,7 +516,9 @@ In the Nether, the End or Heaven no Earth God hears, and it spins.
 
 **The pecking order.** Every creature's strength is set against a typical character of its level
 (`entity/MobScaling`): its health in that character's ordinary hits ("HITS"), each of its blows a
-share of that character's health ("BLOW"). By blow, mobs are much weaker than their bosses:
+share of that character's health ("BLOW"). By blow, mobs are much weaker than their bosses; and a
+boss is a group's fight, not one character's: three or four of its level, some sixty to ninety hits
+each, where one alone cannot realistically outlast it:
 
 | Rank | Blow (share of health, before resistance) | Hits to kill | Who |
 |---|---|---|---|
@@ -525,13 +527,19 @@ share of that character's health ("BLOW"). By blow, mobs are much weaker than th
 | Heavy mobs | 11–12%, no single hit (slam, gore, pounce, swoop) over 12% | 10–12 | Bone Servants, Furnace-Brick Brutes, ogres, elephant-demons, lion-demons, turtle soldiers, Crab Generals, Ox-Head |
 | Captains | a regular's ×1.2: at most 14.4% | a regular's ×2.5 | any of the above, purple-named |
 | Minibosses | 17–19%: a miniboss's hardest hit is 19% whatever its kind | a captain's, or more | the floor wardens and gate keepers of every lair (White Bone's Wardens and Keepers of the Bone Gate, the Bottomless Cave's guardians, the Fire Cloud Cave's door wardens and floor guardians, Lion-Camel's floor wardens), the Six Strong Generals, Clear Wind and Bright Moon, Heavenly Generals |
-| Bosses | 20–32% | 25–160 | every `ZoneBoss` |
+| Bosses | 25–33% (3–4 blows kill you); no special or area hit harder | 250–350, all its lives together; each life more than any miniboss's | every `ZoneBoss` |
 
 A miniboss is a captain made one by `ZoneMonster.becomeMiniboss(level, health over a captain's)`;
 its hits are scaled so its hardest is `MINIBOSS_HIT` (19%). A mob's special hits are declared in
 `specialShares()` and struck with `hitOf(share)`, so its rank scales them with its blow.
+A boss's lives are its `ZoneBoss.lives()` (Lady White Bone's four, whole each time, 75 hits apiece;
+Zhuanlun's 200, and born again at half). By boss, in hits all lives together: Lady White Bone 300,
+Lady Earth Flow 270, the Dragon Kings 270, the Ten Kings 280 (Zhuanlun 300), King Yama 350, Red Boy
+320, Zhenyuan 280 (more hand to hand: he brushes one blow in four aside), the White Elephant 330, the
+Azure Lion 350. Their health runs to tens of millions at level 100, past vanilla's cap of 1024 max
+health: `JTTWEngine` lifts the cap (and attack's) to a billion.
 `PeckingOrderGameTests` makes every creature of the mod in each of its ranks and fails if any hits
-out of its place.
+out of its place, any boss is under 250 hits, or any boss's life is no more than the toughest miniboss's.
 
 To add a zone:
 
@@ -742,10 +750,10 @@ of the world.
   (0.36), in packs of 3–5 (a captain brings 4). Strike one and the pack turns on you; each darts in,
   bites and scurries back, so a pack circles.
 - **Flower Maid** (`FlowerMaidEntity`): 5 hits, a stab of 9%; every 5 s she mends the most
-  wounded of the household near her (a fifth of its health; 3% of her mistress's), and pressed
+  wounded of the household near her (a fifth of its health; 0.9% of her mistress's), and pressed
   close she breathes out pollen (Slowness II and Weakness for 4 s).
-- **Lady Earth Flow** (`LadyEarthFlowEntity`, a `ZoneBoss`, level 43, 80 hits, pink bar), put on her
-  dais once when the land is made, two maids beside her: her twin swords cut twice a stroke (12.5%
+- **Lady Earth Flow** (`LadyEarthFlowEntity`, a `ZoneBoss`, level 43, 270 hits, pink bar), put on her
+  dais once when the land is made, two maids beside her: her twin swords cut twice a stroke (14%
   each; the female blade slows). At 60% (phase 1) she calls 4 mice and 2 maids and starts to burrow,
   rising behind whoever she fights. At 30% (phase 2), once, she leaves her embroidered shoe in her
   likeness (`EarthFlowDecoyEntity`: weak, no XP or karma, a shoe again when struck down or after a
@@ -844,14 +852,14 @@ The Four Seas and the Dragon Kings' crystal palaces (水晶宫, novel chapter 3)
   fish and turtle soldiers share one kit (teal-and-gold lacquer, red plumes, sea-blue sashes);
   their models are drawn by `assets_source/shrimp_soldier.py`, `fish_soldier.py` and
   `turtle_soldier.py`.
-- **The Dragon Kings** (`DragonKingEntity`, a `ZoneBoss`, level 55, sixty ordinary hits): a dragon in
+- **The Dragon Kings** (`DragonKingEntity`, a `ZoneBoss`, level 55, 270 ordinary hits): a dragon in
   a man's shape, robed and crowned, swimming freely; half again a man's height, a long antlered
   dragon's head with trailing barbels, an emperor's dragon robe with its sea-and-cliff hem, wide
   sleeves, a cloud collar and a jade belt. Each wears his own crown and carries his own regalia: Ao
   Guang the mian crown and court tablet (drawn largest, the eldest), Ao Qin a crown of flames and the
   flaming pearl, Ao Run the winged official's hat and a jade ruyi, Ao Shun an icicle crown, a sword
-  and the frost pearl. Bolts of his sea (three, fanned, past two
-  thirds), a claw up close, and his sea's own wrath every 8 s (5 s past a third): **Ao Guang**
+  and the frost pearl. Bolts of his sea (25%; three, fanned, past two
+  thirds), a claw up close (30%), and his sea's own wrath (22%) every 8 s (5 s past a third): **Ao Guang**
   (East, blue-green robes) a tidal surge that hurls all near him away; **Ao Qin** (South, red) the
   boiling sea that scalds and saps strength; **Ao Run** (West, white) a whirlpool round his foe that
   drags all near it to its grinding heart; **Ao Shun** (North, black) the frozen abyss that freezes and
@@ -945,27 +953,27 @@ XP 125, stepped up from the Mystical Waters' 110 (575 a grunt kill at the band's
   (healing harms them).
 - Captains as in every zone (purple, larger, stronger, with escorts; the Impermanence's captain
   brings only its partner), never past level 66.
-- **The Ten Kings** (`KingOfHellEntity`, `HellKings`, ZoneBosses on their thrones, 50 hits, a
-  tablet blow of 20%, red bars; levels 57–65 from the First to the Tenth, King Yama passed over),
+- **The Ten Kings** (`KingOfHellEntity`, `HellKings`, ZoneBosses on their thrones, 280 hits, a
+  tablet blow of 25%, red bars; levels 57–65 from the First to the Tenth, King Yama passed over),
   each passing his court's **judgement** every 7 s on whoever fights him within 14 blocks:
   1. **Qinguang** (秦广王), the **Karma Mirror**: a beam for his blow, ×0.6 for the good (karma 100+),
-     up to ×3 for the wicked (1 + |karma|/500);
-  2. **Chujiang** (楚江王), the cold hell: all within 8 **frozen** (12%, frost, Slowness III 5 s);
+     up to ×1.3 for the wicked (1 + 0.3 × |karma|/1000; at −1000 and below, a third of their health);
+  2. **Chujiang** (楚江王), the cold hell: all within 8 **frozen** (15%, frost, Slowness III 5 s);
   3. **Songdi** (宋帝王), the **iron hooks**: hauls his foe from up to 14 blocks to his feet and strikes;
   4. **Wuguan** (五官王), the **scales**: takes half the difference of their health shares from a
      healthier foe;
   6. **Biancheng** (卞城王), the **bell** of the Wailing City: all within 7 **kneel** (pinned: cannot move) 2 s;
-  7. **Taishan** (泰山王), **boiling oil**: all within 7 scalded (12%) and burning (he does not burn);
-  8. **Dushi** (都市王), the **crushing carts**: charges, crushing (×1.6) and flinging what he meets;
+  7. **Taishan** (泰山王), **boiling oil**: all within 7 scalded (15%) and burning (he does not burn);
+  8. **Dushi** (都市王), the **crushing carts**: charges, crushing (×1.3) and flinging what he meets;
   9. **Pingdeng** (平等王), "Equal": **equal measure**, a third of every blow struck him struck back;
   10. **Zhuanlun** (转轮王), the **Wheel**: struck down the first time he is **born again** at half
-      health; his judgement is **Meng Po's soup** (his foe's good effects forgotten; nausea).
-- **King Yama** (阎罗王, `KingYamaEntity`, the Fifth Court, level 66, 140 hits, 24%, purple bar,
+      health (200 hits, then 100); his judgement is **Meng Po's soup** (his foe's good effects forgotten; nausea).
+- **King Yama** (阎罗王, `KingYamaEntity`, the Fifth Court, level 66, 350 hits, 27%, purple bar,
   the climax): phase 0, his blows and **the Writ** every 10 s (marked; Hell's creatures near come);
   at 66% **his court rises** (Ox-Head, Horse-Face, a clerk) and he passes **sentence**: a ring of
   soul fire where his foe stands, and 1.5 s later judgement falls there (a third of the health of
   whoever is still in it, and they burn; step out); at 33% **the wrath of Yama**: he grows (×1.35),
-  strikes and moves 30% harder and faster, sentences fall every 3.5 s, and soul fire round him
+  strikes 20% harder (32.4%) and moves 30% faster, sentences fall every 3.5 s, and soul fire round him
   scorches whoever stands within 3.5 blocks.
 - **Drops** (1.21 loot tables): each king his relic, sigils (3–4), Hell Bank Notes, gold, and a 10%
   chance of a **Page of the Book of Life and Death**: the Shard of the Karma Mirror, the Rime
@@ -1060,11 +1068,11 @@ Boy's Fire Cloud Cave on Mount Haohao (火云洞, chapters 40–42), in
   vanishes into fog and comes out behind his foe; **Mad-Hurrying Wind** (急如火) charges, fire springing
   up in his track; **Swift-Rushing Wind** (快如风), the fastest, hurls all near him away; **Flame-Head
   General** (兴烘掀) bursts into flame; **Eye-Spark Officer** (掀烘兴) shoots sparks from his eyes.
-- **Red Boy** (红孩儿, the Holy Child King; `RedBoyEntity`, a `ZoneBoss`, level 77, 70 hits, red bar),
+- **Red Boy** (红孩儿, the Holy Child King; `RedBoyEntity`, a `ZoneBoss`, level 77, 320 hits, red bar),
   son of the Bull Demon King and Princess Iron Fan: a child in a red stomacher with **his own
-  fire-tipped spear** (`RedBoySpearItem`, not Nezha's). Spear thrusts of 26% that set alight. Every 7 s he stops,
+  fire-tipped spear** (`RedBoySpearItem`, not Nezha's). Spear thrusts of 30% that set alight. Every 7 s he stops,
   strikes his nose twice (1 s) and breathes the **True Samadhi Fire** (三昧真火) from mouth and nose: a
-  cone 10 blocks long, a blow of 20%, then the burning; flames are left on the ground. At two
+  cone 10 blocks long, a blow of 25%, then the burning; flames are left on the ground. At two
   thirds (phase 1) his **five fire carts** (五辆小车) are set out round his lair in the five-element
   pentagon and lit: each belches the fire round itself every 3 s, and while any stands **every blow
   on him is halved**; break them first (5 hits each). At a third (phase 2) the fire comes from his
@@ -1236,8 +1244,8 @@ left to its host.
   temple's disciples and fight to the death; struck down, Clear Wind always leaves the **Golden
   Striker**, Bright Moon the **Silk-Lined Tray**: the two things it takes to bring a fruit down whole.
   Each pays as a General.
-- **The Great Immortal Zhenyuan** (镇元大仙, `ZhenyuanEntity`, a `ZoneBoss`, level 88, 160 hits,
-  20%, yellow bar). **Not at his temple**: as in the novel, he is away (hearing the Primordial Lord
+- **The Great Immortal Zhenyuan** (镇元大仙, `ZhenyuanEntity`, a `ZoneBoss`, level 88, 280 hits,
+  28%, yellow bar). **Not at his temple**: as in the novel, he is away (hearing the Primordial Lord
   lecture), and no lair puts him there. **He comes back for whoever kills the last of his
   disciples** (`TempleRecord`, saved data of the overworld keyed by the temple's region centre, so it
   holds with the temple's chunks unloaded and through restarts): each of the 24 is marked as its
@@ -1249,8 +1257,8 @@ left to its host.
   stand), down a column of cloud out of the sky, a ring of cloud rolling out over the ground and
   gold motes spiralling up about him, keeping to no lair, and fights them **to the death**, hunting
   them within 64 blocks. If they are not in the world then, he comes when they next are. Once for
-  each temple; no word is spoken. His kit: **hard to harm** (no blow takes more than 2.5% of his
-  health; one blow in four struck hand to hand he brushes aside with his whisk); **the Universe in
+  each temple; no word is spoken. His kit: **hard to harm** (no blow takes more than 1.4% of his
+  health, some four ordinary hits; one blow in four struck hand to hand he brushes aside with his whisk); **the Universe in
   his Sleeve** (袖里乾坤, `Sleeve`): every 12 s (7 s from 30%) his sleeve is raised and the air drawn
   toward it for a second, then whoever he fights within 12 blocks (from 30%, everyone within 8) is
   **swept in**: out of the world (unseen, blind, held at his side wherever he goes, nothing can
@@ -1428,14 +1436,14 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   falls away (smoke, fire, the ground shaking; no blow lands on him nor does he strike; a captive is
   let go), then the beast stands in his place, in another model and a larger body, and the players
   near are told what he is. The true form is synced and saved; the fight goes on in it.
-- **The Azure Lion** (青狮, Manjushri's lion; `AzureLionEntity`, a `ZoneBoss`, level 100, 90 hits,
+- **The Azure Lion** (青狮, Manjushri's lion; `AzureLionEntity`, a `ZoneBoss`, level 100, 350 hits,
   an azure bar, in the throne room): a hulking demon king in dark lacquered armour, a wild green-blue
-  mane bristling about a snarling maw, clawed hands, a giant's broadsword: blows of 26%. Every 9 s he throws back his head
+  mane bristling about a snarling maw, clawed hands, a giant's broadsword: blows of 30%. Every 9 s he throws back his head
   and **roars**: a cone 12 blocks long, 12%, Slowness II and Weakness, thrown back. Every 13 s, a foe
   within 4.5 blocks before him, his jaws gape for a second, and he **swallows the foe whole**: inside
   him the foe is unseen and in the dark and cannot get down; his belly takes 5% of a level-100
   character's health a second, armour or none. Blows struck from inside count half again, and once
-  they come to 6% of his health he retches the foe up and reels for 2 s; else after 10 s he spits him
+  they come to 5.4 ordinary hits of a level-100 character (some 1.5% of his health) he retches the foe up and reels for 2 s; else after 10 s he spits him
   out anyway. At two thirds he roars for his kin (three lion-demons); at a third he **reveals his
   true form**: a giant guardian lion of dark azure on all fours (3.6 by 4.0 blocks, some seven long,
   larger than the Great White Bull), lean and long-legged, his face ringed in spiral curls and his
@@ -1444,12 +1452,12 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   reach the foe as he lands, it is swallowed (inside the lion as inside the demon king, and fought
   out of him the same way).
 - **The White Elephant** (白象, Samantabhadra's six-tusked elephant; `WhiteElephantEntity`, level 98,
-  85 hits, a white bar, in the throne room): a giant in ivory-and-gold plate, a great domed
+  330 hits, a white bar, in the throne room): a giant in ivory-and-gold plate, a great domed
   elephant's head under a gold war-frontlet, ears like sails, a heavy trunk, six tusks, a giant's
-  lance held upright: thrusts of 24%. Every 10 s, a foe within 6
+  lance held upright: thrusts of 28%. Every 10 s, a foe within 6
   blocks before him, his trunk rears and **coils round the foe, lifting him high**: it crushes him
   every 0.75 s for 8% and after 3 s **hurls him away**; blows on the trunk from where one is held,
-  once they come to 4% of his health, make him drop the foe and recoil (as Wukong got free by driving
+  once they come to 3.4 ordinary hits of a level-98 character (some 1% of his health), make him drop the foe and recoil (as Wukong got free by driving
   his staff up it). From two thirds he trumpets for his followers (two elephant-demons) and **stamps**
   (16%, thrown up, within 5 blocks); at a third he **reveals his true form**: a towering white war
   elephant (3.6 by 4.6 blocks, some nine long with his tusks) in a crimson and gold saddle-cloth,

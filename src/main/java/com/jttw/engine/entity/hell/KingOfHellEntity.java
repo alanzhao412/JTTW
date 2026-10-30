@@ -45,8 +45,11 @@ import java.util.EnumSet;
  */
 public abstract class KingOfHellEntity extends ZoneBoss {
 
-    /** Fifty of his level's ordinary hits to kill; his tablet strikes for a fifth of their health. */
-    public static final double HITS = 50, BLOW = 0.20;
+    /**
+     * 280 of his level's ordinary hits to kill, a group's fight (the Tenth, who is born again at
+     * half, {@value #ZHUANLUN_HITS} and half that again); his tablet strikes for a quarter of their health.
+     */
+    public static final double HITS = 280, ZHUANLUN_HITS = 200, BLOW = 0.25;
     /** How far he keeps from his throne, how close one must be for his judgement, how often he strikes. */
     public static final int HALL = 13, STRIKE_EVERY = 30;
     public static final double JUDGES_WITHIN = 14;
@@ -79,11 +82,16 @@ public abstract class KingOfHellEntity extends ZoneBoss {
         return court == 5 ? KingYamaEntity.LEVEL : court < 5 ? 56 + court : 55 + court;
     }
 
+    /** The ordinary hits of his level a king of this court takes to kill (his first life, for the Tenth). */
+    public static double hitsOf(int court) {
+        return court == 5 ? KingYamaEntity.YAMA_HITS : court == 10 ? ZHUANLUN_HITS : HITS;
+    }
+
     /** A king's attributes, of his court's level. */
     public static AttributeSupplier.Builder createAttributes(int court) {
         int level = levelOf(court);
         return Monster.createMonsterAttributes()
-                .add(Attributes.MAX_HEALTH, HITS * MobScaling.typicalHit(level))
+                .add(Attributes.MAX_HEALTH, hitsOf(court) * MobScaling.typicalHit(level))
                 .add(Attributes.ATTACK_DAMAGE, BLOW * MobScaling.typicalHealth(level))
                 .add(Attributes.MOVEMENT_SPEED, 0.26)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.8)

@@ -699,13 +699,13 @@ public class WuzhuangGameTests {
         openAir(h);
         ServerPlayer p = player(h);
         ZhenyuanEntity zh = immortal(h, ModEntities.ZHENYUAN.get(), new BlockPos(2, 2, 2), false);
-        close(h, ZhenyuanEntity.HITS * MobScaling.typicalHit(ZhenyuanEntity.LEVEL), zh.getMaxHealth(), "160 hits of a level-88 character");
+        close(h, ZhenyuanEntity.HITS * MobScaling.typicalHit(ZhenyuanEntity.LEVEL), zh.getMaxHealth(), "280 hits of a level-88 character");
         eq(h, BossEvent.BossBarColor.YELLOW, zh.bossBar().getColor(), "his bar");
         check(h, zh.getDisplayName().getString().endsWith("· Lv 88"), "named: " + zh.getDisplayName().getString());
         zh.stagger();
         float full = zh.getHealth();
         zh.hurt(h.getLevel().damageSources().playerAttack(p), 1e9f);
-        check(h, full - zh.getHealth() <= zh.getMaxHealth() * ZhenyuanEntity.HIT_CAP_PERMILLE / 1000.0 + 1e-3, "no blow takes more than 2.5%");
+        check(h, full - zh.getHealth() <= zh.getMaxHealth() * ZhenyuanEntity.HIT_CAP_PERMILLE / 1000.0 + 1e-3, "no blow takes more than 1.4%");
         check(h, zh.isAlive(), "and he stands");
         // at 60% his household near him come to his side; he makes none
         DaoistDiscipleEntity d = mob(h, ModEntities.DAOIST_DISCIPLE.get(), 78, false, new BlockPos(0, 2, 4));

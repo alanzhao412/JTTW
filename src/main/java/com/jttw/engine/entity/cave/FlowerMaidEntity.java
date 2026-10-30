@@ -45,9 +45,9 @@ public class FlowerMaidEntity extends CaveMonster {
 
     /** Five of a same-level character's ordinary hits to kill; a stab of 9% of their health, before resistance. */
     public static final double HITS = 5, STAB = 0.09;
-    /** How often she tends, how far, and how much she mends: of a creature's health, of her mistress's. */
+    /** How often she tends, how far, and how much she mends: of a creature's health, of her mistress's (a sliver: two or three ordinary hits). */
     public static final int TEND_EVERY = 100;
-    public static final double TEND_RANGE = 10, MEND = 0.2, MEND_MISTRESS = 0.03;
+    public static final double TEND_RANGE = 10, MEND = 0.2, MEND_MISTRESS = 0.009;
     /** Her pollen: how close one must be, how far it spreads, how often, how long it lasts. */
     public static final double POLLEN_NEAR = 3.5, POLLEN_RANGE = 4.5;
     public static final int POLLEN_EVERY = 160, POLLEN_LASTS = 80;

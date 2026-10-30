@@ -10,6 +10,9 @@ import com.jttw.engine.entity.wild.WildYaoguai;
 import com.jttw.engine.entity.wuzhuang.TempleYouthEntity;
 import com.jttw.engine.entity.zone.ZoneBoss;
 import com.jttw.engine.entity.zone.ZoneMonster;
+import com.jttw.engine.world.cave.CaveHousehold;
+import com.jttw.engine.world.feature.LionCamelCityFeature;
+import com.jttw.engine.world.ridge.CaveGarrison;
 import com.jttw.engine.registry.ModEntities;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
@@ -31,8 +34,10 @@ import static com.jttw.engine.gametest.GT.*;
  * The pecking order of the mod's creatures, by how hard each hits (a share of a same-level
  * character's health): every regular mob's hardest single hit at most {@link ZoneMonster#MOB_HIT_CAP},
  * every captain's at most that times a captain's measure, every miniboss's between a captain's and a
- * boss's, every boss's blow over them all. Every kind there is is measured, so a new one that hits
- * out of its place fails here. Each is made and measured off the world, never let loose in it.
+ * boss's, every boss's blow over them all. And by how much it takes to kill: a boss is a group's
+ * fight, at least {@link ZoneBoss#LEAST_HITS} ordinary hits all its lives together, and each of its
+ * lives more than any miniboss. Every kind there is is measured, so a new one out of its place fails
+ * here. Each is made and measured off the world, never let loose in it.
  */
 @GameTestHolder(JTTWEngine.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -41,7 +46,10 @@ public class PeckingOrderGameTests {
     /** The most a captain's hardest hit may be. */
     public static final double CAPTAIN_CAP = 0.145;
     /** A miniboss's blow, at least and at most; and the least any boss's. */
-    public static final double MINIBOSS_LEAST = 0.17, MINIBOSS_MOST = 0.20, BOSS_LEAST = 0.20, BOSS_MOST = 0.33;
+    public static final double MINIBOSS_LEAST = 0.17, MINIBOSS_MOST = 0.20, BOSS_LEAST = ZoneBoss.LEAST_BLOW, BOSS_MOST = ZoneBoss.MOST_BLOW;
+    /** The most a lair makes a miniboss's health over a captain's. */
+    public static final double MINIBOSS_OVER_CAPTAIN = Math.max(1, Math.max(CaveHousehold.GUARDIAN_HEALTH,
+            Math.max(CaveGarrison.GUARDIAN_HEALTH, LionCamelCityFeature.WARDEN_HEALTH)));
     /** The most ordinary hits a regular mob takes to kill. */
     public static final double MOB_HITS_MOST = 12;
     private static final double EPS = 1e-6;
@@ -68,6 +76,53 @@ public class PeckingOrderGameTests {
 
     private static String name(Entity e) {
         return BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()).getPath();
+    }
+
+    /** Its health now, in a same-level character's ordinary hits. */
+    private static double hits(LivingEntity e, int level) {
+        return e.getMaxHealth() / MobScaling.typicalHit(level);
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void aBossTakesAGroupAndEachOfItsLivesOutlastsAnyMiniboss(GameTestHelper h) {
+        // the toughest miniboss there is, in hits: any kind a lair could make one of, at the most a lair gives one, and the temple youths
+        double miniboss = 0;
+        String toughest = "";
+        List<ZoneBoss> bosses = new ArrayList<>();
+        for (Entity e : every(h)) {
+            double m = -1;
+            if (e instanceof ZoneMonster z) {
+                z.becomeMiniboss(z.captainLevel(), 1);
+                m = hits(z, z.captainLevel()) * (z instanceof StrongGeneralEntity ? 1 : MINIBOSS_OVER_CAPTAIN);
+            } else if (e instanceof HeavenlySoldierEntity s) {
+                s.become(40, true, null);
+                m = hits(s, 40);
+            } else if (e instanceof TempleYouthEntity y) {
+                m = hits(y, y.mobLevel());
+            } else if (e instanceof ZoneBoss b) {
+                bosses.add(b);
+                continue;
+            }
+            if (m > miniboss) {
+                miniboss = m;
+                toughest = name(e);
+            }
+            e.discard();
+        }
+        check(h, miniboss >= 60, "the minibosses measured: the toughest " + toughest + ", " + miniboss);
+        for (ZoneBoss b : bosses) {
+            double full = hits(b, b.mobLevel()), all = 0, least = Double.MAX_VALUE;
+            for (double life : b.lives()) {
+                all += full * life;
+                least = Math.min(least, full * life);
+            }
+            check(h, all >= ZoneBoss.LEAST_HITS - EPS, name(b) + " a group's fight: " + all + " hits");
+            check(h, all <= 360, name(b) + " no endless one: " + all + " hits");
+            check(h, least > miniboss, name(b) + "'s every life outlasts any miniboss (" + toughest + ", " + miniboss + "): " + least);
+            b.discard();
+        }
+        check(h, bosses.size() >= 15, "every boss measured: " + bosses.size());
+        h.succeed();
     }
 
     @GameTest(template = PLATFORM)

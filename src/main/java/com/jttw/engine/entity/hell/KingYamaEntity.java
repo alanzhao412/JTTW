@@ -49,8 +49,8 @@ import java.util.List;
 public class KingYamaEntity extends KingOfHellEntity {
 
     public static final int LEVEL = 66;
-    /** A hundred and forty of a level-66 character's ordinary hits to kill; his blows 24% of their health. */
-    public static final double YAMA_HITS = 140, YAMA_BLOW = 0.24;
+    /** 350 of a level-66 character's ordinary hits to kill, the most of the Ten; his blows 27% of their health (in his wrath, 32.4%). */
+    public static final double YAMA_HITS = 350, YAMA_BLOW = 0.27;
     public static final int COURT_AT_PERCENT = 66, WRATH_AT_PERCENT = 33;
     /** His hall: he keeps within this of his throne. */
     public static final int GREAT_HALL = 18;
@@ -61,7 +61,7 @@ public class KingYamaEntity extends KingOfHellEntity {
     public static final double SENTENCE_RADIUS = 2.5, SENTENCE_SHARE = 1 / 3.0;
     /** His wrath: how much larger, how much stronger and quicker; the soul fire round him, how near and how hot. */
     public static final float WRATH_SCALE = 1.35f;
-    public static final double WRATH_POWER = 0.3, AURA = 3.5, AURA_SHARE = 0.25;
+    public static final double WRATH_POWER = 0.2, WRATH_SPEED = 0.3, AURA = 3.5, AURA_SHARE = 0.25;
 
     private static final EntityDataAccessor<Boolean> WRATH = SynchedEntityData.defineId(KingYamaEntity.class, EntityDataSerializers.BOOLEAN);
 
@@ -245,7 +245,7 @@ public class KingYamaEntity extends KingOfHellEntity {
                 new AttributeModifier(WRATH_POWER_ID, WRATH_POWER, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
         var speed = getAttribute(Attributes.MOVEMENT_SPEED);
         if (speed != null && speed.getModifier(WRATH_SPEED_ID) == null) speed.addPermanentModifier(
-                new AttributeModifier(WRATH_SPEED_ID, WRATH_POWER, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+                new AttributeModifier(WRATH_SPEED_ID, WRATH_SPEED, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
         playSound(SoundEvents.WITHER_SPAWN, 1.5f, 0.6f);
         if (level() instanceof ServerLevel server) {
             server.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, getX(), getY(1), getZ(), 150, 1.2, 1.5, 1.2, 0.1);

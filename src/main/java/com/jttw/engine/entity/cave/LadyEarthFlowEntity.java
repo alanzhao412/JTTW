@@ -78,8 +78,8 @@ import java.util.EnumSet;
 public class LadyEarthFlowEntity extends ZoneBoss {
 
     public static final int LEVEL = 43;
-    /** Eighty of a level-43 character's ordinary hits to kill; each cut an eighth of their health, before resistance. */
-    public static final double HITS = 80, CUT = 0.125;
+    /** 270 of a level-43 character's ordinary hits to kill, a group's fight; each cut 14% of their health (a stroke 28%), before resistance. */
+    public static final double HITS = 270, CUT = 0.14;
     public static final double HEALTH = HITS * MobScaling.typicalHit(LEVEL), CUT_DAMAGE = CUT * MobScaling.typicalHealth(LEVEL);
     public static final int HOUSEHOLD_AT_PERCENT = 60, ESCAPE_AT_PERCENT = 30;
     /** Ticks between her strokes, and from the first cut of a stroke to the second. */
