@@ -34,7 +34,8 @@ import static com.jttw.engine.gametest.GT.*;
  * The pecking order of the mod's creatures, by how hard each hits (a share of a same-level
  * character's health): every regular mob's hardest single hit at most {@link ZoneMonster#MOB_HIT_CAP},
  * every captain's at most that times a captain's measure, every miniboss's between a captain's and a
- * boss's, every boss's blow over them all. And by how much it takes to kill: a boss is a group's
+ * boss's, every boss's blow over them all (and its special hits, {@link ZoneBoss#specialShares}, no harder
+ * than its blow may be). And by how much it takes to kill: a boss is a group's
  * fight, at least {@link ZoneBoss#LEAST_HITS} ordinary hits all its lives together, and each of its
  * lives more than any miniboss. Every kind there is is measured, so a new one out of its place fails
  * here. Each is made and measured off the world, never let loose in it.
@@ -188,6 +189,12 @@ public class PeckingOrderGameTests {
                     bosses++;
                     if (b instanceof LadyEarthFlowEntity) blow *= 2; // her stroke is two cuts, the second hard on the first
                     check(h, blow >= BOSS_LEAST - EPS && blow <= BOSS_MOST + EPS, name(b) + "'s blow, a boss's: " + blow);
+                    // its special hits (the blows that fall on all near it) no harder than a boss's blow, and as they land
+                    for (double special : b.specialShares()) {
+                        check(h, special > 0 && special <= BOSS_MOST + EPS, name(b) + "'s special hit: " + special);
+                        double lands = b.hitOf(special) / MobScaling.typicalHealth(b.mobLevel());
+                        check(h, Math.abs(lands - special) <= EPS, name(b) + "'s special hit lands as declared: " + lands);
+                    }
                 }
             } finally {
                 e.discard();

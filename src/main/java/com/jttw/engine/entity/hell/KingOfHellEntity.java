@@ -9,6 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.BossEvent;
@@ -28,9 +29,11 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
+import java.util.List;
 
 /**
  * One of the Ten Kings of Hell (十殿阎王), the judges of the dead, each on the throne of his own
@@ -39,6 +42,11 @@ import java.util.EnumSet;
  * strikes with the tablet, and every few seconds passes the judgement of his court on whoever
  * fights him ({@link #judge}): each court its own. King Yama ({@link KingYamaEntity}), the Fifth,
  * is the strongest of them and fights in phases.
+ *
+ * <p>Some courts' kings have, besides, a <b>sentence on all</b> ({@link #areaShare()} over 0): every
+ * {@link #areaEvery()} ticks, with a foe in reach, he stands, raises his court's emblem over his head
+ * for {@value #AREA_WIND_UP} ticks (his court's sign gathering round him, a sound rising), and then
+ * brings it down on everyone within {@link #areaReach()} at once ({@link #release}).
  *
  * <p>The First Court's king is level 57, and each after one more, King Yama passed over (the Sixth
  * 61, the Tenth 65); King Yama is 66.
@@ -54,14 +62,22 @@ public abstract class KingOfHellEntity extends ZoneBoss {
     public static final int HALL = 13, STRIKE_EVERY = 30;
     public static final double JUDGES_WITHIN = 14;
 
-    private static final EntityDataAccessor<Integer> JUDGING = SynchedEntityData.defineId(KingOfHellEntity.class, EntityDataSerializers.INT);
+    /** How long he stands with his emblem raised before his sentence on all falls. */
+    public static final int AREA_WIND_UP = 30;
 
-    private int judgement;
+    private static final EntityDataAccessor<Integer> JUDGING = SynchedEntityData.defineId(KingOfHellEntity.class, EntityDataSerializers.INT);
+    /** Ticks left of his sentence on all's wind-up (for his pose: the emblem raised overhead). */
+    private static final EntityDataAccessor<Integer> RAISING = SynchedEntityData.defineId(KingOfHellEntity.class, EntityDataSerializers.INT);
+
+    private int judgement, area;
+    /** Which way he faced as he raised his emblem (for a sentence that falls before him only). */
+    private Vec3 areaFacing = new Vec3(0, 0, 1);
 
     protected KingOfHellEntity(EntityType<? extends KingOfHellEntity> type, Level level) {
         super(type, level);
         xpReward = 300;
         judgement = judgeEvery() / 2;
+        area = areaEvery() * 3 / 4;
     }
 
     /** His court: 1 to 10. */
@@ -130,6 +146,7 @@ public abstract class KingOfHellEntity extends ZoneBoss {
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(JUDGING, 0);
+        builder.define(RAISING, 0);
     }
 
     /** Whether he is passing judgement now (for his pose: the tablet raised). */
@@ -140,6 +157,134 @@ public abstract class KingOfHellEntity extends ZoneBoss {
     /** Raises his tablet in judgement for a moment (his judgement does; so does the gallery, to show it). */
     public void showJudging() {
         entityData.set(JUDGING, 20);
+    }
+
+    // ── His sentence on all ─────────────────────────────────────────────
+
+    /** His sentence on all, as a share of a same-level character's health: 0, none (the default). */
+    public double areaShare() {
+        return 0;
+    }
+
+    /** How far his sentence on all reaches. */
+    public double areaReach() {
+        return 7;
+    }
+
+    /** How often he passes it, in ticks. */
+    public int areaEvery() {
+        return 240;
+    }
+
+    /** His sentence on all, at its hardest (on some it may fall lighter: {@link #areaHitOn}). */
+    @Override
+    public double[] specialShares() {
+        return areaShare() > 0 ? new double[]{areaShare()} : new double[0];
+    }
+
+    /** Whether he is raising his emblem now, his sentence on all about to fall. */
+    public boolean raising() {
+        return entityData.get(RAISING) > 0;
+    }
+
+    /** How far through the raising he is: 0 as it begins, 1 as it falls. */
+    public float raised() {
+        return 1f - entityData.get(RAISING) / (float) AREA_WIND_UP;
+    }
+
+    /** Which way he faced as he raised it. */
+    public Vec3 areaFacing() {
+        return areaFacing;
+    }
+
+    /** Whether {@code e} stands where his sentence on all falls: within its reach (some courts', before him only). */
+    public boolean inArea(LivingEntity e) {
+        return e.distanceTo(this) <= areaReach() && Math.abs(e.getY() - getY()) <= 3;
+    }
+
+    /** Those his sentence on all would fall on now. */
+    public List<LivingEntity> areaFoes() {
+        return foesWithin(areaReach() + 1).stream().filter(this::inArea).filter(e -> !HellRules.inSanctuary(e)).toList();
+    }
+
+    /** His sentence on all as it falls on {@code e}. */
+    public float areaHitOn(LivingEntity e) {
+        return hitOf(areaShare());
+    }
+
+    /**
+     * Raises his emblem: {@value #AREA_WIND_UP} ticks from now his sentence on all falls. Returns
+     * whether he began (not if he has none, or is raising it already).
+     */
+    public boolean beginArea() {
+        if (areaShare() <= 0 || raising()) return false;
+        LivingEntity t = getTarget();
+        Vec3 way = t != null ? t.position().subtract(position()).multiply(1, 0, 1) : getLookAngle().multiply(1, 0, 1);
+        areaFacing = way.lengthSqr() < 1e-4 ? new Vec3(0, 0, 1) : way.normalize();
+        entityData.set(RAISING, AREA_WIND_UP);
+        area = areaEvery();
+        getNavigation().stop();
+        raiseSound();
+        return true;
+    }
+
+    /** The sound of his emblem raised. */
+    protected void raiseSound() {
+        playSound(SoundEvents.EVOKER_PREPARE_ATTACK, 2f, 0.6f);
+    }
+
+    /** His court's sign gathering as he raises it ({@code left} ticks before it falls). */
+    protected void raiseSigns(ServerLevel server, int left) {}
+
+    /** One tick of his sentence on all: the raising, and its fall; or, its time come and a foe in reach, its beginning. */
+    public void tickArea() {
+        int left = entityData.get(RAISING);
+        if (left > 0) {
+            getNavigation().stop();
+            if (level() instanceof ServerLevel server) raiseSigns(server, left);
+            entityData.set(RAISING, --left);
+            if (left == 0) {
+                swing(InteractionHand.MAIN_HAND, true);
+                release(areaFoes());
+            }
+            return;
+        }
+        if (area > 0) area--;
+        LivingEntity t = getTarget();
+        if (area == 0 && areaShare() > 0 && t != null && t.isAlive() && inArea(t)) beginArea();
+    }
+
+    /** His sentence on all falls on {@code caught}. Returns how many it struck. */
+    public int release(List<? extends LivingEntity> caught) {
+        int n = 0;
+        for (LivingEntity e : caught) {
+            e.invulnerableTime = 0;
+            if (e.hurt(areaSource(), areaHitOn(e))) {
+                n++;
+                onAreaHit(e);
+            }
+        }
+        releaseSigns();
+        return n;
+    }
+
+    /** What his sentence on all strikes with. */
+    protected DamageSource areaSource() {
+        return damageSources().indirectMagic(this, this);
+    }
+
+    /** What else it does to one it struck. */
+    protected void onAreaHit(LivingEntity e) {}
+
+    /** The sight and sound of its fall. */
+    protected void releaseSigns() {}
+
+    /** A ring of {@code particle} on the ground round him, {@code r} out: where his sentence on all reaches. */
+    protected void ring(ServerLevel server, net.minecraft.core.particles.ParticleOptions particle, double r, int points) {
+        for (int i = 0; i < points; i++) {
+            double a = i * Math.PI * 2 / points;
+            server.sendParticles(particle, getX() + Math.cos(a) * r, getY() + 0.15, getZ() + Math.sin(a) * r, 1, 0, 0, 0, 0);
+        }
     }
 
     @Override
@@ -195,6 +340,8 @@ public abstract class KingOfHellEntity extends ZoneBoss {
             setTarget(null);
             t = null;
         }
+        tickArea();
+        if (raising()) return;
         if (judgement > 0) judgement--;
         if (judgement == 0 && t != null && t.isAlive() && distanceTo(t) <= JUDGES_WITHIN) {
             if (judge(t)) {
@@ -244,12 +391,14 @@ public abstract class KingOfHellEntity extends ZoneBoss {
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putInt("Judgement", judgement);
+        tag.putInt("Area", area);
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         judgement = tag.getInt("Judgement");
+        if (tag.contains("Area")) area = tag.getInt("Area");
     }
 
     /** Close in; a blow of the tablet; again. */
@@ -283,8 +432,12 @@ public abstract class KingOfHellEntity extends ZoneBoss {
         public void tick() {
             LivingEntity t = king.getTarget();
             if (t == null) return;
-            king.getLookControl().setLookAt(t, 30f, 30f);
             if (rest > 0) rest--;
+            if (king.raising()) {
+                king.getNavigation().stop();
+                return;
+            }
+            king.getLookControl().setLookAt(t, 30f, 30f);
             if (king.inReach(t)) {
                 king.getNavigation().stop();
                 if (rest == 0) {

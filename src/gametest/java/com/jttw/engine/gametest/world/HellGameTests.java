@@ -336,6 +336,135 @@ public class HellGameTests {
         h.succeed();
     }
 
+    @GameTest(template = PLATFORM)
+    public static void bianchengsBellStrikesAllItBringsToTheirKnees(GameTestHelper h) {
+        var bell = king(h, ModEntities.KING_BIANCHENG.get(), new BlockPos(0, 2, 0));
+        IronGolem a = dummy(h, new BlockPos(3, 2, 2)), b = dummy(h, new BlockPos(1, 2, 4)), far = dummy(h, new BlockPos(7, 2, 7));
+        float full = a.getHealth();
+        eq(h, 2, bell.toll(List.of(a, b, far)), "two within its reach kneel");
+        close(h, bell.hitOf(HellKings.Biancheng.NOTE), full - a.getHealth(), "its note strikes the one");
+        close(h, bell.hitOf(HellKings.Biancheng.NOTE), full - b.getHealth(), "and the other alike");
+        eq(h, full, far.getHealth(), "nothing beyond it");
+        h.succeed();
+    }
+
+    // ── The sentences on all ────────────────────────────────────────────
+
+    /**
+     * A king's sentence on all, played out: two that fight him stand in its reach ({@code a} he
+     * faces), one beyond it, and one in it that steps out halfway through the raising. Nothing falls
+     * while his emblem is raised; then it falls on the two alone, as {@link KingOfHellEntity#areaHitOn}
+     * says. Returns the two struck.
+     */
+    private static IronGolem[] sentenceOnAll(GameTestHelper h, KingOfHellEntity k, BlockPos a, BlockPos b, BlockPos leaves, BlockPos out) {
+        IronGolem ga = dummy(h, a), gb = dummy(h, b), gl = dummy(h, leaves), go = dummy(h, out);
+        for (IronGolem g : List.of(ga, gb, gl, go)) g.setTarget(k);
+        k.setTarget(ga);
+        float full = ga.getHealth();
+        List<LivingEntity> foes = k.areaFoes();
+        check(h, foes.contains(ga) && foes.contains(gb) && foes.contains(gl), "the three in its reach would be struck: " + foes);
+        check(h, !foes.contains(go), "not the one beyond it");
+        check(h, k.areaShare() > 0 && k.beginArea(), "he raises his emblem");
+        check(h, k.raising() && !k.beginArea(), "raising it, once");
+        for (int t = 1; t < KingOfHellEntity.AREA_WIND_UP; t++) {
+            k.tickArea();
+            if (t == KingOfHellEntity.AREA_WIND_UP / 2) gl.teleportTo(gl.getX() + 30, gl.getY(), gl.getZ());
+            check(h, k.raising(), "still raised at tick " + t);
+        }
+        for (IronGolem g : List.of(ga, gb, gl, go)) eq(h, full, g.getHealth(), "nothing falls while it is raised");
+        k.tickArea();
+        check(h, !k.raising(), "it falls");
+        close(h, k.areaHitOn(ga), full - ga.getHealth(), "on the one he faced");
+        close(h, k.areaHitOn(gb), full - gb.getHealth(), "on the other in its reach");
+        eq(h, full, gl.getHealth(), "not on the one who stepped out in time");
+        eq(h, full, go.getHealth(), "not on the one beyond it");
+        check(h, k.hitOf(k.areaShare()) > 0 && k.areaShare() <= com.jttw.engine.entity.zone.ZoneBoss.MOST_BLOW, "a boss's blow at most");
+        return new IronGolem[]{ga, gb};
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void qinguangsMirrorFlashesOverAllBeforeHim(GameTestHelper h) {
+        var k = king(h, ModEntities.KING_QINGUANG.get(), new BlockPos(0, 2, 0));
+        // he faces +z; the one beside him, close as it is, is out of the mirror's light
+        IronGolem[] hit = sentenceOnAll(h, k, new BlockPos(0, 2, 4), new BlockPos(2, 2, 6), new BlockPos(1, 2, 2), new BlockPos(4, 2, 0));
+        close(h, k.hitOf(HellKings.Qinguang.FLASH), k.areaHitOn(hit[0]), "for one of no account, the flash's measure");
+        check(h, hit[0].hasEffect(MobEffects.BLINDNESS) && hit[1].hasEffect(MobEffects.BLINDNESS), "dazzled");
+        ServerPlayer good = player(h), wicked = player(h);
+        Morality.set(good, 200);
+        Morality.set(wicked, -5000);
+        close(h, k.hitOf(HellKings.Qinguang.FLASH) * HellKings.Qinguang.FOR_THE_GOOD, k.areaHitOn(good), "lightly on the good");
+        close(h, k.hitOf(HellKings.Qinguang.FLASH) * HellKings.Qinguang.AT_WORST, k.areaHitOn(wicked), "hardest on the wicked");
+        check(h, HellKings.Qinguang.FLASH * HellKings.Qinguang.AT_WORST <= com.jttw.engine.entity.zone.ZoneBoss.MOST_BLOW, "within a boss's blow");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void songdisHooksLashOutInARing(GameTestHelper h) {
+        var k = king(h, ModEntities.KING_SONGDI.get(), new BlockPos(0, 2, 0));
+        IronGolem[] hit = sentenceOnAll(h, k, new BlockPos(3, 2, 2), new BlockPos(1, 2, 4), new BlockPos(2, 2, 0), new BlockPos(6, 2, 6));
+        for (IronGolem g : hit) {
+            Vec3 in = k.position().subtract(g.position()).multiply(1, 0, 1).normalize();
+            check(h, g.getDeltaMovement().multiply(1, 0, 1).dot(in) > 0.5, "dragged in toward him: " + g.getDeltaMovement());
+        }
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void wuguansScalesComeDownOnAllNearHim(GameTestHelper h) {
+        var k = king(h, ModEntities.KING_WUGUAN.get(), new BlockPos(0, 2, 0));
+        IronGolem[] hit = sentenceOnAll(h, k, new BlockPos(3, 2, 2), new BlockPos(1, 2, 4), new BlockPos(2, 2, 0), new BlockPos(5, 2, 5));
+        for (IronGolem g : hit) check(h, g.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "weighed down");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void pingdengJudgesAllNearHimAlike(GameTestHelper h) {
+        var k = king(h, ModEntities.KING_PINGDENG.get(), new BlockPos(0, 2, 0));
+        IronGolem[] hit = sentenceOnAll(h, k, new BlockPos(3, 2, 2), new BlockPos(1, 2, 4), new BlockPos(2, 2, 0), new BlockPos(7, 2, 7));
+        close(h, hit[0].getHealth(), hit[1].getHealth(), "the same on each");
+        close(h, k.hitOf(HellKings.Pingdeng.JUDGEMENT), hit[0].getMaxHealth() - hit[0].getHealth(), "a quarter of a same-level character's health");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void zhuanlunsWheelRollsOutOverAllNearHim(GameTestHelper h) {
+        var k = king(h, ModEntities.KING_ZHUANLUN.get(), new BlockPos(0, 2, 0));
+        IronGolem[] hit = sentenceOnAll(h, k, new BlockPos(3, 2, 2), new BlockPos(1, 2, 4), new BlockPos(2, 2, 0), new BlockPos(7, 2, 7));
+        for (IronGolem g : hit) {
+            Vec3 out = g.position().subtract(k.position()).multiply(1, 0, 1).normalize();
+            check(h, g.getDeltaMovement().multiply(1, 0, 1).dot(out) > 0.5, "flung back from him: " + g.getDeltaMovement());
+        }
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void aKingRaisesHisSentenceOnAllInHisOwnTime(GameTestHelper h) {
+        var k = king(h, ModEntities.KING_ZHUANLUN.get(), new BlockPos(0, 2, 0));
+        IronGolem g = dummy(h, new BlockPos(3, 2, 2));
+        g.setTarget(k);
+        k.setTarget(g);
+        int t = 0;
+        while (!k.raising() && t++ < k.areaEvery() + 5) k.tickArea();
+        check(h, k.raising(), "raised within his time: " + t);
+        check(h, t > 1, "not at once: " + t);
+        // a king with none never raises it
+        var chujiang = king(h, ModEntities.KING_CHUJIANG.get(), new BlockPos(4, 2, 4));
+        chujiang.setTarget(g);
+        for (int i = 0; i < chujiang.areaEvery() + 5; i++) chujiang.tickArea();
+        check(h, !chujiang.raising() && !chujiang.beginArea(), "Chujiang has no sentence on all but his frost");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void aSentenceOnAllFallsOnPlayersWhoFightButSparesTheWatching(GameTestHelper h) {
+        var k = king(h, ModEntities.KING_PINGDENG.get(), new BlockPos(0, 2, 0));
+        ServerPlayer fighter = player(h), watcher = player(h);
+        watcher.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
+        check(h, k.isFoe(fighter), "a player near him is struck");
+        check(h, !k.isFoe(watcher), "one only watching is not");
+        h.succeed();
+    }
+
     @GameTest(template = PLATFORM, timeoutTicks = 40)
     public static void songdiHooksAndHaulsToHisFeet(GameTestHelper h) {
         openAir(h);

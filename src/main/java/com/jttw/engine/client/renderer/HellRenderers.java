@@ -1062,8 +1062,8 @@ public final class HellRenderers {
 
     /**
      * A king's pose: the tablet held up before him in his right hand, his emblem in his left;
-     * judging, the emblem thrust up high and the tablet raised; striking, the tablet brought down.
-     * His own emblem alone shown.
+     * judging, the emblem thrust up high and the tablet raised; raising his sentence on all, both
+     * lifted high over his head, trembling; striking, the tablet brought down. His own emblem alone shown.
      */
     public static final class KingModel<T extends KingOfHellEntity> extends EntityModel<T> {
         private final ModelPart root, head, beard, rightBeard, leftBeard, rightArm, leftArm, rightForearm, rightSleeve, leftSleeve,
@@ -1113,14 +1113,22 @@ public final class HellRenderers {
             head.xRot = pitch * Mth.DEG_TO_RAD;
             head.y = head.getInitialPose().y + Mth.sin(age * 0.06f) * 0.15f;
             // the tablet before him, the emblem in his left; judging, the emblem thrust up and the tablet raised; a blow, the tablet brought down
-            float rx = Mth.cos(age * 0.05f) * 0.03f, lx = -rx;
+            float rx = Mth.cos(age * 0.05f) * 0.03f, lx = -rx, rz = 0, lz = 0;
             if (e.isJudging()) {
                 rx = -0.9f;
                 lx = -0.5f;
             }
+            if (e.raising()) {
+                // his sentence on all: tablet and emblem lifted high over his head, higher as it gathers, trembling with its weight
+                float up = Math.min(1f, e.raised() * 2.5f), shake = Mth.sin(age * 1.7f) * 0.04f * up;
+                rx = -2.85f * up + shake;
+                lx = -2.85f * up - shake;
+                rz = -0.25f * up;
+                lz = 0.25f * up;
+            }
             rx -= strike * 1.4f;
-            turn(rightArm, rx, 0);
-            turn(leftArm, lx, 0);
+            turn(rightArm, rx, rz);
+            turn(leftArm, lx, lz);
             turn(rightForearm, strike * 0.5f, 0);
             // the great sleeves hang under their weight whatever the arms do
             turn(rightSleeve, -(rx + strike * 0.5f) * 0.85f + Mth.sin(age * 0.05f) * 0.04f + amount * 0.2f, 0);

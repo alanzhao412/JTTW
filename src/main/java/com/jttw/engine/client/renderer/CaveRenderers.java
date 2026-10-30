@@ -244,7 +244,30 @@ public final class CaveRenderers {
         public void setupAnim(T e, float swing, float amount, float age, float yaw, float pitch) {
             super.setupAnim(e, swing * 0.5f, amount, age, yaw, pitch);
             tail.yRot = Mth.sin(age * 0.09f) * 0.3f;
-            if (e.isAggressive()) {
+            int whirl = e instanceof LadyEarthFlowEntity lady ? lady.whirlLeft() : 0;
+            if (whirl > LadyEarthFlowEntity.WHIRL_SPIN) {
+                // the whirl's wind-up: sunk low, leaning in, both blades swept out wide behind her
+                float t = Math.min(1f, (LadyEarthFlowEntity.WHIRL_WIND_UP + LadyEarthFlowEntity.WHIRL_SPIN - whirl) / 6f);
+                body.xRot = 0.45f * t;
+                head.xRot = head.xRot * (1 - t) - 0.3f * t;
+                head.y = 2.5f * t;
+                body.y = 2.5f * t;
+                rightArm.y = leftArm.y = 2f + 2.5f * t;
+                rightArm.xRot = 0.6f * t;
+                leftArm.xRot = 0.6f * t;
+                rightArm.zRot = 1.2f * t;
+                leftArm.zRot = -1.2f * t;
+                rightArm.yRot = 0.5f * t;
+                leftArm.yRot = -0.5f * t;
+            } else if (whirl > 0) {
+                // spinning: both blades straight out, a ring of steel (the renderer turns her)
+                rightArm.xRot = -0.1f;
+                leftArm.xRot = -0.1f;
+                rightArm.zRot = 1.5f;
+                leftArm.zRot = -1.5f;
+                rightArm.yRot = 0;
+                leftArm.yRot = 0;
+            } else if (e.isAggressive()) {
                 // both blades up and forward, the right a little higher
                 rightArm.xRot = -1.35f + Mth.sin(age * 0.25f) * 0.08f + rightArm.xRot * 0.3f;
                 leftArm.xRot = -1.0f - Mth.sin(age * 0.25f) * 0.08f + leftArm.xRot * 0.3f;
@@ -271,6 +294,17 @@ public final class CaveRenderers {
         @Override
         protected void scale(LadyEarthFlowEntity e, PoseStack pose, float partial) {
             pose.scale(SIZE, SIZE, SIZE);
+        }
+
+        /** In her whirl she spins on her heel, twice round. */
+        @Override
+        protected void setupRotations(LadyEarthFlowEntity e, PoseStack pose, float bob, float yBodyRot, float partial, float scale) {
+            super.setupRotations(e, pose, bob, yBodyRot, partial, scale);
+            int left = e.whirlLeft();
+            if (left > 0 && left <= LadyEarthFlowEntity.WHIRL_SPIN) {
+                float done = (LadyEarthFlowEntity.WHIRL_SPIN - left + partial) / LadyEarthFlowEntity.WHIRL_SPIN;
+                pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-720f * Math.min(1f, done)));
+            }
         }
 
         @Override

@@ -7,6 +7,7 @@ import com.jttw.engine.entity.cave.EarthFlowDecoyEntity;
 import com.jttw.engine.entity.cave.FlowerMaidEntity;
 import com.jttw.engine.entity.cave.LadyEarthFlowEntity;
 import com.jttw.engine.entity.cave.MouseSpiritEntity;
+import com.jttw.engine.entity.zone.ZoneBoss;
 import com.jttw.engine.entity.zone.ZoneMonster;
 import com.jttw.engine.item.EarthFlowSwordItem;
 import com.jttw.engine.item.PairedBlade;
@@ -307,6 +308,57 @@ public class CaveGameTests {
         lady.cut(golem, true);
         close(h, LadyEarthFlowEntity.CUT_DAMAGE, afterFirst - golem.getHealth(), "the female blade's cut, straight after");
         check(h, golem.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "slows");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void herWhirlCutsAllAroundHerAfterItsWindUp(GameTestHelper h) {
+        LadyEarthFlowEntity lady = lady(h, new BlockPos(0, 2, 0));
+        lady.setNoAi(true);
+        var a = dummy(h, new BlockPos(2, 2, 1));
+        var b = dummy(h, new BlockPos(1, 2, 3));
+        var steps = dummy(h, new BlockPos(3, 2, 0));
+        var far = dummy(h, new BlockPos(4, 2, 4));
+        for (var g : List.of(a, b, steps, far)) g.setTarget(lady);
+        lady.setTarget(a);
+        float full = a.getHealth();
+        List<LivingEntity> foes = lady.whirlFoes();
+        check(h, foes.contains(a) && foes.contains(b) && foes.contains(steps) && !foes.contains(far), "within her reach, and not beyond: " + foes);
+        check(h, lady.beginWhirl() && lady.windingUp() && !lady.beginWhirl(), "she sinks low, the blades swept back, once");
+        for (int t = 1; t < LadyEarthFlowEntity.WHIRL_WIND_UP; t++) {
+            lady.tickWhirl();
+            if (t == LadyEarthFlowEntity.WHIRL_WIND_UP / 2) steps.teleportTo(steps.getX() + 30, steps.getY(), steps.getZ());
+            check(h, lady.windingUp(), "still winding up at tick " + t);
+        }
+        for (var g : List.of(a, b, steps, far)) eq(h, full, g.getHealth(), "no cut while she winds up");
+        lady.tickWhirl();
+        check(h, lady.whirling() && !lady.windingUp(), "she spins");
+        double cut = LadyEarthFlowEntity.WHIRL * MobScaling.typicalHealth(LadyEarthFlowEntity.LEVEL);
+        close(h, cut, full - a.getHealth(), "the one cut");
+        close(h, cut, full - b.getHealth(), "and the other");
+        check(h, a.hasEffect(MobEffects.MOVEMENT_SLOWDOWN) && b.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "and slowed");
+        eq(h, full, steps.getHealth(), "not the one who stepped back in time");
+        eq(h, full, far.getHealth(), "not the one beyond her reach");
+        for (int t = 0; t < LadyEarthFlowEntity.WHIRL_SPIN; t++) lady.tickWhirl();
+        check(h, !lady.whirling(), "and stands again");
+        close(h, cut, full - a.getHealth(), "once only");
+        check(h, LadyEarthFlowEntity.WHIRL <= ZoneBoss.MOST_BLOW, "within a boss's blow");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void herWhirlComesInItsOwnTimeAndTakesPlayersNear(GameTestHelper h) {
+        LadyEarthFlowEntity lady = lady(h, new BlockPos(0, 2, 0));
+        lady.setNoAi(true);
+        ServerPlayer p = player(h), watching = player(h);
+        watching.setGameMode(GameType.SPECTATOR);
+        check(h, lady.isFoe(p) && !lady.isFoe(watching), "a player near her would be cut, not one watching");
+        var g = dummy(h, new BlockPos(2, 2, 1));
+        g.setTarget(lady);
+        lady.setTarget(g);
+        int t = 0;
+        while (!lady.whirling() && t++ < LadyEarthFlowEntity.WHIRL_EVERY + 5) lady.tickWhirl();
+        check(h, lady.windingUp() && t > 1, "she whirls in her own time: " + t);
         h.succeed();
     }
 

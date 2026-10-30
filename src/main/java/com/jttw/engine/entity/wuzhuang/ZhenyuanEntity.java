@@ -2,6 +2,7 @@ package com.jttw.engine.entity.wuzhuang;
 
 import com.jttw.engine.entity.MobScaling;
 import com.jttw.engine.registry.ModEntities;
+import com.jttw.engine.world.wuzhuang.Wuzhuang;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -58,6 +59,12 @@ import java.util.UUID;
  *       warning (his sleeve raised, the air drawn toward it), then whoever he fights, if within
  *       {@value #SLEEVE_REACH} blocks, is swept in, and from 30% everyone within
  *       {@value #SLEEVE_ALL} blocks of him;</li>
+ *   <li><b>the sweep of the whisk</b> (every {@value #SWEEP_EVERY} ticks, a foe within
+ *       {@value #SWEEP_REACH} blocks): he lifts the whisk over his head and whirls it, the wind
+ *       gathering in a ring of cloud round him, for {@value #SWEEP_WIND_UP} ticks; then sweeps it
+ *       round him, a gale off its horsetail striking everyone within {@value #SWEEP_REACH} blocks
+ *       ({@link #SWEEP} of their health) and blowing them back. Only those he fights: the
+ *       temple's enemies, and whoever has struck him;</li>
  *   <li>at 60%, he <b>calls his disciples</b>: any of his household still living within
  *       {@value #CALL_REACH} blocks come to his side (he makes none: a temple's disciples are only
  *       so many, and when he comes for their killer there are none left);</li>
@@ -81,10 +88,15 @@ public class ZhenyuanEntity extends TempleImmortal {
     /** How far from the one he comes for he arrives (at least, at most), and how far he will go on hunting them. */
     public static final int ARRIVE_NEAR = 4, ARRIVE_FAR = 8, HUNT = 64;
     public static final float DISCIPLES_AT = 0.6f, ALL_AT = 0.3f;
+    /** The sweep of the whisk: how often, how long its wind-up, how long the sweep is shown; how far, how hard (of a level-88 character's health), how far it blows one back. */
+    public static final int SWEEP_EVERY = 220, SWEEP_WIND_UP = 25, SWEEP_SHOWN = 8;
+    public static final double SWEEP_REACH = 6, SWEEP = 0.25, GALE = 1.2;
 
     private static final EntityDataAccessor<Integer> SLEEVE_RAISED = SynchedEntityData.defineId(ZhenyuanEntity.class, EntityDataSerializers.INT);
+    /** Ticks left of the sweep of his whisk: over {@value #SWEEP_SHOWN} lifted and whirling, then sweeping round (for his pose). */
+    private static final EntityDataAccessor<Integer> SWEEPING = SynchedEntityData.defineId(ZhenyuanEntity.class, EntityDataSerializers.INT);
 
-    private int sleeve = SLEEVE_EVERY / 2, windUp;
+    private int sleeve = SLEEVE_EVERY / 2, windUp, gust = SWEEP_EVERY * 3 / 4;
     private final List<LivingEntity> held = new ArrayList<>();
     private int staggered;
     /** The one he came for, if he came for someone: he hunts them. */
@@ -146,6 +158,7 @@ public class ZhenyuanEntity extends TempleImmortal {
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(SLEEVE_RAISED, 0);
+        builder.define(SWEEPING, 0);
     }
 
     /** Whether his sleeve is raised (sweeping, or about to: for his pose). */
@@ -161,7 +174,18 @@ public class ZhenyuanEntity extends TempleImmortal {
     @Override
     protected void registerGoals() {
         goalSelector.addGoal(0, new FloatGoal(this));
-        goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.1, true));
+        goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.1, true) {
+            // the whisk lifted for its sweep, he strikes no ordinary stroke and keeps his ground
+            @Override
+            public boolean canUse() {
+                return !sweeping() && super.canUse();
+            }
+
+            @Override
+            public boolean canContinueToUse() {
+                return !sweeping() && super.canContinueToUse();
+            }
+        });
         goalSelector.addGoal(5, new MoveTowardsRestrictionGoal(this, 1.0));
         goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 16f));
         goalSelector.addGoal(7, new RandomLookAroundGoal(this));
@@ -197,6 +221,99 @@ public class ZhenyuanEntity extends TempleImmortal {
     public void stagger() {
         staggered = 40;
         addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 2, false, false));
+    }
+
+    // ── The sweep of the whisk ──────────────────────────────────────────
+
+    /** The sweep's gale. */
+    @Override
+    public double[] specialShares() {
+        return new double[]{SWEEP};
+    }
+
+    /** He sweeps only those he fights: the temple's enemies, his foe, and whoever has struck him. */
+    @Override
+    protected boolean fights(Player p) {
+        return Wuzhuang.isTempleEnemy(p) || struckLately(p) || p.getUUID().equals(quarry);
+    }
+
+    /** Ticks left of the sweep of his whisk: over {@value #SWEEP_SHOWN}, lifted and whirling; then sweeping round; 0 when he is not. */
+    public int sweepLeft() {
+        return entityData.get(SWEEPING);
+    }
+
+    /** Whether he has the whisk lifted, about to sweep it round (or is sweeping it). */
+    public boolean sweeping() {
+        return sweepLeft() > 0;
+    }
+
+    /** Those the sweep would strike now. */
+    public List<LivingEntity> sweepFoes() {
+        return foesWithin(SWEEP_REACH).stream().filter(e -> Math.abs(e.getY() - getY()) <= 3 && !Sleeve.isHeld(e)).toList();
+    }
+
+    /** Lifts the whisk and whirls it: {@value #SWEEP_WIND_UP} ticks from now it sweeps round. Returns whether he began. */
+    public boolean beginSweep() {
+        if (sweeping() || windUp > 0) return false;
+        entityData.set(SWEEPING, SWEEP_WIND_UP + SWEEP_SHOWN);
+        gust = SWEEP_EVERY;
+        getNavigation().stop();
+        playSound(SoundEvents.ELYTRA_FLYING, 1.2f, 1.6f);
+        playSound(SoundEvents.ILLUSIONER_PREPARE_BLINDNESS, 1.5f, 0.7f);
+        return true;
+    }
+
+    /** One tick of the sweep: the whirling wind-up, the sweep (it strikes as it begins), or, its time come and a foe near, its beginning. */
+    public void tickSweep() {
+        int left = sweepLeft();
+        if (left > 0) {
+            getNavigation().stop();
+            entityData.set(SWEEPING, --left);
+            if (level() instanceof ServerLevel server && left > SWEEP_SHOWN) {
+                // the whisk whirling overhead, and the wind gathering in a ring of cloud at the sweep's edge
+                double a = left * 0.9;
+                server.sendParticles(ParticleTypes.CLOUD, getX() + Math.cos(a) * 0.9, getY() + getBbHeight() + 0.5, getZ() + Math.sin(a) * 0.9, 1, 0, 0, 0, 0);
+                for (int i = 0; i < 6; i++) {
+                    double b = random.nextDouble() * Math.PI * 2;
+                    server.sendParticles(ParticleTypes.CLOUD, getX() + Math.cos(b) * SWEEP_REACH, getY() + 0.3, getZ() + Math.sin(b) * SWEEP_REACH,
+                            0, -Math.sin(b), 0.02, Math.cos(b), 0.2);
+                }
+            }
+            if (left == SWEEP_SHOWN) sweepGale(sweepFoes());
+            return;
+        }
+        if (gust > 0) gust--;
+        LivingEntity t = getTarget();
+        if (gust == 0 && windUp == 0 && t != null && t.isAlive() && t.distanceTo(this) <= SWEEP_REACH && !Sleeve.isHeld(t)) beginSweep();
+    }
+
+    /** The whisk swept round: a gale strikes {@code caught} and blows them back. Returns how many it struck. */
+    public int sweepGale(List<? extends LivingEntity> caught) {
+        int n = 0;
+        for (LivingEntity e : caught) {
+            e.invulnerableTime = 0;
+            if (!e.hurt(damageSources().mobAttack(this), hitOf(SWEEP))) continue;
+            n++;
+            setLastHurtMob(e);
+            Vec3 out = e.position().subtract(position()).multiply(1, 0, 1);
+            if (out.lengthSqr() > 1e-4) {
+                out = out.normalize();
+                e.push(out.x * GALE, 0.4, out.z * GALE);
+                e.hurtMarked = true;
+            }
+        }
+        swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);
+        playSound(SoundEvents.BREEZE_WIND_CHARGE_BURST.value(), 2f, 0.7f);
+        playSound(SoundEvents.PLAYER_ATTACK_SWEEP, 1.5f, 0.6f);
+        if (level() instanceof ServerLevel server) {
+            for (int i = 0; i < 40; i++) {
+                double a = i * Math.PI * 2 / 40;
+                server.sendParticles(ParticleTypes.CLOUD, getX() + Math.cos(a) * 1.2, getY(0.5), getZ() + Math.sin(a) * 1.2,
+                        0, Math.cos(a), 0.05, Math.sin(a), 0.5);
+            }
+            server.sendParticles(ParticleTypes.GUST, getX(), getY(0.5), getZ(), 6, SWEEP_REACH / 3, 0.3, SWEEP_REACH / 3, 0);
+        }
+        return n;
     }
 
     // ── His disciples ───────────────────────────────────────────────────
@@ -386,6 +503,8 @@ public class ZhenyuanEntity extends TempleImmortal {
         int raised = entityData.get(SLEEVE_RAISED);
         if (raised > 0) entityData.set(SLEEVE_RAISED, raised - 1);
         hunt();
+        tickSweep();
+        if (sweeping()) return;
         if (sleeve > 0) sleeve--;
         LivingEntity t = getTarget();
         if (windUp > 0) {
@@ -455,11 +574,13 @@ public class ZhenyuanEntity extends TempleImmortal {
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         if (quarry != null) tag.putUUID("Quarry", quarry);
+        tag.putInt("Gust", gust);
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         quarry = tag.hasUUID("Quarry") ? tag.getUUID("Quarry") : null;
+        if (tag.contains("Gust")) gust = tag.getInt("Gust");
     }
 }

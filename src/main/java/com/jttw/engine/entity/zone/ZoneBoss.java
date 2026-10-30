@@ -1,5 +1,6 @@
 package com.jttw.engine.entity.zone;
 
+import com.jttw.engine.entity.MobScaling;
 import com.jttw.engine.progression.level.EnemyTier;
 import com.jttw.engine.world.ZoneAllies;
 import com.jttw.engine.world.Zones;
@@ -16,6 +17,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.monster.Monster;
@@ -24,6 +26,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -49,7 +52,8 @@ import java.util.function.Predicate;
  * <p>A boss is a group's fight, not one character's: all its lives together it takes at least
  * {@link #LEAST_HITS} of a same-level character's ordinary hits to kill (three or four of them,
  * some sixty to ninety hits each), and its main blow takes {@link #LEAST_BLOW} to {@link #MOST_BLOW}
- * of that character's health, so three or four of them kill; its special hits are no harder. Each
+ * of that character's health, so three or four of them kill; its special hits ({@link #specialShares()},
+ * each struck with {@link #hitOf}) are no harder. Each
  * of its lives ({@link #lives()}) is more than any miniboss's health (see the README's pecking order).
  */
 public abstract class ZoneBoss extends Monster implements MobLevel {
@@ -120,6 +124,53 @@ public abstract class ZoneBoss extends Monster implements MobLevel {
      */
     public double[] lives() {
         return new double[]{1};
+    }
+
+    /**
+     * Its special hits (an area blow, a spin, a shockwave...), each at its hardest as a share of a
+     * same-level character's health: none by default. Each no more than {@link #MOST_BLOW} (the
+     * pecking order holds it to that).
+     */
+    public double[] specialShares() {
+        return new double[0];
+    }
+
+    /** A hit of {@code share} of a same-level character's health, as it lands from it, at its level. */
+    public float hitOf(double share) {
+        return (float) (share * MobScaling.typicalHealth(mobLevel()));
+    }
+
+    /**
+     * Whether it would strike this player with a blow that falls on all near it: by default any it
+     * may attack (not its allies); a righteous one only those who have given it cause.
+     */
+    protected boolean fights(Player p) {
+        return true;
+    }
+
+    /** Whether {@code p} struck it lately (within {@link #FIGHTER_MEMORY} ticks). */
+    public boolean struckLately(Player p) {
+        Long at = fighters.get(p.getUUID());
+        return at != null && level().getGameTime() - at <= FIGHTER_MEMORY;
+    }
+
+    /**
+     * Those within {@code r} of it that a blow on all near it falls on ({@link #isFoe}): the players
+     * it would fight (not watching or building, not its allies), its own foe, and whatever is fighting it.
+     */
+    public List<LivingEntity> foesWithin(double r) {
+        List<LivingEntity> out = new ArrayList<>();
+        for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(r), e -> e != this && e.isAlive())) {
+            if (e.distanceTo(this) <= r && isFoe(e)) out.add(e);
+        }
+        return out;
+    }
+
+    /** Whether a blow on all near it falls on {@code e}: a player it would fight, its own foe, or what is fighting it. */
+    public boolean isFoe(LivingEntity e) {
+        if (e == this || !e.isAlive()) return false;
+        if (e instanceof Player p) return !p.isSpectator() && !p.isCreative() && canAttack(p) && (e == getTarget() || fights(p));
+        return e == getTarget() || e instanceof Mob m && m.getTarget() == this;
     }
 
     // ── The boss bar ────────────────────────────────────────────────────
