@@ -9,10 +9,12 @@ hollows and lit cyan over its muscles, the slabs of its chest, its ridged belly,
 and arms; patches of blue-green scales over its shoulders and down its forearms; a spined fin down its
 back, fins on its forearms and calves, fin-ears, webbed and clawed hands and feet. Its head thrust
 forward: wild hair standing up off it like flames, red at the root to yellow at the tips, a flaming
-beard under its jaw; a heavy brow, knotted and scowling, shadowing bulging, burning gold eyes; jutting
-cheekbones; a broad flat nose, its nostrils flared; a snarl of dark lips drawn back off dark red gums,
-its mouth open dark into its throat, two great fangs hanging from its upper jaw and two tusks jutting up
-from its lower, yellowed and shaded; two ridged horns curving up and back from its temples.
+beard under its jaw; a sloping, furrowed forehead to a crag of a brow jutting out over deep sockets,
+knotted between the eyes and raised to a scowl at its ends, small slanted eyes burning gold sunk in its
+shadow; jutting cheekbones; a heavy muzzle thrust out before the face, a broad flat nose on it, its
+nostrils flared; a snarl of dark lips drawn back off dark red gums, its mouth open dark into its throat,
+two great fangs hanging from its upper jaw, and two tusks rising from the corners of its great jaw past
+the muzzle, yellowed and shaded; two ridged horns curving up and back from its temples.
 
 Its ornaments: gold armlets and anklets, gold hoops in its ears, a necklace of pearls and little
 skulls; a long red silk scarf (披帛) over its shoulders, its ends flowing behind; a wrap of sea-green
@@ -144,31 +146,42 @@ def body():
 
 def head():
     return [
+        # the head, sculpted in depth: a sloping forehead to a crag of a brow jutting over deep sockets, small
+        # burning eyes sunk in their shadow; jutting cheekbones; a heavy muzzle thrust out before the face,
+        # a broad flat nose on it, its lip snarling up off the fangs; a great underslung jaw below
         part('head', 'body', (0, -16.8, -1.4), HEAD, [
             (-3.6, -7.4, -3.2, 7.2, 6.6, 6.6, 'skull'),
-            (-3.9, -5.6, -4.3, 7.8, 1.7, 1.8, 'brow'),
-            (-3.7, -4.0, -4.0, 7.4, 2.8, 3.6, 'cheeks'),
-            (-3.9, -3.25, -4.35, 2.2, 1.1, 1.0, 'cheekbone'),
-            (1.7, -3.25, -4.35, 2.2, 1.1, 1.0, 'cheekbone'),
-            (-1.7, -4.6, -5.0, 3.4, 2.5, 1.2, 'nose'),
-            (-2.5, -3.0, -4.75, 1.0, 1.0, 1.1, 'nostril'),
-            (1.5, -3.0, -4.75, 1.0, 1.0, 1.1, 'nostril'),
-            (-3.0, -2.3, -4.5, 6.0, 1.5, 2.2, 'upperlip'),
-            (-2.6, -0.9, -4.0, 5.2, 1.3, 2.8, 'maw'),
-            (-2.35, -1.0, -4.3, 1.1, 1.4, 1.0, 'fang'),
-            (1.25, -1.0, -4.3, 1.1, 1.4, 1.0, 'fang'),
-            (-2.1, 0.3, -4.15, 0.6, 1.3, 0.6, 'fangtip'),
-            (1.5, 0.3, -4.15, 0.6, 1.3, 0.6, 'fangtip'),
+            (-3.3, -7.2, -4.0, 6.6, 1.6, 1.0, 'forehead'),
+            (-3.8, -5.7, -4.5, 7.6, 1.2, 1.4, 'browshelf'),
+            (-1.2, -6.1, -5.25, 2.4, 1.9, 1.5, 'browknot'),
+            (-3.5, -4.6, -4.0, 7.0, 1.2, 0.8, 'socket'),
+            (-3.7, -3.4, -4.3, 7.4, 2.4, 3.8, 'cheeks'),
+            (-4.1, -3.5, -4.6, 1.8, 1.1, 2.2, 'cheekbone'),
+            (2.3, -3.5, -4.6, 1.8, 1.1, 2.2, 'cheekbone'),
+            (-2.8, -3.6, -6.2, 5.6, 2.1, 2.6, 'muzzle'),
+            (-0.8, -5.0, -5.5, 1.6, 1.4, 1.5, 'bridge'),
+            (-1.6, -4.3, -6.7, 3.2, 1.9, 1.6, 'nose'),
+            (-2.5, -3.1, -6.5, 1.0, 1.1, 1.2, 'nostril'),
+            (1.5, -3.1, -6.5, 1.0, 1.1, 1.2, 'nostril'),
+            (-3.0, -1.6, -6.3, 6.0, 1.0, 2.8, 'upperlip'),
+            (-2.6, -0.8, -5.6, 5.2, 1.2, 4.0, 'maw'),
+            (-2.3, -0.7, -6.0, 1.0, 1.3, 0.9, 'fang'),
+            (1.3, -0.7, -6.0, 1.0, 1.3, 0.9, 'fang'),
+            (-2.1, 0.5, -5.9, 0.6, 1.2, 0.6, 'fangtip'),
+            (1.5, 0.5, -5.9, 0.6, 1.2, 0.6, 'fangtip'),
             (-3.0, -7.0, 2.6, 6.0, 6.6, 1.6, 'nape'),
         ]),
-        part('jaw', 'head', (0, -1.2, -0.4), (0.26, 0, 0), [
-            (-3.2, 0, -4.0, 6.4, 2.4, 4.4, 'jaw'),
-            (-2.2, 2.1, -3.6, 4.4, 0.9, 2.8, 'chin')]),
-        part('beard', 'jaw', (0, 2.6, -2.6), (0.2, 0, 0), [(-2.4, 0, -1.0, 4.8, 4.4, 2.2, 'flamebeard')]),
-        part('right_tusk', 'jaw', (-2.6, 0.5, -3.7), (-0.3, 0.25, -0.38), [(-0.45, -2.0, -0.45, 0.9, 2.3, 0.9, 'tusk')]),
-        part('right_tusk_tip', 'right_tusk', (0, -1.9, 0), (-0.5, 0, 0.2), [(-0.35, -1.5, -0.35, 0.7, 1.7, 0.7, 'tusktip')]),
-        # bulging eyes, burning gold
-        part('right_eye', 'head', (-1.85, -4.35, -4.3), (0, 0.18, 0), [(-1.15, -1.0, -0.9, 2.3, 2.0, 1.4, 'eyeball')]),
+        # the scowl: each brow a ridge rising from the knot to its outer end, raised and swept back
+        part('right_brow', 'head', (-0.9, -5.35, -4.75), (0, 0.22, 0.3), [(-3.4, -0.75, -0.55, 3.4, 1.5, 1.9, 'brow')]),
+        part('jaw', 'head', (0, -0.8, -0.6), (0.24, 0, 0), [
+            (-3.1, 0, -5.6, 6.2, 2.2, 5.6, 'jaw'),
+            (-2.3, 1.9, -5.3, 4.6, 1.1, 3.0, 'chin')]),
+        part('beard', 'jaw', (0, 2.4, -3.6), (0.2, 0, 0), [(-2.4, 0, -1.0, 4.8, 4.4, 2.2, 'flamebeard')]),
+        # two tusks from the jaw's corners, rising outside the snarl past the muzzle toward the cheeks
+        part('right_tusk', 'jaw', (-3.2, 0.4, -5.0), (-0.42, 0.2, -0.3), [(-0.55, -2.4, -0.55, 1.1, 2.7, 1.1, 'tusk')]),
+        part('right_tusk_tip', 'right_tusk', (0, -2.3, 0), (-0.45, 0, 0.25), [(-0.4, -1.4, -0.4, 0.8, 1.6, 0.8, 'tusktip')]),
+        # small burning eyes, slanted in a glare, sunk in the shadow under the brow
+        part('right_eye', 'head', (-1.9, -4.05, -4.2), (0, 0.18, 0.2), [(-1.5, -0.8, -0.45, 3.0, 1.6, 0.5, 'eye')]),
         # fin-ears, gold hoops in them
         part('right_ear', 'head', (-3.6, -4.4, -0.6), (0.1, 0.6, -0.35), [(-0.25, -3.4, 0, 0.5, 4.8, 4.0, 'earfin')]),
         part('right_hoop', 'head', (-3.7, -1.6, -1.0), (0, 0, 0.1), [
@@ -555,25 +568,119 @@ def paint_yaksha(p, style, f, dims):
                     for j in range(fh - 6, fh - 1):
                         p.px((x, fy + j), k(SKIN_DEEP, 0.7))
                         p.px((x + 1, fy + j), mixc((180, 40, 60), SKIN, 0.5))
-    if style == 'brow':                                           # a crag of a brow, knotted, scowling down to the nose
-        skin(p, f, warts=0.4)
+    if style == 'brow':                                           # one brow: a knotted ridge, lit along its crest, shadowing down; bristling flame
+        skin(p, f, warts=0.45, fall=0.1)
+        for s in ('front', 'right', 'left', 'back'):
+            fx, fy, fw, fh = f[s]
+            for i, j, xy in w.each(p, f[s]):
+                c = p.get(xy)
+                if j == 0:
+                    c = mixc(c, (180, 232, 255), 0.55)            # lit along its crest
+                elif j == 1:
+                    c = mixc(c, SKIN_HI, 0.35)
+                c = k(c, 1 - 0.45 * max(0, j - 1) / max(1, fh - 2))   # shadowing down to the eye
+                if j >= fh - 1:
+                    c = k(SKIN_DEEP, 0.55)
+                if s == 'front' and (i * 5 + j * 3) % 9 == 0 and 0 < j < fh - 1:
+                    c = k(SKIN_DEEP, 0.9)                         # its knots and creases
+                p.px(xy, c)
+        w.flat(p, f, k(SKIN_DEEP, 0.3), faces=('bottom',))
+        for i, j, xy in w.each(p, f['top']):                      # bristling brows of flame along its crest
+            if p.rnd.random() < 0.6:
+                p.px(xy, mixc(FLAME, FLAME_ROOT, p.rnd.random() * 0.8))
+            if p.rnd.random() < 0.12:
+                p.lit(xy, FLAME_TIP, 0.5)
+    if style == 'browknot':                                       # the knot between the brows: the scowl's furrows plunging to the nose
+        skin(p, f, warts=0.3, fall=0.1)
+        fx, fy, fw, fh = f['front']
+        for i, j, xy in w.each(p, f['front']):
+            c = p.get(xy)
+            if i in (fw // 2 - 1, fw // 2):
+                c = k(SKIN_DEEP, 0.6 + 0.1 * (j % 2))             # the deep cleft down its middle
+            elif i in (1, fw - 2) and j > 0:
+                c = k(SKIN_DEEP, 0.85)                            # a furrow each side
+            elif j == 0 or i in (2, fw - 3):
+                c = mixc(c, (180, 232, 255), 0.45)                # the bulges of flesh between, lit
+            if j >= fh - 1:
+                c = k(c, 0.7)
+            p.px(xy, c)
+        w.flat(p, f, k(SKIN_DEEP, 0.4), faces=('bottom',))
+    if style == 'browshelf':                                      # the brow's shelf over the sockets: heavy, dark beneath
+        skin(p, f, warts=0.3, fall=0.3)
+        w.flat(p, f, k(SKIN_DEEP, 0.3), faces=('bottom',))
+        fx, fy, fw, fh = f['front']
+        for i, j, xy in w.each(p, f['front']):
+            p.px(xy, k(p.get(xy), 0.8 - 0.25 * j / max(1, fh - 1)))
+    if style == 'forehead':                                       # the sloping forehead: furrowed, lit at its swell
+        skin(p, f, warts=0.2, fall=0.1)
+        fx, fy, fw, fh = f['front']
+        for i, j, xy in w.each(p, f['front']):
+            c = p.get(xy)
+            d = abs(i + 0.5 - fw / 2) / (fw / 2)
+            if j % 2 == 1 and 0.2 < d < 0.85 and (i + j) % 5:
+                c = k(SKIN_DEEP, 1.15)                            # its furrows
+            elif d < 0.5:
+                c = mixc(c, SKIN_HI, 0.25 * (1 - d / 0.5))
+            p.px(xy, c)
+    if style == 'socket':                                         # the hollows the eyes are sunk in: deep shadow
+        w.flat(p, f, k(SKIN_DEEP, 0.45), noise=2)
         fx, fy, fw, fh = f['front']
         for i in range(fw):
-            d = abs(i + 0.5 - fw / 2) / (fw / 2)                  # 0 its middle .. 1 its ends
-            for j in range(fh):
-                c = p.get((fx + i, fy + j))
-                if j == 0:
-                    c = mixc(c, SKIN_HI, 0.45)                    # lit along its ridge
-                c = k(c, 1 - 0.35 * j / max(1, fh - 1))           # shadowing down to the eyes
-                if j >= fh - 1 - int(1.5 * (1 - d)):
-                    c = k(SKIN_DEEP, 0.8)
-                if d < 0.14 and j > 0:                            # the scowl's furrow down to the nose
-                    c = k(SKIN_DEEP, 0.7)
-                p.px((fx + i, fy + j), c)
-        w.flat(p, f, k(SKIN_DEEP, 0.45), faces=('bottom',))
-        for i, j, xy in w.each(p, f['top']):                      # bristling brows of flame
-            if p.rnd.random() < 0.55:
-                p.px(xy, mixc(FLAME, FLAME_ROOT, p.rnd.random()))
+            p.px((fx + i, fy), k(SKIN_DEEP, 0.3))
+    if style == 'eye':                                            # a small burning eye, almond-shaped: gold, a hot core, a black slit, red-rimmed
+        w.flat(p, f, k(SKIN_DEEP, 0.4), noise=1)
+        fx, fy, fw, fh = f['front']                               # 6x4 painted, 5x3 seen: its outer corner at i=0, its inner at the right
+        vw, vh = max(3, int(fw * 0.95)), max(2, int(fh * 0.8))
+        for i in range(vw):
+            for j in range(vh):
+                u = (i + 0.5) / vw                                 # 0 outer .. 1 inner
+                v = (j + 0.5) / vh                                 # 0 top .. 1 bottom
+                lid = 0.2 + 0.4 * u                                # the upper lid bearing down toward the nose: a glare
+                low = 1.0 - 0.35 * abs(u - 0.45) * 2              # the lower lid, rounding up to each corner
+                if v < lid - 0.2 or v > low or (u < 0.1 and v < 0.5) or (u > 0.88 and v < 0.7):
+                    p.px((fx + i, fy + j), k(SKIN_DEEP, 0.5))     # the lids, in shadow
+                    continue
+                d = abs(u - 0.45) * 2
+                c = mixc((255, 246, 190), EYE, min(1, d * 1.4))
+                if d > 0.75:
+                    c = (232, 84, 30)                             # red at its corners
+                p.lit((fx + i, fy + j), c, 1.0)
+        pc = int(vw * 0.45)
+        for j in range(vh):                                       # a black slit of a pupil
+            if p.glow.getpixel((fx + pc, fy + j))[3]:
+                p.px((fx + pc, fy + j), (14, 8, 6))
+                p.glow.putpixel((fx + pc, fy + j), (0, 0, 0, 0))
+    if style == 'muzzle':                                         # the heavy muzzle: flesh thrust forward, lit across its swell, creased by the snarl
+        skin(p, f, warts=0.25, fall=0.15)
+        fx, fy, fw, fh = f['top']                                 # its top, back to front: lit across its crown
+        for i, j, xy in w.each(p, f['top']):
+            d = abs(i + 0.5 - fw / 2) / (fw / 2)
+            p.px(xy, mixc(p.get(xy), SKIN_HI, 0.5 * (1 - d)))
+        fx, fy, fw, fh = f['front']
+        for i, j, xy in w.each(p, f['front']):
+            d = abs(i + 0.5 - fw / 2) / (fw / 2)
+            c = mixc(p.get(xy), SKIN_HI, 0.35 * (1 - abs(d - 0.55) / 0.45)) if d > 0.1 else p.get(xy)
+            if d > 0.88:
+                c = k(c, 0.7)
+            p.px(xy, c)
+        for s in ('right', 'left'):                               # its sides: the snarl's creases fanning back from the lip
+            fx, fy, fw, fh = f[s]
+            for g in range(3):
+                for t in range(fw):
+                    x = t if s == 'right' else fw - 1 - t          # from its front corner back
+                    y = fh - 2 - g * 1.4 - t * 0.35
+                    if 0 <= y < fh and t < fw - 1 - g:
+                        p.px((fx + x, fy + y), k(SKIN_DEEP, 0.8))
+                        if y - 1 >= 0:
+                            p.px((fx + x, fy + y - 1), mixc(p.get((fx + x, fy + y - 1)), SKIN_HI, 0.4))
+        w.flat(p, f, k(SKIN_DEEP, 0.5), faces=('bottom',))
+    if style == 'bridge':                                         # the nose's bridge between the eyes, from the knot of the brow: lit down its crest
+        skin(p, f, warts=0.1, fall=0.1)
+        for s in ('front', 'top'):
+            fx, fy, fw, fh = f[s]
+            for i, j, xy in w.each(p, f[s]):
+                d = abs(i + 0.5 - fw / 2) / (fw / 2)
+                p.px(xy, mixc(p.get(xy), (180, 232, 255), 0.5 * max(0, 1 - d * 1.4)) if d < 0.7 else k(p.get(xy), 0.75))
     if style == 'cheeks':                                         # the flesh of its face: shadowed under the eyes, creased by the snarl
         skin(p, f, warts=0.2)
         fx, fy, fw, fh = f['front']

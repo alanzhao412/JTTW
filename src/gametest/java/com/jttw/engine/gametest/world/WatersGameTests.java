@@ -202,6 +202,20 @@ public class WatersGameTests {
         h.succeedWhen(() -> check(h, g.getHealth() < before, "it struck through the water (bolt at " + whereabouts(h, bolt) + ")"));
     }
 
+    @GameTest(template = PLATFORM, timeoutTicks = 60)
+    public static void aYakshasThrustIsDrawnBackThenLandsAsItDrivesHome(GameTestHelper h) {
+        YakshaEntity yaksha = sea(h, ModEntities.YAKSHA.get(), 47, false, new BlockPos(1, 2, 1));
+        LivingEntity g = golem(h, new BlockPos(2, 2, 1));
+        float before = g.getHealth();
+        yaksha.thrust(g);
+        check(h, yaksha.swinging && g.getHealth() == before, "the wind-up shows before the blow lands");
+        check(h, yaksha.getCurrentSwingDuration() == YakshaEntity.THRUST_TICKS, "a thrust of its own length");
+        h.runAfterDelay(YakshaEntity.STAB + 2, () -> {
+            close(h, yaksha.blowAt(47, false), before - g.getHealth(), "then the thrust lands");
+            h.succeed();
+        });
+    }
+
     @GameTest(template = PLATFORM)
     public static void aYakshaRaisesTheAlarm(GameTestHelper h) {
         ServerPlayer p = player(h);

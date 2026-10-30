@@ -42,8 +42,17 @@ public class YakshaEntity extends SeaMonster {
     public static final int BOLT_EVERY = 50;
     /** How far its alarm carries. */
     public static final double ALARM = 20;
+    /**
+     * Its thrust, a swing of so many ticks: drawn back and cocked, then driven home (the blow lands
+     * {@value #STAB} ticks in, as the trident drives out), held, and drawn back.
+     */
+    public static final int THRUST_TICKS = 20, STAB = 8;
 
     private int bolt = BOLT_EVERY / 2;
+    /** The foe its thrust is driving at, and the ticks until it lands (0: none under way). */
+    @Nullable
+    private LivingEntity stabbing;
+    private int stab;
 
     public YakshaEntity(EntityType<? extends YakshaEntity> type, Level level) {
         super(type, level);
@@ -93,12 +102,32 @@ public class YakshaEntity extends SeaMonster {
 
     @Override
     protected void registerGoals() {
-        goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.25, true));
+        goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.25, true) {
+            @Override
+            protected void checkAndPerformAttack(LivingEntity target) {
+                if (canPerformAttack(target)) {
+                    resetAttackCooldown();
+                    thrust(target);
+                }
+            }
+        });
         goalSelector.addGoal(5, new RandomSwimmingGoal(this, 0.9, 20));
         goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 16f));
         goalSelector.addGoal(7, new RandomLookAroundGoal(this));
         targetSelector.addGoal(1, new HurtByTargetGoal(this));
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, false));
+    }
+
+    @Override
+    public int getCurrentSwingDuration() {
+        return THRUST_TICKS;
+    }
+
+    /** Begins a thrust at {@code target}: the wind-up shows, and the blow lands {@value #STAB} ticks on if it is still in reach. */
+    public void thrust(LivingEntity target) {
+        swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+        stabbing = target;
+        stab = STAB;
     }
 
     /** Hurls a bolt of the tide at {@code target}. */
@@ -135,6 +164,11 @@ public class YakshaEntity extends SeaMonster {
     @Override
     protected void customServerAiStep() {
         super.customServerAiStep();
+        if (stab > 0 && --stab == 0) {
+            LivingEntity foe = stabbing;
+            stabbing = null;
+            if (foe != null && foe.isAlive() && isWithinMeleeAttackRange(foe)) doHurtTarget(foe);
+        }
         LivingEntity target = getTarget();
         if (bolt > 0) bolt--;
         if (target == null || !target.isAlive() || bolt > 0) return;

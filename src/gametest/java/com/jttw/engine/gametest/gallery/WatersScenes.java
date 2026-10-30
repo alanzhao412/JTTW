@@ -192,17 +192,28 @@ final class WatersScenes {
                         new double[]{0.5, 2.4, 5.2, 0.5, 2.2, 10.5}),
                 creature("waters_yaksha_back", p -> sea(p, ModEntities.YAKSHA.get(), 0.5, 1.0, 10.5, 25f, false),
                         new double[]{1.4, 2.8, 5.6, 0.5, 2.2, 10.5}),
+                // the thrust in its three beats: drawn back and cocked, driven home, and the lunge carried through
+                new AbilityScenes.Scene("waters_yaksha_windup", p -> {
+                    pool(p);
+                    sea(p, ModEntities.YAKSHA.get(), 0.5, 1.0, 10.5, 160f, false);
+                    AbilityScenes.sceneCam = new double[]{2.6, 2.6, 5.6, 0.5, 2.2, 10.5};
+                }, p -> swingAll(p), 6, false),
                 new AbilityScenes.Scene("waters_yaksha_thrust", p -> {
                     pool(p);
                     sea(p, ModEntities.YAKSHA.get(), 0.5, 1.0, 10.5, 160f, false);
                     AbilityScenes.sceneCam = new double[]{2.6, 2.6, 5.6, 0.5, 2.2, 10.5};
-                }, p -> swingAll(p), 5, false),
+                }, p -> swingAll(p), 9, false),
+                new AbilityScenes.Scene("waters_yaksha_follow", p -> {
+                    pool(p);
+                    sea(p, ModEntities.YAKSHA.get(), 0.5, 1.0, 10.5, 160f, false);
+                    AbilityScenes.sceneCam = new double[]{2.6, 2.6, 5.6, 0.5, 2.2, 10.5};
+                }, p -> swingAll(p), 13, false),
                 // the thrust from above and behind, the yaksha facing straight away: the trident must run dead ahead
                 new AbilityScenes.Scene("waters_yaksha_thrust_above", p -> {
                     pool(p);
                     sea(p, ModEntities.YAKSHA.get(), 0.5, 1.0, 12.0, 180f, false);
                     AbilityScenes.sceneCam = new double[]{0.6, 7.4, 15.2, 0.5, 2.0, 10.2};
-                }, p -> swingAll(p), 5, false),
+                }, p -> swingAll(p), 11, false),
                 king(Sea.EAST), king(Sea.SOUTH), king(Sea.WEST), king(Sea.NORTH),
                 kingClose(Sea.EAST), kingClose(Sea.SOUTH), kingClose(Sea.WEST), kingClose(Sea.NORTH),
                 kingSide(Sea.EAST), kingSide(Sea.NORTH),

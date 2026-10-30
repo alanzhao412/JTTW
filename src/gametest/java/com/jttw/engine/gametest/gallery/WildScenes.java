@@ -119,6 +119,7 @@ final class WildScenes {
                 }, cam(0.5, 2.5, 2.8, 0.5, 1.0, 8.8)),
                 scene("wild_kobold_close", p -> put(p, ModEntities.KOBOLD.get(), 0.5, 6.5, 155f), cam(-0.3, 1.6, 4.0, 0.5, 1.05, 6.5)),
                 scene("wild_kobold_face", p -> put(p, ModEntities.KOBOLD.get(), 0.5, 6.5, 135f), cam(-0.2, 1.95, 4.4, -0.25, 1.72, 6.1)),
+                scene("wild_kobold_front", p -> put(p, ModEntities.KOBOLD.get(), 0.5, 6.5, 180f), cam(0.5, 1.85, 4.3, 0.5, 1.6, 6.5)),
                 scene("wild_kobold_side", p -> put(p, ModEntities.KOBOLD.get(), 0.5, 6.5, 90f), cam(0.6, 1.25, 3.4, 0.6, 1.0, 6.5)),
                 scene("wild_kobold_back", p -> put(p, ModEntities.KOBOLD.get(), 0.5, 6.5, 20f), cam(0.5, 1.6, 3.7, 0.5, 1.0, 6.5)),
                 swinging("wild_kobold_action", p -> {

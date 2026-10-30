@@ -66,8 +66,11 @@ def back_spines(y0, y1, z, n, h, style='spine'):
 
 
 def teeth(x, y, z0, length, up):
-    """A row of teeth along a jaw's edge, as a thin strip (cut into teeth on the skin)."""
-    return (x, y - (0.8 if up else 0), z0, 0.3, 0.8, length, 'teeth_up' if up else 'teeth_down')
+    """A row of teeth along each side of a jaw's edge (x the right side's; the left's mirrors it), as thin
+    strips (cut into teeth on the skin)."""
+    st = 'teeth_up' if up else 'teeth_down'
+    y0 = y - (0.8 if up else 0)
+    return [(x, y0, z0, 0.3, 0.8, length, st), (-x - 0.3, y0, z0, 0.3, 0.8, length, st)]
 
 
 KOBOLD = mirrored([
@@ -132,25 +135,35 @@ KOBOLD = mirrored([
         (-0.7, -0.7, 0, 1.4, 1.4, 4.4, 'tail4')]),
 
     # the head: a crocodile's
+    # the head: a crocodile's, narrow and wedge-shaped from every side. A rounded cranium, a step narrower
+    # at its crown and stepping down behind to the neck, the bony brows raised over the eyes at its top
+    # corners; broad at the jaws' hinge, the long snout tapering in three lengths to its tip, the nostrils
+    # raised on it; the jaw line under it notched with teeth
     part('head', 'neck', (0, -3.0, -0.6), HEAD, [
-        (-2.6, -4.4, -3.0, 5.2, 4.4, 5.0, 'cranium'),
-        (-2.15, -3.5, -7.2, 4.3, 2.5, 4.4, 'snout'),
-        (-1.45, -3.2, -10.4, 2.9, 2.1, 3.3, 'snouttip'),
-        (-1.05, -3.75, -10.2, 2.1, 0.7, 1.5, 'nostrils'),
-        (-0.3, -5.4, -1.6, 0.6, 1.2, 1.4, 'spine_small'),
-        (-0.3, -5.2, 0.2, 0.6, 1.4, 1.6, 'spine'),
-        teeth(-2.2, -1.0, -6.9, 4.0, False),
-        teeth(-1.5, -1.1, -10.1, 3.0, False),
+        (-2.15, -4.0, -2.8, 4.3, 3.9, 4.8, 'cranium'),
+        (-1.55, -4.7, -2.2, 3.1, 0.8, 3.8, 'crown'),
+        (-1.75, -3.6, 1.9, 3.5, 3.0, 1.1, 'occiput'),
+        (-1.85, -3.35, -6.4, 3.7, 2.35, 3.7, 'snout'),
+        (-1.4, -3.15, -8.8, 2.8, 2.1, 2.5, 'snoutmid'),
+        (-1.05, -2.95, -10.6, 2.1, 1.8, 1.9, 'snouttip'),
+        (-0.85, -3.5, -10.3, 1.7, 0.6, 1.3, 'nostrils'),
+        (-0.3, -5.6, -1.4, 0.6, 1.2, 1.4, 'spine_small'),
+        (-0.3, -5.0, 0.4, 0.6, 1.4, 1.6, 'spine'),
+        *teeth(-1.95, -1.0, -6.2, 3.5, False),
+        *teeth(-1.5, -1.05, -8.6, 2.3, False),
+        *teeth(-1.15, -1.15, -10.4, 1.7, False),
     ]),
     part('jaw', 'head', (0, -0.9, -2.4), (0.05, 0, 0), [
-        (-2.05, 0, -4.8, 4.1, 1.4, 5.2, 'jaw'),
-        (-1.4, 0.05, -8.0, 2.8, 1.2, 3.3, 'jawtip'),
-        (-1.7, 1.2, -4.0, 3.4, 1.3, 4.2, 'throat'),
-        teeth(-1.95, 0.1, -4.6, 4.0, True),
-        teeth(-1.3, 0.1, -7.7, 3.0, True)]),
-    part('right_jowl', 'head', (-2.35, -1.6, -1.6), (0, 0.12, 0), [(-0.5, -0.9, -1.6, 0.9, 2.0, 3.0, 'jowl')]),
-    part('right_brow', 'head', (-1.75, -4.15, -2.0), (0.15, 0.1, 0.25), [(-0.85, -0.6, -1.9, 1.7, 1.2, 3.2, 'brow')]),
-    part('right_eye', 'head', (-2.5, -3.3, -2.0), (0, 0.1, 0), [(-0.3, -0.55, -0.85, 0.5, 1.1, 1.7, 'eye')]),
+        (-1.95, 0, -4.0, 3.9, 1.35, 4.6, 'jaw'),
+        (-1.4, 0.05, -6.4, 2.8, 1.2, 2.5, 'jawmid'),
+        (-1.0, 0.1, -8.2, 2.0, 1.05, 1.9, 'jawtip'),
+        (-1.6, 1.2, -3.8, 3.2, 1.2, 4.0, 'throat'),
+        *teeth(-1.8, 0.1, -3.9, 3.5, True),
+        *teeth(-1.3, 0.15, -6.3, 2.3, True),
+        *teeth(-0.9, 0.2, -8.1, 1.7, True)]),
+    part('right_jowl', 'head', (-2.1, -1.2, -1.4), (0, 0.18, -0.12), [(-0.7, -0.9, -1.8, 0.9, 1.9, 3.4, 'jowl')]),
+    part('right_brow', 'head', (-1.25, -4.15, -2.3), (0.12, 0.08, 0.4), [(-0.85, -0.6, -1.6, 1.5, 1.1, 2.9, 'brow')]),
+    part('right_eye', 'head', (-2.1, -3.45, -2.0), (0, 0.15, 0.2), [(-0.3, -0.55, -0.85, 0.5, 1.1, 1.7, 'eye')]),
 
     # the arms: a scaled upper arm, a forearm in a leather bracer, a clawed hand
     part('right_arm', 'body', (-4.5, -12.8, 0.1), ARM, [
@@ -377,14 +390,23 @@ def paint_kobold(p, style, f, dims):
                     p.clear(xy)
         w.cut_all(p, f, ('top', 'front', 'back'))
 
-    if style == 'cranium':                                        # the head: fine scales; a crest of plates down the crown
+    if style in ('cranium', 'crown', 'occiput'):                  # the head: fine scales; a crest of plates down the crown
         scaly(p, f, cw=3, ch=2, inner_pale=0, belly_faces=('bottom',))
         fx, fy, fw, fh = f['top']
-        osteoderms(p, (fx + fw // 2 - 2, fy, 4, fh), light=w.LIGHT['top'], pw=4, ph=3)
+        if style == 'crown':
+            osteoderms(p, f['top'], light=w.LIGHT['top'], pw=3, ph=3)
+        else:
+            osteoderms(p, (fx + fw // 2 - 2, fy, 4, fh), light=w.LIGHT['top'], pw=4, ph=3)
+        if style == 'occiput':
+            osteoderms(p, f['back'], light=w.LIGHT['back'], pw=3, ph=3)
         fx, fy, fw, fh = f['front']
         scale_rows(p, f['front'], lambda i, j: k(DORSAL, 0.85), cw=3, ch=2, light=w.LIGHT['front'])
+        if style == 'crown':                                      # its edges rounding down into the head's sides
+            for s_ in ('front', 'right', 'left', 'back'):
+                fx, fy, fw, fh = f[s_]
+                w.hline(p, f[s_], fh - 1, k(DORSAL, 0.55 * w.LIGHT[s_]))
 
-    if style in ('snout', 'snouttip'):                            # the long snout: fine scales above, paling to its lip, its lip line dark
+    if style in ('snout', 'snoutmid', 'snouttip'):                            # the long snout: fine scales above, paling to its lip, its lip line dark
         for s in f:
             rect = f[s]
             fx, fy, fw, fh = rect
@@ -392,9 +414,12 @@ def paint_kobold(p, style, f, dims):
             if s == 'bottom':                                     # its palate
                 w.flat(p, {s: rect}, MOUTH, noise=2)
             elif s in ('right', 'left', 'front'):
+                step = s == 'front' and style != 'snouttip'       # the step down to the next, narrower length: in shadow
                 scale_rows(p, rect, lambda i, j, fh=fh: mix(DORSAL, BELLY, w.clamp((j / max(1, fh - 1) - 0.5) / 0.5) * 0.55),
-                           cw=3, ch=2, light=lv, fall=0)
+                           cw=3, ch=2, light=lv * (0.62 if step else 1.0), fall=0)
                 w.hline(p, rect, fh - 1, k((30, 26, 22), lv))     # the lip line
+                if s != 'front':                                  # the snout's upper edge, catching the light
+                    w.hline(p, rect, 0, k(mix(DORSAL, GLOSS, 0.3), 1.1 * lv))
             else:
                 fx, fy, fw, fh = rect                             # its top: rows of small bony scutes across it
                 for i, j, xy in w.each(p, rect):
@@ -420,15 +445,15 @@ def paint_kobold(p, style, f, dims):
             fx, fy, fw, fh = f[s]
             for i, j, xy in w.each(p, f[s]):
                 u = i if s == 'left' else fw - 1 - i
-                ph = (u + (1 if style == 'teeth_up' else 0)) % 3
-                tip = (j >= fh - 1) if style == 'teeth_up' else (j == 0)
-                if ph == 2 or (ph == 1 and tip):
+                ph = (u + (2 if style == 'teeth_up' else 0)) % 4    # a tooth two wide, a gap two wide: they interlock
+                tip = (j == 0) if style == 'teeth_up' else (j >= fh - 1)
+                if ph >= 2 or (ph == 1 and tip):
                     p.clear(xy)
                 else:
                     p.px(xy, k(mix(TOOTH, (200, 186, 150), 0.4 * (j / max(1, fh - 1) if style == 'teeth_down' else 1 - j / max(1, fh - 1))), w.LIGHT[s]))
             p.clear((fx, fy)) if False else None
 
-    if style in ('jaw', 'jawtip'):                                # the lower jaw: olive on its sides, cream beneath; its mouth within
+    if style in ('jaw', 'jawmid', 'jawtip'):                                # the lower jaw: olive on its sides, cream beneath; its mouth within
         for s in f:
             rect = f[s]
             fx, fy, fw, fh = rect

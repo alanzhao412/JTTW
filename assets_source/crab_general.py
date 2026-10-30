@@ -19,11 +19,11 @@ gilded general's helmet on the front of its crown, warm gold embossed with waves
 highlights glinting, a flame-shaped frontlet with a red jewel, gold fin-wings and red pompoms, a tall
 red plume, and two long pheasant-tail plumes (翎子) arching back over it; a small seat of teal lamellar
 plates behind the helmet, edged in gold, a gold mirror on it and a raised cantle; teal and gold plates
-over its claws' arms and a gold ring at each wrist; and at the shell's rear a narrow post, from which
-four back flags (靠旗) rise close-set, high over the shell, red fields in toothed teal-and-gold borders,
+over its claws' arms and a gold ring at each wrist; and on the crown's rear slope a tall narrow post, from
+which four back flags (靠旗) rise close-set and near upright, fanned to the sides, high over the shell, red fields in toothed teal-and-gold borders,
 their top edges and staff sides gilt-hemmed, a gold wave across each, on red staffs with gold
-spear-tips and red tassels, and from whose foot a red cape, gold-bordered with a wave at its hem,
-hangs over the shell's rear edge.
+spear-tips and red tassels, and from whose foot a short red cape, gold-bordered with a wave at its hem,
+lies back down the slope, the shell's rear showing below it.
 
 Run from the repository root: python assets_source/crab_general.py"""
 import math
@@ -265,12 +265,12 @@ def helmet():
     ]
 
 
-POST_Z = 8.4                    # the flags' post: at the rear of the shell, behind the seat
+POST_Z = 5.9                    # the flags' post: on the crown's rear slope, close behind the seat, clear of the shell's rear
 
 
 def saddle():
     """A small seat of lamellar plates on the crown behind the helmet, its mirror, a raised cantle; behind it,
-    on the shell's rear, the post the flags rise from, and the cape hanging from its foot over the rear edge."""
+    on the crown's rear slope, the post the flags rise from, and the short cape lying back from its foot."""
     y = TIERS[-1][0]
     py = top_at(0, POST_Z)
     out = [
@@ -280,24 +280,28 @@ def saddle():
             (-1.2, -1.8, 1.0, 2.4, 0.6, 2.0, 'mirror'),
             (-2.7, -3.2, 3.5, 5.4, 2.6, 0.9, 'saddle2')]),
         part('right_saddle_flap', 'saddle', (-3.4, 0, 2.3), (0, 0, 0.62), [(-0.5, 0, -2.0, 0.8, 3.0, 4.0, 'saddleflap')]),
-        # the post: a narrow cluster of sockets at the shell's rear, the flags rising close from it
+        # the post: one slender socket rising from the crown's rear slope, a gold collar at its head, from which
+        # the flags fan out high above the shell; only the slim post comes down to it
         part('flag_post', 'body', (0, py + 0.2, POST_Z), (0, 0, 0), [
-            (-1.6, -4.4, -1.1, 3.2, 4.8, 2.2, 'socket'),
+            (-0.9, -12.0, -0.9, 1.8, 12.4, 1.8, 'socket'),
+            (-1.7, -13.2, -1.5, 3.4, 1.6, 3.0, 'gcollar'),
             (-2.0, -0.6, -1.5, 4.0, 1.0, 3.0, 'mirror')]),
-        # the cape: from a gold bar at the post's foot, over the shell's rear edge and down behind
-        part('cape', 'flag_post', (0, 0.2, 1.4), (0.42, 0, 0), [(-4.4, 0, -0.3, 8.8, 5.6, 0.6, 'cape')]),
-        part('cape_2', 'cape', (0, 5.2, 0), (0.55, 0, 0), [(-5.0, 0, -0.3, 10.0, 5.2, 0.6, 'cape_hem')]),
+        # the cape: a short one, from a gold bar at the post's foot, lying back down the crown's slope and
+        # ending above the shell's rear, which shows below it
+        part('cape', 'flag_post', (0, 0.2, 1.0), (1.05, 0, 0), [(-2.4, 0, -0.3, 4.8, 2.8, 0.6, 'cape')]),
+        part('cape_2', 'cape', (0, 2.6, 0), (0.1, 0, 0), [(-2.6, 0, -0.3, 5.2, 2.2, 0.6, 'cape_hem')]),
     ]
-    # the four back flags (靠旗): close-set in the post, fanned a little outward and back, high over the shell
-    for i, (x, lean, spread) in enumerate(((-0.6, -0.1, -0.12), (-1.2, -0.16, -0.36))):
+    # the four back flags (靠旗): close-set in the head of the tall post, standing near upright and fanned out
+    # to the sides, so they rise high over the shell rather than lean back across its rear
+    for i, (x, lean, spread) in enumerate(((-0.6, 0.04, -0.16), (-1.2, -0.02, -0.42))):
         n = 'right_flag_%d' % (i + 1)
         out += [
-            part(n, 'flag_post', (x, -4.2, -0.2 + 0.5 * i), (lean, 0, spread), [
-                (-0.45, -27.0, -0.45, 0.9, 27.4, 0.9, 'flagstaff'),
-                (-0.65, -30.4, -0.3, 1.3, 3.6, 0.6, 'flagtip'),
-                (-0.7, -27.4, -0.7, 1.4, 1.0, 1.4, 'gcollar'),
-                (-1.2, -26.6, -1.2, 2.4, 3.6, 2.4, 'tassel')]),
-            part(n + '_cloth', n, (-0.4, -22.6, 0), (0, 0.1, 0), [(-10.0, 0, -0.3, 10.0, 13.6, 0.6, 'flag')]),
+            part(n, 'flag_post', (x * 0.6, -12.6, -0.2 + 0.5 * i), (lean, 0, spread), [
+                (-0.45, -22.0, -0.45, 0.9, 22.4, 0.9, 'flagstaff'),
+                (-0.65, -25.4, -0.3, 1.3, 3.6, 0.6, 'flagtip'),
+                (-0.7, -22.4, -0.7, 1.4, 1.0, 1.4, 'gcollar'),
+                (-1.2, -21.6, -1.2, 2.4, 3.6, 2.4, 'tassel')]),
+            part(n + '_cloth', n, (-0.4, -17.6, 0), (0, 0.1, 0), [(-10.0, 0, -0.3, 10.0, 13.6, 0.6, 'flag')]),
         ]
     return out
 
