@@ -202,23 +202,38 @@ def ox_head():
             (-5, -7.6, 0.6, 10, 6.8, 6, 'ox_hump'),
             (-3, -4, -6, 6, 7, 2.2, 'dewlap'),
         ]),
+        # the head: a bull's. A broad poll between the horns over a wide, curly forehead; the eyes set at its
+        # lower corners, out at the sides of the face under heavy bony brows; great round cheeks; and below,
+        # the long face sloping down and narrowing to the muzzle, a broad wet nose at its end, flared
+        # nostrils, a heavy jaw beneath
         part('head', 'neck', (0, -6.2, -1.6), (-0.05, 0, 0), [
-            (-5.6, -7.6, -5.2, 11.2, 9, 9.4, 'ox_skull'),
-            (-5.9, -8.2, -5.8, 11.8, 2.6, 4.6, 'ox_poll'),
-            (-4.6, -3.0, -10.6, 9.2, 6.4, 5.6, 'ox_snout'),
-            (-4.0, -2.6, -11.4, 8.0, 4.4, 0.9, 'ox_nose'),
-            (-4.9, -2.0, -10.9, 1.4, 2.6, 2.6, 'ox_nostril'), (3.5, -2.0, -10.9, 1.4, 2.6, 2.6, 'ox_nostril'),
-            (-3, -10, -4.8, 6, 2.8, 5, 'ox_tuft'),
-            (-1.6, -7.9, -6.3, 3.2, 2.6, 0.6, 'plaque'),
-            (-1.8, 3.2, -10.2, 0.7, 1.8, 0.9, 'fang'), (1.1, 3.2, -10.2, 0.7, 1.8, 0.9, 'fang'),
+            (-5.0, -8.0, -4.4, 10.0, 7.0, 8.4, 'ox_skull'),
+            (-5.8, -8.7, -3.8, 11.6, 2.4, 4.6, 'ox_poll'),
+            (-4.5, -7.4, -5.6, 9.0, 3.8, 1.6, 'ox_forehead'),
+            (-3.0, -10.0, -5.0, 6.0, 2.8, 4.4, 'ox_tuft'),
+            (-1.6, -6.9, -5.95, 3.2, 2.4, 0.6, 'plaque'),
+            (-5.4, -2.8, -5.0, 1.8, 4.2, 4.8, 'ox_cheek'), (3.6, -2.8, -5.0, 1.8, 4.2, 4.8, 'ox_cheek'),
         ]),
-        part('jaw', 'head', (0, 3.2, -5.0), (0.06, 0, 0), [(-4.1, 0, -5.4, 8.2, 2.6, 7.2, 'ox_jaw')]),
-        part('nose_ring', 'head', (0, 0.6, -11.9), (-0.15, 0, 0), [
+        # the long face, sloping down from under the brow: the bridge, the muzzle narrowing to the nose
+        part('face', 'head', (0, -1.0, -4.6), (0.3, 0, 0), [
+            (-3.7, -3.4, -4.4, 7.4, 3.8, 4.8, 'ox_face'),
+            (-1.5, -3.85, -4.6, 3.0, 0.6, 4.4, 'ox_ridge'),
+            (-3.0, -3.7, -1.6, 6.0, 0.5, 2.0, 'ox_whorl'),
+            (-3.4, -2.9, -7.0, 6.8, 3.7, 3.0, 'ox_muzzle'),
+            (-3.8, -2.6, -7.8, 7.6, 3.2, 0.9, 'ox_nose'),
+            (-4.2, -1.9, -7.5, 1.3, 2.0, 1.9, 'ox_nostril'), (2.9, -1.9, -7.5, 1.3, 2.0, 1.9, 'ox_nostril'),
+            (-3.3, 0.6, -7.5, 6.6, 1.0, 3.6, 'ox_lip'),
+            (-2.6, 1.3, -7.1, 0.8, 1.9, 0.9, 'fang'), (1.8, 1.3, -7.1, 0.8, 1.9, 0.9, 'fang'),
+        ]),
+        part('jaw', 'head', (0, -1.0, -4.6), (0.3, 0, 0), [
+            (-3.4, 1.6, -6.8, 6.8, 1.8, 6.0, 'ox_jaw'),
+            (-2.6, 3.0, -6.5, 5.2, 1.1, 2.6, 'ox_chin')]),
+        part('nose_ring', 'face', (0, 0.2, -8.0), (-0.45, 0, 0), [
             (-3.1, 0, -0.6, 1.2, 5, 1.2, 'ring'), (1.9, 0, -0.6, 1.2, 5, 1.2, 'ring'),
             (-3.1, 5, -0.6, 6.2, 1.2, 1.2, 'ring'), (-1.0, 4.8, -0.9, 2, 2, 1.8, 'ringbead')]),
-        part('right_eye', 'head', (-3.5, -4.6, -5.3), (0, 0.22, 0), [(-1.4, -0.8, -0.4, 2.8, 1.6, 0.6, 'ox_eye')]),
-        part('right_brow', 'head', (-3.4, -5.7, -5.6), (0, 0.2, 0.3), [(-2.4, -0.9, -0.9, 4.4, 1.6, 1.8, 'ox_brow')]),
-        part('right_ear', 'head', (-5.6, -4.8, -0.2), (0.1, 0.25, -0.35), [(-4.8, -0.9, -1.4, 4.8, 1.8, 2.8, 'ox_ear')]),
+        part('right_eye', 'head', (-3.95, -2.95, -5.5), (0, 0.38, 0.18), [(-1.25, -0.7, -0.3, 2.5, 1.4, 0.5, 'ox_eye')]),
+        part('right_brow', 'head', (-3.5, -4.05, -5.4), (0.1, 0.4, 0.22), [(-2.1, -0.7, -0.9, 3.8, 1.4, 1.7, 'ox_brow')]),
+        part('right_ear', 'head', (-5.0, -4.6, -0.4), (0.1, 0.3, -0.4), [(-4.6, -1.0, -1.6, 4.6, 2.0, 3.2, 'ox_ear')]),
         # the horns: heavy at the root, a gold band about it, curving out, up and forward to a black tip
         part('right_horn', 'head', (-5.2, -6.6, -1.0), (0.1, -0.1, 0.08), [
             (-5, -1.9, -1.9, 5, 3.8, 3.8, 'horn1'),
@@ -282,6 +297,14 @@ def tone(c, t):
     """A hide's (shadow, body, light) at t: 0 shadow .. 1 body .. 2 light."""
     t = max(0.0, min(2.0, t))
     return mixc(c[0], c[1], t) if t < 1 else mixc(c[1], c[2], t - 1)
+
+
+def each(rect):
+    """Each pixel of a face: (i, j, (x, y))."""
+    fx, fy, fw, fh = rect
+    for j in range(fh):
+        for i in range(fw):
+            yield i, j, (fx + i, fy + j)
 
 
 def fur(p, f, hide, light=1.0, round_=True, streak=True, sides=None):
@@ -1133,29 +1156,93 @@ def guard_painter(ox, captain):
             if style == 'ox_tuft':
                 for s in SIDES:
                     ragged(p, f[s], teeth=2, depth=2, down=False)
-        if style == 'ox_snout':                                   # the broad snout: grey-brown, paler to the nose
+        if style == 'ox_forehead':                                # the broad forehead: tight curls, darker to its edges, shadowed under
+            for s, r in f.items():
+                if s in ('front', 'top'):
+                    curls(p, r, HIDE)
+                else:
+                    fur(p, {s: r}, HIDE)
+            fx, fy, fw, fh = f['front']
+            for i, j, xy in each(f['front']):
+                edge = min(i, fw - 1 - i)
+                if edge < 3:
+                    p.px(xy, noisy(p, tone(HIDE, 0.4 + 0.2 * edge), 3))
+                if j >= fh - 1:
+                    p.px(xy, tone(HIDE, 0.25))
+            p.face(f['bottom'], tone(HIDE, 0.15), 1.0, noise=2)
+        if style == 'ox_cheek':                                   # the great round cheek (the chewing muscle): lit across its swell, rimmed dark
             fur(p, f, HIDE)
-            for s in ('top', 'right', 'left', 'front'):          # hide down the bridge, the pale muzzle only about the lips
+            for s in ('right', 'left', 'front'):
                 fx, fy, fw, fh = f[s]
-                for j in range(fh):
-                    for i in range(fw):
-                        if s == 'top':
-                            t = j / max(1, fh - 1)               # toward the nose
-                        elif s == 'front':
-                            t = 0.5 + 0.5 * j / max(1, fh - 1)
-                        else:
-                            toward = (i / fw) if s == 'right' else (1 - i / fw)
-                            t = 0.25 * toward + 0.75 * j / max(1, fh - 1)
-                        if t > 0.55:
-                            p.px((fx + i, fy + j), noisy(p, tone(OX_MUZZLE, 0.8 + (t - 0.55)), 4))
-            for s in ('right', 'left'):                           # the lip's line
+                cx, cy = fw * 0.5, fh * 0.42
+                for i, j, xy in each(f[s]):
+                    d = math.hypot((i + 0.5 - cx) / (fw / 2), (j + 0.5 - cy) / (fh / 2))
+                    if d < 0.55:
+                        p.px(xy, noisy(p, tone(HIDE, 1.55 - d), 3))
+                    elif 0.85 < d < 1.05:
+                        p.px(xy, tone(HIDE, 0.4))
+        if style == 'ox_face':                                    # the long face: dark hide, lit down its bridge, shadowed down its sides
+            fur(p, f, HIDE)
+            fx, fy, fw, fh = f['top']                             # the bridge, back to front
+            for i, j, xy in each(f['top']):
+                d = abs(i + 0.5 - fw / 2) / (fw / 2)
+                p.px(xy, noisy(p, tone(HIDE, 1.2 - 0.7 * d + (0.12 if i % 3 == 0 else 0) - (0.25 if d < 0.12 else 0)), 3))
+            for s in ('right', 'left'):
+                fx, fy, fw, fh = f[s]
+                for i, j, xy in each(f[s]):
+                    if j == 1 and i % 4 != 0:
+                        p.px(xy, tone(HIDE, 1.5))                 # the ridge of the face's bone, catching the light
+                    elif j > fh * 0.55:
+                        p.px(xy, noisy(p, tone(HIDE, 0.55), 3))
+            p.face(f['bottom'], tone(HIDE, 0.2), 1.0, noise=2)
+        if style == 'ox_ridge':                                   # the bone of the face's bridge, standing up down its middle: lit along its crest
+            fur(p, f, HIDE)
+            for s_ in ('top', 'front'):
+                fx, fy, fw, fh = f[s_]
+                for i, j, xy in each(f[s_]):
+                    d = abs(i + 0.5 - fw / 2) / (fw / 2)
+                    p.px(xy, noisy(p, tone(HIDE, 1.6 - 0.9 * d), 3))
+            for s_ in ('right', 'left'):
+                fx, fy, fw, fh = f[s_]
+                for i, j, xy in each(f[s_]):
+                    p.px(xy, tone(HIDE, 0.45))
+        if style == 'ox_whorl':                                   # the curly whorl of hair at the top of the face, under the brow
+            for s_, r in f.items():
+                curls(p, r, HIDE)
+        if style == 'ox_muzzle':                                  # the muzzle: hide down the bridge greying to the pale muzzle at the nose
+            fur(p, f, HIDE)
+            for s in ('top', 'right', 'left', 'front'):
+                fx, fy, fw, fh = f[s]
+                for i, j, xy in each(f[s]):
+                    if s == 'top':
+                        t = j / max(1, fh - 1)                    # 0 at its back .. 1 at the nose
+                    elif s == 'front':
+                        t = 1.0
+                    else:
+                        t = (i / max(1, fw - 1)) if s == 'right' else (1 - i / max(1, fw - 1))
+                        t = t * 0.8 + 0.4 * j / max(1, fh - 1)
+                    if t > 0.45:
+                        a = min(1.0, (t - 0.45) / 0.4)
+                        col = mixc(tone(HIDE, 1.0), tone(OX_MUZZLE, 1.05 - 0.35 * j / max(1, fh - 1)), a)
+                        p.px(xy, noisy(p, k(col, LIGHTS[s]), 4))
+            p.face(f['bottom'], (60, 26, 26), 1.0, noise=3)
+        if style == 'ox_lip':                                     # the upper lip: pale grey muzzle, whiskered, its edge dark; the mouth red under it
+            fur(p, f, OX_MUZZLE, streak=False)
+            for s in ('front', 'right', 'left'):
+                fx, fy, fw, fh = f[s]
+                for i, j, xy in each(f[s]):
+                    if j >= fh - 1:
+                        p.px(xy, (40, 24, 22))
+                    elif (i * 7 + j * 5) % 11 == 0:
+                        p.px(xy, tone(OX_MUZZLE, 0.4))           # whisker pits
+            p.face(f['bottom'], (120, 30, 34), 1.0, noise=4)
+        if style == 'ox_chin':                                    # the chin: pale muzzle, a dark lip along its top, a tuft beneath
+            fur(p, f, OX_MUZZLE, light=0.9)
+            for s in ('front', 'right', 'left'):
                 fx, fy, fw, fh = f[s]
                 for i in range(fw):
-                    p.px((fx + i, fy + fh - 2), (40, 24, 22))
-            fx, fy, fw, fh = f['front']
-            for i in range(fw):
-                p.px((fx + i, fy + fh - 2), (40, 24, 22))
-                p.px((fx + i, fy + fh - 1), (120, 30, 34))
+                    p.px((fx + i, fy), (60, 30, 30))
+            shaggy(p, f['bottom'], HIDE, depth=0)
         if style == 'ox_nose':                                    # the wet nose: two great nostrils, a gleam
             PAD = (88, 66, 70)
             for s, r in f.items():
@@ -1192,6 +1279,13 @@ def guard_painter(ox, captain):
                 point(p, f[s], keep=0.5, down=True, sharp=0.6)
         if style == 'ox_ear':
             fur(p, f, HIDE)
+            for s in ('front', 'back', 'top', 'bottom'):          # its tip rounded off (the tip at its outer, -x, end)
+                fx, fy, fw, fh = f[s]
+                for i, j, xy in each(f[s]):
+                    t = i if s != 'back' else fw - 1 - i           # 0 at its tip
+                    across = abs(j + 0.5 - fh / 2) / (fh / 2)
+                    if t < 3 and across > 0.35 + 0.22 * t:
+                        p.clear(xy)
             fx, fy, fw, fh = f['bottom']                          # the ear's hollow, beneath and before
             for j in range(1, fh - 1):
                 for i in range(1, fw - 1):

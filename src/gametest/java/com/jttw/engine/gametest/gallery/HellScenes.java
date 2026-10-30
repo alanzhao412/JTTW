@@ -108,6 +108,10 @@ final class HellScenes {
                 }, PAIR),
                 scene("hell_ox_close", p -> creature(p, ModEntities.OX_HEAD.get(), 0.5, 7.5, 160f, false), CLOSE),
                 scene("hell_ox_side", p -> creature(p, ModEntities.OX_HEAD.get(), 0.5, 7.5, 90f, false), CLOSE),
+                // Ox-Head's head close: before him, at three-quarters, and in profile
+                scene("hell_ox_face", p -> creature(p, ModEntities.OX_HEAD.get(), 0.5, 7.5, 180f, false), new double[]{0.5, 2.85, 4.5, 0.5, 2.65, 7.5}),
+                scene("hell_ox_three_quarter", p -> creature(p, ModEntities.OX_HEAD.get(), 0.5, 7.5, 215f, false), new double[]{0.5, 2.85, 4.5, 0.5, 2.65, 7.5}),
+                scene("hell_ox_profile", p -> creature(p, ModEntities.OX_HEAD.get(), 0.5, 7.5, 270f, false), new double[]{0.5, 2.8, 4.4, 0.5, 2.6, 7.5}),
                 scene("hell_ox_charging", p -> {
                     OxHeadEntity ox = creature(p, ModEntities.OX_HEAD.get(), 0.5, 7.5, 160f, false);
                     if (ox != null) ox.showCharging(true);
