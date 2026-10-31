@@ -438,7 +438,12 @@ public final class BlackWindPlan {
             }
             // log pillars round it, a great roof of tiles over it on its beams
             for (int x = x0; x <= x1; x += 11) for (int z : new int[]{z0, z1}) for (int y = 1; y <= 9; y++) set(x, y, z, LOG);
-            for (int x = x0; x <= x1; x += 11) for (int y = 1; y <= 9; y++) set(x, y, (z0 + z1) / 2 - 4, y > 7 ? LOG : get(x, y, (z0 + z1) / 2 - 4));
+            // the middle row: king posts hung from the roof's ridge (to its tiles, so none hangs in the air)
+            for (int x = x0; x <= x1; x += 11) {
+                int zm = (z0 + z1) / 2 - 4;
+                int in = Math.min(Math.min(x - (x0 - 2), (x1 + 2) - x), Math.min(zm - (z0 - 2), (z1 + 2) - zm));
+                for (int y = 8; y <= (in < 4 ? 8 + in : 13); y++) set(x, y, zm, LOG); // up to the roof's planks, or its tiles
+            }
             for (int x = x0 - 2; x <= x1 + 2; x++) {
                 for (int z = z0 - 2; z <= z1 + 2; z++) {
                     int in = Math.min(Math.min(x - (x0 - 2), (x1 + 2) - x), Math.min(z - (z0 - 2), (z1 + 2) - z));

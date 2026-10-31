@@ -217,7 +217,8 @@ public class BlackWindWorksFeature extends Feature<NoneFeatureConfiguration> {
             if (m == null) continue;
             double a = i * Math.PI * 2 / n + 0.4;
             int mx = x + (int) Math.round(Math.cos(a) * 3), mz = z + (int) Math.round(Math.sin(a) * 3);
-            m.moveTo(mx + 0.5, y, mz + 0.5, random.nextFloat() * 360f, 0f);
+            BlockPos at = com.jttw.engine.entity.zone.ZoneMonster.roomNear(level, type, new BlockPos(mx, y, mz), 2); // clear of the camp's props
+            m.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360f, 0f);
             m.finalizeSpawn(level, level.getCurrentDifficultyAt(m.blockPosition()), MobSpawnType.STRUCTURE, null);
             m.become(captain ? m.rollCaptainLevel(random) : m.rollRegularLevel(random), captain);
             m.setPersistenceRequired();

@@ -43,9 +43,18 @@ final class ZoneAudit {
         List<Mob> mobs = level.getEntitiesOfClass(Mob.class, box, m -> BuiltInRegistries.ENTITY_TYPE.getKey(m.getType()).getNamespace().equals(JTTWEngine.MOD_ID));
         List<String> stuck = new ArrayList<>();
         for (Mob m : mobs) {
-            if (!level.noCollision(m, m.getBoundingBox().deflate(0.06))) {
-                stuck.add(BuiltInRegistries.ENTITY_TYPE.getKey(m.getType()).getPath() + " at " + m.blockPosition().toShortString()
-                        + " in " + BuiltInRegistries.BLOCK.getKey(level.getBlockState(m.blockPosition()).getBlock()).getPath());
+            AABB body = m.getBoundingBox().deflate(0.06, 0.12, 0.06); // a carpet or a slab's lip underfoot is stood on, not stuck in
+            if (!level.noCollision(m, body)) {
+                String what = "?";
+                for (BlockPos q : BlockPos.betweenClosed(BlockPos.containing(body.minX, body.minY, body.minZ), BlockPos.containing(body.maxX, body.maxY, body.maxZ))) {
+                    var shape = level.getBlockState(q).getCollisionShape(level, q);
+                    if (!shape.isEmpty() && shape.bounds().move(q).intersects(body)) {
+                        what = BuiltInRegistries.BLOCK.getKey(level.getBlockState(q).getBlock()).getPath() + " at " + q.toShortString();
+                        break;
+                    }
+                }
+                stuck.add(BuiltInRegistries.ENTITY_TYPE.getKey(m.getType()).getPath() + " at " + String.format("%.1f %.1f %.1f", m.getX(), m.getY(), m.getZ())
+                        + " in " + what);
             }
         }
         out.add(String.format("%s audit: the mod's creatures loaded %d; stuck in blocks %d%s", name, mobs.size(), stuck.size(), sample(stuck)));
@@ -84,15 +93,22 @@ final class ZoneAudit {
         out.add(String.format("  trunks hanging over nothing %d%s; trunks left bare (no leaves round their top) %d%s", hanging.size(), sample(hanging),
                 bare.size(), sample(bare)));
         out.add(String.format("  water or lava never let flow (over or beside air) %d%s", fluids.size(), sample(fluids)));
-        // seams: a cliff only at a chunk's border
-        List<String> seams = new ArrayList<>();
+        // seams: a cliff only at a chunk's border, against the same looked for half-way across the chunks (what the land has anyway)
+        List<String> seams = new ArrayList<>(), control = new ArrayList<>();
         for (int x = cx - reach; x <= cx + reach; x++) for (int z = cz - reach; z <= cz + reach; z++) {
             if (!in.test(new BlockPos(x, 64, z))) continue;
             if ((x & 15) == 15) seam(level, x, z, 1, 0, seams);
             if ((z & 15) == 15) seam(level, x, z, 0, 1, seams);
+            if ((x & 15) == 7) seam(level, x, z, 1, 0, control);
+            if ((z & 15) == 7) seam(level, x, z, 0, 1, control);
         }
-        out.add(String.format("  cliffs only at chunk borders (8 or more, the ground either side smooth) %d%s; %d columns looked at in %.1f s", seams.size(),
-                sample(seams), columns, (System.nanoTime() - t0) / 1e9));
+        out.add(String.format("  cliffs only at chunk borders (8 or more, the ground either side smooth; trees not counted) %d%s, against %d half-way across the chunks; "
+                + "%d columns looked at in %.1f s", seams.size(), sample(seams), control.size(), columns, (System.nanoTime() - t0) / 1e9));
+        try {
+            java.nio.file.Files.write(java.nio.file.Path.of("audit-" + name.replaceAll("[^A-Za-z]+", "_") + ".txt"), all);
+        } catch (java.io.IOException ignored) {
+        }
+        all.clear();
         return out;
     }
 
@@ -100,12 +116,25 @@ final class ZoneAudit {
         if (!loaded(level, x - dx, z - dz) || !loaded(level, x + 2 * dx, z + 2 * dz)) return;
         int a = h(level, x - dx, z - dz), b = h(level, x, z), c = h(level, x + dx, z + dz), d = h(level, x + 2 * dx, z + 2 * dz);
         if (Math.abs(c - b) >= 8 && Math.abs(b - a) <= 2 && Math.abs(d - c) <= 2) {
-            out.add(x + " " + z + " (" + b + " to " + c + (dx == 1 ? ", east" : ", south") + ")");
+            out.add(x + " " + z + " (" + b + " " + top(level, x, z) + " to " + c + " " + top(level, x + dx, z + dz) + (dx == 1 ? ", east" : ", south") + ")");
         }
     }
 
+    private static String top(ServerLevel level, int x, int z) {
+        return BuiltInRegistries.BLOCK.getKey(level.getBlockState(new BlockPos(x, h(level, x, z) - 1, z)).getBlock()).getPath();
+    }
+
+    /** The ground's height (over its top block): the land's, trees and great mushrooms not counted. */
     private static int h(ServerLevel level, int x, int z) {
-        return level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1, z);
+        while (p.getY() > level.getMinBuildHeight()) {
+            BlockState st = level.getBlockState(p);
+            if (!st.is(BlockTags.LOGS) && !st.is(BlockTags.LEAVES) && !st.is(net.minecraft.world.level.block.Blocks.MUSHROOM_STEM)
+                    && !st.is(net.minecraft.world.level.block.Blocks.BROWN_MUSHROOM_BLOCK) && !st.is(net.minecraft.world.level.block.Blocks.RED_MUSHROOM_BLOCK)
+                    && !st.is(net.minecraft.world.level.block.Blocks.BAMBOO) && !st.isAir()) break;
+            p.move(Direction.DOWN);
+        }
+        return p.getY() + 1;
     }
 
     private static boolean touchesWood(ServerLevel level, int x, int y, int z) {
@@ -124,7 +153,11 @@ final class ZoneAudit {
         return false;
     }
 
+    /** Every finding, not only the few in the report, written to {@code audit-<name>.txt} in the game's folder. */
+    private static final List<String> all = new ArrayList<>();
+
     private static String sample(List<String> xs) {
+        all.addAll(xs);
         if (xs.isEmpty()) return "";
         return " (" + String.join("; ", xs.subList(0, Math.min(6, xs.size()))) + (xs.size() > 6 ? "; ..." : "") + ")";
     }

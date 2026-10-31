@@ -125,7 +125,8 @@ public final class FlowerFruitGarrison {
                                                         BlockPos post, int reach, RandomSource random, int[] c, int part) {
         T m = type.create(level.getLevel());
         if (m == null) return null;
-        m.moveTo(x + 0.5, y, z + 0.5, random.nextFloat() * 360f, 0f);
+        BlockPos at = com.jttw.engine.entity.zone.ZoneMonster.roomNear(level, type, new BlockPos(x, y, z), 2); // clear of the stools, the pots, the beds
+        m.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360f, 0f);
         m.finalizeSpawn(level, level.getCurrentDifficultyAt(m.blockPosition()), MobSpawnType.STRUCTURE, null);
         m.become(lv, captain);
         m.setPersistenceRequired();
