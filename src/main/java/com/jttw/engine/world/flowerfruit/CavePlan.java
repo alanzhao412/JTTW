@@ -241,7 +241,8 @@ public final class CavePlan {
         if (inSanctum(x, z)) {
             double d = Math.hypot(x - SANCTUM_X, z - SANCTUM_Z);
             if (fl > 0) return Math.abs(x) <= 1 ? s(Blocks.RED_WOOL) : s(Blocks.POLISHED_BLACKSTONE_BRICKS);
-            if (Math.abs(d - 9) < 0.6 || Math.abs(d - 17) < 0.6) return s(Blocks.GILDED_BLACKSTONE);
+            if (Math.abs(d - 9) < 0.6) return s(Blocks.SHROOMLIGHT);                    // a ring of light let into the floor
+            if (Math.abs(d - 17) < 0.6) return s(Blocks.GILDED_BLACKSTONE);
             return q < 600 ? s(Blocks.POLISHED_BLACKSTONE_BRICKS) : q < 850 ? s(Blocks.POLISHED_BLACKSTONE) : s(Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS);
         }
         if (onDais(x, z)) return Math.abs(x) <= 1 ? s(Blocks.YELLOW_WOOL) : s(Blocks.POLISHED_ANDESITE);
@@ -466,6 +467,12 @@ public final class CavePlan {
                 return dy % 6 == 0 ? s(Blocks.GILDED_BLACKSTONE) : s(Blocks.POLISHED_BLACKSTONE_BRICKS);
             }
             if (d <= 2.6 && dy == 1 && ((dx - px + dz - pz) % 2 == 0)) return s(Blocks.SOUL_CAMPFIRE);
+        }
+        // eight braziers round the arena
+        for (int k = 0; k < 8; k++) {
+            double a = k * Math.PI / 4;
+            int bx = (int) Math.round(Math.cos(a) * 13), bz = (int) Math.round(Math.sin(a) * 13);
+            if (dx == bx && dz == bz && dz > SANCTUM_THRONE_Z - SANCTUM_Z + 6) return dy == 1 ? s(Blocks.GILDED_BLACKSTONE) : dy == 2 ? s(Blocks.CAMPFIRE) : null;
         }
         // braziers either side of his throne's steps
         if (Math.abs(dx) == 6 && dz == SANCTUM_THRONE_Z - SANCTUM_Z + 6) return dy == 1 ? s(Blocks.GILDED_BLACKSTONE) : dy == 2 ? s(Blocks.CAMPFIRE) : null;

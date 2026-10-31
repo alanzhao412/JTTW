@@ -389,3 +389,47 @@ def generate(painter_class):
 if __name__ == '__main__':
     from fighting_buddha import BuddhaPainter
     generate(BuddhaPainter)
+
+
+# ── The same head for another: the Six-Eared Macaque (flower_fruit.py) ──────────────────────────────
+
+def head_with_ears(n, gap=2.9):
+    """The head with its ears (each cup and its rim) `n` a side, stacked close, `gap` apart: the
+    Six-Eared Macaque's three, so that at a glance he passes for the Monkey King. The rest as HEAD."""
+    out = []
+    for name, parent, pivot, rot, boxes, mirror in HEAD:
+        if 'ear' in name and 'tuft' not in name and 'year' not in name:
+            continue
+        out.append((name, parent, pivot, rot, boxes, mirror))
+    ears = [p_ for p_ in HEAD if ('_ear' in p_[0] and 'tuft' not in p_[0])]
+    for e in range(n):
+        dy = (e - (n - 1) / 2) * gap
+        tilt = (e - (n - 1) / 2) * 0.12
+        for name, parent, (px, py, pz), (rx, ry, rz), boxes, mirror in ears:
+            new = name.replace('_ear', '_ear_%d' % e, 1)
+            if parent == 'head':
+                out.append((new, 'head', (px, py + dy, pz + abs(e - (n - 1) / 2) * 0.3), (rx, ry, rz + (tilt if px < 0 else -tilt)), boxes, mirror))
+            else:
+                out.append((new, parent.replace('_ear', '_ear_%d' % e, 1), (px, py, pz), (rx, ry, rz), boxes, mirror))
+    return out
+
+
+def generate_for(painter_class, name, java, tag, parts, eyes=None, seed=77):
+    """Paints `parts` (HEAD, or head_with_ears) as `name`, its eyes `eyes` (iris, deep, hot, rim) if
+    given, and writes its model into `java` between its `tag` markers. The Buddha's own is generate()."""
+    global IRIS, IRIS_DEEP, IRIS_HOT, RIM
+    keep = (IRIS, IRIS_DEEP, IRIS_HOT, RIM)
+    if eyes:
+        IRIS, IRIS_DEEP, IRIS_HOT, RIM = eyes
+    try:
+        bg.UNITS = 64
+        bg.S = 4
+        bg.TEX = bg.UNITS * bg.S
+        p = painter_class(seed)
+        slots = exact_paint(parts, p, paint_box)
+        p.img.save('src/main/resources/assets/jttw_engine/textures/entity/%s.png' % name)
+        p.glow.save('src/main/resources/assets/jttw_engine/textures/entity/%s_glow.png' % name)
+        emit(parts, slots, java, tag)
+        print(name, len(parts), 'parts,', len(slots), 'boxes')
+    finally:
+        IRIS, IRIS_DEEP, IRIS_HOT, RIM = keep
