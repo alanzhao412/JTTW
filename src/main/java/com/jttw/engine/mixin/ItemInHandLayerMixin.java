@@ -22,5 +22,9 @@ public abstract class ItemInHandLayerMixin {
     private void jttw_staffAtEase(LivingEntity entity, ItemStack stack, ItemDisplayContext context, HumanoidArm arm,
                                   PoseStack pose, MultiBufferSource buffers, int light, CallbackInfo ci) {
         if (entity instanceof Player p && stack == p.getMainHandItem() && StaffStance.resting(p)) ci.cancel();
+        // the Fighting Buddha's staff, in red and gold, is drawn by his own layer (FightingBuddhaLayer)
+        if (entity instanceof net.minecraft.client.player.AbstractClientPlayer p && stack == p.getMainHandItem()
+                && com.jttw.engine.client.FightingBuddhaClient.drawnAsBuddha(p)
+                && com.jttw.engine.client.renderer.FightingBuddhaLayer.holdsStaff(p)) ci.cancel();
     }
 }
