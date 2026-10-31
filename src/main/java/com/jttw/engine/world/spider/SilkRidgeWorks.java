@@ -53,6 +53,10 @@ public final class SilkRidgeWorks {
     public static final int TEMPLE_X = -96, TEMPLE_Z = 74, TEMPLE_HALF = 24, TEMPLE_N = -30, TEMPLE_S = 30;
     /** The canopy: an ellipsoid over the temple, these half-widths and this high. */
     public static final int CANOPY_RX = 36, CANOPY_RZ = 44, CANOPY_H = 27;
+    /** How far past the canopy's foot its anchor cables reach the ground. */
+    public static final int ANCHOR_OUT = 7;
+    /** How far from the temple's middle anything of the canopy (its cables and their anchors) reaches. */
+    public static final int CANOPY_REACH_X = CANOPY_RX + ANCHOR_OUT + 3, CANOPY_REACH_Z = CANOPY_RZ + ANCHOR_OUT + 3;
     /** Where the Demon Lord stands, from the temple's middle: in its court. */
     public static final int COURT_X = 0, COURT_Z = 12;
 
@@ -74,7 +78,7 @@ public final class SilkRidgeWorks {
     public static double levelShare(int lx, int lz) {
         double yard = outside(lx, lz, COTTAGE_X - YARD_HALF, COTTAGE_X + YARD_HALF, COTTAGE_BACK, COTTAGE_Z + YARD_S);
         double spring = Math.max(0, Math.hypot(lx - SPRING_X, lz - SPRING_Z) - SPRING_LEVEL);
-        double temple = outside(lx, lz, TEMPLE_X - CANOPY_RX - 6, TEMPLE_X + CANOPY_RX + 6, TEMPLE_Z - CANOPY_RZ - 4, TEMPLE_Z + CANOPY_RZ + 6);
+        double temple = outside(lx, lz, TEMPLE_X - CANOPY_REACH_X, TEMPLE_X + CANOPY_REACH_X, TEMPLE_Z - CANOPY_REACH_Z, TEMPLE_Z + CANOPY_REACH_Z);
         return 1 - smooth(0, 9, Math.min(yard, Math.min(spring, temple)));
     }
 
@@ -88,7 +92,7 @@ public final class SilkRidgeWorks {
     /** Whether (lx, lz) is any of the works' (where {@link #at} may say something). */
     public static boolean covers(int lx, int lz) {
         return inCottage(lx, lz) || Math.hypot(lx - SPRING_X, lz - SPRING_Z) <= SPRING_LEVEL
-                || Math.abs(lx - TEMPLE_X) <= CANOPY_RX + 1 && Math.abs(lz - TEMPLE_Z) <= CANOPY_RZ + 1;
+                || Math.abs(lx - TEMPLE_X) <= CANOPY_REACH_X && Math.abs(lz - TEMPLE_Z) <= CANOPY_REACH_Z;
     }
 
     private static boolean inCottage(int lx, int lz) {
@@ -104,12 +108,14 @@ public final class SilkRidgeWorks {
      */
     @Nullable
     public static BlockState at(int lx, int ly, int lz, boolean canopy) {
-        if (inCottage(lx, lz)) return cottage(lx - COTTAGE_X, ly, lz - COTTAGE_Z);
         if (Math.hypot(lx - SPRING_X, lz - SPRING_Z) <= SPRING_LEVEL) return spring(lx - SPRING_X, ly, lz - SPRING_Z);
+        if (ly < -1) return null; // the ground under the cottage and the temple is the land's
+        if (inCottage(lx, lz)) return cottage(lx - COTTAGE_X, ly, lz - COTTAGE_Z);
         int tx = lx - TEMPLE_X, tz = lz - TEMPLE_Z;
-        if (Math.abs(tx) <= CANOPY_RX + 1 && Math.abs(tz) <= CANOPY_RZ + 1) {
-            if (canopy && inCanopy(tx, ly, tz)) return SpiderCaveRegistry.SILK_SEAL.get().defaultBlockState();
-            return temple(tx, ly, tz);
+        if (Math.abs(tx) <= CANOPY_REACH_X && Math.abs(tz) <= CANOPY_REACH_Z) {
+            BlockState silk = canopy ? canopyAt(tx, ly, tz) : null;
+            if (silk != null) return silk;
+            if (Math.abs(tx) <= CANOPY_RX + 1 && Math.abs(tz) <= CANOPY_RZ + 1) return temple(tx, ly, tz);
         }
         return null;
     }
@@ -322,6 +328,134 @@ public final class SilkRidgeWorks {
         return x * x + y * y + z * z < 1;
     }
 
+    /** The canopy's radii, the spokes of its web from the knot at its crown; every other one runs on to the ground as a cable. */
+    static final int SPOKES = 16;
+    /** The polar angle (from the crown) of the canopy's hub, of the clear ring round it, and of its rim at an anchor. */
+    static final double HUB = 0.085, FREE = 0.2, RIM = 1.03;
+    /** How far the rim sags between two anchors, and the swags under it. */
+    static final double RIM_SAG = 0.10, SWAG = 0.17, SWAG_SAG = 0.16;
+    /** The spiral's pitch (polar angle a turn). */
+    static final double PITCH = 0.15;
+
+    /**
+     * What the sisters' canopy puts at temple-local (tx, ly, tz), or null where it puts nothing. Its
+     * shell ({@link #inCanopy}) is whole, so none passes it; but it is a web: radii from the knot at
+     * its crown, a spiral of silk round them, a heavy rim sagging between the cables that hold it,
+     * swags and drapes hanging from that, all in sealing silk; and between the strands only the
+     * sisters' gauze, which one sees through. Past it, from every other radius, a cable runs down to
+     * an anchor of silk on the ground.
+     */
+    @Nullable
+    public static BlockState canopyAt(int tx, int ly, int tz) {
+        if (ly < 0 || ly > CANOPY_H) return null;
+        if (inCanopy(tx, ly, tz)) return (strand(tx, ly, tz) ? SpiderCaveRegistry.SILK_SEAL : SpiderCaveRegistry.SILK_VEIL).get().defaultBlockState();
+        if (insideCanopy(tx, ly, tz)) return null;
+        return cable(tx, ly, tz);
+    }
+
+    /** The canopy's half-width (blocks) out along azimuth {@code theta} at its foot. */
+    private static double footRadius(double theta) {
+        double c = Math.cos(theta) / CANOPY_RX, s = Math.sin(theta) / CANOPY_RZ;
+        return 1 / Math.sqrt(c * c + s * s);
+    }
+
+    /** Where between two neighbouring radii {@code theta} lies, 0 at one to 1 at the next, every {@code step}. */
+    private static double between(double theta, double step) {
+        double r = theta / step;
+        return r - Math.floor(r);
+    }
+
+    /** The rim's polar angle along azimuth {@code theta}: highest at the anchors, sagging between. */
+    static double rimAt(double theta) {
+        return RIM + RIM_SAG * Math.sin(Math.PI * between(theta, 4 * Math.PI / SPOKES));
+    }
+
+    /** Whether the shell's block at (tx, ly, tz) is one of the web's strands (else gauze). */
+    public static boolean strand(int tx, int ly, int tz) {
+        double x = tx / (double) CANOPY_RX, y = (ly + 0.4) / CANOPY_H, z = tz / (double) CANOPY_RZ;
+        double rho = Math.hypot(x, z), phi = Math.atan2(rho, y), theta = Math.atan2(z, x);
+        if (phi < HUB) return true; // the knot at the crown
+        double foot = footRadius(theta);
+        // blocks of the shell per radian of polar angle, here
+        double meridian = Math.hypot(CANOPY_H * Math.sin(phi), foot * Math.cos(phi));
+        double across = Math.hypot(tx, tz); // blocks per radian of azimuth
+        double step = 2 * Math.PI / SPOKES;
+        double d = Math.abs(Math.IEEEremainder(theta, step));
+        int k = (int) Math.round(theta / step);
+        boolean anchor = Math.floorMod(k, 2) == 0;
+        if (d * across < (anchor ? 1.05 : 0.62)) return true; // a radius (the anchors' doubled)
+        double rim = rimAt(theta);
+        if (Math.abs(phi - rim) * meridian < 0.95) return true;
+        double sag = Math.sin(Math.PI * between(theta, step));
+        if (phi < rim) {
+            if (phi < FREE) return false; // the clear ring round the knot
+            // the spiral: wound out from the crown, each turn sagging a little between radii
+            double u = (phi - FREE - 0.03 * sag) / PITCH - (theta + Math.PI) / (2 * Math.PI);
+            return Math.abs(u - Math.rint(u)) * PITCH * meridian < 0.52;
+        }
+        // under the rim: swags looping down between the anchors, and drapes hanging from both
+        double ba = between(theta, 2 * step);
+        double swag = rim + SWAG + SWAG_SAG * Math.sin(Math.PI * ba);
+        if (Math.abs(phi - swag) * meridian < 0.6) return true;
+        double drapeStep = 2 * Math.PI / 24;
+        int j = (int) Math.round(theta / drapeStep);
+        if (Math.abs(theta - j * drapeStep) * across < 0.5) {
+            int h = hash(j, 0, 0, 40);
+            if (h < 45) return false; // only here and there a drape
+            double end = (h < 55 ? swag : rim) + 0.06 + (h % 13) * 0.035;
+            return phi <= end;
+        }
+        return false;
+    }
+
+    /** The cables from the canopy's rim to its anchors on the ground, and the anchors (null where there are none). */
+    @Nullable
+    private static BlockState cable(int tx, int ly, int tz) {
+        double step = 2 * Math.PI / SPOKES;
+        BlockState out = null;
+        for (int k = 0; k < SPOKES; k += 2) {
+            double theta = k * step;
+            if (theta > Math.PI) theta -= 2 * Math.PI;
+            double phi = rimAt(theta);
+            double c = Math.cos(theta), sn = Math.sin(theta);
+            double px = CANOPY_RX * Math.sin(phi) * c, pz = CANOPY_RZ * Math.sin(phi) * sn, py = CANOPY_H * Math.cos(phi);
+            // two stays from each anchor point, splayed, or one straight down the radius
+            int stays = k % 4 == 0 ? 2 : 1;
+            for (int st = 0; st < stays; st++) {
+                double ft = theta + (stays == 1 ? 0 : (st == 0 ? -0.075 : 0.075));
+                double reach = footRadius(ft) + ANCHOR_OUT - (stays == 1 ? 2 : 0);
+                double fx = Math.cos(ft) * reach, fz = Math.sin(ft) * reach;
+                BlockState b = stay(tx, ly, tz, px, py, pz, fx, fz);
+                if (b != null) {
+                    if (b.is(SpiderCaveRegistry.SILK_SEAL.get())) return b;
+                    out = b;
+                }
+            }
+        }
+        return out;
+    }
+
+    /** One stay: a cable from (px, py, pz) on the rim down to the ground at (fx, fz), sagging a little, and the knot of silk anchoring it. */
+    @Nullable
+    private static BlockState stay(int tx, int ly, int tz, double px, double py, double pz, double fx, double fz) {
+        double dx = fx - px, dz = fz - pz, len = Math.hypot(dx, dz);
+        double qx = tx - px, qz = tz - pz;
+        double t = (qx * dx + qz * dz) / (len * len);
+        double off = Math.abs(qx * dz - qz * dx) / len;
+        double fd = Math.hypot(tx - fx, tz - fz);
+        if (fd < 1.6 && ly == 0 || fd < 0.9 && ly == 1) return SpiderCaveRegistry.SILK_SEAL.get().defaultBlockState();
+        if (fd < 2.6 && ly == 0 && hash(tx, 0, tz, 41) < 45) return s(Blocks.COBWEB);
+        if (t < 0 || t > 1 || off > 0.62) return null;
+        double half = 0.7 / len;
+        double y0 = cableY(Math.max(0, t - half), py), y1 = cableY(Math.min(1, t + half), py);
+        int lo = (int) Math.round(Math.min(y0, y1)), hi = (int) Math.round(Math.max(y0, y1));
+        return ly >= lo && ly <= hi ? SpiderCaveRegistry.SILK_SEAL.get().defaultBlockState() : null;
+    }
+
+    private static double cableY(double t, double py) {
+        return py * (1 - t) - 1.6 * 4 * t * (1 - t);
+    }
+
     /** The main hall: its half-width, its back and front (from the temple's middle). */
     static final int HALL_HALF = 13, HALL_N = -27, HALL_S = -9;
 
@@ -330,7 +464,14 @@ public final class SilkRidgeWorks {
         int ax = Math.abs(tx);
         boolean walled = ax <= TEMPLE_HALF && tz >= TEMPLE_N && tz <= TEMPLE_S;
         if (y == -1) {
-            if (!walled) return hash(tx, y, tz, 10) < 60 ? s(Blocks.GRAVEL) : s(Blocks.COBBLESTONE);
+            if (!walled) {
+                // the way up to the gate; trodden gravel round the walls; then the valley's grass, worn
+                double off = outside(tx, tz, -TEMPLE_HALF, TEMPLE_HALF, TEMPLE_N, TEMPLE_S);
+                int r = hash(tx, y, tz, 10);
+                if (Math.abs(tx) <= 2 && tz > TEMPLE_S) return r < 75 ? s(Blocks.DIRT_PATH) : s(Blocks.COARSE_DIRT);
+                if (off <= 2 + r % 2) return r < 55 ? s(Blocks.GRAVEL) : r < 80 ? s(Blocks.COBBLESTONE) : s(Blocks.MOSSY_COBBLESTONE);
+                return r < 55 ? s(Blocks.GRASS_BLOCK) : r < 72 ? s(Blocks.COARSE_DIRT) : r < 87 ? s(Blocks.PODZOL) : s(Blocks.MOSS_BLOCK);
+            }
             if (ax <= 2 || (tz >= HALL_S && tz <= HALL_S + 2 && ax <= 8)) return s(Blocks.STONE_BRICKS);
             if (flowerbed(tx, tz)) return s(Blocks.GRASS_BLOCK);
             return hash(tx, y, tz, 11) < 75 ? s(Blocks.POLISHED_ANDESITE) : s(Blocks.ANDESITE);

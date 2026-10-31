@@ -21,6 +21,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.TransparentBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -59,6 +60,14 @@ public final class SpiderCaveRegistry {
             .pushReaction(PushReaction.DESTROY)));
     /** The sisters' sealing silk: shuts a way, and no hand nor blast nor art breaks it; only its spinner's death loosens it. */
     public static final DeferredHolder<Block, Block> SILK_SEAL = BLOCKS.register("silk_seal", () -> new Block(BlockBehaviour.Properties.of()
+            .mapColor(MapColor.SNOW).sound(SoundType.WOOL).strength(-1.0F, 3_600_000.0F).noLootTable().noOcclusion()
+            .isValidSpawn((s, l, p, t) -> false).isRedstoneConductor((s, l, p) -> false).isSuffocating((s, l, p) -> false)
+            .isViewBlocking((s, l, p) -> false).pushReaction(PushReaction.BLOCK)));
+    /**
+     * The sisters' gauze: the sealing silk spun so fine it is all but clear, a veil between the
+     * strands of their canopy (one sees through it, none passes it); it falls with the canopy.
+     */
+    public static final DeferredHolder<Block, Block> SILK_VEIL = BLOCKS.register("silk_veil", () -> new TransparentBlock(BlockBehaviour.Properties.of()
             .mapColor(MapColor.SNOW).sound(SoundType.WOOL).strength(-1.0F, 3_600_000.0F).noLootTable().noOcclusion()
             .isValidSpawn((s, l, p, t) -> false).isRedstoneConductor((s, l, p) -> false).isSuffocating((s, l, p) -> false)
             .isViewBlocking((s, l, p) -> false).pushReaction(PushReaction.BLOCK)));

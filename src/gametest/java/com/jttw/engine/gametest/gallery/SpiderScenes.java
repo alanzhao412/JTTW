@@ -240,11 +240,12 @@ final class SpiderScenes {
                 // the canopy over the temple again (the shots go by name, and the open temple's come first)
                 ServerLevel level = p.serverLevel();
                 int f = ground(p);
-                for (int tx = -SilkRidgeWorks.CANOPY_RX; tx <= SilkRidgeWorks.CANOPY_RX; tx++)
-                    for (int tz = -SilkRidgeWorks.CANOPY_RZ; tz <= SilkRidgeWorks.CANOPY_RZ; tz++)
+                for (int tx = -SilkRidgeWorks.CANOPY_REACH_X; tx <= SilkRidgeWorks.CANOPY_REACH_X; tx++)
+                    for (int tz = -SilkRidgeWorks.CANOPY_REACH_Z; tz <= SilkRidgeWorks.CANOPY_REACH_Z; tz++)
                         for (int ly = 0; ly <= SilkRidgeWorks.CANOPY_H; ly++) {
-                            if (SilkRidgeWorks.inCanopy(tx, ly, tz)) level.setBlock(new BlockPos(VX + SilkRidgeWorks.TEMPLE_X + tx, f + ly,
-                                    VZ + SilkRidgeWorks.TEMPLE_Z + tz), SpiderCaveRegistry.SILK_SEAL.get().defaultBlockState(), Block.UPDATE_CLIENTS);
+                            BlockState silk = SilkRidgeWorks.canopyAt(tx, ly, tz);
+                            if (silk != null) level.setBlock(new BlockPos(VX + SilkRidgeWorks.TEMPLE_X + tx, f + ly,
+                                    VZ + SilkRidgeWorks.TEMPLE_Z + tz), silk, Block.UPDATE_CLIENTS);
                         }
                 canopyDown = false;
             }
@@ -259,10 +260,10 @@ final class SpiderScenes {
             if (!canopyDown) {
                 ServerLevel level = p.serverLevel();
                 int f = ground(p);
-                for (int tx = -SilkRidgeWorks.CANOPY_RX; tx <= SilkRidgeWorks.CANOPY_RX; tx++)
-                    for (int tz = -SilkRidgeWorks.CANOPY_RZ; tz <= SilkRidgeWorks.CANOPY_RZ; tz++)
+                for (int tx = -SilkRidgeWorks.CANOPY_REACH_X; tx <= SilkRidgeWorks.CANOPY_REACH_X; tx++)
+                    for (int tz = -SilkRidgeWorks.CANOPY_REACH_Z; tz <= SilkRidgeWorks.CANOPY_REACH_Z; tz++)
                         for (int ly = 0; ly <= SilkRidgeWorks.CANOPY_H; ly++) {
-                            if (!SilkRidgeWorks.inCanopy(tx, ly, tz)) continue;
+                            if (SilkRidgeWorks.canopyAt(tx, ly, tz) == null) continue;
                             BlockPos at = new BlockPos(VX + SilkRidgeWorks.TEMPLE_X + tx, f + ly, VZ + SilkRidgeWorks.TEMPLE_Z + tz);
                             BlockState under = SilkRidgeWorks.at(SilkRidgeWorks.TEMPLE_X + tx, ly, SilkRidgeWorks.TEMPLE_Z + tz, false);
                             level.setBlock(at, under == null ? Blocks.AIR.defaultBlockState() : under, Block.UPDATE_CLIENTS);

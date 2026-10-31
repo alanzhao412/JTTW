@@ -173,4 +173,18 @@ class SpiderCavePlacementTest {
             if (Math.abs(tz) < SilkRidgeWorks.CANOPY_RZ - 1) assertTrue(crossed, "walled at ground level, row " + tz);
         }
     }
+
+    @Test
+    void theCanopyIsAWebNotAWall() {
+        // strands of silk over a good part of it, gauze one sees through between
+        int shell = 0, strands = 0;
+        for (int tx = -SilkRidgeWorks.CANOPY_RX; tx <= SilkRidgeWorks.CANOPY_RX; tx++) for (int tz = -SilkRidgeWorks.CANOPY_RZ; tz <= SilkRidgeWorks.CANOPY_RZ; tz++)
+            for (int ly = 0; ly <= SilkRidgeWorks.CANOPY_H; ly++) {
+                if (!SilkRidgeWorks.inCanopy(tx, ly, tz)) continue;
+                shell++;
+                if (SilkRidgeWorks.strand(tx, ly, tz)) strands++;
+            }
+        double share = strands / (double) shell;
+        assertTrue(share > 0.2 && share < 0.55, "strands: " + strands + " of " + shell);
+    }
 }
