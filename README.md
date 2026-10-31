@@ -200,8 +200,7 @@ model and skins from [`assets_source/fighting_buddha.py`](assets_source/fighting
 ascends, his own body is no longer drawn. His armour and cape are hidden too (`BuddhaArmourMixin`,
 `BuddhaCapeMixin`). In their place he is drawn as the Monkey King made Buddha, a little larger than a
 man:
-- **Head:** golden fur, a heart-shaped face of bare skin ringed in red, glowing red-gold eyes, a short
-  muzzle, round ears and ruffs of fur.
+- **Head** (its own model at twice the detail, [`fighting_buddha_head.py`](assets_source/fighting_buddha_head.py)): a heart-shaped face of warm tan skin recessed in a frame of golden-brown fur (sideburns and cheek tufts standing proud), a heavy brow ridge drawn down in a frown casting the eyes into deep sockets, the Fiery Golden Eyes angled and burning (golden irises, dark pupils, a rim of fire), hollow cheeks under prominent cheekbones, a muzzle standing out from the face with a stepped nose bridge, flat nostrils, an upper lip and a smirk, a chin, and round shaded ears half in the fur.
 - **Crown:** the golden fillet, now a jewelled Buddha's crown of five lotus-petal plaques, with red
   silk ribbons flaring behind.
 - **Robe:** a crimson monk's robe with a crossed white collar and wide gold-hemmed sleeves, falling

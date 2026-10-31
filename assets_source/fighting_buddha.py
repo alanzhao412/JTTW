@@ -215,20 +215,7 @@ BUDDHA = mirrored([
     part('right_leg', 'root', (-1.9, 12, 0), (0, 0, 0), []),
 
     # ── the Monkey King's head ──
-    part('skull', 'head', (0, 0, 0), (0, 0, 0), [
-        (-4.4, -8.7, -4.2, 8.8, 8.8, 8.6, 'head'),
-        (-2.3, -4.0, -6.0, 4.6, 2.9, 2.0, 'muzzle'),
-        (-1.8, -1.15, -5.4, 3.6, 1.2, 1.4, 'jaw'),
-        (-0.8, -4.7, -6.35, 1.6, 1.0, 0.6, 'nose'),
-        (-3.9, -6.55, -4.95, 7.8, 1.15, 1.1, 'brow'),
-        (-3.2, -9.9, -2.4, 6.4, 1.4, 6.0, 'fur_crown'),
-        (-4.0, -8.6, 3.9, 8.0, 7.0, 1.4, 'fur_mane'),
-    ]),
-    part('right_eye', 'head', (-1.85, -5.1, -4.35), (0, 0.08, 0), [(-0.8, -0.45, -0.2, 1.6, 0.9, 0.35, 'eye')]),
-    part('right_ear', 'head', (-4.4, -4.9, -0.4), (0, -0.35, 0), [(-1.1, -1.5, -1.2, 1.1, 3.0, 2.4, 'ear')]),
-    part('right_ruff_0', 'head', (-3.9, -3.6, -3.2), (0.1, 0.2, 0.55), [(-0.7, 0, -0.9, 1.4, 3.6, 1.8, 'ruff')]),
-    part('right_ruff_1', 'head', (-4.2, -2.6, -1.8), (0.2, 0.3, 0.85), [(-0.7, 0, -0.9, 1.4, 3.4, 1.8, 'ruff')]),
-    part('right_ruff_2', 'head', (-4.0, -1.4, -0.4), (0.35, 0.2, 1.1), [(-0.6, 0, -0.8, 1.2, 3.0, 1.6, 'ruff_small')]),
+    # (the head itself, the Monkey King's face, is its own model: fighting_buddha_head.py)
     # the crown's band
     part('circlet', 'head', (0, 0, 0), (0, 0, 0), [(-4.95, -8.4, -4.75, 9.9, 1.5, 9.6, 'circlet')]),
     # its ribbons, flaring back from behind the ears, each in two lengths
@@ -709,3 +696,5 @@ if __name__ == '__main__':
     p.save('fighting_buddha')
     emit(BUDDHA, slots, JAVA)
     print('fighting buddha', len(BUDDHA), 'parts,', len(slots), 'boxes')
+    import fighting_buddha_head
+    fighting_buddha_head.generate(BuddhaPainter)

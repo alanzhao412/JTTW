@@ -162,6 +162,7 @@ public final class ClientInit {
         event.registerLayerDefinition(com.jttw.engine.client.renderer.WhiteElephantRenderer.TRUE_LAYER, com.jttw.engine.client.renderer.WhiteElephantRenderer::trueLayer);
         // the open world's yaoguai
         event.registerLayerDefinition(com.jttw.engine.client.renderer.FightingBuddhaLayer.LAYER, com.jttw.engine.client.renderer.FightingBuddhaLayer::layer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.FightingBuddhaLayer.HEAD_LAYER, com.jttw.engine.client.renderer.FightingBuddhaLayer::headLayer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.WildRenderers.GOBLIN_LAYER, com.jttw.engine.client.renderer.WildRenderers::goblinLayer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.WildRenderers.KOBOLD_LAYER, com.jttw.engine.client.renderer.WildRenderers::koboldLayer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.WildRenderers.WOLFMAN_LAYER, com.jttw.engine.client.renderer.WildRenderers::wolfmanLayer);
