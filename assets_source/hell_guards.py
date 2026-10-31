@@ -214,9 +214,11 @@ def ox_head():
             (-1.6, -6.9, -5.95, 3.2, 2.4, 0.6, 'plaque'),
             (-5.4, -2.8, -5.0, 1.8, 4.2, 4.8, 'ox_cheek'), (3.6, -2.8, -5.0, 1.8, 4.2, 4.8, 'ox_cheek'),
         ]),
-        # the long face, sloping down from under the brow: the bridge, the muzzle narrowing to the nose
+        # the long face, sloping down from under the brow: the bridge, the bony crest down each side of it from
+        # under the eye toward the muzzle, the muzzle narrowing to the nose
         part('face', 'head', (0, -1.0, -4.6), (0.3, 0, 0), [
             (-3.7, -3.4, -4.4, 7.4, 3.8, 4.8, 'ox_face'),
+            (-3.95, -2.75, -4.2, 0.45, 0.8, 3.9, 'ox_crest'), (3.5, -2.75, -4.2, 0.45, 0.8, 3.9, 'ox_crest'),
             (-1.5, -3.85, -4.6, 3.0, 0.6, 4.4, 'ox_ridge'),
             (-3.0, -3.7, -1.6, 6.0, 0.5, 2.0, 'ox_whorl'),
             (-3.4, -2.9, -7.0, 6.8, 3.7, 3.0, 'ox_muzzle'),
@@ -225,8 +227,9 @@ def ox_head():
             (-3.3, 0.6, -7.5, 6.6, 1.0, 3.6, 'ox_lip'),
             (-2.6, 1.3, -7.1, 0.8, 1.9, 0.9, 'fang'), (1.8, 1.3, -7.1, 0.8, 1.9, 0.9, 'fang'),
         ]),
+        # the jaw: its top rising into the lip, so that only a short dark line of the mouth shows at rest
         part('jaw', 'head', (0, -1.0, -4.6), (0.3, 0, 0), [
-            (-3.4, 1.6, -6.8, 6.8, 1.8, 6.0, 'ox_jaw'),
+            (-3.3, 1.25, -6.8, 6.6, 2.15, 6.0, 'ox_jaw'),
             (-2.6, 3.0, -6.5, 5.2, 1.1, 2.6, 'ox_chin')]),
         part('nose_ring', 'face', (0, 0.2, -8.0), (-0.45, 0, 0), [
             (-3.1, 0, -0.6, 1.2, 5, 1.2, 'ring'), (1.9, 0, -0.6, 1.2, 5, 1.2, 'ring'),
@@ -1187,14 +1190,31 @@ def guard_painter(ox, captain):
             for i, j, xy in each(f['top']):
                 d = abs(i + 0.5 - fw / 2) / (fw / 2)
                 p.px(xy, noisy(p, tone(HIDE, 1.2 - 0.7 * d + (0.12 if i % 3 == 0 else 0) - (0.25 if d < 0.12 else 0)), 3))
-            for s in ('right', 'left'):
-                fx, fy, fw, fh = f[s]
+            for s in ('right', 'left'):                           # its sides: hair lying back along the face in streaks,
+                fx, fy, fw, fh = f[s]                             # lit along the bridge's edge, a hollow under the crest,
+                rows = [p.rnd.uniform(-0.18, 0.18) for _ in range(fh)]   # the hide greying toward the muzzle, dark under the jaw line
                 for i, j, xy in each(f[s]):
-                    if j == 1 and i % 4 != 0:
-                        p.px(xy, tone(HIDE, 1.5))                 # the ridge of the face's bone, catching the light
-                    elif j > fh * 0.55:
-                        p.px(xy, noisy(p, tone(HIDE, 0.55), 3))
+                    tn = i / max(1, fw - 1) if s == 'right' else 1 - i / max(1, fw - 1)   # 0 at its back .. 1 toward the nose
+                    tj = j / max(1, fh - 1)
+                    t = 1.15 - 0.75 * tj + rows[j] + (0.18 if (i + 2 * j) % 5 == 0 else 0) - (0.2 if (i + j) % 7 == 0 else 0)
+                    if j <= 1:
+                        t = 1.55 - 0.3 * j if i % 4 != 0 else 1.2   # the edge of the bridge, catching the light
+                    elif abs(tj - 0.5) < 0.12:
+                        t -= 0.35                                 # the hollow under the crest
+                    col = tone(HIDE, t)
+                    if tn > 0.55:                                 # greying toward the muzzle
+                        col = mixc(col, tone(OX_MUZZLE, t * 0.9), (tn - 0.55) / 0.45 * 0.5)
+                    p.px(xy, noisy(p, k(col, LIGHTS[s]), 3))
             p.face(f['bottom'], tone(HIDE, 0.2), 1.0, noise=2)
+        if style == 'ox_crest':                                   # the bony crest down the face's side: lit along its top, its hair laid back
+            fur(p, f, HIDE, light=1.15)
+            for s_ in ('top', 'right', 'left'):
+                fx, fy, fw, fh = f[s_]
+                for i, j, xy in each(f[s_]):
+                    up = (s_ == 'top') or j == 0
+                    t = (1.75 if up else 1.05) - (0.25 if i % 3 == 0 else 0)
+                    p.px(xy, noisy(p, k(tone(HIDE, t), LIGHTS[s_]), 3))
+            p.face(f['bottom'], tone(HIDE, 0.15), 1.0, noise=2)
         if style == 'ox_ridge':                                   # the bone of the face's bridge, standing up down its middle: lit along its crest
             fur(p, f, HIDE)
             for s_ in ('top', 'front'):
@@ -1225,7 +1245,7 @@ def guard_painter(ox, captain):
                         a = min(1.0, (t - 0.45) / 0.4)
                         col = mixc(tone(HIDE, 1.0), tone(OX_MUZZLE, 1.05 - 0.35 * j / max(1, fh - 1)), a)
                         p.px(xy, noisy(p, k(col, LIGHTS[s]), 4))
-            p.face(f['bottom'], (60, 26, 26), 1.0, noise=3)
+            p.face(f['bottom'], tone(HIDE, 0.25), 1.0, noise=3)
         if style == 'ox_lip':                                     # the upper lip: pale grey muzzle, whiskered, its edge dark; the mouth red under it
             fur(p, f, OX_MUZZLE, streak=False)
             for s in ('front', 'right', 'left'):
@@ -1235,7 +1255,7 @@ def guard_painter(ox, captain):
                         p.px(xy, (40, 24, 22))
                     elif (i * 7 + j * 5) % 11 == 0:
                         p.px(xy, tone(OX_MUZZLE, 0.4))           # whisker pits
-            p.face(f['bottom'], (120, 30, 34), 1.0, noise=4)
+            p.face(f['bottom'], (46, 22, 22), 1.0, noise=3)          # the mouth's roof: dark, so a parted mouth is a line of shadow
         if style == 'ox_chin':                                    # the chin: pale muzzle, a dark lip along its top, a tuft beneath
             fur(p, f, OX_MUZZLE, light=0.9)
             for s in ('front', 'right', 'left'):
@@ -1267,11 +1287,15 @@ def guard_painter(ox, captain):
                 p.px((fx + x, fy + y), (200, 186, 194))
         if style == 'ox_jaw':
             fur(p, f, OX_MUZZLE, light=0.9)
-            fx, fy, fw, fh = f['top']
-            p.face((fx, fy, fw, fh), (120, 30, 34), 1.0, noise=4)
-            fx, fy, fw, fh = f['front']
-            for i in range(fw):
-                p.px((fx + i, fy), (60, 26, 26))
+            fx, fy, fw, fh = f['top']                             # within: a dark mouth, its tongue red only toward the front
+            for i, j, xy in each(f['top']):
+                front = j / max(1, fh - 1)                     # 0 at its back .. 1 at its front
+                edge = i in (0, fw - 1)
+                p.px(xy, noisy(p, (46, 22, 22) if edge or front < 0.5 else mixc((70, 26, 28), (112, 34, 38), (front - 0.5) * 2), 3))
+            for s_ in ('front', 'right', 'left'):                 # its upper edge, the lip line: dark
+                fx, fy, fw, fh = f[s_]
+                for i in range(fw):
+                    p.px((fx + i, fy), (40, 24, 22))
         if style == 'fang':
             for s, r in f.items():
                 p.face(r, IVORY, LIGHTS[s], noise=3, fall=0.3)

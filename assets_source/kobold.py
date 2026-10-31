@@ -4,9 +4,9 @@ is written into WildRenderers' koboldLayer() between its GENERATED markers, its 
 (kobold_glow.png).
 
 A lizard warrior as tall as a man that mines the dark under the mountains, standing on heavy
-digitigrade legs, a thick tail tapering behind it to the ground. A crocodile's head: a long snout,
-teeth showing all along its jaw line, raised nostrils at its tip, a bony brow ridge over each
-slit-pupilled amber eye, a crest of spines from its crown down its neck, its back and its tail.
+digitigrade legs, a thick tail tapering behind it to the ground. A lizard's head, broad and flat: a long, low snout,
+single teeth showing all along its jaw line, raised nostrils at its tip, a bony brow ridge over each
+slit-pupilled amber eye set out on the head's sides, a crest of spines from its crown down its neck, its back and its tail.
 Healthy, glossy scales in clean rows, each lit at its upper edge and shadowed at its lower one: deep
 olive-green over its back and limbs, shading to a pale cream-yellow belly of broad scutes; rows of
 bony osteoderm plates down its back and tail; finer scales on its head. Clawed hands and feet.
@@ -65,12 +65,24 @@ def back_spines(y0, y1, z, n, h, style='spine'):
     return out
 
 
-def teeth(x, y, z0, length, up):
-    """A row of teeth along each side of a jaw's edge (x the right side's; the left's mirrors it), as thin
-    strips (cut into teeth on the skin)."""
-    st = 'teeth_up' if up else 'teeth_down'
-    y0 = y - (0.8 if up else 0)
-    return [(x, y0, z0, 0.3, 0.8, length, st), (-x - 0.3, y0, z0, 0.3, 0.8, length, st)]
+def teeth(lip, y, segs, up, phase=0.0, every=1.15, size=(0.42, 0.75, 0.42)):
+    """Single teeth along each side of a jaw's edge, each its own small peg with a gap of the jaw between
+    it and the next, so at any distance they read as teeth, not a pale band. `segs` are the jaw's lengths
+    along which they stand, (z from, z to, half its breadth there); `lip` how far in from its side they
+    stand; `y` the jaw's edge they hang from (the upper) or rise from (the lower). Upper and lower
+    teeth are staggered by `phase` so they interlock."""
+    tw, th, td = size
+    st = 'fang_up' if up else 'fang_down'
+    out = []
+    for z0, z1, half in segs:
+        z = z0 - phase
+        while z - td > z1 + 0.05:
+            x = half - lip - tw
+            y0 = y - th if up else y
+            out.append((x, y0, z - td, tw, th, td, st))
+            out.append((-x - tw, y0, z - td, tw, th, td, st))
+            z -= every
+    return out
 
 
 KOBOLD = mirrored([
@@ -135,35 +147,32 @@ KOBOLD = mirrored([
         (-0.7, -0.7, 0, 1.4, 1.4, 4.4, 'tail4')]),
 
     # the head: a crocodile's
-    # the head: a crocodile's, narrow and wedge-shaped from every side. A rounded cranium, a step narrower
-    # at its crown and stepping down behind to the neck, the bony brows raised over the eyes at its top
-    # corners; broad at the jaws' hinge, the long snout tapering in three lengths to its tip, the nostrils
-    # raised on it; the jaw line under it notched with teeth
+    # the head: a lizard's, wide and flat. A broad cranium, widest at the jaws' hinge, a step narrower at
+    # its crown and stepping down behind to the neck; the eyes set out on its sides, each bulging under a
+    # bony brow; the snout lower and flatter than the cranium, wider than it is deep, tapering in three
+    # lengths to a blunt, broad tip, the nostrils raised on it; the lower jaw a little narrower, so the
+    # upper teeth, single pegs with gaps between them, hang outside it; the lower stand between them
     part('head', 'neck', (0, -3.0, -0.6), HEAD, [
-        (-2.15, -4.0, -2.8, 4.3, 3.9, 4.8, 'cranium'),
-        (-1.55, -4.7, -2.2, 3.1, 0.8, 3.8, 'crown'),
-        (-1.75, -3.6, 1.9, 3.5, 3.0, 1.1, 'occiput'),
-        (-1.85, -3.35, -6.4, 3.7, 2.35, 3.7, 'snout'),
-        (-1.4, -3.15, -8.8, 2.8, 2.1, 2.5, 'snoutmid'),
-        (-1.05, -2.95, -10.6, 2.1, 1.8, 1.9, 'snouttip'),
-        (-0.85, -3.5, -10.3, 1.7, 0.6, 1.3, 'nostrils'),
-        (-0.3, -5.6, -1.4, 0.6, 1.2, 1.4, 'spine_small'),
-        (-0.3, -5.0, 0.4, 0.6, 1.4, 1.6, 'spine'),
-        *teeth(-1.95, -1.0, -6.2, 3.5, False),
-        *teeth(-1.5, -1.05, -8.6, 2.3, False),
-        *teeth(-1.15, -1.15, -10.4, 1.7, False),
+        (-2.5, -3.9, -2.6, 5.0, 3.6, 4.4, 'cranium'),
+        (-1.6, -4.55, -2.0, 3.2, 0.7, 3.4, 'crown'),
+        (-1.85, -3.5, 1.8, 3.7, 2.9, 1.1, 'occiput'),
+        (-2.25, -2.7, -6.2, 4.5, 1.7, 3.6, 'snout'),
+        (-1.65, -2.4, -8.5, 3.3, 1.4, 2.3, 'snoutmid'),
+        (-1.1, -2.1, -10.2, 2.2, 1.1, 1.7, 'snouttip'),
+        (-0.8, -2.45, -10.0, 1.6, 0.4, 1.0, 'nostrils'),
+        (-0.3, -5.45, -1.4, 0.6, 1.2, 1.4, 'spine_small'),
+        (-0.3, -4.9, 0.4, 0.6, 1.4, 1.6, 'spine'),
+        *teeth(0.08, -1.0, ((-3.0, -6.2, 2.25), (-6.2, -8.5, 1.65), (-8.5, -10.0, 1.1)), False),
     ]),
     part('jaw', 'head', (0, -0.9, -2.4), (0.05, 0, 0), [
-        (-1.95, 0, -4.0, 3.9, 1.35, 4.6, 'jaw'),
-        (-1.4, 0.05, -6.4, 2.8, 1.2, 2.5, 'jawmid'),
-        (-1.0, 0.1, -8.2, 2.0, 1.05, 1.9, 'jawtip'),
-        (-1.6, 1.2, -3.8, 3.2, 1.2, 4.0, 'throat'),
-        *teeth(-1.8, 0.1, -3.9, 3.5, True),
-        *teeth(-1.3, 0.15, -6.3, 2.3, True),
-        *teeth(-0.9, 0.2, -8.1, 1.7, True)]),
-    part('right_jowl', 'head', (-2.1, -1.2, -1.4), (0, 0.18, -0.12), [(-0.7, -0.9, -1.8, 0.9, 1.9, 3.4, 'jowl')]),
-    part('right_brow', 'head', (-1.25, -4.15, -2.3), (0.12, 0.08, 0.4), [(-0.85, -0.6, -1.6, 1.5, 1.1, 2.9, 'brow')]),
-    part('right_eye', 'head', (-2.1, -3.45, -2.0), (0, 0.15, 0.2), [(-0.3, -0.55, -0.85, 0.5, 1.1, 1.7, 'eye')]),
+        (-1.75, 0, -4.0, 3.5, 1.1, 4.6, 'jaw'),
+        (-1.25, 0.05, -6.2, 2.5, 0.95, 2.3, 'jawmid'),
+        (-0.8, 0.1, -7.8, 1.6, 0.8, 1.7, 'jawtip'),
+        (-1.5, 1.0, -3.8, 3.0, 1.1, 4.0, 'throat'),
+        *teeth(0.12, 0.0, ((-0.6, -4.0, 1.75), (-4.0, -6.2, 1.25), (-6.2, -7.6, 0.8)), True, phase=0.55)]),
+    part('right_jowl', 'head', (-2.45, -1.2, -1.2), (0, 0.18, -0.1), [(-0.7, -0.9, -1.8, 0.9, 1.9, 3.4, 'jowl')]),
+    part('right_brow', 'head', (-2.25, -3.85, -2.0), (0.1, 0.3, 0.3), [(-0.95, -0.55, -1.6, 1.6, 0.9, 2.8, 'brow')]),
+    part('right_eye', 'head', (-2.7, -3.0, -2.1), (0, 0.4, 0.1), [(-0.45, -0.65, -0.9, 0.7, 1.3, 1.8, 'eye')]),
 
     # the arms: a scaled upper arm, a forearm in a leather bracer, a clawed hand
     part('right_arm', 'body', (-4.5, -12.8, 0.1), ARM, [
@@ -439,19 +448,16 @@ def paint_kobold(p, style, f, dims):
             for j in range(1, fh - 1):
                 p.px((fx + x, fy + j), (16, 14, 12))
 
-    if style in ('teeth_down', 'teeth_up'):                       # teeth all along its jaw line, interlocking
-        w.cut_all(p, f, ('top', 'bottom', 'front', 'back'))
-        for s in ('right', 'left'):
-            fx, fy, fw, fh = f[s]
-            for i, j, xy in w.each(p, f[s]):
-                u = i if s == 'left' else fw - 1 - i
-                ph = (u + (2 if style == 'teeth_up' else 0)) % 4    # a tooth two wide, a gap two wide: they interlock
-                tip = (j == 0) if style == 'teeth_up' else (j >= fh - 1)
-                if ph >= 2 or (ph == 1 and tip):
-                    p.clear(xy)
-                else:
-                    p.px(xy, k(mix(TOOTH, (200, 186, 150), 0.4 * (j / max(1, fh - 1) if style == 'teeth_down' else 1 - j / max(1, fh - 1))), w.LIGHT[s]))
-            p.clear((fx, fy)) if False else None
+    if style in ('fang_down', 'fang_up'):                         # a single tooth: ivory, yellowing to its root, its tip pale
+        for s_ in f:
+            fx, fy, fw, fh = f[s_]
+            for i, j, xy in w.each(p, f[s_]):
+                t = j / max(1, fh - 1)
+                root = 1 - t if style == 'fang_down' else t       # 0 at its tip .. 1 at its root
+                c = mix(TOOTH, (176, 160, 118), 0.55 * root)
+                if s_ in ('right', 'left', 'front', 'back') and i == fw - 1:
+                    c = k(c, 0.8)                                 # its edge in shadow, so each stands apart
+                p.px(xy, k(c, w.LIGHT[s_]))
 
     if style in ('jaw', 'jawmid', 'jawtip'):                                # the lower jaw: olive on its sides, cream beneath; its mouth within
         for s in f:
@@ -485,8 +491,8 @@ def paint_kobold(p, style, f, dims):
 
     if style == 'eye':                                            # an amber eye, a black slit pupil, set in a dark lid
         w.flat(p, f, k(DORSAL, 0.4), noise=1)
-        for s in ('right', 'left'):
-            fx, fy, fw, fh = f[s]                                 # 3x2
+        for s in ('right', 'left', 'front'):                      # turned a little forward, so it shows from before it too
+            fx, fy, fw, fh = f[s]
             for i, j, xy in w.each(p, f[s]):
                 p.lit(xy, mix((255, 226, 120), EYE, j / max(1, fh - 1)))
             px_ = fx + fw // 2

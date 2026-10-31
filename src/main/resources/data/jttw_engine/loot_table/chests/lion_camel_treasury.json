@@ -6,7 +6,12 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "jttw_engine:yin_yang_vase"
+          "name": "jttw_engine:yin_yang_vase",
+          "conditions": [
+            {
+              "condition": "jttw_engine:one_vase"
+            }
+          ]
         }
       ]
     },

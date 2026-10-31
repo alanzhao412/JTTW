@@ -1104,8 +1104,13 @@ Boy's Fire Cloud Cave on Mount Haohao (火云洞, chapters 40–42), in
 - **The outposts** (`RangeShape.outposts`, laid by `FlameSeamsFeature`): watchtowers of red brick in
   rings of black stone, a signal fire smoking on top and braziers round them, one tried every 72
   blocks over the range (some 20–35 a region) and three on the ravine's rims looking down on the way
-  to the door. Each has its band, put there once and kept: a captain and three or four imps and
-  brutes; about one band in three is a patrol that roams 40 blocks round its tower. The mountains'
+  to the door. Each stands on the land, never sunk in it: its paving is seated on the ground round
+  it (the range's height as it will be raised, sampled at its middle and in rings 3, 6 and 9 blocks
+  out, and the level seven in ten of them lie at or under), a plinth of black stone under it down to
+  the ground wherever the ground falls away, the ground over it cut away and the ground round it
+  cut back 8 blocks out, rising a block for each block out (`FlameSeamsFeature.seat`,
+  `layOutpost`). Each has its band, put there once and kept, on its paving: a captain and three or
+  four imps and brutes; about one band in three is a patrol that roams 40 blocks round its tower. The mountains'
   own creatures come in bigger packs than before (imps 3–5, brutes 1–2) and one in eight is a captain.
 - **The heat** (`FireMountain`, `BurningEarthBlock`): lit burning earth scorches whatever stands on
   it once a second, **4% of its health** (magma's hot-floor damage, so armour softens it) and sets it
@@ -1482,7 +1487,10 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   there already, the city's is gone (`DemonKingEntity.goDownToHisThrone`). A cave laid half on ground
   made before is broken where the old ground is (it can be dug through: only the blueprint's own
   blocks are proof against picks), never sealed. A world whose city was made before keeps its old
-  treasury chest on the hall's dais, so there the throne room's makes a second vase.
+  treasury chest on the hall's dais, and the vase is that one's: the throne room's chest then holds
+  the rest of the hoard but no second vase (`LionTreasury`: the vase's entry is under the
+  `jttw_engine:one_vase` condition, which looks for the old chest whenever a chest in the cave is
+  first opened).
 - **Creatures** (`LionCamelMonster`: level 89, captains 96, any light, in numbers): **Lion-Demons**
   (狮子精, the Azure Lion's kin: 10 hits, sabre cuts of 11%; they pounce from 4–11 blocks for 12% and
   a stagger; strike one and the pride turns), **Elephant-Demons** (象精, the White Elephant's
@@ -1857,7 +1865,7 @@ and 12% (its slam three quarters of that).
 | Kind | Levels | Looks | Ways | Where, when | Weight (below 20) | Leaves |
 |---|---|---|---|---|---|---|
 | Goblin (山魈) | 2–8 | a hunched, long-limbed mountain demon as tall as a man: soot-indigo skin, a wild white mane, a great horn and a broken one, tusks and a gaping fanged mouth, amber eyes under a heavy brow, bone ornaments, torn talismans worn as trophies, dark rags, a jagged iron chopper | quick; packs of 3–5; falls back (crouched, hissing, claws up, eyes on its foe) when hurt below 30% or with none of its pack about it, and comes on again once the pack is round it | hills, forests, plains; on the surface, by night | 1x | copper cash, flint, paper; now and then a string of cash |
-| Kobold (穴居蜥妖) | 3–10 | a man-tall lizard warrior and miner: a crocodile's head with teeth all along its jaws, slit-pupilled eyes, glossy olive scales over a cream belly of scutes, bony plates and a crest of spines down its back and thick tail; a leather harness, a scrap-iron pauldron, a pick, a satchel of ore and a burning lantern at its belt | swarms of 3–6; raises the alarm (every kobold within 16 blocks comes); its pick costs a foe its footing; armoured | under any dry land, in the caves, well below the sea | 1x | ore (copper, iron, coal), copper cash; now and then raw gold, rarely a diamond |
+| Kobold (穴居蜥妖) | 3–10 | a man-tall lizard warrior and miner: a lizard's head, broad and flat, its long snout low, single teeth along its jaws, slit-pupilled eyes set on its sides, glossy olive scales over a cream belly of scutes, bony plates and a crest of spines down its back and thick tail; a leather harness, a scrap-iron pauldron, a pick, a satchel of ore and a burning lantern at its belt | swarms of 3–6; raises the alarm (every kobold within 16 blocks comes); its pick costs a foe its footing; armoured | under any dry land, in the caves, well below the sea | 1x | ore (copper, iron, coal), copper cash; now and then raw gold, rarely a diamond |
 | Wolfman (狼妖) | 10–17 | a tall wolf soldier in black lamellae laced red, a war cloak and a back banner, a long glaive | packs of 2–4; howls when it sights a foe and calls every wolfman within 32 blocks | forests and taiga; on the surface, by night | 2x | wolf pelts (2 leather each), bones, iron nuggets; now and then a string of cash |
 | Ogre (山夜叉) | 15–20 | a red mountain yaksha over 3 blocks tall, horns and tusks, a tiger-skin loincloth, spiked iron bracers, a necklace of skulls, an iron wolf-tooth club | alone, rare; slow, every blow heavy and throwing its foe back, hardly moved itself; now and then heaves its club up and slams the ground (everything within 4 blocks hurt and flung) | mountains and swamps; on the surface, by night | 5x | tusks (bone meal), iron, leather, bones; now and then a tael of silver |
 
