@@ -45,7 +45,7 @@ final class FlowerFruitScenes {
 
     private static final int X0 = -8, X1 = 8, Z0 = 3, Z1 = 16;
     /** Where the falls and the cave are laid: the basin's floor this far up and north of the stage. */
-    private static final int CAVE_Z = -125, CAVE_UP = 40;
+    private static final int CAVE_X = 92, CAVE_Z = -20, CAVE_UP = 40;
     private static boolean patch, cave;
 
     private static int ground(ServerPlayer p) {
@@ -124,7 +124,7 @@ final class FlowerFruitScenes {
 
     /** A camera in the laid cave: (x, y, z) from the basin's middle at its floor, looking at (lx, ly, lz). */
     private static double[] at(double x, double y, double z, double lx, double ly, double lz) {
-        return new double[]{x + 0.5, CAVE_UP + y, CAVE_Z + z + 0.5, lx + 0.5, CAVE_UP + ly, CAVE_Z + lz + 0.5};
+        return new double[]{CAVE_X + x + 0.5, CAVE_UP + y, CAVE_Z + z + 0.5, CAVE_X + lx + 0.5, CAVE_UP + ly, CAVE_Z + lz + 0.5};
     }
 
     /** One creature, alone, seen from the front, the side, the back and close at its face (its height {@code tall}). */
@@ -216,7 +216,7 @@ final class FlowerFruitScenes {
                 cave("ff_iron_bridge", at(-12, 6, CavePlan.BRIDGE_Z1, 0, 0, (CavePlan.CHASM_Z0 + CavePlan.CHASM_Z1) / 2.0)),
                 cave("ff_stone_gate", at(0, 6, CavePlan.BRIDGE_Z0 + 2, 0, 11, CavePlan.GATE_Z)),
                 cave("ff_tablet", at(0, 12, CavePlan.GATE_Z + 6, 0, 13, CavePlan.GATE_Z)),
-                cave("ff_great_hall", at(0, 12, CavePlan.COURT_Z0 - 2, 0, 4, -20)),
+                cave("ff_great_hall", at(-7, 9, CavePlan.COURT_Z0 - 3, 0, 3, -22)),
                 cave("ff_old_throne", at(5, 4, -10, 0, 3, CavePlan.DAIS_Z0 + 2)),
                 cave("ff_pilgrims_in_hall", at(-4, 4, -2, 0, 2, -14)),
                 cave("ff_dormitory", at(-CavePlan.SIDE_X + 8, 5, CavePlan.SIDE_Z + 14, -CavePlan.SIDE_X, 1, CavePlan.SIDE_Z)),
@@ -240,7 +240,7 @@ final class FlowerFruitScenes {
         int g = ground(p);
         for (int lx = -80; lx <= 80; lx++) {
             for (int lz = CavePlan.Z_MIN - 6; lz <= IslandShape.BASIN_END - 20; lz++) {
-                int x = lx, z = CAVE_Z + lz;
+                int x = CAVE_X + lx, z = CAVE_Z + lz;
                 int top = (int) Math.round(IslandShape.falls(lx, lz, IslandShape.BASIN_Y + 42));
                 boolean pool = IslandShape.pool(lx, lz);
                 if (pool) top = IslandShape.BASIN_Y - IslandShape.poolDepth(lx, lz);
@@ -277,13 +277,13 @@ final class FlowerFruitScenes {
             if (n == 0) continue;
             int top = base + (int) Math.round(IslandShape.falls(lx, IslandShape.CLIFF_Z, IslandShape.BASIN_Y + 42)) - 1;
             for (int y = top; y > top - n && y > base + IslandShape.BASIN_Y + 1; y--) {
-                if (!level.isEmptyBlock(at.set(lx, y, z))) break;
+                if (!level.isEmptyBlock(at.set(CAVE_X + lx, y, z))) break;
                 level.setBlock(at, Blocks.VINE.defaultBlockState().setValue(net.minecraft.world.level.block.VineBlock.NORTH, true), Block.UPDATE_CLIENTS);
             }
         }
         int floor = base + IslandShape.BASIN_Y + 1;
         for (CavePlan.Post post : CavePlan.POSTS) {
-            double x = post.x() + 0.5, z = CAVE_Z + post.z() + 0.5, y = floor + CavePlan.floor(post.x(), post.z());
+            double x = CAVE_X + post.x() + 0.5, z = CAVE_Z + post.z() + 0.5, y = floor + CavePlan.floor(post.x(), post.z());
             if (post.kind() == CavePlan.PILGRIM) {
                 pilgrim(p, post.variant(), x, y, z, 0f);
                 continue;
@@ -297,10 +297,10 @@ final class FlowerFruitScenes {
             if (m != null) m.become(post.level(), post.captain());
         }
         for (int[] l : CavePlan.LUGGAGE) {
-            level.setBlock(at.set(l[0], floor, CAVE_Z + l[1]), Blocks.CHEST.defaultBlockState(), Block.UPDATE_CLIENTS);
+            level.setBlock(at.set(CAVE_X + l[0], floor, CAVE_Z + l[1]), Blocks.CHEST.defaultBlockState(), Block.UPDATE_CLIENTS);
         }
         for (CavePlan.Sign sign : CavePlan.SIGNS) {
-            BlockPos s = new BlockPos(sign.x(), base + IslandShape.BASIN_Y + sign.y(), CAVE_Z + sign.z());
+            BlockPos s = new BlockPos(CAVE_X + sign.x(), base + IslandShape.BASIN_Y + sign.y(), CAVE_Z + sign.z());
             level.setBlock(s, Blocks.DARK_OAK_WALL_SIGN.defaultBlockState().setValue(net.minecraft.world.level.block.WallSignBlock.FACING, sign.facing()), Block.UPDATE_CLIENTS);
             if (level.getBlockEntity(s) instanceof net.minecraft.world.level.block.entity.SignBlockEntity be) {
                 var text = new net.minecraft.world.level.block.entity.SignText();
@@ -308,7 +308,7 @@ final class FlowerFruitScenes {
                 be.setText(text.setColor(net.minecraft.world.item.DyeColor.ORANGE).setHasGlowingText(true), true);
             }
         }
-        macaque(p, CavePlan.BOSS_X + 0.5, floor, CAVE_Z + CavePlan.BOSS_Z + 0.5, 0f);
+        macaque(p, CAVE_X + CavePlan.BOSS_X + 0.5, floor, CAVE_Z + CavePlan.BOSS_Z + 0.5, 0f);
         cave = true;
     }
 

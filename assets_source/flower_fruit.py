@@ -972,6 +972,14 @@ MACAQUE = mirrored(MACAQUE + monkey_head('chest', (0, -9.0, -0.9), (-0.05, 0, 0)
     part('sway_cloak', 'chest', (0, -8.6, 2.8), (0.16, 0, 0), [(-4.6, 0, -0.3, 9.2, 15.0, 0.6, 'm_cloak')]),
     part('right_bracer', 'right_forearm', (0, 2.4, 0), (0, 0, 0), [(-1.55, 0, -1.55, 3.1, 4.2, 3.1, 'm_bracer')]),
     part('right_bootcuff', 'right_shin', (0, 0.8, 0), (0, 0, 0), [(-1.7, 0, -1.7, 3.4, 1.4, 3.4, 'm_cuff')]),
+    # a ruff of his golden fur at the neck over the mail, the red undersleeves, gold knee guards, the belt's tassels
+    part('neckruff', 'chest', (0, -8.6, 0), (0, 0, 0), [(-3.6, -1.4, -2.9, 7.2, 2.2, 5.8, 'm_ruff')]),
+    part('right_undersleeve', 'right_arm', (0, 2.4, 0), (0, 0, 0), [(-1.55, 0, -1.55, 3.1, 3.6, 3.1, 'm_sleeve')]),
+    part('right_kneeguard', 'right_shin', (0, -0.6, -1.3), (-0.12, 0, 0), [(-1.6, -1.2, -0.7, 3.2, 2.8, 1.0, 'm_knee')]),
+    part('sway_belttassel_r', 'belt', (-2.2, 0.8, -2.7), (-0.05, 0, 0.05), [(-0.45, 0, -0.3, 0.9, 4.6, 0.6, 'm_tassel')]),
+    part('sway_belttassel_l', 'belt', (2.2, 0.8, -2.7), (-0.05, 0, -0.05), [(-0.45, 0, -0.3, 0.9, 4.6, 0.6, 'm_tassel')]),
+    part('right_strap', 'chest', (-1.8, -8.4, -2.6), (0, 0, -0.42), [(-0.5, 0, -0.35, 1.0, 9.2, 0.6, 'm_strap')]),
+    part('right_plume_end', 'right_plume_tip', (0, -8.8, 0), (-0.55, 0, -0.08), [(-0.25, -6.0, -0.25, 0.5, 6.0, 0.5, 'm_plume')]),
 ])
 MACAQUE += tail('body', (0, -1.6, 2.3), 5, 1.6, 0.9, 3.0, 0.24, 'm_tail', start=(1.2, 0, 0))
 # the iron staff, gold-banded at both ends, held at his right side, upright
@@ -1083,6 +1091,20 @@ def paint_macaque(p, style, f, dims):
                 fx, fy, fw, fh = f[s]
                 for i in range(0, fw, 3):
                     p.px((fx + i, fy + fh // 2), GOLD)
+    if style == 'm_ruff':
+        tufted(p, f, MAC_TIP, MAC_FUR, (214, 176, 112), depth=2, every=2)
+    if style == 'm_sleeve':
+        cloth(p, f, RED, fold=3)
+    if style == 'm_knee':
+        gold(p, f)
+        fx, fy, fw, fh = f['front']
+        w.disc(p, fx + fw / 2, fy + fh / 2, 1.0, (200, 50, 40))
+    if style == 'm_tassel':
+        pelt(p, f, (200, 30, 26), (110, 12, 12), (240, 90, 60))
+        for s_ in S:
+            w.tufts(p, f[s_], depth=2, every=2)
+    if style == 'm_strap':
+        w.leather(p, f, RED_DEEP, stitch=GOLD)
     if style == 'm_cuff':
         tufted(p, f, MAC_TIP, MAC_FUR, depth=1, every=2)
     if style == 'm_bracer':

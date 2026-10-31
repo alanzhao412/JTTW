@@ -462,10 +462,13 @@ public final class CavePlan {
             double d = Math.hypot(dx - px, dz - pz);
             if (d <= 1.6) {
                 if (dy == ceil - 8 + fl) return s(Blocks.GOLD_BLOCK);
+                if (dy == 4 || dy == 11) return s(Blocks.SHROOMLIGHT);              // bands of light round each pillar
                 return dy % 6 == 0 ? s(Blocks.GILDED_BLACKSTONE) : s(Blocks.POLISHED_BLACKSTONE_BRICKS);
             }
             if (d <= 2.6 && dy == 1 && ((dx - px + dz - pz) % 2 == 0)) return s(Blocks.SOUL_CAMPFIRE);
         }
+        // braziers either side of his throne's steps
+        if (Math.abs(dx) == 6 && dz == SANCTUM_THRONE_Z - SANCTUM_Z + 6) return dy == 1 ? s(Blocks.GILDED_BLACKSTONE) : dy == 2 ? s(Blocks.CAMPFIRE) : null;
         // torn yellow banners behind his throne, on the wall
         if (dz == SANCTUM_THRONE_Z - SANCTUM_Z - 2 && Math.abs(dx) >= 6 && Math.abs(dx) <= 10 && Math.abs(dx) % 2 == 0 && dy >= 4 && dy <= 9) {
             return dy == 9 ? s(Blocks.GOLD_BLOCK) : (dy + dx) % 4 == 0 ? s(Blocks.ORANGE_WOOL) : s(Blocks.YELLOW_WOOL);
