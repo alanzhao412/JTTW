@@ -314,6 +314,21 @@ public final class Zones {
     public static final Zone KUNLUN = Zone.place(KUNLUN_BIOME,
             TagKey.create(Registries.BIOME, id("kunlun_hosts")), ZoneLayout.KUNLUN, Vertical.WHOLE_COLUMN).hostSampledAt(256);
 
+    public static final ResourceKey<Biome> FLOWER_FRUIT_BIOME = ResourceKey.create(Registries.BIOME, id("flower_fruit_mountain"));
+
+    /**
+     * Levels 20-30, White Bone Ridge's first band too: Flower-Fruit Mountain (花果山) and the Water
+     * Curtain Cave (水帘洞), the Monkey King's old kingdom, an island raised out of the sea (ocean,
+     * the whole column, its host judged just under the waves), held by the Six-Eared Macaque
+     * (六耳猕猴, chapters 57-58), his monkey army and his fake pilgrims. The Macaque himself is far
+     * past the band: a level-120 superboss, an optional fight in his own sanctum. Its monkeys know
+     * the true Monkey King: they spare a Wukong player ({@link ZoneAllies#WUKONG}); the fake
+     * pilgrims and the Macaque do not. It keeps clear of every zone before it.
+     */
+    public static final Zone FLOWER_FRUIT = Zone.overworld(FLOWER_FRUIT_BIOME,
+            TagKey.create(Registries.BIOME, id("flower_fruit_mountain_hosts")), ZoneLayout.FLOWER_FRUIT, Vertical.WHOLE_COLUMN,
+            20, 30, 80).hostSampledAt(60).alliedTo(ZoneAllies.WUKONG);
+
     public static final ResourceKey<Biome> SPIDER_CAVE_BIOME = ResourceKey.create(Registries.BIOME, id("silk_web_ridge"));
 
     /**
@@ -348,7 +363,7 @@ public final class Zones {
      * Kunlun) stay last and keep clear of every zone.
      */
     public static final List<Zone> ALL = List.of(WHITE_BONE, BOTTOMLESS, MYSTICAL_WATERS, HELL, FIRE_MOUNTAIN, MOUNT_WUZHUANG, SPIDER_CAVE,
-            BLACK_WIND, LION_CAMEL, FENGDU, KUNLUN);
+            BLACK_WIND, FLOWER_FRUIT, LION_CAMEL, FENGDU, KUNLUN);
 
     /** Where the overworld zones of {@link #ALL} lie. */
     public static final ZoneMap MAP = new ZoneMap(ALL);

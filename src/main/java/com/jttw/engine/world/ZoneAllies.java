@@ -21,6 +21,9 @@ public final class ZoneAllies {
     /** Whoever plays the Gold-Winged Peng (Lion-Camel Ridge's creatures are his kin's). */
     public static final Predicate<Player> PENG = p -> PengCharacter.is(p);
 
+    /** Whoever plays Sun Wukong (Flower-Fruit Mountain's monkeys know their true king). */
+    public static final Predicate<Player> WUKONG = p -> com.jttw.engine.character.wukong.WukongCharacter.is(p);
+
     /** Whether {@code other} is a player these allies take in. */
     public static boolean allied(Predicate<Player> allies, Entity other) {
         return other instanceof Player p && allies.test(p);

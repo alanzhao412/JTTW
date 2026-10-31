@@ -30,6 +30,7 @@ public final class Rumours {
         if (zone == Zones.FIRE_MOUNTAIN) return "Red Boy, the Holy Child King, and his Six Strong Generals";
         if (zone == Zones.MOUNT_WUZHUANG) return "the Great Immortal Zhenyuan's disciples, guarding the ginseng tree";
         if (zone == Zones.LION_CAMEL) return "the Azure Lion and the White Elephant, who ate a whole kingdom";
+        if (zone == Zones.FLOWER_FRUIT) return "the Six-Eared Macaque, a false Monkey King no mortal band can match";
         return "demons no one has lived to name";
     }
 
@@ -44,6 +45,7 @@ public final class Rumours {
         if (zone == Zones.LION_CAMEL) return "Lion-Camel Ridge";
         if (zone == Zones.FENGDU) return "Fengdu, the Ghost City";
         if (zone == Zones.KUNLUN) return "Mount Kunlun";
+        if (zone == Zones.FLOWER_FRUIT) return "Flower-Fruit Mountain";
         return zone.biome().location().getPath();
     }
 

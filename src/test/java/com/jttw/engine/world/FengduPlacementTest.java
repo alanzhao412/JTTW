@@ -48,9 +48,14 @@ class FengduPlacementTest {
         assertFalse(F.hasLevelBand(), "no band of its own: Hell's is the band it leads to");
         assertTrue(Zones.HELL.hasLevelBand() && Zones.LION_CAMEL.hasLevelBand());
         for (Zones.Zone zone : Zones.ALL) {
-            if (zone.hasLevelBand()) assertTrue(Zones.ALL.indexOf(zone) < Zones.ALL.indexOf(F), "after " + zone.id() + ": it keeps clear of every zone");
+            // after every zone of the bands' rings out to the last (a later zone keeps clear of it in turn: ZoneMap)
+            if (zone.hasLevelBand() && zone.layout() != null && zone.layout().far() >= Zones.LION_CAMEL.layout().far())
+                assertTrue(Zones.ALL.indexOf(zone) < Zones.ALL.indexOf(F), "after " + zone.id() + ": it keeps clear of every zone");
         }
-        assertEquals(List.of(Zones.KUNLUN), Zones.ALL.subList(Zones.ALL.indexOf(F) + 1, Zones.ALL.size()), "only Mount Kunlun, another place, after it");
+        // after it only Mount Kunlun, another place, and zones of the first rings added later (they keep clear of it in turn)
+        for (Zones.Zone zone : Zones.ALL.subList(Zones.ALL.indexOf(F) + 1, Zones.ALL.size())) {
+            assertTrue(zone == Zones.KUNLUN || zone.layout().far() < Zones.LION_CAMEL.layout().near(), zone.id() + " after it");
+        }
         assertTrue(Zones.MAP.zones().contains(F));
         assertSame(F, Zones.byBiome(Zones.FENGDU_BIOME));
         assertEquals(Zones.Vertical.WHOLE_COLUMN, F.vertical(), "the whole column: no zone shares its ground at any height");

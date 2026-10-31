@@ -140,6 +140,7 @@ public final class EarthGod {
             };
         }
         if (zone == Zones.FIRE_MOUNTAIN) return "Past the heat of the Flaming Mountains, at the head of Withered Pine Ravine, a great iron door shuts Red Boy's Fire Cloud Cave; eight floors down he keeps his throne";
+        if (zone == Zones.FLOWER_FRUIT) return "Over the sea stands Flower-Fruit Mountain, where the Six-Eared Macaque, the false Great Sage, has taken the Water Curtain Cave";
         if (zone == Zones.BLACK_WIND) return "Under the black winds of Black Wind Mountain, past the burnt Guanyin Chan Temple, the Black Bear Demon keeps the Tang Monk's stolen kasaya in the Black Wind Cave, behind the great door in the cliff of the peak";
         if (zone == Zones.MOUNT_WUZHUANG) return "Over the clouds floats Mount Longevity, where the Great Immortal Zhenyuan tends his ginseng tree";
         if (zone == Zones.SPIDER_CAVE) return "Under Silk-Web Ridge a thatched cottage hides the Spider Cave, where the Seven Spider Spirits keep their "
@@ -191,7 +192,22 @@ public final class EarthGod {
         }
         if (wayOut) return toKunlun(at, seed);
         Answer a = forLevel(at, level, seed, fallen, city);
-        return new Answer(a.target(), a.zone(), a.words().copy().append(Component.literal(KUNLUN_HINT)));
+        return new Answer(a.target(), a.zone(), a.words().copy().append(Component.literal(flowerFruit(at, level, seed) + KUNLUN_HINT)));
+    }
+
+    /**
+     * For a player of Flower-Fruit Mountain's band (it shares the first band with White Bone Ridge,
+     * where the needle points): a word on the island too, its way, and its master past all bands.
+     */
+    public static String flowerFruit(Vec3 at, int level, long seed) {
+        Zones.Zone ff = Zones.FLOWER_FRUIT;
+        if (level < ff.minLevel() || level > ff.maxLevel()) return "";
+        int[] c = ff.centres(seed).length == 0 ? null : ff.centres(seed)[0];
+        if (c == null) return "";
+        String where = ff.depth(seed, (int) Math.floor(at.x), (int) Math.floor(at.z)) > 0 ? "you stand on it now"
+                : "it lies some " + roughly(Math.hypot(c[0] - at.x, c[1] - at.z)) + " blocks to the " + wind(at.x, at.z, c[0], c[1]) + ", over the sea";
+        return " §7\"Or there is Flower-Fruit Mountain, the Monkey King's old island: " + where + ". Its monkeys and the false pilgrims are of your "
+                + "strength; but the false Great Sage who sits deep in the Water Curtain Cave is beyond any mortal band.\"";
     }
 
     /** Said after every answer in the world of the living: how to ask the way to Mount Kunlun. */
@@ -252,6 +268,8 @@ public final class EarthGod {
     public static BlockPos needle(Zones.Zone zone, int[] c) {
         if (zone == Zones.LION_CAMEL) return new BlockPos(c[0], 64, c[1] + com.jttw.engine.world.lion.LionFortress.DOOR_LZ);
         if (zone == Zones.FIRE_MOUNTAIN) return com.jttw.engine.world.fire.FireFortress.doorTarget(c); // the cave's door
+        if (zone == Zones.FLOWER_FRUIT) return new BlockPos(c[0], com.jttw.engine.world.flowerfruit.IslandShape.BASIN_Y + 1,
+                c[1] + com.jttw.engine.world.flowerfruit.IslandShape.CLIFF_Z + 1); // the cave's mouth, behind the falls
         if (zone == Zones.BLACK_WIND) return com.jttw.engine.world.blackwind.BlackWindCave.doorTarget(c); // the cave's door
         if (zone == Zones.SPIDER_CAVE) return new BlockPos(c[0] + com.jttw.engine.world.spider.SilkRidgeWorks.COTTAGE_X, 64,
                 c[1] + com.jttw.engine.world.spider.SilkRidgeWorks.COTTAGE_Z); // the cottage over the cave's mouth

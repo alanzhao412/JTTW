@@ -50,7 +50,8 @@ public class PeckingOrderGameTests {
     public static final double MINIBOSS_LEAST = 0.17, MINIBOSS_MOST = 0.20, BOSS_LEAST = ZoneBoss.LEAST_BLOW, BOSS_MOST = ZoneBoss.MOST_BLOW;
     /** The most a lair makes a miniboss's health over a captain's. */
     public static final double MINIBOSS_OVER_CAPTAIN = Math.max(1, Math.max(Math.max(CaveHousehold.GUARDIAN_HEALTH,
-            Math.max(CaveGarrison.GUARDIAN_HEALTH, LionCamelCityFeature.WARDEN_HEALTH)), com.jttw.engine.entity.spider.SpiderSpiritEntity.BOWER_HEALTH));
+            Math.max(CaveGarrison.GUARDIAN_HEALTH, LionCamelCityFeature.WARDEN_HEALTH)), Math.max(com.jttw.engine.entity.spider.SpiderSpiritEntity.BOWER_HEALTH,
+            com.jttw.engine.world.flowerfruit.CavePlan.PILGRIM_HEALTH)));
     /** The most ordinary hits a regular mob takes to kill. */
     public static final double MOB_HITS_MOST = 12;
     private static final double EPS = 1e-6;
@@ -61,7 +62,18 @@ public class PeckingOrderGameTests {
             ModEntities.LION_DEMON.get(), ModEntities.ELEPHANT_DEMON.get(), ModEntities.PENG_DEMON.get(),
             com.jttw.engine.registry.BlackWindRegistry.BEAR_SOLDIER.get(), com.jttw.engine.registry.BlackWindRegistry.LINGXUZI.get(),
             com.jttw.engine.registry.BlackWindRegistry.WHITE_ROBED_SCHOLAR.get(),
+            com.jttw.engine.registry.FlowerFruitRegistry.FAKE_PILGRIM.get(),
             com.jttw.engine.registry.SpiderCaveRegistry.SPIDER_SPIRIT.get());
+
+    /**
+     * The one superboss, past every rule a boss keeps but the least: the Six-Eared Macaque, level 120,
+     * an optional fight, the strongest boss there is. Up to this many hits, all his lives together.
+     */
+    public static final double SUPERBOSS_HITS_MOST = 460;
+
+    private static boolean superboss(Entity e) {
+        return e instanceof com.jttw.engine.entity.flowerfruit.SixEaredMacaqueEntity;
+    }
 
     private static List<Entity> every(GameTestHelper h) {
         List<Entity> out = new ArrayList<>();
@@ -121,11 +133,45 @@ public class PeckingOrderGameTests {
                 least = Math.min(least, full * life);
             }
             check(h, all >= ZoneBoss.LEAST_HITS - EPS, name(b) + " a group's fight: " + all + " hits");
-            check(h, all <= 360, name(b) + " no endless one: " + all + " hits");
+            check(h, all <= (superboss(b) ? SUPERBOSS_HITS_MOST : 360), name(b) + " no endless one: " + all + " hits");
             check(h, least > miniboss, name(b) + "'s every life outlasts any miniboss (" + toughest + ", " + miniboss + "): " + least);
             b.discard();
         }
         check(h, bosses.size() >= 15, "every boss measured: " + bosses.size());
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void theSixEaredMacaqueIsTheStrongestBossThereIs(GameTestHelper h) {
+        var macaque = com.jttw.engine.registry.FlowerFruitRegistry.SIX_EARED_MACAQUE.get().create(h.getLevel());
+        check(h, macaque != null, "made");
+        int lv = macaque.mobLevel();
+        eq(h, 120, lv, "level 120, past the players' cap");
+        check(h, macaque.getDisplayName().getString().contains("Lv 120"), macaque.getDisplayName().getString());
+        double his = hits(macaque, lv), blow = share(macaque, lv);
+        check(h, his >= 400 && his <= SUPERBOSS_HITS_MOST, "some 400-450 hits at his level: " + his);
+        check(h, blow >= BOSS_MOST - 0.005 && blow <= BOSS_MOST + EPS, "his blow the top of a boss's band: " + blow);
+        // a level past the cap is measured against a character grown on past it, gently
+        check(h, MobScaling.typicalHealth(120) > MobScaling.typicalHealth(100) * 1.5 && MobScaling.typicalHit(120) > MobScaling.typicalHit(100) * 1.5,
+                "his level counts past 100");
+        int others = 0;
+        for (Entity e : every(h)) {
+            try {
+                if (!(e instanceof ZoneBoss b) || superboss(b) || b instanceof TempleYouthEntity) continue;
+                others++;
+                double all = 0;
+                for (double life : b.lives()) all += hits(b, b.mobLevel()) * life;
+                check(h, his > all, "more hits than " + name(b) + " (" + all + "): " + his);
+                check(h, blow >= share(b, b.mobLevel()) - EPS || b instanceof LadyEarthFlowEntity, "a blow no lighter than " + name(b) + "'s");
+                check(h, lv > b.mobLevel(), "higher than " + name(b));
+                // and in plain health, far over any: he is the strongest
+                check(h, macaque.getMaxHealth() > b.getMaxHealth() * java.util.Arrays.stream(b.lives()).sum(), "more health than " + name(b));
+            } finally {
+                e.discard();
+            }
+        }
+        check(h, others >= 15, "weighed against every other boss: " + others);
+        macaque.discard();
         h.succeed();
     }
 
@@ -138,6 +184,7 @@ public class PeckingOrderGameTests {
         for (Entity e : every(h)) {
             if (e instanceof TempleYouthEntity y) minions.merge(y.zone().id(), y.mobLevel(), Math::max);
             else if (e instanceof ZoneBoss b) bosses.add(b);
+            else if (e instanceof com.jttw.engine.entity.flowerfruit.MacaqueCloneEntity) { /* the superboss's hair: of his level, not the band's */ }
             else if (e instanceof ZoneMonster m) minions.merge(m.zone().id(), Math.max(m.zone().maxLevel(), m.captainLevel()), Math::max);
             if (!(e instanceof ZoneBoss) || e instanceof TempleYouthEntity) e.discard();
         }
@@ -173,6 +220,12 @@ public class PeckingOrderGameTests {
         }
         for (ZoneBoss b : bosses) {
             com.jttw.engine.world.Zones.Zone z = b.zone();
+            if (superboss(b)) {
+                // the one superboss stands past every band and every head boss (theSixEaredMacaqueIsTheStrongestBossThereIs)
+                check(h, b.mobLevel() > ZoneBoss.levelOver(z), name(b) + " far past his zone's head boss's level: " + b.mobLevel());
+                b.discard();
+                continue;
+            }
             zones.put(z.id(), z);
             int top = Math.max(z.maxLevel(), minions.getOrDefault(z.id(), 0));
             check(h, b.mobLevel() > top, name(b) + " (Lv " + b.mobLevel() + ") above everything else of its zone (Lv " + top + ")");

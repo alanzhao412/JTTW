@@ -52,7 +52,8 @@ class LionCamelPlacementTest {
         assertSame(L, Zones.byBiome(Zones.LION_CAMEL_RIDGE_BIOME));
         assertTrue(Zones.MAP.zones().contains(L));
         assertTrue(Zones.ALL.indexOf(L) > Zones.ALL.indexOf(Zones.FIRE_MOUNTAIN), "after the Flaming Mountains");
-        assertEquals(L, Zones.ALL.stream().filter(Zones.Zone::hasLevelBand).reduce((a, b) -> b).orElseThrow(), "the last zone of a band");
+        assertEquals(L, Zones.ALL.stream().filter(Zones.Zone::hasLevelBand).max(java.util.Comparator.comparingInt(Zones.Zone::maxLevel)).orElseThrow(),
+                "the last band");
     }
 
     @Test

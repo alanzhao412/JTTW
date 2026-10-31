@@ -58,6 +58,7 @@ public class JTTWEngine {
         com.jttw.engine.registry.ModArmorMaterials.register(modEventBus);
         ModItems.register(modEventBus);
         ModEntities.register(modEventBus);
+        com.jttw.engine.registry.FlowerFruitRegistry.register(modEventBus);
         com.jttw.engine.registry.BlackWindRegistry.register(modEventBus);
         ModAttributes.register(modEventBus);
         com.jttw.engine.registry.ModEffects.register(modEventBus);
