@@ -140,6 +140,7 @@ public final class EarthGod {
             };
         }
         if (zone == Zones.FIRE_MOUNTAIN) return "Past the heat of the Flaming Mountains, at the head of Withered Pine Ravine, a great iron door shuts Red Boy's Fire Cloud Cave; eight floors down he keeps his throne";
+        if (zone == Zones.BLACK_WIND) return "Under the black winds of Black Wind Mountain, past the burnt Guanyin Chan Temple, the Black Bear Demon keeps the Tang Monk's stolen kasaya in the Black Wind Cave, behind the great door in the cliff of the peak";
         if (zone == Zones.MOUNT_WUZHUANG) return "Over the clouds floats Mount Longevity, where the Great Immortal Zhenyuan tends his ginseng tree";
         if (zone == Zones.LION_CAMEL) return "Lion-Camel Ridge: eight hundred li of demons, and the city they devoured. Its kings sit at the "
                 + "bottom of the Lion-Camel Cave, behind the great door in the mountain north of the city";
@@ -217,6 +218,11 @@ public final class EarthGod {
     /** What the Earth God answers a player at their place and level in the world of the living, of the zone for it. */
     private static Answer forLevel(Vec3 at, int level, long seed, Set<Sea> fallen, @Nullable BlockPos city) {
         Zones.Zone zone = overworldZoneFor(level);
+        // a zone sharing the band, whose country the asker stands in, is the one named (Black Wind Mountain, in the ridge's band)
+        for (Zones.Zone other : Zones.ALL) {
+            if (other != zone && other.hasFootprint() && other.minLevel() == zone.minLevel() && other.maxLevel() == zone.maxLevel()
+                    && other.depth(seed, (int) Math.floor(at.x), (int) Math.floor(at.z)) > 0) zone = other;
+        }
         int[] c = regionFor(zone, seed, (int) Math.floor(at.x), (int) Math.floor(at.z), fallen);
         if (zone == Zones.FENGDU && c != null) return wayIn(at, seed, c, city);
         if (c == null) return new Answer(null, null, Component.literal("The Earth God scratches his head: he knows of no such place."));
@@ -244,6 +250,7 @@ public final class EarthGod {
     public static BlockPos needle(Zones.Zone zone, int[] c) {
         if (zone == Zones.LION_CAMEL) return new BlockPos(c[0], 64, c[1] + com.jttw.engine.world.lion.LionFortress.DOOR_LZ);
         if (zone == Zones.FIRE_MOUNTAIN) return com.jttw.engine.world.fire.FireFortress.doorTarget(c); // the cave's door
+        if (zone == Zones.BLACK_WIND) return com.jttw.engine.world.blackwind.BlackWindCave.doorTarget(c); // the cave's door
         return new BlockPos(c[0], 64, c[1]);
     }
 

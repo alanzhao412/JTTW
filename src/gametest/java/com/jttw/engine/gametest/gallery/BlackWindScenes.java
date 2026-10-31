@@ -45,7 +45,7 @@ final class BlackWindScenes {
     private static final int X0 = -8, X1 = 8, Z0 = 3, Z1 = 18;
     /** Where the cave's pieces and the temple are laid, from the stage, and how high. */
     private static final int DOOR_X = 60, DOOR_Z = -100, DOOR_UP = 40, COURT_X = -80, COURT_Z = -30, COURT_UP = 40,
-            THRONE_X = -80, THRONE_Z = 160, THRONE_UP = 60, TEMPLE_X = 90, TEMPLE_Z = 92;
+            THRONE_X = -80, THRONE_Z = 160, THRONE_UP = 60, TEMPLE_X = 64, TEMPLE_Z = 72;
 
     private static boolean patch, door, court, throne, temple;
 
@@ -114,24 +114,24 @@ final class BlackWindScenes {
     static List<AbilityScenes.Scene> all() {
         return List.of(
                 // the Black Bear Demon
-                scene("bw_king_front", p -> king(p, 0.5, 11.5, 180f), new double[]{0.5, 3.0, 2.5, 0.5, 2.6, 11.5}),
-                scene("bw_king_quarter", p -> king(p, 0.5, 11.5, 210f), new double[]{-4.5, 3.4, 4.0, 0.5, 2.4, 11.5}),
-                scene("bw_king_side", p -> king(p, 0.5, 11.5, 90f), new double[]{0.5, 2.8, 2.0, 0.5, 2.4, 11.5}),
-                scene("bw_king_back", p -> king(p, 0.5, 9.5, 0f), new double[]{0.5, 3.4, 1.5, 0.5, 2.6, 9.5}),
-                scene("bw_king_face", p -> king(p, 0.5, 9.5, 180f), new double[]{1.0, 4.4, 5.6, 0.5, 4.3, 9.5}),
-                scene("bw_king_kasaya", p -> king(p, 0.5, 9.5, 180f), new double[]{1.5, 3.2, 5.0, 0.5, 2.8, 9.5}),
+                scene("bw_king_front", p -> king(p, 0.5, 11.5, 180f), new double[]{0.5, 2.6, 5.0, 0.5, 2.3, 11.5}),
+                scene("bw_king_quarter", p -> king(p, 0.5, 11.5, 210f), new double[]{-3.5, 3.0, 6.2, 0.5, 2.2, 11.5}),
+                scene("bw_king_side", p -> king(p, 0.5, 11.5, 90f), new double[]{0.5, 2.5, 5.0, 0.5, 2.2, 11.5}),
+                scene("bw_king_back", p -> king(p, 0.5, 9.5, 0f), new double[]{0.5, 2.8, 3.2, 0.5, 2.3, 9.5}),
+                scene("bw_king_face", p -> king(p, 0.5, 9.5, 180f), new double[]{1.1, 4.3, 6.4, 0.5, 4.2, 9.5}),
+                scene("bw_king_kasaya", p -> king(p, 0.5, 9.5, 180f), new double[]{1.4, 3.0, 5.6, 0.5, 2.7, 9.5}),
                 scene("bw_king_black_wind", p -> {
                     BlackBearDemonEntity k = king(p, 0.5, 11.5, 180f);
                     if (k != null) k.pose(BlackBearDemonEntity.GATHERING);
-                }, new double[]{0.5, 3.2, 2.5, 0.5, 2.6, 11.5}),
+                }, new double[]{0.5, 2.9, 5.0, 0.5, 2.5, 11.5}),
                 scene("bw_king_maul", p -> {
                     BlackBearDemonEntity k = king(p, 0.5, 11.5, 160f);
                     if (k != null) k.pose(BlackBearDemonEntity.REARING);
-                }, new double[]{-3.5, 3.0, 3.0, 0.5, 3.0, 11.5}),
+                }, new double[]{-3.0, 2.8, 5.5, 0.5, 2.8, 11.5}),
                 scene("bw_king_gale", p -> {
                     BlackBearDemonEntity k = king(p, 0.5, 11.5, 200f);
                     if (k != null) k.pose(BlackBearDemonEntity.DRAWING);
-                }, new double[]{4.5, 3.0, 3.5, 0.5, 2.6, 11.5}),
+                }, new double[]{4.0, 2.8, 5.8, 0.5, 2.4, 11.5}),
                 new AbilityScenes.Scene("bw_king_whirlwinds", p -> {
                     patch(p);
                     BlackBearDemonEntity k = king(p, 0.5, 12.5, 180f);
@@ -146,74 +146,74 @@ final class BlackWindScenes {
                 scene("bw_soldiers", p -> {
                     creature(p, BlackWindRegistry.BEAR_SOLDIER.get(), -2.5, 11.5, 200f, false);
                     creature(p, BlackWindRegistry.BEAR_SOLDIER.get(), 2.5, 12.5, 160f, true);
-                }, new double[]{0.5, 2.8, 2.5, 0.5, 2.0, 12.0}),
+                }, new double[]{0.5, 2.3, 5.8, 0.5, 1.8, 12.0}),
                 scene("bw_soldier_back", p -> creature(p, BlackWindRegistry.BEAR_SOLDIER.get(), 0.5, 9.5, 20f, false),
-                        new double[]{0.5, 2.6, 3.0, 0.5, 1.8, 9.5}),
+                        new double[]{0.5, 2.2, 4.6, 0.5, 1.7, 9.5}),
                 scene("bw_soldier_slam", p -> {
                     BearSoldierEntity s = creature(p, BlackWindRegistry.BEAR_SOLDIER.get(), 0.5, 9.5, 150f, false);
                     if (s != null) s.rear();
-                }, new double[]{-3.0, 2.4, 3.5, 0.5, 2.4, 9.5}),
+                }, new double[]{-2.6, 2.3, 4.6, 0.5, 2.2, 9.5}),
                 // the boars
                 scene("bw_boars", p -> {
                     creature(p, BlackWindRegistry.BOAR_DEMON.get(), -2.0, 9.5, 200f, false);
                     creature(p, BlackWindRegistry.BOAR_DEMON.get(), 2.0, 10.5, 160f, true);
-                }, new double[]{0.5, 2.2, 3.0, 0.5, 1.4, 10.0}),
+                }, new double[]{0.5, 1.9, 5.4, 0.5, 1.3, 10.0}),
                 scene("bw_boar_close", p -> creature(p, BlackWindRegistry.BOAR_DEMON.get(), 0.5, 8.5, 200f, false),
-                        new double[]{1.6, 2.2, 5.0, 0.5, 1.8, 8.5}),
+                        new double[]{1.3, 1.9, 5.7, 0.5, 1.7, 8.5}),
                 scene("bw_boar_side", p -> creature(p, BlackWindRegistry.BOAR_DEMON.get(), 0.5, 8.5, 90f, false),
-                        new double[]{0.5, 1.8, 4.0, 0.5, 1.3, 8.5}),
+                        new double[]{0.5, 1.6, 5.2, 0.5, 1.3, 8.5}),
                 scene("bw_boar_charge", p -> {
                     BoarDemonEntity b = creature(p, BlackWindRegistry.BOAR_DEMON.get(), 0.5, 9.5, 120f, false);
                     if (b != null) b.pose(BoarDemonEntity.CHARGING);
                     BoarDemonEntity c = creature(p, BlackWindRegistry.BOAR_DEMON.get(), -3.5, 12.5, 200f, false);
                     if (c != null) c.pose(BoarDemonEntity.PAWING);
-                }, new double[]{3.5, 2.0, 4.0, -0.5, 1.3, 10.5}),
+                }, new double[]{3.0, 1.9, 5.4, -0.5, 1.2, 10.5}),
                 // the imps
                 scene("bw_imps", p -> {
                     creature(p, BlackWindRegistry.WIND_IMP.get(), -1.5, 7.5, 200f, false);
                     creature(p, BlackWindRegistry.WIND_IMP.get(), 1.5, 8.0, 160f, true);
                     creature(p, BlackWindRegistry.WIND_IMP.get(), -0.2, 9.5, 180f, false);
-                }, new double[]{0.5, 1.6, 4.0, 0.5, 0.8, 8.0}),
+                }, new double[]{0.5, 1.3, 5.3, 0.5, 0.8, 8.0}),
                 scene("bw_imp_close", p -> creature(p, BlackWindRegistry.WIND_IMP.get(), 0.5, 7.0, 200f, false),
-                        new double[]{1.2, 1.4, 4.5, 0.5, 0.9, 7.0}),
+                        new double[]{0.9, 1.2, 5.0, 0.5, 0.9, 7.0}),
                 scene("bw_imp_back", p -> creature(p, BlackWindRegistry.WIND_IMP.get(), 0.5, 7.0, 20f, false),
-                        new double[]{0.5, 1.5, 4.2, 0.5, 0.8, 7.0}),
+                        new double[]{0.5, 1.2, 5.0, 0.5, 0.8, 7.0}),
                 scene("bw_imp_ride", p -> {
                     WindImpEntity i = creature(p, BlackWindRegistry.WIND_IMP.get(), 0.5, 7.5, 100f, false);
                     if (i != null) i.pose(WindImpEntity.RIDING);
-                }, new double[]{0.5, 1.4, 4.0, 0.5, 0.8, 7.5}),
+                }, new double[]{0.5, 1.2, 5.2, 0.5, 0.8, 7.5}),
                 // Lingxuzi
-                scene("bw_lingxuzi", p -> put(p, BlackWindRegistry.LINGXUZI.get(), 0.5, 0, 8.5, 190f), new double[]{1.0, 2.0, 4.0, 0.5, 1.6, 8.5}),
-                scene("bw_lingxuzi_side", p -> put(p, BlackWindRegistry.LINGXUZI.get(), 0.5, 0, 8.5, 90f), new double[]{0.5, 1.8, 4.0, 0.5, 1.4, 8.5}),
-                scene("bw_lingxuzi_back", p -> put(p, BlackWindRegistry.LINGXUZI.get(), 0.5, 0, 8.5, 10f), new double[]{0.5, 1.9, 4.0, 0.5, 1.4, 8.5}),
-                scene("bw_lingxuzi_face", p -> put(p, BlackWindRegistry.LINGXUZI.get(), 0.5, 0, 8.5, 200f), new double[]{1.0, 2.2, 6.6, 0.5, 2.0, 8.5}),
+                scene("bw_lingxuzi", p -> put(p, BlackWindRegistry.LINGXUZI.get(), 0.5, 0, 8.5, 190f), new double[]{0.9, 1.7, 5.5, 0.5, 1.4, 8.5}),
+                scene("bw_lingxuzi_side", p -> put(p, BlackWindRegistry.LINGXUZI.get(), 0.5, 0, 8.5, 90f), new double[]{0.5, 1.6, 5.5, 0.5, 1.3, 8.5}),
+                scene("bw_lingxuzi_back", p -> put(p, BlackWindRegistry.LINGXUZI.get(), 0.5, 0, 8.5, 10f), new double[]{0.5, 1.7, 5.5, 0.5, 1.3, 8.5}),
+                scene("bw_lingxuzi_face", p -> put(p, BlackWindRegistry.LINGXUZI.get(), 0.5, 0, 8.5, 200f), new double[]{0.8, 2.2, 6.8, 0.5, 2.1, 8.5}),
                 scene("bw_lingxuzi_pounce", p -> {
                     LingxuziEntity l = put(p, BlackWindRegistry.LINGXUZI.get(), 0.5, 0, 8.5, 140f);
                     if (l != null) l.pose(LingxuziEntity.CROUCHING);
-                }, new double[]{-2.5, 1.6, 4.5, 0.5, 1.0, 8.5}),
+                }, new double[]{-1.8, 1.4, 5.5, 0.5, 0.9, 8.5}),
                 scene("bw_lingxuzi_elixir", p -> {
                     LingxuziEntity l = put(p, BlackWindRegistry.LINGXUZI.get(), 0.5, 0, 8.5, 200f);
                     if (l != null) l.pose(LingxuziEntity.DRINKING);
-                }, new double[]{1.4, 2.0, 5.0, 0.5, 1.7, 8.5}),
+                }, new double[]{1.1, 1.9, 6.0, 0.5, 1.7, 8.5}),
                 // the White-Robed Scholar
-                scene("bw_scholar", p -> put(p, BlackWindRegistry.WHITE_ROBED_SCHOLAR.get(), 0.5, 0, 9.5, 190f), new double[]{1.0, 2.0, 4.5, 0.5, 1.5, 9.5}),
-                scene("bw_scholar_side", p -> put(p, BlackWindRegistry.WHITE_ROBED_SCHOLAR.get(), 0.5, 0, 9.5, 90f), new double[]{0.5, 1.8, 4.0, 0.5, 1.2, 9.5}),
-                scene("bw_scholar_back", p -> put(p, BlackWindRegistry.WHITE_ROBED_SCHOLAR.get(), 0.5, 0, 8.5, 20f), new double[]{0.5, 2.0, 3.0, 0.5, 1.0, 8.5}),
-                scene("bw_scholar_face", p -> put(p, BlackWindRegistry.WHITE_ROBED_SCHOLAR.get(), 0.5, 0, 8.5, 190f), new double[]{0.9, 2.3, 6.6, 0.5, 2.1, 8.5}),
+                scene("bw_scholar", p -> put(p, BlackWindRegistry.WHITE_ROBED_SCHOLAR.get(), 0.5, 0, 9.5, 190f), new double[]{0.9, 1.7, 6.3, 0.5, 1.4, 9.5}),
+                scene("bw_scholar_side", p -> put(p, BlackWindRegistry.WHITE_ROBED_SCHOLAR.get(), 0.5, 0, 9.5, 90f), new double[]{0.5, 1.6, 6.0, 0.5, 1.1, 9.5}),
+                scene("bw_scholar_back", p -> put(p, BlackWindRegistry.WHITE_ROBED_SCHOLAR.get(), 0.5, 0, 8.5, 20f), new double[]{0.5, 1.8, 4.5, 0.5, 0.9, 8.5}),
+                scene("bw_scholar_face", p -> put(p, BlackWindRegistry.WHITE_ROBED_SCHOLAR.get(), 0.5, 0, 8.5, 190f), new double[]{0.8, 2.3, 6.9, 0.5, 2.2, 8.5}),
                 scene("bw_scholar_spit", p -> {
                     WhiteRobedScholarEntity s = put(p, BlackWindRegistry.WHITE_ROBED_SCHOLAR.get(), 0.5, 0, 9.0, 160f);
                     if (s != null) s.pose(WhiteRobedScholarEntity.REARING);
-                }, new double[]{-2.0, 2.0, 5.0, 0.5, 1.8, 9.0}),
+                }, new double[]{-1.6, 1.9, 6.0, 0.5, 1.7, 9.0}),
                 scene("bw_scholar_coil", p -> {
                     WhiteRobedScholarEntity s = put(p, BlackWindRegistry.WHITE_ROBED_SCHOLAR.get(), 0.5, 0, 9.0, 200f);
                     if (s != null) s.pose(WhiteRobedScholarEntity.COILING);
-                }, new double[]{3.0, 3.0, 4.5, 0.5, 0.8, 10.0}),
+                }, new double[]{2.6, 2.6, 5.6, 0.5, 0.8, 10.0}),
                 // the three friends together
                 scene("bw_three_friends", p -> {
                     put(p, BlackWindRegistry.LINGXUZI.get(), -3.0, 0, 9.5, 200f);
                     king(p, 0.5, 12.5, 180f);
                     put(p, BlackWindRegistry.WHITE_ROBED_SCHOLAR.get(), 4.0, 0, 9.5, 160f);
-                }, new double[]{0.5, 3.0, 1.0, 0.5, 2.2, 11.0}),
+                }, new double[]{0.5, 2.6, 3.5, 0.5, 2.0, 11.0}),
                 // the cave and the temple, laid off the stage
                 new AbilityScenes.Scene("bw_cave_door", p -> {
                     door(p);
@@ -249,7 +249,7 @@ final class BlackWindScenes {
                 }, p -> {}, 1, false),
                 new AbilityScenes.Scene("bw_temple", p -> {
                     temple(p);
-                    AbilityScenes.sceneCam = new double[]{TEMPLE_X + 30.5, 22.0, TEMPLE_Z + 52.0, TEMPLE_X + 0.5, 2.0, TEMPLE_Z - 6.0};
+                    AbilityScenes.sceneCam = new double[]{TEMPLE_X + 18.5, 16.0, TEMPLE_Z + 46.0, TEMPLE_X + 0.5, 2.0, TEMPLE_Z - 4.0};
                 }, p -> {}, 1, false),
                 new AbilityScenes.Scene("bw_temple_hall", p -> {
                     temple(p);

@@ -51,15 +51,14 @@ public final class BlackWindBlocks {
 
     /** The black peak's rock inside, in uneven bands of deepslate, tuff and blackstone, a seam of coal now and then. */
     public static BlockState rock(int y, int x, int z) {
-        int band = Math.floorMod(y + ((x * 29 + z * 13) >> 5), 13);
-        return switch (band) {
-            case 0, 1 -> s(Blocks.TUFF);
-            case 4 -> s(Blocks.BLACKSTONE);
-            case 7 -> hash(x >> 1, y, z >> 1) < 12 ? s(Blocks.COAL_ORE) : s(Blocks.DEEPSLATE);
-            case 9 -> s(Blocks.COBBLED_DEEPSLATE);
-            case 11 -> s(Blocks.ANDESITE);
-            default -> s(Blocks.DEEPSLATE);
-        };
+        // blotches of tuff, cobbled deepslate and blackstone in the deepslate, a few blocks across, coal here and there
+        int cell = hash(Math.floorDiv(x + (y >> 3), 3), Math.floorDiv(y, 3), Math.floorDiv(z - (y >> 3), 3));
+        int fine = hash(x, y, z);
+        if (cell < 12) return s(Blocks.TUFF);
+        if (cell < 20) return s(Blocks.BLACKSTONE);
+        if (cell < 30) return s(Blocks.COBBLED_DEEPSLATE);
+        if (fine < 3) return s(Blocks.COAL_ORE);
+        return fine < 15 ? s(Blocks.COBBLED_DEEPSLATE) : s(Blocks.DEEPSLATE);
     }
 
     private static BlockState stair(Block b, Direction facing) {

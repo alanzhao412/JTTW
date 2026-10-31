@@ -123,18 +123,22 @@ def bear(king):
         # the head: a broad skull, a long muzzle, round ears; the jaw apart
         part('head', 'body', (0, -31, -3), (0.08, 0, 0), [
             (-7, -11, -6.5, 14, 11.5, 12.5, 'skull'),
-            (-4.2, -6.6, -13.4, 8.4, 6.4, 7.4, 'muzzle'),
-            (-3.4, -7.8, -12.4, 6.8, 1.6, 6.4, 'bridge'),
-            (-2.2, -7.3, -14.2, 4.4, 2.8, 1.6, 'nose'),
-            (-7, -11.6, -7.3, 14, 3, 2.2, 'brow'),
-            (-8.6, -8, -4.6, 2.2, 7, 8.6, 'cheek'), (6.4, -8, -4.6, 2.2, 7, 8.6, 'cheek'),
-            (-2.9, -1.2, -12.6, 1, 2.2, 1, 'fang'), (1.9, -1.2, -12.6, 1, 2.2, 1, 'fang'),
+            (-4.8, -6.4, -10.6, 9.6, 6.2, 4.6, 'muzzle'),
+            (-3.6, -6.0, -14.4, 7.2, 5.0, 4.0, 'muzzle_tip'),
+            (-2.8, -7.5, -12.2, 5.6, 1.6, 6.2, 'bridge'),
+            (-2.6, -7.0, -15.4, 5.2, 3.0, 1.6, 'nose'),
+            (-3.7, -1.6, -14.6, 7.4, 1.2, 4.4, 'lip'),
+            (-9.4, -8.6, -4.8, 3.2, 8, 9, 'cheek'), (6.2, -8.6, -4.8, 3.2, 8, 9, 'cheek'),
+            (-6.0, -13.2, -3.5, 12, 3, 10, 'forelock'),
+            (-3.2, -1.2, -14.0, 1.1, 2.6, 1.1, 'fang'), (2.1, -1.2, -14.0, 1.1, 2.6, 1.1, 'fang'),
         ]),
-        part('jaw', 'head', (0, -0.8, -6), (0.04, 0, 0), [
-            (-3.8, 0, -7.4, 7.6, 2.8, 7.6, 'jaw'),
-            (-3.5, -1.0, -7.2, 7, 1.0, 1.2, 'lowteeth')]),
-        part('right_ear', 'head', (-5.6, -10.6, -1.4), (0, 0.2, -0.32), [(-2.4, -4.4, -1.2, 4.8, 4.8, 2.4, 'ear')]),
-        part('right_eye', 'head', (-3.6, -8.2, -6.6), (0, 0.22, 0), [(-1.2, -0.7, -0.5, 2.4, 1.6, 0.7, 'eye')]),
+        part('jaw', 'head', (0, -0.6, -6), (0.16, 0, 0), [
+            (-3.9, 0, -8.2, 7.8, 2.8, 8.4, 'jaw'),
+            (-3.6, -1.0, -8.0, 7.2, 1.0, 1.2, 'lowteeth'),
+            (-3.1, -2.4, -7.6, 1, 2.4, 1, 'fang'), (2.1, -2.4, -7.6, 1, 2.4, 1, 'fang')]),
+        part('right_ear', 'head', (-5.4, -11.4, -0.6), (-0.1, 0.25, -0.38), [(-2.6, -4.8, -1.3, 5.2, 5.2, 2.6, 'ear')]),
+        part('right_brow', 'head', (-0.6, -9.8, -6.8), (0.1, 0.15, 0.32), [(-5.2, -1.2, -1.1, 5.4, 2.2, 2.4, 'brow')]),
+        part('right_eye', 'head', (-3.5, -8.0, -6.6), (0, 0.22, 0), [(-1.3, -0.7, -0.5, 2.6, 1.5, 0.7, 'eye')]),
     ]
     if king:
         parts += [
@@ -149,20 +153,21 @@ def bear(king):
             part('cloak', 'body', (0, -29, D + 1.2), (0.12, 0, 0), [(-W - 1, 0, -0.6, 2 * W + 2, 17, 1.2, 'cloak')]),
             part('cloak_lower', 'cloak', (0, 16.6, 0), (0.06, 0, 0), [(-W - 1.6, 0, -0.6, 2 * W + 3.2, 16, 1.2, 'cloak_lower')]),
             # the kasaya: thrown across his breast from the left shoulder to the right hip, over his back too, its end at his hip
-            part('kasaya_front', 'body', (1.0, -17.5, -D - 2.3), (0, 0, -0.62), [(-15, -5.2, -0.6, 30, 10.4, 1.2, 'kasaya')]),
-            part('kasaya_back', 'body', (1.0, -17.5, D + 1.9), (0, 0, -0.62), [(-15, -5.2, -0.6, 30, 10.4, 1.2, 'kasaya')]),
+            part('kasaya_front', 'body', (1.0, -17.0, -D - 2.3), (0, 0, -0.62), [(-16, -7, -0.6, 32, 14, 1.2, 'kasaya')]),
+            part('kasaya_skirt', 'body', (W / 2 - 1, -5.6, -D - 2.6), (-0.1, 0, -0.08), [(-6.5, 0, -0.6, 13, 15, 1.2, 'kasaya_panel')]),
+            part('kasaya_back', 'body', (1.0, -17.0, D + 2.1), (0, 0, -0.62), [(-16, -7, -0.6, 32, 14, 1.2, 'kasaya')]),
             part('kasaya_shoulder', 'body', (W + 1.5, -27.5, 0), (0, 0, -0.35), [(-5, -1.2, -D - 2.6, 9, 2.4, 2 * D + 5.2, 'kasaya_drape')]),
-            part('kasaya_tail', 'body', (-W + 2.2, -9, -D - 2.6), (-0.06, 0, 0.08), [(-3.4, 0, -0.6, 6.8, 15, 1.2, 'kasaya_end')]),
+            part('kasaya_tail', 'body', (-W + 2.6, -10, -D - 2.6), (-0.06, 0, 0.08), [(-4.2, 0, -0.6, 8.4, 20, 1.2, 'kasaya_end')]),
             part('jade_ring', 'body', (W - 3.4, -24.8, -D - 3.1), (0, 0, 0), [(-1.8, -1.8, -0.5, 3.6, 3.6, 1, 'jade')]),
             # the black-tasselled spear, upright in his right paw
             part('spear', 'right_hand', (0, 2.6, -0.2), aim([BODY, ARM, FOREARM, HAND], (0.02, 0, 0)), [
                 (-0.75, -46, -0.75, 1.5, 70, 1.5, 'shaft'),
                 (-1.2, -47.6, -1.2, 2.4, 2, 2.4, 'collar'),
                 (-1.6, -49.4, -0.5, 3.2, 2.2, 1, 'guard'),
-                (-1.4, -60, -0.4, 2.8, 10.8, 0.8, 'spearhead'),
+                (-2.4, -63, -0.45, 4.8, 14, 0.9, 'spearhead'),
                 (-1.1, 22, -1.1, 2.2, 3, 2.2, 'butt'),
                 (-1.0, -28, -1.0, 2, 1.2, 2, 'band'), (-1.0, 8, -1.0, 2, 1.2, 2, 'band')]),
-            part('tassel', 'spear', (0, -46.2, 0), (0, 0, 0), [(-2.6, 0, -2.6, 5.2, 7.5, 5.2, 'tassel'), (-1.8, 7, -1.8, 3.6, 3, 3.6, 'tassel_tip')]),
+            part('tassel', 'spear', (0, -46.2, 0), (0, 0, 0), [(-3.2, 0, -3.2, 6.4, 9, 6.4, 'tassel'), (-4.0, 4, -4.0, 8, 6, 8, 'tassel_flare'), (-2.4, 9, -2.4, 4.8, 4, 4.8, 'tassel_tip')]),
         ]
     else:
         parts += [
@@ -365,11 +370,11 @@ def paint_bear(king, lace):
                 bear_face(p, f['front'], base=GOLD if king else BRONZE)
 
         # the head
-        if style in ('skull', 'cheek'):
+        if style in ('skull', 'cheek', 'forelock'):
             pelt(p, f, density=0.45)
-            if style == 'cheek':
+            if style in ('cheek', 'forelock'):
                 for s in S:
-                    w.tufts(p, f[s], depth=3, every=2)
+                    w.tufts(p, f[s], depth=4, every=2, down=style == 'cheek')
             if style == 'skull':
                 fx, fy, fw, fh = f['front']                       # a brown-grey mask about the eyes, lighter toward the muzzle
                 for i, j, xy in w.each(p, f['front']):
@@ -383,14 +388,14 @@ def paint_bear(king, lace):
                 for j in range(fh):
                     if j > fh - 1 - (1 - d) * 2:
                         p.px((fx + i, fy + j), k(FUR_DARK, 0.6))
-        if style in ('muzzle', 'bridge'):                         # the tan muzzle, darker along its lips, whisker spots
+        if style in ('muzzle', 'bridge', 'muzzle_tip', 'lip'):                         # the tan muzzle, darker along its lips, whisker spots
             for s in f:
                 fx, fy, fw, fh = f[s]
                 for i, j, xy in w.each(p, f[s]):
                     t = j / max(1, fh - 1)
                     c = mix(MUZZLE, MUZZLE_DARK, 0.25 + 0.5 * t if s in ('right', 'left') else 0.2)
                     p.px(xy, [v * w.LIGHT[s] + p.rnd.randint(-5, 5) for v in c])
-            if style == 'muzzle':
+            if style in ('muzzle', 'muzzle_tip'):
                 for s in ('right', 'left'):
                     fx, fy, fw, fh = f[s]
                     for i in range(fw):
@@ -493,11 +498,11 @@ def paint_bear(king, lace):
                     w.ragged(p, f[s], teeth=3, depth=6)
                     w.tear_holes(p, f[s], n=2, size_=2)
             w.flat(p, f, (10, 8, 10), faces=('right', 'left', 'top', 'bottom'))
-        if style in ('kasaya', 'kasaya_drape', 'kasaya_end'):
+        if style in ('kasaya', 'kasaya_drape', 'kasaya_end', 'kasaya_panel'):
             for s in f:
-                brocade(p, f[s], light=w.LIGHT[s], cell=6 if style != 'kasaya_drape' else 5)
+                brocade(p, f[s], light=w.LIGHT[s], cell=7 if style != 'kasaya_drape' else 5)
             w.border(p, f, GOLD_LIGHT, width=1)
-            if style == 'kasaya_end':
+            if style in ('kasaya_end', 'kasaya_panel'):
                 for s in ('front', 'back'):
                     fx, fy, fw, fh = f[s]
                     for i in range(fw):                           # a fringe of gold
@@ -534,14 +539,14 @@ def paint_bear(king, lace):
                     p.px(xy, [x * w.LIGHT[s] + p.rnd.randint(-3, 3) for x in c])
             for s in S:
                 w.point(p, f[s], down=False, keep=0.3, sharp=0.5)
-        if style in ('tassel', 'tassel_tip'):                     # a great tassel of black horsehair, red at its root
+        if style in ('tassel', 'tassel_tip', 'tassel_flare'):                     # a great tassel of black horsehair, red at its root
             for s in f:
                 w.strands(p, f[s], k(HORSEHAIR, w.LIGHT[s]), (4, 4, 4), k((70, 60, 66), w.LIGHT[s]), density=0.5)
                 if style == 'tassel':
                     w.hline(p, f[s], 0, (176, 28, 30))
                     w.hline(p, f[s], 1, (120, 18, 20))
             for s in S:
-                w.tufts(p, f[s], depth=3 if style == 'tassel_tip' else 2, every=2)
+                w.tufts(p, f[s], depth=4 if style != 'tassel' else 2, every=2)
 
         # the soldier's
         if style in ('helm_bowl', 'helm_top', 'helm_rim', 'cheekguard', 'plume_socket'):

@@ -79,6 +79,8 @@ public final class ChunkBench {
     private static final boolean VILLAGE = "village".equals(System.getProperty("jttw.chunkBench.mode", ""));
     /** "ridge" runs {@link RidgeBench}: White Bone Ridge, what its heart costs to make, and pictures of it. */
     private static final boolean RIDGE = "ridge".equals(System.getProperty("jttw.chunkBench.mode", ""));
+    /** "blackwind" runs {@link BlackWindBench}: Black Wind Mountain, its range, temple, cave and king, and pictures of it. */
+    private static final boolean BLACKWIND = "blackwind".equals(System.getProperty("jttw.chunkBench.mode", ""));
     private static final TicketType<ChunkPos> BENCH = TicketType.create("jttw_bench", Comparator.comparingLong(ChunkPos::toLong));
     private static final int GRID = 12;
     private static final int FLIGHT_TICKS = 400;
@@ -235,6 +237,15 @@ public final class ChunkBench {
             if (p.tickCount < 100) return;
             if (LionBench.tick(p)) {
                 report.addAll(LionBench.report());
+                write();
+                next(Step.DONE);
+            }
+            return;
+        }
+        if (BLACKWIND) {
+            if (p.tickCount < 100) return;
+            if (BlackWindBench.tick(p)) {
+                report.addAll(BlackWindBench.report());
                 write();
                 next(Step.DONE);
             }

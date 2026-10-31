@@ -69,6 +69,8 @@ import java.util.List;
  */
 public class BlackBearDemonEntity extends ZoneBoss {
 
+    /** Subduing him is a good deed (Guanyin herself came for him), though less than ending a man-eater as Lady White Bone. */
+    public static final int KARMA = 100;
     /** How far over the top of his zone's band a boss stands. */
     public static final int LEVELS_ABOVE_BAND = 15;
     public static final int LEVEL = 36 + LEVELS_ABOVE_BAND;

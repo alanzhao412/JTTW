@@ -367,10 +367,15 @@ public final class BlackWindCave {
         return level.getEntitiesOfClass(Mob.class, bounds(origin), m -> m.isAlive() && floorOf(m) == n && origin.equals(originOf(m)));
     }
 
-    private static boolean loaded(ServerLevel level, BlockPos origin) {
-        for (int cx = (origin.getX() + BlackWindPlan.X_MIN) >> 4; cx <= (origin.getX() + BlackWindPlan.X_MAX) >> 4; cx++) {
-            for (int cz = (origin.getZ() + BlackWindPlan.Z_MIN) >> 4; cz <= (origin.getZ() + BlackWindPlan.Z_MAX + 24) >> 4; cz++) {
-                if (!level.areEntitiesLoaded(ChunkPos.asLong(cx, cz))) return false;
+    /**
+     * Whether the parts of the cave that hold garrisons (the forecourt and the court) have their creatures
+     * loaded and ticking, so a count of them is a true one. The throne cavern, farther in, need not be:
+     * someone at the door would not have it loaded.
+     */
+    public static boolean loaded(ServerLevel level, BlockPos origin) {
+        for (int cx = (origin.getX() - BlackWindPlan.COURT_RX - 2) >> 4; cx <= (origin.getX() + BlackWindPlan.COURT_RX + 2) >> 4; cx++) {
+            for (int cz = (origin.getZ() + BlackWindPlan.STAIR_HEAD_Z - 2) >> 4; cz <= (origin.getZ() + BlackWindPlan.Z_MAX) >> 4; cz++) {
+                if (!level.isPositionEntityTicking(new BlockPos(cx * 16 + 8, origin.getY(), cz * 16 + 8))) return false;
             }
         }
         return true;
