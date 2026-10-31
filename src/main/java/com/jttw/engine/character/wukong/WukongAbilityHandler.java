@@ -421,6 +421,8 @@ public final class WukongAbilityHandler {
         Vec3 eye = player.getEyePosition();
         Vec3 look = player.getLookAngle();
         ServerLevel level = player.serverLevel();
+        // the Fighting Buddha's eyes burn through anything (BuddhaBreaking)
+        boolean unstoppable = BuddhaBreaking.unstoppable(player);
 
         for (int i = 1; i <= 30; i++) {
             Vec3 point = eye.add(look.scale(i));
@@ -433,7 +435,10 @@ public final class WukongAbilityHandler {
                         BlockPos target = center.offset(dx, dy, dz);
                         net.minecraft.world.level.block.state.BlockState state = level.getBlockState(target);
 
-                        if (!state.isAir() && state.getDestroySpeed(level, target) >= 0
+                        if (state.isAir()) continue;
+                        if (unstoppable) {
+                            level.destroyBlock(target, true, player);
+                        } else if (state.getDestroySpeed(level, target) >= 0
                                 && state.getDestroySpeed(level, target) < 50f) {
                             // Don't destroy bedrock or obsidian-tier blocks
                             level.destroyBlock(target, true, player);

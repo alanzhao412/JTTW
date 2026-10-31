@@ -79,6 +79,9 @@ public final class NetworkHandler {
         registrar.playToClient(com.jttw.engine.network.s2c.ArmamentsShownPacket.TYPE, com.jttw.engine.network.s2c.ArmamentsShownPacket.STREAM_CODEC, com.jttw.engine.network.s2c.ArmamentsShownPacket::handle);
         registrar.playToClient(com.jttw.engine.network.s2c.BeastFormPacket.TYPE, com.jttw.engine.network.s2c.BeastFormPacket.STREAM_CODEC, com.jttw.engine.network.s2c.BeastFormPacket::handle);
         registrar.playToClient(com.jttw.engine.network.s2c.QiSeenPacket.TYPE, com.jttw.engine.network.s2c.QiSeenPacket.STREAM_CODEC, com.jttw.engine.network.s2c.QiSeenPacket::handle);
+        registrar.playToClient(com.jttw.engine.network.s2c.FightingBuddhaPacket.TYPE, com.jttw.engine.network.s2c.FightingBuddhaPacket.STREAM_CODEC, com.jttw.engine.network.s2c.FightingBuddhaPacket::handle);
+        registrar.playToClient(com.jttw.engine.network.s2c.OpenSomersaultMenuPacket.TYPE, com.jttw.engine.network.s2c.OpenSomersaultMenuPacket.STREAM_CODEC, com.jttw.engine.network.s2c.OpenSomersaultMenuPacket::handle);
+        registrar.playToServer(com.jttw.engine.network.c2s.SomersaultTravelPacket.TYPE, com.jttw.engine.network.c2s.SomersaultTravelPacket.STREAM_CODEC, com.jttw.engine.network.c2s.SomersaultTravelPacket::handle);
         registrar.playToClient(com.jttw.engine.network.s2c.WaterFxPacket.TYPE, com.jttw.engine.network.s2c.WaterFxPacket.STREAM_CODEC, com.jttw.engine.network.s2c.WaterFxPacket::handle);
     }
 

@@ -19,6 +19,7 @@
     "RandomizableContainerMixin",
     "RangedAttributeAccessor",
     "ServerGamePacketListenerMixin",
+    "ServerPlayerVanishMixin",
     "VanillaRegistriesMixin",
     "VillagerHostilesSensorMixin",
     "WalkAnimationStateAccessor"

@@ -589,13 +589,16 @@ public class CharacterScreen extends Screen {
 
         int level = PlayerLevel.getLevel(player);
         int points = com.jttw.engine.client.ClientAbilityData.getSkillPoints();
-        List<AbilityUnlock> unlocks = AbilityUnlock.getAll().stream()
+        List<AbilityUnlock> unlocks = new java.util.ArrayList<>(AbilityUnlock.getAll().stream()
                 .filter(u -> u.cls() == cls)
                 .sorted(java.util.Comparator.comparingInt(AbilityUnlock::requiredLevel))
-                .toList();
+                .toList());
+        // Wukong's own: at level 100 he becomes the Victorious Fighting Buddha, and its four powers are his
+        boolean wukong = com.jttw.engine.character.Characters.of(player) == com.jttw.engine.character.wukong.WukongCharacter.INSTANCE;
+        if (wukong) unlocks.addAll(com.jttw.engine.character.wukong.FightingBuddha.MILESTONES);
 
         // Header: the class, and the points to spend (the same pool as the skill tree's)
-        String kind = cls == ProgressionClass.DIVINE_BEAST ? " §7Passives" : " §7Abilities";
+        String kind = cls == ProgressionClass.DIVINE_BEAST ? " §7Passives" : wukong ? " §7· §6Fighting Buddha" : " §7Abilities";
         g.drawString(mc.font, "§6" + formatClassName(cls) + kind + "  §8|  §7Skill points §e" + points,
                 cx, cy, C_LABEL, false);
         g.fill(cx, cy + 10, cx + cw, cy + 11, C_SEPARATOR);
