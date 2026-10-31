@@ -78,7 +78,8 @@ final class BuddhaScenes {
                     AbilityScenes.sceneCam = new double[]{2.8, 1.8, 3.6, 0.5, 1.25, 0.5}; },
                         p -> p.swing(InteractionHand.MAIN_HAND, true), 3, false),
                 shot("buddha_face", false, -15f, new double[]{0.9, 1.85, 1.75, 0.5, 1.72, 0.5}),
-                shot("buddha_face_side", false, 70f, new double[]{0.9, 1.85, 1.75, 0.5, 1.72, 0.5}),
+                shot("buddha_face_side", false, 60f, new double[]{0.55, 1.85, 2.0, 0.5, 1.72, 0.5}),
+                shot("buddha_profile", false, 90f, new double[]{0.5, 1.8, 2.3, 0.5, 1.7, 0.5}),
                 // in netherite: his robes are drawn, not his armour
                 shot("buddha_armour", true, -25f, new double[]{2.0, 1.6, 3.0, 0.5, 1.1, 0.5}),
                 screen("buddha_skills", p -> AbilityScenes.openClassAbilities = true),
