@@ -1,11 +1,9 @@
 package com.jttw.engine.world.feature;
 
 import com.jttw.engine.JTTWEngine;
-import com.jttw.engine.entity.flowerfruit.FakePilgrimEntity;
-import com.jttw.engine.entity.flowerfruit.FlowerFruitMonster;
-import com.jttw.engine.registry.FlowerFruitRegistry;
 import com.jttw.engine.world.Zones;
 import com.jttw.engine.world.flowerfruit.CavePlan;
+import com.jttw.engine.world.flowerfruit.FlowerFruitGarrison;
 import com.jttw.engine.world.flowerfruit.IslandShape;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
@@ -15,8 +13,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.RandomizableContainer;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -35,6 +31,8 @@ import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.storage.loot.LootTable;
 
+import java.util.List;
+
 /**
  * Flower-Fruit Mountain's life, once {@link FlowerFruitIslandFeature} has raised it:
  * <ul>
@@ -43,11 +41,12 @@ import net.minecraft.world.level.storage.loot.LootTable;
  *   <li>broad-leafed trees and flowering azalea on the lower slopes, <b>pines</b> on the heights and on
  *       the heads of the rock pillars, bamboo about the pool and the stream, ferns, grass and flowers;</li>
  *   <li><b>the monkeys' camps</b> ({@link IslandShape#camps}): a ring of stones, a fire, stools, a
- *       lean-to and a pole flying the Great Sage's yellow banner; and each one's band, put there once
- *       and kept (about one in three roams);</li>
+ *       lean-to and a pole flying the Great Sage's yellow banner; and each one's band, put there and
+ *       kept (about one in three roams), mustered again 20 minutes after it falls ({@link FlowerFruitGarrison});</li>
  *   <li><b>the cave's garrison</b> ({@link CavePlan#POSTS}): the monkeys at their posts in the Water
  *       Curtain Cave, the three fake pilgrims (minibosses) before the old throne, and the stolen
- *       luggage beside them ({@link #LUGGAGE}); the signs, the tablet over the stone gate among them.</li>
+ *       luggage beside them ({@link #LUGGAGE}); the signs, the tablet over the stone gate among them. The
+ *       garrison too comes back 20 minutes after the last of it falls ({@link FlowerFruitGarrison}).</li>
  * </ul>
  */
 public class FlowerFruitLifeFeature extends Feature<NoneFeatureConfiguration> {
@@ -207,7 +206,9 @@ public class FlowerFruitLifeFeature extends Feature<NoneFeatureConfiguration> {
         boolean any = false;
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
         int r = IslandShape.CAMP_REACH;
-        for (IslandShape.Camp camp : IslandShape.camps(seed)) {
+        List<IslandShape.Camp> all = IslandShape.camps(seed);
+        for (int n = 0; n < all.size(); n++) {
+            IslandShape.Camp camp = all.get(n);
             int mx = c[0] + camp.x(), mz = c[1] + camp.z();
             if (mx + r < x0 || mx - r > x0 + 15 || mz + r < z0 || mz - r > z0 + 15) continue;
             int base = IslandShape.campBase(seed, camp);
@@ -227,37 +228,9 @@ public class FlowerFruitLifeFeature extends Feature<NoneFeatureConfiguration> {
                 }
             }
             any = true;
-            if ((mx >> 4) == (x0 >> 4) && (mz >> 4) == (z0 >> 4)) band(level, camp, mx, base + 1, mz, random);
+            if ((mx >> 4) == (x0 >> 4) && (mz >> 4) == (z0 >> 4)) FlowerFruitGarrison.band(level, seed, c, n, random);
         }
         return any;
-    }
-
-    /** A camp's band: a captain and three or four, of the three kinds; kept; a patrol roams. */
-    private static void band(WorldGenLevel level, IslandShape.Camp camp, int x, int y, int z, RandomSource random) {
-        long h = Mth.getSeed(x, 43, z);
-        int n = 4 + (int) Math.floorMod(h >> 8, 2L);
-        for (int i = 0; i < n; i++) {
-            boolean captain = i == 0;
-            int roll = (int) Math.floorMod(h >> (4 + i * 3), 7L);
-            EntityType<? extends FlowerFruitMonster> type = roll < 3 ? FlowerFruitRegistry.STONE_GIBBON.get()
-                    : roll < 6 ? FlowerFruitRegistry.SPEAR_APE.get() : FlowerFruitRegistry.GREAT_BABOON.get();
-            double a = i * Math.PI * 2 / n + 0.4;
-            put(level, type, x + (int) Math.round(Math.cos(a) * 3.5), y, z + (int) Math.round(Math.sin(a) * 3.5), captain,
-                    captain ? 26 + random.nextInt(3) : 20 + random.nextInt(3), new BlockPos(x, y, z), camp.patrol() ? 40 : 12, random);
-        }
-    }
-
-    private static <T extends FlowerFruitMonster> T put(WorldGenLevel level, EntityType<T> type, int x, int y, int z, boolean captain, int lv,
-                                                        BlockPos post, int reach, RandomSource random) {
-        T m = type.create(level.getLevel());
-        if (m == null) return null;
-        m.moveTo(x + 0.5, y, z + 0.5, random.nextFloat() * 360f, 0f);
-        m.finalizeSpawn(level, level.getCurrentDifficultyAt(m.blockPosition()), MobSpawnType.STRUCTURE, null);
-        m.become(lv, captain);
-        m.setPersistenceRequired();
-        m.restrictTo(post, reach);
-        level.addFreshEntityWithPassengers(m);
-        return m;
     }
 
     /** The cave's garrison at its posts in this chunk, the fake pilgrims among them, and the luggage. */
@@ -267,23 +240,7 @@ public class FlowerFruitLifeFeature extends Feature<NoneFeatureConfiguration> {
         for (CavePlan.Post post : CavePlan.POSTS) {
             int x = c[0] + post.x(), z = c[1] + post.z();
             if ((x >> 4) != (x0 >> 4) || (z >> 4) != (z0 >> 4)) continue;
-            BlockPos at = new BlockPos(x, floor + CavePlan.floor(post.x(), post.z()), z);
-            switch (post.kind()) {
-                case CavePlan.PILGRIM -> {
-                    FakePilgrimEntity f = FlowerFruitRegistry.FAKE_PILGRIM.get().create(level.getLevel());
-                    if (f == null) break;
-                    f.moveTo(x + 0.5, at.getY(), z + 0.5, 0f, 0f);
-                    f.finalizeSpawn(level, level.getCurrentDifficultyAt(at), MobSpawnType.STRUCTURE, null);
-                    f.setVariant(post.variant());
-                    f.becomeMiniboss(post.level(), CavePlan.PILGRIM_HEALTH);
-                    f.setPersistenceRequired();
-                    f.restrictTo(at, FakePilgrimEntity.POST);
-                    level.addFreshEntityWithPassengers(f);
-                }
-                case CavePlan.GIBBON -> put(level, FlowerFruitRegistry.STONE_GIBBON.get(), x, at.getY(), z, post.captain(), post.level(), at, 10, random);
-                case CavePlan.APE -> put(level, FlowerFruitRegistry.SPEAR_APE.get(), x, at.getY(), z, post.captain(), post.level(), at, 10, random);
-                default -> put(level, FlowerFruitRegistry.GREAT_BABOON.get(), x, at.getY(), z, post.captain(), post.level(), at, 10, random);
-            }
+            FlowerFruitGarrison.post(level, c, post, random);
             any = true;
         }
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
