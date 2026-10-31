@@ -73,6 +73,8 @@ public final class ChunkBench {
     private static final boolean LION = "lion".equals(System.getProperty("jttw.chunkBench.mode", ""));
     /** "kunlun" runs {@link KunlunBench}: where Mount Kunlun was placed, its peak, its stair walked, its summit. */
     private static final boolean KUNLUN = "kunlun".equals(System.getProperty("jttw.chunkBench.mode", ""));
+    /** "flowerfruit" runs {@link FlowerFruitBench}: where Flower-Fruit Mountain was placed, the island, its falls and cave, pictures. */
+    private static final boolean FLOWER_FRUIT = "flowerfruit".equals(System.getProperty("jttw.chunkBench.mode", ""));
     /** "void" runs the generation and flight measurements in the Great Void instead of the Overworld. */
     private static final boolean VOID = "void".equals(System.getProperty("jttw.chunkBench.mode", ""));
     /** "village" runs {@link VillageBench}: the nearest Tang village of each kind, and the nearest as built. */
@@ -217,6 +219,15 @@ public final class ChunkBench {
             if (p.tickCount < 100) return;
             if (RidgeBench.tick(p)) {
                 report.addAll(RidgeBench.report());
+                write();
+                next(Step.DONE);
+            }
+            return;
+        }
+        if (FLOWER_FRUIT) {
+            if (p.tickCount < 100) return;
+            if (FlowerFruitBench.tick(p)) {
+                report.addAll(FlowerFruitBench.report());
                 write();
                 next(Step.DONE);
             }

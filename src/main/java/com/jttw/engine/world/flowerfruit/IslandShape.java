@@ -161,7 +161,7 @@ public final class IslandShape {
     }
 
     /** The falls country over the mountain's height {@code h}: the basin cut down, the cliff stood up over it, the gorge cut into it. */
-    static double falls(int lx, int lz, double h) {
+    public static double falls(int lx, int lz, double h) {
         int ax = Math.abs(lx);
         if (lz > CLIFF_Z) {
             // the basin, level, walled at its sides and south end by the land climbing back

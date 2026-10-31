@@ -85,6 +85,12 @@ final class AbilityScenes {
             java.util.Map.entry("hell_court", 100), java.util.Map.entry("hell_court_inside", 60), java.util.Map.entry("hell_yama_hall", 100),
             java.util.Map.entry("hell_yama_hall_inside", 60), java.util.Map.entry("hell_wheel", 100), java.util.Map.entry("hell_court_ten", 60),
             java.util.Map.entry("hell_bridge", 100), java.util.Map.entry("hell_bridge_walk", 60), java.util.Map.entry("hell_meng_po", 60),
+            // Flower-Fruit Mountain's falls and the Water Curtain Cave, laid off the stage (the first laid once, a while)
+            java.util.Map.entry("ff_behind_the_curtain", 400), java.util.Map.entry("ff_cave_mouth", 120), java.util.Map.entry("ff_dormitory", 120),
+            java.util.Map.entry("ff_falls", 200), java.util.Map.entry("ff_falls_low", 120), java.util.Map.entry("ff_great_hall", 120),
+            java.util.Map.entry("ff_iron_bridge", 120), java.util.Map.entry("ff_old_throne", 80), java.util.Map.entry("ff_pilgrims_in_hall", 80),
+            java.util.Map.entry("ff_sanctum", 120), java.util.Map.entry("ff_sanctum_macaque", 80), java.util.Map.entry("ff_sanctum_warning", 80),
+            java.util.Map.entry("ff_stone_gate", 100), java.util.Map.entry("ff_store", 100), java.util.Map.entry("ff_tablet", 80),
             // the Fire Cloud Cave, laid off the stage
             java.util.Map.entry("fire_cave_door", 160), java.util.Map.entry("fire_cave_door_close", 80), java.util.Map.entry("fire_cave_throne_room", 160),
             java.util.Map.entry("fire_cave_red_boy_on_his_dais", 200), java.util.Map.entry("fire_fanned", 60),
@@ -141,6 +147,7 @@ final class AbilityScenes {
         all.addAll(WatersScenes.all());
         all.addAll(HellScenes.all());
         all.addAll(FireScenes.all());
+        all.addAll(FlowerFruitScenes.all());
         all.addAll(WuzhuangScenes.all());
         all.addAll(LionScenes.all());
         all.addAll(FengduScenes.all());
@@ -1223,6 +1230,7 @@ final class AbilityScenes {
         WatersScenes.clear(p);
         HellScenes.clear(p);
         FireScenes.clear(p);
+        FlowerFruitScenes.clear(p);
         WuzhuangScenes.clear(p);
         LionScenes.clear(p);
         VillageScenes.clear(p);

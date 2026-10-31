@@ -460,7 +460,9 @@ the first aerial zone, in the sky; Lion-Camel Ridge, the last band, is the last.
 Fengdu, the Ghost City: a place, not a zone of a band, placed as the zones are, whose Gate of
 Ghosts is the way down to Hell for everyone who comes to it by an Ancient City and fights it open.
 Far to the west stands Mount Kunlun, another such place: a towering sacred massif with the Queen
-Mother of the West's palace on its summit, where the Banana-Leaf Fan lies.
+Mother of the West's palace on its summit, where the Banana-Leaf Fan lies. Out in the sea near spawn rises Flower-Fruit Mountain, the
+Monkey King's old island, of the first band's levels; at the back of its Water Curtain Cave sits the
+Six-Eared Macaque, an optional level-120 superboss, the strongest boss of all.
 
 **One of each a world.** Every boss lives in one place: each overworld zone has a single region a
 world (`ZoneMap`), except the Mystical Waters, which have one in each of the Four Seas, east, south,
@@ -470,6 +472,7 @@ west lengthens with the pilgrim: the higher a zone's levels, the farther out its
 | Zone | Levels | Distance from spawn (centre) | Regions |
 |---|---|---|---|
 | White Bone Ridge | 20–36 | 1–2 km | one, ~840 blocks across (never under 720) |
+| Flower-Fruit Mountain (an island in the sea) | 20–30; its optional superboss, the Six-Eared Macaque, 120 | 1.8–3.2 km | one, ~640 |
 | Bottomless Cave (Pit-Hole Mountain and under it) | 37–46 | 2–3 km | one, ~380 |
 | Mystical Waters (deep ocean) | 47–56 | 3–4.5 km | four, one per sea (within 30° of east, south, west, north), ~440 |
 | Hell (a dimension, entered through Fengdu) | 57–66 | — | the Ten Courts |
@@ -522,11 +525,11 @@ each, where one alone cannot realistically outlast it:
 
 | Rank | Blow (share of health, before resistance) | Hits to kill | Who |
 |---|---|---|---|
-| Light mobs | 6–7% (15–20 hits kill you) | 2–4 | wraiths, mouse spirits, ember imps, fish soldiers, yin soldiers, wandering ghosts, judge-clerks, cloud cranes, Wind-Drillers, goblins |
-| Normal mobs | 8–10% | 4–8 | flower maids, shrimp soldiers, yaksha, Horse-Face, the Impermanence, peng-demons, Daoist disciples, kobolds, wolfmen, heavenly soldiers |
-| Heavy mobs | 11–12%, no single hit (slam, gore, pounce, swoop) over 12% | 10–12 | Bone Servants, Furnace-Brick Brutes, ogres, elephant-demons, lion-demons, turtle soldiers, Crab Generals, Ox-Head |
+| Light mobs | 6–7% (15–20 hits kill you) | 2–4 | wraiths, mouse spirits, ember imps, fish soldiers, yin soldiers, wandering ghosts, judge-clerks, cloud cranes, Wind-Drillers, goblins, stone-throwing gibbons, the Macaque's hair clones |
+| Normal mobs | 8–10% | 4–8 | flower maids, shrimp soldiers, yaksha, Horse-Face, the Impermanence, peng-demons, Daoist disciples, kobolds, wolfmen, heavenly soldiers, spear apes |
+| Heavy mobs | 11–12%, no single hit (slam, gore, pounce, swoop) over 12% | 10–12 | Bone Servants, Furnace-Brick Brutes, ogres, elephant-demons, lion-demons, turtle soldiers, Crab Generals, Ox-Head, great baboons |
 | Captains | a regular's ×1.2: at most 14.4% | a regular's ×2.5 | any of the above, purple-named |
-| Minibosses | 17–19%: a miniboss's hardest hit is 19% whatever its kind | a captain's, or more | the floor wardens and gate keepers of every lair (White Bone's Wardens and Keepers of the Bone Gate, the Bottomless Cave's guardians, the Fire Cloud Cave's door wardens and floor guardians, Lion-Camel's floor wardens), the Six Strong Generals, Clear Wind and Bright Moon, Heavenly Generals |
+| Minibosses | 17–19%: a miniboss's hardest hit is 19% whatever its kind | a captain's, or more | the floor wardens and gate keepers of every lair (White Bone's Wardens and Keepers of the Bone Gate, the Bottomless Cave's guardians, the Fire Cloud Cave's door wardens and floor guardians, Lion-Camel's floor wardens), the Six Strong Generals, Clear Wind and Bright Moon, Heavenly Generals, the Six-Eared Macaque's three fake pilgrims |
 | Bosses | 25–33% (3–4 blows kill you); no special or area hit harder | 250–350, all its lives together; each life more than any miniboss's | every `ZoneBoss` |
 
 A miniboss is a captain made one by `ZoneMonster.becomeMiniboss(level, health over a captain's)`;
@@ -538,8 +541,16 @@ Lady Earth Flow 270, the Dragon Kings 270, the Ten Kings 280 (Zhuanlun 300), Kin
 320, Zhenyuan 280 (more hand to hand: he brushes one blow in four aside), the White Elephant 330, the
 Azure Lion 350. Their health runs to tens of millions at level 100, past vanilla's cap of 1024 max
 health: `JTTWEngine` lifts the cap (and attack's) to a billion.
+**One superboss** stands over them all: the Six-Eared Macaque, an optional fight at **level 120**
+(past the players' cap), 430 hits of a level-120 character and a blow of 33% of one's health, the
+strongest boss there is. A level past the cap is measured against a character grown on past it, each
+level 1.03x the one before (`MobScaling.PAST_CAP_GROWTH`; gentler than the campaign's 1.10, so
+level 120 is about 1.8x a level-100 character): against capped players he takes some 780 of their
+hits and his blow is about 60% of their health, two blows and they fall.
 `PeckingOrderGameTests` makes every creature of the mod in each of its ranks and fails if any hits
-out of its place, any boss is under 250 hits, or any boss's life is no more than the toughest miniboss's.
+out of its place, any boss is under 250 hits, or any boss's life is no more than the toughest
+miniboss's; and over 360 hits, but for the one named superboss exception (the Macaque, up to 460),
+whom it checks is the strongest boss there is.
 
 To add a zone:
 
@@ -1775,6 +1786,120 @@ the axis of the world, the reason the Overworld's sky was raised (see **The tall
   map.
 
 ---
+
+#### Flower-Fruit Mountain (levels 20–30; the Six-Eared Macaque, level 120)
+
+Flower-Fruit Mountain (花果山, the Monkey King's old kingdom) and the Water Curtain Cave (水帘洞)
+behind its waterfall, taken by the Six-Eared Macaque (六耳猕猴, chapters 56–58), who wore the Monkey
+King's shape so exactly that only the Buddha could tell them apart, beat the Tang Monk, stole his
+luggage and made himself a false pilgrimage to fetch the scriptures in his place. In
+[`world/flowerfruit/`](src/main/java/com/jttw/engine/world/flowerfruit/) and
+[`entity/flowerfruit/`](src/main/java/com/jttw/engine/entity/flowerfruit/); its registrations kept to
+`registry/FlowerFruitRegistry` (one line in `JTTWEngine`), its art to `FlowerFruitRenderers`.
+
+- **Where** (`Zones.FLOWER_FRUIT`): an island raised out of the sea (ocean, warm, lukewarm and cold
+  ocean and their deep kinds; the host judged just under the waves), the whole column. One a world,
+  a region about 640 blocks across, 1.8–3.2 km from spawn: it shares the first band with White Bone
+  Ridge (where the Earth Gods' needle points for 20–30; they name the island too, and its way), and
+  keeps clear of every zone before it.
+- **The island** (`IslandShape`, pure and unit-tested; `FlowerFruitIslandFeature`, column by
+  column): a towering mountain out of the sea, its coast some 220 blocks from the centre, its flanks
+  climbing in shelves (the orchards' terraces) and spurs to a sharp peak 170 blocks over the sea; the
+  **immortal stone egg** (仙石) on the summit that the Monkey King was born from, split open and
+  hollow; **fantastic rock pillars**, sheer columns of banded stone with pines on their heads,
+  standing out of the flanks and out of the shallows round it; beaches and shoals. Grey stone banded
+  with calcite, andesite and tuff on the faces, moss on the lower ones; grass, moss and podzol above.
+  Misty air (pale fog, drifting motes), clear blue-green water.
+- **The falls** (on the south face): a great cliff, a river down a gorge from its spring to the
+  lip, out over an overhang, and falling **sixty blocks** as a sheet into the pool in the basin at
+  the cliff's foot, the pool's stream winding on to the sea; behind the sheet, a ledge along the
+  cliff's foot to the cave's mouth.
+- **Life** (`FlowerFruitLifeFeature`): peach orchards in pink blossom on the terraces, fallen petals
+  under them; broad-leafed trees and flowering azalea lower down, pines on the heights, bamboo about
+  the pool and the stream, ferns, grass, peonies, roses and lilac. **The monkeys' camps**
+  (`IslandShape.camps`): a ring of mossy stones, a fire and stools, a lean-to, a pole flying the
+  Great Sage's yellow banner; each with its band put there once and kept (a captain and three or
+  four; about one in three roams).
+- **The Water Curtain Cave** (`CavePlan`, the same in every world, pure and unit-tested, laid with
+  the island): the mouth, an arch in the cliff behind the falling water; **the iron bridge** (铁板桥)
+  across the chasm the cave's stream runs in, chains for its rails, lanterns at its ends; the gate
+  court and its **stone gate**, two stone monkeys squatting before it and over it **the tablet**:
+  花果山福地，水帘洞洞天, "Blessed Land of Flower-Fruit Mountain, Cave Heaven of Water Curtain Cave";
+  **the great hall**, 84 by 60 under a vault 27 high, ten great columns of dripstone, stalactites,
+  lamps on chains, shroomlight in the vault, the monkeys' stone tables, stools, pots and bowls, and
+  the Monkey King's old stone throne on its dais under the Great Sage's yellow banners; the
+  **dormitory** of stone beds to the west, the **store** of stone pots, bowls, cauldrons and the
+  armoury to the east. Its garrison (`CavePlan.POSTS`, 22 monkeys and their captains) is put there
+  once and kept, each to its post.
+- **The monkey truce** (`ZoneAllies.WUKONG`): the monkeys know the true Monkey King. Nothing of the
+  monkey army targets a Wukong player or fights him back, even struck (and what he strikes down of
+  theirs leaves him nothing); when he comes near with no fight on they drop to their knees and
+  kowtow, now and then one hailing him ("The Great King is home!"). The fake pilgrims and the
+  Macaque know him too, and fight him all the same.
+- **Creatures** (`FlowerFruitMonster`: level 20, captains 27, any light, one in eight a captain;
+  every attack warned first):
+  - **Stone-Throwing Gibbon** (投石长臂猿, light): long-armed, a pale ring of fur round its dark face,
+    a sling-bag of stones. You kill it in **3 hits**; its claw is 6.5% (16 kill you). It rears back
+    with a stone over its head (0.5 s), then hurls it in an arc, 7% (a captain three, fanned), from
+    3–18 blocks.
+  - **Spear Ape** (持枪猿兵, normal): a red-faced macaque in leather lamellae, a red headband, a long
+    tasselled spear. **6 hits**; its thrust 9% (12 kill you). It draws its spear back (0.7 s) and
+    lunges 5.5 blocks, 10% to all in its line.
+  - **Great Baboon** (巨狒, heavy): a hulk with a silver mane, a dog's fanged muzzle, iron bands on its
+    arms. **11 hits**; its blow 11.5% (9 kill you). It rears up beating its chest (1 s) and pounds
+    the ground, 11% to all within 4.5 blocks, thrown up.
+  - Captains: 2.5x the hits (gibbon 8, ape 15, baboon 28), blows 1.2x (8–14%).
+- **The fake pilgrims** (`FakePilgrimEntity`, the zone's minibosses, levels 28–30, purple; one each,
+  before the old throne with **the stolen luggage**, two chests): the **false Tang Sanzang**
+  (kasaya, Vairocana crown, ringed staff) chants the **Tightening-Fillet Spell** (1.5 s, golden rings
+  rising): all within 8 blocks struck, slowed and dizzied, and a Wukong player, whose head the fillet
+  binds, held fast; the **false Zhu Bajie** heaves his nine-tooth rake over his shoulder (0.9 s) and
+  sweeps it round before him, all in its arc thrown back; the **false Sha Wujing** (necklace of
+  skulls, crescent-moon spade) levels his spade (0.7 s) and charges 8 blocks. Each a monkey in the
+  likeness, a monkey's tail under his robe; struck down, the likeness falls away. You kill one in
+  **40 hits** (a captain's 25, and 1.6x); a blow is 19% (6 kill you), a trick 13%. (The novel's fake
+  white horse is left out.)
+- **The Six-Eared Macaque** (`SixEaredMacaqueEntity`, the strongest boss in the world, and
+  **optional**): level **120**, past the players' cap, in **his sanctum** at the back of the cave, a
+  tunnel off the great hall with a warning at its mouth ("Beyond sits one who calls himself the Great
+  Sage", Lv 120); no one has to face him to have the rest of the mountain, its army, its pilgrims and
+  its cave. The sanctum: a round hall under a 30-high vault, six gold-banded black pillars (one for
+  each ear) with soul fire at their feet, his throne of black stone and gold on its steps under torn
+  yellow banners. He is the Monkey King's mirror: the phoenix-plumed cap, the gold fillet, golden chain
+  mail, a tiger-skin kilt, a red cloak, an iron staff banded in gold, and three ears a side. **430
+  hits of a level-120 character** (some 780 of a level-100 player's), his staff a third of a level-120
+  character's health (some 60% of a capped player's: two blows); a yellow bar; he speaks. His kit,
+  each part warned:
+  - **the whirling staff**: he spins it over his head (1 s), then sweeps it round him: 30%, all within
+    5.5 blocks thrown back;
+  - **the cloud somersault** (筋斗云): he crouches as a cloud gathers under him (0.6 s), then shoots
+    along a line up to 16 blocks, 28% to all in his path, and stands past his foe;
+  - **hair clones** (身外身法, from two thirds): he plucks and chews his hair (0.8 s) and blows: three
+    of himself (five from a third), frail (2 hits), a light blow, no bar, gone in half a minute, again
+    every 30 s; they pay nothing;
+  - **the Dharma image** (法天象地, at a third): half again his height, quicker; and **the
+    heaven-splitting blow**: the grown staff raised high (1.3 s, its line lit gold on the ground) and
+    brought down, 33% along a line 14 blocks long;
+  - **six ears**: nothing is hidden from him; he finds the invisible and the sneaking.
+  He keeps to his sanctum: brought far out of it he is back at once.
+- **What they leave**: the monkeys **monkey hair**, apples, stones, iron; the fake pilgrims gold,
+  emeralds, paper, now and then an immortal peach; the stolen luggage bread, paper, gold, emeralds,
+  apples; the Macaque **his iron staff** one time in two (+60% damage, +1 reach, a staff's pace;
+  `MacaqueStaffItem`), 2–4 immortal peaches, diamonds, gold, sigils, hair.
+- **XP and karma**: band 20–30, base grunt XP 80 (White Bone Ridge's pay); the Macaque's hair clones
+  pay nothing. Striking him down (he beat the Tang Monk and stole his luggage) is a good deed: **karma
+  +150**; the pilgrims are captains (+5), the monkeys monsters (+1).
+- **Art**: `FlowerFruitRenderers` (one frame for all of them, its poses for each warning and blow,
+  kneeling to the king; models and skins with glowing eyes from `assets_source/flower_fruit.py`, the
+  staff and the hair too).
+- **Tests and pictures**: `FlowerFruitPlacementTest` (the sea for its hosts, its band, one island in
+  its ring and on no other zone's ground, the towering peak and the sea round it, pillars and camps,
+  the falls country, the egg, a way on foot from the mouth to the sanctum and the rock over all of the
+  cave, the posts), `FlowerFruitGameTests` (the ranks, each warned attack, the truce and the kneeling,
+  the pilgrims' tricks, the Macaque's level, kit, phases and lair, loot, XP and karma, the cave in
+  blocks), `PeckingOrderGameTests` (the superboss exception, and that he is the strongest boss);
+  gallery scenes `-Pgallery.only=scene__ff_`; the island, its falls and its cave in a real world with
+  `./gradlew runWorldgenBench -Pbench.mode=flowerfruit`.
 
 ## The open world's yaoguai
 
