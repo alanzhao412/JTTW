@@ -44,7 +44,7 @@ OUT = 'src/main/resources/assets/jttw_engine/textures/entity/'
 S = w.SIDES
 
 # Drawn sizes: FlowerFruitRenderers.SIZE_*
-SIZES = {'gibbon': 0.92, 'ape': 0.95, 'baboon': 1.1, 'tang': 0.95, 'bajie': 0.95, 'sha': 0.95, 'macaque': 1.0}
+SIZES = {'gibbon': 0.92, 'ape': 0.95, 'baboon': 1.1, 'tang': 0.95, 'bajie': 0.95, 'sha': 0.95, 'macaque': 1.25}
 
 GOLD = (232, 184, 62)
 GOLD_DEEP = (150, 100, 30)
@@ -139,6 +139,9 @@ def monkey_head(parent, at, rot, M):
         # the brow: two heavy ridges meeting over the nose, angled down to it in a scowl
         part('right_brow', 'head', (0, -Hh * 0.84, -D - 0.75), (0, 0.18, 0.2), [(-W * 0.95, -0.6, -0.65, W * 0.98, 1.25, 1.3, pfx + 'brow')]),
         part('right_cheekpad', 'head', (-W * 0.5, -Hh * 0.38, -D - 0.45), (0, 0.3, 0), [(-1.3, -1.2, -0.7, 2.4, 2.2, 1.2, pfx + 'cheek')]),
+        # the eyes: each a part of its own, wide apart, deep-set under the brow's overhang, burning
+        part('right_eye', 'head', (-W * 0.42, -Hh * 0.68, -D - 0.5), (0, 0.22, 0), [
+            (-1.05 * M.get('eye', 1.0), -0.55, -0.45, 2.1 * M.get('eye', 1.0), 1.1, 0.5, pfx + 'eye')]),
         part('jaw', 'head', (0, -Hh * 0.42 + mh - 0.2, -D - 0.2), (0.06, 0, 0), [
             (-mw * 0.86, 0, -ml * 0.88 - 0.4, 2 * mw * 0.86, M.get('jaw_h', 1.4), ml * 0.88 + 0.6, pfx + 'jaw'),
             (-mw * 0.8, M.get('jaw_h', 1.4) - 0.2, -ml * 0.6, 2 * mw * 0.8, 1.0, ml * 0.6 + 0.6, pfx + 'chin')]),
@@ -152,9 +155,9 @@ def monkey_head(parent, at, rot, M):
         out.append(part('crownlock_%d' % i, 'head', (x, -Hh * 1.0, z), (-0.75, r, r * 0.6), [(-1.1, -0.5, -0.4, 2.2, 1.0, 3.2 + 0.6 * (i % 2), pfx + 'lock')]))
     n = M.get('ears', 1)
     for e in range(n):
-        y = -Hh * 0.6 + (e - (n - 1) / 2) * 2.15
+        y = -Hh * 0.6 + (e - (n - 1) / 2) * M.get('ear_gap', 2.15)
         z = -D * 0.15 + abs(e - (n - 1) / 2) * 0.5
-        out.append(part('right_ear_%d' % e if n > 1 else 'right_ear', 'head', (-W - 0.1, y, z), (0, -0.35, 0.18 - 0.08 * e), [
+        out.append(part('right_ear_%d' % e if n > 1 else 'right_ear', 'head', (-W - 0.1, y, z), (0, -0.35 - M.get('ear_out', 0.0), 0.18 - 0.08 * e), [
             (-0.9, -1.2 * M.get('ear', 1.0), -1.0 * M.get('ear', 1.0), 1.0, 2.4 * M.get('ear', 1.0), 2.1 * M.get('ear', 1.0), pfx + 'ear')]))
     return out
 
@@ -231,16 +234,19 @@ def monkey_face(p, rect, skin_c, shade, eye_c, ring=None, eye_w=3, eye_y=None, b
         inside = abs(dx) < edge and lobe and not (dy < 0.12 and abs(dx) < 0.12 and heart)
         c = mix(skin_c, shade, w.clamp(abs(dx) * 0.6 + w.vnoise(fx + i, fy + j, 3, 9) * 0.3)) if inside else (ring or k(shade, 0.7))
         p.px(xy, [v + p.rnd.randint(-4, 4) for v in c])
-    ey = eye_y if eye_y is not None else max(1, int(fh * 0.32))
-    gap = max(1, fw // 10)
-    left_x = int(cx - gap - eye_w + 1)
-    right_x = int(cx + gap + 1)
-    for x in (left_x, right_x):
-        w.eye(p, rect, x, ey, eye_w, 2, eye_c, lid=lid or k(shade, 0.6), socket=k(shade, 0.45), glow=glow)
-    # wrinkles under the eyes and at the brow
-    for x in range(left_x - 1, right_x + eye_w + 1):
-        if 0 <= x < fw and (x + ey) % 2 == 0:
-            p.px((fx + x, fy + ey + 3), k(shade, 0.8))
+    # the deep sockets the eyes (parts of their own, set under the brow: monkey_head) sit in, one each
+    # side, wide apart; wrinkles under them
+    ey = eye_y if eye_y is not None else max(1, int(fh * 0.22))
+    for cxe in (fw * 0.25, fw * 0.75):
+        for j in range(ey - 1, ey + 4):
+            for i in range(int(cxe - 3), int(cxe + 3) + 1):
+                if 0 <= i < fw and 0 <= j < fh:
+                    d = ((i + 0.5 - cxe) / 3.2) ** 2 + ((j + 0.5 - ey - 1.2) / 2.4) ** 2
+                    if d < 1:
+                        p.px((fx + i, fy + j), k(shade, 0.3 + 0.35 * d))
+        for i in range(int(cxe - 2), int(cxe + 3)):
+            if 0 <= i < fw and ey + 4 < fh and i % 2 == 0:
+                p.px((fx + i, fy + ey + 4), k(shade, 0.75))
 
 
 def muzzle(p, f, skin_c, shade, nostril=(30, 14, 12), lips=None, teeth=None, fangs=False):
@@ -277,9 +283,25 @@ def cloth(p, f, base, deep=None, fold=4, faces=None, fall=0.3):
     w.cloth(p, f, base, deep or k(base, 0.55), fold=fold, faces=faces, fall=fall, coarse=False)
 
 
-def common(p, style, f, pfx, fur, dark, tip, face, shade, hand, nail=CLAW):
+def common(p, style, f, pfx, fur, dark, tip, face, shade, hand, nail=CLAW, eye=(255, 190, 70)):
     """What every frame shares, in this creature's colours: fingers and toes, fur tufts, the lip,
     chin, cheek pads, nape and the locks over the crown."""
+    if style == pfx + 'eye':
+        w.flat(p, f, k(shade, 0.25))
+        fx, fy, fw, fh = f['front']                                # a burning iris, a dark pupil, a catch of light
+        for j in range(fh):
+            for i in range(fw):
+                edge = i in (0, fw - 1)
+                c = k(eye, 0.7) if edge else eye
+                if j == 0 and edge:
+                    p.px((fx + i, fy + j), k(shade, 0.3))
+                    continue
+                p.lit((fx + i, fy + j), c, 1.0)
+        mid = fw // 2
+        for j in range(fh):
+            p.px((fx + mid, fy + j), (12, 8, 6))
+            p.glow.putpixel((fx + mid, fy + j), (0, 0, 0, 0))
+        p.lit((fx + max(1, mid - 1), fy), (255, 250, 230), 1.0)
     if style in ('finger', 'toe'):
         skin(p, f, hand, k(hand, 0.55))
         for s_ in ('front', 'bottom'):
@@ -326,10 +348,11 @@ LOIN = (54, 72, 118)
 
 GIBBON = biped(dict(hipw=1.7, thigh=2.8, thigh_len=4.8, shin=2.4, shin_len=4.6, foot=(2.6, 4.6, 1.3),
                     pelvis=(5.0, 3.0, 3.8), chest=(6.2, 7.0, 4.2), arm=(2.2, 7.8, 2.0, 7.4, 2.4, 3.2),
-                    lean=0.22, chest_lean=0.1, legr=(-0.5, 0, 0.06), shinr=(0.85, 0, 0), footr=(-0.35, 0, 0),
+                    lean=0.12, chest_lean=0.06, legr=(-0.45, 0, 0.06), shinr=(0.85, 0, 0), footr=(-0.35, 0, 0),
                     armr=(-0.18, 0, 0.1), forer=(-0.25, 0, 0)))
 GIBBON = mirrored(GIBBON + monkey_head('chest', (0, -7.0, -0.8), (-0.2, 0, 0),
-                                       dict(w=3.3, h=5.9, d=3.1, p='g_', muzzle=(1.5, 1.7, 1.1), ears=1, ear=0.85, ruff=1.3)) + [
+                                       dict(w=3.6, h=6.2, d=3.3, p='g_', muzzle=(1.6, 1.8, 1.2), ears=1, ear=0.8, ruff=1.8, eye=1.05)) + [
+    part('facering', 'head', (0, -6.2 * 0.5, -3.3 - 0.2), (0, 0, 0), [(-3.9, -3.4, -0.3, 7.8, 6.4, 0.7, 'g_ring')]),
     part('right_shoulderfur', 'chest', (-3.0, -6.6, 0), (0, 0, 0.3), [(-1.4, -0.6, -2.2, 2.6, 2.6, 4.4, 'g_ruff')]),
     part('loincloth', 'body', (0, -0.6, -2.0), (-0.05, 0, 0), [(-2.2, 0, -0.3, 4.4, 4.6, 0.6, 'g_loin')]),
     part('sway_loin_back', 'body', (0, -0.6, 2.0), (0.1, 0, 0), [(-2.2, 0, -0.3, 4.4, 3.6, 0.6, 'g_loin')]),
@@ -345,7 +368,7 @@ GIBBON = w.settle(GIBBON, ('right_foot', 'left_foot'))
 
 
 def paint_gibbon(p, style, f, dims, captain=False):
-    common(p, style, f, 'g_', GIB_FUR, GIB_DARK, GIB_TIP, GIB_FACE, GIB_SHADE, (40, 32, 30))
+    common(p, style, f, 'g_', GIB_FUR, GIB_DARK, GIB_TIP, GIB_FACE, GIB_SHADE, (206, 198, 182), eye=GIB_EYE)
     if style in ('thigh', 'shin', 'upperarm', 'forearm', 'chest', 'pelvis', 'g_skull', 'g_crown'):
         pelt(p, f, GIB_FUR, GIB_DARK, GIB_TIP)
         if style == 'chest':
@@ -353,12 +376,22 @@ def paint_gibbon(p, style, f, dims, captain=False):
             for i, j, xy in w.each(p, (fx + 2, fy, fw - 4, fh // 2)):
                 c = p.get(xy)
                 p.px(xy, mix(c[:3], (120, 104, 90), 0.4))
-    if style in ('foot', 'hand'):
-        skin(p, f, (40, 32, 30), (20, 16, 16))
+    if style in ('foot', 'hand'):                                 # white hands and feet, as a lar gibbon's
+        pelt(p, f, (214, 206, 190), (150, 142, 128), (236, 230, 220))
         fx, fy, fw, fh = f['front']
         for x in range(0, fw, 2):                                 # its long fingers
             for j in range(fh // 2, fh):
                 p.px((fx + x, fy + j), (18, 14, 14))
+    if style == 'g_ring':                                        # the pale ring of fur framing its face, open in the middle
+        tufted(p, f, GIB_RING, k(GIB_RING, 0.75), depth=2, every=2)
+        fx, fy, fw, fh = f['front']
+        for i, j, xy in w.each(p, f['front']):
+            if ((i + 0.5 - fw / 2) / (fw * 0.36)) ** 2 + ((j + 0.5 - fh * 0.52) / (fh * 0.42)) ** 2 < 1:
+                p.clear(xy)
+        fx, fy, fw, fh = f['back']
+        for i, j, xy in w.each(p, f['back']):
+            if ((i + 0.5 - fw / 2) / (fw * 0.36)) ** 2 + ((j + 0.5 - fh * 0.52) / (fh * 0.42)) ** 2 < 1:
+                p.clear(xy)
     if style == 'g_ruff':
         tufted(p, f, k(GIB_FUR, 1.15), GIB_DARK, GIB_TIP, depth=3)
     if style == 'g_face':
@@ -431,7 +464,7 @@ APE = w.settle(APE, ('right_foot', 'left_foot'))
 
 
 def paint_ape(p, style, f, dims, captain=False):
-    common(p, style, f, 'a_', APE_FUR, APE_DARK, APE_TIP, APE_FACE, APE_SHADE, (150, 90, 70))
+    common(p, style, f, 'a_', APE_FUR, APE_DARK, APE_TIP, APE_FACE, APE_SHADE, (150, 90, 70), eye=APE_EYE)
     lace = VIOLET if captain else LACE
     if style in ('thigh', 'upperarm', 'forearm', 'chest', 'pelvis', 'a_skull', 'a_crown', 'shin'):
         pelt(p, f, APE_FUR, APE_DARK, APE_TIP)
@@ -530,7 +563,7 @@ BABOON = w.settle(BABOON, ('right_foot', 'left_foot', 'right_hand', 'left_hand')
 
 
 def paint_baboon(p, style, f, dims, captain=False):
-    common(p, style, f, 'b_', BAB_FUR, BAB_DARK, BAB_TIP, BAB_FACE, BAB_SHADE, (58, 46, 44))
+    common(p, style, f, 'b_', BAB_FUR, BAB_DARK, BAB_TIP, BAB_FACE, BAB_SHADE, (58, 46, 44), eye=BAB_EYE)
     if style in ('thigh', 'shin', 'upperarm', 'forearm', 'chest', 'pelvis', 'b_skull', 'b_crown', 'b_tail'):
         pelt(p, f, BAB_FUR, BAB_DARK, BAB_TIP)
     if style in ('foot', 'hand'):
@@ -644,7 +677,7 @@ def fake_tell(p, f):
 
 
 def paint_tang(p, style, f, dims):
-    common(p, style, f, 't_', FAKE_FUR, FAKE_FUR_DARK, FAKE_FUR_TIP, MONK_SKIN, MONK_SHADE, (150, 110, 74))
+    common(p, style, f, 't_', FAKE_FUR, FAKE_FUR_DARK, FAKE_FUR_TIP, MONK_SKIN, MONK_SHADE, (150, 110, 74), eye=TANG_EYE)
     if style in ('t_robe', 'pelvis', 't_robe_chest'):
         cloth(p, f, ROBE_GREY, fold=4)
         if style == 't_robe':
@@ -763,13 +796,14 @@ BAJIE = mirrored(BAJIE + [
         (-2.6, -3.6, -8.4, 5.2, 3.6, 5.0, 'j_snout'),
         (-2.8, -3.8, -8.8, 5.6, 3.8, 0.6, 'j_snoutend'),
         (-4.2, -3.2, -3.8, 8.4, 3.6, 4.0, 'j_jowl'),
-        (-3.4, -4.9, -3.9, 6.8, 1.0, 0.6, 'j_brow'),
+        (-3.4, -5.9, -3.9, 6.8, 1.0, 0.6, 'j_brow'),
         (-3.6, -6.4, -1.6, 7.2, 1.2, 4.6, 'j_bristle')]),
     part('jaw', 'head', (0, -0.3, -3.2), (0.05, 0, 0), [(-2.0, 0, -4.2, 4.0, 1.4, 4.6, 'j_jaw')]),
     part('right_tusk', 'jaw', (-1.6, 0.1, -3.8), (-0.3, 0, 0.1), [(-0.35, -1.8, -0.35, 0.7, 1.9, 0.7, 'j_tusk')]),
-    part('right_ear', 'head', (-3.7, -5.8, -0.8), (-0.95, 0.35, 0.55), [(-0.4, 0, -2.6, 0.8, 6.8, 5.2, 'j_ear')]),
-    part('right_brow', 'head', (-1.8, -4.9, -3.75), (0, 0, 0.25), [(-1.6, -0.5, -0.4, 3.0, 0.9, 0.8, 'j_brow')]),
-    part('right_eye', 'head', (-1.8, -4.3, -3.65), (0, 0, 0), [(-0.8, -0.4, -0.2, 1.6, 0.9, 0.3, 'j_eye')]),
+    part('right_ear', 'head', (-3.8, -5.6, 0.4), (-0.55, 0.6, 0.75), [(-0.4, 0, -2.8, 0.8, 7.0, 5.4, 'j_ear')]),
+    part('monkcap', 'head', (0, -6.0, 0.2), (-0.1, 0, 0), [(-3.6, -1.6, -3.4, 7.2, 1.8, 7.0, 'j_cap'), (-3.0, -2.4, -2.8, 6.0, 1.0, 5.8, 'j_cap')]),
+    part('right_brow', 'head', (-1.8, -5.25, -3.85), (0, 0, 0.25), [(-1.6, -0.5, -0.4, 3.0, 0.9, 0.8, 'j_brow')]),
+    part('right_eye', 'head', (-1.9, -4.2, -3.7), (0, 0.15, 0), [(-1.0, -0.55, -0.25, 2.0, 1.1, 0.4, 'j_eye')]),
 ])
 BAJIE += tail('body', (0, -0.6, 3.4), 4, 1.3, 0.8, 3.0, 0.25, 'fake_tail', start=(1.2, 0, 0))
 RAKE_AIM = aim([(0, 0, 0), (0, 0, 0), (-0.15, 0, 0.2), (-0.4, 0, 0)], (0.1, 0, 0))
@@ -818,16 +852,23 @@ def paint_bajie(p, style, f, dims):
             for j in (fh // 2 - 1, fh // 2):
                 for t in range(2):
                     p.px((fx + x + t, fy + j), (40, 20, 22))
+    if style == 'j_cap':
+        cloth(p, f, (30, 28, 34), fold=3)
+        trim(p, f, (120, 30, 30), top=False)
     if style == 'j_brow':
         skin(p, f, k(BAJIE_SKIN, 0.8), BAJIE_SHADE)
     if style == 'j_bristle':
         tufted(p, f, (40, 34, 36), (16, 14, 14), depth=2, every=2, faces=('front', 'right', 'left'))
-    if style == 'j_eye':
-        w.flat(p, f, (240, 230, 210))
+    if style == 'j_eye':                                          # small, shrewd, glinting: a monkey's eyes in a pig's face
+        w.flat(p, f, (30, 22, 24))
         fx, fy, fw, fh = f['front']
         for j in range(fh):
-            p.lit((fx + fw // 2, fy + j), BAJIE_EYE, 0.5)
-            p.px((fx + fw // 2 - 1, fy + j), (20, 14, 12))
+            for i in range(1, fw - 1):
+                p.lit((fx + i, fy + j), BAJIE_EYE, 1.0)
+        for j in range(fh):
+            p.px((fx + fw // 2, fy + j), (14, 10, 8))
+            p.glow.putpixel((fx + fw // 2, fy + j), (0, 0, 0, 0))
+        p.lit((fx + 1, fy), (255, 250, 230), 1.0)
     if style == 'j_tusk':
         w.flat(p, f, IVORY)
     if style == 'j_ear':
@@ -888,7 +929,7 @@ SHA = w.settle(SHA, ('right_foot', 'left_foot'))
 
 
 def paint_sha(p, style, f, dims):
-    common(p, style, f, 's_', SHA_HAIR, SHA_HAIR_DARK, SHA_HAIR_TIP, SHA_SKIN, SHA_SHADE, (96, 100, 104))
+    common(p, style, f, 's_', SHA_HAIR, SHA_HAIR_DARK, SHA_HAIR_TIP, SHA_SKIN, SHA_SHADE, (96, 100, 104), eye=SHA_EYE)
     if style in ('s_robe', 'pelvis', 's_robe_chest', 's_arm'):
         cloth(p, f, OCHRE, fold=4)
         if style == 's_robe':
@@ -942,57 +983,80 @@ def paint_sha(p, style, f, dims):
 
 # ── The Six-Eared Macaque ────────────────────────────────────────────────────
 
-MAC_FUR, MAC_DARK, MAC_TIP = (104, 72, 44), (52, 34, 22), (164, 122, 74)
+MAC_FUR, MAC_DARK, MAC_TIP = (78, 52, 34), (36, 24, 16), (150, 112, 66)
+MAC_GOLD = (200, 156, 52)
 MAC_FACE, MAC_SHADE = (196, 112, 70), (120, 58, 34)
 MAC_EYE = (255, 96, 30)
-CLOAK = (150, 20, 22)
+CLOAK = (112, 14, 20)
 
-MACAQUE = biped(dict(hipw=1.9, thigh=3.0, thigh_len=6.0, shin=2.7, shin_len=6.0, foot=(3.0, 5.0, 1.6),
-                     pelvis=(6.0, 3.4, 4.4), chest=(7.6, 9.0, 5.0), arm=(2.7, 7.4, 2.5, 7.2, 2.7, 2.8),
-                     lean=0.08, chest_lean=0.05, legr=(-0.2, 0, 0.06), shinr=(0.32, 0, 0), footr=(-0.12, 0, 0),
-                     armr=(-0.12, 0, 0.12), forer=(-0.4, 0, 0), thigh_style='m_trouser', shin_style='m_boot',
-                     foot_style='m_bootfoot', chest_style='m_mail', pelvis_style='m_mail_low'))
-MACAQUE = mirrored(MACAQUE + monkey_head('chest', (0, -9.0, -0.9), (-0.05, 0, 0),
-                                         dict(w=3.7, h=6.5, d=3.4, p='m_', muzzle=(2.0, 2.2, 2.0), ears=3, ear=0.9, ruff=1.35)) + [
-    # the cap: a gold dome, phoenix wings rising at its sides, the two long pheasant plumes arcing back
-    part('cap', 'head', (0, -5.4, 0.2), (0, 0, 0), [(-3.0, -2.4, -3.0, 6.0, 2.6, 6.0, 'm_cap'),
-                                                    (-0.9, -3.4, -3.3, 1.8, 1.6, 1.2, 'm_capjewel')]),
-    part('right_capwing', 'cap', (-3.1, -1.0, 0), (0.1, 0.1, -0.55), [(-0.3, -3.4, -1.6, 0.6, 3.6, 3.4, 'm_wing')]),
-    part('right_plume', 'cap', (-1.0, -2.4, 1.0), (-0.95, 0.1, -0.15), [(-0.35, -14.0, -0.35, 0.7, 14.0, 0.7, 'm_plume')]),
-    part('right_plume_tip', 'right_plume', (0, -13.6, 0), (-0.55, 0, -0.1), [(-0.3, -9.0, -0.3, 0.6, 9.0, 0.6, 'm_plume')]),
-    part('fillet', 'head', (0, -4.2, 0), (0, 0, 0), [(-3.45, -0.5, -3.3, 6.9, 0.9, 6.6, 'm_fillet')]),
-    # the shoulder plates, the jade belt, the tiger-skin kilt, the cloak
-    part('right_pauldron', 'right_arm', (-0.7, -0.8, 0), (0, 0, 0.32), [(-2.0, -1.4, -2.2, 3.6, 2.6, 4.4, 'm_pauldron'),
-                                                                        (-2.4, 0.9, -2.4, 3.4, 1.8, 4.8, 'm_pauldron2')]),
-    part('belt', 'body', (0, -3.0, 0), (0, 0, 0), [(-3.5, -0.7, -2.6, 7.0, 1.6, 5.2, 'm_belt'),
-                                                  (-1.2, -1.0, -2.9, 2.4, 2.2, 0.6, 'm_buckle')]),
-    part('sway_kilt_front', 'body', (0, -1.4, -2.3), (-0.08, 0, 0), [(-3.2, 0, -0.4, 6.4, 5.6, 0.8, 'm_tiger')]),
-    part('sway_kilt_back', 'body', (0, -1.4, 2.3), (0.12, 0, 0), [(-3.2, 0, -0.4, 6.4, 5.2, 0.8, 'm_tiger')]),
-    part('right_kilt_side', 'body', (-3.1, -1.4, 0), (0, 0, 0.14), [(-0.4, 0, -2.2, 0.8, 4.8, 4.4, 'm_tiger')]),
-    part('sway_cloak', 'chest', (0, -8.6, 2.8), (0.16, 0, 0), [(-4.6, 0, -0.3, 9.2, 15.0, 0.6, 'm_cloak')]),
-    part('right_bracer', 'right_forearm', (0, 2.4, 0), (0, 0, 0), [(-1.55, 0, -1.55, 3.1, 4.2, 3.1, 'm_bracer')]),
-    part('right_bootcuff', 'right_shin', (0, 0.8, 0), (0, 0, 0), [(-1.7, 0, -1.7, 3.4, 1.4, 3.4, 'm_cuff')]),
-    # a ruff of his golden fur at the neck over the mail, the red undersleeves, gold knee guards, the belt's tassels
-    part('neckruff', 'chest', (0, -8.6, 0), (0, 0, 0), [(-3.6, -1.4, -2.9, 7.2, 2.2, 5.8, 'm_ruff')]),
-    part('right_undersleeve', 'right_arm', (0, 2.4, 0), (0, 0, 0), [(-1.55, 0, -1.55, 3.1, 3.6, 3.1, 'm_sleeve')]),
-    part('right_kneeguard', 'right_shin', (0, -0.6, -1.3), (-0.12, 0, 0), [(-1.6, -1.2, -0.7, 3.2, 2.8, 1.0, 'm_knee')]),
-    part('sway_belttassel_r', 'belt', (-2.2, 0.8, -2.7), (-0.05, 0, 0.05), [(-0.45, 0, -0.3, 0.9, 4.6, 0.6, 'm_tassel')]),
-    part('sway_belttassel_l', 'belt', (2.2, 0.8, -2.7), (-0.05, 0, -0.05), [(-0.45, 0, -0.3, 0.9, 4.6, 0.6, 'm_tassel')]),
-    part('right_strap', 'chest', (-1.8, -8.4, -2.6), (0, 0, -0.42), [(-0.5, 0, -0.35, 1.0, 9.2, 0.6, 'm_strap')]),
-    part('right_plume_end', 'right_plume_tip', (0, -8.8, 0), (-0.55, 0, -0.08), [(-0.25, -6.0, -0.25, 0.5, 6.0, 0.5, 'm_plume')]),
+MACAQUE = biped(dict(hipw=2.1, thigh=3.4, thigh_len=6.4, shin=3.0, shin_len=6.2, foot=(3.2, 5.2, 1.6),
+                     pelvis=(6.8, 3.6, 4.8), chest=(8.8, 10.0, 5.6), arm=(3.1, 7.8, 2.9, 7.6, 3.0, 3.0),
+                     lean=0.06, chest_lean=0.06, legr=(-0.18, 0, 0.08), shinr=(0.3, 0, 0), footr=(-0.12, 0, 0),
+                     armr=(-0.12, 0, 0.16), forer=(-0.4, 0, 0), thigh_style='m_trouser', shin_style='m_boot',
+                     foot_style='m_bootfoot', chest_style='m_mail', pelvis_style='m_mail_low', tuft_style='m_tuft'))
+MACAQUE = mirrored(MACAQUE + monkey_head('chest', (0, -10.0, -0.8), (-0.06, 0, 0),
+                                         dict(w=3.9, h=6.8, d=3.6, p='m_', muzzle=(2.2, 2.5, 2.6), ears=3, ear=1.3, ruff=1.6,
+                                              eye=1.15, ear_gap=2.7, ear_out=0.6, jaw_h=1.6)) + [
+    # the brow's heavy ridge over the nose, a bridge down the muzzle, fangs over the lip
+    part('browbridge', 'head', (0, -6.8 * 0.8, -3.6 - 1.3), (0.25, 0, 0), [(-1.1, -0.7, -0.5, 2.2, 1.5, 1.1, 'm_brow')]),
+    part('nosebridge', 'head', (0, -6.8 * 0.55, -3.6 - 1.0), (0.5, 0, 0), [(-0.7, -0.4, -1.6, 1.4, 1.0, 2.0, 'm_nose')]),
+    part('right_upfang', 'head', (-1.3, -6.8 * 0.42 + 2.5 - 0.6, -3.6 - 2.9), (0, 0, 0.08), [(-0.3, 0, -0.3, 0.6, 1.3, 0.6, 'm_fang')]),
+    # the cap: a gold dome, a jewel, phoenix wings rising at its sides, the two long pheasant plumes arcing back
+    part('cap', 'head', (0, -5.6, 0.2), (0, 0, 0), [(-3.2, -2.6, -3.2, 6.4, 2.8, 6.4, 'm_cap'),
+                                                    (-3.5, -0.6, -3.5, 7.0, 1.0, 7.0, 'm_capband'),
+                                                    (-0.9, -3.6, -3.5, 1.8, 1.8, 1.2, 'm_capjewel')]),
+    part('right_capwing', 'cap', (-3.3, -1.2, 0), (0.1, 0.1, -0.6), [(-0.3, -4.4, -1.8, 0.6, 4.6, 3.8, 'm_wing')]),
+    part('right_plume', 'cap', (-1.1, -2.6, 1.0), (-0.9, 0.1, -0.16), [(-0.4, -15.0, -0.4, 0.8, 15.0, 0.8, 'm_plume')]),
+    part('right_plume_tip', 'right_plume', (0, -14.6, 0), (-0.55, 0, -0.1), [(-0.35, -10.0, -0.35, 0.7, 10.0, 0.7, 'm_plume')]),
+    part('right_plume_end', 'right_plume_tip', (0, -9.8, 0), (-0.55, 0, -0.08), [(-0.25, -7.0, -0.25, 0.5, 7.0, 0.5, 'm_plume')]),
+    part('fillet', 'head', (0, -4.4, 0), (0, 0, 0), [(-3.6, -0.5, -3.5, 7.2, 0.9, 7.0, 'm_fillet')]),
+    # the cloud collar, the breast in layered plates, the great mirror over the heart
+    part('collar', 'chest', (0, -9.8, 0), (0, 0, 0), [(-4.6, -1.0, -3.3, 9.2, 2.2, 6.6, 'm_collar')]),
+    part('neckruff', 'chest', (0, -10.4, 0), (0, 0, 0), [(-3.9, -1.6, -3.0, 7.8, 2.0, 6.0, 'm_ruff')]),
+    part('breastplate', 'chest', (0, 0, 0), (0, 0, 0), [(-4.7, -9.2, -3.2, 9.4, 4.4, 0.6, 'm_plate'),
+                                                        (-4.5, -5.2, -3.1, 9.0, 4.0, 0.6, 'm_plate'),
+                                                        (-1.9, -8.6, -3.7, 3.8, 3.8, 0.5, 'm_mirror')]),
+    part('right_strap', 'chest', (-1.9, -9.2, -3.4), (0, 0, -0.42), [(-0.5, 0, -0.35, 1.0, 10.0, 0.6, 'm_strap')]),
+    # the shoulders in three tiers of gold lamellae, each bitten by a gold beast head
+    part('right_pauldron', 'right_arm', (-0.8, -1.0, 0), (0, 0, 0.36), [(-2.3, -1.6, -2.5, 4.0, 2.6, 5.0, 'm_pauldron'),
+                                                                        (-2.7, 0.7, -2.7, 4.0, 2.2, 5.4, 'm_pauldron2'),
+                                                                        (-3.1, 2.6, -2.9, 4.0, 2.2, 5.8, 'm_pauldron2'),
+                                                                        (-3.5, -0.4, -1.3, 0.9, 2.6, 2.6, 'm_beast')]),
+    part('right_undersleeve', 'right_arm', (0, 2.6, 0), (0, 0, 0), [(-1.7, 0, -1.7, 3.4, 4.0, 3.4, 'm_sleeve')]),
+    part('right_bracer', 'right_forearm', (0, 2.4, 0), (0, 0, 0), [(-1.7, 0, -1.7, 3.4, 4.6, 3.4, 'm_bracer')]),
+    # the belt of jade, the war skirt in gold lamellae over the tiger-skin kilt, its tassels
+    part('belt', 'body', (0, -3.2, 0), (0, 0, 0), [(-3.8, -0.8, -2.8, 7.6, 1.8, 5.6, 'm_belt'),
+                                                  (-1.3, -1.1, -3.1, 2.6, 2.4, 0.6, 'm_buckle')]),
+    part('sway_kilt_front', 'body', (0, -1.6, -2.5), (-0.06, 0, 0), [(-3.0, 0, -0.4, 6.0, 7.6, 0.8, 'm_tiger')]),
+    part('sway_kilt_back', 'body', (0, -1.6, 2.5), (0.1, 0, 0), [(-3.4, 0, -0.4, 6.8, 7.2, 0.8, 'm_tiger')]),
+    part('right_tasset', 'body', (-2.2, -1.8, -2.7), (-0.1, 0.1, 0.08), [(-1.9, 0, -0.5, 3.8, 6.2, 1.0, 'm_tasset')]),
+    part('right_side_tasset', 'body', (-3.5, -1.8, 0), (0, 0, 0.16), [(-0.5, 0, -2.5, 1.0, 6.0, 5.0, 'm_tasset')]),
+    part('back_tasset', 'body', (0, -1.8, 2.8), (0.14, 0, 0), [(-3.6, 0, -0.5, 7.2, 6.0, 1.0, 'm_tasset')]),
+    part('sway_belttassel_r', 'belt', (-0.9, 1.0, -3.0), (-0.05, 0, 0.05), [(-0.45, 0, -0.3, 0.9, 5.4, 0.6, 'm_tassel')]),
+    part('sway_belttassel_l', 'belt', (0.9, 1.0, -3.0), (-0.05, 0, -0.05), [(-0.45, 0, -0.3, 0.9, 5.4, 0.6, 'm_tassel')]),
+    # the cloak, crimson and black, from his shoulders nearly to his heels, in two falls
+    part('sway_cloak', 'chest', (0, -9.6, 3.1), (0.14, 0, 0), [(-5.2, 0, -0.3, 10.4, 12.0, 0.6, 'm_cloak')]),
+    part('sway_cloak_low', 'sway_cloak', (0, 11.8, 0), (0.1, 0, 0), [(-5.6, 0, -0.3, 11.2, 10.0, 0.6, 'm_cloaklow')]),
+    # greaves, knee guards, the cloud-walking boots with their toes turned up
+    part('right_kneeguard', 'right_shin', (0, -0.6, -1.5), (-0.12, 0, 0), [(-1.7, -1.3, -0.7, 3.4, 3.0, 1.0, 'm_knee')]),
+    part('right_greave', 'right_shin', (0, 1.6, -1.6), (0, 0, 0), [(-1.6, 0, -0.4, 3.2, 3.6, 0.8, 'm_greave')]),
+    part('right_bootcuff', 'right_shin', (0, 0.6, 0), (0, 0, 0), [(-1.8, 0, -1.8, 3.6, 1.4, 3.6, 'm_cuff')]),
+    part('right_boottoe', 'right_foot', (0, 0.3, -4.5), (0.65, 0, 0), [(-1.5, -1.4, -1.4, 3.0, 1.5, 2.0, 'm_boottoe')]),
 ])
-MACAQUE += tail('body', (0, -1.6, 2.3), 5, 1.6, 0.9, 3.0, 0.24, 'm_tail', start=(1.2, 0, 0))
-# the iron staff, gold-banded at both ends, held at his right side, upright
-MSTAFF_AIM = aim([(0.08, 0, 0), (0.05, 0, 0), (-0.12, 0, 0.12), (-0.4, 0, 0)], (1.2, 0, 0))
-MACAQUE += [part('staff', 'right_hand', (0, 1.4, 0), MSTAFF_AIM, [
-    (-0.55, -18.0, -0.55, 1.1, 36.0, 1.1, 'm_staff'),
-    (-0.75, -21.0, -0.75, 1.5, 3.2, 1.5, 'm_staffgold'),
-    (-0.75, 17.8, -0.75, 1.5, 3.2, 1.5, 'm_staffgold')])]
+MACAQUE += tail('body', (0, -1.8, 2.6), 6, 1.8, 0.9, 3.0, 0.24, 'm_tail', start=(1.2, 0, 0))
+# the iron staff, its gold caps at both ends, held at his right side, upright
+MSTAFF_AIM = aim([(0.06, 0, 0), (0.06, 0, 0), (-0.12, 0, 0.16), (-0.4, 0, 0)], (0.03, 0, 0))
+MACAQUE += [part('staff', 'right_hand', (0, 1.5, 0), MSTAFF_AIM, [
+    (-0.65, -35.0, -0.65, 1.3, 40.0, 1.3, 'm_staff'),
+    (-0.85, -39.0, -0.85, 1.7, 4.4, 1.7, 'm_staffgold'),
+    (-0.95, -35.4, -0.95, 1.9, 0.7, 1.9, 'm_staffring'),
+    (-0.85, 4.6, -0.85, 1.7, 4.4, 1.7, 'm_staffgold'),
+    (-0.95, 4.4, -0.95, 1.9, 0.7, 1.9, 'm_staffring')])]
 MACAQUE = w.settle(MACAQUE, ('right_foot', 'left_foot'))
 
 
 def paint_macaque(p, style, f, dims):
-    common(p, style, f, 'm_', MAC_FUR, MAC_DARK, MAC_TIP, MAC_FACE, MAC_SHADE, (110, 64, 44))
+    common(p, style, f, 'm_', MAC_FUR, MAC_DARK, MAC_TIP, MAC_FACE, MAC_SHADE, (110, 64, 44), eye=MAC_EYE)
     if style in ('upperarm', 'forearm', 'm_skull', 'm_crown', 'm_tail'):
         pelt(p, f, MAC_FUR, MAC_DARK, MAC_TIP)
     if style == 'hand':
@@ -1035,7 +1099,7 @@ def paint_macaque(p, style, f, dims):
     if style == 'm_capjewel':
         w.flat(p, f, (210, 30, 40))
         fx, fy, fw, fh = f['front']
-        p.lit((fx + fw // 2, fy + fh // 2), (255, 120, 110), 0.6)
+        p.px((fx + fw // 2, fy + fh // 2), (255, 140, 130))
     if style == 'm_plume':                                         # a pheasant's tail feather: barred buff and brown
         for s in S + ('top', 'bottom'):
             fx, fy, fw, fh = f[s]
@@ -1091,6 +1155,67 @@ def paint_macaque(p, style, f, dims):
                 fx, fy, fw, fh = f[s]
                 for i in range(0, fw, 3):
                     p.px((fx + i, fy + fh // 2), GOLD)
+    if style == 'm_tuft':
+        tufted(p, f, MAC_TIP, MAC_DARK, (214, 176, 112), depth=3, every=2)
+    if style == 'm_fang':
+        w.flat(p, f, IVORY)
+    if style == 'm_capband':
+        gold(p, f)
+        for s_ in S:
+            fx, fy, fw, fh = f[s_]
+            for i in range(1, fw, 3):
+                p.px((fx + i, fy + fh // 2), (190, 30, 40))
+    if style == 'm_collar':
+        gold(p, f)
+        for s_ in S:
+            fx, fy, fw, fh = f[s_]
+            for i in range(fw):
+                if (i // 2) % 3 == 1:
+                    p.px((fx + i, fy + fh // 2), RED_DEEP)
+    if style == 'm_plate':
+        lamellae(p, f, MAC_GOLD, RED, rows=3, cols=4, rim=GOLD_DEEP)
+    if style == 'm_mirror':
+        w.flat(p, f, GOLD_DEEP)
+        fx, fy, fw, fh = f['front']
+        w.disc(p, fx + fw / 2, fy + fh / 2, fw / 2 - 0.5, GOLD_LIGHT, rim=GOLD_DEEP)
+        w.disc(p, fx + fw / 2, fy + fh / 2, fw / 4, (40, 30, 30))
+        w.disc(p, fx + fw / 2, fy + fh / 2, 1.0, (200, 50, 40))
+    if style == 'm_beast':
+        gold(p, f)
+        fx, fy, fw, fh = f['right']
+        for i in range(fw):
+            p.px((fx + i, fy + fh - 2), (40, 20, 10))
+        p.px((fx + 1, fy + 1), (200, 40, 30))
+        p.px((fx + fw - 2, fy + 1), (200, 40, 30))
+    if style == 'm_tasset':
+        lamellae(p, f, MAC_GOLD, RED, rows=4, cols=2, rim=GOLD_DEEP)
+        trim(p, f, RED_DEEP, top=False)
+    if style == 'm_cloaklow':
+        for s_ in ('front', 'back'):
+            w.weave(p, f[s_], CLOAK, k(CLOAK, 0.45), light=w.LIGHT[s_], fold=5, fall=0.35)
+            fx, fy, fw, fh = f[s_]
+            for j in range(fh):
+                for i in (0, fw - 1):
+                    p.px((fx + i, fy + j), GOLD_DEEP)
+            for i in range(fw):
+                p.px((fx + i, fy + fh - 1), GOLD)
+                p.px((fx + i, fy + fh - 2), k(CLOAK, 0.3))
+            w.ragged(p, f[s_], teeth=4, depth=2)
+        w.flat(p, f, k(CLOAK, 0.5), faces=('right', 'left', 'top', 'bottom'))
+    if style == 'm_greave':
+        gold(p, f)
+        fx, fy, fw, fh = f['front']
+        for j in range(1, fh, 3):
+            for i in range(fw):
+                p.px((fx + i, fy + j), GOLD_DEEP)
+    if style == 'm_boottoe':
+        w.leather(p, f, (60, 40, 30), stitch=GOLD_DEEP)
+        for s_ in S:
+            fx, fy, fw, fh = f[s_]
+            for i in range(fw):
+                p.px((fx + i, fy + fh - 1), (220, 210, 190))
+    if style == 'm_staffring':
+        gold(p, f)
     if style == 'm_ruff':
         tufted(p, f, MAC_TIP, MAC_FUR, (214, 176, 112), depth=2, every=2)
     if style == 'm_sleeve':

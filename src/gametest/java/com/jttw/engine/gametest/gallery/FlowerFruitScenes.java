@@ -45,7 +45,7 @@ final class FlowerFruitScenes {
 
     private static final int X0 = -8, X1 = 8, Z0 = 3, Z1 = 16;
     /** Where the falls and the cave are laid: the basin's floor this far up and north of the stage. */
-    private static final int CAVE_X = 92, CAVE_Z = -20, CAVE_UP = 40;
+    private static final int CAVE_X = 92, CAVE_Z = -20, CAVE_UP = 150;
     private static boolean patch, cave;
 
     private static int ground(ServerPlayer p) {
@@ -134,18 +134,20 @@ final class FlowerFruitScenes {
                 scene("ff_" + name + "_front", p -> put.accept(p, 180f), new double[]{0.5, eye + 0.3, 9.5 - d, 0.5, eye, 9.5}),
                 scene("ff_" + name + "_side", p -> put.accept(p, 90f), new double[]{0.5, eye + 0.3, 9.5 - d, 0.5, eye, 9.5}),
                 scene("ff_" + name + "_back", p -> put.accept(p, 0f), new double[]{0.5, eye + 0.3, 9.5 - d, 0.5, eye, 9.5}),
-                scene("ff_" + name + "_face", p -> put.accept(p, 160f), new double[]{1.0, face + 0.15, 9.5 - 1.5 - tall * 0.9, 0.5, face - 0.05, 9.5}));
+                // a true close-up of the head, from a little to its left (its weapon is in its right hand), unobstructed
+                scene("ff_" + name + "_face", p -> put.accept(p, 180f), new double[]{0.5 - tall * 0.12, face, 9.5 - 0.75 - tall * 0.42,
+                        0.5, face - 0.02, 9.5 - 0.1 * tall}));
     }
 
     static List<AbilityScenes.Scene> all() {
         List<AbilityScenes.Scene> all = new java.util.ArrayList<>();
-        all.addAll(views("gibbon", 1.25, (p, yaw) -> monkey(p, FlowerFruitRegistry.STONE_GIBBON.get(), 0.5, 9.5, yaw, false)));
-        all.addAll(views("ape", 1.45, (p, yaw) -> monkey(p, FlowerFruitRegistry.SPEAR_APE.get(), 0.5, 9.5, yaw, false)));
-        all.addAll(views("baboon", 1.7, (p, yaw) -> monkey(p, FlowerFruitRegistry.GREAT_BABOON.get(), 0.5, 9.5, yaw, false)));
-        all.addAll(views("tang", 1.75, (p, yaw) -> pilgrim(p, FakePilgrimEntity.TANG, 0.5, ground(p), 9.5, yaw)));
-        all.addAll(views("bajie", 1.65, (p, yaw) -> pilgrim(p, FakePilgrimEntity.BAJIE, 0.5, ground(p), 9.5, yaw)));
-        all.addAll(views("sha", 1.85, (p, yaw) -> pilgrim(p, FakePilgrimEntity.SHA, 0.5, ground(p), 9.5, yaw)));
-        all.addAll(views("macaque", 1.95, (p, yaw) -> macaque(p, 0.5, ground(p), 9.5, yaw)));
+        all.addAll(views("gibbon", 1.55, (p, yaw) -> monkey(p, FlowerFruitRegistry.STONE_GIBBON.get(), 0.5, 9.5, yaw, false)));
+        all.addAll(views("ape", 2.0, (p, yaw) -> monkey(p, FlowerFruitRegistry.SPEAR_APE.get(), 0.5, 9.5, yaw, false)));
+        all.addAll(views("baboon", 1.9, (p, yaw) -> monkey(p, FlowerFruitRegistry.GREAT_BABOON.get(), 0.5, 9.5, yaw, false)));
+        all.addAll(views("tang", 2.1, (p, yaw) -> pilgrim(p, FakePilgrimEntity.TANG, 0.5, ground(p), 9.5, yaw)));
+        all.addAll(views("bajie", 2.0, (p, yaw) -> pilgrim(p, FakePilgrimEntity.BAJIE, 0.5, ground(p), 9.5, yaw)));
+        all.addAll(views("sha", 2.2, (p, yaw) -> pilgrim(p, FakePilgrimEntity.SHA, 0.5, ground(p), 9.5, yaw)));
+        all.addAll(views("macaque", 3.2, (p, yaw) -> macaque(p, 0.5, ground(p), 9.5, yaw)));
         all.addAll(List.of(
                 scene("ff_monkeys", p -> {
                     monkey(p, FlowerFruitRegistry.STONE_GIBBON.get(), -2.5, 9.5, 200f, false);
@@ -184,11 +186,11 @@ final class FlowerFruitScenes {
                 scene("ff_macaque_spin", p -> {
                     SixEaredMacaqueEntity m = macaque(p, 0.5, ground(p), 9.5, 180f);
                     if (m != null) m.startSpin();
-                }, new double[]{0.5, 1.8, 4.6, 0.5, 1.6, 9.5}),
+                }, new double[]{0.5, 2.8, 2.6, 0.5, 2.6, 9.5}),
                 scene("ff_macaque_crouch", p -> {
                     SixEaredMacaqueEntity m = macaque(p, 0.5, ground(p), 9.5, 150f);
                     if (m != null) m.startDash(p);
-                }, new double[]{0.5, 1.5, 5.0, 0.5, 1.0, 9.5}),
+                }, new double[]{0.5, 2.0, 4.0, 0.5, 1.4, 9.5}),
                 scene("ff_macaque_clones", p -> {
                     SixEaredMacaqueEntity m = macaque(p, 0.5, ground(p), 11.5, 180f);
                     if (m != null) {
@@ -200,14 +202,14 @@ final class FlowerFruitScenes {
                             c.setYHeadRot(180f);
                         });
                     }
-                }, new double[]{0.5, 2.2, 4.0, 0.5, 1.4, 11.5}),
+                }, new double[]{0.5, 2.8, 2.0, 0.5, 2.0, 11.5}),
                 scene("ff_macaque_dharma", p -> {
                     SixEaredMacaqueEntity m = macaque(p, 0.5, ground(p), 11.5, 180f);
                     if (m != null) {
                         m.becomeGiant();
                         m.startSlam(p);
                     }
-                }, new double[]{0.5, 2.8, 4.0, 0.5, 3.0, 11.5})));
+                }, new double[]{0.5, 3.4, 0.0, 0.5, 4.2, 11.5})));
         all.addAll(List.of(
                 cave("ff_falls", at(0, 18, IslandShape.BASIN_END - 20, 0, 34, IslandShape.CLIFF_Z)),
                 cave("ff_falls_low", at(-14, 4, IslandShape.POOL_Z + 18, 0, 10, IslandShape.CLIFF_Z)),
