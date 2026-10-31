@@ -454,7 +454,7 @@ A level zone is a biome put over the overworld (`world/Zones`): no biome library
 biome, the vanilla biomes it may take over (a tag), a `ZoneLayout` (the ring round spawn its region
 lies in, radius, wobble, a salt of its own), the heights it takes (`Vertical`: the whole column,
 `below(y)` for an underground zone, `above(y)` for an aerial one), its level band and the players it
-is allied to. White Bone Ridge is the first, the Bottomless Cave the second, the Mystical Waters the
+is allied to. White Bone Ridge is the first (Black Wind Mountain shares its band and ring), the Bottomless Cave the second, the Mystical Waters the
 third; Hell, a dimension of its own, is the fourth; then the Flaming Mountains, and Mount Wuzhuang,
 the first aerial zone, in the sky; Lion-Camel Ridge, the last band, is the last. Past it all lies
 Fengdu, the Ghost City: a place, not a zone of a band, placed as the zones are, whose Gate of
@@ -470,6 +470,7 @@ west lengthens with the pilgrim: the higher a zone's levels, the farther out its
 | Zone | Levels | Distance from spawn (centre) | Regions |
 |---|---|---|---|
 | White Bone Ridge | 20–36 | 1–2 km | one, ~840 blocks across (never under 720) |
+| Black Wind Mountain | 20–36 (the ridge's band) | 1–2 km | one, ~700 (never under 640), clear of the ridge |
 | Bottomless Cave (Pit-Hole Mountain and under it) | 37–46 | 2–3 km | one, ~380 |
 | Mystical Waters (deep ocean) | 47–56 | 3–4.5 km | four, one per sea (within 30° of east, south, west, north), ~440 |
 | Hell (a dimension, entered through Fengdu) | 57–66 | — | the Ten Courts |
@@ -522,11 +523,11 @@ each, where one alone cannot realistically outlast it:
 
 | Rank | Blow (share of health, before resistance) | Hits to kill | Who |
 |---|---|---|---|
-| Light mobs | 6–7% (15–20 hits kill you) | 2–4 | wraiths, mouse spirits, ember imps, fish soldiers, yin soldiers, wandering ghosts, judge-clerks, cloud cranes, Wind-Drillers, goblins |
-| Normal mobs | 8–10% | 4–8 | flower maids, shrimp soldiers, yaksha, Horse-Face, the Impermanence, peng-demons, Daoist disciples, kobolds, wolfmen, heavenly soldiers |
-| Heavy mobs | 11–12%, no single hit (slam, gore, pounce, swoop) over 12% | 10–12 | Bone Servants, Furnace-Brick Brutes, ogres, elephant-demons, lion-demons, turtle soldiers, Crab Generals, Ox-Head |
+| Light mobs | 6–7% (15–20 hits kill you) | 2–4 | wraiths, mouse spirits, ember imps, fish soldiers, yin soldiers, wandering ghosts, judge-clerks, cloud cranes, Wind-Drillers, goblins, black-wind imps |
+| Normal mobs | 8–10% | 4–8 | flower maids, shrimp soldiers, yaksha, Horse-Face, the Impermanence, peng-demons, Daoist disciples, kobolds, wolfmen, heavenly soldiers, boar demons |
+| Heavy mobs | 11–12%, no single hit (slam, gore, pounce, swoop) over 12% | 10–12 | Bone Servants, Furnace-Brick Brutes, ogres, elephant-demons, lion-demons, turtle soldiers, Crab Generals, Ox-Head, Black Bear Soldiers |
 | Captains | a regular's ×1.2: at most 14.4% | a regular's ×2.5 | any of the above, purple-named |
-| Minibosses | 17–19%: a miniboss's hardest hit is 19% whatever its kind | a captain's, or more | the floor wardens and gate keepers of every lair (White Bone's Wardens and Keepers of the Bone Gate, the Bottomless Cave's guardians, the Fire Cloud Cave's door wardens and floor guardians, Lion-Camel's floor wardens), the Six Strong Generals, Clear Wind and Bright Moon, Heavenly Generals |
+| Minibosses | 17–19%: a miniboss's hardest hit is 19% whatever its kind | a captain's, or more | the floor wardens and gate keepers of every lair (White Bone's Wardens and Keepers of the Bone Gate, the Bottomless Cave's guardians, the Fire Cloud Cave's door wardens and floor guardians, Lion-Camel's floor wardens), the Six Strong Generals, Clear Wind and Bright Moon, Heavenly Generals, Lingxuzi and the White-Robed Scholar (Black Wind's door keepers) and its stair's warden |
 | Bosses | 25–33% (3–4 blows kill you); no special or area hit harder | 250–350, all its lives together; each life more than any miniboss's | every `ZoneBoss` |
 
 A miniboss is a captain made one by `ZoneMonster.becomeMiniboss(level, health over a captain's)`;
@@ -535,7 +536,7 @@ its hits are scaled so its hardest is `MINIBOSS_HIT` (19%). A mob's special hits
 A boss's lives are its `ZoneBoss.lives()` (Lady White Bone's four, whole each time, 75 hits apiece;
 Zhuanlun's 200, and born again at half). By boss, in hits all lives together: Lady White Bone 300,
 Lady Earth Flow 270, the Dragon Kings 270, the Ten Kings 280 (Zhuanlun 300), King Yama 350, Red Boy
-320, Zhenyuan 280 (more hand to hand: he brushes one blow in four aside), the White Elephant 330, the
+320, the Black Bear Demon 300, Zhenyuan 280 (more hand to hand: he brushes one blow in four aside), the White Elephant 330, the
 Azure Lion 350. Their health runs to tens of millions at level 100, past vanilla's cap of 1024 max
 health: `JTTWEngine` lifts the cap (and attack's) to a billion.
 `PeckingOrderGameTests` makes every creature of the mod in each of its ranks and fails if any hits
@@ -634,6 +635,134 @@ mountain and the road by `BoneMassifFeature`), so it comes out whole whichever c
   the door and every floor: on seeds 12345 and 42, 18–26 s for the 361 chunks (14–20 a second; 14–15
   s, 24–26 a second, before the cave), the massif 12–14 ms a chunk and the cave 5–8 ms a chunk where it lies. The
   cave's inside is also laid in the form gallery (`RidgeScenes`).
+
+#### Black Wind Mountain (levels 20–36)
+
+Black Wind Mountain (黑风山, chapters 16–17), the novel's first demon lair: the old abbot of the
+Guanyin Chan Temple coveted the Tang Monk's brocade kasaya and set fire to his own temple to burn the
+pilgrims; the Monkey King turned the wind on the monks' halls, and while the temple burned the Black
+Bear Demon, come over the mountain to help put the fire out, carried the kasaya off to his Black Wind
+Cave. In [`world/blackwind/`](src/main/java/com/jttw/engine/world/blackwind/) and
+[`entity/blackwind/`](src/main/java/com/jttw/engine/entity/blackwind/); its registrations are its own
+(`registry/BlackWindRegistry`, one line in `JTTWEngine`), its renderers too (`BlackWindRenderers`).
+
+- **Where** (`Zones.BLACK_WIND`): White Bone Ridge's band (20–36) and ring (1–2 km), over cold pine and
+  mountain-forest country (taiga, old-growth pine and spruce taiga, snowy taiga, windswept forest and
+  hills, groves, dark forest), the whole column, host judged at y 256. One region a world, about 700
+  blocks across (never under 640), clear of the ridge and every zone before it.
+- **The range** (`BlackWindShape`, `BlackWindRangeFeature`, pure and unit-tested): from the region's
+  edge the ground climbs into ridges of dark mountain, their crests broken by crags, up to some 70
+  blocks over the land; at the heart **the black peak** rises 190 more round a point 40 blocks north of
+  the centre, its summit bare blackstone, basalt and gravel, its south face a cliff over the cave's
+  door. The slopes are grass and podzol under the old pine taiga's pines (darker in the hollows), the
+  faces dark rock in blotches of deepslate, tuff and blackstone. A dark grey sky and fog, falling ash,
+  no rain; the soul-sand valley's wind for its ambience, the old taiga's music.
+- **The black wind** (`BlackWind`, `BlackWhirlwindEntity`): whirls of black smoke some five blocks high
+  rise round anyone on the mountain under the open sky, a few at a time, and wander across the pines,
+  buffeting what they cross (harmless; the Black Bear's own are not).
+- **The valley road**: a valley cut from the cliff south to the region's edge, a trodden road up its
+  middle edged with cobbles, its floor level before the door (the forecourt) and across a terrace on the
+  way, ramping between to the land at its mouth (`BlackWindShape.floors`); no pine stands in its way.
+- **The burnt Guanyin Chan Temple** (观音禅院, `TemplePlan`, on the terrace 150 blocks down the valley):
+  the compound's broken red wall, the mountain gate's two pillars (one fallen short) and its lintel in
+  the dirt, the bell tower's and drum tower's charred posts and the great bell where it fell, the side
+  halls' stubs, the main hall's platform with its columns burnt to stumps, its back wall standing black,
+  one corner of its roof still on its beams, the statue of Guanyin thrown down before her empty
+  pedestal, a broken relic pagoda, ash and cinders, three fires still smouldering under the rubble, dead
+  trees burnt black. A boar-demon captain and four scavengers pick over it (put once, kept).
+- **The watch-camps** (`BlackWindShape.camps`, laid by `BlackWindWorksFeature`): one tried every 84
+  blocks over the range, on level ground clear of the peak and the valley: a stockade of sharpened spruce
+  stakes round a smoking fire, a black banner on its pole, lean-tos of black cloth, a rack of spears;
+  each with its band put there once and kept, a captain and three or four (one band in three roams 40
+  blocks round, a patrol).
+- **Creatures** (`BlackWindMonster`: level 20, captains 27, any light; never born inside the cave; one in
+  ten of the world's own a captain, who comes with his escort). In hits of a same-level character
+  ("you kill it in") and blows to kill that character ("it kills you in"):
+
+  | Creature | Rank | You kill it in | It kills you in | What it does |
+  |---|---|---|---|---|
+  | **Black-Wind Imp** (黑风小妖) | light | 3 (a captain 7½) | 15 claws of 6.5% | every 3.5 s, its foe 3–11 off, spins up a gust (0.5 s, the black wind gathering round it) and rides it at its foe: 7%, thrown back; strike one and the rest turn |
+  | **Boar Demon** (野猪精) | normal | 6 (15) | 11 axe blows of 9% | every 5.5 s, its foe 4–15 off, paws the ground (0.8 s, snorting, the dirt flying) and charges: the first it meets gored for 10% and thrown |
+  | **Black Bear Soldier** (黑熊兵) | heavy | 11 (27½) | 8–9 mace blows of 12% | its foe close, rears up mace high (0.9 s) and crashes down: 11% to all within 3.5 blocks, thrown up |
+  | **Lingxuzi** (凌虚子), the grey-wolf Daoist | miniboss (level 30) | 40 | 5–6 sword strokes of 19% | every 5 s crouches (0.6 s) and springs: 17% to all where he lands; once, under half his health, stops (1.2 s) and swallows an elixir, a fifth of his health back |
+  | **The White-Robed Scholar** (白衣秀士), the white-flower snake | miniboss (level 30) | 36 | 5–6 fan strokes of 19% | every 3.5 s, his foe 4–16 off, rears hissing (0.6 s) and spits venom: 17% and poison; his foe close, gathers (0.6 s) and lashes his tail round him: 17% to all within 3.5, flung aside and slowed |
+  | **Warden of the grand stair** (a Black Bear Soldier) | miniboss (level 33) | 44 | 5–6 blows of 19% | the soldier's slam at 17% |
+
+- **The Black Wind Cave** (黑风洞, `BlackWindPlan`, worked out once, the same in every world, pure and
+  unit-tested; `BlackWindBlocks` says what each code is; the range lays it column by column, so it comes
+  out whole across its chunks; `BlackWindCave` keeps it):
+  - **The forecourt** before the cliff: braziers of soul fire up the road; a tiled pavilion where the
+    Black Bear's friends sit and talk, a stone table and stools; a stele across the road; and **its two
+    keepers**, Lingxuzi and the White-Robed Scholar (minibosses, level 30), with two boars and four imps.
+  - **The great door**: a facade cut into the cliff, deepslate tile banded in carved stone, pillars
+    crowned with soul fire, a tiled eave over it hung with soul lanterns, a gilded plaque; the door two
+    leaves of black lacquer banded in black iron and studded with gold, **11 wide and 15 high**; two
+    crouching black bears of stone before it, eyes of crying obsidian. **The rule**: while its keepers
+    live it is barred from within (knock on it and they turn on you); once both are dead the black wind
+    blows it open from the middle out as soon as anyone comes within 14 blocks (or knocks), and it stays
+    open. It does not yield to picks or axes (a player in creative breaks it as anything else).
+  - **The Black Wind Court**, at the end of a passage thirteen wide: a cavern a hundred blocks across
+    under a dome thirty high, hung with basalt and soul lanterns on chains, great basalt columns; the
+    garrison's camp in it: four barracks of spruce and dark oak either side of a paved road, braziers,
+    a training yard of straw dummies and spear racks; across it a wall with towers and a gatehouse hung
+    in black and red; behind the wall the **inner court**, the great tiled pavilion where the
+    **Buddha-Robe Feast** (佛衣会) was laid, its long tables with candles; and at its back the head of
+    the grand stair, shut by an iron grate. **Its garrison**: 27 (imps, boars and bear soldiers, levels
+    24–26, captains 30), mustered when anyone comes to the forecourt or the court, and **the warden** of
+    the stair (a Black Bear Soldier miniboss, level 33), whose death throws the grate open for good.
+  - **The throne cavern**, down the grand stair (eighteen deep): two rows of basalt pillars, soul fire at
+    their feet, a red carpet edged in black to a stepped dais and the Black Bear's throne of blackstone and
+    gold; on the rock behind it the stolen kasaya's likeness worked in red and gold, its jade ring; his
+    treasury chest beside the throne (`chests/black_wind_treasury`: gold, emeralds, diamonds, golden
+    apples, bottles of experience, sigils). The Black Bear is put there once, when the land is made, on
+    the open floor before the dais (`BlackWindCaveFeature`), and kept to the cavern.
+  - **The garrisons are kept** to their part of the cave: one found off it is taken back to its post.
+    A part whose garrison is all dead stays empty 20 minutes, then is mustered again the next time
+    someone comes near while no one is in it. The door and the grate, once opened, stay open.
+- **The Black Bear Demon** (黑熊精, the Great King of the Black Wind 黑风大王; `BlackBearDemonEntity`, a
+  `ZoneBoss`): a towering black bear near four blocks to his ears, in black lamellae edged in gold, a gold
+  diadem, a black war cloak, **the stolen kasaya** thrown across his breast; his black-tasselled spear (黑缨
+  枪). **Level 51**, his band's top and fifteen (a boss towers over his mountain); **300 hits** of a level-51
+  character, one life; his spear **30%** (four thrusts kill), a purple bar. A fight for three or four:
+  - **the black wind** (黑风): every 9 s (6 s from his first phase), his foe within 11 blocks, he plants his
+    spear, spreads his arms and roars while the black wind draws in round him (**1.5 s**); then it bursts
+    out: **22%** to all within 9 blocks, **blinded** 3 s, and hurled away and up;
+  - **the bear's maul**: his foe within 5, he rears up on his hind legs, both arms high (**0.9 s**), and
+    crashes down: **26%** to all within 5 blocks, thrown up;
+  - **phase 1** (at 60%): three **whirlwinds** of the black wind rise round his lair and hunt his foes,
+    drawing in and lifting what they catch and striking it **4% each half second**, for 30 s; the black
+    wind comes faster;
+  - **phase 2** (at 30%): two more whirlwinds, he is a sixth quicker, and every 7.5 s he draws back his spear
+    (**1.1 s**) and hurls **the gale** before him: **25%** in a cone 14 blocks long, 30° either side,
+    flinging what it catches.
+  Brought down he is not killed but subdued: Guanyin's golden hoop closes on his brow and he gives up the
+  kasaya, to keep the mountain of Potalaka ever after.
+- **The Brocade Kasaya** (锦襕袈裟, `BrocadeKasayaItem`): the Buddha's robe, the Black Bear's treasure, his
+  loot **every time**. Worn on the chest: as diamond against blows (8, toughness 3), **no fire burns its
+  wearer** (fire, lava and burning cancelled), and poison leaves him. Epic, fire-proof as an item.
+- **What they leave**: imps feathers and gunpowder (a phantom membrane now and then), boars pork and
+  leather and iron, bear soldiers leather, bone, coal and iron; Lingxuzi a golden apple (his elixir),
+  bottles of experience and gold; the Scholar paper, books, emeralds and bottles of experience; captains
+  their sigils; the Black Bear the kasaya, sigils, gold, golden apples (an enchanted one in four),
+  diamonds.
+- **XP and karma**: White Bone Ridge's band and pay (base grunt XP 80); subduing the Black Bear is a good
+  deed, **karma +100**; his friends are captains (+5). The Earth Gods' luopan sends the band to White
+  Bone Ridge, but in Black Wind Mountain's own country names the Black Bear and points to his great door.
+- **Art**: `assets_source/black_bear.py` (the King and his soldiers, one frame; a soldier's skin and a
+  captain's), `black_wind_folk.py` (the boar, the imp, Lingxuzi, the Scholar; captains' skins for the boar
+  and the imp), `kasaya_items.py` (the kasaya's icon and its worn layer). Their attacks are posed: the king
+  spreading his arms and roaring as the wind gathers, rearing for the maul, drawing back for the gale;
+  the soldiers rearing; the boar pawing and charging; the imp whirling and riding its gust; Lingxuzi
+  crouching, leaping, drinking; the Scholar rearing with his tongue out, his tail sweeping as he coils.
+- **Tests and pictures**: `BlackWindGameTests` (the region in the ridge's ring and band, the creatures and
+  captains, each one's attack, the friends always minibosses, Lingxuzi's elixir once, the king's level,
+  hits and blows, his black wind, maul, gale, whirlwinds and phases, the kasaya and what it does, XP and
+  karma), `BlackWindCaveGameTests` (the whole cave laid off the grid: the door's rule, the court's
+  muster and the warden's grate, the garrison and the king kept to their parts), `BlackWindPlanTest`
+  (the door, the grate, the arena, a way on foot from the door to the king that the grate shuts, the
+  garrisons on open floor, the temple, the peak and the valley), `ZonesTest`; gallery scenes
+  `-Pgallery.only=bw_`; the mountain, the temple, a camp, the cave and the king in a real world with
+  `./gradlew runWorldgenBench -Pbench.mode=blackwind`.
 
 #### The Bottomless Cave (levels 37–46)
 
