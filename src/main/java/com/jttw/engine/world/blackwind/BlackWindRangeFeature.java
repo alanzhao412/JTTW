@@ -36,7 +36,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
 public class BlackWindRangeFeature extends Feature<NoneFeatureConfiguration> {
 
     public static final Zones.Zone ZONE = BlackWindShape.ZONE;
-    private static final int STEEP = 3;
+    private static final int STEEP = 2;
     private static final int FACE = 0, SLOPE = 1, HOLLOW = 2, SUMMIT = 3, VALLEY = 4, COURT = 5;
     /** How high over the forecourt the bare summit begins. */
     public static final int SUMMIT_OVER = 120;
@@ -65,21 +65,22 @@ public class BlackWindRangeFeature extends Feature<NoneFeatureConfiguration> {
         switch (kind) {
             case COURT -> {
                 if (Math.abs(lx) <= 3) return Math.abs(lx) == 3 ? s(Blocks.POLISHED_DEEPSLATE) : hash(x, z, 9) < 20 ? s(Blocks.CRACKED_DEEPSLATE_TILES) : s(Blocks.DEEPSLATE_TILES);
-                return roll < 40 ? s(Blocks.GRAVEL) : roll < 70 ? s(Blocks.TUFF) : roll < 85 ? s(Blocks.COBBLED_DEEPSLATE) : s(Blocks.COARSE_DIRT);
+                return roll < 40 ? s(Blocks.GRAVEL) : roll < 70 ? s(Blocks.TUFF) : roll < 85 ? s(Blocks.COBBLED_DEEPSLATE) : s(Blocks.PACKED_MUD);
             }
             case VALLEY -> {
                 if (BlackWindShape.onRoad(lx, lz)) return s(Blocks.DIRT_PATH);
                 if (Math.abs(lx) == 3) return hash(x, z, 8) < 60 ? s(Blocks.COBBLESTONE) : s(Blocks.MOSSY_COBBLESTONE);
-                return roll < 25 ? s(Blocks.COARSE_DIRT) : roll < 40 ? s(Blocks.GRAVEL) : roll < 48 ? s(Blocks.MOSS_BLOCK) : s(Blocks.GRASS_BLOCK);
+                // no pine roots in the valley's floor: stones, gravel and packed earth, moss on the stones
+                return roll < 30 ? s(Blocks.GRAVEL) : roll < 55 ? s(Blocks.MOSSY_COBBLESTONE) : roll < 75 ? s(Blocks.PACKED_MUD) : s(Blocks.COBBLESTONE);
             }
             case SUMMIT -> {
                 return roll < 35 ? s(Blocks.BLACKSTONE) : roll < 55 ? s(Blocks.BASALT) : roll < 75 ? s(Blocks.GRAVEL) : s(Blocks.DEEPSLATE);
             }
             case HOLLOW -> {
-                return roll < 55 ? s(Blocks.PODZOL) : roll < 70 ? s(Blocks.COARSE_DIRT) : roll < 80 ? s(Blocks.MOSS_BLOCK) : s(Blocks.GRASS_BLOCK);
+                return roll < 30 ? s(Blocks.PODZOL) : roll < 40 ? s(Blocks.COARSE_DIRT) : roll < 55 ? s(Blocks.MOSS_BLOCK) : s(Blocks.GRASS_BLOCK);
             }
             case SLOPE -> {
-                return roll < 18 ? s(Blocks.PODZOL) : roll < 26 ? s(Blocks.COARSE_DIRT) : roll < 30 ? s(Blocks.MOSSY_COBBLESTONE) : s(Blocks.GRASS_BLOCK);
+                return roll < 8 ? s(Blocks.PODZOL) : roll < 14 ? s(Blocks.COARSE_DIRT) : roll < 22 ? s(Blocks.MOSSY_COBBLESTONE) : s(Blocks.GRASS_BLOCK);
             }
             default -> {
                 return BlackWindBlocks.rock(0, x, z);
@@ -144,7 +145,7 @@ public class BlackWindRangeFeature extends Feature<NoneFeatureConfiguration> {
                     BlockState st;
                     if (y == top) st = kind == FACE ? BlackWindBlocks.rock(y, x, z) : topOf(kind, x, z, lx, lz);
                     else if (kind == FACE || kind == SUMMIT || y < top - 3) st = BlackWindBlocks.rock(y, x, z);
-                    else st = kind == COURT ? s(Blocks.TUFF) : s(Blocks.DIRT);
+                    else st = kind == COURT || kind == VALLEY ? s(Blocks.TUFF) : y >= top - 1 ? s(Blocks.DIRT) : BlackWindBlocks.rock(y, x, z);
                     level.setBlock(p.set(x, y, z), st, Block.UPDATE_CLIENTS);
                 }
                 any = true;

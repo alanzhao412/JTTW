@@ -136,9 +136,9 @@ final class BlackWindBench {
 
     private static void plan(ServerLevel level, List<BlackWindShape.Camp> camps) {
         int f = BlackWindPlan.FACE_Z, tz = TemplePlan.TEMPLE_Z, ty = terrace - origin.getY();
-        shot("bw_world_range_from_afar", 220, 150, 420, 0, 60, -40, false);
-        shot("bw_world_peak_and_valley", 60, 90, 330, 0, 40, 40, false);
-        shot("bw_world_valley_road", 6, ty + 16, tz + 70, 0, 10, f, false);
+        shot("bw_world_range_from_afar", 150, 70, 290, 0, 60, -40, false);
+        shot("bw_world_peak_and_valley", 40, 70, 330, 0, 50, 0, false);
+        shot("bw_world_valley_road", 0, ty + 7, tz + 96, 0, 12, f, false);
         shot("bw_world_temple_ruin", 30, ty + 22, tz + 40, 0, ty + 2, tz - 6, false);
         shot("bw_world_temple_hall", 8, ty + 6, tz + 4, -2, ty + 3, tz - 28, false);
         shot("bw_world_forecourt_and_door", 14, 14, f + 46, 0, 12, f, false);
