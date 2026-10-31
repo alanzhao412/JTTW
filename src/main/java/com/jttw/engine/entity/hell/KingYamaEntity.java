@@ -48,8 +48,8 @@ import java.util.List;
  */
 public class KingYamaEntity extends KingOfHellEntity {
 
-    public static final int LEVEL = 66;
-    /** 350 of a level-66 character's ordinary hits to kill, the most of the Ten; his blows 27% of their health (in his wrath, 32.4%). */
+    public static final int LEVEL = com.jttw.engine.entity.zone.ZoneBoss.levelOver(com.jttw.engine.world.Zones.HELL);
+    /** 350 of a level-81 character's ordinary hits to kill, the most of the Ten; his blows 27% of their health (in his wrath, 32.4%). */
     public static final double YAMA_HITS = 350, YAMA_BLOW = 0.27;
     public static final int COURT_AT_PERCENT = 66, WRATH_AT_PERCENT = 33;
     /** His hall: he keeps within this of his throne. */

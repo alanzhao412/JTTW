@@ -109,7 +109,7 @@ public class WatersGameTests {
         }
     }
 
-    /** A still iron golem, its health raised so no level-55 blow ends it: a target to measure blows on. */
+    /** A still iron golem, its health raised so no Dragon King's blow ends it: a target to measure blows on. */
     private static LivingEntity golem(GameTestHelper h, BlockPos at) {
         var g = h.spawn(EntityType.IRON_GOLEM, at);
         g.setNoAi(true);
@@ -397,7 +397,7 @@ public class WatersGameTests {
             eq(h, k[3], king.bossBar().getColor(), king.sea() + "'s bar");
             eq(h, k[0], DragonKingEntity.typeOf(king.sea()), "his type");
             check(h, king.getDisplayName().getString().contains("Lv " + DragonKingEntity.LEVEL), king.getDisplayName().getString());
-            close(h, DragonKingEntity.HEALTH, king.getMaxHealth(), "270 ordinary hits of a level-55 character");
+            close(h, DragonKingEntity.HEALTH, king.getMaxHealth(), "270 ordinary hits of a character of his level");
             eq(h, EnemyTier.BOSS.name(), king.getPersistentData().getString(SeaMonster.KEY_TIER), "a Boss of the waters");
             check(h, !king.canDrownInFluidType(net.neoforged.neoforge.common.NeoForgeMod.WATER_TYPE.value()), "he breathes water");
             check(h, king.getNavigation() instanceof AmphibiousPathNavigation, "he swims");

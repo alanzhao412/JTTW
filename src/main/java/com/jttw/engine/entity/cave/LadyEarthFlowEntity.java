@@ -53,6 +53,7 @@ import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
+import java.util.List;
 
 /**
  * Lady Earth Flow (地涌夫人), the Golden-Nosed, White-Furred Mouse Spirit of the Bottomless Cave: in
@@ -61,6 +62,11 @@ import java.util.EnumSet;
  * eight floors of maze, she fights:
  * <ul>
  *   <li><b>the twin swords</b>: every stroke two cuts, the male blade and then the female;</li>
+ *   <li><b>the whirl</b> (every {@value #WHIRL_EVERY} ticks, a foe within {@value #WHIRL_REACH}
+ *       blocks): she sinks low with both blades swept out behind her for {@value #WHIRL_WIND_UP}
+ *       ticks, petals drawn in round her, then spins on her heel, the two blades a ring of steel:
+ *       everyone within {@value #WHIRL_REACH} blocks is cut ({@link #WHIRL} of their health),
+ *       thrown back and slowed;</li>
  *   <li><b>her household</b> (from {@value #HOUSEHOLD_AT_PERCENT}% of her health): she calls her mouse
  *       kin and two flower maids, and from then on she <b>burrows</b>, sinking into the earth and
  *       rising behind whoever she fights;</li>
@@ -77,8 +83,8 @@ import java.util.EnumSet;
  */
 public class LadyEarthFlowEntity extends ZoneBoss {
 
-    public static final int LEVEL = 43;
-    /** 270 of a level-43 character's ordinary hits to kill, a group's fight; each cut 14% of their health (a stroke 28%), before resistance. */
+    public static final int LEVEL = ZoneBoss.levelOver(Zones.BOTTOMLESS);
+    /** 270 of a level-61 character's ordinary hits to kill, a group's fight; each cut 14% of their health (a stroke 28%), before resistance. */
     public static final double HITS = 270, CUT = 0.14;
     public static final double HEALTH = HITS * MobScaling.typicalHit(LEVEL), CUT_DAMAGE = CUT * MobScaling.typicalHealth(LEVEL);
     public static final int HOUSEHOLD_AT_PERCENT = 60, ESCAPE_AT_PERCENT = 30;
@@ -96,10 +102,15 @@ public class LadyEarthFlowEntity extends ZoneBoss {
     public static final String KEY_HOUSEHOLD = "jttw_earth_flow_household";
     /** How far beyond her ground she may be drawn before she is back on it, across and up or down. */
     public static final int LEASH = 6;
+    /** The whirl: how often; how long she winds up, how long she spins; how far it reaches, how hard it cuts (of a level-61 character's health). */
+    public static final int WHIRL_EVERY = 180, WHIRL_WIND_UP = 20, WHIRL_SPIN = 10;
+    public static final double WHIRL_REACH = 4.5, WHIRL = 0.22;
 
     private static final EntityDataAccessor<Boolean> FLED = SynchedEntityData.defineId(LadyEarthFlowEntity.class, EntityDataSerializers.BOOLEAN);
+    /** Ticks left of her whirl, its wind-up and its spin (for her pose). */
+    private static final EntityDataAccessor<Integer> WHIRLING = SynchedEntityData.defineId(LadyEarthFlowEntity.class, EntityDataSerializers.INT);
 
-    private int burrow = BURROW_EVERY;
+    private int burrow = BURROW_EVERY, whirl = WHIRL_EVERY / 2;
     @Nullable
     private BlockPos refuge;
     /** The centre of the cave whose palace is her lair, if she was put there when the land was made. */
@@ -159,6 +170,7 @@ public class LadyEarthFlowEntity extends ZoneBoss {
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(FLED, false);
+        builder.define(WHIRLING, 0);
     }
 
     /** Whether she has left her shoe behind and fled (it happens once). */
@@ -218,6 +230,104 @@ public class LadyEarthFlowEntity extends ZoneBoss {
         if (hit && female) target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 0), this);
         playSound(SoundEvents.PLAYER_ATTACK_SWEEP, 0.8f, female ? 1.4f : 1.1f);
         return hit;
+    }
+
+    // ── The whirl ───────────────────────────────────────────────────────
+
+    /** The whirl's cut. */
+    @Override
+    public double[] specialShares() {
+        return new double[]{WHIRL};
+    }
+
+    /** Ticks left of her whirl: over {@value #WHIRL_SPIN} winding up, then spinning; 0 when she is not. */
+    public int whirlLeft() {
+        return entityData.get(WHIRLING);
+    }
+
+    /** Whether she is winding up her whirl or spinning in it. */
+    public boolean whirling() {
+        return whirlLeft() > 0;
+    }
+
+    /** Whether she is winding up (the blades swept back), not yet spinning. */
+    public boolean windingUp() {
+        return whirlLeft() > WHIRL_SPIN;
+    }
+
+    /** Those the whirl would cut now. */
+    public List<LivingEntity> whirlFoes() {
+        return foesWithin(WHIRL_REACH).stream().filter(e -> Math.abs(e.getY() - getY()) <= 2.5).toList();
+    }
+
+    /** Sinks low, the blades swept back: the whirl comes {@value #WHIRL_WIND_UP} ticks from now. Returns whether she began. */
+    public boolean beginWhirl() {
+        if (whirling()) return false;
+        entityData.set(WHIRLING, WHIRL_WIND_UP + WHIRL_SPIN);
+        whirl = WHIRL_EVERY;
+        getNavigation().stop();
+        playSound(SoundEvents.FOX_AGGRO, 1.5f, 1.2f);
+        playSound(SoundEvents.ARMOR_EQUIP_IRON.value(), 1.5f, 0.6f);
+        return true;
+    }
+
+    /** One tick of the whirl: the wind-up, the spin (it cuts as it begins), or, its time come and a foe near, its beginning. */
+    public void tickWhirl() {
+        int left = whirlLeft();
+        if (left > 0) {
+            getNavigation().stop();
+            entityData.set(WHIRLING, --left);
+            if (level() instanceof ServerLevel server) {
+                if (left > WHIRL_SPIN) {
+                    // petals drawn in round her, from the edge of her reach
+                    for (int i = 0; i < 4; i++) {
+                        double a = random.nextDouble() * Math.PI * 2;
+                        server.sendParticles(ParticleTypes.CHERRY_LEAVES, getX() + Math.cos(a) * WHIRL_REACH, getY(0.5), getZ() + Math.sin(a) * WHIRL_REACH,
+                                0, -Math.cos(a), 0, -Math.sin(a), 0.25);
+                    }
+                    if (left % 5 == 0) playSound(SoundEvents.PLAYER_ATTACK_SWEEP, 0.6f, 0.5f + (WHIRL_WIND_UP + WHIRL_SPIN - left) * 0.03f);
+                } else {
+                    // the ring of steel
+                    double a = left * Math.PI * 2 / 5;
+                    server.sendParticles(ParticleTypes.SWEEP_ATTACK, getX() + Math.cos(a) * 2.5, getY(0.6), getZ() + Math.sin(a) * 2.5, 1, 0, 0, 0, 0);
+                    if (left % 3 == 0) playSound(SoundEvents.PLAYER_ATTACK_SWEEP, 1.2f, 1.3f);
+                }
+            }
+            if (left == WHIRL_SPIN) whirl(whirlFoes());
+            return;
+        }
+        if (whirl > 0) whirl--;
+        LivingEntity t = getTarget();
+        if (whirl == 0 && t != null && t.isAlive() && t.distanceTo(this) <= WHIRL_REACH) beginWhirl();
+    }
+
+    /** The whirl cuts {@code caught}: each struck, thrown back and slowed. Returns how many it struck. */
+    public int whirl(List<? extends LivingEntity> caught) {
+        int n = 0;
+        for (LivingEntity e : caught) {
+            e.invulnerableTime = 0;
+            if (!e.hurt(damageSources().mobAttack(this), hitOf(WHIRL))) continue;
+            n++;
+            setLastHurtMob(e);
+            e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 1), this);
+            Vec3 out = e.position().subtract(position()).multiply(1, 0, 1);
+            if (out.lengthSqr() > 1e-4) {
+                out = out.normalize();
+                e.push(out.x * 0.9, 0.3, out.z * 0.9);
+                e.hurtMarked = true;
+            }
+        }
+        swing(InteractionHand.MAIN_HAND, true);
+        playSound(SoundEvents.PLAYER_ATTACK_STRONG, 1.5f, 0.8f);
+        playSound(SoundEvents.FOX_SCREECH, 1.2f, 1.4f);
+        if (level() instanceof ServerLevel server) {
+            for (int i = 0; i < 16; i++) {
+                double a = i * Math.PI * 2 / 16;
+                server.sendParticles(ParticleTypes.SWEEP_ATTACK, getX() + Math.cos(a) * 2.2, getY(0.6), getZ() + Math.sin(a) * 2.2, 1, 0, 0, 0, 0);
+            }
+            server.sendParticles(ParticleTypes.CHERRY_LEAVES, getX(), getY(0.6), getZ(), 40, WHIRL_REACH / 2, 0.4, WHIRL_REACH / 2, 0.1);
+        }
+        return n;
     }
 
     /** Calls up her household round her: mouse kin and flower maids, never captains. */
@@ -399,8 +509,9 @@ public class LadyEarthFlowEntity extends ZoneBoss {
         super.customServerAiStep();
         if (burrow > 0) burrow--;
         if (tickCount % 20 == 0) keepToLair();
+        tickWhirl();
         LivingEntity t = getTarget();
-        if (phase() >= 1 && burrow == 0 && t != null && t.isAlive() && distanceToSqr(t) > 9) burrow(t);
+        if (phase() >= 1 && !whirling() && burrow == 0 && t != null && t.isAlive() && distanceToSqr(t) > 9) burrow(t);
         // fled and alone, she mends
         if (fled() && tickCount % 20 == 0 && getHealth() < getMaxHealth() * MEND_UP_TO
                 && level().getNearestPlayer(this, ALONE) == null) {
@@ -440,6 +551,7 @@ public class LadyEarthFlowEntity extends ZoneBoss {
         super.addAdditionalSaveData(tag);
         tag.putBoolean("Fled", fled());
         tag.putInt("Burrow", burrow);
+        tag.putInt("Whirl", whirl);
         if (refuge != null) tag.put("Refuge", NbtUtils.writeBlockPos(refuge));
         if (cave != null) tag.putIntArray("Cave", cave);
     }
@@ -449,6 +561,7 @@ public class LadyEarthFlowEntity extends ZoneBoss {
         super.readAdditionalSaveData(tag);
         entityData.set(FLED, tag.getBoolean("Fled"));
         burrow = tag.getInt("Burrow");
+        if (tag.contains("Whirl")) whirl = tag.getInt("Whirl");
         NbtUtils.readBlockPos(tag, "Refuge").ifPresent(r -> {
             refuge = r;
             restrictTo(r, SHRINE_GROUND);
@@ -489,8 +602,13 @@ public class LadyEarthFlowEntity extends ZoneBoss {
         public void tick() {
             LivingEntity t = boss.getTarget();
             if (t == null) return;
-            boss.getLookControl().setLookAt(t, 30f, 30f);
             if (rest > 0) rest--;
+            if (boss.whirling()) {
+                second = -1;
+                boss.getNavigation().stop();
+                return;
+            }
+            boss.getLookControl().setLookAt(t, 30f, 30f);
             if (second >= 0 && --second < 0 && boss.inReach(t)) boss.cut(t, true);
             if (rest == 0 && boss.inReach(t)) {
                 boss.cut(t, false);

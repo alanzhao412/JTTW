@@ -242,6 +242,66 @@ public class RidgeGameTests {
     // ── Lady White Bone ─────────────────────────────────────────────────
 
     @GameTest(template = PLATFORM)
+    public static void herBoneStormBurstsOverAllNearHerAfterItGathers(GameTestHelper h) {
+        LadyWhiteBoneEntity lady = lady(h, new BlockPos(0, 2, 0));
+        lady.setNoAi(true);
+        lady.setDisguise(LadyWhiteBoneEntity.HERSELF);
+        List<net.minecraft.world.entity.animal.IronGolem> golems = new java.util.ArrayList<>();
+        for (BlockPos at : List.of(new BlockPos(3, 2, 2), new BlockPos(1, 2, 4), new BlockPos(2, 2, 0), new BlockPos(7, 2, 7))) {
+            var g = h.spawn(EntityType.IRON_GOLEM, at);
+            g.setNoAi(true);
+            g.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1_000_000);
+            g.setHealth(1_000_000);
+            g.setTarget(lady);
+            sweepAround(h, g);
+            golems.add(g);
+        }
+        var a = golems.get(0);
+        var b = golems.get(1);
+        var steps = golems.get(2);
+        var far = golems.get(3);
+        lady.setTarget(a);
+        float full = a.getHealth();
+        List<LivingEntity> foes = lady.stormFoes();
+        check(h, foes.contains(a) && foes.contains(b) && foes.contains(steps) && !foes.contains(far), "within its reach, and not beyond: " + foes);
+        check(h, lady.beginStorm() && lady.storming() && !lady.beginStorm(), "the bones rise round her, once");
+        for (int t = 1; t < LadyWhiteBoneEntity.STORM_WIND_UP; t++) {
+            lady.tickStorm();
+            if (t == LadyWhiteBoneEntity.STORM_WIND_UP / 2) steps.teleportTo(steps.getX() + 30, steps.getY(), steps.getZ());
+            check(h, lady.storming(), "still gathering at tick " + t);
+        }
+        for (var g : golems) eq(h, full, g.getHealth(), "nothing struck while it gathers");
+        lady.tickStorm();
+        check(h, !lady.storming(), "it bursts");
+        double hit = LadyWhiteBoneEntity.STORM * MobScaling.typicalHealth(LadyWhiteBoneEntity.LEVEL);
+        check(h, Math.abs(hit - (full - a.getHealth())) <= hit * 1e-3 + 0.1, "the one struck: " + (full - a.getHealth()) + " of " + hit);
+        check(h, Math.abs(hit - (full - b.getHealth())) <= hit * 1e-3 + 0.1, "and the other: " + (full - b.getHealth()));
+        check(h, a.hasEffect(MobEffects.MOVEMENT_SLOWDOWN) && b.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "cut and slowed");
+        eq(h, full, steps.getHealth(), "not the one who stepped back in time");
+        eq(h, full, far.getHealth(), "not the one beyond it");
+        check(h, LadyWhiteBoneEntity.STORM <= com.jttw.engine.entity.zone.ZoneBoss.MOST_BLOW, "within a boss's blow");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void herBoneStormComesInItsOwnTimeButNeverInDisguise(GameTestHelper h) {
+        LadyWhiteBoneEntity lady = lady(h, new BlockPos(0, 2, 0));
+        lady.setNoAi(true);
+        var g = h.spawn(EntityType.IRON_GOLEM, new BlockPos(3, 2, 2));
+        g.setNoAi(true);
+        sweepAround(h, g);
+        g.setTarget(lady);
+        lady.setTarget(g);
+        lady.setDisguise(LadyWhiteBoneEntity.SERVANT);
+        check(h, !lady.beginStorm(), "passing for one of her dead, she raises none");
+        lady.setDisguise(LadyWhiteBoneEntity.HERSELF);
+        int t = 0;
+        while (!lady.storming() && t++ < LadyWhiteBoneEntity.STORM_EVERY + 5) lady.tickStorm();
+        check(h, lady.storming() && t > 1, "herself, she raises it in her own time: " + t);
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
     public static void herVeilBlindsThoseNear(GameTestHelper h) {
         ServerPlayer p = player(h);
         p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL); // the veil passes over creative players

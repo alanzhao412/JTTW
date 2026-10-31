@@ -128,12 +128,12 @@ public class LionCamelGameTests {
         return k;
     }
 
-    /** A still iron golem, its health raised so no level-100 blow ends it: a target to measure blows on. */
+    /** A still iron golem, its health raised so no demon king's blow ends it: a target to measure blows on. */
     private static LivingEntity golem(GameTestHelper h, BlockPos at) {
         var g = h.spawn(EntityType.IRON_GOLEM, at);
         g.goalSelector.removeAllGoals(x -> true);
         g.targetSelector.removeAllGoals(x -> true);
-        g.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1_000_000);
+        g.getAttribute(Attributes.MAX_HEALTH).setBaseValue(100_000_000);
         g.setHealth(g.getMaxHealth());
         sweepAround(h, g);
         return g;
@@ -299,8 +299,8 @@ public class LionCamelGameTests {
     @GameTest(batch = "lion_camel_theAzureLionIsAKingAtTheCap", template = PLATFORM)
     public static void theAzureLionIsAKingAtTheCap(GameTestHelper h) {
         AzureLionEntity lion = king(h, ModEntities.AZURE_LION.get(), new BlockPos(2, 2, 2));
-        check(h, lion.getDisplayName().getString().contains("Lv 100"), lion.getDisplayName().getString());
-        close(h, AzureLionEntity.HEALTH, lion.getMaxHealth(), "350 ordinary hits of a level-100 character");
+        check(h, lion.getDisplayName().getString().contains("Lv " + AzureLionEntity.LEVEL), lion.getDisplayName().getString());
+        close(h, AzureLionEntity.HEALTH, lion.getMaxHealth(), "350 ordinary hits of a character of his level");
         eq(h, EnemyTier.BOSS.name(), lion.getPersistentData().getString(ZoneMonster.KEY_TIER), "a Boss");
         eq(h, Zones.LION_CAMEL.id(), lion.getPersistentData().getString(ZoneMonster.KEY_ZONE), "of the ridge");
         eq(h, BossEvent.BossBarColor.BLUE, lion.bossBar().getColor(), "an azure bar");
@@ -379,7 +379,7 @@ public class LionCamelGameTests {
         List<LivingEntity> caught = lion.roar(before);
         check(h, caught.contains(before) && !caught.contains(aside), "the one before him, not the one at his side");
         close(h, lion.roarDamage(), hp - before.getHealth(), "its blow");
-        close(h, AzureLionEntity.ROAR * MobScaling.typicalHealth(100), lion.roarDamage(), "12% of a level-100 character's health");
+        close(h, AzureLionEntity.ROAR * MobScaling.typicalHealth(AzureLionEntity.LEVEL), lion.roarDamage(), "12% of a level-100 character's health");
         check(h, before.hasEffect(MobEffects.MOVEMENT_SLOWDOWN) && before.hasEffect(MobEffects.WEAKNESS), "slowed and weakened");
         eq(h, asideHp, aside.getHealth(), "untouched at his side");
         h.succeed();
@@ -472,8 +472,8 @@ public class LionCamelGameTests {
     @GameTest(batch = "lion_camel_theWhiteElephantIsAKing", template = PLATFORM)
     public static void theWhiteElephantIsAKing(GameTestHelper h) {
         WhiteElephantEntity e = king(h, ModEntities.WHITE_ELEPHANT.get(), new BlockPos(2, 2, 2));
-        check(h, e.getDisplayName().getString().contains("Lv 98"), e.getDisplayName().getString());
-        close(h, WhiteElephantEntity.HEALTH, e.getMaxHealth(), "330 ordinary hits of a level-98 character");
+        check(h, e.getDisplayName().getString().contains("Lv " + WhiteElephantEntity.LEVEL), e.getDisplayName().getString());
+        close(h, WhiteElephantEntity.HEALTH, e.getMaxHealth(), "330 ordinary hits of a character of his level");
         eq(h, EnemyTier.BOSS.name(), e.getPersistentData().getString(ZoneMonster.KEY_TIER), "a Boss");
         eq(h, BossEvent.BossBarColor.WHITE, e.bossBar().getColor(), "a white bar");
         h.succeed();
