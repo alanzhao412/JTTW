@@ -198,19 +198,24 @@ final class FireBench {
         shot("fire_ravine_to_the_door", 0, 30, 150, 0, 8, FortressPlan.FACE_Z);
         shot("fire_great_door", 10, 9, FortressPlan.FACE_Z + 30, 0, 9, FortressPlan.FACE_Z);
         shot("fire_great_door_close", -4, 4, FortressPlan.FACE_Z + 14, 0, 9, FortressPlan.FACE_Z);
-        // an outpost and its band: the nearest of the ones that keep to their towers, standing in the open (not sunk in the range)
+        // the outposts nearest the heart, whatever ground they stand on (each seated on it, never sunk), and what they stand on
         var posts = RangeShape.outposts(Zones.seed(), centre.getX(), centre.getZ());
         var shape = com.jttw.engine.world.feature.ZoneTerrain.broadShape(level);
         List<RangeShape.Outpost> near = new ArrayList<>(posts);
         near.sort(java.util.Comparator.comparingDouble(o -> Math.hypot(o.x() - centre.getX(), o.z() - centre.getZ())));
+        int taken = 0;
         for (var o : near) {
-            if (o.rim() || o.patrol()) continue;
+            if (o.rim() || taken >= 5) continue;
             int base = com.jttw.engine.world.feature.FlameSeamsFeature.outpostBase(level, shape, Zones.seed(), o);
-            if (surface(level, o.x() + 10, o.z() + 10) > base + 6 || surface(level, o.x() - 10, o.z() - 10) > base + 6) continue;
             int bx = o.x() - origin.getX(), bz = o.z() - origin.getZ(), by = base - origin.getY();
-            int cam = Math.max(by + 16, surface(level, o.x() + 14, o.z() + 14) - origin.getY() + 6);
-            shot("fire_outpost", bx + 14, cam, bz + 14, bx, by + 2, bz);
-            break;
+            int around = Integer.MIN_VALUE;
+            for (int k = 0; k < 16; k++) {
+                double a = k * Math.PI / 8;
+                around = Math.max(around, surface(level, o.x() + (int) Math.round(Math.cos(a) * 8), o.z() + (int) Math.round(Math.sin(a) * 8)));
+            }
+            report.add(String.format("outpost at %d %d: paving at %d, the ground 8 out at most %d (%+d)", o.x(), o.z(), base, around, around - base));
+            int cam = Math.max(by + 12, surface(level, o.x() + 16, o.z() + 16) - origin.getY() + 6);
+            shot("fire_outpost_" + (++taken), bx + 16, cam, bz + 16, bx, by + 3, bz);
         }
         // from beside the first watchtower on the ravine's rim, down on the forecourt and its wardens
         for (var o : posts) {

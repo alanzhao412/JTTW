@@ -361,8 +361,6 @@ public final class WukongAbilityHandler {
 
     private static final Set<UUID> ACTIVE_GOLDEN_EYES_XRAY = new HashSet<>();
     private static final float GOLDEN_EYES_QI_DRAIN = 0.05f; // per tick, same as Eye of Heaven T3
-    /** The Eye Laser's hit on each entity in its path at level 1; scaled by Wukong's power. */
-    private static final float EYE_LASER_DAMAGE = 8.0f;
 
     /**
      * Toggle xray mode for Fiery Golden Eyes.
@@ -386,85 +384,10 @@ public final class WukongAbilityHandler {
     }
 
     /**
-     * Fire the Eye Laser (normal activate, no shift).
-     * Fires a beam along the look direction for 30 blocks.
-     * Destroys blocks in a 1-block radius, sets fire, damages entities.
+     * Fire the Eye Laser (normal activate, no shift) at his chosen output: see {@link EyeLaser}.
      */
     public static void fireEyeLaser(ServerPlayer player) {
-        if (!player.getPersistentData().getBoolean(ImmortalItems.KEY_FIERY_GOLDEN_EYES)) return;
-
-        // 5 second (100 tick) cooldown: the game time the laser is ready again (absent = ready)
-        long now = player.level().getGameTime();
-        if (now < player.getPersistentData().getLong("jttw_eye_laser_ready_at")) {
-            player.sendSystemMessage(Component.literal("\u00a7cEye Laser is on cooldown!"));
-            return;
-        }
-
-        // Cost: 10 Qi
-        if (!QiData.spend(player, 10f)) {
-            player.sendSystemMessage(Component.literal("\u00a7cNot enough Qi!"));
-            return;
-        }
-        // Only a shot actually fired starts the cooldown
-        player.getPersistentData().putLong("jttw_eye_laser_ready_at", now + 100);
-
-        // Sync Qi
-        NetworkHandler.sendToPlayer(player,
-                new SyncQiPacket(QiData.getCurrent(player), QiData.getMax(player)));
-
-        // Send cooldown to client
-        NetworkHandler.sendToPlayer(player,
-                new SyncCooldownPacket(player.getUUID(), "wu_golden_eyes", 100, 100));
-
-        // Fire the beam: 8 damage at level 1, scaled by his power
-        float laserDamage = com.jttw.engine.progression.stats.LevelPower.scaled(player, EYE_LASER_DAMAGE);
-        Vec3 eye = player.getEyePosition();
-        Vec3 look = player.getLookAngle();
-        ServerLevel level = player.serverLevel();
-
-        for (int i = 1; i <= 30; i++) {
-            Vec3 point = eye.add(look.scale(i));
-            BlockPos center = BlockPos.containing(point);
-
-            // Destroy blocks in 1-block radius cylinder
-            for (int dx = -1; dx <= 1; dx++) {
-                for (int dy = -1; dy <= 1; dy++) {
-                    for (int dz = -1; dz <= 1; dz++) {
-                        BlockPos target = center.offset(dx, dy, dz);
-                        net.minecraft.world.level.block.state.BlockState state = level.getBlockState(target);
-
-                        if (!state.isAir() && state.getDestroySpeed(level, target) >= 0
-                                && state.getDestroySpeed(level, target) < 50f) {
-                            // Don't destroy bedrock or obsidian-tier blocks
-                            level.destroyBlock(target, true, player);
-                        }
-                    }
-                }
-            }
-
-            // Set fire on exposed surfaces around the path
-            for (int dx = -1; dx <= 1; dx++) {
-                for (int dz = -1; dz <= 1; dz++) {
-                    BlockPos firePos = center.offset(dx, -1, dz);
-                    BlockPos above = firePos.above();
-                    if (level.getBlockState(above).isAir()
-                            && net.minecraft.world.level.block.BaseFireBlock.canBePlacedAt(level, above,
-                                    net.minecraft.core.Direction.UP)) {
-                        level.setBlockAndUpdate(above,
-                                net.minecraft.world.level.block.Blocks.FIRE.defaultBlockState());
-                    }
-                }
-            }
-
-            // Damage entities along the path
-            AABB hitBox = new AABB(center).inflate(1.0);
-            List<LivingEntity> hit = level.getEntitiesOfClass(LivingEntity.class, hitBox,
-                    e -> e != player && e.isAlive());
-            for (LivingEntity entity : hit) {
-                entity.hurt(level.damageSources().magic(), laserDamage);
-                entity.setRemainingFireTicks(60); // 3 seconds
-            }
-        }
+        EyeLaser.fire(player);
     }
 
     // Golden Eyes xray Qi drain — piggyback on the ring of fire server tick

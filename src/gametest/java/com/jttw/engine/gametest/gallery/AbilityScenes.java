@@ -128,10 +128,15 @@ final class AbilityScenes {
             java.util.Map.entry("tang_ghost_market_close", 60), java.util.Map.entry("tang_heaven_merchant", 100),
             // the Bottomless Cave, laid off the stage
             java.util.Map.entry("cave_palace", 120), java.util.Map.entry("cave_gate_hall", 80),
-            // the White Bone Cave's inside, laid south of the stage
+            // the White Bone Cave's inside, laid far south of the stage (past the villages)
             java.util.Map.entry("ridge_cave_ossuary", 300), java.util.Map.entry("ridge_cave_bone_forge", 200),
             java.util.Map.entry("ridge_cave_borrowed_faces", 200), java.util.Map.entry("ridge_cave_seal", 200),
-            java.util.Map.entry("ridge_cave_throne_lady", 200), java.util.Map.entry("ridge_cave_throne_hall", 160)));
+            java.util.Map.entry("ridge_cave_throne_lady", 200), java.util.Map.entry("ridge_cave_throne_hall", 160),
+            // Black Wind Mountain's cave and temple, laid off the stage; the king's whirlwinds rising
+            java.util.Map.entry("bw_cave_door", 300), java.util.Map.entry("bw_cave_door_close", 80), java.util.Map.entry("bw_cave_keepers", 80),
+            java.util.Map.entry("bw_cave_court", 300), java.util.Map.entry("bw_cave_feast", 80), java.util.Map.entry("bw_cave_throne", 300),
+            java.util.Map.entry("bw_cave_king_on_his_floor", 80), java.util.Map.entry("bw_temple", 160), java.util.Map.entry("bw_temple_hall", 60),
+            java.util.Map.entry("bw_king_whirlwinds", 40)));
 
     /** The scenes' long waits, with Silk-Web Ridge's. */
     private static java.util.Map<String, Integer> withSpider(java.util.Map<String, Integer> base) {
@@ -156,6 +161,10 @@ final class AbilityScenes {
         all.addAll(WildScenes.all());
         all.addAll(CaveScenes.all());
         all.addAll(RidgeScenes.all());
+        all.addAll(BuddhaScenes.all());
+        all.addAll(BlackWindScenes.all());
+        all.addAll(CloneScenes.all());
+        all.addAll(EyeLaserScenes.all());
         all.addAll(SpiderScenes.all());
         return all;
     }
@@ -1231,10 +1240,12 @@ final class AbilityScenes {
         WatersScenes.clear(p);
         HellScenes.clear(p);
         FireScenes.clear(p);
+        BlackWindScenes.clear(p);
         WuzhuangScenes.clear(p);
         LionScenes.clear(p);
         VillageScenes.clear(p);
         WildScenes.clear(p);
+        CloneScenes.clear(p);
         SpiderScenes.clear(p);
         keepScreen = false;
         topSpeed = false;

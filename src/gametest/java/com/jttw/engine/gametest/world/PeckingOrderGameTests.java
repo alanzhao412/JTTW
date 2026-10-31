@@ -34,7 +34,8 @@ import static com.jttw.engine.gametest.GT.*;
  * The pecking order of the mod's creatures, by how hard each hits (a share of a same-level
  * character's health): every regular mob's hardest single hit at most {@link ZoneMonster#MOB_HIT_CAP},
  * every captain's at most that times a captain's measure, every miniboss's between a captain's and a
- * boss's, every boss's blow over them all. And by how much it takes to kill: a boss is a group's
+ * boss's, every boss's blow over them all (and its special hits, {@link ZoneBoss#specialShares}, no harder
+ * than its blow may be). And by how much it takes to kill: a boss is a group's
  * fight, at least {@link ZoneBoss#LEAST_HITS} ordinary hits all its lives together, and each of its
  * lives more than any miniboss. Every kind there is is measured, so a new one out of its place fails
  * here. Each is made and measured off the world, never let loose in it.
@@ -58,6 +59,8 @@ public class PeckingOrderGameTests {
     private static final Set<EntityType<?>> MINIBOSS_KINDS = Set.of(ModEntities.BONE_SERVANT.get(), ModEntities.WRAITH.get(),
             ModEntities.MOUSE_SPIRIT.get(), ModEntities.FLOWER_MAID.get(), ModEntities.FURNACE_BRUTE.get(), ModEntities.STRONG_GENERAL.get(),
             ModEntities.LION_DEMON.get(), ModEntities.ELEPHANT_DEMON.get(), ModEntities.PENG_DEMON.get(),
+            com.jttw.engine.registry.BlackWindRegistry.BEAR_SOLDIER.get(), com.jttw.engine.registry.BlackWindRegistry.LINGXUZI.get(),
+            com.jttw.engine.registry.BlackWindRegistry.WHITE_ROBED_SCHOLAR.get(),
             com.jttw.engine.registry.SpiderCaveRegistry.SPIDER_SPIRIT.get());
 
     private static List<Entity> every(GameTestHelper h) {
@@ -127,6 +130,68 @@ public class PeckingOrderGameTests {
     }
 
     @GameTest(template = PLATFORM)
+    public static void bossesStandFarAboveTheirZonesInLevel(GameTestHelper h) {
+        // the highest level anything of a zone but its bosses comes at: its band's top, its captains and minibosses, the temple youths
+        java.util.Map<String, Integer> minions = new java.util.HashMap<>(), head = new java.util.HashMap<>();
+        java.util.Map<String, com.jttw.engine.world.Zones.Zone> zones = new java.util.HashMap<>();
+        List<ZoneBoss> bosses = new ArrayList<>();
+        for (Entity e : every(h)) {
+            if (e instanceof TempleYouthEntity y) minions.merge(y.zone().id(), y.mobLevel(), Math::max);
+            else if (e instanceof ZoneBoss b) bosses.add(b);
+            else if (e instanceof ZoneMonster m) minions.merge(m.zone().id(), Math.max(m.zone().maxLevel(), m.captainLevel()), Math::max);
+            if (!(e instanceof ZoneBoss) || e instanceof TempleYouthEntity) e.discard();
+        }
+        // and the posts of every fortress and garrison, at whatever level each is put there
+        String ridge = com.jttw.engine.world.Zones.WHITE_BONE.id(), cave = com.jttw.engine.world.Zones.BOTTOMLESS.id(),
+                fire = com.jttw.engine.world.Zones.FIRE_MOUNTAIN.id(), lion = com.jttw.engine.world.Zones.LION_CAMEL.id();
+        var bone = com.jttw.engine.world.ridge.WhiteBoneCave.of(h.getLevel().getSeed());
+        for (int k = 0; k <= com.jttw.engine.world.ridge.WhiteBoneCave.FLOORS; k++) {
+            for (var post : bone.posts(k)) minions.merge(ridge, post.level(), Math::max);
+        }
+        for (var post : bone.outside()) minions.merge(ridge, post.level(), Math::max);
+        int caveTop = com.jttw.engine.world.Zones.BOTTOMLESS.maxLevel();
+        for (int k = -1; k < com.jttw.engine.world.feature.Labyrinth.LEVELS; k++) {
+            // a household's are put a level either side of their floor's, never past the band (CaveHousehold.put)
+            minions.merge(cave, Math.min(caveTop, com.jttw.engine.entity.cave.CaveMonster.captainOn(k) + 1), Math::max);
+            minions.merge(cave, Math.min(caveTop, com.jttw.engine.entity.cave.CaveMonster.regularOn(k) + 1), Math::max);
+            if (k >= 0) minions.merge(cave, com.jttw.engine.entity.cave.CaveMonster.guardianOn(k), Math::max);
+        }
+        for (int f = 0; f <= com.jttw.engine.world.fire.FortressPlan.FLOORS + 1; f++) {
+            minions.merge(fire, com.jttw.engine.world.fire.FortressPlan.regularLevel(f), Math::max);
+            minions.merge(fire, com.jttw.engine.world.fire.FortressPlan.captainLevel(f), Math::max);
+            minions.merge(fire, com.jttw.engine.world.fire.FortressPlan.guardianLevel(f), Math::max);
+        }
+        for (int k = 0; k <= com.jttw.engine.world.lion.LionFortress.FLOORS; k++) {
+            for (int role : new int[]{com.jttw.engine.world.lion.LionFortress.REGULAR, com.jttw.engine.world.lion.LionFortress.CAPTAIN,
+                    com.jttw.engine.world.lion.LionFortress.WARDEN}) {
+                minions.merge(lion, com.jttw.engine.world.lion.LionFortress.levelOf(k, role), Math::max);
+            }
+        }
+        for (var z : List.of(com.jttw.engine.world.Zones.WHITE_BONE, com.jttw.engine.world.Zones.BOTTOMLESS,
+                com.jttw.engine.world.Zones.FIRE_MOUNTAIN, com.jttw.engine.world.Zones.LION_CAMEL)) {
+            check(h, minions.get(z.id()) <= z.maxLevel(), z.id() + "'s posts within its band: up to " + minions.get(z.id()));
+        }
+        for (ZoneBoss b : bosses) {
+            com.jttw.engine.world.Zones.Zone z = b.zone();
+            zones.put(z.id(), z);
+            int top = Math.max(z.maxLevel(), minions.getOrDefault(z.id(), 0));
+            check(h, b.mobLevel() > top, name(b) + " (Lv " + b.mobLevel() + ") above everything else of its zone (Lv " + top + ")");
+            check(h, b.mobLevel() <= ZoneBoss.levelOver(z), name(b) + " no higher than its zone's head: " + b.mobLevel());
+            head.merge(z.id(), b.mobLevel(), Math::max);
+            b.discard();
+        }
+        for (var entry : head.entrySet()) {
+            com.jttw.engine.world.Zones.Zone z = zones.get(entry.getKey());
+            int top = Math.max(z.maxLevel(), minions.getOrDefault(z.id(), 0));
+            eq(h, ZoneBoss.levelOver(z), entry.getValue(), z.id() + "'s head boss: its band's top and " + ZoneBoss.LEVELS_ABOVE_BAND);
+            check(h, entry.getValue() >= top + ZoneBoss.LEVELS_ABOVE_BAND,
+                    z.id() + "'s head boss (Lv " + entry.getValue() + ") " + ZoneBoss.LEVELS_ABOVE_BAND + " over everything else of it (Lv " + top + ")");
+        }
+        check(h, head.size() >= 7, "every zone's bosses measured: " + head.keySet());
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
     public static void mobsHitFarLessThanTheirBosses(GameTestHelper h) {
         int zone = 0, wild = 0, bosses = 0;
         for (Entity e : every(h)) {
@@ -134,7 +199,8 @@ public class PeckingOrderGameTests {
                 if (e instanceof ZoneMonster m) {
                     zone++;
                     String n = name(m);
-                    boolean general = m instanceof StrongGeneralEntity || m instanceof com.jttw.engine.entity.spider.SpiderSpiritEntity;
+                    boolean general = m instanceof StrongGeneralEntity || m instanceof com.jttw.engine.entity.blackwind.BlackWindChief
+                            || m instanceof com.jttw.engine.entity.spider.SpiderSpiritEntity; // always minibosses
                     if (!general) {
                         // a regular: its blow and its hardest hit (its specials too) within a mob's; its health a mob's
                         int lv = m.regularLevel();
@@ -189,6 +255,12 @@ public class PeckingOrderGameTests {
                     bosses++;
                     if (b instanceof LadyEarthFlowEntity) blow *= 2; // her stroke is two cuts, the second hard on the first
                     check(h, blow >= BOSS_LEAST - EPS && blow <= BOSS_MOST + EPS, name(b) + "'s blow, a boss's: " + blow);
+                    // its special hits (the blows that fall on all near it) no harder than a boss's blow, and as they land
+                    for (double special : b.specialShares()) {
+                        check(h, special > 0 && special <= BOSS_MOST + EPS, name(b) + "'s special hit: " + special);
+                        double lands = b.hitOf(special) / MobScaling.typicalHealth(b.mobLevel());
+                        check(h, Math.abs(lands - special) <= EPS, name(b) + "'s special hit lands as declared: " + lands);
+                    }
                 }
             } finally {
                 e.discard();

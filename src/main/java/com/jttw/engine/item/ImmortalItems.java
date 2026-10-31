@@ -216,5 +216,8 @@ public final class ImmortalItems {
         if (src.getBoolean(KEY_IMMORTAL_PILLS))   dst.putBoolean(KEY_IMMORTAL_PILLS, true);
         if (src.getBoolean(KEY_IMMORTAL_PEACHES))  dst.putBoolean(KEY_IMMORTAL_PEACHES, true);
         if (src.getBoolean(KEY_FIERY_GOLDEN_EYES)) dst.putBoolean(KEY_FIERY_GOLDEN_EYES, true);
+        // the laser's chosen output goes with the eyes
+        String output = com.jttw.engine.character.wukong.EyeLaser.KEY_OUTPUT;
+        if (src.contains(output)) dst.putInt(output, src.getInt(output));
     }
 }

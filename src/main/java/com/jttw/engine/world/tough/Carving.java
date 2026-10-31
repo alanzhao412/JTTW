@@ -9,16 +9,24 @@ import net.minecraft.world.level.block.state.BlockState;
  * the thrown spear and the axe all spend their budgets by: the greater of how hard it is to mine
  * and a quarter of how well it stands a blast. Earth and stone cost little (dirt 0.5, stone 1.5),
  * obsidian 300, a tough block 375 to the weak and as little as stone to the mightiest; what cannot
- * be broken (bedrock) can never be paid for.
+ * be broken (bedrock) can never be paid for, except by the Fighting Buddha, to whom nothing costs
+ * more than stone ({@link com.jttw.engine.character.wukong.BuddhaBreaking}).
  */
 public final class Carving {
 
     private Carving() {}
 
+    /** What stone costs to carve: the most any block costs the Fighting Buddha. */
+    public static final double STONE = 1.5;
+
     /** The cost of carving {@code state}, for a breaker of {@code strength} (see Tough#strength); infinite if it cannot be. */
     public static double cost(Level level, BlockPos pos, BlockState state, double strength) {
         if (state.isAir()) return 0;
         float hardness = state.getDestroySpeed(level, pos);
+        if (com.jttw.engine.character.wukong.BuddhaBreaking.unstoppable(strength)) {
+            // the Fighting Buddha's: nothing costs him more than stone, bedrock and the unbreakable alike
+            return hardness < 0 ? STONE : Math.min(STONE, Math.max(hardness, state.getBlock().getExplosionResistance() / 4.0));
+        }
         if (hardness < 0) return Double.POSITIVE_INFINITY; // bedrock, barriers: never
         float resistance = Tough.is(state) ? Tough.resistance(strength) : state.getBlock().getExplosionResistance();
         return Math.max(hardness, resistance / 4.0);

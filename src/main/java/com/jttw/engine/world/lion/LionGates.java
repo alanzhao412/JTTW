@@ -339,6 +339,8 @@ public final class LionGates {
     @SubscribeEvent
     public static void onExplode(ExplosionEvent.Detonate event) {
         if (!(event.getLevel() instanceof ServerLevel level)) return;
+        // the Fighting Buddha's blast: no sorcery holds against it
+        if (com.jttw.engine.character.wukong.BuddhaBreaking.unstoppable(event.getExplosion().getIndirectSourceEntity())) return;
         event.getAffectedBlocks().removeIf(p -> isFabric(level, p, level.getBlockState(p)));
     }
 

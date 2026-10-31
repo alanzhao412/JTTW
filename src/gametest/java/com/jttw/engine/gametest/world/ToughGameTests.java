@@ -158,15 +158,33 @@ public class ToughGameTests {
         });
     }
 
+    /** Bedrock holds against the mightiest short of the Fighting Buddha (Wukong at 99; at 100 nothing holds, below). */
     @GameTest(template = PLATFORM, batch = "staff_physics", timeoutTicks = 200)
     public static void bedrockStopsEvenTheMightiest(GameTestHelper h) {
         ServerPlayer owner = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
-        PlayerLevel.setLevel(owner, 100);
+        PlayerLevel.setLevel(owner, 99);
         wall(h, Blocks.BEDROCK);
         PlacedStaffEntity staff = felled(h, owner, 4f);
         h.runAfterDelay(140, () -> {
             check(h, elevation(staff) > 35, "leaning on the bedrock: " + elevation(staff));
             for (int y = 2; y < 10; y++) h.assertBlockPresent(Blocks.BEDROCK, new BlockPos(2, y, 3));
+            h.succeed();
+        });
+    }
+
+    /** The Fighting Buddha's (Wukong at 100) staff, felled, smashes through bedrock as through stone. */
+    @GameTest(template = PLATFORM, batch = "theFightingBuddhasStaffBreaksBedrock", timeoutTicks = 200)
+    public static void theFightingBuddhasStaffBreaksBedrock(GameTestHelper h) {
+        ServerPlayer owner = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
+        PlayerLevel.setLevel(owner, 100);
+        wall(h, Blocks.BEDROCK);
+        felled(h, owner, 4f);
+        h.runAfterDelay(140, () -> {
+            int broken = 0;
+            for (int x = 0; x < 5; x++) for (int y = 2; y < 10; y++) {
+                if (!h.getBlockState(new BlockPos(x, y, 3)).is(Blocks.BEDROCK)) broken++;
+            }
+            check(h, broken > 0, "it broke through the bedrock");
             h.succeed();
         });
     }

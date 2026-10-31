@@ -164,6 +164,7 @@ public final class Morality {
         if (victim instanceof LadyWhiteBoneEntity) return SLAY_LADY;
         if (victim instanceof LadyEarthFlowEntity) return SLAY_EARTH_FLOW;
         if (victim instanceof com.jttw.engine.entity.fire.RedBoyEntity) return SLAY_RED_BOY;
+        if (victim instanceof com.jttw.engine.entity.blackwind.BlackBearDemonEntity) return com.jttw.engine.entity.blackwind.BlackBearDemonEntity.KARMA;
         if (victim instanceof com.jttw.engine.entity.spider.HundredEyedDemonEntity) return SLAY_HUNDRED_EYED;
         if (victim instanceof com.jttw.engine.entity.lion.AzureLionEntity) return SLAY_AZURE_LION;
         if (victim instanceof com.jttw.engine.entity.lion.WhiteElephantEntity) return SLAY_WHITE_ELEPHANT;
@@ -194,6 +195,7 @@ public final class Morality {
         if (deed == SLAY_MONSTER && victim instanceof com.jttw.engine.entity.hell.WanderingGhostEntity) return "you laid a wandering ghost to rest";
         if (deed == SLAY_CAPTAIN && victim instanceof com.jttw.engine.entity.fire.StrongGeneralEntity) return "you struck down one of Red Boy's Six Strong Generals";
         if (victim instanceof com.jttw.engine.entity.fire.RedBoyEntity) return "you subdued Red Boy, the Holy Child King";
+        if (victim instanceof com.jttw.engine.entity.blackwind.BlackBearDemonEntity) return "you subdued the Black Bear Demon and won back the kasaya";
         if (victim instanceof com.jttw.engine.entity.spider.HundredEyedDemonEntity) return "you subdued the Hundred-Eyed Demon Lord, who poisoned the Tang Monk's tea";
         if (deed == SLAY_CAPTAIN && victim instanceof com.jttw.engine.entity.spider.SpiderSpiritEntity) return "you struck down one of the Seven Spider Spirits";
         if (victim instanceof com.jttw.engine.entity.lion.AzureLionEntity) return "you struck down the Azure Lion, who ate a kingdom";

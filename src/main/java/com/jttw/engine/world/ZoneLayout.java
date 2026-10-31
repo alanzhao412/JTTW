@@ -89,6 +89,14 @@ public record ZoneLayout(int near, int far, int radius, int wobble, long salt, b
     public static final ZoneLayout SPIDER_CAVE = new ZoneLayout(6000, 7500, 240, 24, 0x5B1DC0FEL, false);
 
     /**
+     * Black Wind Mountain, in White Bone Ridge's band and ring: a region about 700 blocks across (never
+     * under 640), room for the dark range, the black peak with the Black Wind Cave in its cliff, the
+     * valley road up to its door past the burnt Guanyin Chan Temple, and the bear's camps; 1-2 km out,
+     * clear of the ridge.
+     */
+    public static final ZoneLayout BLACK_WIND = new ZoneLayout(1000, 2000, 350, 30, 0xB1AC3B1DL, false);
+
+    /**
      * Each quarter's half-width, in degrees, a sea's region (or one kept to a quarter) is tried in:
      * well inside its 45, so the four lie plainly round the compass.
      */

@@ -15,7 +15,7 @@ import net.minecraft.world.phys.AABB;
 import java.util.List;
 
 /**
- * The White Bone Cave in the form gallery: its inside laid whole just south of the stage, hung in
+ * The White Bone Cave in the form gallery: its inside laid whole far south of the stage, hung in
  * the air over the flat world (its rock a great block, its halls hollowed out of it), each floor
  * shot with its own garrison standing at their posts, and Lady White Bone on her throne room's
  * floor among her court, found out and herself. The mountain over it, its forecourt and its great
@@ -25,8 +25,12 @@ final class RidgeScenes {
 
     private RidgeScenes() {}
 
-    /** Where the cave is laid: its centre, from the stage's origin, and its forecourt floor over the gallery's ground. */
-    private static final int CX = -30, CZ = 85, RISE = 200;
+    /**
+     * Where the cave is laid: its centre, from the stage's origin, and its forecourt floor over the
+     * gallery's ground. Well south of the stage, past the Tang villages (laid round z 150, {@code VillageScenes})
+     * and every other piece laid off the stage: its rock, hung over them, would roof them over.
+     */
+    private static final int CX = -30, CZ = 330, RISE = 200;
 
     private static boolean laid;
 

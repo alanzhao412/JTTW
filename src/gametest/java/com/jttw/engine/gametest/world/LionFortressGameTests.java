@@ -454,4 +454,39 @@ public class LionFortressGameTests {
         check(h, answer.words().getString().contains("Lion-Camel Cave"), "and he names it: " + answer.words().getString());
         h.succeed();
     }
+
+    // ── One vase a world ────────────────────────────────────────────────
+
+    /** The Yin-Yang Vases the treasury's table rolls for a chest at {@code at}. */
+    private static int vasesAt(ServerLevel level, BlockPos at, long seed) {
+        var table = level.getServer().reloadableRegistries().getLootTable(com.jttw.engine.world.lion.LionCamelCity.TREASURY_LOOT);
+        var items = table.getRandomItems(new net.minecraft.world.level.storage.loot.LootParams.Builder(level)
+                .withParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.ORIGIN, Vec3.atCenterOf(at))
+                .create(net.minecraft.world.level.storage.loot.parameters.LootContextParamSets.CHEST), seed);
+        return items.stream().filter(i -> i.is(com.jttw.engine.registry.ModItems.YIN_YANG_VASE.get())).mapToInt(net.minecraft.world.item.ItemStack::getCount).sum();
+    }
+
+    @GameTest(batch = "lion_fortress_aWorldMadeBeforeKeepsOneVase", template = PLATFORM, timeoutTicks = 100)
+    public static void aWorldMadeBeforeKeepsOneVase(GameTestHelper h) {
+        ServerLevel level = h.getLevel();
+        int[] c = Zones.LION_CAMEL.centres(level.getSeed())[0];
+        LionGates.Fortress f = LionGates.of(level, c[0], c[1]);
+        check(h, f != null, "the region's fortress is found");
+        int[] t = LionFortress.TREASURY;
+        BlockPos cave = f.world(t[0], t[1], LionFortress.FZ + t[2]);
+        BlockPos city = f.world(com.jttw.engine.world.lion.LionTreasury.OLD_X, 4, com.jttw.engine.world.lion.LionTreasury.OLD_Z);
+        BlockState was = level.getBlockState(city);
+        onEnd(h, () -> level.setBlock(city, was, 3));
+        // a world made new: the throne room's treasury holds the vase
+        check(h, com.jttw.engine.world.lion.LionTreasury.oldCityChest(level, f) == null, "no old chest in a city made new");
+        for (long seed = 0; seed < 5; seed++) eq(h, 1, vasesAt(level, cave, seed), "the throne room's vase, in a world made new");
+        // a world whose city was made before: its old chest keeps the vase, the throne room's has none
+        level.setBlock(city, Blocks.CHEST.defaultBlockState(), 3);
+        check(h, city.equals(com.jttw.engine.world.lion.LionTreasury.oldCityChest(level, f)), "the old chest is found");
+        for (long seed = 0; seed < 5; seed++) {
+            eq(h, 0, vasesAt(level, cave, seed), "no second vase in the throne room");
+            eq(h, 1, vasesAt(level, city, seed), "the old city chest's vase");
+        }
+        h.succeed();
+    }
 }

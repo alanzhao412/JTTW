@@ -58,9 +58,11 @@ public class JTTWEngine {
         com.jttw.engine.registry.ModArmorMaterials.register(modEventBus);
         ModItems.register(modEventBus);
         ModEntities.register(modEventBus);
+        com.jttw.engine.registry.BlackWindRegistry.register(modEventBus);
         ModAttributes.register(modEventBus);
         com.jttw.engine.registry.ModEffects.register(modEventBus);
         com.jttw.engine.registry.ModVillages.register(modEventBus);
+        com.jttw.engine.world.lion.LionTreasury.register(modEventBus);
         com.jttw.engine.registry.SpiderCaveRegistry.register(modEventBus);
 
         // The campaign's power curve outgrows vanilla's caps of 1024 max health and 2048 attack: lift them.

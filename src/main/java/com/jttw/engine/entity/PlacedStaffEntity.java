@@ -357,7 +357,7 @@ public class PlacedStaffEntity extends Entity {
      */
     private float reachable(float upTo, @Nullable Player payer, @Nullable java.util.List<BlockPos> breaks, @Nullable double[] cost) {
         Level lv = level();
-        double strength = com.jttw.engine.world.tough.Tough.strength(payer), paid = drillPaid;
+        double strength = com.jttw.engine.character.wukong.BuddhaBreaking.strength(payer), paid = drillPaid;
         int baseY = net.minecraft.util.Mth.floor(getY()), topY = net.minecraft.util.Mth.floor(getY() + VISUAL_HEIGHT * upTo);
         BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
         for (int by = baseY; by <= topY; by++) {
@@ -398,7 +398,7 @@ public class PlacedStaffEntity extends Entity {
         drillPaid += cost[0];
         for (BlockPos pos : column) drilled.add(pos.asLong());
         if (!column.isEmpty()) {
-            com.jttw.engine.world.TerrainBreaker.breakBlocks(sl, column); // no drops, spread over ticks
+            com.jttw.engine.world.TerrainBreaker.breakBlocks(sl, column, payer()); // no drops, spread over ticks
             sl.sendParticles(ParticleTypes.CLOUD, getX(), getY() + VISUAL_HEIGHT * reached, getZ(),
                     (int) (reached * 0.5f + 2), 0.4, 0.4, 0.4, 0.02);
             level().playSound(null, getX(), getY(), getZ(), SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS,
@@ -608,7 +608,7 @@ public class PlacedStaffEntity extends Entity {
         resting = false;
         stillTicks = 0;
         landingOwner = getOwnerUUID();
-        strength = com.jttw.engine.world.tough.Tough.strength(toppledBy);
+        strength = com.jttw.engine.character.wukong.BuddhaBreaking.strength(toppledBy);
         syncRod();
     }
 
@@ -646,7 +646,8 @@ public class PlacedStaffEntity extends Entity {
             velB = noFaster(rodB.subtract(b0).scale(1 / h).scale(0.998), freeB);
         }
         if (!toBreak.isEmpty()) {
-            com.jttw.engine.world.TerrainBreaker.breakBlocks(level, new java.util.ArrayList<>(toBreak));
+            com.jttw.engine.world.TerrainBreaker.breakBlocks(level, new java.util.ArrayList<>(toBreak),
+                    com.jttw.engine.character.wukong.BuddhaBreaking.unstoppable(strength));
             toBreak.clear();
         }
         // rolling: sideways travel of its middle, across its length, turns it about its length

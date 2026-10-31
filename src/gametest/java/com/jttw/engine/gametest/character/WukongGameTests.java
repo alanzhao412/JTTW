@@ -225,8 +225,9 @@ public class WukongGameTests {
         h.succeed();
     }
 
-    @GameTest(template = PLATFORM, setupTicks = 100, timeoutTicks = 200, batch = "eyeLaserHasAFiveSecondCooldown")
-    public static void eyeLaserHasAFiveSecondCooldown(GameTestHelper h) {
+    /** At its first output the laser is ready again after 3 s (each output has its own: EyeLaserGameTests). */
+    @GameTest(template = PLATFORM, setupTicks = 100, timeoutTicks = 200, batch = "eyeLaserHasAThreeSecondCooldownAtOutputOne")
+    public static void eyeLaserHasAThreeSecondCooldownAtOutputOne(GameTestHelper h) {
         ServerPlayer p = wukong(h);
         p.getPersistentData().putBoolean(ImmortalItems.KEY_FIERY_GOLDEN_EYES, true);
         p.setXRot(-90f);
@@ -234,12 +235,12 @@ public class WukongGameTests {
         near(h, 90f, QiData.getCurrent(p), "first shot");
         WukongAbilityHandler.fireEyeLaser(p);
         near(h, 90f, QiData.getCurrent(p), "second shot refused during cooldown");
-        h.runAfterDelay(95, () -> {
+        h.runAfterDelay(55, () -> {
             WukongAbilityHandler.fireEyeLaser(p);
-            near(h, 90f, QiData.getCurrent(p), "still on cooldown before 100 ticks");
+            near(h, 90f, QiData.getCurrent(p), "still on cooldown before 60 ticks");
             h.runAfterDelay(6, () -> {
                 WukongAbilityHandler.fireEyeLaser(p);
-                near(h, 80f, QiData.getCurrent(p), "fires again after 100 ticks");
+                near(h, 80f, QiData.getCurrent(p), "fires again after 60 ticks");
                 h.succeed();
             });
         });

@@ -83,11 +83,25 @@ public final class WukongCharacter implements PlayableCharacter {
     @Override
     public List<AbilitySlot> fullBar(net.minecraft.world.entity.player.Player player) {
         List<AbilitySlot> all = PlayableCharacter.super.fullBar(player);
-        if (all.size() <= SLOT_COUNT || !ImmortalItems.hasFieryGoldenEyes(player)) return all;
-        List<AbilitySlot> withEyes = new java.util.ArrayList<>(all);
-        withEyes.set(SLOT_COUNT + 2, GOLDEN_EYES);
-        return List.copyOf(withEyes);
+        boolean buddha = FightingBuddha.is(player);
+        if (all.size() <= SLOT_COUNT && !buddha) return all;
+        List<AbilitySlot> full = new java.util.ArrayList<>(all);
+        // the Fighting Buddha's two powers make a Shift page if there was none
+        while (full.size() < 2 * SLOT_COUNT) full.add(AbilitySlot.EMPTY);
+        if (ImmortalItems.hasFieryGoldenEyes(player)) full.set(SLOT_COUNT + 2, GOLDEN_EYES);
+        if (buddha) {
+            full.set(SLOT_COUNT + 1, BUDDHA_VANISH);
+            full.set(SLOT_COUNT + 3, SOMERSAULT_ANYWHERE);
+        }
+        return List.copyOf(full);
     }
+
+    /** Shift + B: the Fighting Buddha's Appear and Disappear (level 100). */
+    public static final AbilitySlot BUDDHA_VANISH =
+            new AbilitySlot(FightingBuddha.VANISH, "Appear and Disappear", AbilityType.TOGGLE, 1);
+    /** Shift + M: the Fighting Buddha's Somersault Anywhere (level 100); a menu, filled by the server. */
+    public static final AbilitySlot SOMERSAULT_ANYWHERE =
+            new AbilitySlot(FightingBuddha.TRAVEL, "Somersault Anywhere", AbilityType.MENU, 1);
 
     @Override
     public void use(ServerPlayer player, String abilityId, AbilityAction action) {
@@ -98,6 +112,8 @@ public final class WukongCharacter implements PlayableCharacter {
                 else if (action == AbilityAction.STOP) WukongAbilityHandler.stopRing(player);
             }
             case "wu_clone" -> { if (action == AbilityAction.USE) WuCloneManager.summon(player); }
+            case FightingBuddha.VANISH -> { if (action == AbilityAction.USE) BuddhaVanish.toggle(player); }
+            case FightingBuddha.TRAVEL -> { if (action == AbilityAction.USE) SomersaultTravel.openMenu(player); }
             case "wu_golden_eyes" -> {
                 // Fiery Golden Eyes: sneaking toggles x-ray, otherwise fires the eye laser
                 if (action == AbilityAction.USE) {

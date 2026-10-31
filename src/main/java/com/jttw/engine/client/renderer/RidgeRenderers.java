@@ -403,6 +403,23 @@ public final class RidgeRenderers {
                 forearm[1].xRot = -1.45f + breath * 0.05f;
                 hand[1].xRot = -0.25f;
             }
+            if (e.storming()) {
+                // the bone storm gathering: arms flung wide and up, head thrown back, jaw agape, shroud lifting
+                float up = Math.min(1f, (LadyWhiteBoneEntity.STORM_WIND_UP - e.stormLeft()) / 6f), shake = Mth.sin(age * 1.9f) * 0.05f * up;
+                torso.xRot = 0.2f - 0.45f * up;
+                head.xRot = -0.6f * up;
+                jaw.xRot = 0.55f * up + shake;
+                for (int s = 0; s < 2; s++) {
+                    float side = s == 0 ? 1f : -1f;
+                    arm[s].xRot = -1.9f * up + shake;
+                    arm[s].yRot = 0;
+                    arm[s].zRot = 1.1f * up * side;
+                    forearm[s].xRot = -0.3f * up;
+                }
+                shroud.xRot -= 0.5f * up;
+                hem.xRot = -0.25f * up;
+                fighting = true; // claws spread
+            }
             for (int s = 0; s < 2; s++) {
                 float out = s == 0 ? 1f : -1f; // the way a hanging bone leans outward from her, about z
                 boolean spread = fighting || s == 1;

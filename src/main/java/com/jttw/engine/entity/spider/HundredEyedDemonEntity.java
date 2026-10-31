@@ -51,7 +51,7 @@ import java.util.List;
  * in yellow robes. He poisoned the Tang Monk's tea with red dates; and when the Monkey King came for
  * him he threw off his robe and raised his arms, and from the thousand eyes under his ribs poured a
  * golden light that walled Wukong in. A {@link ZoneBoss} in the temple's court, level
- * {@value #LEVEL} (his band's top and fifteen: he towers over the ridge he keeps), 300 ordinary hits
+ * 103 (his band's top and fifteen: he towers over the ridge he keeps), 300 ordinary hits
  * of a character of his level (a group's fight), a yellow bar. Every attack he has is shown first:
  * <ul>
  *   <li>his blow: a cut of his Daoist sword, {@value #SWORD};</li>
@@ -76,9 +76,8 @@ import java.util.List;
  */
 public class HundredEyedDemonEntity extends ZoneBoss implements SilkKin {
 
-    /** How far over his band's top a boss stands (the rule for every boss). */
-    public static final int OVER_BAND = 15;
-    public static final int LEVEL = 88 + OVER_BAND;
+    /** His band's top and {@link ZoneBoss#LEVELS_ABOVE_BAND} more (the rule for every boss). */
+    public static final int LEVEL = ZoneBoss.levelOver(Zones.SPIDER_CAVE);
     /** 300 ordinary hits of a character of his level; his sword 28% of their health; the light 25%, the tea 15%, the sweep 22%. */
     public static final double HITS = 300, SWORD = 0.28, LIGHT = 0.25, LIGHT_AWAY = 0.08, TEA = 0.15, SWEEP = 0.22;
     public static final double HEALTH = HITS * MobScaling.typicalHit(LEVEL);
@@ -225,7 +224,13 @@ public class HundredEyedDemonEntity extends ZoneBoss implements SilkKin {
     }
 
     private float share(double s) {
-        return (float) (s * MobScaling.typicalHealth(LEVEL));
+        return hitOf(s);
+    }
+
+    /** His blows on all near him: the golden light, the poisoned tea, the centipede's sweep. */
+    @Override
+    public double[] specialShares() {
+        return new double[]{LIGHT, TEA, SWEEP};
     }
 
     // ── The golden light ────────────────────────────────────────────────

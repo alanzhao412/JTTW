@@ -76,15 +76,22 @@ public final class TerrainBreaker {
         @Nullable final Explosion explosion;
         @Nullable final Runnable then;
         final boolean effects;
+        /** The Fighting Buddha's work: what would hold against anyone else (bedrock, any block) breaks. */
+        final boolean unstoppable;
         int cursor;
 
         Job(List<BlockPos> positions, @Nullable Explosion explosion, boolean effects, @Nullable Runnable then) {
+            this(positions, explosion, effects, then, false);
+        }
+
+        Job(List<BlockPos> positions, @Nullable Explosion explosion, boolean effects, @Nullable Runnable then, boolean unstoppable) {
             this.positions = new ArrayList<>(positions);
             this.members = new java.util.HashSet<>(positions.size() * 2);
             for (BlockPos p : positions) members.add(p.asLong());
             this.explosion = explosion;
             this.effects = effects;
             this.then = then;
+            this.unstoppable = unstoppable;
         }
 
         boolean done() {
@@ -99,8 +106,21 @@ public final class TerrainBreaker {
 
     /** Breaks these blocks, no drops, over as many ticks as it takes. Air and unbreakable blocks are left. */
     public static void breakBlocks(ServerLevel level, Collection<BlockPos> positions) {
+        breakBlocks(level, positions, false);
+    }
+
+    /**
+     * As {@link #breakBlocks(ServerLevel, Collection)}, the work brought by {@code by}: if that is the
+     * Fighting Buddha, nothing is unbreakable to it ({@link com.jttw.engine.character.wukong.BuddhaBreaking}).
+     */
+    public static void breakBlocks(ServerLevel level, Collection<BlockPos> positions, @Nullable Entity by) {
+        breakBlocks(level, positions, com.jttw.engine.character.wukong.BuddhaBreaking.unstoppable(by));
+    }
+
+    /** As {@link #breakBlocks(ServerLevel, Collection)}; {@code unstoppable}, unbreakable blocks break too. */
+    public static void breakBlocks(ServerLevel level, Collection<BlockPos> positions, boolean unstoppable) {
         if (positions.isEmpty()) return;
-        enqueue(level, new Job(dedupe(positions), null, true, null));
+        enqueue(level, new Job(dedupe(positions), null, true, null, unstoppable));
     }
 
     /** Runs {@code action} once all the breaking asked for in this world so far is done. */
@@ -125,10 +145,13 @@ public final class TerrainBreaker {
      */
     @Nullable
     public static Explosion explode(ServerLevel level, @Nullable Entity source, double x, double y, double z, float power) {
-        Explosion explosion = new Explosion(level, source, null, null, x, y, z, power, false,
+        // the Fighting Buddha's blast: no block resists it, and no protection stops it
+        boolean unstoppable = com.jttw.engine.character.wukong.BuddhaBreaking.unstoppable(source);
+        Explosion explosion = new Explosion(level, source, null,
+                unstoppable ? com.jttw.engine.character.wukong.BuddhaBreaking.CALCULATOR : null, x, y, z, power, false,
                 Explosion.BlockInteraction.DESTROY, net.minecraft.core.particles.ParticleTypes.EXPLOSION,
                 net.minecraft.core.particles.ParticleTypes.EXPLOSION_EMITTER, net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE);
-        if (EventHooks.onExplosionStart(level, explosion)) return null;
+        if (!unstoppable && EventHooks.onExplosionStart(level, explosion)) return null;
         explosion.explode(); // the blast: what it reaches, and the creatures it hurts and throws
         List<BlockPos> blocks = new ArrayList<>(explosion.getToBlow());
         // Each nearby player sees and hears it, and is thrown by it; the blocks follow from the server
@@ -139,7 +162,7 @@ public final class TerrainBreaker {
                         explosion.getSmallExplosionParticles(), explosion.getLargeExplosionParticles(), explosion.getExplosionSound()));
             }
         }
-        if (!blocks.isEmpty()) enqueue(level, new Job(dedupe(blocks), explosion, false, null));
+        if (!blocks.isEmpty()) enqueue(level, new Job(dedupe(blocks), explosion, false, null, unstoppable));
         return explosion;
     }
 
@@ -169,7 +192,7 @@ public final class TerrainBreaker {
                 looked++;
                 if (!level.isLoaded(pos)) continue; // never load a chunk to break it
                 BlockState state = level.getBlockState(pos);
-                if (state.isAir() || state.getDestroySpeed(level, pos) < 0) continue;
+                if (state.isAir() || (!job.unstoppable && state.getDestroySpeed(level, pos) < 0)) continue;
                 boolean interior = true;
                 for (Direction d : Direction.values()) {
                     if (!job.members.contains(pos.relative(d).asLong())) { interior = false; break; }

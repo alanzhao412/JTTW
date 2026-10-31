@@ -7,6 +7,7 @@ import com.jttw.engine.entity.cave.EarthFlowDecoyEntity;
 import com.jttw.engine.entity.cave.FlowerMaidEntity;
 import com.jttw.engine.entity.cave.LadyEarthFlowEntity;
 import com.jttw.engine.entity.cave.MouseSpiritEntity;
+import com.jttw.engine.entity.zone.ZoneBoss;
 import com.jttw.engine.entity.zone.ZoneMonster;
 import com.jttw.engine.item.EarthFlowSwordItem;
 import com.jttw.engine.item.PairedBlade;
@@ -86,8 +87,8 @@ public class CaveGameTests {
     private static net.minecraft.world.entity.animal.IronGolem dummy(GameTestHelper h, BlockPos at) {
         var golem = h.spawn(EntityType.IRON_GOLEM, at);
         golem.setNoAi(true);
-        golem.getAttribute(Attributes.MAX_HEALTH).setBaseValue(10_000);
-        golem.setHealth(10_000);
+        golem.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1_000_000);
+        golem.setHealth(1_000_000);
         sweepAround(h, golem);
         return golem;
     }
@@ -287,8 +288,8 @@ public class CaveGameTests {
         check(h, lady.getMainHandItem().is(ModItems.EARTH_FLOW_SWORD_MALE.get()) && lady.getOffhandItem().is(ModItems.EARTH_FLOW_SWORD_FEMALE.get()),
                 "the male blade in her right hand, the female in her left");
         check(h, PairedBlade.paired(lady), "a pair");
-        close(h, LadyEarthFlowEntity.HEALTH, lady.getMaxHealth(), "270 hits of a level-43 character");
-        check(h, lady.getDisplayName().getString().equals("Lady Earth Flow · Lv 43"), "named: " + lady.getDisplayName().getString());
+        close(h, LadyEarthFlowEntity.HEALTH, lady.getMaxHealth(), "270 hits of a character of her level");
+        check(h, lady.getDisplayName().getString().equals("Lady Earth Flow · Lv " + LadyEarthFlowEntity.LEVEL), "named: " + lady.getDisplayName().getString());
         eq(h, EnemyTier.BOSS.name(), lady.getPersistentData().getString(ZoneMonster.KEY_TIER), "pays as a Boss");
         check(h, !lady.removeWhenFarAway(10_000) && lady.isPersistenceRequired(), "never despawned");
         h.succeed();
@@ -307,6 +308,57 @@ public class CaveGameTests {
         lady.cut(golem, true);
         close(h, LadyEarthFlowEntity.CUT_DAMAGE, afterFirst - golem.getHealth(), "the female blade's cut, straight after");
         check(h, golem.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "slows");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void herWhirlCutsAllAroundHerAfterItsWindUp(GameTestHelper h) {
+        LadyEarthFlowEntity lady = lady(h, new BlockPos(0, 2, 0));
+        lady.setNoAi(true);
+        var a = dummy(h, new BlockPos(2, 2, 1));
+        var b = dummy(h, new BlockPos(1, 2, 3));
+        var steps = dummy(h, new BlockPos(3, 2, 0));
+        var far = dummy(h, new BlockPos(4, 2, 4));
+        for (var g : List.of(a, b, steps, far)) g.setTarget(lady);
+        lady.setTarget(a);
+        float full = a.getHealth();
+        List<LivingEntity> foes = lady.whirlFoes();
+        check(h, foes.contains(a) && foes.contains(b) && foes.contains(steps) && !foes.contains(far), "within her reach, and not beyond: " + foes);
+        check(h, lady.beginWhirl() && lady.windingUp() && !lady.beginWhirl(), "she sinks low, the blades swept back, once");
+        for (int t = 1; t < LadyEarthFlowEntity.WHIRL_WIND_UP; t++) {
+            lady.tickWhirl();
+            if (t == LadyEarthFlowEntity.WHIRL_WIND_UP / 2) steps.teleportTo(steps.getX() + 30, steps.getY(), steps.getZ());
+            check(h, lady.windingUp(), "still winding up at tick " + t);
+        }
+        for (var g : List.of(a, b, steps, far)) eq(h, full, g.getHealth(), "no cut while she winds up");
+        lady.tickWhirl();
+        check(h, lady.whirling() && !lady.windingUp(), "she spins");
+        double cut = LadyEarthFlowEntity.WHIRL * MobScaling.typicalHealth(LadyEarthFlowEntity.LEVEL);
+        close(h, cut, full - a.getHealth(), "the one cut");
+        close(h, cut, full - b.getHealth(), "and the other");
+        check(h, a.hasEffect(MobEffects.MOVEMENT_SLOWDOWN) && b.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "and slowed");
+        eq(h, full, steps.getHealth(), "not the one who stepped back in time");
+        eq(h, full, far.getHealth(), "not the one beyond her reach");
+        for (int t = 0; t < LadyEarthFlowEntity.WHIRL_SPIN; t++) lady.tickWhirl();
+        check(h, !lady.whirling(), "and stands again");
+        close(h, cut, full - a.getHealth(), "once only");
+        check(h, LadyEarthFlowEntity.WHIRL <= ZoneBoss.MOST_BLOW, "within a boss's blow");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void herWhirlComesInItsOwnTimeAndTakesPlayersNear(GameTestHelper h) {
+        LadyEarthFlowEntity lady = lady(h, new BlockPos(0, 2, 0));
+        lady.setNoAi(true);
+        ServerPlayer p = player(h), watching = player(h);
+        watching.setGameMode(GameType.SPECTATOR);
+        check(h, lady.isFoe(p) && !lady.isFoe(watching), "a player near her would be cut, not one watching");
+        var g = dummy(h, new BlockPos(2, 2, 1));
+        g.setTarget(lady);
+        lady.setTarget(g);
+        int t = 0;
+        while (!lady.whirling() && t++ < LadyEarthFlowEntity.WHIRL_EVERY + 5) lady.tickWhirl();
+        check(h, lady.windingUp() && t > 1, "she whirls in her own time: " + t);
         h.succeed();
     }
 
