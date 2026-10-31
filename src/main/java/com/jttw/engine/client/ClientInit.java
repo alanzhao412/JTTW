@@ -375,6 +375,7 @@ public final class ClientInit {
                 wasSlot1Down = false;
                 wasSlot2Down = false;
                 wasSlot3Down = false;
+                EyeLaserInput.cancel();
                 return;
             }
 
@@ -474,7 +475,9 @@ public final class ClientInit {
                                 new ActivateAbilityPacket(heldIndex[2] = ClientAbilityData.serverIndex(2), AbilityAction.START));
                         ChargeMeter.pressed(slot2.id());
                     } else if (slot2Type != null) {
-                        activateSlot(mc, 2);
+                        // the Golden Eyes' laser waits for N to come up: held, the wheel sets its output
+                        if (EyeLaserInput.isLaser(mc, slot2)) EyeLaserInput.press();
+                        else activateSlot(mc, 2);
                         while (ABILITY_SLOT_2.consumeClick()) {}
                     }
                 } else if (!isDown && wasSlot2Down) {
@@ -482,6 +485,8 @@ public final class ClientInit {
                         NetworkHandler.sendToServer(
                                 new ActivateAbilityPacket(heldIndex[2], AbilityAction.STOP));
                         ChargeMeter.released();
+                    } else if (EyeLaserInput.release(mc)) {
+                        activateSlot(mc, 2);
                     }
                 }
                 wasSlot2Down = isDown;

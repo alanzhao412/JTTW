@@ -51,6 +51,11 @@ public final class GT {
         if (p.connection instanceof Silent s) s.heard = heard;
     }
 
+    /** As {@link #listen}, for the mod's own packets: every payload sent to {@code p} from now on is added to {@code got}. */
+    public static void listenPayloads(ServerPlayer p, java.util.List<net.minecraft.network.protocol.common.custom.CustomPacketPayload> got) {
+        if (p.connection instanceof Silent s) s.payloads = got;
+    }
+
     /**
      * The fake player the tests were written against, Forge 1.20.1's: its packets go nowhere,
      * it ignores teleport packets, it does not tick by itself and cannot be hurt, but it opens
@@ -119,6 +124,8 @@ public final class GT {
 
         /** What it has heard, if it listens ({@link #listen}). */
         java.util.List<String> heard;
+        /** The payloads it was sent, if it listens for them ({@link #listenPayloads}). */
+        java.util.List<net.minecraft.network.protocol.common.custom.CustomPacketPayload> payloads;
 
         @Override
         public void send(net.minecraft.network.protocol.Packet<?> packet) {
@@ -131,6 +138,7 @@ public final class GT {
         }
 
         private void hear(net.minecraft.network.protocol.Packet<?> packet) {
+            if (payloads != null && packet instanceof net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket custom) payloads.add(custom.payload());
             if (heard == null) return;
             if (packet instanceof net.minecraft.network.protocol.game.ClientboundSystemChatPacket chat) heard.add(chat.content().getString());
             else if (packet instanceof net.minecraft.network.protocol.game.ClientboundPlayerChatPacket chat) heard.add(chat.body().content());

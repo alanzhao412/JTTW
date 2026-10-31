@@ -203,6 +203,26 @@ public final class SkillBarRenderer {
 
         // Key badge — bottom strip
         drawKeyBadge(gfx, mc, x, y, slotIdx, occupied);
+
+        // the Fiery Golden Eyes' laser: its output, five pips over the slot (the first page's; the Shift page's is the x-ray)
+        if (occupied && com.jttw.engine.character.wukong.EyeLaser.ABILITY_ID.equals(entry.id()) && ClientAbilityData.currentPage() == 1) {
+            drawLaserOutput(gfx, x, y);
+        }
+    }
+
+    /** Lit pips, pale gold to white-hot red, one per level of output. */
+    private static final int[] LASER_PIPS = {0xFFFFE27A, 0xFFFFC53A, 0xFFFF9A1E, 0xFFFF6414, 0xFFFF2E1E};
+
+    private static void drawLaserOutput(GuiGraphics gfx, int x, int y) {
+        int output = ClientAbilityData.getEyeLaserOutput();
+        int top = y - 6, pip = 4;
+        gfx.fill(x - 1, top - 1, x + SLOT + 1, top + 4, C_BORDER);
+        for (int i = 0; i < 5; i++) {
+            int px = x + i * (pip + 1);
+            boolean lit = i < output;
+            gfx.fill(px, top, px + pip, top + 3, lit ? LASER_PIPS[i] : 0xFF2E2618);
+            if (lit) gfx.fill(px, top, px + pip, top + 1, 0x66FFFFFF); // a highlight along its top
+        }
     }
 
     // -----------------------------------------------------------------------
