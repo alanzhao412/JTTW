@@ -156,6 +156,7 @@ final class AbilityScenes {
         all.addAll(RidgeScenes.all());
         all.addAll(BuddhaScenes.all());
         all.addAll(BlackWindScenes.all());
+        all.addAll(CloneScenes.all());
         return all;
     }
 
@@ -1235,6 +1236,7 @@ final class AbilityScenes {
         LionScenes.clear(p);
         VillageScenes.clear(p);
         WildScenes.clear(p);
+        CloneScenes.clear(p);
         keepScreen = false;
         topSpeed = false;
         com.jttw.engine.client.renderer.GoldenEyesRenderer.setMode(p.getUUID(), 0);

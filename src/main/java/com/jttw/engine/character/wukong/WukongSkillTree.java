@@ -174,12 +174,12 @@ public final class WukongSkillTree {
         ));
         TREE.add(new SkillNode(
                 CLONE_2, "Shadow Clone II",
-                new String[]{ "Up to 2 clones at once.", "Hit a clone to dismiss it.", "" },
+                new String[]{ "Up to 2 clones at once.", "Sneak-use one: follow, work", "or guard. Hit it to dismiss." },
                 4, 1, 1, List.of(CLONE_1), AbilityType.TOGGLE, 2, "Shadow Clone"
         ));
         TREE.add(new SkillNode(
                 CLONE_3, "Shadow Clone III",
-                new String[]{ "Press B to summon clones.", "Max 9 clones active.", "Hit a clone to dismiss it." },
+                new String[]{ "Press B to summon clones.", "Max 9 clones active.", "B at the max calls them back." },
                 5, 1, 2, List.of(CLONE_2), AbilityType.TOGGLE, 3, "Shadow Clone"
         ));
 

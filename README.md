@@ -176,6 +176,7 @@ neither does Wukong below level 100.
   and jigsaw blocks, barriers, light blocks, and end portals and gateways. There are no exceptions.
   - Carving budgets still apply, but no block costs him more than stone does.
   - No block resists his blasts more than stone, so they make the crater they would make in stone.
+  - His shadow clones' mining breaks the same blocks, bedrock included, at the pace of stone.
 - **Somersault Anywhere** (Shift + M, a menu,
   [`SomersaultTravel`](src/main/java/com/jttw/engine/character/wukong/SomersaultTravel.java)). The key
   asks the server for the menu, which lists:
@@ -203,6 +204,87 @@ his own body and his armour he wears:
 
 Behind his head a halo of golden light slowly turns, and behind his body an aura of golden flame
 breathes. Both are drawn full-bright, and motes of gold drift round him.
+
+### Shadow Clones
+
+Sun Wukong's hair clones (Shadow Clone I–III: B summons one more, 10 Qi, up to 1 / 2 / 9 at
+once; they drain Qi while out). Each is a second Wukong with his health, attack, resistances and
+weapon, and copies of his best pickaxe and axe when it works. It acts as a player would
+([`WuCloneManager`](src/main/java/com/jttw/engine/character/wukong/WuCloneManager.java),
+[`CloneMining`](src/main/java/com/jttw/engine/character/wukong/CloneMining.java),
+[`CloneCombat`](src/main/java/com/jttw/engine/character/wukong/CloneCombat.java),
+[`CloneSense`](src/main/java/com/jttw/engine/character/wukong/CloneSense.java)).
+
+**Commands.** All of them answer on the action bar.
+- **Sneak + use a clone**: cycles that clone through **Follow me** → **Work here** → **Guard
+  here**. Work and Guard take the spot where the clone stands.
+  - *Follow me*: it keeps with you, fights at your side, and gathers what lies open near you
+    (within 8 blocks).
+  - *Work here*: it mines, fells and harvests within 16 blocks of the spot (10 up or down). It
+    also digs to buried ores. When there is nothing left to do, it comes back and hands you what
+    it gathered.
+  - *Guard here*: it holds the spot and fights whatever comes near.
+- **Use a clone**: opens its pack (27 slots). Only you can.
+- **B at the cap**: calls every clone back. Each drops what it was doing, follows you again,
+  and hands you its pack when it reaches you. One that is far off appears by you.
+- **Hit a clone**: dismisses it. Its pack spills where it stood.
+
+**Gathering.**
+- *What it takes*: ores it has a good enough pickaxe for, ripe crops (it replants them), and
+  trees it has an axe for. A tree is logs that its own grown leaves touch. Logs without them,
+  such as a log house, are left alone.
+- *Finding work*: it sweeps its area a layer at a time. A following clone takes only what lies
+  open to the air. A working one also finds what is buried.
+- *Sharing work*: it claims a whole vein (or tree), every connected block of it. Its fellows go
+  to other veins, so two clones never work one block. It weighs the rarest ores first and veins
+  away from where the others already are. It finishes a vein, including blocks that were hidden
+  until it opened them.
+- *Reach*: it works a block from a player's reach, 4.5 blocks from its eye to the nearest point
+  of the block, with the face in sight. If it can already do that, it works from where it
+  stands. Otherwise it picks a spot from which it could, never on the block or its vein, and
+  paths there. When something is in the way within reach, it digs through it.
+- *Hard-to-reach work* (Work here only): it tunnels, two blocks high, level or in stairs up and
+  down. It bridges gaps with stone or dirt from its pack. It pillars up under what is overhead,
+  and afterwards breaks its pillar back down and takes the blocks with it.
+- *What it digs*: natural ground only (stone, deepslate, netherrack, dirt, sand, gravel, leaves
+  and the like), never anything built. Each break goes through the break event a player's would,
+  as you, so protected places stay protected. Ordinary clones respect hardness: bedrock, obsidian
+  and the lairs' rock hold. The Fighting Buddha's clones break those too (see below).
+- *Safety*: it never breaks a block that holds back lava or water. It never breaks the floor
+  under its feet or under the path it is taking. It never digs out sand or gravel that would
+  fall on its head. It does not stand next to lava or fire.
+- *Giving up*: what it cannot reach, it looks at again a few times, then leaves alone for two
+  minutes.
+- *The pack*: what it breaks goes straight into its pack. A working clone also picks up what
+  lies loose round its work, such as saplings and apples from leaves. A nearly full pack goes
+  into the nearest chest or barrel, or, with none about, its best finds are sent to you.
+
+**Keeping up.**
+- A following clone takes its own place on an arc behind you, so the clones never crowd you or
+  push you.
+- If you leave it more than 20 blocks behind (by walking, flying or a somersault), it appears by
+  you. If you are in the air, it lands on the ground below you. If you change realm, it follows.
+- If it gets stuck, it first jumps and works out its path again, then digs through plain ground
+  in its way, then comes back to you (or to its work site).
+- If it ends up in lava, inside a wall or in the void, it is taken out at once.
+- It never jumps down more than three blocks.
+- Path-finding is bounded: at most 4 new paths per tick across all clones, and every sweep and
+  search is limited in size, so nine clones do not slow the server.
+
+**Fighting.**
+- *What it fights, in order*: what is attacking you, then what you attack (another player only
+  while you are fighting him, and only where PvP allows), then what attacks it, then hostile
+  creatures near you (or near its post).
+- *What it leaves alone*: you, your other clones, your pets and summons, those allied to you,
+  and other players' pets unless they join the fight. A neutral creature is left alone until it
+  turns on you or the clone.
+- *Spreading out*: each enemy already fought by one of your clones counts against it, so
+  several clones split between several enemies. Clones on one enemy surround it from evenly
+  spread sides instead of queueing.
+- *Hurt*: badly hurt, it lights its own Ring of Fire if you have that skill and it has the Qi.
+  If it cannot, it falls back behind you and heals half a heart a second while out of the fight,
+  then goes back in at 60% health. If cornered, it fights where it stands.
+- *Leash*: it does not chase more than 24 blocks from you (or its post).
 
 ### The 18, 36 and 72 Transformations
 
@@ -284,8 +366,8 @@ Abilities and items are drawn from the source material rather than invented:
     throne (`chests/lion_camel_treasury`: the vase, always, among gold, gems, bones and the ridge's
     spoils). One fortress a world, so one vase.
   - **Banana-Leaf Fan**: one a world, in the treasure chest of the palace on Mount Kunlun's summit (see Mount Kunlun).
-- **Wu Clones** — Wukong's hair-clone technique, implemented as summoned entities with their own
-  pathfinding goals ([`WuCloneManager`](src/main/java/com/jttw/engine/character/wukong/WuCloneManager.java))
+- **Wu Clones** — Wukong's hair-clone technique: summoned clones that follow, work and guard,
+  mining from a player's reach and fighting at his side (see "Shadow Clones" above)
 - **Xiaotian Quan** — Erlang Shen's hound, a custom entity with hand-authored model and animation.
   Every bite slows (Slowness I, 2 s). Its own branch: I summons it; II gives it +25% health and
   attack and tracking sense (the nearest hostile glows for him); III +50%, its bites' Slowness I
@@ -467,7 +549,7 @@ src/main/java/com/jttw/engine/
 ```
 
 Largest components: `TransformationAbilityHandler` (1,385 lines), `YuanDiAbilityHandler` (1,236),
-`WuCloneManager` (874, including custom pathfinding goals).
+`CloneMining` (923, the shadow clones' work planner).
 
 ### The taller sky
 
