@@ -70,19 +70,19 @@ ARM, FOREARM, HAND = (-0.2, 0, 0.2), (-0.7, -0.1, 0), (0, 0, 0)
 
 
 def kasaya_strips(side, W, D):
-    """The kasaya over his breast (side -1) or back (+1): thrown over the left shoulder and down across him to
-    the right hip, laid as bands one under another, each ending on the slant, each lying a little out from the
-    one over it so the cloth falls in folds."""
+    """The kasaya over his breast (side -1) or back (+1): thrown over the left shoulder and down across him to the
+    right hip, its breadth laid as four long folds side by side along the slant, each lying out a little from the
+    next, so the cloth falls in folds; the folds lower on his left side, shorter, covering the left of his belly."""
     out = []
-    z = -D - 2.0 if side < 0 else D + 1.6
-    n = 8
-    for k in range(n):
-        y = -29.5 + k * 3.4
-        left = W + 1.6                                   # its left edge, over his left side
-        right = W - 3.0 - k * (2 * W + 2.0) / (n - 1)     # its slant, from the left shoulder to the right hip
-        fold = (0.6 if k % 2 else 0.0) + k * 0.12
-        out.append(part('kasaya_%s_%d' % ('front' if side < 0 else 'back', k), 'body', (0, y, z + side * fold), (side * -0.06, 0, 0),
-                        [(right, 0, -0.7, left - right, 3.8, 1.4, 'kasaya_band' if k % 3 else 'kasaya_band_seam')]))
+    z = -D - 2.2 if side < 0 else D + 1.8
+    ang = -0.62
+    ux, uy = 0.58, 0.81                                  # across the slant, toward his left hip
+    for k in range(4):
+        cx, cy = 1.2 + ux * 4.0 * k, -18.5 + uy * 4.0 * k
+        length = 36 - 7 * k
+        fold = (0.5 if k % 2 else 0.0) + 0.15 * k
+        out.append(part('kasaya_%s_%d' % ('front' if side < 0 else 'back', k), 'body', (cx, cy, z + side * fold), (side * -0.05, 0, ang + 0.03 * (k % 2)),
+                        [(-length / 2, -2.3, -0.7, length, 4.6, 1.4, 'kasaya_band' if k % 2 == 0 else 'kasaya_band_seam')]))
     return out
 
 
