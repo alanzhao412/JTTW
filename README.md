@@ -377,13 +377,13 @@ Abilities and items are drawn from the source material rather than invented:
   the time. The output is saved with him and kept through death. It starts at I.
   ([`EyeLaser`](src/main/java/com/jttw/engine/character/wukong/EyeLaser.java))
 
-  | Output | Qi | Range | Cut | Hit at level 1 | Same-level character, hits to kill | Sets burning | Cooldown |
-  |---|---|---|---|---|---|---|---|
-  | I, Glint | 10 | 20 | 1 block (the line itself) | 8 | 4 | 3 s | 3 s |
-  | II, Gaze | 20 | 30 | a cross 3 wide, 2 tall when level | 13 | 3 | 4 s | 4 s |
-  | III, Glare | 35 | 40 | 3 × 3 | 20 | 2 | 5 s | 5 s |
-  | IV, Blaze | 55 | 52 | a round bore 5 wide | 32 | 1 | 7 s | 7 s |
-  | V, Sunfire | 80 | 64 | a round bore 7 wide | 50 | 1, with room to spare | 10 s | 10 s |
+  | Output | Qi | Range | Cut | Hit at level 1 | Same-level character, hits to kill | Fiery Gaze: beat a second at level 1, burns a same-level character to death in | Slowness | Furnaces | Cooldown |
+  |---|---|---|---|---|---|---|---|---|---|
+  | I, Glint | 10 | 20 | 1 block (the line itself) | 8 | 4 | 0.5, about 50 s | I | lit | 3 s |
+  | II, Gaze | 20 | 30 | a cross 3 wide, 2 tall when level | 13 | 3 | 0.8, about 35 s | I | lit | 4 s |
+  | III, Glare | 35 | 40 | 3 × 3 | 20 | 2 | 1.2, about 20 s | II | cut | 5 s |
+  | IV, Blaze | 55 | 52 | a round bore 5 wide | 32 | 1 | 1.8, about 15 s | II | cut | 7 s |
+  | V, Sunfire | 80 | 64 | a round bore 7 wide | 50 | 1, with room to spare | 2.5, about 10 s | III | cut | 10 s |
 
   - **Damage.** The hit scales with his power (`LevelPower.scaled`), so the table's hits-to-kill
     hold from level 1 to about 60. They count a typical character of his own level, before
@@ -394,6 +394,18 @@ Abilities and items are drawn from the source material rather than invented:
     eyes over the first few blocks, so it never takes the ground from under his feet. Fire is left
     along the floor of the bore and all round where the beam ends. Up to output III the blocks drop
     as if mined. At IV and V they are burnt away to nothing.
+  - **Its fire never goes out** ([`FieryGaze`](src/main/java/com/jttw/engine/character/wukong/FieryGaze.java),
+    the effect "Fiery Gaze"). Whatever the beam strikes burns until it dies. Water, rain, Fire
+    Resistance and milk do not put it out; only a totem's death-defiance clears it, as it clears
+    every effect. It is seen burning even under water. Each second it takes the beat in the table,
+    scaled by his power when he fired, and it slows the burning one (Slowness by output, as long as
+    it burns). A second shot keeps the fiercer fire; fires never stack. Bosses burn too: against a
+    boss's great health it is only a slow chip (output V alone would take some twenty minutes to
+    burn down a boss of his level). The hit also sets ordinary fire for 3–10 s by output.
+  - **Furnaces.** At outputs I and II the beam does not cut a furnace, blast furnace or smoker: it
+    stops there and lights it with a lava bucket's worth of fuel (a hundred items: 20,000 ticks in a
+    furnace, 10,000 in the faster two), if it had less. The Eight Trigrams Furnace is lit as Nezha's or
+    the Phoenix's true fire lights it. From output III furnaces are cut like any block.
   - **What stops it.** Bedrock and other unbreakable blocks always stop the beam. Obsidian-hard
     blocks (hardness 50 or more) stop it below output V, and V burns through them. Nothing past the
     block that stopped it is touched. Liquids do not stop it, and it leaves them as they are. As the

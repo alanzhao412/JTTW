@@ -216,6 +216,7 @@
   "entity.jttw_engine.fire_cart": "Fire Cart",
   "entity.jttw_engine.ember_bolt": "Ember",
   "effect.jttw_engine.samadhi_fire": "True Samadhi Fire",
+  "effect.jttw_engine.fiery_gaze": "Fiery Gaze",
   "effect.jttw_engine.stunned": "Stunned",
   "effect.jttw_engine.pinned": "Pinned",
   "death.attack.jttw_engine.samadhi_breath": "%1$s was burned to ash by the True Samadhi Fire",
