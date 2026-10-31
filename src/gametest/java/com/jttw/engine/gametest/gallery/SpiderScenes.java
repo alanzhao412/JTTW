@@ -179,22 +179,28 @@ final class SpiderScenes {
             if (s != null) s.showArt(false, true);
         }, new double[]{-1.8, 2.0, 5.5, 0.5, 1.4, 10.0}));
         // the Hundred-Eyed Demon Lord
-        all.addAll(turns("spider_lord", (p, yaw) -> lord(p, 0.5, 10.5, yaw), 10.5, 2.3, 6.5));
-        all.add(scene("spider_lord_face", p -> lord(p, 0.5, 10.0, 180f), new double[]{0.9, 3.9, 7.4, 0.5, 3.75, 10.0}));
+        all.addAll(turns("spider_lord", (p, yaw) -> lord(p, 0.5, 10.5, yaw), 10.5, 2.1, 7.0));
+        all.add(scene("spider_lord_face", p -> lord(p, 0.5, 10.0, 180f), new double[]{0.9, 3.15, 7.6, 0.5, 3.0, 10.0}));
         for (String[] art : new String[][]{{"glaring", "1"}, {"pouring", "2"}, {"rearing", "3"}}) {
             all.add(scene("spider_lord_" + art[0], p -> {
                 HundredEyedDemonEntity l = lord(p, 0.5, 11.0, 200f);
                 if (l != null) l.showAct(Integer.parseInt(art[1]), false);
-            }, new double[]{4.5, 3.4, 4.5, 0.5, 2.6, 11.0}));
+            }, new double[]{3.6, 3.0, 6.0, 0.5, 2.3, 11.0}));
         }
         all.add(scene("spider_lord_unrobed", p -> {
             HundredEyedDemonEntity l = lord(p, 0.5, 11.0, 160f);
             if (l != null) l.showAct(HundredEyedDemonEntity.IDLE, true);
-        }, new double[]{-3.0, 3.0, 4.5, 0.5, 2.2, 11.0}));
+        }, new double[]{-2.6, 2.8, 6.0, 0.5, 2.2, 11.0}));
         all.add(scene("spider_lord_unrobed_glaring", p -> {
             HundredEyedDemonEntity l = lord(p, 0.5, 11.0, 180f);
             if (l != null) l.showAct(HundredEyedDemonEntity.GLARING, true);
-        }, new double[]{0.5, 2.6, 4.0, 0.5, 2.6, 11.0}));
+        }, new double[]{0.5, 2.6, 5.6, 0.5, 2.4, 11.0}));
+        // the Demon Lord among the sisters: how he towers over them
+        all.add(scene("spider_lord_court", p -> {
+            lord(p, 0.5, 11.0, 180f);
+            sister(p, 0, -3.0, 11.0, 195f);
+            sister(p, 4, 4.0, 11.0, 165f);
+        }, new double[]{0.5, 2.2, 2.6, 0.5, 2.0, 11.0}));
         // the valley's piece, far off the stage
         all.add(far("spider_cottage", new double[]{9.5, 7.0, 84.0, 0.0, 4.0, 50.0}));
         all.add(far("spider_cottage_inside", new double[]{4.5, 2.2, 56.5, -4.0, 1.0, 48.0}));
