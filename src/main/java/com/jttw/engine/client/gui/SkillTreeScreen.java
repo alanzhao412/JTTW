@@ -247,6 +247,7 @@ public class SkillTreeScreen extends Screen {
         gfx.pose().popPose();
         gfx.disableScissor();
         drawScrollBars(gfx);
+        drawFightingBuddha(gfx);
 
         // Tooltip last (on top, not clipped)
         if (hoveredNodeId != null) {
@@ -254,6 +255,23 @@ public class SkillTreeScreen extends Screen {
         }
 
         hoveredNodeId = null;
+    }
+
+    /**
+     * Wukong's tree: under it, the Victorious Fighting Buddha (斗战胜佛), a free milestone of level
+     * 100, and its four powers with their keys, gold once reached.
+     */
+    private void drawFightingBuddha(GuiGraphics gfx) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || Characters.of(mc.player) != WukongCharacter.INSTANCE) return;
+        boolean reached = com.jttw.engine.character.wukong.FightingBuddha.is(mc.player);
+        String head = (reached ? "§6✦ " : "§8⬡ ") + "Lv 100 · 斗战胜佛 Victorious Fighting Buddha "
+                + (reached ? "§a(reached · free)" : "§8(free milestone)");
+        String powers = (reached ? "§e" : "§7") + "Indestructible Body · Shift+B Appear and Disappear · Breaks Anything · Shift+M Somersault Anywhere";
+        int y = panelY + panelH + 4;
+        if (y + 18 > height) y = panelY + panelH - 22;
+        drawScaled(gfx, head, panelX + 4, y, 0.8f, 0xFFFFFFFF, true);
+        drawScaled(gfx, powers, panelX + 4, y + 9, 0.7f, 0xFFFFFFFF, true);
     }
 
     /** Where the window shows only part of the tree: a thin bar on the bottom (and right) edge, its thumb where the view is. */

@@ -149,6 +149,7 @@ final class AbilityScenes {
         all.addAll(WildScenes.all());
         all.addAll(CaveScenes.all());
         all.addAll(RidgeScenes.all());
+        all.addAll(BuddhaScenes.all());
         return all;
     }
 

@@ -100,7 +100,7 @@ public class QiWaveEntity extends Entity {
         float sizeAtk = (float) (attackDamage / LevelPower.of(owner));
         this.strFactor = Math.min(1.0f, Math.max(0.0f, (sizeAtk - ATK_MIN) / (ATK_MAX - ATK_MIN)));
         this.budget = attackDamage * BUDGET_PER_ATK;
-        this.strength = com.jttw.engine.world.tough.Tough.strength(owner);
+        this.strength = com.jttw.engine.character.wukong.BuddhaBreaking.strength(owner);
         // Offset spawn point forward so the wave doesn't destroy where the player stands
         double startRadius = MIN_CONE_START + (MAX_CONE_START - MIN_CONE_START) * strFactor;
         double offset = startRadius + 2.0;
@@ -185,7 +185,8 @@ public class QiWaveEntity extends Entity {
             if (distanceTraveled >= maxDistance) {
                 // Final explosion at termination point
                 Vec3 pos = position();
-                com.jttw.engine.world.TerrainBreaker.breakBlocks(serverLevel, carved);
+                com.jttw.engine.world.TerrainBreaker.breakBlocks(serverLevel, carved,
+                        com.jttw.engine.character.wukong.BuddhaBreaking.unstoppable(strength));
                 com.jttw.engine.world.TerrainBreaker.explode(serverLevel, owner, pos.x, pos.y, pos.z, 3.0f);
                 discard();
                 return;
@@ -260,7 +261,8 @@ public class QiWaveEntity extends Entity {
             this.entityData.set(PROGRESS, (float) t);
         }
 
-        com.jttw.engine.world.TerrainBreaker.breakBlocks(serverLevel, carved);
+        com.jttw.engine.world.TerrainBreaker.breakBlocks(serverLevel, carved,
+                        com.jttw.engine.character.wukong.BuddhaBreaking.unstoppable(strength));
 
         // Sound every few ticks
         if (tickCount % 3 == 0) {
