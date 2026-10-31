@@ -85,47 +85,147 @@ public class FlameSeamsFeature extends Feature<NoneFeatureConfiguration> {
         }
     }
 
+    /** How far past an outpost's reach the ground round it is cut back, a slope of one block up for each out, so no bank stands over its paving. */
+    public static final int BANK = 8;
+    /** Whether (x, z) is on the ground cut back round one of the outposts of the region centred at c. */
+    private static boolean onBank(long seed, int[] c, int x, int z) {
+        int r = RangeShape.OUTPOST_REACH + BANK;
+        for (RangeShape.Outpost o : RangeShape.outposts(seed, c[0], c[1])) {
+            int dx = x - o.x(), dz = z - o.z();
+            if (dx * dx + dz * dz <= (r + 0.5) * (r + 0.5)) return true;
+        }
+        return false;
+    }
+
+    /** How far down an outpost's foundation may go. */
+    public static final int FOUNDATION = 40;
+
     /**
      * Raises this chunk's share of the outposts near it, and puts each one's band there if its
      * middle is in this chunk. Returns whether it built any.
      */
     private static boolean outposts(WorldGenLevel level, long seed, int[] c, int x0, int z0, RandomSource random) {
         boolean any = false;
-        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
         DensityFunction shape = null;
         for (RangeShape.Outpost o : RangeShape.outposts(seed, c[0], c[1])) {
-            int r = RangeShape.OUTPOST_REACH;
+            int r = RangeShape.OUTPOST_REACH + BANK;
             if (o.x() + r < x0 || o.x() - r > x0 + 15 || o.z() + r < z0 || o.z() - r > z0 + 15) continue;
             if (shape == null) shape = ZoneTerrain.broadShape(level);
             int base = outpostBase(level, shape, seed, o);
-            for (int x = Math.max(x0, o.x() - r); x <= Math.min(x0 + 15, o.x() + r); x++) {
-                for (int z = Math.max(z0, o.z() - r); z <= Math.min(z0 + 15, o.z() + r); z++) {
-                    int dx = x - o.x(), dz = z - o.z();
-                    if (dx * dx + dz * dz > (r + 0.5) * (r + 0.5)) continue;
-                    if (!ZONE.isAt(level, p.set(x, base, z))) continue;
-                    // its foundation down to the ground, the ground over it cut away
-                    int ground = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z) - 1;
-                    for (int y = base - 1; y >= base - 24; y--) {
-                        if (y <= ground && level.getBlockState(p.set(x, y, z)).isSolid()) break;
-                        level.setBlock(p.set(x, y, z), FlamingRangeFeature.inner(y, x, z), Block.UPDATE_CLIENTS);
-                    }
-                    for (int dy = 0; dy <= 14; dy++) {
-                        BlockState st = outpostAt(dx, dy, dz);
-                        level.setBlock(p.set(x, base + dy, z), st == null ? Blocks.AIR.defaultBlockState() : st, Block.UPDATE_CLIENTS);
-                    }
-                    for (int y = base + 15; y <= ground; y++) level.setBlock(p.set(x, y, z), Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
-                }
-            }
+            layOutpost(level, o.x(), o.z(), base, x0, z0, x0 + 15, z0 + 15, q -> ZONE.isAt(level, q));
             any = true;
             if ((o.x() >> 4) == (x0 >> 4) && (o.z() >> 4) == (z0 >> 4)) band(level, o, base, random);
         }
         return any;
     }
 
-    /** The level of an outpost's paving: the land and the range over it at its middle, the same from every chunk. */
+    /**
+     * Lays the share of the outpost at (ox, oz), its paving at {@code base}, in the columns from
+     * (x0, z0) to (x1, z1) where {@code inZone} holds: its foundation, a plinth of black stone at
+     * its rim, down to the ground wherever the ground falls away under it; the ground over it cut
+     * away; and the ground round it cut back ({@value #BANK} blocks out, one up for each out), so it
+     * stands on the land, never sunk in a pit.
+     */
+    public static void layOutpost(WorldGenLevel level, int ox, int oz, int base, int x0, int z0, int x1, int z1,
+                                  java.util.function.Predicate<BlockPos> inZone) {
+        int reach = RangeShape.OUTPOST_REACH;
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        for (int x = Math.max(x0, ox - reach - BANK); x <= Math.min(x1, ox + reach + BANK); x++) {
+            for (int z = Math.max(z0, oz - reach - BANK); z <= Math.min(z1, oz + reach + BANK); z++) {
+                int dx = x - ox, dz = z - oz;
+                double d = Math.sqrt(dx * dx + dz * dz);
+                if (d > reach + BANK + 0.5) continue;
+                if (!inZone.test(p.set(x, base, z))) continue;
+                int ground = groundAt(level, x, z);
+                if (d > reach + 0.5) {
+                    // the bank: the ground cut back, its top put back on its new face
+                    int allowed = base + (int) Math.floor(d - reach);
+                    if (ground <= allowed) continue;
+                    BlockState top = level.getBlockState(p.set(x, ground, z));
+                    if (!top.isSolid()) top = s(ModBlocks.CINDER_ASH.get());
+                    for (int y = allowed + 1; y <= ground; y++) level.setBlock(p.set(x, y, z), Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+                    if (level.getBlockState(p.set(x, allowed, z)).isSolid()) level.setBlock(p, top, Block.UPDATE_CLIENTS);
+                    continue;
+                }
+                // its foundation down to the ground: a plinth of black stone at its rim, the range's rock within
+                boolean rim = d > reach - 1;
+                for (int y = base - 1; y >= base - FOUNDATION; y--) {
+                    if (y <= ground && level.getBlockState(p.set(x, y, z)).isSolid()) break;
+                    level.setBlock(p.set(x, y, z), rim ? s(Blocks.POLISHED_BLACKSTONE_BRICKS) : FlamingRangeFeature.inner(y, x, z), Block.UPDATE_CLIENTS);
+                }
+                for (int dy = 0; dy <= 14; dy++) {
+                    BlockState st = outpostAt(dx, dy, dz);
+                    level.setBlock(p.set(x, base + dy, z), st == null ? Blocks.AIR.defaultBlockState() : st, Block.UPDATE_CLIENTS);
+                }
+                // the ground over it cut away
+                for (int y = base + 15; y <= ground; y++) level.setBlock(p.set(x, y, z), Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+            }
+        }
+    }
+
+    /**
+     * The top of the ground in column (x, z): while the land is made the worldgen heightmap is the one
+     * kept up as the range is raised, in a world already made the other; the higher of the two.
+     */
+    private static int groundAt(WorldGenLevel level, int x, int z) {
+        return Math.max(level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z), level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z)) - 1;
+    }
+
+    private static BlockState s(Block b) {
+        return b.defaultBlockState();
+    }
+
+    /** The outposts' pavings' levels, by seed and place: worked out once each. */
+    private static final java.util.Map<Long, Integer> BASES = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /**
+     * The level of an outpost's paving, the same from every chunk: seated on the ground round it
+     * ({@link #seat}), the ground being the range's as it will be once raised there ({@link #rangeTop}).
+     */
     public static int outpostBase(WorldGenLevel level, DensityFunction shape, long seed, RangeShape.Outpost o) {
-        int land = Math.max(level.getSeaLevel(), ZoneTerrain.landAt(shape, o.x(), o.z(), level.getMinBuildHeight(), ZoneTerrain.landTop(level)));
-        return Math.min(level.getMaxBuildHeight() - 20, land + RangeShape.riseAt(seed, o.x(), o.z()));
+        long key = seed * 31 + (((long) o.x()) << 32 ^ (o.z() & 0xFFFFFFFFL));
+        Integer known = BASES.get(key);
+        if (known != null) return known;
+        int seat = seat((x, z) -> rangeTop(level, shape, seed, x, z), o.x(), o.z());
+        int base = Math.min(level.getMaxBuildHeight() - 20, Math.max(level.getSeaLevel(), seat));
+        BASES.put(key, base);
+        return base;
+    }
+
+    /**
+     * The top of the range at (x, z) as {@link FlamingRangeFeature} will raise it, worked out
+     * without its chunk: the land as the generator makes it there (under any water, and the
+     * water's top), and the range's rise over it.
+     */
+    public static int rangeTop(WorldGenLevel level, DensityFunction shape, long seed, int x, int z) {
+        var source = level.getLevel().getChunkSource();
+        var generator = source.getGenerator();
+        int floor = generator.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, level, source.randomState()) - 1;
+        int surface = generator.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, level, source.randomState()) - 1;
+        int maxY = ZoneTerrain.landTop(level);
+        int land = ZoneTerrain.landAt(shape, x, z, level.getMinBuildHeight(), maxY);
+        int top = Math.max(Math.max(land, floor) + RangeShape.riseAt(seed, x, z), surface);
+        return Math.min(top, maxY - 2);
+    }
+
+    /**
+     * Where an outpost at (ox, oz) is seated on {@code ground}: the ground's height sampled at its
+     * middle and in rings round it (3, 6 and 9 out, eight ways each), and the level that seven in ten
+     * of them lie at or under. In a hollow it stands up on the hollow's rim, not down in it; on a
+     * slope, part way up, its plinth under the low side and the high side cut back.
+     */
+    public static int seat(java.util.function.IntBinaryOperator ground, int ox, int oz) {
+        int[] h = new int[25];
+        int n = 0;
+        h[n++] = ground.applyAsInt(ox, oz);
+        for (int ring = 3; ring <= 9; ring += 3) {
+            for (int k = 0; k < 8; k++) {
+                double a = k * Math.PI / 4;
+                h[n++] = ground.applyAsInt(ox + (int) Math.round(Math.cos(a) * ring), oz + (int) Math.round(Math.sin(a) * ring));
+            }
+        }
+        java.util.Arrays.sort(h);
+        return h[(int) (n * 0.7)];
     }
 
     /** What an outpost holds at (dx, dy, dz) from its middle (dy 0 its paving); null where it is open. */
@@ -152,6 +252,12 @@ public class FlameSeamsFeature extends Feature<NoneFeatureConfiguration> {
         return null;
     }
 
+    /** Where the {@code i}th of an outpost's band of {@code n} stands: on its paving, four out from its tower. */
+    public static BlockPos bandSpot(int ox, int oz, int base, int i, int n) {
+        double a = i * Math.PI * 2 / n + 0.4;
+        return new BlockPos(ox + (int) Math.round(Math.cos(a) * 4), base + 1, oz + (int) Math.round(Math.sin(a) * 4));
+    }
+
     /** An outpost's band: a captain and three or four of his kind and the other, kept; a patrol roams. */
     private static void band(WorldGenLevel level, RangeShape.Outpost o, int base, RandomSource random) {
         long h = Mth.getSeed(o.x(), 41, o.z());
@@ -163,9 +269,8 @@ public class FlameSeamsFeature extends Feature<NoneFeatureConfiguration> {
             EntityType<? extends FireMonster> type = (i % 3 == 2) == imps ? ModEntities.FURNACE_BRUTE.get() : ModEntities.EMBER_IMP.get();
             FireMonster m = type.create(level.getLevel());
             if (m == null) continue;
-            double a = i * Math.PI * 2 / n + 0.4;
-            int x = o.x() + (int) Math.round(Math.cos(a) * 4), z = o.z() + (int) Math.round(Math.sin(a) * 4);
-            m.moveTo(x + 0.5, base + 1, z + 0.5, random.nextFloat() * 360f, 0f);
+            BlockPos at = bandSpot(o.x(), o.z(), base, i, n);
+            m.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360f, 0f);
             m.finalizeSpawn(level, level.getCurrentDifficultyAt(m.blockPosition()), MobSpawnType.STRUCTURE, null);
             m.become(captain ? m.rollCaptainLevel(random) : m.rollRegularLevel(random), captain);
             m.setPersistenceRequired();
@@ -187,11 +292,13 @@ public class FlameSeamsFeature extends Feature<NoneFeatureConfiguration> {
             int x = x0 + dx, z = z0 + dz;
             if (ZONE.depth(seed, x, z) <= 0) continue;
             boolean way = false; // the gorge's floor: fire may lie on it, but nothing stands in the way
+            boolean bank = false; // the ground cut back round an outpost: fire, but no spire or vent to stand over it
             if (c != null) {
                 int lx = x - c[0], lz = z - c[1];
                 if ((Math.abs(lx) <= 26 && lz >= FortressPlan.SHELL - 2 && lz <= FortressPlan.Z_MAX + 2) || RangeShape.onForecourt(lx, lz)) continue;
                 if (RangeShape.outpostAt(seed, c[0], c[1], x, z) != null) continue;
                 way = RangeShape.onGorgeFloor(lx, lz);
+                bank = onBank(seed, c, x, z);
             }
             int top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1;
             p.set(x, top, z);
@@ -208,7 +315,7 @@ public class FlameSeamsFeature extends Feature<NoneFeatureConfiguration> {
                 if (RangeShape.seam(seed, x, z) && levelAround(level, p, x, top, z)) {
                     level.setBlock(p.set(x, top, z), Blocks.LAVA.defaultBlockState(), Block.UPDATE_CLIENTS);
                     level.setBlock(p.set(x, top - 1, z), Blocks.MAGMA_BLOCK.defaultBlockState(), Block.UPDATE_CLIENTS);
-                } else if (roll < 4 && !way) {
+                } else if (roll < 4 && !way && !bank) {
                     // a vent: a smouldering crack, smoke going up from it
                     level.setBlock(p.set(x, top - 1, z), Blocks.HAY_BLOCK.defaultBlockState(), Block.UPDATE_CLIENTS);
                     level.setBlock(p.set(x, top, z), Blocks.CAMPFIRE.defaultBlockState().setValue(CampfireBlock.SIGNAL_FIRE, true), Block.UPDATE_CLIENTS);
@@ -216,7 +323,7 @@ public class FlameSeamsFeature extends Feature<NoneFeatureConfiguration> {
                     level.setBlock(p, Blocks.FIRE.defaultBlockState(), Block.UPDATE_CLIENTS);
                 }
                 any = true;
-            } else if (roll < 3 && !way && (here.is(ModBlocks.FLAME_ROCK.get()) || here.is(ModBlocks.CINDER_ASH.get()))) {
+            } else if (roll < 3 && !way && !bank && (here.is(ModBlocks.FLAME_ROCK.get()) || here.is(ModBlocks.CINDER_ASH.get()))) {
                 // a charred spire
                 int high = 3 + hash(x, z, 19) % 6;
                 for (int up = 1; up <= high; up++) {

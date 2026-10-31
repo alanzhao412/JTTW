@@ -674,4 +674,82 @@ public class FireGameTests {
                 "and the furnace's fuel is forged from them");
         h.succeed();
     }
+
+    // ── The outposts: stood on the land, never sunk in it ───────────────
+
+    /** Ground shapes an outpost may come on: a hollow (its middle low, the land round it high), a slope, a knoll. */
+    private static int groundOf(String kind, int dx, int dz) {
+        double d = Math.sqrt(dx * dx + dz * dz);
+        return switch (kind) {
+            case "hollow" -> (int) Math.round(Math.min(9, Math.max(0, d - 2) * 1.2));
+            case "slope" -> (int) Math.floor(dx * 0.6);
+            default -> (int) Math.round(Math.max(0, 7 - d * 0.7));
+        };
+    }
+
+    /**
+     * Raises ground of the given shape far off the test grid, seats an outpost on it as the land's
+     * making does ({@code FlameSeamsFeature.seat}, {@code layOutpost}), and checks it stands on the
+     * land: its paving no more than a block under the ground round it, its ground floor open to the
+     * sky round its tower, its plinth solid down to the ground, and room for its band to stand.
+     */
+    private static void outpostOn(GameTestHelper h, String kind, BlockPos o) {
+        var level = h.getLevel();
+        int reach = com.jttw.engine.world.fire.RangeShape.OUTPOST_REACH, out = reach + com.jttw.engine.world.feature.FlameSeamsFeature.BANK + 4;
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        for (int cx = (o.getX() - out) >> 4; cx <= (o.getX() + out) >> 4; cx++) for (int cz = (o.getZ() - out) >> 4; cz <= (o.getZ() + out) >> 4; cz++) level.getChunk(cx, cz);
+        Runnable clear = () -> {
+            for (int x = -out; x <= out; x++) for (int z = -out; z <= out; z++) for (int y = -20; y <= 40; y++)
+                level.setBlock(p.set(o.getX() + x, o.getY() + y, o.getZ() + z), Blocks.AIR.defaultBlockState(), 2 | 16);
+        };
+        clear.run();
+        onEnd(h, clear);
+        for (int x = -out; x <= out; x++) for (int z = -out; z <= out; z++) {
+            int top = o.getY() + groundOf(kind, x, z);
+            for (int y = o.getY() - 20; y <= top; y++) level.setBlock(p.set(o.getX() + x, y, o.getZ() + z),
+                    (y == top ? ModBlocks.CINDER_ASH.get() : ModBlocks.FLAME_ROCK.get()).defaultBlockState(), 2 | 16);
+        }
+        int base = com.jttw.engine.world.feature.FlameSeamsFeature.seat((x, z) -> o.getY() + groundOf(kind, x - o.getX(), z - o.getZ()), o.getX(), o.getZ());
+        com.jttw.engine.world.feature.FlameSeamsFeature.layOutpost(level, o.getX(), o.getZ(), base, o.getX() - out, o.getZ() - out, o.getX() + out, o.getZ() + out, q -> true);
+        check(h, level.getBlockState(p.set(o.getX(), base, o.getZ())).is(Blocks.POLISHED_BLACKSTONE_BRICKS), kind + ": its paving");
+        // the ground round it no higher than a block over its paving, just outside its ring, and the bank rising no faster than a block a block
+        for (int k = 0; k < 32; k++) {
+            double a = k * Math.PI / 16;
+            for (int r = reach + 1; r <= reach + 4; r++) {
+                int dx = (int) Math.round(Math.cos(a) * r), dz = (int) Math.round(Math.sin(a) * r);
+                double d = Math.sqrt(dx * dx + dz * dz);
+                if (d <= reach + 0.5) continue; // its own ring
+                int ground = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, o.getX() + dx, o.getZ() + dz) - 1;
+                check(h, ground <= base + Math.max(1, (int) Math.floor(d - reach)),
+                        kind + ": the ground " + dx + " " + dz + " out at " + (ground - base) + " over its paving, not burying it");
+            }
+        }
+        // its ground floor open: round the tower, from its paving up, nothing over it
+        for (int[] at : new int[][]{{4, 0}, {-4, 0}, {0, 4}, {0, -4}, {4, 2}, {-2, -4}}) {
+            int x = o.getX() + at[0], z = o.getZ() + at[1];
+            eq(h, base, level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, x, z) - 1, kind + ": open to the sky at " + at[0] + " " + at[1]);
+        }
+        // the plinth: every column of its paving solid down to the ground
+        for (int x = -reach; x <= reach; x++) for (int z = -reach; z <= reach; z++) {
+            if (x * x + z * z > (reach + 0.5) * (reach + 0.5)) continue;
+            int ground = o.getY() + groundOf(kind, x, z);
+            for (int y = Math.min(ground, base - 1); y < base; y++) {
+                check(h, level.getBlockState(p.set(o.getX() + x, y, o.getZ() + z)).isSolid(), kind + ": its plinth solid at " + x + " " + (y - base) + " " + z);
+            }
+        }
+        // its band: each on its paving, room to stand
+        for (int n = 4; n <= 5; n++) for (int i = 0; i < n; i++) {
+            BlockPos s = com.jttw.engine.world.feature.FlameSeamsFeature.bandSpot(o.getX(), o.getZ(), base, i, n);
+            check(h, level.getBlockState(s.below()).isSolid() && level.getBlockState(s).isAir() && level.getBlockState(s.above()).isAir(),
+                    kind + ": room for its band at " + (s.getX() - o.getX()) + " " + (s.getZ() - o.getZ()));
+        }
+    }
+
+    @GameTest(template = PLATFORM, batch = "fire_outposts_seated", timeoutTicks = 100)
+    public static void anOutpostStandsOnTheLandNeverSunkInIt(GameTestHelper h) {
+        outpostOn(h, "hollow", new BlockPos(-29_000, 100, 29_000));
+        outpostOn(h, "slope", new BlockPos(-29_000, 100, 29_064));
+        outpostOn(h, "knoll", new BlockPos(-29_000, 100, 29_128));
+        h.succeed();
+    }
 }
