@@ -63,7 +63,8 @@ import static com.jttw.engine.gametest.GT.*;
 public class BlackWindGameTests {
 
     private static void close(GameTestHelper h, double expected, double actual, String what) {
-        check(h, Math.abs(expected - actual) <= Math.abs(expected) * 1e-3 + 1e-3, what + ": expected " + expected + " but was " + actual);
+        // within a float's step at the golems' health (a blow is measured as health before less after)
+        check(h, Math.abs(expected - actual) <= Math.abs(expected) * 1e-3 + Math.ulp(1_000_000f), what + ": expected " + expected + " but was " + actual);
     }
 
     private static void sweepAround(GameTestHelper h, Entity... held) {

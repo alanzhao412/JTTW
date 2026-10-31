@@ -82,6 +82,13 @@ public record ZoneLayout(int near, int far, int radius, int wobble, long salt, b
     public static final ZoneLayout KUNLUN = new ZoneLayout(5000, 8000, 465, 30, 0x6B0A1F5EL, false, WEST);
 
     /**
+     * Silk-Web Ridge and the Spider Cave, Mount Wuzhuang's band on the ground: a region about 480 blocks
+     * across (never under 430), its valley, the ridge across it with the cave inside, the cottage, the
+     * spring and the temple; 6-7.5 km out, as Mount Wuzhuang (whose region it keeps clear of).
+     */
+    public static final ZoneLayout SPIDER_CAVE = new ZoneLayout(6000, 7500, 240, 24, 0x5B1DC0FEL, false);
+
+    /**
      * Black Wind Mountain, in White Bone Ridge's band and ring: a region about 700 blocks across (never
      * under 640), room for the dark range, the black peak with the Black Wind Cave in its cliff, the
      * valley road up to its door past the burnt Guanyin Chan Temple, and the bear's camps; 1-2 km out,

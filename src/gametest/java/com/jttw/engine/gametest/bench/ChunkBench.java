@@ -65,6 +65,8 @@ public final class ChunkBench {
     private static final boolean HELL = "hell".equals(System.getProperty("jttw.chunkBench.mode", ""));
     /** "waters" runs {@link WatersBench}: where the Mystical Waters turn up, its trench and its palace. */
     private static final boolean WATERS = "waters".equals(System.getProperty("jttw.chunkBench.mode", ""));
+    /** "spider" runs {@link SpiderBench}: Silk-Web Ridge as built in a real world, and pictures of it. */
+    private static final boolean SPIDER = "spider".equals(System.getProperty("jttw.chunkBench.mode", ""));
     /** "wuzhuang" runs {@link WuzhuangBench}: how often Mount Wuzhuang turns up, and the nearest as built. */
     private static final boolean WUZHUANG = "wuzhuang".equals(System.getProperty("jttw.chunkBench.mode", ""));
     /** "fire" runs {@link FireBench}: where the Flaming Mountains turn up, the range and the Fire Cloud Cave. */
@@ -255,6 +257,15 @@ public final class ChunkBench {
             if (p.tickCount < 100) return;
             if (FireBench.tick(p)) {
                 report.addAll(FireBench.report());
+                write();
+                next(Step.DONE);
+            }
+            return;
+        }
+        if (SPIDER) {
+            if (p.tickCount < 100) return;
+            if (SpiderBench.tick(p)) {
+                report.addAll(SpiderBench.report());
                 write();
                 next(Step.DONE);
             }

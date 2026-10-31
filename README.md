@@ -667,7 +667,7 @@ lies in, radius, wobble, a salt of its own), the heights it takes (`Vertical`: t
 `below(y)` for an underground zone, `above(y)` for an aerial one), its level band and the players it
 is allied to. White Bone Ridge is the first (Black Wind Mountain shares its band and ring), the Bottomless Cave the second, the Mystical Waters the
 third; Hell, a dimension of its own, is the fourth; then the Flaming Mountains, and Mount Wuzhuang,
-the first aerial zone, in the sky; Lion-Camel Ridge, the last band, is the last. Past it all lies
+the first aerial zone, in the sky, and on the ground in the same band Silk-Web Ridge and its Spider Cave; Lion-Camel Ridge, the last band, is the last. Past it all lies
 Fengdu, the Ghost City: a place, not a zone of a band, placed as the zones are, whose Gate of
 Ghosts is the way down to Hell for everyone who comes to it by an Ancient City and fights it open.
 Far to the west stands Mount Kunlun, another such place: a towering sacred massif with the Queen
@@ -687,6 +687,7 @@ west lengthens with the pilgrim: the higher a zone's levels, the farther out its
 | Hell (a dimension, entered through Fengdu) | 57–66 | the Ten Kings 72–80, King Yama 81 | — | the Ten Courts |
 | Flaming Mountains | 67–77 | Red Boy 92 | 4.5–6 km | one, ~640 |
 | Mount Wuzhuang (over the clouds) | 78–88 | Zhenyuan 103 | 6–7.5 km | one, ~260 |
+| Silk-Web Ridge and the Spider Cave (on the ground) | 78–88 (Mount Wuzhuang's band) | the Hundred-Eyed Demon Lord 103 | 6–7.5 km | one, ~480 (never under 430) |
 | Lion-Camel Ridge | 89–100 | the White Elephant 113, the Azure Lion 115 | 7.5–9 km | one, ~680 |
 | Fengdu, the Ghost City (river and hill country) | none: the way to Hell | — | 9–10.5 km | one, ~240 |
 | Mount Kunlun (mountain country, to the west) | none: the Banana-Leaf Fan | — | 5–8 km, within 30° of west | one, ~930 |
@@ -742,11 +743,11 @@ each, where one alone cannot realistically outlast it:
 
 | Rank | Blow (share of health, before resistance) | Hits to kill | Who |
 |---|---|---|---|
-| Light mobs | 6–7% (15–20 hits kill you) | 2–4 | wraiths, mouse spirits, ember imps, fish soldiers, yin soldiers, wandering ghosts, judge-clerks, cloud cranes, Wind-Drillers, goblins, black-wind imps |
-| Normal mobs | 8–10% | 4–8 | flower maids, shrimp soldiers, yaksha, Horse-Face, the Impermanence, peng-demons, Daoist disciples, kobolds, wolfmen, heavenly soldiers, boar demons |
-| Heavy mobs | 11–12%, no single hit (slam, gore, pounce, swoop) over 12% | 10–12 | Bone Servants, Furnace-Brick Brutes, ogres, elephant-demons, lion-demons, turtle soldiers, Crab Generals, Ox-Head, Black Bear Soldiers |
+| Light mobs | 6–7% (15–20 hits kill you) | 2–4 | wraiths, mouse spirits, ember imps, fish soldiers, yin soldiers, wandering ghosts, judge-clerks, cloud cranes, Wind-Drillers, goblins, black-wind imps, spider demons, stinging sons |
+| Normal mobs | 8–10% | 4–8 | flower maids, shrimp soldiers, yaksha, Horse-Face, the Impermanence, peng-demons, Daoist disciples, kobolds, wolfmen, heavenly soldiers, boar demons, Mantis Sons |
+| Heavy mobs | 11–12%, no single hit (slam, gore, pounce, swoop) over 12% | 10–12 | Bone Servants, Furnace-Brick Brutes, ogres, elephant-demons, lion-demons, turtle soldiers, Crab Generals, Ox-Head, Black Bear Soldiers, Cockroach Sons |
 | Captains | a regular's ×1.2: at most 14.4% | a regular's ×2.5 | any of the above, purple-named |
-| Minibosses | 17–19%: a miniboss's hardest hit is 19% whatever its kind | a captain's, or more | the floor wardens and gate keepers of every lair (White Bone's Wardens and Keepers of the Bone Gate, the Bottomless Cave's guardians, the Fire Cloud Cave's door wardens and floor guardians, Lion-Camel's floor wardens), the Six Strong Generals, Clear Wind and Bright Moon, Heavenly Generals, Lingxuzi and the White-Robed Scholar (Black Wind's door keepers) and its stair's warden |
+| Minibosses | 17–19%: a miniboss's hardest hit is 19% whatever its kind | a captain's, or more | the floor wardens and gate keepers of every lair (White Bone's Wardens and Keepers of the Bone Gate, the Bottomless Cave's guardians, the Fire Cloud Cave's door wardens and floor guardians, Lion-Camel's floor wardens), the Six Strong Generals, the Seven Spider Spirits, Clear Wind and Bright Moon, Heavenly Generals, Lingxuzi and the White-Robed Scholar (Black Wind's door keepers) and its stair's warden |
 | Bosses | 25–33% (3–4 blows kill you); no special or area hit harder | 250–350, all its lives together; each life more than any miniboss's | every `ZoneBoss`, 15 levels over its zone's band |
 
 **Every boss strikes all near it.** A boss is fought by a group, so each has at least one blow
@@ -770,6 +771,7 @@ pecking order holds it to a boss's blow:
 | Pingdeng | **impartial judgement**: the same blow on all | a golden balance, its ring marked (30) | 8 round him | 25% (4) | 12 s |
 | Zhuanlun | **the Wheel turning**: a shockwave, flinging all back | the Wheel spins in soul fire over his head (30) | 8 round him | 25% (4) | 12 s |
 | Red Boy | the True Samadhi Fire; at a third, a ring of it | strikes his nose twice | a cone; round him | 25% (4) | — |
+| The Hundred-Eyed Demon Lord | **the golden light** of his thousand eyes: on all who face him, blinding and holding them fast (8% to one turned away); **the poisoned tea**, cups bursting where his foes stand; **the centipede's sweep**, flinging all back | arms flung up, his eyes blazing (30); rings of yellow-green motes where each cup will burst (30); rearing on his coils, scratching the ground (20) | 14 round him; 3 round each cup; 7.5 round him | 25% (4); 15% (7); 22% (5) | 16 s (11 s unrobed); 12 s (7.5 s past a third); 10 s, when foes are close |
 | Zhenyuan | **the sweep of the whisk**: a gale, blowing all back; the Sleeve (from 30%) takes all within 8 | the whisk whirled overhead, a ring of cloud gathering (25) | 6 round him | 25% (4) | 11 s |
 | The Azure Lion | the roar | head thrown back | a cone | as his roar | — |
 | The White Elephant | stamping, trampling | — | round him | as his stamp | — |
@@ -782,7 +784,7 @@ its hits are scaled so its hardest is `MINIBOSS_HIT` (19%). A mob's special hits
 A boss's lives are its `ZoneBoss.lives()` (Lady White Bone's four, whole each time, 75 hits apiece;
 Zhuanlun's 200, and born again at half). By boss, in hits all lives together: Lady White Bone 300,
 Lady Earth Flow 270, the Dragon Kings 270, the Ten Kings 280 (Zhuanlun 300), King Yama 350, Red Boy
-320, the Black Bear Demon 300, Zhenyuan 280 (more hand to hand: he brushes one blow in four aside), the White Elephant 330, the
+320, the Black Bear Demon 300, Zhenyuan 280 (more hand to hand: he brushes one blow in four aside), the Hundred-Eyed Demon Lord 300, the White Elephant 330, the
 Azure Lion 350. Their health runs to tens of millions at level 100 and beyond, past vanilla's cap of 1024 max
 health: `JTTWEngine` lifts the cap (and attack's) to a billion.
 `PeckingOrderGameTests` makes every creature of the mod in each of its ranks and fails if any hits
@@ -1719,6 +1721,147 @@ left to its host.
   cranes in flight, the youths, Zhenyuan, the sleeve, Zhenyuan arriving out of cloud in an ordinary
   farmyard, and the island laid north of the stage: gate, court, hall, garden, the fruit, the road, the stair, from below and from afar); the
   mountain in a real world with `./gradlew runWorldgenBench -Pbench.mode=wuzhuang`.
+
+#### Silk-Web Ridge and the Spider Cave (levels 78–88)
+
+Silk-Web Ridge (盘丝岭) and the Spider Cave (盘丝洞, chapters 72–73): the Seven Spider Spirits, seven
+sisters who spin silk from their waists and bathe in the Purifying Spring, their adopted insect sons,
+and their sworn brother the Hundred-Eyed Demon Lord of the Yellow Flower Temple, in
+[`world/spider/`](src/main/java/com/jttw/engine/world/spider/) and
+[`entity/spider/`](src/main/java/com/jttw/engine/entity/spider/); everything it registers is in its own
+registers ([`SpiderCaveRegistry`](src/main/java/com/jttw/engine/registry/SpiderCaveRegistry.java)).
+Mount Wuzhuang's band, on the ground (Wuzhuang is in the sky).
+
+- **Where** (`Zones.SPIDER_CAVE`, after Mount Wuzhuang in `Zones.ALL`): over dark, overgrown country
+  (dark forest, forest, birch and old-growth birch, taiga and both old-growth taigas, windswept forest,
+  jungle, sparse and bamboo jungle, swamp), host judged at y 256, the whole column. One region a world,
+  about 480 blocks across (never under 430), 6–7.5 km out, in Mount Wuzhuang's ring and clear of its
+  region and of every zone before it.
+- **The valley** (`SilkRidgeShape`, pure, unit-tested; laid by `SilkRidgeFeature`): within 185 blocks
+  of the centre the land is brought to the valley's floor, rolling a little, then back to its own over
+  30 more. Its ground is dark (podzol and moss in the grass, coarse earth), a dark forest and old
+  spruces grow over it (the biome's own trees), and `SilkWebsFeature` strings silk through it:
+  cobwebs in the hollows under the crowns, cocoons of woven silk hanging from the boughs, webs on the
+  cliffs; here and there a binding web low over the grass or an old skull. Grey-violet fog, drifting
+  motes of silk, cave and warped-forest sounds. Paths of worn earth lead from the valley's south edge
+  up to the cottage, with branches to the spring and the temple.
+- **The ridge**: some 400 blocks from end to end across the valley, east to west, its crest a little
+  north of the centre, steep on the south, long on the north, crags of stone, tuff and andesite
+  streaked with calcite, four peaks along it (the highest some 90 blocks over the floor), forest on its
+  gentler slopes. Under it, always under five blocks of rock at least, the cave.
+- **The thatched cottage** (茅屋, `SilkRidgeWorks`): at the ridge's southern foot, under a sheer stone
+  face, a cottage of mud brick in a dark timber frame under a deep hip roof of thatch, its yard of
+  trodden earth (a woodpile, a trough, a barrel, a withy fence); inside, two looms and an embroidery
+  table (the four women at their needlework the Tang Monk saw), a bench, candles, a chest. Its back
+  door opens on the passage into the cave.
+- **The Spider Cave** (`SpiderCavePlan`, pure, unit-tested): the passage runs north into the rock to
+  the **Silk Hall**, a dome 68 by 44 blocks and 26 high: ten pillars of woven silk from floor to vault,
+  a great radial web hung across its northern end, cocoons hanging from the vault, egg sacs glowing
+  green in it, bones on the floor. From the hall a chain of tunnels (binding webs strung low in them)
+  leads through **the seven bowers** (七间绣房), west, north and round to the east, the youngest
+  sister's first, the eldest's last: each a dome some 26 by 22 blocks, a dais of dark planks under a
+  carpet of its sister's colour, a loom, silk drapes from its vault, a soul lantern on a chain; the
+  last the sisters' **treasury** chest (`chests/spider_cave_treasury`). **The rule**: the tunnel on from
+  each bower is shut by a wall of **sealing silk** (`silk_seal`: no hand, blast or art breaks it, no
+  phasing passes it, see-through between its threads) that only that bower's sister's death loosens.
+- **Who keeps it** (put at their posts when the land is made, kept, held near their posts; one found
+  far off its post with no one to fight is put back): the hall's ten (spiders, mantises, a cockroach,
+  stinging sons; two captains), in each bower its sister and two to five of her sons (captains in the
+  later bowers); outside, a band in the cottage's yard, one by the spring, one at the temple's gate;
+  and the ridge's own creatures come in any light (spider demons in threes and fours, stinging sons in
+  twos and threes, mantises, a cockroach), one in twelve a captain.
+- **The Purifying Spring** (濯垢泉, `SpiderCave.bathe`): a steaming pool in a rim of mossy stone, a
+  bath pavilion over its north bank, stone lanterns at the steps down into it. Its water washes away
+  the ridge's venom, poison, withering and the binding silk (pinned), and mends a little while one
+  stays in it.
+- **The Yellow Flower Temple** (黄花观): to the south-west, a walled Daoist temple in ochre under dark
+  tiles, a gatehouse with a gilded plaque, a court of yellow flowers (dandelions, sunflowers) with a
+  smoking censer and stone lanterns, side halls of cells, and the double-eaved main hall with gilded
+  finials, its altar to the Three Pure Ones and the tea table. **The canopy**: while any of the seven
+  sisters lives, their canopy of silk (sealing silk, an ellipsoid 72 by 88 blocks and 27 high) is over
+  the whole temple, as they threw it over it in chapter 73, and the Demon Lord is shielded (no blow
+  reaches him, against digging under it). When the last sister falls, everyone in the region is told,
+  and the canopy sags and falls away (`SpiderCave.Record`, saved data keyed by the region: which
+  sisters have fallen and whether the canopy is all down; any of it in an unloaded chunk falls when
+  someone comes near).
+- **The venom** (`venom`, `Venom`): the spiders' bite, the stinging sons' stings, the Demon Lord's tea:
+  1% of its bearer's greatest health a second a level, through any armour (vanilla's Poison is nothing
+  at these levels), never the last of it. Milk and the spring cure it; the ridge's own are proof.
+- **Binding webs** (`binding_web`, `BindingWebBlock`): whatever walks into one (but the ridge's own) is
+  **pinned** (`Stun.pin`: held, though it may strike what is in reach) for 2 s, then has 1.5 s to tear
+  free before it holds again; it slows as a cobweb does; a sword or shears cut it quickly. The webs a
+  sister casts in a fight are fresh: they fall apart by themselves after 8 s.
+- **Creatures** (`SilkMonster`: level 78, captains 85, never past 88; any light), each "you kill it in
+  X ordinary hits / it kills you in Y blows" against a same-level character:
+  - **Spider demons** (蜘蛛小妖, light): 3 hits / 16 bites (6.5%, with 3 s of venom); it leaps, and from
+    4–14 blocks it **rears up** (0.6 s) and spits a strand of silk (`SilkStrandEntity`: 5%, pinned
+    1.5 s); a captain spits two. Strike one and those near turn on you.
+  - **Stinging sons** (蜜蜂, 马蜂, 牛蜢: the Honeybee, Hornet and Gadfly Sons, light, flying): 3 hits / 15
+    stings (7%, venom 3 s); now and then it **hangs buzzing** (0.7 s), then darts straight at you: 9%
+    and 5 s of venom.
+  - **Mantis Sons** (螳螂精, normal): 6 hits / 12 cuts (9%); close, it **raises both scythes** (0.7 s)
+    and sweeps them through all before it, 3.4 blocks and 60° either side: 10%. Step aside or back.
+  - **Cockroach Sons** (蜚蠊精, heavy, armoured): 11 hits / 9 blows (11.5%); 3–12 blocks off it **scrapes
+    the ground** (0.8 s), then charges straight where you were: 12% and thrown back. It cannot turn.
+  - **Captains**: purple, larger, 2.5 times the hits (7.5, 7.5, 15, 27.5) and blows 1.2 times as hard
+    (13, 12, 10 and 8 blows kill you); they bring two or three of their kind; besides the sigil every
+    captain leaves, a skein of spider silk and now and then a Golden Eye.
+- **The Seven Spider Spirits** (七个蜘蛛精, `SpiderSpiritEntity`, one frame, seven skins: the eldest in
+  crimson and gold, the second rose, the third peach, the fourth gold, the fifth jade, the sixth azure,
+  the seventh lilac): always minibosses, one keeping each bower, the youngest (level 82) in the first to
+  the eldest (88) in the last; 35 hits at a captain's strength, 56 in her bower (1.6 times a captain's);
+  her blow (a lash of her sash) a miniboss's 19% (6 kill you). **Silk from her waist**: every 6 s she
+  draws herself up, silk gathering glowing at her waist (1 s), her spider's legs spreading; then it
+  pours out in a cone 9 blocks long, 30° either side: 17% and pinned 2.5 s. **Webs underfoot**: every
+  9 s she marks up to three foes within 12 blocks (a ring of white motes under each, 1.2 s), then a
+  fresh binding web springs up where each stood. At half her health she **calls her sons**: two insect
+  demons come (once). Her death loosens her bower's seal, and is remembered.
+- **The Hundred-Eyed Demon Lord** (百眼魔君, `HundredEyedDemonEntity`, a `ZoneBoss`, level **103**: his
+  band's top and fifteen, towering over the ridge he keeps; 300 hits of a character of his level, a
+  yellow bar), a centipede spirit in a Daoist's yellow robe, sworn brother of the seven, who poisoned
+  the Tang Monk's tea. His blow, a cut of his Daoist sword: 28% (four kill). Every art is shown first:
+  - **the golden light of his thousand eyes** (金光): every 16 s (11 s once his robe is off) he flings
+    his arms up, his eyes blazing brighter for 1.5 s (gold motes gathering, a rising chime); then the
+    light bursts over all within 14 blocks: whoever **faces him** takes 25%, is blinded for 5 s and
+    held 1.5 s; whoever has **turned away** takes only 8%;
+  - **poisoned tea** (毒茶): every 12 s (7.5 s from a third) he flicks his sleeve: rings of yellow-green
+    motes mark where each foe stands and a spot or two about them (1.5 s), then the tea bursts 3 blocks
+    round each: 15% and 6 s of venom;
+  - **the centipede's sweep**: when two foes are close, or one within 4 blocks, he rears on his coils,
+    scratching the ground in a ring (1 s), then sweeps his long body round: 22% to all within 7.5
+    blocks, hurled off;
+  - at two thirds he **throws off his robe**: his eyes bared for good (they flare now and then), the
+    light faster, and three stinging sons come at his call; at a third the tea comes faster and in more
+    cups. No art of his hits harder than his blow; a fight for three or four.
+- **What they leave**: the Demon Lord three to five **Golden Eyes**, always his **Golden-Light Eye**
+  (金光眼, `GoldenLightEyeItem`: raised, it flashes his light, every hostile creature within 8 blocks
+  blinded and held 2 s; then 20 s to dim), a block of gold, spider silk, sigils; a sister spider silk,
+  gold, a Golden Eye one time in four; spider demons **Spider Silk**, string, spider eyes; the sons
+  **Insect Carapaces**. Four spider silk make a block of **woven silk**; one makes three string.
+- **XP and karma**: band 78–88, base grunt XP 145, as Mount Wuzhuang's (972 a grunt). Subduing the
+  Demon Lord is a good deed (**+150**, as Red Boy); the sisters are captains (+5), the rest monsters.
+- **Where it is**: the Earth Gods know its master and point to the cottage over the cave's mouth; but
+  asked by level they still name Mount Wuzhuang for the band 78–88 (`EarthGod.zoneFor` takes a band's
+  first zone), so the luopan leads here only to whoever is already in its country.
+- **Art**: `SpiderCaveRenderers` (its own client registration; skins with a full-bright glowing skin
+  over them, the Demon Lord's ablaze in his glare): models and skins from `assets_source/silk_kin.py`
+  (the spider demon, the stinging sons' three skins, the Mantis Son, the Cockroach Son),
+  `spider_spirits.py` (the seven sisters), `hundred_eyed.py` (the Demon Lord), on the shared
+  `silk_court.py`; blocks and items from `spider_items.py`.
+- **Tests and pictures**: `SpiderCaveGameTests` (the band, one region in its ring and clear of the
+  others, the pay, the needle; the creatures and captains, the strand, the venom and the spring, the
+  binding web's hold and grace and the fresh web falling apart, the sweep and the ram, the dart; the
+  sisters always minibosses, their silk, webs and sons, a sister's death loosening her seal and being
+  remembered, the Demon Lord shielded till all seven have fallen; his level and pecking order, the
+  golden light on those facing and those turned away, the tea, the sweep, the robe and the brood; the
+  keepers put at their posts as the land is made; loot; karma), `SpiderCavePlacementTest` (hosts,
+  band and ring, never on another zone's ground, rock over the cave, the works level, a ridge that
+  towers, every seal shutting all beyond it on foot, the hall and the bowers great rooms, the canopy
+  closing over the temple), `PeckingOrderGameTests` (the sisters among the minibosses); gallery
+  scenes `-Pgallery.only=spider_` (every creature from the front, side and back, close, and in each
+  telegraphed art; a piece of the valley laid off the stage: the cottage, the passage, the hall and
+  its web, a bower, a seal, the spring and its pavilion, the temple under its canopy and without it);
+  the region in a real world with `./gradlew runWorldgenBench -Pbench.mode=spider`.
 
 #### Lion-Camel Ridge (levels 89–100)
 

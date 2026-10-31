@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "##",
+    "##"
+  ],
+  "key": {
+    "#": {
+      "item": "jttw_engine:spider_silk"
+    }
+  },
+  "result": {
+    "id": "jttw_engine:woven_silk",
+    "count": 1
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "fresh=false": {
+      "model": "jttw_engine:block/binding_web"
+    },
+    "fresh=true": {
+      "model": "jttw_engine:block/binding_web"
+    }
+  }
+}
