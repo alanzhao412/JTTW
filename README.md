@@ -142,6 +142,26 @@ Unstoppable Force III, Primordial Smite III, the Bell of Taiyi. Pinned: Territor
 Wave III's bubble, the Frost Head's shard (and, against players, Biancheng's bell and the Daoist
 disciples' binding talismans).
 
+### Sun Wukong, the Monkey King
+
+From the start, a Wukong player is drawn as the Monkey King himself, not in the player's own skin
+([`MonkeyKingModel`](src/main/java/com/jttw/engine/client/renderer/MonkeyKingModel.java), drawn by
+`MonkeyKingLayer`). He has no armour or outfit of his own:
+- **Head:** the sculpted head the Fighting Buddha also wears
+  ([`assets_source/fighting_buddha_head.py`](assets_source/fighting_buddha_head.py)), without the crown.
+- **Body:** a lean, muscular monkey's build in golden-brown fur, broad at the shoulders and narrow at
+  the waist ([`assets_source/monkey_king.py`](assets_source/monkey_king.py)). The chest and belly are
+  bare tan skin.
+- **Limbs:** long arms ending in monkey hands, and bowed legs ending in long monkey feet.
+- **Tail:** curling up behind him and swaying.
+- **Golden fillet (紧箍):** worn on his head. It is part of him, not armour.
+
+He is about a man's size, so real armour is drawn over him as on anyone, and he holds items in his
+hands as usual. Everyone sees him this way: the server tells each client which players are Wukong. In
+first person his arms are the Monkey King's. His shadow clones are drawn as he is. A transformation
+(the 72 and the rest) wins: its form is drawn. At level 100 the Victorious Fighting Buddha takes his
+place.
+
 ### The Victorious Fighting Buddha (斗战胜佛)
 
 At level 100, the cap, Sun Wukong becomes the Victorious Fighting Buddha, as the Buddha names him at

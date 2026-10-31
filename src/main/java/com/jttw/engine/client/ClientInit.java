@@ -163,6 +163,7 @@ public final class ClientInit {
         // the open world's yaoguai
         event.registerLayerDefinition(com.jttw.engine.client.renderer.FightingBuddhaLayer.LAYER, com.jttw.engine.client.renderer.FightingBuddhaLayer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.FightingBuddhaLayer.HEAD_LAYER, com.jttw.engine.client.renderer.FightingBuddhaLayer::headLayer);
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.MonkeyKingModel.LAYER, com.jttw.engine.client.renderer.MonkeyKingModel::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.WildRenderers.GOBLIN_LAYER, com.jttw.engine.client.renderer.WildRenderers::goblinLayer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.WildRenderers.KOBOLD_LAYER, com.jttw.engine.client.renderer.WildRenderers::koboldLayer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.WildRenderers.WOLFMAN_LAYER, com.jttw.engine.client.renderer.WildRenderers::wolfmanLayer);
@@ -180,6 +181,7 @@ public final class ClientInit {
                 renderer.addLayer(new com.jttw.engine.client.renderer.BeastFormLayer(renderer));
                 renderer.addLayer(new com.jttw.engine.client.renderer.StaffRestLayer(renderer));
                 renderer.addLayer(new com.jttw.engine.client.renderer.FightingBuddhaLayer(renderer, event.getEntityModels()));
+                renderer.addLayer(new com.jttw.engine.client.renderer.MonkeyKingLayer(renderer, event.getEntityModels()));
             }
         }
     }

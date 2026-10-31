@@ -37,8 +37,8 @@ public class FightingBuddhaLayer extends RenderLayer<AbstractClientPlayer, Playe
     private static final ResourceLocation GLOW = JTTWEngine.id("textures/entity/fighting_buddha_glow.png");
     /** The head, the Monkey King's face, is its own model, drawn at twice the body's detail. */
     public static final ModelLayerLocation HEAD_LAYER = new ModelLayerLocation(JTTWEngine.id("fighting_buddha"), "head");
-    private static final ResourceLocation HEAD_TEXTURE = JTTWEngine.id("textures/entity/fighting_buddha_head.png");
-    private static final ResourceLocation HEAD_GLOW = JTTWEngine.id("textures/entity/fighting_buddha_head_glow.png");
+    public static final ResourceLocation HEAD_TEXTURE = JTTWEngine.id("textures/entity/fighting_buddha_head.png");
+    public static final ResourceLocation HEAD_GLOW = JTTWEngine.id("textures/entity/fighting_buddha_head_glow.png");
     /** How much larger than a man he is drawn, about his feet. */
     public static final float SIZE = 1.1f;
 
@@ -70,7 +70,7 @@ public class FightingBuddhaLayer extends RenderLayer<AbstractClientPlayer, Playe
     @Override
     public void render(PoseStack pose, MultiBufferSource buffers, int light, AbstractClientPlayer p,
                        float swing, float swingAmount, float partial, float age, float headYaw, float headPitch) {
-        if (p.isInvisible() || !FightingBuddhaClient.ascended(p)) return;
+        if (!FightingBuddhaClient.drawnAsBuddha(p)) return;
         PlayerModel<AbstractClientPlayer> m = getParentModel();
         head.copyFrom(m.head);
         monkeyHead.copyFrom(m.head);

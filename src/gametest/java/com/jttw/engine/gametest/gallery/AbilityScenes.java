@@ -171,6 +171,7 @@ final class AbilityScenes {
         all.addAll(CaveScenes.all());
         all.addAll(RidgeScenes.all());
         all.addAll(BuddhaScenes.all());
+        all.addAll(MonkeyScenes.all());
         all.addAll(BlackWindScenes.all());
         all.addAll(CloneScenes.all());
         all.addAll(EyeLaserScenes.all());
@@ -1247,6 +1248,7 @@ final class AbilityScenes {
 
     static void reset(ServerPlayer p) {
         WatersScenes.clear(p);
+        MonkeyScenes.clear(p);
         HellScenes.clear(p);
         FireScenes.clear(p);
         FlowerFruitScenes.clear(p);
