@@ -131,6 +131,12 @@ final class BlackWindBench {
             report.add("mustered " + BlackWindPlan.get().floor(n).name() + ": " + g.size());
         }
         terrace = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, centre.getX(), centre.getZ() + TemplePlan.TEMPLE_Z) - 1;
+        report.addAll(ZoneAudit.audit(level, "Black Wind Mountain", centre.getX(), centre.getZ() + 100, 230, origin.getY() + BlackWindPlan.Y_MIN - 4, 400,
+                q -> ZONE.depth(seed, q.getX(), q.getZ()) > 0));
+        if (!kings.isEmpty()) {
+            report.add(ZoneAudit.route(level, "from the forecourt to the Black Bear", origin.offset(0, 1, BlackWindPlan.FACE_Z + 6), kings.get(0).blockPosition(),
+                    BlackWindCave.bounds(origin).inflate(4), (st -> st.is(net.minecraft.tags.BlockTags.DOORS) || st.is(net.minecraft.tags.BlockTags.TRAPDOORS) || st.is(net.minecraft.tags.BlockTags.FENCE_GATES) || com.jttw.engine.world.blackwind.BlackWindBlocks.doorish(st) || st.is(net.minecraft.world.level.block.Blocks.IRON_BARS))));
+        }
         plan(level, camps);
     }
 

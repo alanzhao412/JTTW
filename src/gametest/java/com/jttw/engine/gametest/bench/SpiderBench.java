@@ -91,6 +91,16 @@ final class SpiderBench {
                 var lords = level.getEntitiesOfClass(HundredEyedDemonEntity.class, all);
                 report.add("the Demon Lord: " + (lords.isEmpty() ? "NOT there" : lords.get(0).blockPosition() + ", shielded " + lords.get(0).shielded()));
                 report.add("keepers of the ridge: " + level.getEntitiesOfClass(SilkMonster.class, all).size());
+                report.addAll(ZoneAudit.audit(level, "Silk-Web Ridge", centre[0], centre[1], LOAD * 16 - 8, region.floor() - 40, region.floor() + 120,
+                        q -> Zones.SPIDER_CAVE.depth(level.getSeed(), q.getX(), q.getZ()) > 0));
+                java.util.function.Predicate<net.minecraft.world.level.block.state.BlockState> open = (st -> st.is(net.minecraft.tags.BlockTags.DOORS) || st.is(net.minecraft.tags.BlockTags.TRAPDOORS) || st.is(net.minecraft.tags.BlockTags.FENCE_GATES)
+                        || st.is(SpiderCaveRegistry.SILK_SEAL.get()));
+                BlockPos yard = region.at(SilkRidgeWorks.COTTAGE_X, 1, SilkRidgeWorks.COTTAGE_FRONT + 2);
+                AABB walk = all.inflate(0, 40, 0);
+                if (!lords.isEmpty()) report.add(ZoneAudit.route(level, "from the cottage's yard to the Demon Lord", yard, lords.get(0).blockPosition(), walk, open));
+                for (SpiderSpiritEntity sis : sisters) {
+                    report.add(ZoneAudit.route(level, "from the cottage's yard to " + sis.getDisplayName().getString(), yard, sis.blockPosition(), walk, open));
+                }
                 stage = 2;
                 ticks = 0;
             }

@@ -719,11 +719,15 @@ Wukong came to a mountain whose demon he did not know, he struck the ground and 
 God (土地公) came up out of it, bowing, to tell him who lived there. Every player is given a luopan
 (a geomancer's compass) the first time they join a world, and more are crafted from any planks, a
 copper ingot and red dye. Used, the Earth God rises in a puff of earth and names the zone for its
-holder's level (the one whose band holds it; under 20 White Bone Ridge, past 100 Lion-Camel Ridge),
+holder's level (the one whose band holds it; under 20 the first band's, past 100 Lion-Camel Ridge),
 its master, and which way and roughly how far it lies, while a trail of incense smoke drifts off that
 way; for the Mystical Waters, the nearest sea whose Dragon King still lives (the kings' deaths are
-remembered for the world). Held, its needle points there, as a compass's does, kept up to date as
-its holder goes and grows. Hell's band (57–66) is told that its trials lie in Diyu, past any Earth
+remembered for the world). Where a band holds more than one zone (White Bone Ridge, Black Wind
+Mountain and, to 30, Flower-Fruit Mountain; Mount Wuzhuang and Silk-Web Ridge), he speaks of the one
+whose country its holder stands in, or else the nearest (by where its needle would point), and then
+names the others too in grey, nearest first, each with its way and distance (`EarthGod.zonesFor`,
+`chosenFor`); of Flower-Fruit he always warns that its master is beyond any mortal band. Held, its
+needle points to the zone he spoke of, as a compass's does, kept up to date as its holder goes and grows. Hell's band (57–66) is told that its trials lie in Diyu, past any Earth
 God's ground; that the way down is through Fengdu, the Ghost City, whose Gate of Ghosts is sealed to
 those who walk there; and that the way in is under the earth, by an Ancient City, whose great frame
 lit with soul fire carries one before the gate, where its guard must be fought: the needle points to
@@ -737,6 +741,17 @@ In the world of the living, asked sneaking (and held while sneaking), anyone of 
 the way to Mount Kunlun instead, and the needle points to its summit; every other answer there
 ends with a grey word on how to ask it, so the guidance by level is otherwise unchanged.
 In the Nether, the End or Heaven no Earth God hears, and it spins.
+
+**Clouds over the dark zones** (`client/ZoneClouds`, `ClientLevelMixin` on `getCloudColor`): vanilla's
+bright white clouds would sit oddly under Black Wind Mountain's ash-grey sky, the Flaming Mountains'
+orange one or Silk-Web Ridge's violet murk, so over those zones they take the sky's colour: dark ash
+over Black Wind, smoky orange over the Flaming Mountains, violet-grey over Silk-Web Ridge, a leaden
+grey-blue over Fengdu, a dim dusty grey over Lion-Camel Ridge. The tint multiplies vanilla's cloud
+colour (night, rain and thunder still darken it); it is sampled round the camera as vanilla samples
+the sky's colour (a gaussian over the biomes some twenty blocks about) and eased from tick to tick, so
+it fades in over a border rather than snapping. The other zones' skies are pale (White Bone Ridge's
+bone-white, Flower-Fruit's, Mount Wuzhuang's over its own clouds, Kunlun's) and keep white clouds;
+Hell keeps the Nether's sky, which has none. Client-side only.
 
 **The pecking order.** Every creature's strength is set against a typical character of its level
 (`entity/MobScaling`): its health in that character's ordinary hits ("HITS"), each of its blows a
@@ -886,7 +901,7 @@ mountain and the road by `BoneMassifFeature`), so it comes out whole whichever c
   does not come back.
 - **Natural spawns** keep to the open ridge (`RidgeRules`): none inside the cave, whose floors hold
   only their garrison.
-- **The Earth God's Luopan** points the ridge's band to the great door, and in the ridge's country
+- **The Earth God's Luopan** points the ridge's band to the great door when the ridge is the nearest zone of the band (or is named among them, its way told), and in the ridge's country
   says the door is at the head of the road, that its keepers must fall first, and that eight floors
   lie under it.
 - **Old worlds.** Whether a world has the cave is decided once, the first time it is loaded with it,
@@ -1010,8 +1025,9 @@ Cave. In [`world/blackwind/`](src/main/java/com/jttw/engine/world/blackwind/) an
   their sigils; the Black Bear the kasaya, sigils, gold, golden apples (an enchanted one in four),
   diamonds.
 - **XP and karma**: White Bone Ridge's band and pay (base grunt XP 80); subduing the Black Bear is a good
-  deed, **karma +100**; his friends are captains (+5). The Earth Gods' luopan sends the band to White
-  Bone Ridge, but in Black Wind Mountain's own country names the Black Bear and points to his great door.
+  deed, **karma +100**; his friends are captains (+5). The Earth Gods' luopan sends the band to the
+  nearer of White Bone Ridge, Black Wind and (to 30) Flower-Fruit, naming the others with their ways;
+  in Black Wind Mountain's own country it names the Black Bear and points to his great door.
 - **Art**: `assets_source/black_bear.py` (the King and his soldiers, one frame; a soldier's skin and a
   captain's), `black_wind_folk.py` (the boar, the imp, Lingxuzi, the Scholar; captains' skins for the boar
   and the imp), `kasaya_items.py` (the kasaya's icon and its worn layer). Their attacks are posed: the king
@@ -1849,9 +1865,10 @@ Mount Wuzhuang's band, on the ground (Wuzhuang is in the sky).
   **Insect Carapaces**. Four spider silk make a block of **woven silk**; one makes three string.
 - **XP and karma**: band 78–88, base grunt XP 145, as Mount Wuzhuang's (972 a grunt). Subduing the
   Demon Lord is a good deed (**+150**, as Red Boy); the sisters are captains (+5), the rest monsters.
-- **Where it is**: the Earth Gods know its master and point to the cottage over the cave's mouth; but
-  asked by level they still name Mount Wuzhuang for the band 78–88 (`EarthGod.zoneFor` takes a band's
-  first zone), so the luopan leads here only to whoever is already in its country.
+- **Where it is**: the Earth Gods know its master and point to the cottage over the cave's mouth.
+  Asked by level, the band 78–88 is sent to the nearer of Silk-Web Ridge and Mount Wuzhuang (by where
+  the needle would point: here the cottage) and told the other's way and distance too; in its own
+  country (on the ground under Mount Wuzhuang's footprint, the heights decide), always here.
 - **Art**: `SpiderCaveRenderers` (its own client registration; skins with a full-bright glowing skin
   over them, the Demon Lord's ablaze in his glare): models and skins from `assets_source/silk_kin.py`
   (the spider demon, the stinging sons' three skins, the Mantis Son, the Cockroach Son),
@@ -2355,8 +2372,8 @@ luggage and made himself a false pilgrimage to fetch the scriptures in his place
 - **Where** (`Zones.FLOWER_FRUIT`): an island raised out of the sea (ocean, warm, lukewarm and cold
   ocean and their deep kinds; the host judged just under the waves), the whole column. One a world,
   a region about 640 blocks across, 1–2 km from spawn: it shares the first band and its ring with
-  White Bone Ridge and Black Wind Mountain (the Earth Gods' needle points to the ridge for 20–30;
-  they name the island too, and its way), and keeps clear of every zone before it.
+  White Bone Ridge and Black Wind Mountain (the Earth Gods' needle points to the nearest of the three
+  for 20–30, and they name the others with their ways), and keeps clear of every zone before it.
 - **The island** (`IslandShape`, pure and unit-tested; `FlowerFruitIslandFeature`, column by
   column): a towering mountain out of the sea, its coast some 220 blocks from the centre, its flanks
   climbing in shelves (the orchards' terraces) and spurs to a sharp peak 170 blocks over the sea; the
@@ -2373,8 +2390,8 @@ luggage and made himself a false pilgrimage to fetch the scriptures in his place
   under them; broad-leafed trees and flowering azalea lower down, pines on the heights, bamboo about
   the pool and the stream, ferns, grass, peonies, roses and lilac. **The monkeys' camps**
   (`IslandShape.camps`): a ring of mossy stones, a fire and stools, a lean-to, a pole flying the
-  Great Sage's yellow banner; each with its band put there once and kept (a captain and three or
-  four; about one in three roams).
+  Great Sage's yellow banner; each with its band put there and kept (a captain and three or
+  four; about one in three roams), and mustered again as the cave's garrison is (below).
 - **The Water Curtain Cave** (`CavePlan`, the same in every world, pure and unit-tested, laid with
   the island): the mouth, an arch in the cliff behind the falling water; **the iron bridge** (铁板桥)
   across the chasm the cave's stream runs in, chains for its rails, lanterns at its ends; the gate
@@ -2384,8 +2401,14 @@ luggage and made himself a false pilgrimage to fetch the scriptures in his place
   lamps on chains, shroomlight in the vault, the monkeys' stone tables, stools, pots and bowls, and
   the Monkey King's old stone throne on its dais under the Great Sage's yellow banners; the
   **dormitory** of stone beds to the west, the **store** of stone pots, bowls, cauldrons and the
-  armoury to the east. Its garrison (`CavePlan.POSTS`, 22 monkeys and their captains) is put there
-  once and kept, each to its post.
+  armoury to the east. Its garrison (`CavePlan.POSTS`, 22 monkeys and their captains, and the three
+  fake pilgrims) is put there as the land is made and kept, each to its post. **Respawn**
+  (`FlowerFruitGarrison`, as Black Wind's and the Fire Cloud Cave's): the garrison and each camp's
+  band are marked with the part they hold; a part whose holders are all dead stays empty for **20
+  minutes**, then is mustered again whole the next time someone comes near (80 blocks of the falls;
+  56 of a camp) while no one is in it (under the cave's roof; within 24 of the camp's fire). The
+  Macaque is no part of it. (In a world made before this, the first garrison is unmarked, so once
+  its 20 minutes pass a second may join whoever of it still lives.)
 - **The monkey truce** (`ZoneAllies.WUKONG`): the monkeys know the true Monkey King. Nothing of the
   monkey army targets a Wukong player or fights him back, even struck (and what he strikes down of
   theirs leaves him nothing); when he comes near with no fight on they drop to their knees and
@@ -2452,7 +2475,9 @@ luggage and made himself a false pilgrimage to fetch the scriptures in his place
   the falls country, the egg, a way on foot from the mouth to the sanctum and the rock over all of the
   cave, the posts), `FlowerFruitGameTests` (the ranks, each warned attack, the truce and the kneeling,
   the pilgrims' tricks, the Macaque's level, kit, phases and lair, loot, XP and karma, the cave in
-  blocks), `PeckingOrderGameTests` (the superboss exception, and that he is the strongest boss);
+  blocks), `FlowerFruitGarrisonGameTests` (the cave's garrison and a camp's band: marked, cleared,
+  kept empty while someone is in it, mustered again when its time comes round),
+  `PeckingOrderGameTests` (the superboss exception, and that he is the strongest boss);
   gallery scenes `-Pgallery.only=scene__ff_`; the island, its falls and its cave in a real world with
   `./gradlew runWorldgenBench -Pbench.mode=flowerfruit`.
 
