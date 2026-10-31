@@ -754,19 +754,21 @@ BAJIE = robe_frame(dict(hipw=2.4, thigh=3.6, thigh_len=4.8, shin=3.2, shin_len=4
                    9.2, 7.4, 8.6, 'j_robe')
 BAJIE = mirrored(BAJIE + [
     # the great belly, bare under the open robe
-    part('belly', 'chest', (0, -2.2, -3.4), (0, 0, 0), [(-4.2, -4.4, -1.8, 8.4, 6.6, 2.6, 'j_belly')]),
+    part('belly', 'chest', (0, -2.2, -3.4), (0, 0, 0), [(-4.4, -4.6, -2.4, 8.8, 7.4, 3.2, 'j_belly'), (-3.4, -3.6, -3.2, 6.8, 5.4, 1.0, 'j_belly')]),
     part('right_lapel', 'chest', (-3.6, -8.0, -3.6), (0, 0, 0.18), [(-1.2, 0, -0.5, 2.6, 9.0, 1.0, 'j_lapel')]),
     part('j_belt', 'body', (0, -3.4, 0), (0, 0, 0), [(-4.6, -0.6, -3.8, 9.2, 1.6, 7.6, 'j_belt')]),
     # the pig's head: a broad head, a long snout, flapping ears, tusks
     part('head', 'chest', (0, -8.0, -1.2), (0, 0, 0), [
         (-3.8, -6.0, -3.6, 7.6, 6.2, 7.2, 'j_head'),
-        (-2.2, -3.3, -7.6, 4.4, 3.2, 4.2, 'j_snout'),
-        (-2.3, -3.4, -7.9, 4.6, 3.4, 0.6, 'j_snoutend'),
+        (-2.6, -3.6, -8.4, 5.2, 3.6, 5.0, 'j_snout'),
+        (-2.8, -3.8, -8.8, 5.6, 3.8, 0.6, 'j_snoutend'),
+        (-4.2, -3.2, -3.8, 8.4, 3.6, 4.0, 'j_jowl'),
         (-3.4, -4.9, -3.9, 6.8, 1.0, 0.6, 'j_brow'),
         (-3.6, -6.4, -1.6, 7.2, 1.2, 4.6, 'j_bristle')]),
     part('jaw', 'head', (0, -0.3, -3.2), (0.05, 0, 0), [(-2.0, 0, -4.2, 4.0, 1.4, 4.6, 'j_jaw')]),
     part('right_tusk', 'jaw', (-1.6, 0.1, -3.8), (-0.3, 0, 0.1), [(-0.35, -1.8, -0.35, 0.7, 1.9, 0.7, 'j_tusk')]),
-    part('right_ear', 'head', (-3.6, -5.6, -0.6), (-0.4, 0.5, 0.75), [(-0.4, 0, -2.2, 0.8, 5.4, 4.4, 'j_ear')]),
+    part('right_ear', 'head', (-3.7, -5.8, -0.8), (-0.95, 0.35, 0.55), [(-0.4, 0, -2.6, 0.8, 6.8, 5.2, 'j_ear')]),
+    part('right_brow', 'head', (-1.8, -4.9, -3.75), (0, 0, 0.25), [(-1.6, -0.5, -0.4, 3.0, 0.9, 0.8, 'j_brow')]),
     part('right_eye', 'head', (-1.8, -4.3, -3.65), (0, 0, 0), [(-0.8, -0.4, -0.2, 1.6, 0.9, 0.3, 'j_eye')]),
 ])
 BAJIE += tail('body', (0, -0.6, 3.4), 4, 1.3, 0.8, 3.0, 0.25, 'fake_tail', start=(1.2, 0, 0))
@@ -793,7 +795,7 @@ def paint_bajie(p, style, f, dims):
     if style == 'j_hand':
         fake_tell(p, f)
         skin(p, f, BAJIE_SKIN, BAJIE_SHADE, faces=('front', 'bottom'))
-    if style in ('j_belly', 'j_head', 'j_jaw'):
+    if style in ('j_belly', 'j_head', 'j_jaw', 'j_jowl'):
         skin(p, f, BAJIE_SKIN, BAJIE_SHADE, mottle=0.4)
         if style == 'j_belly':
             fx, fy, fw, fh = f['front']

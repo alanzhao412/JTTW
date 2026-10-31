@@ -45,7 +45,7 @@ final class FlowerFruitScenes {
 
     private static final int X0 = -8, X1 = 8, Z0 = 3, Z1 = 16;
     /** Where the falls and the cave are laid: the basin's floor this far up and north of the stage. */
-    private static final int CAVE_Z = -150, CAVE_UP = 40;
+    private static final int CAVE_Z = -125, CAVE_UP = 40;
     private static boolean patch, cave;
 
     private static int ground(ServerPlayer p) {
@@ -113,6 +113,10 @@ final class FlowerFruitScenes {
 
     private static AbilityScenes.Scene cave(String name, double[] cam) {
         return new AbilityScenes.Scene(name, p -> {
+            // the cave reaches far off the stage: draw that far
+            p.serverLevel().getServer().getPlayerList().setViewDistance(18);
+            net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+            mc.execute(() -> mc.options.renderDistance().set(18));
             lay(p);
             AbilityScenes.sceneCam = cam;
         }, p -> {}, 1, false);
@@ -130,7 +134,7 @@ final class FlowerFruitScenes {
                 scene("ff_" + name + "_front", p -> put.accept(p, 180f), new double[]{0.5, eye + 0.3, 9.5 - d, 0.5, eye, 9.5}),
                 scene("ff_" + name + "_side", p -> put.accept(p, 90f), new double[]{0.5, eye + 0.3, 9.5 - d, 0.5, eye, 9.5}),
                 scene("ff_" + name + "_back", p -> put.accept(p, 0f), new double[]{0.5, eye + 0.3, 9.5 - d, 0.5, eye, 9.5}),
-                scene("ff_" + name + "_face", p -> put.accept(p, 160f), new double[]{0.9, face + 0.1, 9.5 - 0.9 - tall * 0.45, 0.5, face, 9.5}));
+                scene("ff_" + name + "_face", p -> put.accept(p, 160f), new double[]{1.0, face + 0.15, 9.5 - 1.5 - tall * 0.9, 0.5, face - 0.05, 9.5}));
     }
 
     static List<AbilityScenes.Scene> all() {
@@ -265,6 +269,16 @@ final class FlowerFruitScenes {
                         if (st != null) level.setBlock(at.set(x, base + IslandShape.BASIN_Y + ly, z), st, Block.UPDATE_CLIENTS);
                     }
                 }
+            }
+        }
+        // vines down the cliff either side of the falls
+        for (int lx = -IslandShape.BASIN_HALF - 2; lx <= IslandShape.BASIN_HALF + 2; lx++) {
+            int n = IslandShape.vines(lx), z = CAVE_Z + IslandShape.CLIFF_Z + 1;
+            if (n == 0) continue;
+            int top = base + (int) Math.round(IslandShape.falls(lx, IslandShape.CLIFF_Z, IslandShape.BASIN_Y + 42)) - 1;
+            for (int y = top; y > top - n && y > base + IslandShape.BASIN_Y + 1; y--) {
+                if (!level.isEmptyBlock(at.set(lx, y, z))) break;
+                level.setBlock(at, Blocks.VINE.defaultBlockState().setValue(net.minecraft.world.level.block.VineBlock.NORTH, true), Block.UPDATE_CLIENTS);
             }
         }
         int floor = base + IslandShape.BASIN_Y + 1;

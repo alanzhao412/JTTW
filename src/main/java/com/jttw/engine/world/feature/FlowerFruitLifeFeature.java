@@ -306,6 +306,25 @@ public class FlowerFruitLifeFeature extends Feature<NoneFeatureConfiguration> {
         return any;
     }
 
+    /** Vines hung down the cliff's face either side of the falls, from its top. */
+    private static boolean vines(WorldGenLevel level, int[] c, int x0, int z0, BlockPos.MutableBlockPos p) {
+        int z = c[1] + IslandShape.CLIFF_Z + 1;
+        if ((z >> 4) != (z0 >> 4)) return false;
+        boolean any = false;
+        for (int x = x0; x < x0 + 16; x++) {
+            int n = IslandShape.vines(x - c[0]);
+            if (n == 0) continue;
+            int top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z - 1) - 2;
+            for (int y = top; y > top - n && y > IslandShape.BASIN_Y + 1; y--) {
+                p.set(x, y, z);
+                if (!level.isEmptyBlock(p) || !level.getBlockState(p.north()).isSolid()) break;
+                level.setBlock(p, s(Blocks.VINE).setValue(net.minecraft.world.level.block.VineBlock.NORTH, true), Block.UPDATE_CLIENTS);
+                any = true;
+            }
+        }
+        return any;
+    }
+
     @Override
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
         WorldGenLevel level = context.level();
@@ -317,6 +336,7 @@ public class FlowerFruitLifeFeature extends Feature<NoneFeatureConfiguration> {
         boolean any = camps(level, seed, c, x0, z0, context.random());
         if (CavePlan.near(x0 + 8 - c[0], z0 + 8 - c[1], 16)) any |= garrison(level, c, x0, z0, context.random());
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        any |= vines(level, c, x0, z0, p);
         // a pine on the head of each pillar whose middle is here
         for (int dx = 0; dx < 16; dx++) for (int dz = 0; dz < 16; dz++) {
             int x = x0 + dx, z = z0 + dz, lx = x - c[0], lz = z - c[1];

@@ -177,8 +177,8 @@ public final class CavePlan {
 
     /** The tablet over the stone gate, and the warning at the sanctum's tunnel. */
     public static final List<Sign> SIGNS = List.of(
-            new Sign(-2, 13, GATE_Z + 1, Direction.SOUTH, new String[]{"花果山福地", "Blessed Land of", "Flower-Fruit", "Mountain"}),
-            new Sign(2, 13, GATE_Z + 1, Direction.SOUTH, new String[]{"水帘洞洞天", "Cave Heaven of", "Water Curtain", "Cave"}),
+            new Sign(-1, 13, GATE_Z + 1, Direction.SOUTH, new String[]{"花果山福地", "Blessed Land of", "Flower-Fruit", "Mountain"}),
+            new Sign(1, 13, GATE_Z + 1, Direction.SOUTH, new String[]{"水帘洞洞天", "Cave Heaven of", "Water Curtain", "Cave"}),
             new Sign(TUNNEL_X + 4, 3, -11, Direction.SOUTH, new String[]{"Beyond sits one", "who calls himself", "the Great Sage", "§4Lv 120 — beware"}));
 
     // ── The blocks ──────────────────────────────────────────────────────
@@ -254,7 +254,7 @@ public final class CavePlan {
     private static BlockState ceilingBlock(int x, int y, int z) {
         int q = h(x, y, z);
         // light: glowing stone set in the vault here and there (in the sanctum, a dimmer, bluer light)
-        if (q < 18 && ceiling(x, z) > 6) return inSanctum(x, z) ? s(Blocks.SEA_LANTERN) : s(Blocks.SHROOMLIGHT);
+        if (q < 45 && ceiling(x, z) > 6) return inSanctum(x, z) ? s(Blocks.SEA_LANTERN) : s(Blocks.SHROOMLIGHT);
         if (q < 70) return s(Blocks.DRIPSTONE_BLOCK);
         return rock(x, y, z);
     }
@@ -287,7 +287,10 @@ public final class CavePlan {
         if (z >= GATE_Z - 1 && z <= GATE_Z && z >= COURT_Z0 - 1 && ax <= COURT_HALF + 2) {
             boolean door = ax <= DOOR_HALF && dy <= DOOR_H - (ax == DOOR_HALF ? 1 : 0);
             if (door) return null;
-            if (dy >= 11 && dy <= 15 && ax <= 7) return ax == 7 || dy == 11 || dy == 15 ? s(Blocks.GOLD_BLOCK) : z == GATE_Z ? s(Blocks.POLISHED_ANDESITE) : s(Blocks.STONE_BRICKS);
+            // the tablet: a dark plaque framed in gold, close round its two halves of the inscription, a lintel of carved stone over it
+            if (dy >= 12 && dy <= 14 && ax <= 4) return ax == 4 || dy == 12 || dy == 14 ? s(Blocks.GOLD_BLOCK)
+                    : z == GATE_Z ? s(Blocks.POLISHED_BLACKSTONE) : s(Blocks.STONE_BRICKS);
+            if (dy == 15 && ax <= 5) return s(Blocks.CHISELED_STONE_BRICKS);
             if (ax == DOOR_HALF + 1 || ax == DOOR_HALF + 2) return s(Blocks.CHISELED_STONE_BRICKS);
             if (dy == DOOR_H + 1 && ax <= DOOR_HALF + 2) return s(Blocks.CHISELED_STONE_BRICKS);
             return h(x, y, z) < 300 ? s(Blocks.MOSSY_STONE_BRICKS) : s(Blocks.STONE_BRICKS);
@@ -324,7 +327,7 @@ public final class CavePlan {
             BlockState f = furniture(x, dy, z);
             if (f != null) return f;
             // lamps hung on chains from the vault
-            if (h(x, 0, z) < 6 && ax > 4 && dy >= ceil - 5) return dy == ceil - 5 ? s(Blocks.LANTERN).setValue(LanternBlock.HANGING, true) : s(Blocks.CHAIN);
+            if (h(x, 0, z) < 14 && ax > 4 && dy >= ceil - 5) return dy == ceil - 5 ? s(Blocks.LANTERN).setValue(LanternBlock.HANGING, true) : s(Blocks.CHAIN);
             // stalactites
             if (h(x, 1, z) < 35 && dy >= ceil - 3 && ceil > 9) return drip(ceil - dy);
             return null;

@@ -52,15 +52,15 @@ public final class IslandShape {
     /** The basin's half-width and how far south it runs before it climbs out to the land. */
     public static final int BASIN_HALF = 40, BASIN_END = 150;
     /** The waterfall's lip: the river's water at it; the river's half-width. */
-    public static final int LIP_Y = 128, RIVER_HALF = 5;
+    public static final int LIP_Y = 128, RIVER_HALF = 9;
     /** The sheet of falling water: its half-width, how far out from the cliff it falls. */
-    public static final int FALL_HALF = 6, FALL_Z = CLIFF_Z + 3;
+    public static final int FALL_HALF = 10, FALL_Z = CLIFF_Z + 3;
     /** The overhang the river runs out over to its lip. */
     public static final int LIP_OUT = 2;
     /** The gorge the river comes down: from the spring this far north of the cliff. */
-    public static final int SPRING_Z = CLIFF_Z - 58, SPRING_R = 7;
+    public static final int SPRING_Z = CLIFF_Z - 58, SPRING_R = 11;
     /** The pool at the waterfall's foot: its middle and radii. */
-    public static final int POOL_Z = CLIFF_Z + 13, POOL_RX = 15, POOL_RZ = 14, POOL_DEEP = 5;
+    public static final int POOL_Z = CLIFF_Z + 13, POOL_RX = 22, POOL_RZ = 15, POOL_DEEP = 5;
 
     // ── Noise ───────────────────────────────────────────────────────────
 
@@ -230,6 +230,15 @@ public final class IslandShape {
     /** The ledge along the cliff's foot behind the falling sheet, the way to the cave's mouth. */
     public static boolean ledge(int lx, int lz) {
         return lz > CLIFF_Z && lz < FALL_Z && Math.abs(lx) <= BASIN_HALF - 4;
+    }
+
+    /** How far vines hang down the cliff's face at column x (0 for none), from its top: curtains of green either side of the falls. */
+    public static int vines(int lx) {
+        int ax = Math.abs(lx);
+        if (ax <= FALL_HALF + 3 || ax > BASIN_HALF + 2) return 0;
+        long h = hash(0L, lx, 7, 41);
+        int n = (int) Math.floorMod(h, 100L);
+        return n < 25 ? 0 : 6 + n % 34;
     }
 
     // ── The immortal stone egg ──────────────────────────────────────────

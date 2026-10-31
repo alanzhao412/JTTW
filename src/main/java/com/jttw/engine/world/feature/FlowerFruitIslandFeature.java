@@ -52,16 +52,22 @@ public class FlowerFruitIslandFeature extends Feature<NoneFeatureConfiguration> 
         return (int) Math.floorMod(Mth.getSeed(x, salt, z), 1000L);
     }
 
-    /** The mountain's rock: grey stone in tilted bands of calcite, andesite and tuff. */
+    /**
+     * The mountain's rock: grey stone in long, uneven strata (their line wandering with the ground's
+     * grain), a seam of white calcite now and then, andesite and tuff in patches, mossy where it is
+     * low and wet.
+     */
     public static BlockState rock(int y, int x, int z) {
-        int band = Math.floorMod(y + ((x * 19 + z * 13) >> 5), 14);
-        return switch (band) {
-            case 0, 1 -> s(Blocks.CALCITE);
-            case 4 -> s(Blocks.ANDESITE);
-            case 7 -> s(Blocks.TUFF);
-            case 10 -> s(Blocks.DIORITE);
-            default -> s(Blocks.STONE);
-        };
+        int cell = hash(x >> 3, z >> 3, 31) / 40;                  // the grain: strata shift cell by cell
+        int band = Math.floorMod(y + ((x * 7 + z * 5) >> 4) + cell, 29);
+        int patch = hash(x >> 2, (z >> 2) + y / 5, 37);
+        if (band == 0) return s(Blocks.CALCITE);
+        if (band == 9 || band == 10) return patch < 500 ? s(Blocks.ANDESITE) : s(Blocks.STONE);
+        if (band == 18) return patch < 600 ? s(Blocks.TUFF) : s(Blocks.STONE);
+        if (patch < 70) return s(Blocks.ANDESITE);
+        if (patch < 110) return s(Blocks.COBBLESTONE);
+        if (y < IslandShape.SEA + 30 && patch > 900) return s(Blocks.MOSSY_COBBLESTONE);
+        return s(Blocks.STONE);
     }
 
     /** The water as it falls in the sheet: falling, so it streams down. */
