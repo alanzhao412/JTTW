@@ -490,7 +490,7 @@ public class FlowerFruitGameTests {
         check(h, CavePlan.at(CavePlan.DECK_HALF, 1, mid).is(Blocks.CHAIN), "chains for its rails");
         check(h, CavePlan.at(15, CavePlan.STREAM_TOP, mid).is(Blocks.WATER), "the stream under it");
         check(h, CavePlan.at(0, 1, CavePlan.GATE_Z).isAir() && !CavePlan.at(10, 1, CavePlan.GATE_Z).isAir(), "the stone gate's doorway in its wall");
-        check(h, CavePlan.at(0, 13, CavePlan.GATE_Z).is(Blocks.POLISHED_ANDESITE), "the tablet's face over it");
+        check(h, CavePlan.at(0, 13, CavePlan.GATE_Z).is(Blocks.POLISHED_BLACKSTONE) && CavePlan.at(4, 13, CavePlan.GATE_Z).is(Blocks.GOLD_BLOCK), "the tablet's dark face over it, framed in gold");
         check(h, CavePlan.SIGNS.stream().anyMatch(s -> String.join(" ", s.lines()).contains("Lv 120")), "a warning at the sanctum's way");
         check(h, CavePlan.at(0, 1, 0).isAir(), "the hall open");
         check(h, CavePlan.at(0, 3, CavePlan.SANCTUM_THRONE_Z - 1) != null, "the false king's throne");
