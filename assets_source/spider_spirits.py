@@ -48,30 +48,31 @@ FOREARM = (-0.55, -0.2, 0)
 def sister_parts():
     ps = [
         part('body', 'root', (0, 11.5, 0), (0, 0, 0), [
-            (-3.4, -11, -2.1, 6.8, 11, 4.2, 'bodice'),
-            (-3.1, -9.2, -2.5, 6.2, 3, 0.6, 'bodice_front'),
-            (-3.7, -11.6, -2.5, 7.4, 2, 5, 'collar'),
-            (-3.8, -3.6, -2.6, 7.6, 2.2, 5.2, 'sash_band'),
-            (-1.1, -3.8, -3.3, 2.2, 2.6, 0.9, 'jewel'),
+            (-3, -11, -1.9, 6, 11, 3.8, 'bodice'),
+            (-2.7, -9.4, -2.3, 5.4, 2.8, 0.6, 'bodice_front'),
+            (-3.6, -11.2, -2.1, 7.2, 1.8, 4.2, 'shoulders'),
+            (-3.3, -11.7, -2.25, 6.6, 1.8, 4.5, 'collar'),
+            (-3.4, -3.6, -2.35, 6.8, 2.2, 4.7, 'sash_band'),
+            (-1.1, -3.8, -3.05, 2.2, 2.6, 0.9, 'jewel'),
         ]),
         part('skirt', 'body', (0, 0, 0), (0, 0, 0), [
-            (-4, -1.4, -2.8, 8, 6.4, 5.6, 'skirt1'),
-            (-4.8, 4.6, -3.4, 9.6, 6, 6.8, 'skirt2'),
+            (-3.8, -1.4, -2.6, 7.6, 6.4, 5.2, 'skirt1'),
+            (-4.6, 4.6, -3.2, 9.2, 6, 6.4, 'skirt2'),
             (-5.7, 9.8, -4.1, 11.4, 2.8, 8.2, 'skirt3'),
         ]),
         part('apron', 'skirt', (0, -1.2, -3), (-0.08, 0, 0), [(-2.2, 0, -0.4, 4.4, 12.5, 0.4, 'apron')]),
         part('train', 'skirt', (0, 6, 3.8), (0.35, 0, 0), [(-4.6, 0, 0, 9.2, 7, 0.6, 'train')]),
         part('right_sash_end', 'body', (-1.6, -2.4, -2.9), (-0.06, 0, 0.06), [(-0.6, 0, -0.2, 1.2, 9, 0.4, 'sash_end')]),
-        part('gauze', 'body', (0, -10.8, 0), (0, 0, 0), [(-3.9, 0, -2.75, 7.8, 13, 5.5, 'gauze')]),
-        part('head', 'body', (0, -11.6, -0.2), (0, 0, 0), [
-            (-1.1, -1.6, -1.1, 2.2, 1.8, 2.2, 'neck'),
-            (-2.5, -6.8, -2.5, 5, 5.4, 4.8, 'face'),
-            (-2.8, -7.4, -0.4, 5.6, 6.6, 3.1, 'hair_back'),
-            (-2.8, -7.6, -2.8, 5.6, 1.5, 5.2, 'hair_top'),
-            (-2.62, -7.0, -2.75, 5.24, 0.7, 0.4, 'diadem'),
+        part('gauze', 'body', (0, -10.8, 0), (0, 0, 0), [(-3.5, 0, -2.45, 7, 13, 4.9, 'gauze')]),
+        part('head', 'body', (0, -11.5, -0.1), (0, 0, 0), [
+            (-0.9, -1.6, -0.9, 1.8, 1.8, 1.8, 'neck'),
+            (-2.2, -6.2, -2.3, 4.4, 5, 4.4, 'face'),
+            (-2.5, -6.6, -0.4, 5, 5.8, 2.9, 'hair_back'),
+            (-2.5, -6.8, -2.5, 5, 1.3, 4.8, 'hair_top'),
+            (-2.35, -6.35, -2.55, 4.7, 1, 0.4, 'diadem'),
         ]),
-        part('right_lock', 'head', (-2.6, -6.4, -1.6), (0, 0, 0.06), [(-0.5, 0, -0.5, 0.9, 5.4, 1.2, 'lock')]),
-        part('bun', 'head', (0, -7.3, 0.6), (-0.15, 0, 0), [
+        part('right_lock', 'head', (-2.3, -5.8, -1.5), (0, 0, 0.06), [(-0.45, 0, -0.45, 0.8, 5, 1.1, 'lock')]),
+        part('bun', 'head', (0, -6.7, 0.6), (-0.15, 0, 0), [
             (-2.1, -3.6, -1.6, 4.2, 3.8, 3.4, 'bun'),
             (-1.4, -5.6, -1.1, 2.8, 2.2, 2.4, 'bun_top'),
         ]),
@@ -83,26 +84,26 @@ def sister_parts():
         part('right_dangle', 'right_pin', (-3.9, 0.4, 0), (0, 0, 0), [
             (-0.15, 0, -0.15, 0.3, 2.6, 0.3, 'dangle_chain'), (-0.5, 2.5, -0.5, 1, 1, 1, 'dangle_bead')]),
         part('comb', 'bun', (0, -1.8, -1.9), (0.2, 0, 0), [(-1.6, -1.2, -0.3, 3.2, 1.4, 0.5, 'comb')]),
-        part('right_arm', 'body', (-3.9, -10, 0), ARM, [(-1.5, -0.7, -1.6, 2.6, 6.2, 3.2, 'sleeve_upper')]),
+        part('right_arm', 'body', (-3.6, -10.2, 0), ARM, [(-1.4, -0.7, -1.5, 2.4, 6.2, 3, 'sleeve_upper')]),
         part('right_forearm', 'right_arm', (-0.3, 5.4, 0), FOREARM, [
             (-1.05, 0, -1.05, 2, 4.4, 2, 'cuff'),
             (-0.85, 4.2, -0.9, 1.7, 2.2, 1.8, 'hand'),
         ]),
         part('right_sleeve', 'right_forearm', (0, 0.2, 0.6), (0.48, 0.1, -0.02), [(-1.9, -0.6, -1.1, 3.8, 9.8, 5.8, 'sleeve_big')]),
-        part('right_stole', 'right_forearm', (-0.9, 2.6, 0.8), (0.4, 0, 0.15), [(-0.2, 0, -1.1, 0.4, 13, 2.2, 'stole')]),
-        part('right_stole_tail', 'right_stole', (0, 12.6, 0), (-0.45, 0, 0.1), [(-0.2, 0, -1, 0.4, 7, 2, 'stole_tail')]),
+        part('right_stole', 'right_forearm', (-0.9, 2.6, 0.8), (0.4, 0, 0.15), [(-0.2, 0, -1.1, 0.4, 10, 2.2, 'stole')]),
+        part('right_stole_tail', 'right_stole', (0, 9.8, 0), (-0.45, 0, 0.1), [(-0.2, 0, -1, 0.4, 5.5, 2, 'stole_tail')]),
         part('stole_back', 'body', (0, -10.4, 2.6), (0.18, 0, 0), [(-6.4, -0.2, -0.2, 12.8, 3.4, 0.4, 'stole_back')]),
         part('silk_stream', 'body', (0, -2.5, -3.4), (0, 0, 0), [(-0.45, -0.45, -14, 0.9, 0.9, 14, 'silk_stream')]),
-        part('legs_mount', 'body', (0, -8.4, 2.2), (0, 0, 0), []),
+        part('legs_mount', 'body', (0, -9.2, 1.8), (0, 0, 0), []),
     ]
     # eight slender legs folded behind her shoulders like a fan: each rises, turns out, bends down at its knee
     for i in range(4):
         ps += [
-            part('right_sleg_%d' % i, 'legs_mount', (-0.8, -0.4 + i * 1.5, 0), (-(1.05 - i * 0.3), -(0.55 + i * 0.22), 0), [
-                (-0.45, -0.45, 0, 0.9, 0.9, 9 - i * 0.6, 'sleg_a')]),
-            part('right_sleg_tip_%d' % i, 'right_sleg_%d' % i, (0, 0, 8.8 - i * 0.6), (1.35 - i * 0.12, 0, 0), [
-                (-0.35, -0.35, 0, 0.7, 0.7, 9.5 - i * 0.6, 'sleg_b'),
-                (-0.5, -0.5, -0.3, 1, 1, 1, 'sleg_knee')]),
+            part('right_sleg_%d' % i, 'legs_mount', (-0.9, -0.4 + i * 1.4, 0), (-(1.25 - i * 0.32), -(0.62 + i * 0.26), 0), [
+                (-0.6, -0.6, 0, 1.2, 1.2, 11.5 - i * 0.6, 'sleg_a')]),
+            part('right_sleg_tip_%d' % i, 'right_sleg_%d' % i, (0, 0, 11.2 - i * 0.6), (1.45 - i * 0.12, 0, 0), [
+                (-0.45, -0.45, 0, 0.9, 0.9, 12.5 - i * 0.6, 'sleg_b'),
+                (-0.7, -0.7, -0.4, 1.4, 1.4, 1.4, 'sleg_knee')]),
         ]
     return mirrored(ps)
 
@@ -119,6 +120,9 @@ def sister_painter(name, robe, accent, under, stole, eye):
                             p.px((fx + i, fy + j), noisy(p, k(robe, 0.95), 3))
                         if i % 4 == 1:
                             p.px((fx + i, fy + fh - 6), accent)
+        elif style == 'shoulders':
+            cloth(p, f, robe)
+            edges(p, f, accent, top=False)
         elif style == 'collar':
             cloth(p, f, robe)
             fx, fy, fw, fh = f['front']                              # crossed at the breast, edged in her accent
@@ -268,53 +272,45 @@ def sister_painter(name, robe, accent, under, stole, eye):
 
 
 def paint_face(p, f, eye):
-    """A gentle face: pale skin, a faint blush, painted brows, almond eyes darkly lashed, the iris her
-    colour with a faint glow; a small red mouth; a flower mark between her brows."""
-    for s, r in f.items():
+    """A gentle face, 9 x 10 texture pixels to its front: pale skin, painted brows, almond eyes darkly
+    lashed (dark irises with a gleam of her colour), a small red mouth, a flower mark between her brows."""
+    for s_, r in f.items():
         for i, j, xy in each(r):
-            p.px(xy, noisy(p, k(SKIN, LIGHTS[s] * (1.02 - 0.12 * (j / max(1, r[3])))), 2))
-    for s in ('right', 'left'):                                      # her hair over her temples
-        fx, fy, fw, fh = f[s]
-        for i, j, xy in each(f[s]):
-            if j < 3 or (i > fw * 0.55 and j < fh * 0.8):
+            p.px(xy, noisy(p, k(SKIN, LIGHTS[s_] * (1.02 - 0.1 * (j / max(1, r[3])))), 2))
+    for s_ in ('right', 'left'):                                     # her hair over her temples and ears
+        fx, fy, fw, fh = f[s_]
+        for i, j, xy in each(f[s_]):
+            if j < 3 or (i > fw * 0.5 and j < fh * 0.75):
                 p.px(xy, noisy(p, HAIR, 3))
-    fx, fy, fw, fh = f['top']
     for i, j, xy in each(f['top']):
         p.px(xy, noisy(p, HAIR, 3))
-    fx, fy, fw, fh = f['front']                                      # 10 x 11 texture pixels
-    for i in range(fw):
+    fx, fy, fw, fh = f['front']
+    for i in range(fw):                                              # the hairline, a widow's peak
         p.px((fx + i, fy), HAIR)
-        p.px((fx + i, fy + 1), HAIR if i < 2 or i >= fw - 2 else noisy(p, SKIN, 2))
+        if i in (0, fw - 1) or i == fw // 2:
+            p.px((fx + i, fy + 1), HAIR)
     cx = fw // 2
-    # the flower mark between the brows
-    p.px((fx + cx - 1, fy + 2), (220, 40, 60))
-    p.px((fx + cx, fy + 2), (220, 40, 60))
-    p.px((fx + cx - 1, fy + 3), (240, 90, 100))
-    p.px((fx + cx, fy + 3), (240, 90, 100))
-    # brows: fine arcs
-    for i in range(3):
-        p.px((fx + 1 + i, fy + 3 - (1 if i == 1 else 0) + 1), (60, 40, 50))
-        p.px((fx + fw - 2 - i, fy + 3 - (1 if i == 1 else 0) + 1), (60, 40, 50))
-    # eyes: almond, lashed above, the iris her colour
-    for side in (0, 1):
+    p.px((fx + cx, fy + 2), (220, 40, 60))                           # the flower mark
+    for i in range(3):                                               # brows: fine, arched, long
+        p.px((fx + 1 + i, fy + 3), (70, 46, 56) if i else mixc(SKIN, (70, 46, 56), 0.5))
+        p.px((fx + fw - 2 - i, fy + 3), (70, 46, 56) if i else mixc(SKIN, (70, 46, 56), 0.5))
+    for side in (0, 1):                                              # almond eyes under dark lashes
         ex = fx + (1 if side == 0 else fw - 4)
-        ey = fy + 5
         for i in range(3):
-            p.px((ex + i, ey), (24, 14, 20))                        # the lash line
-        p.px((ex + (0 if side == 0 else 2), ey - 1), (24, 14, 20))   # flicked out at the outer corner
-        p.px((ex, ey + 1), (250, 246, 240))
-        p.px((ex + 2, ey + 1), (250, 246, 240))
-        p.px((ex + 1, ey + 1), eye, glow=True)
-        p.px((ex + (1 if side == 0 else 1), ey + 1), mixc(eye, (255, 255, 255), 0.2), glow=True)
-    # a faint blush, a small nose, the red mouth
-    for side in (1, fw - 3):
-        for i in range(2):
-            p.px((fx + side + i, fy + 7), mixc(SKIN, (240, 150, 160), 0.45))
-    p.px((fx + cx - 1, fy + 7), SKIN_SHADE)
-    p.px((fx + cx - 1, fy + 9), LIP)
-    p.px((fx + cx, fy + 9), LIP)
-    p.px((fx + cx - 1, fy + 8), mixc(SKIN, LIP, 0.4))
-    p.px((fx + cx, fy + 8), mixc(SKIN, LIP, 0.4))
+            p.px((ex + i, fy + 4), (22, 12, 18))
+        outer = ex if side == 0 else ex + 2
+        inner = ex + 2 if side == 0 else ex
+        p.px((outer, fy + 5), (22, 12, 18))
+        p.px((ex + 1, fy + 5), (36, 22, 30))
+        p.px((inner, fy + 5), (250, 244, 240))
+        p.px((ex + 1, fy + 5), mixc((36, 22, 30), eye, 0.35))
+    p.px((fx + cx, fy + 6), SKIN_SHADE)                              # the nose
+    for side in (1, fw - 2):
+        p.px((fx + side, fy + 6), mixc(SKIN, (240, 160, 170), 0.35))  # a faint blush
+    p.px((fx + cx, fy + 7), LIP)                                     # a small red mouth
+    p.px((fx + cx - 1, fy + 7), mixc(SKIN, LIP, 0.5))
+    p.px((fx + cx + 1, fy + 7), mixc(SKIN, LIP, 0.5))
+    p.px((fx + cx, fy + 8), mixc(SKIN, LIP, 0.35))
 
 
 if __name__ == '__main__':

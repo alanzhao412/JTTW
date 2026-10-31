@@ -41,6 +41,7 @@ def spider_parts():
             (-5, -4, -6, 10, 7, 11, 'thorax'),
             (-2, -5, -5, 4, 1.2, 9, 'thorax_ridge'),
             (-5.5, -1, -5, 11, 2, 9, 'thorax_rim'),
+            (-3.6, -5.8, -4.2, 7.2, 1.2, 7.6, 'thorax_dome'),
         ]),
         part('head', 'body', (0, -0.5, -6), (0.12, 0, 0), [
             (-4, -3.5, -4.5, 8, 6.5, 4.5, 'face'),
@@ -61,9 +62,12 @@ def spider_parts():
         ]),
         part('abdomen', 'body', (0, -1.5, 4.5), (-0.28, 0, 0), [
             (-7, -6, 0, 14, 11, 15, 'abdomen'),
+            (-5.6, -8, 1.5, 11.2, 2.2, 12, 'abdomen_dome'),
+            (-8, -4, 2, 1.2, 8, 11, 'abdomen_flank'),
+            (6.8, -4, 2, 1.2, 8, 11, 'abdomen_flank'),
             (-5.5, -4.5, 14, 11, 8, 4, 'abdomen_tip'),
             (-1.5, -1, 17.5, 3, 2, 2, 'spinneret'),
-        ] + [(-0.6, -7.6, 2 + 3.2 * i, 1.2, 2, 1.2, 'spike') for i in range(4)]),
+        ] + [(-0.6, -9.6, 2.5 + 3.0 * i, 1.2, 2, 1.2, 'spike') for i in range(4)]),
     ]
     for i, (z, yaw, ln) in enumerate(SPIDER_LEGS):
         ps += [
@@ -91,7 +95,7 @@ SPIDER_EYE = (190, 230, 70)
 
 def spider_painter():
     def paint_box(p, style, f, dims):
-        if style in ('thorax', 'thorax_ridge', 'thorax_rim', 'brow', 'mouthplate'):
+        if style in ('thorax', 'thorax_ridge', 'thorax_rim', 'thorax_dome', 'brow', 'mouthplate'):
             chitin(p, f, SPIDER_BLACK, SPIDER_SHEEN)
             if style == 'thorax':
                 fx, fy, fw, fh = f['top']                            # a pale lyre mark on its back, and bristles
@@ -132,6 +136,15 @@ def spider_painter():
                 for i, j, xy in each(r):
                     t = (j + 0.5) / r[3]
                     p.px(xy, noisy(p, mixc((60, 40, 40), (226, 214, 190), t) if style == 'fang' else mixc((40, 28, 40), (200, 190, 170), 1 - t), 3))
+        elif style in ('abdomen_dome', 'abdomen_flank'):
+            chitin(p, f, (46, 28, 52), SPIDER_SHEEN)
+            for s2 in ('top', 'right', 'left', 'front', 'back'):
+                for i, j, xy in each(f[s2]):
+                    r = p.rnd.random()
+                    if r < 0.12:
+                        p.px(xy, (150, 128, 120))
+                    elif style == 'abdomen_dome' and s2 == 'top' and abs((i + 0.5) / f[s2][2] - 0.5) < 0.12:
+                        p.px(xy, noisy(p, SPIDER_BAND, 5))
         elif style == 'abdomen':
             chitin(p, f, (42, 26, 48), SPIDER_SHEEN, gloss=True)
             # the hourglass and chevrons over its back like a mask; fine hair over it
@@ -206,8 +219,8 @@ def stinger_parts():
             (-1.4, 0.4, 10, 2.8, 2.6, 2.2, 'abdomen_c'),
         ]),
         part('stinger', 'abdomen', (0, 1.6, 12), (0.25, 0, 0), [(-0.4, -0.4, 0, 0.8, 0.8, 3.4, 'sting')]),
-        part('right_wing_fore', 'thorax', (-1.4, -5.6, 2), (0.15, 0.55, 0.35), [(-13, -0.1, -2.2, 13, 0.2, 5, 'wing_fore')]),
-        part('right_wing_hind', 'thorax', (-1.4, -4.2, 2.6), (0.25, 0.85, 0.2), [(-9.5, -0.1, -1.6, 9.5, 0.2, 3.6, 'wing_hind')]),
+        part('right_wing_fore', 'thorax', (-1.4, -5.6, 2), (0.15, 0.55, 0.35), [(-16, -0.1, -2.6, 16, 0.2, 6, 'wing_fore')]),
+        part('right_wing_hind', 'thorax', (-1.4, -4.2, 2.6), (0.25, 0.85, 0.2), [(-12, -0.1, -2, 12, 0.2, 4.4, 'wing_hind')]),
     ]
     return mirrored(ps)
 
@@ -301,32 +314,33 @@ def mantis_parts():
                                                        (-3, -1.4, -3, 6, 1.6, 6, 'sash')]),
         part('sash_tail', 'waist', (1.6, 0, -3), (-0.1, 0, -0.1), [(-0.9, 0, -0.3, 1.8, 7, 0.4, 'sash_tail')]),
         part('abdomen', 'waist', (0, -0.6, 2.2), (-0.32, 0, 0), [
-            (-3, -2, 0, 6, 4.6, 7, 'abdomen_a'),
-            (-2.6, -1.6, 6.5, 5.2, 4, 6, 'abdomen_b'),
+            (-3.6, -2.4, 0, 7.2, 5.2, 7.5, 'abdomen_a'),
+            (-3.0, -2, 7, 6, 4.6, 6.5, 'abdomen_b'),
             (-1.8, -1, 12, 3.6, 2.8, 3, 'abdomen_c'),
         ]),
-        part('wings', 'abdomen', (0, -2.2, -0.5), (0.06, 0, 0), [(-3.4, -0.9, 0, 6.8, 1, 15.5, 'wing_folded')]),
+        part('wings', 'abdomen', (0, -2.7, -0.5), (0.06, 0, 0), [(-3.9, -0.9, 0, 7.8, 1, 16.5, 'wing_folded')]),
         part('prothorax', 'waist', (0, -2, -0.5), (0.14, 0, 0), [
-            (-1.6, -17, -1.6, 3.2, 17, 3.2, 'prothorax'),
+            (-1.9, -17, -1.9, 3.8, 17, 3.8, 'prothorax'),
             (-2.6, -17.6, -2.6, 5.2, 2.6, 5.2, 'collar'),
             (-2.2, -15, -2.3, 4.4, 1.2, 0.8, 'collar_plate'),
         ]),
         part('head', 'prothorax', (0, -17.6, -0.4), (-0.1, 0, 0), [
-            (-3.6, -3.4, -2.4, 7.2, 3.4, 4, 'head_top'),
-            (-2.4, 0, -2.5, 4.8, 2.6, 3, 'head_mid'),
-            (-1.1, 2.4, -2.3, 2.2, 1.8, 2, 'mouthparts'),
+            (-4.4, -4, -2.8, 8.8, 4, 4.6, 'head_top'),
+            (-2.9, 0, -2.9, 5.8, 3, 3.6, 'head_mid'),
+            (-1.4, 2.8, -2.7, 2.8, 2.2, 2.4, 'mouthparts'),
         ]),
-        part('right_eye', 'head', (-3.4, -2.2, -0.4), (0, 0, 0.1), [(-2.2, -1.7, -1.7, 2.6, 3.4, 3.4, 'compound')]),
+        part('right_eye', 'head', (-4.2, -2.4, -0.4), (0, 0, 0.1), [(-2.4, -2, -2, 3, 4, 4, 'compound')]),
         part('right_antenna', 'head', (-0.8, -3.2, -2), (0.85, 0.25, -0.2), [(-0.25, -12, -0.25, 0.5, 12, 0.5, 'antenna')]),
         part('right_coxa', 'prothorax', (-1.9, -14.5, -1.4), (-0.2, 0, 0.1), [(-1, 0, -1, 2, 7, 2, 'coxa'),
                                                                            (-1.4, 0.5, -1.4, 2.8, 1.6, 2.8, 'armlet')]),
         part('right_femur', 'right_coxa', (0, 7, 0), (-2.55, 0, 0), [
-            (-1.15, -0.2, -1.15, 2.3, 9.5, 2.3, 'femur'),
-            (-0.45, 1, -1.9, 0.9, 7.5, 0.8, 'femur_spines'),
+            (-1.4, -0.2, -1.4, 2.8, 11, 2.8, 'femur'),
+            (-0.5, 1, -2.2, 1, 9, 0.9, 'femur_spines'),
         ]),
-        part('right_tibia', 'right_femur', (0, 9.4, 0), (2.7, 0, 0), [
-            (-0.8, 0, -0.8, 1.6, 7.5, 1.6, 'blade'),
-            (-0.5, 7.2, -1.6, 1, 1.6, 1.6, 'hook'),
+        part('right_tibia', 'right_femur', (0, 10.8, 0), (2.7, 0, 0), [
+            (-0.9, 0, -0.9, 1.8, 9, 1.8, 'blade'),
+            (-0.4, 0.8, -1.6, 0.8, 7.5, 0.8, 'blade_edge'),
+            (-0.55, 8.6, -1.9, 1.1, 1.8, 1.9, 'hook'),
         ]),
     ]
     for i, (z, yaw) in enumerate(((-1.2, -0.55), (1.4, 0.6))):
@@ -388,6 +402,10 @@ def mantis_painter():
             for s, r in f.items():
                 for i, j, xy in each(r):
                     p.px(xy, (230, 226, 196) if j % 3 != 2 else (60, 60, 40))
+        elif style == 'blade_edge':
+            for s2, r in f.items():
+                for i, j, xy in each(r):
+                    p.px(xy, (238, 240, 214) if j % 2 else (110, 120, 70))
         elif style in ('blade', 'hook'):
             chitin(p, f, mixc(MANTIS_GREEN, MANTIS_PALE, 0.35), (250, 255, 220))
             if style == 'blade':
@@ -423,15 +441,18 @@ def roach_parts():
             (-8.5, -4.5, -10, 17, 8, 21, 'body'),
             (-7, 3, -8, 14, 1.6, 18, 'belly'),
         ]),
-        part('right_elytron', 'body', (0, -4.6, -8.5), (0.02, 0, 0.04), [(-9.6, -1.8, 0, 9.6, 2.2, 21.5, 'elytron')]),
+        part('right_elytron', 'body', (0, -4.6, -8.5), (0.02, 0, 0.04), [(-9.6, -1.8, 0, 9.6, 2.2, 21.5, 'elytron'),
+                                                                        (-7.4, -3.2, 1.2, 7.4, 1.6, 19, 'elytron_crown'),
+                                                                        (-4.2, -4.2, 2.6, 4.2, 1.2, 15.5, 'elytron_crest')]),
         part('pronotum', 'body', (0, -4.3, -9.5), (0.25, 0, 0), [
             (-9, -1.6, -7, 18, 3, 9, 'pronotum'),
+            (-6.5, -2.8, -6, 13, 1.4, 7.4, 'pronotum_dome'),
             (-8.5, -2.6, -6.5, 1, 1, 1, 'spike'), (-4.5, -2.8, -6.8, 1, 1.2, 1, 'spike'),
             (3.5, -2.8, -6.8, 1, 1.2, 1, 'spike'), (7.5, -2.6, -6.5, 1, 1, 1, 'spike'),
             (-1.5, -2.2, -2, 3, 0.8, 3, 'boss_plate'),
         ]),
         part('head', 'body', (0, 0, -11), (0.35, 0, 0), [
-            (-4, -2.6, -4.4, 8, 5.2, 4.6, 'head'),
+            (-4.8, -3, -5, 9.6, 6, 5.2, 'head'),
             (-2.2, 2.2, -4.8, 4.4, 1.4, 1.4, 'mouthparts'),
         ]),
         part('right_eye', 'head', (-3.4, -1.2, -2.6), (0, 0.2, 0), [(-1.3, -1.6, -1.5, 2.2, 3.2, 3, 'compound')]),
@@ -460,6 +481,19 @@ def roach_painter():
     def paint_box(p, style, f, dims):
         if style in ('body', 'belly'):
             chitin(p, f, ROACH_DARK if style == 'body' else (90, 50, 26), plate=3 if style == 'belly' else 0)
+        elif style in ('elytron_crown', 'elytron_crest'):
+            chitin(p, f, k(ROACH, 1.08), (255, 220, 170))
+            for i, j, xy in each(f['top']):
+                if i % 4 == 2:
+                    p.px(xy, k(ROACH, 0.85))
+        elif style == 'pronotum_dome':
+            chitin(p, f, ROACH, (250, 210, 160))
+            for s2 in ('top', 'front'):
+                fx, fy, fw, fh = f[s2]
+                for i, j, xy in each(f[s2]):
+                    u = (i + 0.5) / fw
+                    if abs(u - 0.3) < 0.12 or abs(u - 0.7) < 0.12:
+                        p.px(xy, noisy(p, ROACH_DARK, 4))
         elif style == 'elytron':
             chitin(p, f, ROACH, (250, 210, 160))
             fx, fy, fw, fh = f['top']                                # fine ribs down it; a bronze band round its rim, riveted

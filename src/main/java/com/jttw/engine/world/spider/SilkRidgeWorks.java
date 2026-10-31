@@ -178,7 +178,7 @@ public final class SilkRidgeWorks {
             if (inside) return s(Blocks.PACKED_MUD);
             if (ax <= 1 && z > COTTAGE_FRONT) return hash(cx, y, cz, 1) < 70 ? s(Blocks.DIRT_PATH) : s(Blocks.COARSE_DIRT);
             int r = hash(cx, y, cz, 2);
-            return r < 40 ? s(Blocks.COARSE_DIRT) : r < 70 ? s(Blocks.DIRT_PATH) : r < 85 ? s(Blocks.GRAVEL) : s(Blocks.ROOTED_DIRT);
+            return r < 40 ? s(Blocks.COARSE_DIRT) : r < 70 ? s(Blocks.DIRT_PATH) : r < 85 ? s(Blocks.PACKED_MUD) : s(Blocks.MUD_BRICKS);
         }
         if (!inside) {
             // the yard: a well-sweep's trough, a woodpile, a fence of withies along its sides
@@ -188,7 +188,7 @@ public final class SilkRidgeWorks {
             if (cx == -10 && z == 62 && y == 0) return s(Blocks.WATER_CAULDRON);
             if (cx == -11 && z == 62 && y == 0) return s(Blocks.BARREL);
             if (cx == -10 && z == 63 && y == 0) return s(Blocks.COMPOSTER);
-            if (y >= 0 && y <= 8 && hip(cx, y, z, -COTTAGE_HALF - 2, COTTAGE_HALF + 2, COTTAGE_BACK - 1, COTTAGE_FRONT + 2, 4, Blocks.SPRUCE_STAIRS, Blocks.HAY_BLOCK) != null) {
+            if (y >= 0 && y <= 8 && hip(cx, y, z, -COTTAGE_HALF - 2, COTTAGE_HALF + 2, COTTAGE_BACK - 1, COTTAGE_FRONT + 2, 4, Blocks.BAMBOO_MOSAIC_STAIRS, Blocks.BAMBOO_MOSAIC) != null) {
                 return thatch(cx, y, z);
             }
             return y <= 9 ? s(Blocks.AIR) : null;
@@ -222,7 +222,7 @@ public final class SilkRidgeWorks {
             return s(Blocks.AIR);
         }
         // the thatch: a deep hip roof of straw over it, its eaves well out
-        BlockState roof = hip(cx, y, z, -COTTAGE_HALF - 2, COTTAGE_HALF + 2, COTTAGE_BACK - 1, COTTAGE_FRONT + 2, 4, Blocks.SPRUCE_STAIRS, Blocks.HAY_BLOCK);
+        BlockState roof = hip(cx, y, z, -COTTAGE_HALF - 2, COTTAGE_HALF + 2, COTTAGE_BACK - 1, COTTAGE_FRONT + 2, 4, Blocks.BAMBOO_MOSAIC_STAIRS, Blocks.BAMBOO_MOSAIC);
         if (roof != null) return thatch(cx, y, z);
         if (y == 4 && ax <= COTTAGE_HALF && z >= COTTAGE_BACK && z <= COTTAGE_FRONT) {
             if (ax == COTTAGE_HALF || z == COTTAGE_BACK || z == COTTAGE_FRONT) return log(Blocks.DARK_OAK_LOG, ax == COTTAGE_HALF ? Direction.Axis.Z : Direction.Axis.X);
@@ -232,16 +232,10 @@ public final class SilkRidgeWorks {
         return y <= 11 ? s(Blocks.AIR) : null;
     }
 
-    /** Thatch: straw, with darker, weathered patches. */
+    /** Thatch: woven bamboo-straw in courses, closing at its ridge. */
     private static BlockState thatch(int x, int y, int z) {
-        BlockState roof = hip(x, y, z, -COTTAGE_HALF - 2, COTTAGE_HALF + 2, COTTAGE_BACK - 1, COTTAGE_FRONT + 2, 4, Blocks.SPRUCE_STAIRS, Blocks.HAY_BLOCK);
-        if (roof == null) return s(Blocks.AIR);
-        if (roof.is(Blocks.HAY_BLOCK)) return roof;
-        // the straw itself is the hay; its eaves a course of weathered stair
-        int k = y - 4;
-        boolean edge = x == -COTTAGE_HALF - 2 + k || x == COTTAGE_HALF + 2 - k || z == COTTAGE_BACK - 1 + k || z == COTTAGE_FRONT + 2 - k;
-        if (k == 0) return roof;
-        return edge && hash(x, y, z, 4) < 35 ? roof : s(Blocks.HAY_BLOCK);
+        BlockState roof = hip(x, y, z, -COTTAGE_HALF - 2, COTTAGE_HALF + 2, COTTAGE_BACK - 1, COTTAGE_FRONT + 2, 4, Blocks.BAMBOO_MOSAIC_STAIRS, Blocks.BAMBOO_MOSAIC);
+        return roof == null ? s(Blocks.AIR) : roof;
     }
 
     // ── The Purifying Spring ────────────────────────────────────────────

@@ -125,7 +125,7 @@ final class SpiderScenes {
             creature(p, SpiderCaveRegistry.SPIDER_DEMON.get(), -3.0, 11.5, 205f, false);
             creature(p, SpiderCaveRegistry.SPIDER_DEMON.get(), 3.0, 12.5, 160f, true);
         }, new double[]{0.5, 3.4, 3.5, 0.5, 0.8, 12.0}));
-        all.addAll(turns("spider_demon", (p, yaw) -> creature(p, SpiderCaveRegistry.SPIDER_DEMON.get(), 0.5, 9.5, yaw, false), 9.5, 0.8, 4.2));
+        all.addAll(turns("spider_demon", (p, yaw) -> creature(p, SpiderCaveRegistry.SPIDER_DEMON.get(), 0.5, 9.5, yaw, false), 9.5, 0.8, 3.4));
         all.add(scene("spider_demon_face", p -> creature(p, SpiderCaveRegistry.SPIDER_DEMON.get(), 0.5, 9.5, 180f, false),
                 new double[]{0.9, 1.3, 7.0, 0.5, 0.9, 9.0}));
         all.add(scene("spider_demon_rearing", p -> {
@@ -168,8 +168,8 @@ final class SpiderScenes {
         all.add(scene("spider_sisters", p -> {
             for (int v = 0; v < 7; v++) sister(p, v, -7.0 + 2.33 * v, 12.5 - Math.abs(v - 3) * 0.4, 180f - (v - 3) * 6f);
         }, new double[]{0.5, 2.4, 2.5, 0.5, 1.4, 12.0}));
-        all.addAll(turns("spider_sister", (p, yaw) -> sister(p, 0, 0.5, 9.5, yaw), 9.5, 1.2, 3.8));
-        all.add(scene("spider_sister_face", p -> sister(p, 3, 0.5, 9.5, 180f), new double[]{0.75, 2.05, 8.0, 0.5, 1.95, 9.5}));
+        all.addAll(turns("spider_sister", (p, yaw) -> sister(p, 0, 0.5, 9.5, yaw), 9.5, 1.25, 3.0));
+        all.add(scene("spider_sister_face", p -> sister(p, 3, 0.5, 9.5, 180f), new double[]{0.7, 2.05, 8.1, 0.5, 2.0, 9.5}));
         all.add(scene("spider_sister_spinning", p -> {
             SpiderSpiritEntity s = sister(p, 1, 0.5, 10.0, 200f);
             if (s != null) s.showArt(true, false);
@@ -179,13 +179,13 @@ final class SpiderScenes {
             if (s != null) s.showArt(false, true);
         }, new double[]{-1.8, 2.0, 5.5, 0.5, 1.4, 10.0}));
         // the Hundred-Eyed Demon Lord
-        all.addAll(turns("spider_lord", (p, yaw) -> lord(p, 0.5, 10.5, yaw), 10.5, 2.0, 7.0));
-        all.add(scene("spider_lord_face", p -> lord(p, 0.5, 10.0, 180f), new double[]{0.9, 3.55, 7.6, 0.5, 3.45, 10.0}));
+        all.addAll(turns("spider_lord", (p, yaw) -> lord(p, 0.5, 10.5, yaw), 10.5, 2.3, 6.5));
+        all.add(scene("spider_lord_face", p -> lord(p, 0.5, 10.0, 180f), new double[]{0.9, 3.9, 7.4, 0.5, 3.75, 10.0}));
         for (String[] art : new String[][]{{"glaring", "1"}, {"pouring", "2"}, {"rearing", "3"}}) {
             all.add(scene("spider_lord_" + art[0], p -> {
                 HundredEyedDemonEntity l = lord(p, 0.5, 11.0, 200f);
                 if (l != null) l.showAct(Integer.parseInt(art[1]), false);
-            }, new double[]{4.0, 3.0, 4.0, 0.5, 2.2, 11.0}));
+            }, new double[]{4.5, 3.4, 4.5, 0.5, 2.6, 11.0}));
         }
         all.add(scene("spider_lord_unrobed", p -> {
             HundredEyedDemonEntity l = lord(p, 0.5, 11.0, 160f);
@@ -199,7 +199,7 @@ final class SpiderScenes {
         all.add(far("spider_cottage", new double[]{9.5, 7.0, 84.0, 0.0, 4.0, 50.0}));
         all.add(far("spider_cottage_inside", new double[]{4.5, 2.2, 56.5, -4.0, 1.0, 48.0}));
         all.add(far("spider_cave_passage", new double[]{0.5, 2.0, 47.0, 0.5, 2.0, 25.0}));
-        all.add(far("spider_cave_hall", new double[]{14.5, 9.0, 22.0, -8.0, 6.0, -10.0}));
+        all.add(far("spider_cave_hall", new double[]{6.5, 5.0, 16.0, -6.0, 6.0, -6.0}));
         all.add(far("spider_cave_web", new double[]{0.5, 9.0, 12.0, 0.5, 11.0, -9.0}));
         all.add(far("spider_cave_bower", new double[]{-40.0, 5.0, -8.0, -50.0, 1.5, -12.0}));
         all.add(far("spider_cave_seal", new double[]{-56.0, 2.2, -17.0, -62.0, 2.0, -26.0}));
@@ -225,17 +225,29 @@ final class SpiderScenes {
 
     /** Scenes that take longer to come right: a valley's worth of new ground for the client to draw, far from the stage. */
     static final java.util.Map<String, Integer> LONG = java.util.Map.ofEntries(
-            java.util.Map.entry("spider_cottage", 400), java.util.Map.entry("spider_cottage_inside", 80), java.util.Map.entry("spider_cave_passage", 80),
-            java.util.Map.entry("spider_cave_hall", 120), java.util.Map.entry("spider_cave_web", 80), java.util.Map.entry("spider_cave_bower", 120),
-            java.util.Map.entry("spider_cave_seal", 80), java.util.Map.entry("spider_spring", 160), java.util.Map.entry("spider_spring_pavilion", 80),
-            java.util.Map.entry("spider_temple_canopy", 200), java.util.Map.entry("spider_temple_canopy_close", 80), java.util.Map.entry("spider_temple", 160),
-            java.util.Map.entry("spider_temple_gate", 80), java.util.Map.entry("spider_temple_court", 80), java.util.Map.entry("spider_temple_hall", 80),
+            java.util.Map.entry("spider_cottage", 400), java.util.Map.entry("spider_cottage_inside", 200), java.util.Map.entry("spider_cave_passage", 200),
+            java.util.Map.entry("spider_cave_hall", 200), java.util.Map.entry("spider_cave_web", 200), java.util.Map.entry("spider_cave_bower", 700),
+            java.util.Map.entry("spider_cave_seal", 200), java.util.Map.entry("spider_spring", 160), java.util.Map.entry("spider_spring_pavilion", 200),
+            java.util.Map.entry("spider_temple_canopy", 200), java.util.Map.entry("spider_temple_canopy_close", 200), java.util.Map.entry("spider_temple", 160),
+            java.util.Map.entry("spider_temple_gate", 200), java.util.Map.entry("spider_temple_court", 200), java.util.Map.entry("spider_temple_hall", 200),
             java.util.Map.entry("spider_valley_above", 300));
 
     /** A scene of the valley's piece from {@code cam} (local to its region centre, heights over its floor). */
     private static AbilityScenes.Scene far(String name, double[] cam) {
         return new AbilityScenes.Scene(name, p -> {
             valley(p);
+            if (canopyDown && name.contains("canopy")) {
+                // the canopy over the temple again (the shots go by name, and the open temple's come first)
+                ServerLevel level = p.serverLevel();
+                int f = ground(p);
+                for (int tx = -SilkRidgeWorks.CANOPY_RX; tx <= SilkRidgeWorks.CANOPY_RX; tx++)
+                    for (int tz = -SilkRidgeWorks.CANOPY_RZ; tz <= SilkRidgeWorks.CANOPY_RZ; tz++)
+                        for (int ly = 0; ly <= SilkRidgeWorks.CANOPY_H; ly++) {
+                            if (SilkRidgeWorks.inCanopy(tx, ly, tz)) level.setBlock(new BlockPos(VX + SilkRidgeWorks.TEMPLE_X + tx, f + ly,
+                                    VZ + SilkRidgeWorks.TEMPLE_Z + tz), SpiderCaveRegistry.SILK_SEAL.get().defaultBlockState(), Block.UPDATE_CLIENTS);
+                        }
+                canopyDown = false;
+            }
             camera(p, cam);
         }, p -> {}, 1, false);
     }
