@@ -790,20 +790,32 @@ BAJIE = mirrored(BAJIE + [
     part('belly', 'chest', (0, -2.2, -3.4), (0, 0, 0), [(-4.4, -4.6, -2.4, 8.8, 7.4, 3.2, 'j_belly'), (-3.4, -3.6, -3.2, 6.8, 5.4, 1.0, 'j_belly')]),
     part('right_lapel', 'chest', (-3.6, -8.0, -3.6), (0, 0, 0.18), [(-1.2, 0, -0.5, 2.6, 9.0, 1.0, 'j_lapel')]),
     part('j_belt', 'body', (0, -3.4, 0), (0, 0, 0), [(-4.6, -0.6, -3.8, 9.2, 1.6, 7.6, 'j_belt')]),
-    # the pig's head: a broad head, a long snout, flapping ears, tusks
+    # the pig's head, sculpted in tiers: a round skull under his monk's cap, heavy jowls, the snout stepping
+    # out in two tiers to its flat disc and its nostrils, an upper lip hanging over the jaw, tusks curling up
+    # from the jaw's corners, small eyes deep under bristling brows, great ears flopping forward
     part('head', 'chest', (0, -8.0, -1.2), (0, 0, 0), [
-        (-3.8, -6.0, -3.6, 7.6, 6.2, 7.2, 'j_head'),
-        (-2.6, -3.6, -8.4, 5.2, 3.6, 5.0, 'j_snout'),
-        (-2.8, -3.8, -8.8, 5.6, 3.8, 0.6, 'j_snoutend'),
-        (-4.2, -3.2, -3.8, 8.4, 3.6, 4.0, 'j_jowl'),
-        (-3.4, -5.9, -3.9, 6.8, 1.0, 0.6, 'j_brow'),
-        (-3.6, -6.4, -1.6, 7.2, 1.2, 4.6, 'j_bristle')]),
-    part('jaw', 'head', (0, -0.3, -3.2), (0.05, 0, 0), [(-2.0, 0, -4.2, 4.0, 1.4, 4.6, 'j_jaw')]),
-    part('right_tusk', 'jaw', (-1.6, 0.1, -3.8), (-0.3, 0, 0.1), [(-0.35, -1.8, -0.35, 0.7, 1.9, 0.7, 'j_tusk')]),
-    part('right_ear', 'head', (-3.8, -5.6, 0.4), (-0.55, 0.6, 0.75), [(-0.4, 0, -2.8, 0.8, 7.0, 5.4, 'j_ear')]),
-    part('monkcap', 'head', (0, -6.0, 0.2), (-0.1, 0, 0), [(-3.6, -1.6, -3.4, 7.2, 1.8, 7.0, 'j_cap'), (-3.0, -2.4, -2.8, 6.0, 1.0, 5.8, 'j_cap')]),
-    part('right_brow', 'head', (-1.8, -5.25, -3.85), (0, 0, 0.25), [(-1.6, -0.5, -0.4, 3.0, 0.9, 0.8, 'j_brow')]),
-    part('right_eye', 'head', (-1.9, -4.2, -3.7), (0, 0.15, 0), [(-1.0, -0.55, -0.25, 2.0, 1.1, 0.4, 'j_eye')]),
+        (-3.8, -6.4, -3.4, 7.6, 6.6, 7.0, 'j_head'),
+        (-3.2, -7.0, -2.8, 6.4, 0.8, 5.8, 'j_head'),
+        (-3.4, -5.8, 3.4, 6.8, 5.4, 0.8, 'j_head'),
+        (-3.6, -6.6, -1.8, 7.2, 1.0, 4.6, 'j_bristle')]),
+    part('snout', 'head', (0, -1.6, -3.4), (0.1, 0, 0), [
+        (-2.9, -2.0, -2.6, 5.8, 3.9, 2.8, 'j_snout'),
+        (-2.4, -1.8, -4.2, 4.8, 3.4, 1.8, 'j_snout'),
+        (-2.6, -2.0, -4.8, 5.2, 3.8, 0.7, 'j_snoutend'),
+        (-1.7, -1.0, -4.95, 1.2, 1.5, 0.3, 'j_nostril'),
+        (0.5, -1.0, -4.95, 1.2, 1.5, 0.3, 'j_nostril'),
+        (-2.8, 1.7, -4.4, 5.6, 0.9, 4.4, 'j_lip')]),
+    part('right_jowl', 'head', (-2.7, -1.9, -2.6), (0.08, 0.15, 0.12), [(-1.5, -1.6, -1.8, 2.8, 4.0, 4.0, 'j_jowl')]),
+    part('right_cheek', 'head', (-3.0, -3.0, -3.1), (0, 0.3, 0), [(-1.2, -0.7, -0.8, 2.4, 1.6, 1.4, 'j_jowl')]),
+    part('jaw', 'head', (0, 0.2, -3.0), (0.08, 0, 0), [(-2.3, 0, -4.4, 4.6, 1.5, 4.8, 'j_jaw'),
+                                                       (-1.8, 1.4, -3.6, 3.6, 0.9, 3.6, 'j_jaw')]),
+    part('right_tusk', 'jaw', (-2.0, 0.2, -4.0), (-0.25, 0, 0.35), [(-0.4, -1.8, -0.4, 0.8, 2.0, 0.8, 'j_tusk')]),
+    part('right_tusk_tip', 'right_tusk', (0, -1.7, 0), (-0.5, 0, 0.3), [(-0.3, -1.5, -0.3, 0.6, 1.6, 0.6, 'j_tusk')]),
+    part('right_ear', 'head', (-3.6, -5.8, -0.2), (-0.35, 0.55, 0.95), [(-0.45, 0, -2.4, 0.9, 4.2, 4.8, 'j_ear')]),
+    part('right_ear_flap', 'right_ear', (0, 4.0, 0), (-0.55, 0, 0), [(-0.4, 0, -2.2, 0.8, 4.4, 4.4, 'j_ear')]),
+    part('monkcap', 'head', (0, -6.4, 0.2), (-0.1, 0, 0), [(-3.7, -1.6, -3.5, 7.4, 1.8, 7.0, 'j_cap'), (-3.1, -2.5, -2.9, 6.2, 1.0, 5.8, 'j_cap')]),
+    part('right_brow', 'head', (-1.8, -5.45, -3.7), (0, 0.1, 0.3), [(-1.8, -0.6, -0.6, 3.4, 0.9, 1.0, 'j_bristle')]),
+    part('right_eye', 'head', (-1.95, -4.55, -3.55), (0, 0.18, 0), [(-1.05, -0.6, -0.3, 2.1, 1.2, 0.45, 'j_eye')]),
 ])
 BAJIE += tail('body', (0, -0.6, 3.4), 4, 1.3, 0.8, 3.0, 0.25, 'fake_tail', start=(1.2, 0, 0))
 RAKE_AIM = aim([(0, 0, 0), (0, 0, 0), (-0.15, 0, 0.2), (-0.4, 0, 0)], (0.1, 0, 0))
@@ -845,6 +857,14 @@ def paint_bajie(p, style, f, dims):
             fx, fy, fw, fh = f[s]
             for i in range(0, fw, 2):
                 p.px((fx + i, fy + fh // 2), BAJIE_SHADE)
+    if style == 'j_nostril':
+        w.flat(p, f, (36, 18, 20))
+    if style == 'j_lip':
+        skin(p, f, mix(BAJIE_SKIN, BAJIE_SNOUT, 0.35), BAJIE_SHADE)
+        for s_ in S:
+            fx, fy, fw, fh = f[s_]
+            for i in range(fw):
+                p.px((fx + i, fy + fh - 1), (40, 22, 24))
     if style == 'j_snoutend':
         skin(p, f, BAJIE_SNOUT, k(BAJIE_SNOUT, 0.6))
         fx, fy, fw, fh = f['front']
@@ -989,268 +1009,252 @@ MAC_FACE, MAC_SHADE = (196, 112, 70), (120, 58, 34)
 MAC_EYE = (255, 96, 30)
 CLOAK = (112, 14, 20)
 
-MACAQUE = biped(dict(hipw=2.1, thigh=3.4, thigh_len=6.4, shin=3.0, shin_len=6.2, foot=(3.2, 5.2, 1.6),
-                     pelvis=(6.8, 3.6, 4.8), chest=(8.8, 10.0, 5.6), arm=(3.1, 7.8, 2.9, 7.6, 3.0, 3.0),
-                     lean=0.06, chest_lean=0.06, legr=(-0.18, 0, 0.08), shinr=(0.3, 0, 0), footr=(-0.12, 0, 0),
-                     armr=(-0.12, 0, 0.16), forer=(-0.4, 0, 0), thigh_style='m_trouser', shin_style='m_boot',
-                     foot_style='m_bootfoot', chest_style='m_mail', pelvis_style='m_mail_low', tuft_style='m_tuft'))
-MACAQUE = mirrored(MACAQUE + monkey_head('chest', (0, -10.0, -0.8), (-0.06, 0, 0),
-                                         dict(w=3.9, h=6.8, d=3.6, p='m_', muzzle=(2.2, 2.5, 2.6), ears=3, ear=1.3, ruff=1.6,
-                                              eye=1.15, ear_gap=2.7, ear_out=0.6, jaw_h=1.6)) + [
-    # the brow's heavy ridge over the nose, a bridge down the muzzle, fangs over the lip
-    part('browbridge', 'head', (0, -6.8 * 0.8, -3.6 - 1.3), (0.25, 0, 0), [(-1.1, -0.7, -0.5, 2.2, 1.5, 1.1, 'm_brow')]),
-    part('nosebridge', 'head', (0, -6.8 * 0.55, -3.6 - 1.0), (0.5, 0, 0), [(-0.7, -0.4, -1.6, 1.4, 1.0, 2.0, 'm_nose')]),
-    part('right_upfang', 'head', (-1.3, -6.8 * 0.42 + 2.5 - 0.6, -3.6 - 2.9), (0, 0, 0.08), [(-0.3, 0, -0.3, 0.6, 1.3, 0.6, 'm_fang')]),
-    # the cap: a gold dome, a jewel, phoenix wings rising at its sides, the two long pheasant plumes arcing back
-    part('cap', 'head', (0, -5.6, 0.2), (0, 0, 0), [(-3.2, -2.6, -3.2, 6.4, 2.8, 6.4, 'm_cap'),
-                                                    (-3.5, -0.6, -3.5, 7.0, 1.0, 7.0, 'm_capband'),
-                                                    (-0.9, -3.6, -3.5, 1.8, 1.8, 1.2, 'm_capjewel')]),
-    part('right_capwing', 'cap', (-3.3, -1.2, 0), (0.1, 0.1, -0.6), [(-0.3, -4.4, -1.8, 0.6, 4.6, 3.8, 'm_wing')]),
-    part('right_plume', 'cap', (-1.1, -2.6, 1.0), (-0.9, 0.1, -0.16), [(-0.4, -15.0, -0.4, 0.8, 15.0, 0.8, 'm_plume')]),
-    part('right_plume_tip', 'right_plume', (0, -14.6, 0), (-0.55, 0, -0.1), [(-0.35, -10.0, -0.35, 0.7, 10.0, 0.7, 'm_plume')]),
-    part('right_plume_end', 'right_plume_tip', (0, -9.8, 0), (-0.55, 0, -0.08), [(-0.25, -7.0, -0.25, 0.5, 7.0, 0.5, 'm_plume')]),
-    part('fillet', 'head', (0, -4.4, 0), (0, 0, 0), [(-3.6, -0.5, -3.5, 7.2, 0.9, 7.0, 'm_fillet')]),
-    # the cloud collar, the breast in layered plates, the great mirror over the heart
-    part('collar', 'chest', (0, -9.8, 0), (0, 0, 0), [(-4.6, -1.0, -3.3, 9.2, 2.2, 6.6, 'm_collar')]),
-    part('neckruff', 'chest', (0, -10.4, 0), (0, 0, 0), [(-3.9, -1.6, -3.0, 7.8, 2.0, 6.0, 'm_ruff')]),
-    part('breastplate', 'chest', (0, 0, 0), (0, 0, 0), [(-4.7, -9.2, -3.2, 9.4, 4.4, 0.6, 'm_plate'),
-                                                        (-4.5, -5.2, -3.1, 9.0, 4.0, 0.6, 'm_plate'),
-                                                        (-1.9, -8.6, -3.7, 3.8, 3.8, 0.5, 'm_mirror')]),
-    part('right_strap', 'chest', (-1.9, -9.2, -3.4), (0, 0, -0.42), [(-0.5, 0, -0.35, 1.0, 10.0, 0.6, 'm_strap')]),
-    # the shoulders in three tiers of gold lamellae, each bitten by a gold beast head
-    part('right_pauldron', 'right_arm', (-0.8, -1.0, 0), (0, 0, 0.36), [(-2.3, -1.6, -2.5, 4.0, 2.6, 5.0, 'm_pauldron'),
-                                                                        (-2.7, 0.7, -2.7, 4.0, 2.2, 5.4, 'm_pauldron2'),
-                                                                        (-3.1, 2.6, -2.9, 4.0, 2.2, 5.8, 'm_pauldron2'),
-                                                                        (-3.5, -0.4, -1.3, 0.9, 2.6, 2.6, 'm_beast')]),
-    part('right_undersleeve', 'right_arm', (0, 2.6, 0), (0, 0, 0), [(-1.7, 0, -1.7, 3.4, 4.0, 3.4, 'm_sleeve')]),
-    part('right_bracer', 'right_forearm', (0, 2.4, 0), (0, 0, 0), [(-1.7, 0, -1.7, 3.4, 4.6, 3.4, 'm_bracer')]),
-    # the belt of jade, the war skirt in gold lamellae over the tiger-skin kilt, its tassels
-    part('belt', 'body', (0, -3.2, 0), (0, 0, 0), [(-3.8, -0.8, -2.8, 7.6, 1.8, 5.6, 'm_belt'),
-                                                  (-1.3, -1.1, -3.1, 2.6, 2.4, 0.6, 'm_buckle')]),
-    part('sway_kilt_front', 'body', (0, -1.6, -2.5), (-0.06, 0, 0), [(-3.0, 0, -0.4, 6.0, 7.6, 0.8, 'm_tiger')]),
-    part('sway_kilt_back', 'body', (0, -1.6, 2.5), (0.1, 0, 0), [(-3.4, 0, -0.4, 6.8, 7.2, 0.8, 'm_tiger')]),
-    part('right_tasset', 'body', (-2.2, -1.8, -2.7), (-0.1, 0.1, 0.08), [(-1.9, 0, -0.5, 3.8, 6.2, 1.0, 'm_tasset')]),
-    part('right_side_tasset', 'body', (-3.5, -1.8, 0), (0, 0, 0.16), [(-0.5, 0, -2.5, 1.0, 6.0, 5.0, 'm_tasset')]),
-    part('back_tasset', 'body', (0, -1.8, 2.8), (0.14, 0, 0), [(-3.6, 0, -0.5, 7.2, 6.0, 1.0, 'm_tasset')]),
-    part('sway_belttassel_r', 'belt', (-0.9, 1.0, -3.0), (-0.05, 0, 0.05), [(-0.45, 0, -0.3, 0.9, 5.4, 0.6, 'm_tassel')]),
-    part('sway_belttassel_l', 'belt', (0.9, 1.0, -3.0), (-0.05, 0, -0.05), [(-0.45, 0, -0.3, 0.9, 5.4, 0.6, 'm_tassel')]),
-    # the cloak, crimson and black, from his shoulders nearly to his heels, in two falls
-    part('sway_cloak', 'chest', (0, -9.6, 3.1), (0.14, 0, 0), [(-5.2, 0, -0.3, 10.4, 12.0, 0.6, 'm_cloak')]),
-    part('sway_cloak_low', 'sway_cloak', (0, 11.8, 0), (0.1, 0, 0), [(-5.6, 0, -0.3, 11.2, 10.0, 0.6, 'm_cloaklow')]),
-    # greaves, knee guards, the cloud-walking boots with their toes turned up
-    part('right_kneeguard', 'right_shin', (0, -0.6, -1.5), (-0.12, 0, 0), [(-1.7, -1.3, -0.7, 3.4, 3.0, 1.0, 'm_knee')]),
-    part('right_greave', 'right_shin', (0, 1.6, -1.6), (0, 0, 0), [(-1.6, 0, -0.4, 3.2, 3.6, 0.8, 'm_greave')]),
-    part('right_bootcuff', 'right_shin', (0, 0.6, 0), (0, 0, 0), [(-1.8, 0, -1.8, 3.6, 1.4, 3.6, 'm_cuff')]),
-    part('right_boottoe', 'right_foot', (0, 0.3, -4.5), (0.65, 0, 0), [(-1.5, -1.4, -1.4, 3.0, 1.5, 2.0, 'm_boottoe')]),
+# The Six-Eared Macaque: the Monkey King's perfect double. His head is the Monkey King's own (the
+# Victorious Fighting Buddha's, fighting_buddha_head.py: a model of its own at twice the detail, drawn on
+# this one's head by MacaqueRenderer), but for its ears, three a side; this is his body and his gear.
+MACAQUE = biped(dict(hipw=2.2, thigh=3.6, thigh_len=7.0, shin=3.2, shin_len=6.8, foot=(3.4, 5.6, 1.8),
+                     pelvis=(7.0, 3.6, 4.8), chest=(9.0, 10.5, 5.6), arm=(3.2, 8.0, 3.0, 7.8, 3.0, 3.0),
+                     lean=0.04, chest_lean=0.04, legr=(-0.14, 0, 0.07), shinr=(0.24, 0, 0), footr=(-0.1, 0, 0),
+                     armr=(-0.1, 0, 0.16), forer=(-0.4, 0, 0), thigh_style='k_trouser', shin_style='k_bootshaft',
+                     foot_style='k_bootfoot', toe_style='k_bootfoot', chest_style='k_mail', pelvis_style='k_mail_low',
+                     upperarm_style='k_sleeve', forearm_style='k_sleeve', hand_style='k_hand', finger_style='k_hand',
+                     tuft_style='k_tuft'))
+# the bare forearm toes are boots here: no toes on cloud-walking boots
+MACAQUE = [q for q in MACAQUE if q[0] != 'right_toes']
+MACAQUE = mirrored(MACAQUE + [
+    # the head: an empty part at the neck, which the Monkey King's head (its own model) rides; his cap on it
+    part('head', 'chest', (0, -10.5, -0.4), (0, 0, 0), []),
+    # the phoenix-feather cap (凤翅紫金冠): a purple-gold dome banded in gold, a jewel at its brow, phoenix
+    # wings rising at its sides, and the two long pheasant plumes arcing up and back
+    part('cap', 'head', (0, -8.4, 0.2), (0, 0, 0), [(-4.0, -2.4, -3.6, 8.0, 2.6, 7.4, 'k_cap'),
+                                                    (-3.0, -3.4, -2.6, 6.0, 1.2, 5.4, 'k_cap'),
+                                                    (-4.7, -0.4, -4.3, 9.4, 1.3, 8.8, 'k_capband'),
+                                                    (-1.0, -2.0, -4.6, 2.0, 2.2, 0.7, 'k_jewel')]),
+    part('right_phoenix', 'cap', (-4.6, -1.0, 0.4), (0.15, 0.2, -0.75), [(-0.3, -5.2, -2.0, 0.6, 5.4, 4.0, 'k_wing'),
+                                                                        (-0.3, -7.2, -0.6, 0.6, 2.2, 2.0, 'k_wing')]),
+    part('right_plume', 'cap', (-1.2, -3.2, 1.2), (-0.62, 0.08, -0.12), [(-0.45, -16.0, -0.45, 0.9, 16.0, 0.9, 'k_plume')]),
+    part('right_plume_mid', 'right_plume', (0, -15.6, 0), (-0.6, 0, -0.08), [(-0.4, -12.0, -0.4, 0.8, 12.0, 0.8, 'k_plume')]),
+    part('right_plume_tip', 'right_plume_mid', (0, -11.8, 0), (-0.6, 0, -0.06), [(-0.3, -9.0, -0.3, 0.6, 9.0, 0.6, 'k_plume')]),
+    # the golden chain mail (锁子黄金甲): a gorget, the breast in two plates and its mirror, a plate over the belly
+    part('gorget', 'chest', (0, -10.4, 0), (0, 0, 0), [(-4.5, -1.2, -3.2, 9.0, 2.0, 6.4, 'k_gorget')]),
+    part('right_breast', 'chest', (-2.25, -9.0, -3.0), (0, 0.12, 0), [(-2.2, 0, -0.5, 4.4, 4.6, 0.7, 'k_plate')]),
+    part('mirror', 'chest', (0, -7.2, -3.55), (0, 0, 0), [(-1.7, -1.7, -0.3, 3.4, 3.4, 0.5, 'k_mirror')]),
+    part('belly_plate', 'chest', (0, -3.6, -3.0), (0, 0, 0), [(-4.0, 0, -0.4, 8.0, 2.8, 0.6, 'k_band')]),
+    part('right_backplate', 'chest', (-2.2, -9.4, 3.0), (0, -0.1, 0), [(-2.2, 0, -0.2, 4.4, 5.0, 0.6, 'k_plate')]),
+    # the shoulders in three tiers of gold scale, each bitten by a gold beast's head
+    part('right_pauldron', 'right_arm', (-0.9, -1.2, 0), (0, 0, 0.36), [(-2.4, -1.6, -2.6, 4.2, 2.6, 5.2, 'k_pauldron'),
+                                                                        (-2.8, 0.7, -2.8, 4.2, 2.3, 5.6, 'k_pauldron'),
+                                                                        (-3.2, 2.7, -3.0, 4.2, 2.3, 6.0, 'k_pauldron'),
+                                                                        (-3.7, -0.5, -1.4, 1.0, 2.8, 2.8, 'k_beast')]),
+    part('right_bracer', 'right_forearm', (0, 1.8, 0), (0, 0, 0), [(-1.75, 0, -1.75, 3.5, 5.0, 3.5, 'k_bracer')]),
+    part('right_cuff', 'right_forearm', (0, 6.6, 0), (0, 0, 0), [(-1.65, 0, -1.65, 3.3, 1.2, 3.3, 'k_tuft')]),
+    # a red silk sash wound twice at the waist, knotted, its ends flying; the tiger-skin kilt; the war skirt
+    part('sash', 'body', (0, -3.4, 0), (0, 0, 0), [(-3.9, -0.9, -2.8, 7.8, 2.2, 5.6, 'k_sash'),
+                                                  (-1.2, -1.2, -3.3, 2.4, 2.4, 0.8, 'k_knot')]),
+    part('sway_sash_end_r', 'sash', (-0.8, 1.0, -3.1), (-0.06, 0, 0.12), [(-0.6, 0, -0.25, 1.2, 8.0, 0.5, 'k_sashend')]),
+    part('sway_sash_end_l', 'sash', (0.8, 1.0, -3.1), (-0.06, 0, -0.08), [(-0.6, 0, -0.25, 1.2, 6.4, 0.5, 'k_sashend')]),
+    part('sway_kilt_front', 'body', (0, -1.6, -2.6), (-0.06, 0, 0), [(-3.3, 0, -0.4, 6.6, 7.2, 0.8, 'k_tiger')]),
+    part('sway_kilt_back', 'body', (0, -1.6, 2.6), (0.1, 0, 0), [(-3.6, 0, -0.4, 7.2, 7.0, 0.8, 'k_tiger')]),
+    part('right_kilt_side', 'body', (-3.6, -1.6, 0), (0, 0, 0.14), [(-0.4, 0, -2.5, 0.8, 6.4, 5.0, 'k_tiger')]),
+    part('right_tasset', 'body', (-2.6, -1.8, -2.9), (-0.1, 0.12, 0.1), [(-1.6, 0, -0.5, 3.2, 5.0, 1.0, 'k_tasset')]),
+    # the red cloak from his shoulders, in two falls, gold-bordered
+    part('sway_cloak', 'chest', (0, -10.2, 3.2), (0.12, 0, 0), [(-5.4, 0, -0.3, 10.8, 12.5, 0.6, 'k_cloak')]),
+    part('sway_cloak_low', 'sway_cloak', (0, 12.3, 0), (0.1, 0, 0), [(-5.8, 0, -0.3, 11.6, 10.5, 0.6, 'k_cloaklow')]),
+    # the lotus-root cloud-walking boots (藕丝步云履): pale silk, their toes turned up in cloud scrolls; greaves
+    part('right_greave', 'right_shin', (0, 0.6, -1.7), (0, 0, 0), [(-1.7, 0, -0.4, 3.4, 3.6, 0.8, 'k_greave')]),
+    part('right_kneeguard', 'right_shin', (0, -0.6, -1.6), (-0.12, 0, 0), [(-1.7, -1.3, -0.7, 3.4, 3.0, 1.0, 'k_knee')]),
+    part('right_boottoe', 'right_foot', (0, 0.4, -4.6), (0.7, 0, 0), [(-1.6, -1.6, -1.4, 3.2, 1.6, 2.2, 'k_boottoe')]),
+    part('right_bootcuff', 'right_shin', (0, 4.0, 0), (0, 0, 0), [(-1.85, 0, -1.85, 3.7, 1.0, 3.7, 'k_bootcuff')]),
 ])
-MACAQUE += tail('body', (0, -1.8, 2.6), 6, 1.8, 0.9, 3.0, 0.24, 'm_tail', start=(1.2, 0, 0))
-# the iron staff, its gold caps at both ends, held at his right side, upright
-MSTAFF_AIM = aim([(0.06, 0, 0), (0.06, 0, 0), (-0.12, 0, 0.16), (-0.4, 0, 0)], (0.03, 0, 0))
+MACAQUE += tail('body', (0, -1.8, 2.7), 6, 1.8, 0.9, 3.0, 0.24, 'k_tail', start=(1.2, 0, 0))
+# the As-You-Will Gold-Banded Staff's double: red-black iron, a long gold cap at each end
+MSTAFF_AIM = aim([(0.04, 0, 0), (0.04, 0, 0), (-0.1, 0, 0.16), (-0.4, 0, 0)], (0.03, 0, 0))
 MACAQUE += [part('staff', 'right_hand', (0, 1.5, 0), MSTAFF_AIM, [
-    (-0.65, -35.0, -0.65, 1.3, 40.0, 1.3, 'm_staff'),
-    (-0.85, -39.0, -0.85, 1.7, 4.4, 1.7, 'm_staffgold'),
-    (-0.95, -35.4, -0.95, 1.9, 0.7, 1.9, 'm_staffring'),
-    (-0.85, 4.6, -0.85, 1.7, 4.4, 1.7, 'm_staffgold'),
-    (-0.95, 4.4, -0.95, 1.9, 0.7, 1.9, 'm_staffring')])]
+    (-0.65, -35.0, -0.65, 1.3, 40.0, 1.3, 'k_staff'),
+    (-0.85, -40.0, -0.85, 1.7, 5.4, 1.7, 'k_staffcap'),
+    (-0.85, 4.6, -0.85, 1.7, 5.4, 1.7, 'k_staffcap')])]
 MACAQUE = w.settle(MACAQUE, ('right_foot', 'left_foot'))
 
 
+GOLD_MAIL = (226, 176, 66)
+GOLD_MAIL_DEEP = (150, 100, 32)
+CAP_PURPLE = (104, 40, 128)
+CAP_PURPLE_DEEP = (58, 18, 72)
+LOTUS = (226, 200, 186)
+LOTUS_DEEP = (170, 136, 124)
+STAFF_RED = (84, 18, 16)
+KING_FUR, KING_FUR_DARK, KING_FUR_TIP = (196, 138, 58), (130, 84, 32), (240, 194, 110)
+KING_RED = (178, 26, 24)
+KING_RED_DEEP = (96, 10, 12)
+
+
+def fine_mail(p, f, base, deep, faces=S):
+    """Fine golden chain mail: small rings in offset rows, each lit along its top and dark beneath; at a
+    distance it reads as gold, near as mail."""
+    for s_ in faces:
+        fx, fy, fw, fh = f[s_]
+        lv = w.LIGHT[s_]
+        for j in range(fh):
+            for i in range(fw):
+                ii = (i + (j // 2) % 2 * 2) % 4
+                jj = j % 2
+                t = 1.12 if jj == 0 else 0.86
+                if ii == 3:
+                    t *= 0.78
+                c = [v * t * lv * (1 - 0.12 * j / max(1, fh)) for v in base]
+                p.px((fx + i, fy + j), [v + p.rnd.randint(-4, 4) for v in c])
+        for i in range(fw):                                       # a hem of plates at its edge
+            p.px((fx + i, fy + fh - 1), k(deep, lv))
+            p.px((fx + i, fy), k(deep, lv * 1.1))
+
+
+def plate(p, f, base, deep, light):
+    """A gold plate: lit toward its top, a raised border, rivets at its corners."""
+    for s_ in S + ('top', 'bottom'):
+        fx, fy, fw, fh = f[s_]
+        lv = w.LIGHT[s_]
+        for i, j, xy in w.each(p, f[s_]):
+            c = mix(light, base, j / max(1, fh - 1))
+            if i in (0, fw - 1) or j in (0, fh - 1):
+                c = deep
+            elif i in (1, fw - 2) or j in (1, fh - 2):
+                c = light
+            p.px(xy, [v * lv + p.rnd.randint(-3, 3) for v in c])
+    fx, fy, fw, fh = f['front']
+    for x, y in ((2, 2), (fw - 3, 2), (2, fh - 3), (fw - 3, fh - 3)):
+        p.px((fx + x, fy + y), deep)
+
+
 def paint_macaque(p, style, f, dims):
-    common(p, style, f, 'm_', MAC_FUR, MAC_DARK, MAC_TIP, MAC_FACE, MAC_SHADE, (110, 64, 44), eye=MAC_EYE)
-    if style in ('upperarm', 'forearm', 'm_skull', 'm_crown', 'm_tail'):
-        pelt(p, f, MAC_FUR, MAC_DARK, MAC_TIP)
-    if style == 'hand':
-        skin(p, f, (110, 64, 44), (60, 32, 22))
-        fx, fy, fw, fh = f['front']
-        for x in range(0, fw, 2):
-            for j in range(fh // 2, fh):
-                p.px((fx + x, fy + j), (44, 22, 16))
-    if style == 'm_face':
-        w.flat(p, f, MAC_FUR)
-        monkey_face(p, f['front'], MAC_FACE, MAC_SHADE, MAC_EYE, ring=k(MAC_FUR, 0.9), eye_w=2)
-    if style == 'm_brow':
-        pelt(p, f, MAC_TIP, MAC_FUR)
-        fx, fy, fw, fh = f['front']
-        for i in range(fw):
-            p.px((fx + i, fy + fh - 1), (40, 20, 12))
-    if style == 'm_cheekfur':
-        tufted(p, f, MAC_TIP, MAC_FUR, (210, 170, 110), depth=3, every=2)
-    if style == 'm_muzzle':
-        muzzle(p, f, MAC_FACE, MAC_SHADE, teeth=IVORY, fangs=True)
-    if style == 'm_nose':
-        skin(p, f, k(MAC_FACE, 0.85), MAC_SHADE)
-    if style == 'm_jaw':
-        skin(p, f, MAC_FACE, MAC_SHADE)
-    if style == 'm_ear':
-        skin(p, f, (200, 120, 84), (124, 64, 40))
-        for s in ('right',):
-            fx, fy, fw, fh = f[s]
-            w.disc(p, fx + fw / 2, fy + fh / 2, min(fw, fh) * 0.25, (110, 50, 30))
-    if style in ('m_cap', 'm_wing'):
-        gold(p, f)
-        for s in S:                                               # worked with purple-gold scrolls
-            fx, fy, fw, fh = f[s]
-            for i in range(fw):
-                if (i // 2) % 3 == 0:
-                    p.px((fx + i, fy + fh // 2), (120, 50, 130))
-        if style == 'm_wing':
-            for s in ('right', 'left'):
-                w.point(p, f[s], down=False, keep=0.8, sharp=0.7)
-    if style == 'm_capjewel':
-        w.flat(p, f, (210, 30, 40))
-        fx, fy, fw, fh = f['front']
-        p.px((fx + fw // 2, fy + fh // 2), (255, 140, 130))
-    if style == 'm_plume':                                         # a pheasant's tail feather: barred buff and brown
-        for s in S + ('top', 'bottom'):
-            fx, fy, fw, fh = f[s]
-            for i, j, xy in w.each(p, f[s]):
-                c = (212, 170, 96) if (j // 3) % 2 == 0 else (110, 64, 30)
-                p.px(xy, k(c, w.LIGHT[s]))
-    if style == 'm_fillet':
-        gold(p, f)
-    if style in ('m_mail', 'm_mail_low'):
-        chainmail(p, f, GOLD, GOLD_DEEP)
-        w.flat(p, f, k(GOLD_DEEP, 0.9), faces=('top', 'bottom'))
-        if style == 'm_mail':
-            fx, fy, fw, fh = f['front']                           # the breast's great gold mirror, and the collar
-            w.disc(p, fx + fw / 2, fy + fh * 0.36, 3.6, GOLD_LIGHT, rim=GOLD_DEEP)
-            w.disc(p, fx + fw / 2, fy + fh * 0.36, 1.6, (200, 60, 40))
-            for i in range(fw):
-                p.px((fx + i, fy), RED)
-                p.px((fx + i, fy + 1), RED_DEEP)
-    if style in ('m_pauldron', 'm_pauldron2'):
-        lamellae(p, f, GOLD, RED, rows=2, cols=3, rim=GOLD_DEEP)
-        gold(p, f, faces=('top',))
-    if style == 'm_belt':
-        w.leather(p, f, RED_DEEP)
-        for s in S:
-            fx, fy, fw, fh = f[s]
-            for i in range(1, fw - 1, 4):
-                for t in range(2):
-                    p.px((fx + i + t, fy + fh // 2), JADE)
-    if style == 'm_buckle':
-        gold(p, f)
-        fx, fy, fw, fh = f['front']
-        w.disc(p, fx + fw / 2, fy + fh / 2, 1.2, JADE)
-    if style == 'm_tiger':
-        tiger(p, f)
-    if style == 'm_cloak':
-        for s in ('front', 'back'):
-            w.weave(p, f[s], CLOAK, k(CLOAK, 0.45), light=w.LIGHT[s], fold=5, fall=0.35)
-            fx, fy, fw, fh = f[s]
-            for i in range(fw):
-                p.px((fx + i, fy + fh - 1), GOLD_DEEP)
-                p.px((fx + i, fy + fh - 2), GOLD)
-            for j in range(fh):
-                for i in (0, fw - 1):
-                    p.px((fx + i, fy + j), GOLD_DEEP)
-        w.flat(p, f, k(CLOAK, 0.5), faces=('right', 'left', 'top', 'bottom'))
-    if style == 'm_trouser':
-        cloth(p, f, RED, fold=3)
-    if style in ('m_boot', 'm_bootfoot'):
-        w.leather(p, f, (60, 40, 30), stitch=GOLD_DEEP)
-        if style == 'm_bootfoot':
-            w.flat(p, f, (220, 210, 190), faces=('bottom',))
-            for s in S:                                           # cloud scrolls on the cloud-walking boots
-                fx, fy, fw, fh = f[s]
-                for i in range(0, fw, 3):
-                    p.px((fx + i, fy + fh // 2), GOLD)
-    if style == 'm_tuft':
-        tufted(p, f, MAC_TIP, MAC_DARK, (214, 176, 112), depth=3, every=2)
-    if style == 'm_fang':
-        w.flat(p, f, IVORY)
-    if style == 'm_capband':
-        gold(p, f)
+    common(p, style, f, 'k_', KING_FUR, KING_FUR_DARK, KING_FUR_TIP, (200, 124, 86), (150, 82, 56), (200, 124, 86))
+    if style in ('k_tail', 'k_tuft'):
+        tufted(p, f, KING_FUR, KING_FUR_DARK, KING_FUR_TIP, depth=2, every=2)
+    if style == 'k_hand':
+        pelt(p, f, KING_FUR, KING_FUR_DARK, KING_FUR_TIP)
+        skin(p, f, (200, 124, 86), (150, 82, 56), faces=('bottom', 'front'))
+    if style in ('k_mail', 'k_mail_low'):
+        fine_mail(p, f, GOLD_MAIL, GOLD_MAIL_DEEP)
+        w.flat(p, f, GOLD_MAIL_DEEP, faces=('top', 'bottom'))
+    if style == 'k_gorget':
+        plate(p, f, GOLD_MAIL, GOLD_MAIL_DEEP, GOLD_LIGHT)
         for s_ in S:
             fx, fy, fw, fh = f[s_]
-            for i in range(1, fw, 3):
-                p.px((fx + i, fy + fh // 2), (190, 30, 40))
-    if style == 'm_collar':
-        gold(p, f)
-        for s_ in S:
-            fx, fy, fw, fh = f[s_]
-            for i in range(fw):
-                if (i // 2) % 3 == 1:
-                    p.px((fx + i, fy + fh // 2), RED_DEEP)
-    if style == 'm_plate':
-        lamellae(p, f, MAC_GOLD, RED, rows=3, cols=4, rim=GOLD_DEEP)
-    if style == 'm_mirror':
-        w.flat(p, f, GOLD_DEEP)
+            for i in range(0, fw, 3):
+                p.px((fx + i, fy + fh // 2), KING_RED)
+    if style in ('k_plate', 'k_band'):
+        plate(p, f, GOLD_MAIL, GOLD_MAIL_DEEP, GOLD_LIGHT)
+        fx, fy, fw, fh = f['front']                               # cloud scrolls chased in it
+        for i in range(3, fw - 3, 4):
+            for j in range(3, fh - 3, 4):
+                p.px((fx + i, fy + j), GOLD_MAIL_DEEP)
+                p.px((fx + i + 1, fy + j + 1), GOLD_MAIL_DEEP)
+    if style == 'k_mirror':
+        w.flat(p, f, GOLD_MAIL_DEEP)
         fx, fy, fw, fh = f['front']
-        w.disc(p, fx + fw / 2, fy + fh / 2, fw / 2 - 0.5, GOLD_LIGHT, rim=GOLD_DEEP)
-        w.disc(p, fx + fw / 2, fy + fh / 2, fw / 4, (40, 30, 30))
-        w.disc(p, fx + fw / 2, fy + fh / 2, 1.0, (200, 50, 40))
-    if style == 'm_beast':
+        w.disc(p, fx + fw / 2, fy + fh / 2, fw / 2 - 0.3, GOLD_LIGHT, rim=GOLD_MAIL_DEEP)
+        w.disc(p, fx + fw / 2, fy + fh / 2, fw / 3, (240, 236, 220))
+        w.disc(p, fx + fw / 2, fy + fh / 2, 1.2, (200, 60, 40))
+    if style == 'k_pauldron':
+        lamellae(p, f, GOLD_MAIL, KING_RED, rows=2, cols=4, rim=GOLD_MAIL_DEEP)
+        w.flat(p, f, GOLD_LIGHT, faces=('top',))
+    if style == 'k_beast':
         gold(p, f)
         fx, fy, fw, fh = f['right']
         for i in range(fw):
             p.px((fx + i, fy + fh - 2), (40, 20, 10))
         p.px((fx + 1, fy + 1), (200, 40, 30))
         p.px((fx + fw - 2, fy + 1), (200, 40, 30))
-    if style == 'm_tasset':
-        lamellae(p, f, MAC_GOLD, RED, rows=4, cols=2, rim=GOLD_DEEP)
-        trim(p, f, RED_DEEP, top=False)
-    if style == 'm_cloaklow':
+    if style == 'k_bracer':
+        plate(p, f, GOLD_MAIL, GOLD_MAIL_DEEP, GOLD_LIGHT)
+    if style == 'k_sleeve':
+        cloth(p, f, KING_RED, KING_RED_DEEP, fold=3)
+    if style in ('k_sash', 'k_knot', 'k_sashend'):
+        cloth(p, f, KING_RED, KING_RED_DEEP, fold=2)
+        if style == 'k_sashend':
+            for s_ in ('front', 'back'):
+                fx, fy, fw, fh = f[s_]
+                for i in range(fw):
+                    p.px((fx + i, fy + fh - 1), GOLD)
+    if style == 'k_tiger':
+        tiger(p, f)
+    if style == 'k_tasset':
+        lamellae(p, f, GOLD_MAIL, KING_RED, rows=3, cols=2, rim=GOLD_MAIL_DEEP)
+    if style in ('k_cloak', 'k_cloaklow'):
         for s_ in ('front', 'back'):
-            w.weave(p, f[s_], CLOAK, k(CLOAK, 0.45), light=w.LIGHT[s_], fold=5, fall=0.35)
+            w.weave(p, f[s_], KING_RED, KING_RED_DEEP, light=w.LIGHT[s_], fold=5, fall=0.3)
             fx, fy, fw, fh = f[s_]
             for j in range(fh):
                 for i in (0, fw - 1):
-                    p.px((fx + i, fy + j), GOLD_DEEP)
+                    p.px((fx + i, fy + j), GOLD)
+            if style == 'k_cloaklow':
+                for i in range(fw):
+                    p.px((fx + i, fy + fh - 1), GOLD)
+                    p.px((fx + i, fy + fh - 2), GOLD_MAIL_DEEP)
+            else:
+                for i in range(fw):
+                    p.px((fx + i, fy), GOLD)
+        w.flat(p, f, KING_RED_DEEP, faces=('right', 'left', 'top', 'bottom'))
+    if style == 'k_trouser':
+        cloth(p, f, KING_RED, KING_RED_DEEP, fold=3)
+    if style in ('k_bootshaft', 'k_bootfoot', 'k_bootcuff', 'k_boottoe'):
+        cloth(p, f, LOTUS, LOTUS_DEEP, fold=3)
+        for s_ in S:                                              # cloud scrolls in gold thread
+            fx, fy, fw, fh = f[s_]
             for i in range(fw):
-                p.px((fx + i, fy + fh - 1), GOLD)
-                p.px((fx + i, fy + fh - 2), k(CLOAK, 0.3))
-            w.ragged(p, f[s_], teeth=4, depth=2)
-        w.flat(p, f, k(CLOAK, 0.5), faces=('right', 'left', 'top', 'bottom'))
-    if style == 'm_greave':
-        gold(p, f)
+                if (i // 2) % 3 == 0:
+                    p.px((fx + i, fy + fh // 2), GOLD_MAIL_DEEP)
+        if style in ('k_bootfoot', 'k_boottoe'):
+            w.flat(p, f, (248, 240, 228), faces=('bottom',))
+        if style == 'k_bootcuff':
+            w.flat(p, f, GOLD_MAIL, faces=('top',))
+    if style in ('k_greave', 'k_knee'):
+        plate(p, f, GOLD_MAIL, GOLD_MAIL_DEEP, GOLD_LIGHT)
+    if style in ('k_cap',):
+        for s_ in S + ('top', 'bottom'):
+            fx, fy, fw, fh = f[s_]
+            lv = w.LIGHT[s_]
+            for i, j, xy in w.each(p, f[s_]):
+                c = CAP_PURPLE if (i // 2 + j) % 5 else GOLD
+                p.px(xy, [v * lv + p.rnd.randint(-4, 4) for v in c])
+        trim(p, f, GOLD)
+    if style == 'k_capband':
+        plate(p, f, GOLD_MAIL, GOLD_MAIL_DEEP, GOLD_LIGHT)
+        for s_ in S:
+            fx, fy, fw, fh = f[s_]
+            for i in range(2, fw - 2, 4):
+                p.px((fx + i, fy + fh // 2), (60, 140, 200))
+    if style == 'k_jewel':
+        w.flat(p, f, (200, 30, 40))
         fx, fy, fw, fh = f['front']
-        for j in range(1, fh, 3):
-            for i in range(fw):
-                p.px((fx + i, fy + j), GOLD_DEEP)
-    if style == 'm_boottoe':
-        w.leather(p, f, (60, 40, 30), stitch=GOLD_DEEP)
+        p.px((fx + 1, fy + 1), (255, 150, 140))
+    if style == 'k_wing':
+        gold(p, f)
+        for s_ in ('right', 'left'):
+            fx, fy, fw, fh = f[s_]
+            for j in range(1, fh, 2):                              # feathered
+                for i in range(fw):
+                    if (i + j) % 3 == 0:
+                        p.px((fx + i, fy + j), CAP_PURPLE)
+            w.point(p, f[s_], down=False, keep=0.8, sharp=0.6)
+    if style == 'k_plume':                                         # a pheasant's tail feather: barred buff and brown
+        for s_ in S + ('top', 'bottom'):
+            fx, fy, fw, fh = f[s_]
+            for i, j, xy in w.each(p, f[s_]):
+                c = (222, 184, 104) if (j // 3) % 2 == 0 else (112, 62, 28)
+                p.px(xy, k(c, w.LIGHT[s_]))
+    if style == 'k_staff':
+        for s_ in S:
+            fx, fy, fw, fh = f[s_]
+            for i, j, xy in w.each(p, f[s_]):
+                c = STAFF_RED if (i + j // 6) % 3 else (30, 10, 10)
+                p.px(xy, [v * w.LIGHT[s_] + p.rnd.randint(-4, 4) for v in c])
+    if style == 'k_staffcap':
+        plate(p, f, GOLD_MAIL, GOLD_MAIL_DEEP, GOLD_LIGHT)
         for s_ in S:
             fx, fy, fw, fh = f[s_]
             for i in range(fw):
-                p.px((fx + i, fy + fh - 1), (220, 210, 190))
-    if style == 'm_staffring':
-        gold(p, f)
-    if style == 'm_ruff':
-        tufted(p, f, MAC_TIP, MAC_FUR, (214, 176, 112), depth=2, every=2)
-    if style == 'm_sleeve':
-        cloth(p, f, RED, fold=3)
-    if style == 'm_knee':
-        gold(p, f)
-        fx, fy, fw, fh = f['front']
-        w.disc(p, fx + fw / 2, fy + fh / 2, 1.0, (200, 50, 40))
-    if style == 'm_tassel':
-        pelt(p, f, (200, 30, 26), (110, 12, 12), (240, 90, 60))
-        for s_ in S:
-            w.tufts(p, f[s_], depth=2, every=2)
-    if style == 'm_strap':
-        w.leather(p, f, RED_DEEP, stitch=GOLD)
-    if style == 'm_cuff':
-        tufted(p, f, MAC_TIP, MAC_FUR, depth=1, every=2)
-    if style == 'm_bracer':
-        gold(p, f)
-        for s in S:
-            fx, fy, fw, fh = f[s]
-            for j in range(1, fh, 3):
-                for i in range(fw):
-                    p.px((fx + i, fy + j), GOLD_DEEP)
-    if style == 'm_staff':
-        staff_iron(p, f)
-        for s in S:
-            fx, fy, fw, fh = f[s]
-            for j in range(0, fh, 7):
-                p.px((fx + fw // 2, fy + j), k(IRON, 1.4))
-    if style == 'm_staffgold':
-        gold(p, f)
-        for s in S:
-            fx, fy, fw, fh = f[s]
-            for i in range(fw):
-                p.px((fx + i, fy + fh // 2), GOLD_DEEP)
+                p.px((fx + i, fy + fh // 3), GOLD_MAIL_DEEP)
+                p.px((fx + i, fy + 2 * fh // 3), GOLD_MAIL_DEEP)
 
 
 # ── Captains' skins ──────────────────────────────────────────────────────────
@@ -1275,6 +1279,14 @@ if __name__ == '__main__':
     build('false_zhu_bajie', BAJIE, paint_bajie, 'bajie', 65)
     build('false_sha_wujing', SHA, paint_sha, 'sha', 66)
     build('six_eared_macaque', MACAQUE, paint_macaque, 'macaque', 67)
+    import fighting_buddha_head as fbh
+    from fighting_buddha import BuddhaPainter
+    # his eyes a colder, paler gold, ringed in blood red: the one tell but his ears
+    fbh.generate_for(BuddhaPainter, 'six_eared_macaque_head', JAVA, 'macaque head', fbh.head_with_ears(3),
+                     eyes=((255, 236, 150), (214, 160, 60), (255, 252, 214), (170, 20, 20)), seed=78)
+    bg.UNITS = 256
+    bg.S = 2
+    bg.TEX = bg.UNITS * bg.S
 
 
 # ── Items ────────────────────────────────────────────────────────────────────
