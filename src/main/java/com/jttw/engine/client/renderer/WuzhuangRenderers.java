@@ -315,6 +315,22 @@ public final class WuzhuangRenderers {
             rightArm.xRot = -0.7f + Mth.cos(age * 0.07f) * 0.05f - stroke * 0.9f;
             rightArm.yRot = -0.25f + stroke * 0.8f;
             rightArm.zRot = 0.1f;
+            int sweep = e.sweepLeft();
+            if (sweep > ZhenyuanEntity.SWEEP_SHOWN) {
+                // the sweep's wind-up: the whisk lifted high over his head and whirled round, the horsetail streaming
+                float up = Math.min(1f, (ZhenyuanEntity.SWEEP_WIND_UP + ZhenyuanEntity.SWEEP_SHOWN - sweep) / 5f);
+                rightArm.xRot = -0.7f + (-2.2f + Mth.cos(age * 0.9f) * 0.25f) * up;
+                rightArm.yRot = -0.25f + Mth.sin(age * 0.9f) * 0.5f * up;
+                rightArm.zRot = 0.1f + Mth.cos(age * 0.9f) * 0.3f * up;
+                stroke = up;
+            } else if (sweep > 0) {
+                // the sweep: brought down and round before him, from his right side across to his left
+                float done = (ZhenyuanEntity.SWEEP_SHOWN - sweep) / (float) ZhenyuanEntity.SWEEP_SHOWN;
+                rightArm.xRot = -1.45f;
+                rightArm.yRot = -1.3f + 2.4f * done;
+                rightArm.zRot = 0.1f;
+                stroke = 1f;
+            }
             tail.xRot = -(rightArm.xRot + whisk.xRot) + 0.15f + Mth.sin(age * 0.08f) * 0.06f + stroke * 0.7f;
             hang(rightSleeve, rightArm, age);
             leftSleeve.xScale = leftSleeve.yScale = leftSleeve.zScale = 1f;

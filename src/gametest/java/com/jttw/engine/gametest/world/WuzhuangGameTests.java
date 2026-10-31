@@ -119,8 +119,8 @@ public class WuzhuangGameTests {
     private static IronGolem dummy(GameTestHelper h, BlockPos at) {
         IronGolem golem = h.spawn(EntityType.IRON_GOLEM, at);
         golem.setNoAi(true);
-        golem.getAttribute(Attributes.MAX_HEALTH).setBaseValue(10_000);
-        golem.setHealth(10_000);
+        golem.getAttribute(Attributes.MAX_HEALTH).setBaseValue(100_000_000);
+        golem.setHealth(100_000_000);
         sweepAround(h, golem);
         return golem;
     }
@@ -692,6 +692,52 @@ public class WuzhuangGameTests {
         });
     }
 
+    // ── Zhenyuan: the sweep of the whisk ────────────────────────────────
+
+    @GameTest(template = PLATFORM)
+    public static void theSweepOfHisWhiskStrikesAllWhoFightHimNear(GameTestHelper h) {
+        ZhenyuanEntity zh = immortal(h, ModEntities.ZHENYUAN.get(), new BlockPos(0, 2, 0), false);
+        IronGolem a = dummy(h, new BlockPos(3, 2, 2)), b = dummy(h, new BlockPos(1, 2, 4)), steps = dummy(h, new BlockPos(3, 2, 0)),
+                far = dummy(h, new BlockPos(5, 2, 5));
+        for (IronGolem g : List.of(a, b, steps, far)) {
+            g.setTarget(zh);
+            g.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1_000_000); // a level-103 blow is more than a golem
+            g.setHealth(1_000_000);
+        }
+        zh.setTarget(a);
+        float full = a.getHealth();
+        List<LivingEntity> foes = zh.sweepFoes();
+        check(h, foes.contains(a) && foes.contains(b) && foes.contains(steps) && !foes.contains(far), "within its reach, and not beyond: " + foes);
+        check(h, zh.beginSweep() && zh.sweeping() && !zh.beginSweep(), "he lifts the whisk, once");
+        for (int t = 1; t < ZhenyuanEntity.SWEEP_WIND_UP; t++) {
+            zh.tickSweep();
+            if (t == ZhenyuanEntity.SWEEP_WIND_UP / 2) steps.teleportTo(steps.getX() + 30, steps.getY(), steps.getZ());
+            check(h, zh.sweepLeft() > ZhenyuanEntity.SWEEP_SHOWN, "still whirling it overhead at tick " + t);
+        }
+        for (IronGolem g : List.of(a, b, steps, far)) eq(h, full, g.getHealth(), "nothing struck while it whirls");
+        zh.tickSweep();
+        double gale = ZhenyuanEntity.SWEEP * MobScaling.typicalHealth(ZhenyuanEntity.LEVEL);
+        close(h, gale, full - a.getHealth(), "the gale strikes the one");
+        close(h, gale, full - b.getHealth(), "and the other");
+        eq(h, full, steps.getHealth(), "not the one who stepped back in time");
+        eq(h, full, far.getHealth(), "not the one beyond it");
+        Vec3 out = a.position().subtract(zh.position()).multiply(1, 0, 1).normalize();
+        check(h, a.getDeltaMovement().multiply(1, 0, 1).dot(out) > 0.5, "blown back: " + a.getDeltaMovement());
+        check(h, ZhenyuanEntity.SWEEP <= com.jttw.engine.entity.zone.ZoneBoss.MOST_BLOW, "within a boss's blow");
+        h.succeed();
+    }
+
+    @GameTest(template = PLATFORM)
+    public static void theSweepSparesThoseWhoGaveHimNoCause(GameTestHelper h) {
+        ZhenyuanEntity zh = immortal(h, ModEntities.ZHENYUAN.get(), new BlockPos(0, 2, 0), false);
+        ServerPlayer p = player(h);
+        check(h, !zh.isFoe(p), "an innocent near him is spared");
+        zh.stagger(); // no parrying
+        zh.hurt(h.getLevel().damageSources().playerAttack(p), 1);
+        check(h, zh.struckLately(p) && zh.isFoe(p), "but not one who struck him");
+        h.succeed();
+    }
+
     // ── Zhenyuan: a fight to the death ──────────────────────────────────
 
     @GameTest(template = PLATFORM)
@@ -699,9 +745,9 @@ public class WuzhuangGameTests {
         openAir(h);
         ServerPlayer p = player(h);
         ZhenyuanEntity zh = immortal(h, ModEntities.ZHENYUAN.get(), new BlockPos(2, 2, 2), false);
-        close(h, ZhenyuanEntity.HITS * MobScaling.typicalHit(ZhenyuanEntity.LEVEL), zh.getMaxHealth(), "280 hits of a level-88 character");
+        close(h, ZhenyuanEntity.HITS * MobScaling.typicalHit(ZhenyuanEntity.LEVEL), zh.getMaxHealth(), "280 hits of a character of his level");
         eq(h, BossEvent.BossBarColor.YELLOW, zh.bossBar().getColor(), "his bar");
-        check(h, zh.getDisplayName().getString().endsWith("· Lv 88"), "named: " + zh.getDisplayName().getString());
+        check(h, zh.getDisplayName().getString().endsWith("· Lv 103"), "named: " + zh.getDisplayName().getString());
         zh.stagger();
         float full = zh.getHealth();
         zh.hurt(h.getLevel().damageSources().playerAttack(p), 1e9f);

@@ -31,6 +31,7 @@ public class StaffRestLayer extends RenderLayer<AbstractClientPlayer, PlayerMode
     public void render(PoseStack pose, MultiBufferSource buffers, int light, AbstractClientPlayer p,
                        float swing, float swingAmount, float partial, float age, float headYaw, float headPitch) {
         if (p.isInvisible() || !StaffStance.resting(p)) return;
+        if (com.jttw.engine.client.FightingBuddhaClient.drawnAsBuddha(p)) return; // his own, in red and gold (FightingBuddhaLayer)
         pose.pushPose();
         getParentModel().body.translateAndRotate(pose);
         pose.translate(X, Y, Z);

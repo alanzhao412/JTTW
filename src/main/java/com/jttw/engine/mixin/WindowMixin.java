@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * The dev clients that run on their own (the form gallery, the worldgen bench, the play-test pass,
  * with {@code -Djttw.backgroundWindow=true}) open behind whatever the developer is doing: the
- * window takes no focus when made or shown, and is put off the screen. It still draws (and its
+ * window is never shown, takes no focus, and is put off the screen. It still draws (and its
  * screenshots, read from the game's own framebuffer, come out whole); the runs themselves already
  * keep the game from pausing when it lacks focus.
  *
@@ -31,6 +31,9 @@ public abstract class WindowMixin {
         if (!jttw$background()) return;
         GLFW.glfwWindowHint(GLFW.GLFW_FOCUSED, GLFW.GLFW_FALSE);
         GLFW.glfwWindowHint(GLFW.GLFW_FOCUS_ON_SHOW, GLFW.GLFW_FALSE);
+        // never shown at all: an unfocused window still pulls a fullscreen game out of its
+        // fullscreen when it appears; the game draws into its own framebuffer either way
+        GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
     }
 
     @Inject(method = "<init>", at = @At("RETURN"))

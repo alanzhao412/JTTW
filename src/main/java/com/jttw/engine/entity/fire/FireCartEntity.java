@@ -28,7 +28,7 @@ import java.util.UUID;
  * and lit with his Samadhi fire. Each stands where it was set and every {@value #PUFF_EVERY}
  * ticks belches the fire round itself; while any of his carts stands, the five-element fire wards
  * him and every blow on him is halved ({@link RedBoyEntity#CART_WARD}). Break them first:
- * {@value #HITS} ordinary hits of a level-77 character each. It is a thing, not a creature: it
+ * {@value #HITS} ordinary hits of a level-92 character each. It is a thing, not a creature: it
  * leaves nothing, pays no XP, and burns out once its master is gone.
  */
 public class FireCartEntity extends Mob {

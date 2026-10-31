@@ -58,7 +58,7 @@ public class ToughGameTests {
     public static void toughStoneStandsTheWeakAndGivesToTheStrong(GameTestHelper h) {
         ServerPlayer weak = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
         ServerPlayer strong = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
-        PlayerLevel.setLevel(strong, 100);
+        PlayerLevel.setLevel(strong, 99); // short of the Fighting Buddha
         BlockPos at = new BlockPos(2, 2, 2);
         h.setBlock(at, ModBlocks.GRAVE_TUFF.get());
         blastBeside(h, weak, at);
@@ -119,7 +119,7 @@ public class ToughGameTests {
     @GameTest(template = PLATFORM, batch = "staff_physics", timeoutTicks = 200)
     public static void aMightyStaffFallsThroughObsidian(GameTestHelper h) {
         ServerPlayer owner = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
-        PlayerLevel.setLevel(owner, 100);
+        PlayerLevel.setLevel(owner, 99); // the mightiest short of the Fighting Buddha (at 100 nothing holds)
         // far enough that it is falling fast when it strikes (one it leans on as it tips, it only touches)
         wall(h, Blocks.OBSIDIAN, 5);
         PlacedStaffEntity staff = felled(h, owner, 4f);
@@ -139,7 +139,7 @@ public class ToughGameTests {
     @GameTest(template = PLATFORM, batch = "staff_physics", timeoutTicks = 200)
     public static void aToppledStaffTipsOverRatherThanDiggingIn(GameTestHelper h) {
         ServerPlayer owner = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
-        PlayerLevel.setLevel(owner, 100);
+        PlayerLevel.setLevel(owner, 99); // short of the Fighting Buddha
         for (int x = 0; x < 5; x++) for (int z = 0; z < 5; z++) h.setBlock(new BlockPos(x, 1, z), Blocks.STONE);
         PlacedStaffEntity staff = felled(h, owner, 2f);
         double floor = h.absolutePos(new BlockPos(2, 2, 1)).getY();
@@ -158,15 +158,33 @@ public class ToughGameTests {
         });
     }
 
+    /** Bedrock holds against the mightiest short of the Fighting Buddha (Wukong at 99; at 100 nothing holds, below). */
     @GameTest(template = PLATFORM, batch = "staff_physics", timeoutTicks = 200)
     public static void bedrockStopsEvenTheMightiest(GameTestHelper h) {
         ServerPlayer owner = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
-        PlayerLevel.setLevel(owner, 100);
+        PlayerLevel.setLevel(owner, 99);
         wall(h, Blocks.BEDROCK);
         PlacedStaffEntity staff = felled(h, owner, 4f);
         h.runAfterDelay(140, () -> {
             check(h, elevation(staff) > 35, "leaning on the bedrock: " + elevation(staff));
             for (int y = 2; y < 10; y++) h.assertBlockPresent(Blocks.BEDROCK, new BlockPos(2, y, 3));
+            h.succeed();
+        });
+    }
+
+    /** The Fighting Buddha's (Wukong at 100) staff, felled, smashes through bedrock as through stone. */
+    @GameTest(template = PLATFORM, batch = "theFightingBuddhasStaffBreaksBedrock", timeoutTicks = 200)
+    public static void theFightingBuddhasStaffBreaksBedrock(GameTestHelper h) {
+        ServerPlayer owner = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
+        PlayerLevel.setLevel(owner, 100);
+        wall(h, Blocks.BEDROCK);
+        felled(h, owner, 4f);
+        h.runAfterDelay(140, () -> {
+            int broken = 0;
+            for (int x = 0; x < 5; x++) for (int y = 2; y < 10; y++) {
+                if (!h.getBlockState(new BlockPos(x, y, 3)).is(Blocks.BEDROCK)) broken++;
+            }
+            check(h, broken > 0, "it broke through the bedrock");
             h.succeed();
         });
     }
@@ -198,7 +216,7 @@ public class ToughGameTests {
     @GameTest(template = PLATFORM, timeoutTicks = 100)
     public static void aMightyStaffGrowsThroughIt(GameTestHelper h) {
         ServerPlayer owner = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
-        PlayerLevel.setLevel(owner, 100);
+        PlayerLevel.setLevel(owner, 99); // short of the Fighting Buddha
         for (int x = 0; x < 5; x++) for (int z = 0; z < 5; z++) h.setBlock(new BlockPos(x, 8, z), Blocks.OBSIDIAN);
         PlacedStaffEntity staff = planted(h, owner);
         for (int i = 0; i < 20; i++) staff.adjustScale(1, owner);

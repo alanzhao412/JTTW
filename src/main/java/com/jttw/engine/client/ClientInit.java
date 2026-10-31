@@ -161,6 +161,7 @@ public final class ClientInit {
         event.registerLayerDefinition(com.jttw.engine.client.renderer.WhiteElephantRenderer.LAYER, com.jttw.engine.client.renderer.WhiteElephantRenderer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.WhiteElephantRenderer.TRUE_LAYER, com.jttw.engine.client.renderer.WhiteElephantRenderer::trueLayer);
         // the open world's yaoguai
+        event.registerLayerDefinition(com.jttw.engine.client.renderer.FightingBuddhaLayer.LAYER, com.jttw.engine.client.renderer.FightingBuddhaLayer::layer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.WildRenderers.GOBLIN_LAYER, com.jttw.engine.client.renderer.WildRenderers::goblinLayer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.WildRenderers.KOBOLD_LAYER, com.jttw.engine.client.renderer.WildRenderers::koboldLayer);
         event.registerLayerDefinition(com.jttw.engine.client.renderer.WildRenderers.WOLFMAN_LAYER, com.jttw.engine.client.renderer.WildRenderers::wolfmanLayer);
@@ -177,6 +178,7 @@ public final class ClientInit {
                 renderer.addLayer(new com.jttw.engine.client.renderer.ArmamentLayer(renderer));
                 renderer.addLayer(new com.jttw.engine.client.renderer.BeastFormLayer(renderer));
                 renderer.addLayer(new com.jttw.engine.client.renderer.StaffRestLayer(renderer));
+                renderer.addLayer(new com.jttw.engine.client.renderer.FightingBuddhaLayer(renderer, event.getEntityModels()));
             }
         }
     }
@@ -373,6 +375,7 @@ public final class ClientInit {
                 wasSlot1Down = false;
                 wasSlot2Down = false;
                 wasSlot3Down = false;
+                EyeLaserInput.cancel();
                 return;
             }
 
@@ -472,7 +475,9 @@ public final class ClientInit {
                                 new ActivateAbilityPacket(heldIndex[2] = ClientAbilityData.serverIndex(2), AbilityAction.START));
                         ChargeMeter.pressed(slot2.id());
                     } else if (slot2Type != null) {
-                        activateSlot(mc, 2);
+                        // the Golden Eyes' laser waits for N to come up: held, the wheel sets its output
+                        if (EyeLaserInput.isLaser(mc, slot2)) EyeLaserInput.press();
+                        else activateSlot(mc, 2);
                         while (ABILITY_SLOT_2.consumeClick()) {}
                     }
                 } else if (!isDown && wasSlot2Down) {
@@ -480,6 +485,8 @@ public final class ClientInit {
                         NetworkHandler.sendToServer(
                                 new ActivateAbilityPacket(heldIndex[2], AbilityAction.STOP));
                         ChargeMeter.released();
+                    } else if (EyeLaserInput.release(mc)) {
+                        activateSlot(mc, 2);
                     }
                 }
                 wasSlot2Down = isDown;
@@ -529,6 +536,10 @@ public final class ClientInit {
                 case MENU -> {
                     // 18 / 36 / 72 Transformations: the character's own menu
                     if (entry.id().endsWith("_transform")) TransformationScreen.openForLocalPlayer();
+                    // the Fighting Buddha's Somersault Anywhere: the server sends the menu, of who and what is there now
+                    else if (entry.id().equals(com.jttw.engine.character.wukong.FightingBuddha.TRAVEL)) {
+                        NetworkHandler.sendToServer(new ActivateAbilityPacket(ClientAbilityData.serverIndex(slot), AbilityAction.USE));
+                    }
                 }
                 case TOGGLE -> {
                     NetworkHandler.sendToServer(

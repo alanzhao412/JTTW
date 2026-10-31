@@ -59,7 +59,8 @@ class KunlunPlacementTest {
     @Test
     void itIsAPlaceOfNoBandLastOfAll() {
         assertFalse(K.hasLevelBand(), "no band: no one is sent there by level, it pays no XP");
-        assertEquals(Zones.ALL.size() - 1, Zones.ALL.indexOf(K), "last: it keeps clear of every zone and of Fengdu");
+        // after Fengdu and every zone before it (the zones added after keep clear of it in turn: ZoneMap)
+        assertTrue(Zones.ALL.indexOf(K) > Zones.ALL.indexOf(Zones.FENGDU), "after Fengdu: it keeps clear of every zone before it and of Fengdu");
         assertTrue(Zones.MAP.zones().contains(K));
         assertSame(K, Zones.byBiome(Zones.KUNLUN_BIOME));
         assertEquals(Zones.Vertical.WHOLE_COLUMN, K.vertical(), "the whole column: no zone shares its ground at any height");

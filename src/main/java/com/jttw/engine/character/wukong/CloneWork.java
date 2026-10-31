@@ -46,11 +46,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * What a shadow clone does with its hands, as a player would: gathers (mines the ores it can see
- * with a pickaxe good enough for them, fells trees with an axe, brings in ripe crops and replants
- * them), keeps what it gathers in its pack, empties the pack into a chest when it is nearly full
- * (or, with no chest about, sends its owner the most valuable of it), and, badly hurt, lights a
- * Ring of Fire of its own.
+ * What a shadow clone gathers and keeps, as a player would: the ores it has a good enough pickaxe
+ * for, trees (logs with their own leaves on them, never a log house) it has an axe for, ripe
+ * crops (replanted); its pack, emptied into a chest when it is nearly full (or, with no chest
+ * about, by sending its owner the most valuable of it), or handed to him when it comes back from
+ * its work; and, badly hurt, a Ring of Fire of its own. How it goes about the gathering is
+ * {@link CloneMining}'s.
  *
  * <p>Its tools are copies of its owner's best: a clone is one of Wukong's hairs, and what he carries
  * it carries. It mines at the pace that tool would, block by block.
@@ -59,13 +60,12 @@ public final class CloneWork {
 
     private CloneWork() {}
 
-    /** How far round its work site a working clone works. */
-    public static final int WORK_RADIUS = 24;
-    /** How far from its owner a following clone gathers. */
-    public static final int FOLLOW_RADIUS = 8;
-    /** How far it looks for something to gather, and how close it must be to work a block. */
-    public static final int SEARCH = 12;
-    public static final double REACH = 4.0;
+    /** How far round its work site a working clone works, across and up or down. */
+    public static final int WORK_RADIUS = 16, WORK_DEPTH = 10;
+    /** How far from its owner a following clone gathers, across and up or down. */
+    public static final int FOLLOW_RADIUS = 8, FOLLOW_DEPTH = 4;
+    /** How far it reaches to work a block: a player's reach. */
+    public static final double REACH = CloneSense.REACH;
     /** How long a working clone finds nothing to do before it goes back to its owner. */
     public static final int IDLE_BEFORE_FOLLOW = 20 * 20;
     /** When its pack counts as nearly full: this few slots left. */
@@ -73,24 +73,85 @@ public final class CloneWork {
     /** How far it looks for a chest to empty its pack into. */
     public static final int CHEST_RANGE = 24;
 
+    /**
+     * Hands its owner everything in its pack it can (into his inventory; what he has no room for
+     * stays in the pack). Returns how many items went.
+     */
+    public static int handOver(WuCloneEntity clone, ServerPlayer owner) {
+        SimpleContainer pack = clone.pack();
+        int given = 0;
+        for (int i = 0; i < pack.getContainerSize(); i++) {
+            ItemStack stack = pack.getItem(i);
+            if (stack.isEmpty()) continue;
+            int before = stack.getCount();
+            owner.getInventory().add(stack);
+            given += before - stack.getCount();
+        }
+        pack.setChanged();
+        if (given > 0) {
+            if (clone.level() instanceof ServerLevel level) {
+                level.sendParticles(ParticleTypes.CLOUD, clone.getX(), clone.getY() + 1, clone.getZ(), 8, 0.3, 0.5, 0.3, 0.02);
+            }
+            owner.displayClientMessage(Component.literal("§eA clone hands you what it gathered (" + given + ")."), true);
+        }
+        return given;
+    }
+
     /** Its Ring of Fire: lit below this share of its health, for so long, so often, for so much of its Qi. */
     public static final float RING_AT_HEALTH = 1f / 3;
     public static final int RING_TICKS = 100, RING_COOLDOWN = 400;
     public static final float RING_QI = 10f;
 
-    /** Blocks some clone is already working, so two do not work one. */
-    private static final Set<Long> CLAIMED = ConcurrentHashMap.newKeySet();
-
     // ── What it can gather, and with what ────────────────────────────────
 
-    private static boolean isOre(BlockState s) {
+    public static boolean isOre(BlockState s) {
         return s.is(BlockTags.GOLD_ORES) || s.is(BlockTags.IRON_ORES) || s.is(BlockTags.COPPER_ORES) || s.is(BlockTags.COAL_ORES)
                 || s.is(BlockTags.LAPIS_ORES) || s.is(BlockTags.REDSTONE_ORES) || s.is(BlockTags.DIAMOND_ORES)
                 || s.is(BlockTags.EMERALD_ORES) || s.is(Blocks.NETHER_QUARTZ_ORE) || s.is(Blocks.ANCIENT_DEBRIS);
     }
 
-    private static boolean isRipeCrop(BlockState s) {
+    public static boolean isRipeCrop(BlockState s) {
         return s.getBlock() instanceof CropBlock crop && crop.isMaxAge(s);
+    }
+
+    /** Whether a clone gathers this block: an ore, a log, a ripe crop. */
+    public static boolean workable(BlockState s) {
+        return isRipeCrop(s) || s.is(BlockTags.LOGS) || isOre(s);
+    }
+
+    /**
+     * Whether two blocks are of one vein (or one tree): the same ore (stone or deepslate alike),
+     * logs of one kind.
+     */
+    public static boolean sameVein(BlockState a, BlockState b) {
+        if (a.getBlock() == b.getBlock()) return !isRipeCrop(a);
+        if (!isOre(a) || !isOre(b)) return false;
+        for (var tag : List.of(BlockTags.GOLD_ORES, BlockTags.IRON_ORES, BlockTags.COPPER_ORES, BlockTags.COAL_ORES,
+                BlockTags.LAPIS_ORES, BlockTags.REDSTONE_ORES, BlockTags.DIAMOND_ORES, BlockTags.EMERALD_ORES)) {
+            if (a.is(tag) && b.is(tag)) return true;
+        }
+        return false;
+    }
+
+    /** Whether these logs are a tree: some leaves the tree grew (not placed) touch them. */
+    public static boolean isTree(net.minecraft.world.level.Level level, java.util.Collection<BlockPos> logs) {
+        for (BlockPos p : logs) {
+            for (int dx = -1; dx <= 1; dx++) for (int dy = -1; dy <= 1; dy++) for (int dz = -1; dz <= 1; dz++) {
+                BlockState s = level.getBlockState(p.offset(dx, dy, dz));
+                if (s.is(BlockTags.LEAVES) && !(s.hasProperty(net.minecraft.world.level.block.LeavesBlock.PERSISTENT)
+                        && s.getValue(net.minecraft.world.level.block.LeavesBlock.PERSISTENT))) return true;
+            }
+        }
+        return false;
+    }
+
+    /** How much a clone wants to gather this block: the rarest ores first, then the common, trees and crops last. */
+    public static int worth(BlockState s) {
+        if (s.is(Blocks.ANCIENT_DEBRIS)) return 10;
+        if (s.is(BlockTags.DIAMOND_ORES) || s.is(BlockTags.EMERALD_ORES)) return 8;
+        if (s.is(BlockTags.GOLD_ORES) || s.is(BlockTags.LAPIS_ORES) || s.is(BlockTags.REDSTONE_ORES)) return 4;
+        if (isOre(s)) return 2;
+        return 0;
     }
 
     /** Whether this pickaxe or axe can take the block, as a player's would (it is the right tool, of a high enough tier). */
@@ -155,9 +216,17 @@ public final class CloneWork {
 
     /** Whether the clone may work here: round its work site, or near its owner when it follows him. */
     static boolean inArea(WuCloneEntity clone, ServerPlayer owner, BlockPos pos) {
+        return inArea(clone, owner, pos, 0);
+    }
+
+    /** As {@link #inArea(WuCloneEntity, ServerPlayer, BlockPos)}, with {@code slack} blocks more. */
+    static boolean inArea(WuCloneEntity clone, ServerPlayer owner, BlockPos pos, int slack) {
         BlockPos site = clone.workSite();
-        if (site != null) return site.distSqr(pos) <= (double) WORK_RADIUS * WORK_RADIUS;
-        return owner.blockPosition().distSqr(pos) <= (double) FOLLOW_RADIUS * FOLLOW_RADIUS;
+        BlockPos centre = site != null ? site : owner.blockPosition();
+        int r = (site != null ? WORK_RADIUS : FOLLOW_RADIUS) + slack;
+        int depth = (site != null ? WORK_DEPTH : FOLLOW_DEPTH) + slack;
+        int dx = pos.getX() - centre.getX(), dz = pos.getZ() - centre.getZ();
+        return dx * dx + dz * dz <= r * r && Math.abs(pos.getY() - centre.getY()) <= depth;
     }
 
     // ── The pack ─────────────────────────────────────────────────────────
@@ -298,153 +367,6 @@ public final class CloneWork {
     }
 
     // ── Goals ────────────────────────────────────────────────────────────
-
-    /**
-     * Gathering: finds the nearest thing in its area it can see and has the tool for, goes to it,
-     * and works it with that tool in hand at the tool's pace, as a player would. Not while it is
-     * fighting or its pack is nearly full.
-     */
-    static final class GatherGoal extends Goal {
-
-        private final WuCloneEntity clone;
-        @Nullable private BlockPos target;
-        private ItemStack tool = ItemStack.EMPTY;
-        private int progress, needed, travel, searchIn;
-
-        GatherGoal(WuCloneEntity clone) {
-            this.clone = clone;
-            setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
-        }
-
-        private boolean fighting() {
-            return clone.getTarget() != null && clone.getTarget().isAlive();
-        }
-
-        @Override
-        public boolean canUse() {
-            if (fighting() || nearlyFull(clone.pack())) return false;
-            if (--searchIn > 0) return false;
-            searchIn = 20;
-            return find();
-        }
-
-        @Override
-        public boolean canContinueToUse() {
-            return target != null && !fighting() && travel < 200 && workable(clone.level().getBlockState(target));
-        }
-
-        @Override
-        public boolean requiresUpdateEveryTick() {
-            return true;
-        }
-
-        private boolean workable(BlockState s) {
-            return isRipeCrop(s) || s.is(BlockTags.LOGS) || isOre(s);
-        }
-
-        /** The nearest block it can and may gather, that it can see (a crop: anywhere in reach). */
-        private boolean find() {
-            ServerPlayer owner = WuCloneManager.resolveOwner(clone);
-            if (owner == null) return false;
-            Vec3 eye = clone.getEyePosition();
-            BlockPos at = clone.blockPosition();
-            BlockPos best = null;
-            double bestDist = Double.MAX_VALUE;
-            BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
-            for (int dx = -SEARCH; dx <= SEARCH; dx++) for (int dy = -SEARCH / 2; dy <= SEARCH / 2; dy++) for (int dz = -SEARCH; dz <= SEARCH; dz++) {
-                double d = dx * dx + dy * dy + dz * dz;
-                if (d >= bestDist) continue;
-                p.setWithOffset(at, dx, dy, dz);
-                BlockState s = clone.level().getBlockState(p);
-                if (!workable(s) || CLAIMED.contains(p.asLong()) || !inArea(clone, owner, p) || toolFor(owner, s) == null) continue;
-                if (!isRipeCrop(s)) {
-                    BlockHitResult hit = clone.level().clip(new ClipContext(eye, Vec3.atCenterOf(p),
-                            ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, clone));
-                    if (hit.getType() != HitResult.Type.BLOCK || !hit.getBlockPos().equals(p)) continue;
-                }
-                best = p.immutable();
-                bestDist = d;
-            }
-            if (best == null) return false;
-            target = best;
-            CLAIMED.add(best.asLong());
-            return true;
-        }
-
-        @Override
-        public void start() {
-            progress = 0;
-            needed = 0;
-            travel = 0;
-            clone.markBusy();
-        }
-
-        @Override
-        public void stop() {
-            if (target != null) {
-                CLAIMED.remove(target.asLong());
-                clone.level().destroyBlockProgress(clone.getId(), target, -1);
-            }
-            target = null;
-            clone.setGathering(false);
-            clone.getNavigation().stop();
-        }
-
-        @Override
-        public void tick() {
-            if (target == null) return;
-            ServerPlayer owner = WuCloneManager.resolveOwner(clone);
-            if (owner == null) return;
-            clone.markBusy();
-            Vec3 centre = Vec3.atCenterOf(target);
-            clone.getLookControl().setLookAt(centre.x, centre.y, centre.z);
-            if (clone.getEyePosition().distanceTo(centre) > REACH) {
-                travel++;
-                if (clone.getNavigation().isDone() || travel % 20 == 0) {
-                    clone.getNavigation().moveTo(target.getX() + 0.5, target.getY(), target.getZ() + 0.5, 1.0);
-                }
-                return;
-            }
-            clone.getNavigation().stop();
-            ServerLevel level = (ServerLevel) clone.level();
-            BlockState s = level.getBlockState(target);
-            if (needed == 0) {
-                ItemStack t = toolFor(owner, s);
-                if (t == null) { // he no longer has the tool for it
-                    target = null;
-                    return;
-                }
-                tool = t;
-                clone.setGathering(true);
-                clone.setItemSlot(EquipmentSlot.MAINHAND, tool.copy());
-                // as fast as that tool takes it in a player's hand
-                float hardness = s.getDestroySpeed(level, target);
-                float speed = tool.isEmpty() ? 1f : Math.max(1f, tool.getDestroySpeed(s));
-                needed = Math.max(4, (int) Math.ceil(hardness * 30 / speed));
-            }
-            if (progress % 5 == 0) clone.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
-            level.destroyBlockProgress(clone.getId(), target, (int) (progress * 10f / needed));
-            if (++progress < needed) return;
-
-            List<ItemStack> drops = Block.getDrops(s, level, target, level.getBlockEntity(target), clone, tool);
-            level.destroyBlock(target, false, clone);
-            if (s.getBlock() instanceof CropBlock crop && level.getBlockState(target.below()).is(Blocks.FARMLAND)) {
-                ItemStack seed = crop.getCloneItemStack(level, target, s);
-                for (ItemStack d : drops) {
-                    if (d.is(seed.getItem())) { // replant from the harvest
-                        d.shrink(1);
-                        level.setBlock(target, crop.defaultBlockState(), Block.UPDATE_ALL);
-                        break;
-                    }
-                }
-            }
-            store(clone, drops);
-            CLAIMED.remove(target.asLong());
-            level.destroyBlockProgress(clone.getId(), target, -1);
-            target = null;
-            searchIn = 0; // straight on to the next
-        }
-    }
 
     /**
      * Emptying its pack, when it is nearly full: into the nearest chest or barrel with room, or,

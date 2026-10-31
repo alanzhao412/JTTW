@@ -50,13 +50,13 @@ import java.util.List;
  * Red Boy (红孩儿), the Holy Child King (圣婴大王) of the Fire Cloud Cave on Mount Haohao, son of the
  * Bull Demon King and Princess Iron Fan (chapters 40–42): a child in a red stomacher, his hair in
  * two tufts, his own fire-tipped spear in his hands ({@link com.jttw.engine.item.RedBoySpearItem}), who three hundred years in the Flaming Mountains made
- * master of the True Samadhi Fire. He wanted to eat the Tang Monk. Level 77, 320 ordinary hits (a
+ * master of the True Samadhi Fire. He wanted to eat the Tang Monk. Level 92 (the top of the Fire Mountain's band and fifteen), 320 ordinary hits (a
  * group's fight), a red bar; a {@link ZoneBoss} in the cave's inner hall.
  * <ul>
  *   <li>his <b>spear</b>: thrusts that set his foe alight;</li>
  *   <li><b>the True Samadhi Fire</b> ({@link SamadhiFire}): every {@value #BREATH_EVERY} ticks he
  *       stops, strikes his nose twice ({@value #WINDUP} ticks), and fire pours from his mouth and
- *       nose in a cone {@value #BREATH_RANGE} blocks long: a blow of a quarter of a level-77
+ *       nose in a cone {@value #BREATH_RANGE} blocks long: a blow of a quarter of a level-92
  *       character's health, then the burning, which water does not put out but feeds, and Fire
  *       Resistance only halves; flames are left on the ground;</li>
  *   <li><b>the five carts</b> (phase 1, at two thirds): his five little carts are set out round
@@ -70,8 +70,8 @@ import java.util.List;
  */
 public class RedBoyEntity extends ZoneBoss {
 
-    public static final int LEVEL = 77;
-    /** 320 ordinary hits of a level-77 character; a spear thrust of 30% of their health; his breath's blow a quarter. */
+    public static final int LEVEL = ZoneBoss.levelOver(Zones.FIRE_MOUNTAIN);
+    /** 320 ordinary hits of a level-92 character; a spear thrust of 30% of their health; his breath's blow a quarter. */
     public static final double HITS = 320, SPEAR = 0.30, BREATH = 0.25;
     public static final double HEALTH = HITS * MobScaling.typicalHit(LEVEL);
     /** How often he breathes the fire (and, from a third, how often then), how long he strikes his nose first. */

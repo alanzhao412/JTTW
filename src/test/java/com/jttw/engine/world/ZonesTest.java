@@ -58,9 +58,21 @@ class ZonesTest {
         int prevFar = 0;
         for (Zones.Zone zone : Zones.MAP.zones()) {
             ZoneLayout l = zone.layout();
-            if (zone == Zones.KUNLUN || sharesAnEarlierBand(zone)) {
-                // a place of no band, kept to the west in the middle rings, not past the last; or a zone
-                // of a band an earlier one already holds (Flower-Fruit Mountain, the first band's), in that band's rings
+            if (zone == Zones.FLOWER_FRUIT) {
+                // of the first band (in White Bone Ridge's), its ring a little past the ridge's, out over the sea
+                assertTrue(sharesAnEarlierBand(zone), zone.id() + ": a band an earlier zone holds");
+                assertTrue(l.near() > ZoneLayout.WHITE_BONE.near() && l.far() <= ZoneLayout.BOTTOMLESS_CAVE.far() + 200, zone.id());
+                assertTrue(l.near() > l.margin(), zone.id() + ": clear of spawn");
+                continue;
+            }
+            if (zone == Zones.BLACK_WIND) {
+                // a zone sharing White Bone Ridge's band shares its ring
+                assertEquals(ZoneLayout.WHITE_BONE.near(), l.near(), zone.id());
+                assertEquals(ZoneLayout.WHITE_BONE.far(), l.far(), zone.id());
+                continue;
+            }
+            if (zone == Zones.KUNLUN) {
+                // a place of no band, kept to the west in the middle rings, not past the last
                 assertTrue(l.near() > l.margin(), zone.id() + ": clear of spawn");
                 continue;
             }

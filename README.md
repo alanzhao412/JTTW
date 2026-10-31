@@ -142,6 +142,163 @@ Unstoppable Force III, Primordial Smite III, the Bell of Taiyi. Pinned: Territor
 Wave III's bubble, the Frost Head's shard (and, against players, Biancheng's bell and the Daoist
 disciples' binding talismans).
 
+### The Victorious Fighting Buddha (斗战胜佛)
+
+At level 100, the cap, Sun Wukong becomes the Victorious Fighting Buddha, as the Buddha names him at
+the journey's end ([`FightingBuddha`](src/main/java/com/jttw/engine/character/wukong/FightingBuddha.java)).
+It is a free milestone, reached by level alone. It is announced once, with a title, a chat message,
+a bell and a burst of gold, and the server is told too. A save that is already at level 100 gets the
+announcement on its next login. The character screen's Skills tab (H) lists the milestone and its four
+powers, and the skill tree (K) shows them beneath the tree. No other character gets any of this, and
+neither does Wukong below level 100.
+
+- **Indestructible Body.** Nothing damages him: other players, mobs, bosses, arrows, fire, lava,
+  falling, drowning, the void, magic, poison, wither, explosions, lightning and anything else. The hit
+  is refused before it lands, so he loses no health, does not flinch and is not knocked back.
+  Explosions do not push him either. No harmful effect takes hold, including the mod's Stunned and
+  Pinned. Anything that gets past the events anyway (health set down directly, fire, frost, lost air)
+  is undone every tick. In the void he is unharmed and is left where he is: he can fall through it or
+  stay in it. Only an operator's `/kill` still kills him.
+- **Appear and Disappear** (Shift + B, a toggle,
+  [`BuddhaVanish`](src/main/java/com/jttw/engine/character/wukong/BuddhaVanish.java)). The server
+  holds this state and saves it. While he is vanished, no other player's game is told he exists
+  (`ServerPlayerVanishMixin` stops the server pairing him with their clients, as for a spectator), so
+  they see no body, armour, held item, name tag, shadow or particles. He is also silent. Every mob
+  that was targeting him lets go: its target, its brain's attack target and grudge, and a neutral
+  mob's anger. No mob can take him as a target, and mob senses count him as unseen. When he
+  reappears, the other players' games are told at once, with a golden flash and a chime. His own HUD
+  shows that he is vanished.
+- **Breaks Anything** ([`BuddhaBreaking`](src/main/java/com/jttw/engine/character/wukong/BuddhaBreaking.java)).
+  Every block his abilities break ignores hardness and every protection. This covers the Ruyi Jingu
+  Bang's blasts, its growing and its fall, the Qi Wave and the Fiery Golden Eyes' laser. It includes
+  bedrock (the world's floor too), obsidian, reinforced deepslate, the mod's tough stone, the
+  Bottomless Cave's rock, Lion-Camel's fabric and gates, and the technical blocks: command, structure
+  and jigsaw blocks, barriers, light blocks, and end portals and gateways. There are no exceptions.
+  - Carving budgets still apply, but no block costs him more than stone does.
+  - No block resists his blasts more than stone, so they make the crater they would make in stone.
+  - His shadow clones' mining breaks the same blocks, bedrock included, at the pace of stone.
+- **Somersault Anywhere** (Shift + M, a menu,
+  [`SomersaultTravel`](src/main/java/com/jttw/engine/character/wukong/SomersaultTravel.java)). The key
+  asks the server for the menu, which lists:
+  - every online player, in any realm
+  - the world spawn and his respawn point
+  - each realm
+  - each zone's region (the four seas each) and its boss's lair
+  - Fengdu's Gate of Ghosts, and Mount Kunlun's palace and Jade Pool
+  - Hell's arrival and each of the Ten Courts
+  - Heaven's arrival and the Jade Palace
+  - typed coordinates (x, y, z and a realm)
+
+  The server finds where the choice is and sets him down at the nearest spot with solid ground and
+  room for his body. If there is none, it uses the nearest open space, then the top of the column. If
+  he is enclosed in rock, room is cleared for him. He never lands inside a block. A golden streak
+  rises where he leaves and falls where he lands (nothing shows if he is vanished). The cooldown is
+  3 seconds.
+
+He looks the part ([`FightingBuddhaLayer`](src/main/java/com/jttw/engine/client/renderer/FightingBuddhaLayer.java),
+model and skins from [`assets_source/fighting_buddha.py`](assets_source/fighting_buddha.py)). Once he
+ascends, his own body is no longer drawn. His armour and cape are hidden too (`BuddhaArmourMixin`,
+`BuddhaCapeMixin`). In their place he is drawn as the Monkey King made Buddha, a little larger than a
+man:
+- **Head:** golden fur, a heart-shaped face of bare skin ringed in red, glowing red-gold eyes, a short
+  muzzle, round ears and ruffs of fur.
+- **Crown:** the golden fillet, now a jewelled Buddha's crown of five lotus-petal plaques, with red
+  silk ribbons flaring behind.
+- **Robe:** a crimson monk's robe with a crossed white collar and wide gold-hemmed sleeves, falling
+  past the knees to cloud shoes.
+- **Kasaya:** worn over the left shoulder with the right bare. It is patched in saffron and gold
+  between gold-thread seams, with a rolled edge and folds across the breast and back, a gold ring
+  clasp, a hanging panel on the left arm, and a gold-thread cord with tassels. Its apron and panels
+  hang past the knees.
+- **Ornaments:** prayer beads of bodhi wood with a jade guru bead, wrist malas and a gold armlet.
+- **Staff:** the Ruyi Jingu Bang in red lacquer banded in gold, with gold end caps. He holds it
+  upright in his hand, or carries it across his shoulder when at ease.
+- **Light:** behind his head a halo with a disc of light, an inner and a beaded outer ring of gold,
+  and two layers of golden flame. Behind his body is an almond-shaped mandorla of light, pointed at
+  the top, edged in gold and fringed with flame. The light is drawn full-bright, and motes of gold
+  drift round him.
+
+### Shadow Clones
+
+Sun Wukong's hair clones (Shadow Clone I–III: B summons one more, 10 Qi, up to 1 / 2 / 9 at
+once; they drain Qi while out). Each is a second Wukong with his health, attack, resistances and
+weapon, and copies of his best pickaxe and axe when it works. It acts as a player would
+([`WuCloneManager`](src/main/java/com/jttw/engine/character/wukong/WuCloneManager.java),
+[`CloneMining`](src/main/java/com/jttw/engine/character/wukong/CloneMining.java),
+[`CloneCombat`](src/main/java/com/jttw/engine/character/wukong/CloneCombat.java),
+[`CloneSense`](src/main/java/com/jttw/engine/character/wukong/CloneSense.java)).
+
+**Commands.** All of them answer on the action bar.
+- **Sneak + use a clone**: cycles that clone through **Follow me** → **Work here** → **Guard
+  here**. Work and Guard take the spot where the clone stands.
+  - *Follow me*: it keeps with you, fights at your side, and gathers what lies open near you
+    (within 8 blocks).
+  - *Work here*: it mines, fells and harvests within 16 blocks of the spot (10 up or down). It
+    also digs to buried ores. When there is nothing left to do, it comes back and hands you what
+    it gathered.
+  - *Guard here*: it holds the spot and fights whatever comes near.
+- **Use a clone**: opens its pack (27 slots). Only you can.
+- **B at the cap**: calls every clone back. Each drops what it was doing, follows you again,
+  and hands you its pack when it reaches you. One that is far off appears by you.
+- **Hit a clone**: dismisses it. Its pack spills where it stood.
+
+**Gathering.**
+- *What it takes*: ores it has a good enough pickaxe for, ripe crops (it replants them), and
+  trees it has an axe for. A tree is logs that its own grown leaves touch. Logs without them,
+  such as a log house, are left alone.
+- *Finding work*: it sweeps its area a layer at a time. A following clone takes only what lies
+  open to the air. A working one also finds what is buried.
+- *Sharing work*: it claims a whole vein (or tree), every connected block of it. Its fellows go
+  to other veins, so two clones never work one block. It weighs the rarest ores first and veins
+  away from where the others already are. It finishes a vein, including blocks that were hidden
+  until it opened them.
+- *Reach*: it works a block from a player's reach, 4.5 blocks from its eye to the nearest point
+  of the block, with the face in sight. If it can already do that, it works from where it
+  stands. Otherwise it picks a spot from which it could, never on the block or its vein, and
+  paths there. When something is in the way within reach, it digs through it.
+- *Hard-to-reach work* (Work here only): it tunnels, two blocks high, level or in stairs up and
+  down. It bridges gaps with stone or dirt from its pack. It pillars up under what is overhead,
+  and afterwards breaks its pillar back down and takes the blocks with it.
+- *What it digs*: natural ground only (stone, deepslate, netherrack, dirt, sand, gravel, leaves
+  and the like), never anything built. Each break goes through the break event a player's would,
+  as you, so protected places stay protected. Ordinary clones respect hardness: bedrock, obsidian
+  and the lairs' rock hold. The Fighting Buddha's clones break those too (see below).
+- *Safety*: it never breaks a block that holds back lava or water. It never breaks the floor
+  under its feet or under the path it is taking. It never digs out sand or gravel that would
+  fall on its head. It does not stand next to lava or fire.
+- *Giving up*: what it cannot reach, it looks at again a few times, then leaves alone for two
+  minutes.
+- *The pack*: what it breaks goes straight into its pack. A working clone also picks up what
+  lies loose round its work, such as saplings and apples from leaves. A nearly full pack goes
+  into the nearest chest or barrel, or, with none about, its best finds are sent to you.
+
+**Keeping up.**
+- A following clone takes its own place on an arc behind you, so the clones never crowd you or
+  push you.
+- If you leave it more than 20 blocks behind (by walking, flying or a somersault), it appears by
+  you. If you are in the air, it lands on the ground below you. If you change realm, it follows.
+- If it gets stuck, it first jumps and works out its path again, then digs through plain ground
+  in its way, then comes back to you (or to its work site).
+- If it ends up in lava, inside a wall or in the void, it is taken out at once.
+- It never jumps down more than three blocks.
+- Path-finding is bounded: at most 4 new paths per tick across all clones, and every sweep and
+  search is limited in size, so nine clones do not slow the server.
+
+**Fighting.**
+- *What it fights, in order*: what is attacking you, then what you attack (another player only
+  while you are fighting him, and only where PvP allows), then what attacks it, then hostile
+  creatures near you (or near its post).
+- *What it leaves alone*: you, your other clones, your pets and summons, those allied to you,
+  and other players' pets unless they join the fight. A neutral creature is left alone until it
+  turns on you or the clone.
+- *Spreading out*: each enemy already fought by one of your clones counts against it, so
+  several clones split between several enemies. Clones on one enemy surround it from evenly
+  spread sides instead of queueing.
+- *Hurt*: badly hurt, it lights its own Ring of Fire if you have that skill and it has the Qi.
+  If it cannot, it falls back behind you and heals half a heart a second while out of the fight,
+  then goes back in at 60% health. If cornered, it fights where it stands.
+- *Leash*: it does not chase more than 24 blocks from you (or its post).
+
 ### The 18, 36 and 72 Transformations
 
 Three transformation arts, each with its own menu and its own forms per level. A character practises
@@ -222,8 +379,50 @@ Abilities and items are drawn from the source material rather than invented:
     throne (`chests/lion_camel_treasury`: the vase, always, among gold, gems, bones and the ridge's
     spoils). One fortress a world, so one vase.
   - **Banana-Leaf Fan**: one a world, in the treasure chest of the palace on Mount Kunlun's summit (see Mount Kunlun).
-- **Wu Clones** — Wukong's hair-clone technique, implemented as summoned entities with their own
-  pathfinding goals ([`WuCloneManager`](src/main/java/com/jttw/engine/character/wukong/WuCloneManager.java))
+- **Wu Clones** — Wukong's hair-clone technique: summoned clones that follow, work and guard,
+  mining from a player's reach and fighting at his side (see "Shadow Clones" above)
+- **Fiery Golden Eyes** (火眼金睛) — Wukong's eyes from the Eight Trigrams Furnace, on N once he
+  has them. They always show the true name and health of whoever he looks at. **Shift + N** turns
+  the x-ray on and off (ores through stone, 1 Qi a second). **Tap N** to fire the laser: it fires
+  the moment the key comes up, with no charge-up. **Hold N and turn the mouse wheel** to set its
+  output instead: up for more, down for less. Nothing fires while you do it, and the hotbar stays
+  where it is. The new output is shown on the action bar, and five pips over slot N show it all
+  the time. The output is saved with him and kept through death. It starts at I.
+  ([`EyeLaser`](src/main/java/com/jttw/engine/character/wukong/EyeLaser.java))
+
+  | Output | Qi | Range | Cut | Hit at level 1 | Same-level character, hits to kill | Sets burning | Cooldown |
+  |---|---|---|---|---|---|---|---|
+  | I, Glint | 10 | 20 | 1 block (the line itself) | 8 | 4 | 3 s | 3 s |
+  | II, Gaze | 20 | 30 | a cross 3 wide, 2 tall when level | 13 | 3 | 4 s | 4 s |
+  | III, Glare | 35 | 40 | 3 × 3 | 20 | 2 | 5 s | 5 s |
+  | IV, Blaze | 55 | 52 | a round bore 5 wide | 32 | 1 | 7 s | 7 s |
+  | V, Sunfire | 80 | 64 | a round bore 7 wide | 50 | 1, with room to spare | 10 s | 10 s |
+
+  - **Damage.** The hit scales with his power (`LevelPower.scaled`), so the table's hits-to-kill
+    hold from level 1 to about 60. They count a typical character of his own level, before
+    resistance. For comparison, an ordinary weapon hit takes about 3. Past level 60 the hits grow
+    fewer, because Wukong's own power outgrows a typical character's (output I kills in 2 at level 80). Each creature in the beam is struck once.
+    His own clones are spared.
+  - **Cutting.** Every block within the cut of the beam's axis goes. The cut flares out from his
+    eyes over the first few blocks, so it never takes the ground from under his feet. Fire is left
+    along the floor of the bore and all round where the beam ends. Up to output III the blocks drop
+    as if mined. At IV and V they are burnt away to nothing.
+  - **What stops it.** Bedrock and other unbreakable blocks always stop the beam. Obsidian-hard
+    blocks (hardness 50 or more) stop it below output V, and V burns through them. Nothing past the
+    block that stopped it is touched. Liquids do not stop it, and it leaves them as they are. As the
+    Victorious Fighting Buddha, his beam breaks anything at every output and nothing stops it.
+  - **How it looks.** Every player within 160 blocks is told of the shot (`EyeLaserBeamPacket`) and
+    draws it at once ([`EyeLaserRenderer`](src/main/java/com/jttw/engine/client/renderer/EyeLaserRenderer.java)).
+    Two fine golden beams leave his two eyes and follow his head, including a transformed form's
+    head height. In his own first-person view they leave from just below and either side of the
+    view. They meet a little ahead of him in one shaft of fire that runs to where the beam stopped.
+    The shaft has a white-hot core inside gold, orange and a red haze, with pulses racing down it.
+    It flashes as it fires, then fades and narrows over about half a second. Along it fly sparks,
+    flames and lava. Chunks of the burnt blocks fly off in their own colour, red-hot and cooling,
+    with crumbs. Where the beam ends there is a flare with rays and a burst of light, and the faces
+    there glow and then char, cooling over seven seconds. The sound is a deep, searing roar (a sonic
+    boom with a blaze's shot under it), deeper at higher outputs, with a hiss and, from III up, a
+    blast where it ends.
 - **Xiaotian Quan** — Erlang Shen's hound, a custom entity with hand-authored model and animation.
   Every bite slows (Slowness I, 2 s). Its own branch: I summons it; II gives it +25% health and
   attack and tracking sense (the nearest hostile glows for him); III +50%, its bites' Slowness I
@@ -405,7 +604,7 @@ src/main/java/com/jttw/engine/
 ```
 
 Largest components: `TransformationAbilityHandler` (1,385 lines), `YuanDiAbilityHandler` (1,236),
-`WuCloneManager` (874, including custom pathfinding goals).
+`CloneMining` (923, the shadow clones' work planner).
 
 ### The taller sky
 
@@ -454,33 +653,43 @@ A level zone is a biome put over the overworld (`world/Zones`): no biome library
 biome, the vanilla biomes it may take over (a tag), a `ZoneLayout` (the ring round spawn its region
 lies in, radius, wobble, a salt of its own), the heights it takes (`Vertical`: the whole column,
 `below(y)` for an underground zone, `above(y)` for an aerial one), its level band and the players it
-is allied to. White Bone Ridge is the first, the Bottomless Cave the second, the Mystical Waters the
+is allied to. White Bone Ridge is the first (Black Wind Mountain shares its band and ring), the Bottomless Cave the second, the Mystical Waters the
 third; Hell, a dimension of its own, is the fourth; then the Flaming Mountains, and Mount Wuzhuang,
 the first aerial zone, in the sky; Lion-Camel Ridge, the last band, is the last. Past it all lies
 Fengdu, the Ghost City: a place, not a zone of a band, placed as the zones are, whose Gate of
 Ghosts is the way down to Hell for everyone who comes to it by an Ancient City and fights it open.
 Far to the west stands Mount Kunlun, another such place: a towering sacred massif with the Queen
-Mother of the West's palace on its summit, where the Banana-Leaf Fan lies. Out in the sea near spawn rises Flower-Fruit Mountain, the
-Monkey King's old island, of the first band's levels; at the back of its Water Curtain Cave sits the
-Six-Eared Macaque, an optional level-120 superboss, the strongest boss of all.
+Mother of the West's palace on its summit, where the Banana-Leaf Fan lies. Out in the sea near
+spawn rises Flower-Fruit Mountain, the Monkey King's old island, of the first band's levels; at the
+back of its Water Curtain Cave sits the Six-Eared Macaque, an optional level-120 superboss, the
+strongest boss of all.
 
 **One of each a world.** Every boss lives in one place: each overworld zone has a single region a
 world (`ZoneMap`), except the Mystical Waters, which have one in each of the Four Seas, east, south,
 west and north of spawn, each its own Dragon King's (Ao Guang, Ao Qin, Ao Run, Ao Shun). The journey
 west lengthens with the pilgrim: the higher a zone's levels, the farther out its ring.
 
-| Zone | Levels | Distance from spawn (centre) | Regions |
-|---|---|---|---|
-| White Bone Ridge | 20–36 | 1–2 km | one, ~840 blocks across (never under 720) |
-| Flower-Fruit Mountain (an island in the sea) | 20–30; its optional superboss, the Six-Eared Macaque, 120 | 1.8–3.2 km | one, ~640 |
-| Bottomless Cave (Pit-Hole Mountain and under it) | 37–46 | 2–3 km | one, ~380 |
-| Mystical Waters (deep ocean) | 47–56 | 3–4.5 km | four, one per sea (within 30° of east, south, west, north), ~440 |
-| Hell (a dimension, entered through Fengdu) | 57–66 | — | the Ten Courts |
-| Flaming Mountains | 67–77 | 4.5–6 km | one, ~640 |
-| Mount Wuzhuang (over the clouds) | 78–88 | 6–7.5 km | one, ~260 |
-| Lion-Camel Ridge | 89–100 | 7.5–9 km | one, ~680 |
-| Fengdu, the Ghost City (river and hill country) | none: the way to Hell | 9–10.5 km | one, ~240 |
-| Mount Kunlun (mountain country, to the west) | none: the Banana-Leaf Fan | 5–8 km, within 30° of west | one, ~930 |
+| Zone | Levels | Its bosses' levels | Distance from spawn (centre) | Regions |
+|---|---|---|---|---|
+| White Bone Ridge | 20–36 | Lady White Bone 51 | 1–2 km | one, ~840 blocks across (never under 720) |
+| Black Wind Mountain | 20–36 (the ridge's band) | the Black Bear Demon 51 | 1–2 km | one, ~700 (never under 640), clear of the ridge |
+| Flower-Fruit Mountain (an island in the sea) | 20–30 (in the ridge's band) | the Six-Eared Macaque 120, an optional superboss | 1.8–3.2 km | one, ~640 |
+| Bottomless Cave (Pit-Hole Mountain and under it) | 37–46 | Lady Earth Flow 61 | 2–3 km | one, ~380 |
+| Mystical Waters (deep ocean) | 47–56 | the four Dragon Kings 71 | 3–4.5 km | four, one per sea (within 30° of east, south, west, north), ~440 |
+| Hell (a dimension, entered through Fengdu) | 57–66 | the Ten Kings 72–80, King Yama 81 | — | the Ten Courts |
+| Flaming Mountains | 67–77 | Red Boy 92 | 4.5–6 km | one, ~640 |
+| Mount Wuzhuang (over the clouds) | 78–88 | Zhenyuan 103 | 6–7.5 km | one, ~260 |
+| Lion-Camel Ridge | 89–100 | the White Elephant 113, the Azure Lion 115 | 7.5–9 km | one, ~680 |
+| Fengdu, the Ghost City (river and hill country) | none: the way to Hell | — | 9–10.5 km | one, ~240 |
+| Mount Kunlun (mountain country, to the west) | none: the Banana-Leaf Fan | — | 5–8 km, within 30° of west | one, ~930 |
+
+**A boss stands far above its zone.** A zone's head boss is of the top of its band and
+`ZoneBoss.LEVELS_ABOVE_BAND` (15) more (`ZoneBoss.levelOver(zone)`), whatever its minions, captains
+and minibosses are (they keep within the band). Under him, a zone's lesser bosses keep their places:
+Hell's Ten Kings are King Yama's level less ten, one more each court (72 to 80), and the White Elephant
+is two under the Azure Lion. Past the players' cap of 100 a typical character's health and hits go on
+growing as they grew over the ten levels to the cap (`MobScaling`), so a boss's hits and blows are
+measured at its own level there as anywhere. Its kill pays a Boss's XP of its zone, as before.
 
 Where in its ring follows from the world seed and its biomes: earliest zone first, the places its
 layout offers (spread evenly over the ring by the seed) are tried in turn, and it takes the first on
@@ -525,12 +734,39 @@ each, where one alone cannot realistically outlast it:
 
 | Rank | Blow (share of health, before resistance) | Hits to kill | Who |
 |---|---|---|---|
-| Light mobs | 6–7% (15–20 hits kill you) | 2–4 | wraiths, mouse spirits, ember imps, fish soldiers, yin soldiers, wandering ghosts, judge-clerks, cloud cranes, Wind-Drillers, goblins, stone-throwing gibbons, the Macaque's hair clones |
-| Normal mobs | 8–10% | 4–8 | flower maids, shrimp soldiers, yaksha, Horse-Face, the Impermanence, peng-demons, Daoist disciples, kobolds, wolfmen, heavenly soldiers, spear apes |
-| Heavy mobs | 11–12%, no single hit (slam, gore, pounce, swoop) over 12% | 10–12 | Bone Servants, Furnace-Brick Brutes, ogres, elephant-demons, lion-demons, turtle soldiers, Crab Generals, Ox-Head, great baboons |
+| Light mobs | 6–7% (15–20 hits kill you) | 2–4 | wraiths, mouse spirits, ember imps, fish soldiers, yin soldiers, wandering ghosts, judge-clerks, cloud cranes, Wind-Drillers, goblins, black-wind imps, stone-throwing gibbons, the Macaque's hair clones |
+| Normal mobs | 8–10% | 4–8 | flower maids, shrimp soldiers, yaksha, Horse-Face, the Impermanence, peng-demons, Daoist disciples, kobolds, wolfmen, heavenly soldiers, boar demons, spear apes |
+| Heavy mobs | 11–12%, no single hit (slam, gore, pounce, swoop) over 12% | 10–12 | Bone Servants, Furnace-Brick Brutes, ogres, elephant-demons, lion-demons, turtle soldiers, Crab Generals, Ox-Head, Black Bear Soldiers, great baboons |
 | Captains | a regular's ×1.2: at most 14.4% | a regular's ×2.5 | any of the above, purple-named |
-| Minibosses | 17–19%: a miniboss's hardest hit is 19% whatever its kind | a captain's, or more | the floor wardens and gate keepers of every lair (White Bone's Wardens and Keepers of the Bone Gate, the Bottomless Cave's guardians, the Fire Cloud Cave's door wardens and floor guardians, Lion-Camel's floor wardens), the Six Strong Generals, Clear Wind and Bright Moon, Heavenly Generals, the Six-Eared Macaque's three fake pilgrims |
-| Bosses | 25–33% (3–4 blows kill you); no special or area hit harder | 250–350, all its lives together; each life more than any miniboss's | every `ZoneBoss` |
+| Minibosses | 17–19%: a miniboss's hardest hit is 19% whatever its kind | a captain's, or more | the floor wardens and gate keepers of every lair (White Bone's Wardens and Keepers of the Bone Gate, the Bottomless Cave's guardians, the Fire Cloud Cave's door wardens and floor guardians, Lion-Camel's floor wardens), the Six Strong Generals, Clear Wind and Bright Moon, Heavenly Generals, Lingxuzi and the White-Robed Scholar (Black Wind's door keepers) and its stair's warden, the Six-Eared Macaque's three fake pilgrims |
+| Bosses | 25–33% (3–4 blows kill you); no special or area hit harder | 250–350, all its lives together; each life more than any miniboss's | every `ZoneBoss`, 15 levels over its zone's band |
+
+**Every boss strikes all near it.** A boss is fought by a group, so each has at least one blow
+that falls on everyone in an area, each telegraphed (a wind-up to step out of) and declared, as
+mobs' special hits are, in `ZoneBoss.specialShares()` and struck with `hitOf(share)`, so the
+pecking order holds it to a boss's blow:
+
+| Boss | Its blow on all | Telegraph (wind-up) | Area | Share (hits that kill) | Every |
+|---|---|---|---|---|---|
+| Lady White Bone | **the bone storm**: the bones of her dead burst out from her, cutting and slowing; besides, shards in a fan and the blinding veil | arms flung wide, head thrown back, bones whirling round her, the ring marked in ash (30) | 8 round her | 22% (5) | 11 s |
+| Lady Earth Flow | **the whirl**: spins on her heel, both blades out; thrown back, slowed | sinks low, blades swept back, petals drawn in (20 ticks) | 4.5 round her | 22% (5) | 9 s |
+| The Dragon Kings | their sea's wrath (surge, boiling sea, whirlpool, frozen abyss) | — | round him / the whirlpool | as their wrath | a few seconds |
+| Qinguang | **the mirror's flash**, weighed by karma; dazzles | mirror held high, light gathering, the ground glinting (30) | a 90° cone, 10 before him | 20% (5); 12% the good, 26% (4) the wicked | 12 s |
+| Chujiang | his frost | — | 8 round him; frozen, slowed | 15% (7) | 7 s |
+| Songdi | **the ring of hooks**, dragging all in | chains rattle, the ring marked in sparks (30) | 7 round him | 22% (5) | 12 s |
+| Wuguan | **the weight of the scales**, Slowness III | glyphs settle over the ground (30) | 6 round him | 24% (5) | 12 s |
+| King Yama | sentence (a ring at his foe's feet), his wrath's soul fire | the ring marked (delay) | the ring; close round him | a third | — |
+| Biancheng | **the bell**: all kneel, and its note strikes them | — | 7 round him | 15% (7) | 7 s |
+| Taishan | the boiling oil, burning | — | 7 round him; burning | 15% (7) | 7 s |
+| Dushi | the crushing carts: everything run down on the way | the roar of the charge | his path | 32.5% (4) | 7 s |
+| Pingdeng | **impartial judgement**: the same blow on all | a golden balance, its ring marked (30) | 8 round him | 25% (4) | 12 s |
+| Zhuanlun | **the Wheel turning**: a shockwave, flinging all back | the Wheel spins in soul fire over his head (30) | 8 round him | 25% (4) | 12 s |
+| Red Boy | the True Samadhi Fire; at a third, a ring of it | strikes his nose twice | a cone; round him | 25% (4) | — |
+| Zhenyuan | **the sweep of the whisk**: a gale, blowing all back; the Sleeve (from 30%) takes all within 8 | the whisk whirled overhead, a ring of cloud gathering (25) | 6 round him | 25% (4) | 11 s |
+| The Azure Lion | the roar | head thrown back | a cone | as his roar | — |
+| The White Elephant | stamping, trampling | — | round him | as his stamp | — |
+
+(Bold: added for the group fight. Each wind-up roots the boss: he strikes nothing else meanwhile.)
 
 A miniboss is a captain made one by `ZoneMonster.becomeMiniboss(level, health over a captain's)`;
 its hits are scaled so its hardest is `MINIBOSS_HIT` (19%). A mob's special hits are declared in
@@ -538,19 +774,20 @@ its hits are scaled so its hardest is `MINIBOSS_HIT` (19%). A mob's special hits
 A boss's lives are its `ZoneBoss.lives()` (Lady White Bone's four, whole each time, 75 hits apiece;
 Zhuanlun's 200, and born again at half). By boss, in hits all lives together: Lady White Bone 300,
 Lady Earth Flow 270, the Dragon Kings 270, the Ten Kings 280 (Zhuanlun 300), King Yama 350, Red Boy
-320, Zhenyuan 280 (more hand to hand: he brushes one blow in four aside), the White Elephant 330, the
-Azure Lion 350. Their health runs to tens of millions at level 100, past vanilla's cap of 1024 max
+320, the Black Bear Demon 300, Zhenyuan 280 (more hand to hand: he brushes one blow in four aside), the White Elephant 330, the
+Azure Lion 350. Their health runs to tens of millions at level 100 and beyond, past vanilla's cap of 1024 max
 health: `JTTWEngine` lifts the cap (and attack's) to a billion.
-**One superboss** stands over them all: the Six-Eared Macaque, an optional fight at **level 120**
-(past the players' cap), 430 hits of a level-120 character and a blow of 33% of one's health, the
-strongest boss there is. A level past the cap is measured against a character grown on past it, each
-level 1.03x the one before (`MobScaling.PAST_CAP_GROWTH`; gentler than the campaign's 1.10, so
-level 120 is about 1.8x a level-100 character): against capped players he takes some 780 of their
-hits and his blow is about 60% of their health, two blows and they fall.
+**One superboss** stands over them all: the Six-Eared Macaque of Flower-Fruit Mountain, an optional
+fight at **level 120** (past the players' cap and every head boss, the only boss not at its band's
+top and 15), 430 hits of a level-120 character and a blow of 33% of one's health: the strongest boss
+there is. Measured as every boss past the cap is (`MobScaling`), against capped players he is far
+more again; he is meant for a strong group of level-100 characters at their best, or not at all.
 `PeckingOrderGameTests` makes every creature of the mod in each of its ranks and fails if any hits
-out of its place, any boss is under 250 hits, or any boss's life is no more than the toughest
-miniboss's; and over 360 hits, but for the one named superboss exception (the Macaque, up to 460),
-whom it checks is the strongest boss there is.
+out of its place, any boss is under 250 hits (or over 360, but for the one named superboss exception,
+the Macaque, up to 460, whom it checks is the strongest boss there is), or any boss's life is no more than the toughest miniboss's;
+any boss's special hit is harder than a boss's blow may be; or any boss is not above everything else
+of its zone (fortress and garrison posts counted: White Bone Cave's, the Bottomless Cave's
+households, the Fire Cloud Cave's, Lion-Camel's floors), its head boss at its band's top and 15.
 
 To add a zone:
 
@@ -610,8 +847,8 @@ mountain and the road by `BoneMassifFeature`), so it comes out whole whichever c
   bone over it). Each way down is a corridor in the hall's wall behind a **seal** of iron bars, then
   a stair in the rock; the stairs alternate north and south, so every floor is crossed end to end.
 - **Who holds them.** Each floor has 8 + k regulars and 1 + k/2 captains (k from 0), regulars from
-  level 21 on the first to 33 on the last, captains five over, placed at fixed posts (laid by the
-  seed); and before its seal its **Warden** (a Bone Servant miniboss six levels over its floor, with
+  level 21 on the first to 33 on the last, captains five over (never past the band's top, 36), placed at fixed posts (laid by the
+  seed); and before its seal its **Warden** (a Bone Servant miniboss six levels over its floor, no higher than 36, with
   60% more health). A Warden's death breaks its seal for good. Every one of them is kept (never
   despawned) and held near its post. One found off its floor with no one to fight is put back at its
   post, and none is ever let into the throne room.
@@ -624,9 +861,13 @@ mountain and the road by `BoneMassifFeature`), so it comes out whole whichever c
   reached instead of fighting through again.
 - **The Throne of Bones**, under the last floor: 61 by 69 blocks under a vault 28 high ribbed like a
   ribcage, two rows of bone pillars, braziers of soul fire, walls of stacked bone set with skulls, a
-  great skull over a stepped dais and a throne of bone. Lady White Bone is put there when the land is
+  great skull over a stepped dais and a throne of bone. Lady White Bone (level 51) is put there when the land is
   made, passing for one of her court of six; her fight is as it was (found out by a blow or by
-  truth-seeing eyes, her blinks, her false deaths, her veil, her boss bar only while she is herself),
+  truth-seeing eyes, her blinks, her false deaths, her veil, her boss bar only while she is herself;
+  and, herself, every 11 s with a foe within 8 blocks, **the bone storm**: she flings her arms wide
+  and throws her head back, jaw agape, while the bones of her dead rise and whirl round her and the
+  ring they will reach is marked in ash (1.5 s; she neither throws nor vanishes meanwhile), then they
+  burst outward: everyone within 8 blocks struck for 22% (five kill), cut and slowed),
   but she never leaves the room: a blink that would take her out of it is not taken, and if she is
   ever outside it (thrown, pulled) she is back in its middle at once. She persists and, once killed,
   does not come back.
@@ -645,6 +886,134 @@ mountain and the road by `BoneMassifFeature`), so it comes out whole whichever c
   the door and every floor: on seeds 12345 and 42, 18–26 s for the 361 chunks (14–20 a second; 14–15
   s, 24–26 a second, before the cave), the massif 12–14 ms a chunk and the cave 5–8 ms a chunk where it lies. The
   cave's inside is also laid in the form gallery (`RidgeScenes`).
+
+#### Black Wind Mountain (levels 20–36)
+
+Black Wind Mountain (黑风山, chapters 16–17), the novel's first demon lair: the old abbot of the
+Guanyin Chan Temple coveted the Tang Monk's brocade kasaya and set fire to his own temple to burn the
+pilgrims; the Monkey King turned the wind on the monks' halls, and while the temple burned the Black
+Bear Demon, come over the mountain to help put the fire out, carried the kasaya off to his Black Wind
+Cave. In [`world/blackwind/`](src/main/java/com/jttw/engine/world/blackwind/) and
+[`entity/blackwind/`](src/main/java/com/jttw/engine/entity/blackwind/); its registrations are its own
+(`registry/BlackWindRegistry`, one line in `JTTWEngine`), its renderers too (`BlackWindRenderers`).
+
+- **Where** (`Zones.BLACK_WIND`): White Bone Ridge's band (20–36) and ring (1–2 km), over cold pine and
+  mountain-forest country (taiga, old-growth pine and spruce taiga, snowy taiga, windswept forest and
+  hills, groves, dark forest), the whole column, host judged at y 256. One region a world, about 700
+  blocks across (never under 640), clear of the ridge and every zone before it.
+- **The range** (`BlackWindShape`, `BlackWindRangeFeature`, pure and unit-tested): from the region's
+  edge the ground climbs into ridges of dark mountain, their crests broken by crags, up to some 70
+  blocks over the land; at the heart **the black peak** rises 190 more round a point 40 blocks north of
+  the centre, its summit bare blackstone, basalt and gravel, its south face a cliff over the cave's
+  door. The slopes are grass and podzol under the old pine taiga's pines (darker in the hollows), the
+  faces dark rock in blotches of deepslate, tuff and blackstone. A dark grey sky and fog, falling ash,
+  no rain; the soul-sand valley's wind for its ambience, the old taiga's music.
+- **The black wind** (`BlackWind`, `BlackWhirlwindEntity`): whirls of black smoke some five blocks high
+  rise round anyone on the mountain under the open sky, a few at a time, and wander across the pines,
+  buffeting what they cross (harmless; the Black Bear's own are not).
+- **The valley road**: a valley cut from the cliff south to the region's edge, a trodden road up its
+  middle edged with cobbles, its floor level before the door (the forecourt) and across a terrace on the
+  way, ramping between to the land at its mouth (`BlackWindShape.floors`); no pine stands in its way.
+- **The burnt Guanyin Chan Temple** (观音禅院, `TemplePlan`, on the terrace 150 blocks down the valley):
+  the compound's broken red wall, the mountain gate's two pillars (one fallen short) and its lintel in
+  the dirt, the bell tower's and drum tower's charred posts and the great bell where it fell, the side
+  halls' stubs, the main hall's platform with its columns burnt to stumps, its back wall standing black,
+  one corner of its roof still on its beams, the statue of Guanyin thrown down before her empty
+  pedestal, a broken relic pagoda, ash and cinders, three fires still smouldering under the rubble, dead
+  trees burnt black. A boar-demon captain and four scavengers pick over it (put once, kept).
+- **The watch-camps** (`BlackWindShape.camps`, laid by `BlackWindWorksFeature`): one tried every 84
+  blocks over the range, on level ground clear of the peak and the valley: a stockade of sharpened spruce
+  stakes round a smoking fire, a black banner on its pole, lean-tos of black cloth, a rack of spears;
+  each with its band put there once and kept, a captain and three or four (one band in three roams 40
+  blocks round, a patrol).
+- **Creatures** (`BlackWindMonster`: level 20, captains 27, any light; never born inside the cave; one in
+  ten of the world's own a captain, who comes with his escort). In hits of a same-level character
+  ("you kill it in") and blows to kill that character ("it kills you in"):
+
+  | Creature | Rank | You kill it in | It kills you in | What it does |
+  |---|---|---|---|---|
+  | **Black-Wind Imp** (黑风小妖) | light | 3 (a captain 7½) | 15 claws of 6.5% | every 3.5 s, its foe 3–11 off, spins up a gust (0.5 s, the black wind gathering round it) and rides it at its foe: 7%, thrown back; strike one and the rest turn |
+  | **Boar Demon** (野猪精) | normal | 6 (15) | 11 axe blows of 9% | every 5.5 s, its foe 4–15 off, paws the ground (0.8 s, snorting, the dirt flying) and charges: the first it meets gored for 10% and thrown |
+  | **Black Bear Soldier** (黑熊兵) | heavy | 11 (27½) | 8–9 mace blows of 12% | its foe close, rears up mace high (0.9 s) and crashes down: 11% to all within 3.5 blocks, thrown up |
+  | **Lingxuzi** (凌虚子), the grey-wolf Daoist | miniboss (level 30) | 40 | 5–6 sword strokes of 19% | every 5 s crouches (0.6 s) and springs: 17% to all where he lands; once, under half his health, stops (1.2 s) and swallows an elixir, a fifth of his health back |
+  | **The White-Robed Scholar** (白衣秀士), the white-flower snake | miniboss (level 30) | 36 | 5–6 fan strokes of 19% | every 3.5 s, his foe 4–16 off, rears hissing (0.6 s) and spits venom: 17% and poison; his foe close, gathers (0.6 s) and lashes his tail round him: 17% to all within 3.5, flung aside and slowed |
+  | **Warden of the grand stair** (a Black Bear Soldier) | miniboss (level 33) | 44 | 5–6 blows of 19% | the soldier's slam at 17% |
+
+- **The Black Wind Cave** (黑风洞, `BlackWindPlan`, worked out once, the same in every world, pure and
+  unit-tested; `BlackWindBlocks` says what each code is; the range lays it column by column, so it comes
+  out whole across its chunks; `BlackWindCave` keeps it):
+  - **The forecourt** before the cliff: braziers of soul fire up the road; a tiled pavilion where the
+    Black Bear's friends sit and talk, a stone table and stools; a stele across the road; and **its two
+    keepers**, Lingxuzi and the White-Robed Scholar (minibosses, level 30), with two boars and four imps.
+  - **The great door**: a facade cut into the cliff, deepslate tile banded in carved stone, pillars
+    crowned with soul fire, a tiled eave over it hung with soul lanterns, a gilded plaque; the door two
+    leaves of black lacquer banded in black iron and studded with gold, **11 wide and 15 high**; two
+    crouching black bears of stone before it, eyes of crying obsidian. **The rule**: while its keepers
+    live it is barred from within (knock on it and they turn on you); once both are dead the black wind
+    blows it open from the middle out as soon as anyone comes within 14 blocks (or knocks), and it stays
+    open. It does not yield to picks or axes (a player in creative breaks it as anything else).
+  - **The Black Wind Court**, at the end of a passage thirteen wide: a cavern a hundred blocks across
+    under a dome thirty high, hung with basalt and soul lanterns on chains, great basalt columns; the
+    garrison's camp in it: four barracks of spruce and dark oak either side of a paved road, braziers,
+    a training yard of straw dummies and spear racks; across it a wall with towers and a gatehouse hung
+    in black and red; behind the wall the **inner court**, the great tiled pavilion where the
+    **Buddha-Robe Feast** (佛衣会) was laid, its long tables with candles; and at its back the head of
+    the grand stair, shut by an iron grate. **Its garrison**: 27 (imps, boars and bear soldiers, levels
+    24–26, captains 30), mustered when anyone comes to the forecourt or the court, and **the warden** of
+    the stair (a Black Bear Soldier miniboss, level 33), whose death throws the grate open for good.
+  - **The throne cavern**, down the grand stair (eighteen deep): two rows of basalt pillars, soul fire at
+    their feet, a red carpet edged in black to a stepped dais and the Black Bear's throne of blackstone and
+    gold; on the rock behind it the stolen kasaya's likeness worked in red and gold, its jade ring; his
+    treasury chest beside the throne (`chests/black_wind_treasury`: gold, emeralds, diamonds, golden
+    apples, bottles of experience, sigils). The Black Bear is put there once, when the land is made, on
+    the open floor before the dais (`BlackWindCaveFeature`), and kept to the cavern.
+  - **The garrisons are kept** to their part of the cave: one found off it is taken back to its post.
+    A part whose garrison is all dead stays empty 20 minutes, then is mustered again the next time
+    someone comes near while no one is in it. The door and the grate, once opened, stay open.
+- **The Black Bear Demon** (黑熊精, the Great King of the Black Wind 黑风大王; `BlackBearDemonEntity`, a
+  `ZoneBoss`): a towering black bear near four blocks to his ears, in black lamellae edged in gold, a gold
+  diadem, a black war cloak, **the stolen kasaya** thrown across his breast; his black-tasselled spear (黑缨
+  枪). **Level 51**, his band's top and fifteen (a boss towers over his mountain); **300 hits** of a level-51
+  character, one life; his spear **30%** (four thrusts kill), a purple bar. A fight for three or four:
+  - **the black wind** (黑风): every 9 s (6 s from his first phase), his foe within 11 blocks, he plants his
+    spear, spreads his arms and roars while the black wind draws in round him (**1.5 s**); then it bursts
+    out: **22%** to all within 9 blocks, **blinded** 3 s, and hurled away and up;
+  - **the bear's maul**: his foe within 5, he rears up on his hind legs, both arms high (**0.9 s**), and
+    crashes down: **26%** to all within 5 blocks, thrown up;
+  - **phase 1** (at 60%): three **whirlwinds** of the black wind rise round his lair and hunt his foes,
+    drawing in and lifting what they catch and striking it **4% each half second**, for 30 s; the black
+    wind comes faster;
+  - **phase 2** (at 30%): two more whirlwinds, he is a sixth quicker, and every 7.5 s he draws back his spear
+    (**1.1 s**) and hurls **the gale** before him: **25%** in a cone 14 blocks long, 30° either side,
+    flinging what it catches.
+  Brought down he is not killed but subdued: Guanyin's golden hoop closes on his brow and he gives up the
+  kasaya, to keep the mountain of Potalaka ever after.
+- **The Brocade Kasaya** (锦襕袈裟, `BrocadeKasayaItem`): the Buddha's robe, the Black Bear's treasure, his
+  loot **every time**. Worn on the chest: as diamond against blows (8, toughness 3), **no fire burns its
+  wearer** (fire, lava and burning cancelled), and poison leaves him. Epic, fire-proof as an item.
+- **What they leave**: imps feathers and gunpowder (a phantom membrane now and then), boars pork and
+  leather and iron, bear soldiers leather, bone, coal and iron; Lingxuzi a golden apple (his elixir),
+  bottles of experience and gold; the Scholar paper, books, emeralds and bottles of experience; captains
+  their sigils; the Black Bear the kasaya, sigils, gold, golden apples (an enchanted one in four),
+  diamonds.
+- **XP and karma**: White Bone Ridge's band and pay (base grunt XP 80); subduing the Black Bear is a good
+  deed, **karma +100**; his friends are captains (+5). The Earth Gods' luopan sends the band to White
+  Bone Ridge, but in Black Wind Mountain's own country names the Black Bear and points to his great door.
+- **Art**: `assets_source/black_bear.py` (the King and his soldiers, one frame; a soldier's skin and a
+  captain's), `black_wind_folk.py` (the boar, the imp, Lingxuzi, the Scholar; captains' skins for the boar
+  and the imp), `kasaya_items.py` (the kasaya's icon and its worn layer). Their attacks are posed: the king
+  spreading his arms and roaring as the wind gathers, rearing for the maul, drawing back for the gale;
+  the soldiers rearing; the boar pawing and charging; the imp whirling and riding its gust; Lingxuzi
+  crouching, leaping, drinking; the Scholar rearing with his tongue out, his tail sweeping as he coils.
+- **Tests and pictures**: `BlackWindGameTests` (the region in the ridge's ring and band, the creatures and
+  captains, each one's attack, the friends always minibosses, Lingxuzi's elixir once, the king's level,
+  hits and blows, his black wind, maul, gale, whirlwinds and phases, the kasaya and what it does, XP and
+  karma), `BlackWindCaveGameTests` (the whole cave laid off the grid: the door's rule, the court's
+  muster and the warden's grate, the garrison and the king kept to their parts), `BlackWindPlanTest`
+  (the door, the grate, the arena, a way on foot from the door to the king that the grate shuts, the
+  garrisons on open floor, the temple, the peak and the valley), `ZonesTest`; gallery scenes
+  `-Pgallery.only=bw_`; the mountain, the temple, a camp, the cave and the king in a real world with
+  `./gradlew runWorldgenBench -Pbench.mode=blackwind`.
 
 #### The Bottomless Cave (levels 37–46)
 
@@ -744,7 +1113,7 @@ of the world.
     (about 14 on the first floor to 30 on the eighth), and its **guardian** before its way down: a
     miniboss (twice a captain's health, a miniboss's bite), named for the floor ("Warden of the
     Granaries"), mice on odd floors, maids on even (who mend the rest). **Stronger the deeper**:
-    regulars level 38 on the first floor to 44 on the eighth, captains 43 to 49, guardians 40 to 47
+    regulars level 38 on the first floor to 44 on the eighth, captains 43 to 46, guardians 39 to 46 (never past the band's top, so their lady stands 15 over all of them)
     (the mountain's 37 and 44). The posted are kept (never despawned, even on Peaceful) and keep to
     their floor: idle and off it (having chased someone up or down a stair, or fallen), they go back
     to their post. **Respawn**: the posted, the guardians and the gate's guard do not come back once
@@ -763,9 +1132,12 @@ of the world.
 - **Flower Maid** (`FlowerMaidEntity`): 5 hits, a stab of 9%; every 5 s she mends the most
   wounded of the household near her (a fifth of its health; 0.9% of her mistress's), and pressed
   close she breathes out pollen (Slowness II and Weakness for 4 s).
-- **Lady Earth Flow** (`LadyEarthFlowEntity`, a `ZoneBoss`, level 43, 270 hits, pink bar), put on her
+- **Lady Earth Flow** (`LadyEarthFlowEntity`, a `ZoneBoss`, level 61, 270 hits, pink bar), put on her
   dais once when the land is made, two maids beside her: her twin swords cut twice a stroke (14%
-  each; the female blade slows). At 60% (phase 1) she calls 4 mice and 2 maids and starts to burrow,
+  each; the female blade slows). Every 9 s, a foe within 4.5 blocks, **the whirl**: she sinks low,
+  both blades swept out behind her, petals drawn in round her (1 s: step back), then spins twice on
+  her heel, a ring of steel: everyone within 4.5 blocks cut for 22% (five kill), thrown back and
+  slowed. At 60% (phase 1) she calls 4 mice and 2 maids and starts to burrow,
   rising behind whoever she fights. At 30% (phase 2), once, she leaves her embroidered shoe in her
   likeness (`EarthFlowDecoyEntity`: weak, no XP or karma, a shoe again when struck down or after a
   minute) and flees out of the palace's back gate to her shrine, strewing petals along the way; no
@@ -863,7 +1235,7 @@ The Four Seas and the Dragon Kings' crystal palaces (水晶宫, novel chapter 3)
   fish and turtle soldiers share one kit (teal-and-gold lacquer, red plumes, sea-blue sashes);
   their models are drawn by `assets_source/shrimp_soldier.py`, `fish_soldier.py` and
   `turtle_soldier.py`.
-- **The Dragon Kings** (`DragonKingEntity`, a `ZoneBoss`, level 55, 270 ordinary hits): a dragon in
+- **The Dragon Kings** (`DragonKingEntity`, a `ZoneBoss`, level 71, 270 ordinary hits): a dragon in
   a man's shape, robed and crowned, swimming freely; half again a man's height, a long antlered
   dragon's head with trailing barbels, an emperor's dragon robe with its sea-and-cliff hem, wide
   sleeves, a cloud collar and a jade belt. Each wears his own crown and carries his own regalia: Ao
@@ -965,21 +1337,38 @@ XP 125, stepped up from the Mystical Waters' 110 (575 a grunt kill at the band's
 - Captains as in every zone (purple, larger, stronger, with escorts; the Impermanence's captain
   brings only its partner), never past level 66.
 - **The Ten Kings** (`KingOfHellEntity`, `HellKings`, ZoneBosses on their thrones, 280 hits, a
-  tablet blow of 25%, red bars; levels 57–65 from the First to the Tenth, King Yama passed over),
+  tablet blow of 25%, red bars; levels 72–80 from the First to the Tenth, King Yama passed over),
   each passing his court's **judgement** every 7 s on whoever fights him within 14 blocks:
   1. **Qinguang** (秦广王), the **Karma Mirror**: a beam for his blow, ×0.6 for the good (karma 100+),
      up to ×1.3 for the wicked (1 + 0.3 × |karma|/1000; at −1000 and below, a third of their health);
+     and every 12 s **the mirror's flash**: he holds the mirror high (1.5 s, light gathering in it, the
+     ground before him glinting), then its light falls over a 90° cone 10 blocks before him, the way
+     he faced as he raised it: 20% of the health of all in it, weighed by karma as the mirror's blow
+     (12% the good, 26% the wicked), and it dazzles (blind 1.5 s); step aside or behind him;
   2. **Chujiang** (楚江王), the cold hell: all within 8 **frozen** (15%, frost, Slowness III 5 s);
   3. **Songdi** (宋帝王), the **iron hooks**: hauls his foe from up to 14 blocks to his feet and strikes;
+     and every 12 s **the ring of hooks**: chains rattling, the ring they reach marked in sparks
+     (1.5 s), then they lash out all round him: all within 7 torn (22%) and dragged in toward him;
   4. **Wuguan** (五官王), the **scales**: takes half the difference of their health shares from a
-     healthier foe;
-  6. **Biancheng** (卞城王), the **bell** of the Wailing City: all within 7 **kneel** (pinned: cannot move) 2 s;
+     healthier foe; and every 12 s **the weight of the scales**: the glyphs of the weighing settle
+     over the ground round him (1.5 s), then the pans come down on all within 6 (24%, Slowness III 3 s);
+  6. **Biancheng** (卞城王), the **bell** of the Wailing City: all within 7 **kneel** (pinned: cannot move) 2 s,
+     struck by its note (15%);
   7. **Taishan** (泰山王), **boiling oil**: all within 7 scalded (15%) and burning (he does not burn);
-  8. **Dushi** (都市王), the **crushing carts**: charges, crushing (×1.3) and flinging what he meets;
+  8. **Dushi** (都市王), the **crushing carts**: charges, crushing (×1.3) and flinging everything he
+     runs down on the way (each once a charge);
   9. **Pingdeng** (平等王), "Equal": **equal measure**, a third of every blow struck him struck back;
+     and every 12 s **impartial judgement**: a golden balance over his head, its ring marked 8 blocks
+     round him (1.5 s), then one blow, the same on all within it (25%), a column of light on each;
   10. **Zhuanlun** (转轮王), the **Wheel**: struck down the first time he is **born again** at half
-      health (200 hits, then 100); his judgement is **Meng Po's soup** (his foe's good effects forgotten; nausea).
-- **King Yama** (阎罗王, `KingYamaEntity`, the Fifth Court, level 66, 350 hits, 27%, purple bar,
+      health (200 hits, then 100); his judgement is **Meng Po's soup** (his foe's good effects forgotten; nausea);
+      and every 12 s **the Wheel turning**: it spins over his head in soul fire, faster and faster
+      (1.5 s), then rolls out from him in a shockwave: all within 8 struck (25%) and flung back.
+
+  Each sentence on all is telegraphed alike: he stops, lifts tablet and emblem high over his head,
+  trembling, while his court's sign gathers and its reach is marked on the ground; then brings them
+  down. Raising it, he strikes no other blow and passes no judgement.
+- **King Yama** (阎罗王, `KingYamaEntity`, the Fifth Court, level 81, 350 hits, 27%, purple bar,
   the climax): phase 0, his blows and **the Writ** every 10 s (marked; Hell's creatures near come);
   at 66% **his court rises** (Ox-Head, Horse-Face, a clerk) and he passes **sentence**: a ring of
   soul fire where his foe stands, and 1.5 s later judgement falls there (a third of the health of
@@ -1053,8 +1442,13 @@ Boy's Fire Cloud Cave on Mount Haohao (火云洞, chapters 40–42), in
 - **The outposts** (`RangeShape.outposts`, laid by `FlameSeamsFeature`): watchtowers of red brick in
   rings of black stone, a signal fire smoking on top and braziers round them, one tried every 72
   blocks over the range (some 20–35 a region) and three on the ravine's rims looking down on the way
-  to the door. Each has its band, put there once and kept: a captain and three or four imps and
-  brutes; about one band in three is a patrol that roams 40 blocks round its tower. The mountains'
+  to the door. Each stands on the land, never sunk in it: its paving is seated on the ground round
+  it (the range's height as it will be raised, sampled at its middle and in rings 3, 6 and 9 blocks
+  out, and the level seven in ten of them lie at or under), a plinth of black stone under it down to
+  the ground wherever the ground falls away, the ground over it cut away and the ground round it
+  cut back 8 blocks out, rising a block for each block out (`FlameSeamsFeature.seat`,
+  `layOutpost`). Each has its band, put there once and kept, on its paving: a captain and three or
+  four imps and brutes; about one band in three is a patrol that roams 40 blocks round its tower. The mountains'
   own creatures come in bigger packs than before (imps 3–5, brutes 1–2) and one in eight is a captain.
 - **The heat** (`FireMountain`, `BurningEarthBlock`): lit burning earth scorches whatever stands on
   it once a second, **4% of its health** (magma's hot-floor damage, so armour softens it) and sets it
@@ -1079,7 +1473,7 @@ Boy's Fire Cloud Cave on Mount Haohao (火云洞, chapters 40–42), in
   vanishes into fog and comes out behind his foe; **Mad-Hurrying Wind** (急如火) charges, fire springing
   up in his track; **Swift-Rushing Wind** (快如风), the fastest, hurls all near him away; **Flame-Head
   General** (兴烘掀) bursts into flame; **Eye-Spark Officer** (掀烘兴) shoots sparks from his eyes.
-- **Red Boy** (红孩儿, the Holy Child King; `RedBoyEntity`, a `ZoneBoss`, level 77, 320 hits, red bar),
+- **Red Boy** (红孩儿, the Holy Child King; `RedBoyEntity`, a `ZoneBoss`, level 92, 320 hits, red bar),
   son of the Bull Demon King and Princess Iron Fan: a child in a red stomacher with **his own
   fire-tipped spear** (`RedBoySpearItem`, not Nezha's). Spear thrusts of 30% that set alight. Every 7 s he stops,
   strikes his nose twice (1 s) and breathes the **True Samadhi Fire** (三昧真火) from mouth and nose: a
@@ -1255,7 +1649,7 @@ left to its host.
   temple's disciples and fight to the death; struck down, Clear Wind always leaves the **Golden
   Striker**, Bright Moon the **Silk-Lined Tray**: the two things it takes to bring a fruit down whole.
   Each pays as a General.
-- **The Great Immortal Zhenyuan** (镇元大仙, `ZhenyuanEntity`, a `ZoneBoss`, level 88, 280 hits,
+- **The Great Immortal Zhenyuan** (镇元大仙, `ZhenyuanEntity`, a `ZoneBoss`, level 103, 280 hits,
   28%, yellow bar). **Not at his temple**: as in the novel, he is away (hearing the Primordial Lord
   lecture), and no lair puts him there. **He comes back for whoever kills the last of his
   disciples** (`TempleRecord`, saved data of the overworld keyed by the temple's region centre, so it
@@ -1275,7 +1669,11 @@ left to its host.
   **swept in**: out of the world (unseen, blind, held at his side wherever he goes, nothing can
   touch them nor they anything), for 5 s, then cast out bruised (a tenth of their health), unless
   they **struggle free** first (five blows at him from within: they burst out unhurt, and he
-  staggers, unable to parry, for 2 s). At 60% he **calls his disciples**: any of his household still
+  staggers, unable to parry, for 2 s). **The sweep of the whisk**: every 11 s, a foe within 6 blocks,
+  he lifts the whisk over his head and whirls it, a ring of cloud gathering at the sweep's edge
+  (1.25 s: get out of it), then sweeps it round him: a gale off its horsetail strikes everyone within
+  6 blocks he fights (the temple's enemies and whoever has struck him; never one who gave him no
+  cause) for 25% (four kill) and blows them back. At 60% he **calls his disciples**: any of his household still
   living within 48 blocks come to his side (he makes none, and when he comes for their killer there
   are none). There is no trial: no yielding, no rest, no guest's leave.
 - **Drops**: Zhenyuan sigils (3–4), a block of gold, crane plumes, talismans and **always his
@@ -1427,7 +1825,10 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   there already, the city's is gone (`DemonKingEntity.goDownToHisThrone`). A cave laid half on ground
   made before is broken where the old ground is (it can be dug through: only the blueprint's own
   blocks are proof against picks), never sealed. A world whose city was made before keeps its old
-  treasury chest on the hall's dais, so there the throne room's makes a second vase.
+  treasury chest on the hall's dais, and the vase is that one's: the throne room's chest then holds
+  the rest of the hoard but no second vase (`LionTreasury`: the vase's entry is under the
+  `jttw_engine:one_vase` condition, which looks for the old chest whenever a chest in the cave is
+  first opened).
 - **Creatures** (`LionCamelMonster`: level 89, captains 96, any light, in numbers): **Lion-Demons**
   (狮子精, the Azure Lion's kin: 10 hits, sabre cuts of 11%; they pounce from 4–11 blocks for 12% and
   a stagger; strike one and the pride turns), **Elephant-Demons** (象精, the White Elephant's
@@ -1447,7 +1848,7 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   falls away (smoke, fire, the ground shaking; no blow lands on him nor does he strike; a captive is
   let go), then the beast stands in his place, in another model and a larger body, and the players
   near are told what he is. The true form is synced and saved; the fight goes on in it.
-- **The Azure Lion** (青狮, Manjushri's lion; `AzureLionEntity`, a `ZoneBoss`, level 100, 350 hits,
+- **The Azure Lion** (青狮, Manjushri's lion; `AzureLionEntity`, a `ZoneBoss`, level 115, 350 hits,
   an azure bar, in the throne room): a hulking demon king in dark lacquered armour, a wild green-blue
   mane bristling about a snarling maw, clawed hands, a giant's broadsword: blows of 30%. Every 9 s he throws back his head
   and **roars**: a cone 12 blocks long, 12%, Slowness II and Weakness, thrown back. Every 13 s, a foe
@@ -1462,7 +1863,7 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   twice as often and from 6 blocks, and **pounces** on a foe 5–13 blocks off, jaws first: if they
   reach the foe as he lands, it is swallowed (inside the lion as inside the demon king, and fought
   out of him the same way).
-- **The White Elephant** (白象, Samantabhadra's six-tusked elephant; `WhiteElephantEntity`, level 98,
+- **The White Elephant** (白象, Samantabhadra's six-tusked elephant; `WhiteElephantEntity`, level 113,
   330 hits, a white bar, in the throne room): a giant in ivory-and-gold plate, a great domed
   elephant's head under a gold war-frontlet, ears like sails, a heavy trunk, six tusks, a giant's
   lance held upright: thrusts of 28%. Every 10 s, a foe within 6
@@ -1867,8 +2268,8 @@ luggage and made himself a false pilgrimage to fetch the scriptures in his place
   each ear) with soul fire at their feet, his throne of black stone and gold on its steps under torn
   yellow banners. He is the Monkey King's mirror: the phoenix-plumed cap, the gold fillet, golden chain
   mail, a tiger-skin kilt, a red cloak, an iron staff banded in gold, and three ears a side. **430
-  hits of a level-120 character** (some 780 of a level-100 player's), his staff a third of a level-120
-  character's health (some 60% of a capped player's: two blows); a yellow bar; he speaks. His kit,
+  hits of a level-120 character**, his staff a third of a level-120 character's health (measured past
+  the cap as every boss is: far more against a capped player); a yellow bar; he speaks. His kit,
   each part warned:
   - **the whirling staff**: he spins it over his head (1 s), then sweeps it round him: 30%, all within
     5.5 blocks thrown back;
@@ -1916,7 +2317,7 @@ and 12% (its slam three quarters of that).
 | Kind | Levels | Looks | Ways | Where, when | Weight (below 20) | Leaves |
 |---|---|---|---|---|---|---|
 | Goblin (山魈) | 2–8 | a hunched, long-limbed mountain demon as tall as a man: soot-indigo skin, a wild white mane, a great horn and a broken one, tusks and a gaping fanged mouth, amber eyes under a heavy brow, bone ornaments, torn talismans worn as trophies, dark rags, a jagged iron chopper | quick; packs of 3–5; falls back (crouched, hissing, claws up, eyes on its foe) when hurt below 30% or with none of its pack about it, and comes on again once the pack is round it | hills, forests, plains; on the surface, by night | 1x | copper cash, flint, paper; now and then a string of cash |
-| Kobold (穴居蜥妖) | 3–10 | a man-tall lizard warrior and miner: a crocodile's head with teeth all along its jaws, slit-pupilled eyes, glossy olive scales over a cream belly of scutes, bony plates and a crest of spines down its back and thick tail; a leather harness, a scrap-iron pauldron, a pick, a satchel of ore and a burning lantern at its belt | swarms of 3–6; raises the alarm (every kobold within 16 blocks comes); its pick costs a foe its footing; armoured | under any dry land, in the caves, well below the sea | 1x | ore (copper, iron, coal), copper cash; now and then raw gold, rarely a diamond |
+| Kobold (穴居蜥妖) | 3–10 | a man-tall lizard warrior and miner: a lizard's head, broad and flat, its long snout low, single teeth along its jaws, slit-pupilled eyes set on its sides, glossy olive scales over a cream belly of scutes, bony plates and a crest of spines down its back and thick tail; a leather harness, a scrap-iron pauldron, a pick, a satchel of ore and a burning lantern at its belt | swarms of 3–6; raises the alarm (every kobold within 16 blocks comes); its pick costs a foe its footing; armoured | under any dry land, in the caves, well below the sea | 1x | ore (copper, iron, coal), copper cash; now and then raw gold, rarely a diamond |
 | Wolfman (狼妖) | 10–17 | a tall wolf soldier in black lamellae laced red, a war cloak and a back banner, a long glaive | packs of 2–4; howls when it sights a foe and calls every wolfman within 32 blocks | forests and taiga; on the surface, by night | 2x | wolf pelts (2 leather each), bones, iron nuggets; now and then a string of cash |
 | Ogre (山夜叉) | 15–20 | a red mountain yaksha over 3 blocks tall, horns and tusks, a tiger-skin loincloth, spiked iron bracers, a necklace of skulls, an iron wolf-tooth club | alone, rare; slow, every blow heavy and throwing its foe back, hardly moved itself; now and then heaves its club up and slams the ground (everything within 4 blocks hurt and flung) | mountains and swamps; on the surface, by night | 5x | tusks (bone meal), iron, leather, bones; now and then a tael of silver |
 

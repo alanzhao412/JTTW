@@ -38,6 +38,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -47,6 +48,11 @@ import java.util.UUID;
  * <ul>
  *   <li><b>bone shards</b>, hurled three at a time in a fan;</li>
  *   <li><b>the veil</b>: every so often, everyone near her goes blind for a few seconds;</li>
+ *   <li><b>the bone storm</b> (every {@value #STORM_EVERY} ticks, a foe within {@value #STORM_REACH}
+ *       blocks): she spreads her arms and throws her head back, her jaw agape, and the bones of her
+ *       dead rise and whirl round her in a rattling ring for {@value #STORM_WIND_UP} ticks; then they
+ *       burst outward: everyone within {@value #STORM_REACH} blocks struck ({@link #STORM} of their
+ *       health), cut and slowed. Raising it she neither throws nor vanishes;</li>
  *   <li><b>vanishing</b>: she blinks away when pressed close, when struck (sometimes), and now and
  *       then for no reason, always to somewhere round her target;</li>
  *   <li><b>her servants</b>: at three quarters, half and a quarter of her health she calls up Bone
@@ -66,9 +72,9 @@ import java.util.UUID;
  */
 public class LadyWhiteBoneEntity extends ZoneBoss implements RangedAttackMob {
 
-    public static final int LEVEL = 33;
+    public static final int LEVEL = ZoneBoss.levelOver(Zones.WHITE_BONE);
     /**
-     * Ordinary hits of a level-33 character to bring down each of her four lives (her three
+     * Ordinary hits of a level-51 character to bring down each of her four lives (her three
      * disguises' deaths, then hers): three hundred in all, a group's fight, each life more than any
      * miniboss's; each shard a quarter of their health, her claw 28%, before resistance.
      */
@@ -82,6 +88,9 @@ public class LadyWhiteBoneEntity extends ZoneBoss implements RangedAttackMob {
     public static final int VEIL_EVERY = 280, VEIL_BLINDS = 100;
     /** How far the veil reaches. */
     public static final double VEIL_RANGE = 24;
+    /** The bone storm: how often, how long it gathers; how far it bursts, how hard (of a level-51 character's health). */
+    public static final int STORM_EVERY = 220, STORM_WIND_UP = 30;
+    public static final double STORM_REACH = 8, STORM = 0.22;
     /** The closest she lets anyone come before she vanishes, and how soon she can again. */
     public static final double TOO_CLOSE = 5;
     public static final int BLINK_COOLDOWN = 60;
@@ -97,9 +106,12 @@ public class LadyWhiteBoneEntity extends ZoneBoss implements RangedAttackMob {
             net.minecraft.network.syncher.SynchedEntityData.defineId(LadyWhiteBoneEntity.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
     private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> DEATHS =
             net.minecraft.network.syncher.SynchedEntityData.defineId(LadyWhiteBoneEntity.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
+    /** Ticks left of the bone storm's gathering (for her pose). */
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> STORMING =
+            net.minecraft.network.syncher.SynchedEntityData.defineId(LadyWhiteBoneEntity.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
 
     private final Set<UUID> slayers = new HashSet<>();
-    private int veil = VEIL_EVERY / 2, blink, call = CALL_EVERY, nextWander = 200;
+    private int veil = VEIL_EVERY / 2, blink, call = CALL_EVERY, nextWander = 200, storm = STORM_EVERY / 2;
     /** How many of the three health marks (3/4, 1/2, 1/4) have called her servants. */
     private int marks;
 
@@ -153,6 +165,7 @@ public class LadyWhiteBoneEntity extends ZoneBoss implements RangedAttackMob {
         super.defineSynchedData(builder);
         builder.define(DISGUISE, HERSELF);
         builder.define(DEATHS, 0);
+        builder.define(STORMING, 0);
     }
 
     /**
@@ -237,8 +250,8 @@ public class LadyWhiteBoneEntity extends ZoneBoss implements RangedAttackMob {
             @Override public boolean canContinueToUse() { return disguised() && super.canContinueToUse(); }
         });
         goalSelector.addGoal(3, new RangedAttackGoal(this, 1.0, 40, 60, 24f) {
-            @Override public boolean canUse() { return !disguised() && super.canUse(); }
-            @Override public boolean canContinueToUse() { return !disguised() && super.canContinueToUse(); }
+            @Override public boolean canUse() { return !disguised() && !storming() && super.canUse(); }
+            @Override public boolean canContinueToUse() { return !disguised() && !storming() && super.canContinueToUse(); }
         });
         goalSelector.addGoal(5, new net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal(this, 0.8) {
             @Override public boolean canUse() { return disguised() && super.canUse(); }
@@ -300,6 +313,99 @@ public class LadyWhiteBoneEntity extends ZoneBoss implements RangedAttackMob {
             server.sendParticles(ParticleTypes.WHITE_ASH, getX(), getY(1), getZ(), 200, 6, 2, 6, 0.02);
         }
         return caught;
+    }
+
+    // ── The bone storm ──────────────────────────────────────────────────
+
+    /** The storm's burst. */
+    @Override
+    public double[] specialShares() {
+        return new double[]{STORM};
+    }
+
+    /** Ticks left of the storm's gathering; 0 when she is not raising it. */
+    public int stormLeft() {
+        return entityData.get(STORMING);
+    }
+
+    /** Whether the bones are whirling round her, about to burst. */
+    public boolean storming() {
+        return stormLeft() > 0;
+    }
+
+    /** Those the storm would strike now. */
+    public List<LivingEntity> stormFoes() {
+        return foesWithin(STORM_REACH).stream().filter(e -> Math.abs(e.getY() - getY()) <= 3).toList();
+    }
+
+    /** Raises the bone storm: {@value #STORM_WIND_UP} ticks from now it bursts. Returns whether she began (never disguised). */
+    public boolean beginStorm() {
+        if (storming() || disguised()) return false;
+        entityData.set(STORMING, STORM_WIND_UP);
+        storm = STORM_EVERY;
+        getNavigation().stop();
+        playSound(SoundEvents.SKELETON_AMBIENT, 2f, 0.5f);
+        playSound(SoundEvents.EVOKER_PREPARE_WOLOLO, 1.5f, 0.6f);
+        return true;
+    }
+
+    /** One tick of the storm: its gathering and its burst; or, its time come and a foe near, its raising. */
+    public void tickStorm() {
+        int left = stormLeft();
+        if (left > 0) {
+            getNavigation().stop();
+            entityData.set(STORMING, --left);
+            if (level() instanceof ServerLevel server) {
+                // the bones of her dead rising and whirling round her, the ring they will reach marked in ash
+                double turn = (STORM_WIND_UP - left) * 0.5;
+                for (int k = 0; k < 6; k++) {
+                    double a = turn + k * Math.PI / 3, r = 1.2 + (STORM_WIND_UP - left) * 0.03;
+                    server.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK,
+                                    net.minecraft.world.level.block.Blocks.BONE_BLOCK.defaultBlockState()),
+                            getX() + Math.cos(a) * r, getY() + 0.4 + k * 0.25, getZ() + Math.sin(a) * r, 1, 0, 0, 0, 0);
+                }
+                if (left % 5 == 0) {
+                    for (int i = 0; i < 32; i++) {
+                        double a = i * Math.PI * 2 / 32;
+                        server.sendParticles(ParticleTypes.WHITE_ASH, getX() + Math.cos(a) * STORM_REACH, getY() + 0.2,
+                                getZ() + Math.sin(a) * STORM_REACH, 2, 0.1, 0.05, 0.1, 0);
+                    }
+                    playSound(SoundEvents.SKELETON_STEP, 1.5f, 0.5f + (STORM_WIND_UP - left) * 0.03f);
+                }
+            }
+            if (left == 0) burst(stormFoes());
+            return;
+        }
+        if (storm > 0) storm--;
+        LivingEntity t = getTarget();
+        if (storm == 0 && !disguised() && t != null && t.isAlive() && t.distanceTo(this) <= STORM_REACH) beginStorm();
+    }
+
+    /** The storm bursts: the bones fly out and strike {@code caught}, cutting and slowing. Returns how many it struck. */
+    public int burst(List<? extends LivingEntity> caught) {
+        int n = 0;
+        for (LivingEntity e : caught) {
+            e.invulnerableTime = 0;
+            if (!e.hurt(damageSources().indirectMagic(this, this), hitOf(STORM))) continue;
+            n++;
+            e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 1), this);
+        }
+        swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);
+        playSound(SoundEvents.SKELETON_HURT, 2f, 0.5f);
+        playSound(SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, 1.2f, 1.6f);
+        playSound(SoundEvents.GHAST_SCREAM, 1.2f, 1.6f);
+        if (level() instanceof ServerLevel server) {
+            var bone = new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK,
+                    net.minecraft.world.level.block.Blocks.BONE_BLOCK.defaultBlockState());
+            for (int i = 0; i < 48; i++) {
+                double a = i * Math.PI * 2 / 48;
+                server.sendParticles(bone, getX() + Math.cos(a), getY(0.5), getZ() + Math.sin(a), 0, Math.cos(a), 0.1, Math.sin(a), 0.9);
+                server.sendParticles(ParticleTypes.WHITE_ASH, getX() + Math.cos(a) * STORM_REACH * 0.6, getY(0.4),
+                        getZ() + Math.sin(a) * STORM_REACH * 0.6, 3, 0.4, 0.3, 0.4, 0.02);
+            }
+            server.sendParticles(ParticleTypes.SWEEP_ATTACK, getX(), getY(0.5), getZ(), 8, STORM_REACH / 3, 0.2, STORM_REACH / 3, 0);
+        }
+        return n;
     }
 
     /** Vanishes and comes back 8 to 14 blocks from {@code around}, on the ground. Returns whether she did. */
@@ -386,7 +492,14 @@ public class LadyWhiteBoneEntity extends ZoneBoss implements RangedAttackMob {
         }
         LivingEntity target = getTarget();
         if (blink > 0) blink--;
+        if (storming()) {
+            // once raised, the storm bursts whatever becomes of her foe
+            tickStorm();
+            return;
+        }
         if (disguised() || target == null || !target.isAlive()) return;
+        tickStorm();
+        if (storming()) return;
 
         if (--veil <= 0) {
             dropVeil();
@@ -415,7 +528,7 @@ public class LadyWhiteBoneEntity extends ZoneBoss implements RangedAttackMob {
         if (found && isAlive()) reveal(source.getEntity() instanceof LivingEntity by ? by : null);
         if (hurt && !level().isClientSide) {
             if (source.getEntity() instanceof ServerPlayer p) slayers.add(p.getUUID());
-            if (blink == 0 && source.getEntity() instanceof LivingEntity by && random.nextFloat() < 0.25f) vanish(by);
+            if (blink == 0 && !storming() && source.getEntity() instanceof LivingEntity by && random.nextFloat() < 0.25f) vanish(by);
         }
         return hurt;
     }
@@ -531,6 +644,7 @@ public class LadyWhiteBoneEntity extends ZoneBoss implements RangedAttackMob {
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putInt("Marks", marks);
+        tag.putInt("Storm", storm);
         tag.putInt("Disguise", disguise());
         tag.putInt("FalseDeaths", falseDeaths());
         ListTag ids = new ListTag();
@@ -545,6 +659,7 @@ public class LadyWhiteBoneEntity extends ZoneBoss implements RangedAttackMob {
         if (k.length == 6) keep = new net.minecraft.world.phys.AABB(k[0], k[1], k[2], k[3], k[4], k[5]);
         super.readAdditionalSaveData(tag);
         marks = tag.getInt("Marks");
+        if (tag.contains("Storm")) storm = tag.getInt("Storm");
         entityData.set(DEATHS, tag.getInt("FalseDeaths"));
         setDisguise(tag.getInt("Disguise"));
         for (Tag id : tag.getList("Slayers", Tag.TAG_INT_ARRAY)) slayers.add(NbtUtils.loadUUID(id));

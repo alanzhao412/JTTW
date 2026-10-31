@@ -1,57 +1,74 @@
 package com.jttw.engine.character.wukong;
 
+import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.character.SummonLeash;
-import com.jttw.engine.registry.ModEntities;
+import com.jttw.engine.entity.WuCloneEntity;
 import com.jttw.engine.progression.level.PlayerLevel;
 import com.jttw.engine.progression.qi.QiData;
 import com.jttw.engine.progression.skilltree.SkillTreeData;
 import com.jttw.engine.progression.stats.ProgressionClass;
-import com.jttw.engine.progression.stats.StatBlock;
-import com.jttw.engine.JTTWEngine;
-import com.jttw.engine.entity.WuCloneEntity;
 import com.jttw.engine.progression.stats.ResistanceHandler;
+import com.jttw.engine.progression.stats.StatBlock;
 import com.jttw.engine.registry.ModAttributes;
-import net.minecraft.network.chat.Component;
+import com.jttw.engine.registry.ModEntities;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.*;
-import net.minecraft.world.entity.ai.goal.target.TargetGoal;
-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.OpenDoorGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.pathfinder.Path;
+import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.phys.Vec3;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-import java.util.*;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
- * Manages Sun Wukong's Shadow Clone ability.
+ * Sun Wukong's Shadow Clones: summoning them, their upkeep, and how they keep with him.
  *
- * Clones are WuCloneEntity instances (extends PathfinderMob, NOT Monster) with
- * wolf-style companion goals:
- *   - Attack whatever the owner attacks
- *   - Defend the owner when they take damage
- *   - Retaliate when the clone itself is hit
- *   - Follow the owner at a comfortable distance
+ * <p>Each press of the key summons one more clone (10 Qi), up to the tier's cap (1 / 2 / 9);
+ * pressed at the cap, it calls every clone back to him ({@link #recallAll}). Hitting your own
+ * clone dismisses it; clones fade when your Qi runs out.
  *
- * Because they're not Monsters, iron golems and other mob-targeting systems ignore them.
+ * <p>Clones are {@link WuCloneEntity} (a PathfinderMob, not a Monster, so iron golems leave them
+ * be). Their goals, first first: keep afloat; fall back when badly hurt
+ * ({@link CloneCombat.Retreat}); fight ({@link CloneCombat.Fight}); empty a full pack
+ * ({@link CloneWork.StashGoal}); gather ({@link CloneMining.WorkGoal}); pick up what lies loose
+ * round their work ({@link CloneMining.CollectGoal}); keep their post or work site; follow him,
+ * each to its own place behind him so they do not crowd him. Whom they fight is
+ * {@link CloneCombat.TargetChoice}'s choice.
  *
- * Each press of the key summons one more clone (10 Qi), up to the tier's cap (1 / 2 / 9).
- * Hitting your own clone dismisses it; clones fade when your Qi runs out.
+ * <p>Keeping up ({@link #keepUp}, every clone, every tick): out of lava, a wall it is smothered
+ * in, or the void at once; a clone that falls behind (he walked, flew or somersaulted away)
+ * appears by him, on the ground below him if he is in the air; a stuck one first jumps and
+ * thinks its path again, then digs through what is in its way, then comes back to him.
  */
 @EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
 public final class WuCloneManager {
@@ -65,9 +82,12 @@ public final class WuCloneManager {
 
     private static final float  QI_COST_SUMMON              = 10f;
     private static final float  QI_DRAIN_PER_TICK_PER_CLONE = 0.05f;
-    private static final double FOLLOW_TELEPORT_DIST        = 18.0;
+    /** Farther than this from him, a following clone appears by him (a fighting one at twice this). */
+    public static final double  FOLLOW_TELEPORT_DIST        = 20.0;
     private static final int    FOLLOW_SPREAD               = 2;
     private static final int    MAX_CLONES_T3               = 9;
+    /** Ticks stuck before it jumps and rethinks its path, digs through, and gives up and comes back to him. */
+    public static final int STUCK_JUMP = 30, STUCK_DIG = 60, STUCK_RETURN = 120;
 
     private static final Map<UUID, List<UUID>> OWNER_TO_CLONES = new HashMap<>();
     /**
@@ -81,8 +101,8 @@ public final class WuCloneManager {
     // =========================================================================
 
     /**
-     * Each press summons one clone (up to tier-based cap).
-     * Tier 1: max 1, Tier 2: max 2, Tier 3: max 9.
+     * Each press summons one clone (up to tier-based cap): tier 1 max 1, tier 2 max 2, tier 3
+     * max 9. At the cap, the press calls them all back instead.
      */
     public static void summon(ServerPlayer player) {
         int tier = SkillTreeData.getCloneTier(player);
@@ -92,10 +112,28 @@ public final class WuCloneManager {
         List<UUID> existing = OWNER_TO_CLONES.get(player.getUUID());
         int currentCount = (existing != null) ? existing.size() : 0;
         if (currentCount >= maxClones) {
+            int back = recallAll(player);
             player.sendSystemMessage(Component.literal("§cMax clones reached (" + maxClones + ")."));
+            player.displayClientMessage(Component.literal("§bYour clones come back to you (" + back + ")."), true);
             return;
         }
         summonOne(player);
+    }
+
+    /**
+     * Calls every clone of his back to him: each drops what it was doing, follows him again, and
+     * hands him its pack when it reaches him; one far off appears by him. Returns how many.
+     */
+    public static int recallAll(ServerPlayer player) {
+        List<WuCloneEntity> clones = clonesOf(player);
+        for (WuCloneEntity clone : clones) {
+            clone.setPriority(WuCloneEntity.Priority.FOLLOW);
+            clone.setTarget(null);
+            clone.getNavigation().stop();
+            clone.handOverOnReturn();
+            if (clone.distanceToSqr(player) > 12 * 12) appearBy(clone, player);
+        }
+        return clones.size();
     }
 
     /** Dismiss a single clone by entity UUID. */
@@ -122,10 +160,10 @@ public final class WuCloneManager {
         removeCloneEntities(level, ids);
     }
 
-    /** This player's clones that are out, in their world. */
+    /** This player's clones that are out, in his world, in the order he summoned them. */
     public static List<WuCloneEntity> clonesOf(ServerPlayer player) {
         List<UUID> ids = OWNER_TO_CLONES.get(player.getUUID());
-        List<WuCloneEntity> out = new java.util.ArrayList<>();
+        List<WuCloneEntity> out = new ArrayList<>();
         if (ids == null) return out;
         for (UUID id : ids) {
             if (player.serverLevel().getEntity(id) instanceof WuCloneEntity clone && clone.isAlive()) out.add(clone);
@@ -142,27 +180,31 @@ public final class WuCloneManager {
     // Goal registration (called by WuCloneEntity.registerGoals)
     // =========================================================================
 
-    /**
-     * Installs companion AI on the given mob.
-     * Called from {@link WuCloneEntity#registerGoals()} at construction time.
-     */
-    public static void registerCloneGoals(PathfinderMob mob) {
-        WuCloneEntity clone = (WuCloneEntity) mob;
-        // Behaviour goals — lower number = higher priority: fight, empty a full pack, gather, follow
-        mob.goalSelector.addGoal(1, new FloatGoal(mob));
-        mob.goalSelector.addGoal(2, new MeleeAttackGoal(mob, 1.2, true));
-        mob.goalSelector.addGoal(3, new CloneWork.StashGoal(clone));
-        mob.goalSelector.addGoal(4, new CloneWork.GatherGoal(clone));
-        mob.goalSelector.addGoal(5, new CloneFollowOwnerGoal(mob, 1.1, 5.0f, 2.5f));
-        mob.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(mob, 0.8));
-        mob.goalSelector.addGoal(7, new LookAtPlayerGoal(mob, Player.class, 8.0F));
-        mob.goalSelector.addGoal(7, new RandomLookAroundGoal(mob));
+    /** Installs a clone's AI. Called from {@link WuCloneEntity#registerGoals()} at construction time. */
+    public static void registerCloneGoals(WuCloneEntity clone) {
+        if (clone.getNavigation() instanceof GroundPathNavigation nav) {
+            nav.setCanOpenDoors(true);
+            nav.setCanFloat(true);
+        }
+        clone.setPathfindingMalus(PathType.DANGER_FIRE, 16f);
+        clone.setPathfindingMalus(PathType.DAMAGE_FIRE, -1f);
+        clone.setPathfindingMalus(PathType.DANGER_OTHER, 8f);
+        clone.setPathfindingMalus(PathType.DAMAGE_OTHER, -1f);
+        clone.setPathfindingMalus(PathType.POWDER_SNOW, -1f);
 
-        // Target-selection goals:
-        // 1. Whatever the owner just attacked
-        mob.targetSelector.addGoal(1, new CloneOwnerHurtGoal(mob));
-        // 2. Auto-aggro nearby hostile mobs within 10 blocks
-        mob.targetSelector.addGoal(2, new NearbyHostileTargetGoal(mob, 10.0));
+        clone.goalSelector.addGoal(0, new FloatGoal(clone));
+        clone.goalSelector.addGoal(1, new CloneCombat.Retreat(clone));
+        clone.goalSelector.addGoal(2, new CloneCombat.Fight(clone));
+        clone.goalSelector.addGoal(3, new CloneWork.StashGoal(clone));
+        clone.goalSelector.addGoal(4, new CloneMining.WorkGoal(clone));
+        clone.goalSelector.addGoal(5, new CloneMining.CollectGoal(clone));
+        clone.goalSelector.addGoal(6, new PostGoal(clone));
+        clone.goalSelector.addGoal(6, new FollowGoal(clone));
+        clone.goalSelector.addGoal(7, new OpenDoorGoal(clone, true));
+        clone.goalSelector.addGoal(8, new LookAtPlayerGoal(clone, Player.class, 8.0F));
+        clone.goalSelector.addGoal(8, new RandomLookAroundGoal(clone));
+
+        clone.targetSelector.addGoal(1, new CloneCombat.TargetChoice(clone));
     }
 
     // =========================================================================
@@ -190,7 +232,6 @@ public final class WuCloneManager {
             }
 
             // Resolve living clones in any dimension, clean up dead/missing ones
-            ServerLevel level = player.serverLevel();
             List<Entity> clones = resolveClones(server, cloneIds);
 
             if (clones.size() != cloneIds.size()) {
@@ -214,6 +255,7 @@ public final class WuCloneManager {
                             player.getX() + Math.cos(angle) * FOLLOW_SPREAD, player.getZ() + Math.sin(angle) * FOLLOW_SPREAD);
                     if (!(moved instanceof WuCloneEntity movedClone)) { idx++; continue; }
                     clone = movedClone;
+                    appearBy(clone, player);
                 }
 
                 // Sync held item (unless it has its own tool in hand) + attack and health periodically
@@ -221,36 +263,133 @@ public final class WuCloneManager {
                     if (!clone.isGathering()) syncHeldItem(clone, player);
                     syncAttack(clone, player);
                 }
-
-                // Safety: if a clone ever somehow targets the owner, clear it
-                if (clone.getTarget() == player) {
-                    clone.setTarget(null);
-                }
-
-                double dist = clone.position().distanceTo(player.position());
-                // A working clone stays at its work until it runs out of it
-                if (!followsOwner(clone)) {
-                    idx++;
-                    continue;
-                }
-
-                // Only teleport to owner if the clone is idle (no combat, no task)
-                boolean busy = (clone.getTarget() != null && clone.getTarget().isAlive())
-                        || !clone.getNavigation().isDone();
-                // A busy clone is still leashed: past twice the follow distance it drops its target
-                if (busy && dist > FOLLOW_TELEPORT_DIST * 2) {
-                    clone.setTarget(null);
-                    clone.getNavigation().stop();
-                    busy = false;
-                }
-                if (!busy && dist > FOLLOW_TELEPORT_DIST) {
-                    double angle = (Math.PI * 2.0 / Math.max(1, clones.size())) * idx;
-                    double tx = player.getX() + Math.cos(angle) * FOLLOW_SPREAD;
-                    double tz = player.getZ() + Math.sin(angle) * FOLLOW_SPREAD;
-                    clone.teleportTo(tx, player.getY(), tz);
-                }
                 idx++;
             }
+        }
+    }
+
+    /**
+     * Keeping one clone with its owner, every tick (from its own tick, so it works for any owner
+     * it can find, in or out of the player list): rescue from lava, walls and the void; appear by
+     * him when left behind; and unsticking.
+     */
+    public static void keepUp(WuCloneEntity clone, ServerPlayer owner) {
+        if (clone.getTarget() == owner) clone.setTarget(null); // never him
+        if (owner.level() != clone.level()) return; // the server tick brings it across
+        Level level = clone.level();
+        boolean smothered = clone.isInWall();
+        clone.wallTicks = smothered ? clone.wallTicks + 1 : 0;
+        if (clone.isInLava() || clone.getY() < level.getMinBuildHeight() - 4 || clone.wallTicks > 10) {
+            rescue(clone, owner);
+            return;
+        }
+        if ((clone.tickCount + clone.getId()) % 10 != 0) return;
+
+        double dist = clone.distanceTo(owner);
+        boolean fighting = clone.getTarget() != null && clone.getTarget().isAlive();
+        if (followsOwner(clone)) {
+            if (fighting && dist > FOLLOW_TELEPORT_DIST * 2) {
+                clone.setTarget(null);
+                fighting = false;
+            }
+            if (!fighting && dist > FOLLOW_TELEPORT_DIST) {
+                appearBy(clone, owner);
+                return;
+            }
+        } else if (clone.workSite() != null) {
+            BlockPos site = clone.workSite();
+            if (clone.blockPosition().distSqr(site) > sq(CloneWork.WORK_RADIUS + 16)) {
+                BlockPos spot = CloneSense.safeSpotNear(clone, site, 3, 3, 8, 0);
+                if (spot != null) jumpTo(clone, spot);
+                return;
+            }
+        }
+        unstick(clone, owner);
+    }
+
+    private static double sq(double d) {
+        return d * d;
+    }
+
+    /** Stuck (on its way somewhere, and barely moving): jump and rethink, then dig through, then come back to him. */
+    private static void unstick(WuCloneEntity clone, ServerPlayer owner) {
+        Vec3 now = clone.position();
+        boolean going = clone.getNavigation().isInProgress() // on its way, or wanting to be with him and not getting there
+                || (followsOwner(clone) && clone.getTarget() == null && clone.distanceToSqr(owner) > 5 * 5);
+        if (going && now.distanceToSqr(clone.lastSample) < 0.3 * 0.3) clone.stuckTicks += 10;
+        else clone.stuckTicks = 0;
+        clone.lastSample = now;
+        if (clone.stuckTicks == STUCK_JUMP) {
+            clone.getJumpControl().jump();
+            clone.getNavigation().recomputePath();
+        } else if (clone.stuckTicks == STUCK_DIG) {
+            digThrough(clone, owner);
+        } else if (clone.stuckTicks >= STUCK_RETURN) {
+            clone.stuckTicks = 0;
+            clone.getNavigation().stop();
+            if (followsOwner(clone) || clone.workSite() == null) appearBy(clone, owner);
+            else {
+                BlockPos spot = CloneSense.safeSpotNear(clone, clone.workSite(), 4, 3, 8, 0);
+                if (spot != null) jumpTo(clone, spot);
+                else appearBy(clone, owner);
+            }
+        }
+    }
+
+    /** Breaks the plain ground in the way of its next step (at its feet and head), if that is safe and allowed. */
+    private static void digThrough(WuCloneEntity clone, ServerPlayer owner) {
+        Path path = clone.getNavigation().getPath();
+        if (path == null || path.isDone()) return;
+        BlockPos next = path.getNextNodePos();
+        ServerLevel level = (ServerLevel) clone.level();
+        for (BlockPos b : new BlockPos[]{next.above(), next, clone.blockPosition().above(2)}) {
+            var s = level.getBlockState(b);
+            if (CloneSense.open(level, b) || !CloneSense.mayBreak(owner, level, b, s)) continue;
+            if (!CloneSense.safeToBreak(clone, b, java.util.Set.of(next.below())) || !CloneSense.permitted(owner, level, b, s)) continue;
+            ItemStack tool = CloneSense.toolFor(owner, s);
+            if (tool == null) continue;
+            clone.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+            CloneWork.store(clone, CloneSense.harvest(level, clone, b, tool));
+        }
+        clone.getNavigation().recomputePath();
+    }
+
+    /** Out of lava, a wall or the void: to the nearest safe spot by it, else by him. */
+    private static void rescue(WuCloneEntity clone, ServerPlayer owner) {
+        BlockPos spot = clone.isInLava() || clone.getY() < clone.level().getMinBuildHeight() ? null
+                : CloneSense.safeSpotNear(clone, clone.blockPosition(), 3, 2, 3, 0);
+        clone.clearFire();
+        if (spot != null) jumpTo(clone, spot);
+        else appearBy(clone, owner);
+        clone.wallTicks = 0;
+    }
+
+    /**
+     * Puts the clone by him: on safe ground round him (below him, if he is in the air), never
+     * on top of him. If he is over nothing it can stand on, it waits.
+     */
+    public static void appearBy(WuCloneEntity clone, ServerPlayer owner) {
+        if (clone.teleportCooldown > 0 || owner.level() != clone.level()) return;
+        BlockPos at = owner.blockPosition();
+        BlockPos spot = CloneSense.safeSpotNear(clone, at, 3, 2, 32, 1.5);
+        if (spot == null) spot = CloneSense.safeSpotNear(clone, at, 6, 4, 48, 0);
+        if (spot == null) return;
+        jumpTo(clone, spot);
+    }
+
+    private static void jumpTo(WuCloneEntity clone, BlockPos spot) {
+        if (clone.level() instanceof ServerLevel level) {
+            level.sendParticles(ParticleTypes.CLOUD, clone.getX(), clone.getY() + 1, clone.getZ(), 8, 0.3, 0.5, 0.3, 0.02);
+        }
+        clone.getNavigation().stop();
+        clone.teleportTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5);
+        clone.resetFallDistance();
+        clone.setDeltaMovement(Vec3.ZERO);
+        clone.stuckTicks = 0;
+        clone.lastSample = clone.position();
+        clone.teleportCooldown = 20;
+        if (clone.level() instanceof ServerLevel level) {
+            level.sendParticles(ParticleTypes.CLOUD, clone.getX(), clone.getY() + 1, clone.getZ(), 8, 0.3, 0.5, 0.3, 0.02);
         }
     }
 
@@ -269,11 +408,14 @@ public final class WuCloneManager {
         player.sendSystemMessage(Component.literal("§6Clone dismissed."));
     }
 
-    /** Prevent clones from ever damaging their owner. */
+    /** Prevent clones from ever damaging their owner, or one another. */
     @SubscribeEvent
     public static void onCloneAttacks(LivingIncomingDamageEvent e) {
         if (!(e.getSource().getEntity() instanceof WuCloneEntity clone)) return;
         if (e.getEntity() instanceof ServerPlayer player && isOwner(clone, player)) {
+            e.setCanceled(true);
+        } else if (e.getEntity() instanceof WuCloneEntity other && clone.getOwnerUUID().isPresent()
+                && clone.getOwnerUUID().equals(other.getOwnerUUID())) {
             e.setCanceled(true);
         }
     }
@@ -317,7 +459,7 @@ public final class WuCloneManager {
         applyPlayerStats(clone, player);
         syncHeldItem(clone, player);
 
-        clone.setDropChance(net.minecraft.world.entity.EquipmentSlot.MAINHAND, 0f);
+        clone.setDropChance(EquipmentSlot.MAINHAND, 0f);
         clone.setCanPickUpLoot(false);
         clone.setPersistenceRequired();
 
@@ -364,7 +506,7 @@ public final class WuCloneManager {
 
     private static void syncHeldItem(WuCloneEntity clone, ServerPlayer player) {
         ItemStack held = player.getMainHandItem().copy();
-        clone.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, held);
+        clone.setItemSlot(EquipmentSlot.MAINHAND, held);
     }
 
     private static void syncAttack(WuCloneEntity clone, ServerPlayer player) {
@@ -384,25 +526,23 @@ public final class WuCloneManager {
     // Helpers
     // =========================================================================
 
-    static boolean isClone(LivingEntity ent) {
+    static boolean isClone(Entity ent) {
         return ent.getPersistentData().getBoolean(CLONE_TAG);
     }
 
-    private static boolean isOwner(LivingEntity ent, ServerPlayer player) {
+    private static boolean isOwner(Entity ent, ServerPlayer player) {
         CompoundTag pd = ent.getPersistentData();
         return pd.hasUUID(CLONE_OWNER_TAG) && pd.getUUID(CLONE_OWNER_TAG).equals(player.getUUID());
     }
 
-
-    static boolean isAllyClone(LivingEntity entity, UUID ownerId) {
-        if (!entity.getPersistentData().getBoolean(CLONE_TAG)) return false;
+    static boolean isAllyClone(Entity entity, @Nullable UUID ownerId) {
+        if (ownerId == null || !entity.getPersistentData().getBoolean(CLONE_TAG)) return false;
         var pd = entity.getPersistentData();
-        return pd.hasUUID(CLONE_OWNER_TAG)
-                && pd.getUUID(CLONE_OWNER_TAG).equals(ownerId);
+        return pd.hasUUID(CLONE_OWNER_TAG) && pd.getUUID(CLONE_OWNER_TAG).equals(ownerId);
     }
 
     /** A clone's owner: online, or as he summoned it; null when he is gone. */
-    @javax.annotation.Nullable
+    @Nullable
     public static ServerPlayer resolveOwner(Mob mob) {
         var pd = mob.getPersistentData();
         if (!pd.hasUUID(CLONE_OWNER_TAG)) return null;
@@ -416,7 +556,8 @@ public final class WuCloneManager {
 
     /** Whether a clone should be with its owner now: it follows him, or it has run out of work. */
     public static boolean followsOwner(WuCloneEntity clone) {
-        return clone.getPriority() == WuCloneEntity.Priority.FOLLOW || clone.idleTicks() > CloneWork.IDLE_BEFORE_FOLLOW;
+        return clone.getPriority() == WuCloneEntity.Priority.FOLLOW
+                || (clone.getPriority() == WuCloneEntity.Priority.WORK && clone.idleTicks() > CloneWork.IDLE_BEFORE_FOLLOW);
     }
 
     private static List<Entity> resolveClones(MinecraftServer server, List<UUID> ids) {
@@ -436,157 +577,136 @@ public final class WuCloneManager {
     }
 
     // =========================================================================
-    // Inner goal: auto-aggro nearby hostile mobs
+    // Following him, and keeping a post
     // =========================================================================
 
-    private static final class NearbyHostileTargetGoal extends TargetGoal {
+    /**
+     * Each clone's own place by him: on an arc behind him (whichever way he faces), a few blocks
+     * off, spread so that no two stand together and none in his way.
+     */
+    static Vec3 placeBy(WuCloneEntity clone, ServerPlayer owner) {
+        List<WuCloneEntity> all = clonesOf(owner);
+        all.sort(Comparator.comparingInt(Entity::getId));
+        int n = Math.max(1, all.size()), i = Math.max(0, all.indexOf(clone));
+        double yaw = Math.toRadians(owner.getYRot());
+        double behind = Math.atan2(-Math.cos(yaw), Math.sin(yaw)); // opposite the way he faces
+        double a = behind + (i - (n - 1) / 2.0) * 0.75;
+        double r = n > 5 ? 3.6 : 2.8;
+        return new Vec3(owner.getX() + Math.cos(a) * r, owner.getY(), owner.getZ() + Math.sin(a) * r);
+    }
 
-        private final Mob clone;
-        private final double range;
-        private LivingEntity found;
+    /**
+     * Following him to its place by him ({@link #placeBy}), at a run when far behind, rethought
+     * only when he has moved; it stands on the ground below its place if he is in the air.
+     */
+    static final class FollowGoal extends Goal {
 
-        NearbyHostileTargetGoal(Mob clone, double range) {
-            super(clone, false);
+        private final WuCloneEntity clone;
+        @Nullable private ServerPlayer owner;
+        private int repathIn, ticks;
+        private Vec3 heading = Vec3.ZERO;
+
+        FollowGoal(WuCloneEntity clone) {
             this.clone = clone;
-            this.range = range;
-            this.setFlags(EnumSet.of(Flag.TARGET));
+            setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
         }
 
-        @Override
-        public boolean canUse() {
-            if (clone.getTarget() != null && clone.getTarget().isAlive()) return false;
-
-            ServerPlayer owner = resolveOwner(clone);
-            UUID ownerId = (owner != null) ? owner.getUUID() : null;
-
-            List<net.minecraft.world.entity.monster.Monster> hostiles =
-                    clone.level().getEntitiesOfClass(
-                            net.minecraft.world.entity.monster.Monster.class,
-                            clone.getBoundingBox().inflate(range),
-                            e -> e.isAlive() && !isAllyClone(e, ownerId)
-                    );
-            if (hostiles.isEmpty()) return false;
-
-            // Pick closest
-            hostiles.sort((a, b) -> Double.compare(
-                    clone.distanceToSqr(a), clone.distanceToSqr(b)));
-            this.found = hostiles.get(0);
+        private boolean wanted() {
+            if (!followsOwner(clone)) return false;
+            owner = resolveOwner(clone);
+            if (owner == null || owner.isSpectator() || owner.level() != clone.level()) return false;
             return true;
         }
 
         @Override
-        public boolean canContinueToUse() {
-            return clone.getTarget() != null && clone.getTarget().isAlive();
-        }
-
-        @Override
-        public void start() {
-            clone.setTarget(this.found);
-            super.start();
-        }
-    }
-
-    // =========================================================================
-    // Inner goal: attack owner's target (owner hit something → pile on)
-    // =========================================================================
-
-    private static final class CloneOwnerHurtGoal extends TargetGoal {
-
-        private final Mob clone;
-        private LivingEntity target;
-        private int timestamp;
-
-        CloneOwnerHurtGoal(Mob clone) {
-            super(clone, false);
-            this.clone = clone;
-            this.setFlags(EnumSet.of(Flag.TARGET));
-        }
-
-        @Override
         public boolean canUse() {
-            ServerPlayer owner = resolveOwner(clone);
-            if (owner == null) return false;
-
-            this.target = owner.getLastHurtMob();
-            int ts = owner.getLastHurtMobTimestamp();
-            if (ts == this.timestamp || this.target == null) return false;
-            if (this.target == owner) return false;
-            if (isAllyClone(this.target, owner.getUUID())) return false;
-
-            return this.canAttack(this.target, TargetingConditions.DEFAULT);
+            if (!wanted()) return false;
+            Vec3 place = placeBy(clone, owner);
+            return clone.position().distanceToSqr(place.x, clone.getY(), place.z) > 2.5 * 2.5
+                    || clone.distanceToSqr(owner) < 1.6 * 1.6;
         }
 
         @Override
         public boolean canContinueToUse() {
-            return this.clone.getTarget() != null && this.clone.getTarget().isAlive();
+            if (!wanted() || ticks > 400) return false;
+            Vec3 place = placeBy(clone, owner);
+            return clone.position().distanceToSqr(place.x, clone.getY(), place.z) > 1.0;
         }
 
         @Override
         public void start() {
-            this.clone.setTarget(this.target);
-            ServerPlayer owner = resolveOwner(clone);
-            if (owner != null) this.timestamp = owner.getLastHurtMobTimestamp();
-            super.start();
-        }
-    }
-
-    // =========================================================================
-    // Inner goal: follow owner (wolf-style pathfinding)
-    // =========================================================================
-
-    private static final class CloneFollowOwnerGoal extends Goal {
-
-        private final Mob clone;
-        private final double speedModifier;
-        private final float startDist;
-        private final float stopDist;
-        private ServerPlayer owner;
-        private int pathRecalcCountdown;
-
-        CloneFollowOwnerGoal(Mob clone, double speedModifier, float startDist, float stopDist) {
-            this.clone = clone;
-            this.speedModifier = speedModifier;
-            this.startDist = startDist;
-            this.stopDist = stopDist;
-            this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
-        }
-
-        @Override
-        public boolean canUse() {
-            if (clone instanceof WuCloneEntity wce && !followsOwner(wce)) return false;
-            ServerPlayer player = resolveOwner(clone);
-            if (player == null || player.isSpectator()) return false;
-            if (clone.distanceToSqr(player) < (double) (startDist * startDist)) return false;
-            this.owner = player;
-            return true;
-        }
-
-        @Override
-        public boolean canContinueToUse() {
-            if (owner == null || !owner.isAlive()) return false;
-            if (clone.getNavigation().isDone()) return false;
-            return clone.distanceToSqr(owner) > (double) (stopDist * stopDist);
-        }
-
-        @Override
-        public void start() {
-            this.pathRecalcCountdown = 0;
-            clone.getNavigation().setSpeedModifier(speedModifier);
+            repathIn = 0;
+            ticks = 0;
+            heading = Vec3.ZERO;
         }
 
         @Override
         public void stop() {
-            this.owner = null;
+            owner = null;
             clone.getNavigation().stop();
         }
 
         @Override
         public void tick() {
+            if (owner == null) return;
+            ticks++;
             clone.getLookControl().setLookAt(owner, 10.0F, (float) clone.getMaxHeadXRot());
-            if (--pathRecalcCountdown <= 0) {
-                pathRecalcCountdown = this.adjustedTickDelay(10);
-                clone.getNavigation().moveTo(owner, speedModifier);
-            }
+            Vec3 place = placeBy(clone, owner);
+            if (--repathIn > 0 && place.distanceToSqr(heading) < 1.5 * 1.5) return;
+            repathIn = 10;
+            heading = place;
+            BlockPos at = BlockPos.containing(place);
+            BlockPos ground = CloneSense.safeSpotNear(clone, at, 1, 2, owner.onGround() ? 3 : 24, 0);
+            Vec3 to = ground != null ? Vec3.atBottomCenterOf(ground) : owner.position();
+            double dist = clone.distanceTo(owner);
+            double speed = dist > 10 ? 1.4 : dist > 5 ? 1.2 : 1.0;
+            if (!clone.getNavigation().moveTo(to.x, to.y, to.z, speed)) clone.getNavigation().moveTo(owner, speed);
+        }
+    }
+
+    /**
+     * Keeping its post (guarding) or staying by its work site (working, with nothing to do this
+     * moment): back to it when drawn off.
+     */
+    static final class PostGoal extends Goal {
+
+        private final WuCloneEntity clone;
+        private int repathIn;
+
+        PostGoal(WuCloneEntity clone) {
+            this.clone = clone;
+            setFlags(EnumSet.of(Flag.MOVE));
+        }
+
+        private double leave() {
+            return clone.getPriority() == WuCloneEntity.Priority.GUARD ? 2.0 : 8.0;
+        }
+
+        @Override
+        public boolean canUse() {
+            BlockPos site = clone.workSite();
+            if (site == null || followsOwner(clone)) return false;
+            return clone.blockPosition().distSqr(site) > leave() * leave();
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            BlockPos site = clone.workSite();
+            return site != null && !followsOwner(clone) && clone.blockPosition().distSqr(site) > 1.5 && !clone.getNavigation().isDone();
+        }
+
+        @Override
+        public void start() {
+            repathIn = 0;
+            tick();
+        }
+
+        @Override
+        public void tick() {
+            BlockPos site = clone.workSite();
+            if (site == null || --repathIn > 0) return;
+            repathIn = 20;
+            clone.getNavigation().moveTo(site.getX() + 0.5, site.getY(), site.getZ() + 0.5, 1.0);
         }
     }
 

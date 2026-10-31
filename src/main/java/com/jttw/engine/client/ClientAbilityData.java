@@ -107,6 +107,17 @@ public final class ClientAbilityData {
         return notes.getOrDefault(abilityId, "");
     }
 
+    /** The Fiery Golden Eyes' chosen output, 1-5 (the server's; shown by slot N). */
+    private static int eyeLaserOutput = 1;
+
+    public static void setEyeLaserOutput(int output) {
+        eyeLaserOutput = Math.max(1, Math.min(5, output));
+    }
+
+    public static int getEyeLaserOutput() {
+        return eyeLaserOutput;
+    }
+
     public static void setCooldown(String abilityId, int remaining, int max) {
         cooldowns.put(abilityId, new int[]{ Math.max(0, remaining), Math.max(1, max) });
     }

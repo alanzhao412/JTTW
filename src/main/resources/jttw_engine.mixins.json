@@ -19,12 +19,15 @@
     "RandomizableContainerMixin",
     "RangedAttributeAccessor",
     "ServerGamePacketListenerMixin",
+    "ServerPlayerVanishMixin",
     "VanillaRegistriesMixin",
     "VillagerHostilesSensorMixin",
     "WalkAnimationStateAccessor"
   ],
   "client": [
     "AbstractClientPlayerMixin",
+    "BuddhaArmourMixin",
+    "BuddhaCapeMixin",
     "CameraMixin",
     "EntityTurnMixin",
     "HumanoidModelMixin",
