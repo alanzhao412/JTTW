@@ -184,7 +184,8 @@ public class SpiderSpiritEntity extends SilkMonster {
     /** Her name: "the Eldest Spider Spirit" and on. */
     @Override
     protected Component getTypeName() {
-        return nameWithLevel(Component.translatable("entity.jttw_engine.spider_spirit." + NAMES[sister()]), mobLevel(), false);
+        return Component.empty().append(Component.translatable("entity.jttw_engine.spider_spirit." + NAMES[sister()]))
+                .append(" · Lv " + mobLevel()).withStyle(s -> s.withColor(net.minecraft.network.chat.TextColor.fromRgb(PURPLE)));
     }
 
     @Override
