@@ -310,6 +310,17 @@ public class SixEaredMacaqueEntity extends ZoneBoss {
         return --dashLeft > 0;
     }
 
+    /** The whole somersault at {@code target} at once, no warning (for tests and scenes): returns whom it struck. */
+    public List<LivingEntity> somersaultNow(LivingEntity target) {
+        startDash(target);
+        dashHit.clear();
+        while (dashStep()) {
+            // on along the line
+        }
+        act(IDLE);
+        return List.copyOf(dashHit);
+    }
+
     /** Begins plucking his hairs: the clones spring up {@value #CLONE_WINDUP} ticks later. */
     public void startClones() {
         act(PLUCKING);

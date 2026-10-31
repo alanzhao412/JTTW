@@ -84,14 +84,16 @@ public abstract class FlowerFruitMonster extends ZoneMonster {
     @Override
     protected void customServerAiStep() {
         super.customServerAiStep();
-        if (tickCount % 10 == 0 && knowsTheKing()) {
-            Player king = getTarget() == null ? FlowerFruit.kingNear(this, BOW_RANGE) : null;
-            entityData.set(BOWING, king != null);
-            if (king != null) {
-                getNavigation().stop();
-                getLookControl().setLookAt(king, 30f, 30f);
-                FlowerFruit.hail(this, king);
-            }
+        if (tickCount % 10 == 0 && knowsTheKing()) kneel(getTarget() == null ? FlowerFruit.kingNear(this, BOW_RANGE) : null);
+    }
+
+    /** Kneels to {@code king} (or, null, rises): it stops, looks to him, and now and then hails him. */
+    public void kneel(@Nullable Player king) {
+        entityData.set(BOWING, king != null);
+        if (king != null) {
+            getNavigation().stop();
+            getLookControl().setLookAt(king, 30f, 30f);
+            FlowerFruit.hail(this, king);
         }
     }
 
@@ -128,16 +130,5 @@ public abstract class FlowerFruitMonster extends ZoneMonster {
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         NbtUtils.readBlockPos(tag, "Post").ifPresent(post -> restrictTo(post, (int) tag.getFloat("PostReach")));
-    }
-
-    /** A line said to {@code to} over its head. */
-    protected static Component say(String words) {
-        return Component.literal(words);
-    }
-
-    /** Where to stand at {@code at}, for summoning its kind. */
-    @Nullable
-    protected static BlockPos stand(ServerLevel level, FlowerFruitMonster m, BlockPos at) {
-        return standingSpot(level, m, at);
     }
 }
