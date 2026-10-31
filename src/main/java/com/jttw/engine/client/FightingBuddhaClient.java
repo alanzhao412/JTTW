@@ -35,6 +35,17 @@ public final class FightingBuddhaClient {
         return (STATE.getOrDefault(e.getId(), 0) & 1) != 0;
     }
 
+    /** Whether this entity is a Wukong player (of any level), as the server says: drawn as the Monkey King. */
+    public static boolean wukong(Entity e) {
+        return (STATE.getOrDefault(e.getId(), 0) & 4) != 0;
+    }
+
+    /** Whether this player wears a transformation now (the 72 and the rest): the form is drawn, not him. */
+    public static boolean transformed(Entity e) {
+        return e instanceof net.minecraft.world.entity.player.Player p
+                && com.jttw.engine.transformation.TransformationManager.getTransformation(p) != null;
+    }
+
     /** Whether the local player is vanished. */
     public static boolean localVanished() {
         var p = Minecraft.getInstance().player;
@@ -42,18 +53,36 @@ public final class FightingBuddhaClient {
     }
 
     /**
-     * Ascended, his own body is not drawn: the Buddha (FightingBuddhaLayer) is drawn in its place. The
-     * player renderer has just made the model's parts visible for this frame; they are hidden again.
-     * (His armour and cape are kept back by BuddhaArmourMixin.)
+     * Wukong's own body is not drawn: the Monkey King (MonkeyKingLayer) is drawn in its place, or, ascended,
+     * the Buddha (FightingBuddhaLayer). The player renderer has just made the model's parts visible for
+     * this frame; they are hidden again. (The Buddha's armour and cape are kept back by BuddhaArmourMixin;
+     * the Monkey King's armour is drawn as anyone's.) A transformation wins over both: its form is drawn.
      */
     @SubscribeEvent
     public static void onRenderPlayer(net.neoforged.neoforge.client.event.RenderPlayerEvent.Pre event) {
-        if (ascended(event.getEntity()) && !event.getEntity().isInvisible()) event.getRenderer().getModel().setAllVisible(false);
+        if (drawnAsBuddha(event.getEntity()) || drawnAsMonkey(event.getEntity())) event.getRenderer().getModel().setAllVisible(false);
     }
 
     /** Whether this entity's armour, cape and held staff are not drawn as usual: the Buddha wears and holds his own. */
     public static boolean drawnAsBuddha(Entity e) {
-        return e instanceof AbstractClientPlayer p && ascended(p) && !p.isInvisible();
+        return e instanceof AbstractClientPlayer p && ascended(p) && !p.isInvisible() && !transformed(p);
+    }
+
+    /** Whether this entity is drawn as the Monkey King: a Wukong player below the Buddha, in no other form. */
+    public static boolean drawnAsMonkey(Entity e) {
+        return e instanceof AbstractClientPlayer p && wukong(p) && !ascended(p) && !p.isInvisible() && !transformed(p);
+    }
+
+    /** One Monkey King model for the first-person arms (made with the player renderers' layers). */
+    public static com.jttw.engine.client.renderer.MonkeyKingModel firstPersonModel;
+
+    /** In first person, Wukong's arms are the Monkey King's: golden fur, bare monkey hands. */
+    @SubscribeEvent
+    public static void onRenderArm(net.neoforged.neoforge.client.event.RenderArmEvent event) {
+        if (firstPersonModel == null) return;
+        if (!drawnAsBuddha(event.getPlayer()) && !drawnAsMonkey(event.getPlayer())) return;
+        event.setCanceled(true);
+        firstPersonModel.renderArm(event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight(), event.getArm());
     }
 
     /** While he is vanished, his HUD says so, faintly, under the crosshair. */

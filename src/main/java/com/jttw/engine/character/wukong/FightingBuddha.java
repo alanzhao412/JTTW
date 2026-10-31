@@ -223,9 +223,9 @@ public final class FightingBuddha {
 
     private static final Map<UUID, Integer> LAST = new ConcurrentHashMap<>();
 
-    /** Bit 0: he is the Fighting Buddha; bit 1: vanished. */
+    /** Bit 0: he is the Fighting Buddha; bit 1: vanished; bit 2: a Wukong player, at any level (drawn as the Monkey King). */
     public static int packed(ServerPlayer p) {
-        return (is(p) ? 1 : 0) | (BuddhaVanish.isVanished(p) ? 2 : 0);
+        return (is(p) ? 1 : 0) | (BuddhaVanish.isVanished(p) ? 2 : 0) | (WukongCharacter.is(p) ? 4 : 0);
     }
 
     /** Tells him and those who see him how he is now. */
