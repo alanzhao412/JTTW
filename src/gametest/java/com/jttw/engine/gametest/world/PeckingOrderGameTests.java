@@ -58,7 +58,9 @@ public class PeckingOrderGameTests {
     /** The kinds a lair makes its floor wardens, gate keepers and guardians of: each must land a miniboss's blow. */
     private static final Set<EntityType<?>> MINIBOSS_KINDS = Set.of(ModEntities.BONE_SERVANT.get(), ModEntities.WRAITH.get(),
             ModEntities.MOUSE_SPIRIT.get(), ModEntities.FLOWER_MAID.get(), ModEntities.FURNACE_BRUTE.get(), ModEntities.STRONG_GENERAL.get(),
-            ModEntities.LION_DEMON.get(), ModEntities.ELEPHANT_DEMON.get(), ModEntities.PENG_DEMON.get());
+            ModEntities.LION_DEMON.get(), ModEntities.ELEPHANT_DEMON.get(), ModEntities.PENG_DEMON.get(),
+            com.jttw.engine.registry.BlackWindRegistry.BEAR_SOLDIER.get(), com.jttw.engine.registry.BlackWindRegistry.LINGXUZI.get(),
+            com.jttw.engine.registry.BlackWindRegistry.WHITE_ROBED_SCHOLAR.get());
 
     private static List<Entity> every(GameTestHelper h) {
         List<Entity> out = new ArrayList<>();
@@ -196,7 +198,7 @@ public class PeckingOrderGameTests {
                 if (e instanceof ZoneMonster m) {
                     zone++;
                     String n = name(m);
-                    boolean general = m instanceof StrongGeneralEntity;
+                    boolean general = m instanceof StrongGeneralEntity || m instanceof com.jttw.engine.entity.blackwind.BlackWindChief; // always minibosses
                     if (!general) {
                         // a regular: its blow and its hardest hit (its specials too) within a mob's; its health a mob's
                         int lv = m.regularLevel();

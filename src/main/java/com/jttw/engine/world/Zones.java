@@ -314,9 +314,25 @@ public final class Zones {
     public static final Zone KUNLUN = Zone.place(KUNLUN_BIOME,
             TagKey.create(Registries.BIOME, id("kunlun_hosts")), ZoneLayout.KUNLUN, Vertical.WHOLE_COLUMN).hostSampledAt(256);
 
+    public static final ResourceKey<Biome> BLACK_WIND_BIOME = ResourceKey.create(Registries.BIOME, id("black_wind_mountain"));
+
+    /**
+     * Levels 20-36, White Bone Ridge's band and ring: Black Wind Mountain (黑风山, chapters 16-17), dark
+     * pine mountains under black whirling winds, the burnt ruin of the Guanyin Chan Temple on the way
+     * up, and the Black Wind Cave in the cliff of its peak, where the Black Bear Demon keeps the Tang
+     * Monk's stolen kasaya. Over cold pine and mountain-forest country (taiga, old-growth taiga, snowy
+     * taiga, windswept forest and hills, groves, dark forest), the whole column, its host judged at y 256
+     * (a column's surface biome there, as the Bottomless Cave's); it keeps clear of every zone before it
+     * ({@code world/blackwind}).
+     */
+    public static final Zone BLACK_WIND = Zone.overworld(BLACK_WIND_BIOME,
+            TagKey.create(Registries.BIOME, id("black_wind_mountain_hosts")), ZoneLayout.BLACK_WIND, Vertical.WHOLE_COLUMN,
+            20, 36, 80).hostSampledAt(256);
+
     /** Every zone, in order: a later one keeps clear of an earlier one sharing its heights. Append new ones. */
     public static final List<Zone> ALL = List.of(WHITE_BONE, BOTTOMLESS, MYSTICAL_WATERS, HELL, FIRE_MOUNTAIN, MOUNT_WUZHUANG, LION_CAMEL, FENGDU,
-            KUNLUN);
+            KUNLUN,
+            BLACK_WIND);
 
     /** Where the overworld zones of {@link #ALL} lie. */
     public static final ZoneMap MAP = new ZoneMap(ALL);

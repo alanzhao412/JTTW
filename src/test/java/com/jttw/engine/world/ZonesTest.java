@@ -49,6 +49,12 @@ class ZonesTest {
         int prevFar = 0;
         for (Zones.Zone zone : Zones.MAP.zones()) {
             ZoneLayout l = zone.layout();
+            if (zone == Zones.BLACK_WIND) {
+                // a zone sharing White Bone Ridge's band shares its ring
+                assertEquals(ZoneLayout.WHITE_BONE.near(), l.near(), zone.id());
+                assertEquals(ZoneLayout.WHITE_BONE.far(), l.far(), zone.id());
+                continue;
+            }
             if (zone == Zones.KUNLUN) {
                 // a place of no band, kept to the west in the middle rings, not past the last
                 assertTrue(l.near() > l.margin(), zone.id() + ": clear of spawn");
