@@ -136,7 +136,9 @@ final class AbilityScenes {
             java.util.Map.entry("bw_cave_door", 300), java.util.Map.entry("bw_cave_door_close", 80), java.util.Map.entry("bw_cave_keepers", 80),
             java.util.Map.entry("bw_cave_court", 300), java.util.Map.entry("bw_cave_feast", 80), java.util.Map.entry("bw_cave_throne", 300),
             java.util.Map.entry("bw_cave_king_on_his_floor", 80), java.util.Map.entry("bw_temple", 160), java.util.Map.entry("bw_temple_hall", 60),
-            java.util.Map.entry("bw_king_whirlwinds", 40));
+            java.util.Map.entry("bw_king_whirlwinds", 40),
+            // the clones given time to walk to the face and dig (a scene's trigger must come within its wait)
+            java.util.Map.entry("clones_mining", 40), java.util.Map.entry("clones_mining_later", 170));
 
         /** Set by a scene that photographs a screen (a furnace's, say), so the gallery leaves it open. */
     static volatile boolean keepScreen;
