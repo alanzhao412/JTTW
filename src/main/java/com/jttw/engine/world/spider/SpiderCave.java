@@ -19,6 +19,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -150,17 +151,18 @@ public final class SpiderCave {
     public static boolean dissolveCanopy(ServerLevel level, Region region) {
         boolean all = true;
         int ox = SilkRidgeWorks.TEMPLE_X, oz = SilkRidgeWorks.TEMPLE_Z;
-        for (int tx = -SilkRidgeWorks.CANOPY_RX; tx <= SilkRidgeWorks.CANOPY_RX; tx++) {
-            for (int tz = -SilkRidgeWorks.CANOPY_RZ; tz <= SilkRidgeWorks.CANOPY_RZ; tz++) {
+        for (int tx = -SilkRidgeWorks.CANOPY_REACH_X; tx <= SilkRidgeWorks.CANOPY_REACH_X; tx++) {
+            for (int tz = -SilkRidgeWorks.CANOPY_REACH_Z; tz <= SilkRidgeWorks.CANOPY_REACH_Z; tz++) {
                 BlockPos col = region.at(ox + tx, 0, oz + tz);
                 if (!level.isLoaded(col)) {
                     all = false;
                     continue;
                 }
                 for (int ly = 0; ly <= SilkRidgeWorks.CANOPY_H; ly++) {
-                    if (!SilkRidgeWorks.inCanopy(tx, ly, tz)) continue;
+                    BlockState silk = SilkRidgeWorks.canopyAt(tx, ly, tz);
+                    if (silk == null) continue;
                     BlockPos p = region.at(ox + tx, ly, oz + tz);
-                    if (!level.getBlockState(p).is(SpiderCaveRegistry.SILK_SEAL.get())) continue;
+                    if (!level.getBlockState(p).is(silk.getBlock())) continue;
                     level.setBlock(p, Blocks.AIR.defaultBlockState(), 2);
                     if ((tx + tz + ly) % 7 == 0) level.sendParticles(ParticleTypes.WHITE_ASH, p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5, 4, 0.4, 0.4, 0.4, 0.01);
                 }

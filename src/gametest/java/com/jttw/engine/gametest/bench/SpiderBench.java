@@ -75,8 +75,9 @@ final class SpiderBench {
                 int canopy = 0, water = 0;
                 for (int tx = -SilkRidgeWorks.CANOPY_RX; tx <= SilkRidgeWorks.CANOPY_RX; tx++) for (int tz = -SilkRidgeWorks.CANOPY_RZ; tz <= SilkRidgeWorks.CANOPY_RZ; tz++)
                     for (int ly = 0; ly <= SilkRidgeWorks.CANOPY_H; ly++) {
-                        if (SilkRidgeWorks.inCanopy(tx, ly, tz) && level.getBlockState(region.at(SilkRidgeWorks.TEMPLE_X + tx, ly, SilkRidgeWorks.TEMPLE_Z + tz))
-                                .is(SpiderCaveRegistry.SILK_SEAL.get())) canopy++;
+                        if (!SilkRidgeWorks.inCanopy(tx, ly, tz)) continue;
+                        var st = level.getBlockState(region.at(SilkRidgeWorks.TEMPLE_X + tx, ly, SilkRidgeWorks.TEMPLE_Z + tz));
+                        if (st.is(SpiderCaveRegistry.SILK_SEAL.get()) || st.is(SpiderCaveRegistry.SILK_VEIL.get())) canopy++;
                     }
                 for (int sx = -SilkRidgeWorks.POOL_RX; sx <= SilkRidgeWorks.POOL_RX; sx++) for (int sz = -SilkRidgeWorks.POOL_RZ; sz <= SilkRidgeWorks.POOL_RZ; sz++) {
                     if (level.getBlockState(region.at(SilkRidgeWorks.SPRING_X + sx, -1, SilkRidgeWorks.SPRING_Z + sz)).is(Blocks.WATER)) water++;

@@ -61,25 +61,52 @@ def binding_web():
 
 
 def silk_seal():
-    """Sealing silk: layers of white threads crossing every way, dense, pearly; gaps of nothing between."""
+    """Sealing silk: a cord of white threads laid thick in every direction, pearly where the light
+    takes them, shadowed in the folds; a few pinholes of nothing where the threads part."""
     rnd = random.Random(73)
-    img = Image.new('RGBA', (16, 16), CLEAR)
-    for _ in range(26):
+    img = Image.new('RGBA', (16, 16))
+    # the body: soft white, shaded in long diagonal folds so a strand of it reads as twisted cord
+    for y in range(16):
+        for x in range(16):
+            fold = 0.5 + 0.5 * math.sin((x + y) * math.pi / 4 + 0.6)
+            v = 0.92 + 0.07 * fold + rnd.uniform(-0.02, 0.02)
+            img.putpixel((x, y), rgba((246, 244, 238), v))
+    # threads over it, mostly along the folds, a few across
+    for _ in range(30):
         x0, y0 = rnd.uniform(0, 16), rnd.uniform(0, 16)
-        a = rnd.choice((0.0, math.pi / 2, math.pi / 4, -math.pi / 4)) + rnd.uniform(-0.25, 0.25)
-        length = rnd.uniform(8, 18)
-        tone = rnd.choice(((248, 246, 240), (232, 230, 226), (214, 216, 222), (240, 236, 246)))
-        line(img, x0, y0, x0 + math.cos(a) * length, y0 + math.sin(a) * length, rgba(tone, a=235), wrap=True)
-    # the shimmer: a few threads catch the light, faintly pearl
-    for _ in range(5):
-        x0, y0 = rnd.uniform(0, 16), rnd.uniform(0, 16)
-        line(img, x0, y0, x0 + 7, y0 + rnd.uniform(-3, 3), rgba((255, 250, 236), a=255), wrap=True)
-    # a border of thicker strands, so a wall of it reads as layered sheets
-    for i in range(16):
-        for y in (0, 15):
-            if rnd.random() < 0.7:
-                put(img, i, y, rgba((226, 224, 218), a=245))
+        a = (math.pi / 4 if rnd.random() < 0.7 else -math.pi / 4) + rnd.uniform(-0.18, 0.18)
+        length = rnd.uniform(4, 11)
+        tone = rnd.choice(((255, 254, 250), (250, 248, 242), (222, 220, 214), (236, 232, 244)))
+        line(img, x0, y0, x0 + math.cos(a) * length, y0 + math.sin(a) * length, rgba(tone), wrap=True)
+    # the shimmer of pearl
+    for _ in range(6):
+        x, y = rnd.randrange(16), rnd.randrange(16)
+        put(img, x, y, rgba((255, 250, 240)))
+        put(img, (x + 1) % 16, (y + 1) % 16, rgba((246, 238, 250)))
     img.save(T + 'block/silk_seal.png')
+
+
+def silk_veil():
+    """The sisters' gauze: silk spun so fine it is all but clear: a milky haze, a few fine threads
+    across it catching the light, a glint of dew."""
+    rnd = random.Random(31)
+    img = Image.new('RGBA', (16, 16))
+    for y in range(16):
+        for x in range(16):
+            img.putpixel((x, y), rgba((244, 244, 248), a=rnd.randint(58, 78)))
+    for _ in range(7):
+        x0, y0 = rnd.uniform(0, 16), rnd.uniform(0, 16)
+        a = rnd.uniform(0, math.pi)
+        length = rnd.uniform(7, 16)
+        line(img, x0, y0, x0 + math.cos(a) * length, y0 + math.sin(a) * length, rgba((252, 252, 255), a=rnd.randint(110, 160)), wrap=True)
+    # its edges a little thicker, as gauze gathers on the strand it hangs from
+    for i in range(16):
+        for x, y in ((i, 0), (i, 15), (0, i), (15, i)):
+            if rnd.random() < 0.5:
+                put(img, x, y, rgba((250, 250, 252), a=60))
+    for _ in range(3):
+        put(img, rnd.randrange(16), rnd.randrange(16), rgba((255, 255, 255), a=200))
+    img.save(T + 'block/silk_veil.png')
 
 
 def woven_silk():
@@ -180,6 +207,9 @@ def models():
     w(B + 'silk_seal.json', {'variants': {'': {'model': 'jttw_engine:block/silk_seal'}}})
     w(M + 'block/silk_seal.json', {'parent': 'minecraft:block/cube_all', 'render_type': 'minecraft:cutout',
                                    'textures': {'all': 'jttw_engine:block/silk_seal'}})
+    w(B + 'silk_veil.json', {'variants': {'': {'model': 'jttw_engine:block/silk_veil'}}})
+    w(M + 'block/silk_veil.json', {'parent': 'minecraft:block/cube_all', 'render_type': 'minecraft:translucent',
+                                   'textures': {'all': 'jttw_engine:block/silk_veil'}})
     w(B + 'woven_silk.json', {'variants': {'': {'model': 'jttw_engine:block/woven_silk'}}})
     w(M + 'block/woven_silk.json', {'parent': 'minecraft:block/cube_all', 'textures': {'all': 'jttw_engine:block/woven_silk'}})
     w(M + 'item/woven_silk.json', {'parent': 'jttw_engine:block/woven_silk'})
@@ -192,6 +222,7 @@ def models():
 if __name__ == '__main__':
     binding_web()
     silk_seal()
+    silk_veil()
     woven_silk()
     spider_silk()
     carapace()

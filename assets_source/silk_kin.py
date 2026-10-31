@@ -14,9 +14,10 @@ from one list of parts; the model is written into SpiderCaveRenderers between it
 - The Mantis Son (螳螂精): a lean, upright mantis demon some two and a half blocks tall on four long
   legs, its long neck-like prothorax rising from its body, a triangular head with great bulging eyes
   and long feelers, two raptorial forelegs folded like scythes (spined femur, hooked blade), leaf-green
-  wings folded over its abdomen; a crimson sash knotted at its waist and a bronze collar plate.
+  wings tented over its abdomen and veined like leaves, thorns down its neck, a flared shield at its
+  shoulders; a crimson sash knotted at its waist and a bronze collar plate.
 - The Cockroach Son (蜚蠊精): a squat, broad beetle-demon on six spined legs, glossy chestnut wing
-  covers with bronze-bound rims, a pale-rimmed shield over its head studded with iron spikes, long
+  covers domed and lacquer-bright, a pale-rimmed shield blotched dark over its head, long
   sweeping feelers, mandibles, cerci at its tail.
 
 Run from the repository root: python assets_source/silk_kin.py"""
@@ -318,24 +319,32 @@ def mantis_parts():
             (-3.0, -2, 7, 6, 4.6, 6.5, 'abdomen_b'),
             (-1.8, -1, 12, 3.6, 2.8, 3, 'abdomen_c'),
         ]),
-        part('wings', 'abdomen', (0, -2.7, -0.5), (0.06, 0, 0), [(-3.9, -0.9, 0, 7.8, 1, 16.5, 'wing_folded')]),
+        part('wings', 'abdomen', (0, -2.7, -0.5), (0.06, 0, 0), []),
+        part('right_tegmen', 'wings', (-0.1, -0.2, 0), (0, 0, 0.42), [(-4.6, -0.3, 0, 4.6, 0.6, 17.5, 'tegmen')]),
+        part('right_hindwing', 'wings', (-0.3, 0.5, 0.6), (0, 0, 0.62), [(-4.4, -0.2, 0, 4.4, 0.4, 15.5, 'hindwing')]),
         part('prothorax', 'waist', (0, -2, -0.5), (0.14, 0, 0), [
             (-1.9, -17, -1.9, 3.8, 17, 3.8, 'prothorax'),
+            (-2.9, -14.6, -2.6, 5.8, 4.2, 5.0, 'pronotum_lobe'),
             (-2.6, -17.6, -2.6, 5.2, 2.6, 5.2, 'collar'),
             (-2.2, -15, -2.3, 4.4, 1.2, 0.8, 'collar_plate'),
+            (-2.25, -9.5, -0.4, 0.5, 0.5, 0.9, 'thorn'), (1.75, -9.5, -0.4, 0.5, 0.5, 0.9, 'thorn'),
+            (-2.25, -6.0, -0.4, 0.5, 0.5, 0.9, 'thorn'), (1.75, -6.0, -0.4, 0.5, 0.5, 0.9, 'thorn'),
+            (-2.25, -2.5, -0.4, 0.5, 0.5, 0.9, 'thorn'), (1.75, -2.5, -0.4, 0.5, 0.5, 0.9, 'thorn'),
         ]),
         part('head', 'prothorax', (0, -17.6, -0.4), (-0.1, 0, 0), [
             (-4.4, -4, -2.8, 8.8, 4, 4.6, 'head_top'),
             (-2.9, 0, -2.9, 5.8, 3, 3.6, 'head_mid'),
             (-1.4, 2.8, -2.7, 2.8, 2.2, 2.4, 'mouthparts'),
         ]),
-        part('right_eye', 'head', (-4.2, -2.4, -0.4), (0, 0, 0.1), [(-2.4, -2, -2, 3, 4, 4, 'compound')]),
+        part('right_eye', 'head', (-4.0, -2.6, -0.4), (0, 0.15, 0.15), [(-2.8, -2.4, -2.4, 3.4, 4.6, 4.6, 'compound')]),
         part('right_antenna', 'head', (-0.8, -3.2, -2), (0.85, 0.25, -0.2), [(-0.25, -12, -0.25, 0.5, 12, 0.5, 'antenna')]),
         part('right_coxa', 'prothorax', (-1.9, -14.5, -1.4), (-0.2, 0, 0.1), [(-1, 0, -1, 2, 7, 2, 'coxa'),
                                                                            (-1.4, 0.5, -1.4, 2.8, 1.6, 2.8, 'armlet')]),
         part('right_femur', 'right_coxa', (0, 7, 0), (-2.55, 0, 0), [
             (-1.4, -0.2, -1.4, 2.8, 11, 2.8, 'femur'),
             (-0.5, 1, -2.2, 1, 9, 0.9, 'femur_spines'),
+            (-0.3, 2.0, -3.4, 0.6, 0.6, 1.6, 'spine'), (-0.3, 4.4, -3.6, 0.6, 0.6, 1.8, 'spine'),
+            (-0.3, 6.8, -3.4, 0.6, 0.6, 1.6, 'spine'), (-0.3, 9.0, -3.0, 0.6, 0.6, 1.2, 'spine'),
         ]),
         part('right_tibia', 'right_femur', (0, 10.8, 0), (2.7, 0, 0), [
             (-0.9, 0, -0.9, 1.8, 9, 1.8, 'blade'),
@@ -389,6 +398,42 @@ def mantis_painter():
             chitin(p, f, MANTIS_DARK)
         elif style.startswith('abdomen'):
             chitin(p, f, mixc(MANTIS_GREEN, MANTIS_PALE, 0.2), plate=3)
+        elif style in ('tegmen', 'hindwing'):                         # the wings tented over its back: leaf-green, veined like a leaf
+            for s2, r in f.items():
+                fx, fy, fw, fh = r
+                for i, j, xy in each(r):
+                    u, v = (i + 0.5) / fw, (j + 0.5) / fh
+                    base = mixc(MANTIS_GREEN, (170, 200, 90), 0.35) if style == 'tegmen' else (150, 120, 160)
+                    c = k(base, LIGHTS[s2] * (1.05 - 0.2 * v))
+                    if style == 'tegmen' and s2 in ('top', 'bottom'):
+                        if abs(u - 0.62) < 0.05 or abs(((v * 6 - u * 2) % 1)) < 0.08 and u > 0.62:
+                            c = k(MANTIS_PALE, 1.0)
+                        elif abs(((v * 9 + u * 2) % 1)) < 0.06 and u < 0.62:
+                            c = k(MANTIS_DARK, 1.0)
+                        if u < 0.08:
+                            c = k((120, 96, 50), 1.0)
+                        if abs(u - 0.4) < 0.08 and abs(v - 0.2) < 0.04:
+                            c = (240, 236, 200)
+                    elif style == 'hindwing' and s2 in ('top', 'bottom') and (i + j) % 4 == 0:
+                        c = k((90, 60, 110), 1.0)
+                    p.px(xy, noisy(p, c, 3))
+        elif style == 'pronotum_lobe':
+            chitin(p, f, MANTIS_GREEN, MANTIS_PALE)
+            for s2 in SIDES:
+                fx, fy, fw, fh = f[s2]
+                for i in range(fw):
+                    p.px((fx + i, fy + fh - 1), (120, 96, 50))
+                    if i % 3 == 0:
+                        p.px((fx + i, fy), MANTIS_PALE)
+        elif style in ('thorn', 'spine'):
+            for s2, r in f.items():
+                for i, j, xy in each(r):
+                    p.px(xy, noisy(p, (238, 232, 196) if s2 != 'front' else (30, 24, 20), 3))
+            for s2 in ('right', 'left', 'top', 'bottom'):
+                fx, fy, fw, fh = f[s2]
+                for i, j, xy in each(f[s2]):
+                    if i < fw * 0.3:
+                        p.px(xy, (30, 24, 20))
         elif style == 'wing_folded':
             for s, r in f.items():
                 fx, fy, fw, fh = r
@@ -442,14 +487,15 @@ def roach_parts():
             (-7, 3, -8, 14, 1.6, 18, 'belly'),
         ]),
         part('right_elytron', 'body', (0, -4.6, -8.5), (0.02, 0, 0.04), [(-9.6, -1.8, 0, 9.6, 2.2, 21.5, 'elytron'),
+                                                                        (-10.1, 0.0, 0.8, 0.9, 2.8, 20.0, 'elytron_flank'),
+                                                                        (-8.2, -1.6, 21.3, 8.0, 1.8, 1.6, 'elytron_tip'),
                                                                         (-7.4, -3.2, 1.2, 7.4, 1.6, 19, 'elytron_crown'),
                                                                         (-4.2, -4.2, 2.6, 4.2, 1.2, 15.5, 'elytron_crest')]),
         part('pronotum', 'body', (0, -4.3, -9.5), (0.25, 0, 0), [
             (-9, -1.6, -7, 18, 3, 9, 'pronotum'),
             (-6.5, -2.8, -6, 13, 1.4, 7.4, 'pronotum_dome'),
-            (-8.5, -2.6, -6.5, 1, 1, 1, 'spike'), (-4.5, -2.8, -6.8, 1, 1.2, 1, 'spike'),
-            (3.5, -2.8, -6.8, 1, 1.2, 1, 'spike'), (7.5, -2.6, -6.5, 1, 1, 1, 'spike'),
-            (-1.5, -2.2, -2, 3, 0.8, 3, 'boss_plate'),
+            (-8.2, -2.2, -6.6, 16.4, 0.8, 8.4, 'pronotum_rim'),
+            (-4.2, -3.6, -5.2, 8.4, 1.0, 5.6, 'pronotum_crown'),
         ]),
         part('head', 'body', (0, 0, -11), (0.35, 0, 0), [
             (-4.8, -3, -5, 9.6, 6, 5.2, 'head'),
@@ -494,20 +540,26 @@ def roach_painter():
                     u = (i + 0.5) / fw
                     if abs(u - 0.3) < 0.12 or abs(u - 0.7) < 0.12:
                         p.px(xy, noisy(p, ROACH_DARK, 4))
-        elif style == 'elytron':
-            chitin(p, f, ROACH, (250, 210, 160))
-            fx, fy, fw, fh = f['top']                                # fine ribs down it; a bronze band round its rim, riveted
-            for i, j, xy in each(f['top']):
-                if i % 4 == 2:
-                    p.px(xy, k(ROACH, 0.8))
-                if i in (0, 1, fw - 1, fw - 2) or j in (0, 1, fh - 1):
-                    p.px(xy, noisy(p, k(BRONZE, 1.05), 4))
-                    if j % 6 == 3 and i in (0, fw - 1):
-                        p.px(xy, (250, 220, 150))
-            for s in SIDES:
-                for i, j, xy in each(f[s]):
-                    if j == f[s][3] - 1:
-                        p.px(xy, BRONZE)
+        elif style in ('elytron', 'elytron_flank', 'elytron_tip'):
+            # lacquer-glossy chestnut: deep at its margins, warming to amber along its crown, a hard white
+            # gleam running its length, faint veins; the light catching the curve of each flank
+            for s, r in f.items():
+                fx, fy, fw, fh = r
+                L = LIGHTS[s]
+                for i, j, xy in each(r):
+                    u, v = (i + 0.5) / fw, (j + 0.5) / fh
+                    across = u if s in ('top', 'bottom', 'front', 'back') else v
+                    warm = 1 - abs(across - 0.55) * 1.6 if s == 'top' else 0.25
+                    c = mixc(ROACH_DARK, (176, 92, 36), max(0, warm))
+                    if s == 'top' and abs(u - 0.62) < 0.05:
+                        c = mixc(c, (255, 236, 200), 0.75)
+                    elif s == 'top' and abs(u - 0.72) < 0.03:
+                        c = mixc(c, (255, 236, 200), 0.35)
+                    if s == 'top' and i % 5 == 1 and abs(u - 0.62) > 0.08:
+                        c = k(c, 0.88)
+                    if style == 'elytron_flank' and s in ('right', 'left'):
+                        c = mixc(ROACH_DARK, (150, 80, 32), 0.4 + 0.4 * (1 - v))
+                    p.px(xy, noisy(p, k(c, L), 3))
         elif style == 'pronotum':
             chitin(p, f, ROACH, (250, 210, 160))
             fx, fy, fw, fh = f['top']                                # a pale rim round its shield, two dark blotches on it
@@ -520,6 +572,16 @@ def roach_painter():
             for s in SIDES:
                 for i, j, xy in each(f[s]):
                     p.px(xy, noisy(p, k(ROACH_PALE, LIGHTS[s] * 0.9), 4))
+        elif style in ('pronotum_rim', 'pronotum_crown'):
+            chitin(p, f, ROACH_PALE if style == 'pronotum_rim' else (150, 78, 30), (255, 236, 200))
+            if style == 'pronotum_crown':
+                fx, fy, fw, fh = f['top']
+                for i, j, xy in each(f['top']):
+                    u, v = (i + 0.5) / fw, (j + 0.5) / fh
+                    if math.hypot((u - 0.5) * 2 - 0.3, v - 0.5) < 0.3 or math.hypot((u - 0.5) * 2 + 0.3, v - 0.5) < 0.3:
+                        p.px(xy, noisy(p, ROACH_DARK, 3))
+                    elif abs(u - 0.5) < 0.04:
+                        p.px(xy, (240, 200, 150))
         elif style in ('spike', 'boss_plate'):
             for s, r in f.items():
                 for i, j, xy in each(r):

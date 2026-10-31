@@ -1,378 +1,459 @@
 """The Hundred-Eyed Demon Lord (百眼魔君), the Many-Eyed Daoist of the Yellow Flower Temple, as
 silk_court.py: his model and skins come from one list of parts, written into SpiderCaveRenderers.
 
-A centipede spirit in a Daoist's shape, towering some three and a half blocks: from the waist up a
-gaunt Daoist in a robe of temple yellow, its cross collar black edged in gold, the eight trigrams
-round its hem and the taiji on its back, great sleeves; a sallow, long face with high cheekbones,
-narrow slanting eyes and a third eye shut on his brow, a thin moustache falling past his chin and a
-long narrow beard, his black hair in a topknot under a gold lotus crown and a jade pin; two long
-feelers sweeping back from his crown, and venom claws at the corners of his mouth; his Daoist sword
-(剑) with its gold guard and red tassel in his right hand. From the waist down he is the centipede:
-under a short apron the body runs out behind him in seven armoured segments, umber and black banded
-with gold, each with a pair of jointed legs, to two long tail-spines. Thrown off, the robe shows what
-it hid: his torso and arms plated like his body, set all over with golden eyes, rows down his flanks
-and ribs and along his arms, that blaze when he raises them (the third skin: his eyes ablaze).
+A centipede spirit in a Daoist master's shape, towering near four blocks. A tall, gaunt figure in a
+voluminous Daoist robe of temple yellow falling to the ground in three flaring tiers: damask
+lozenges woven through the silk, auspicious clouds worked in ochre round each tier, the eight
+trigrams round the hem between black and gold bands, the taiji on his back; a black cross collar
+edged in gold and a stiff high collar standing behind his head; a crimson sash knotted at his
+waist, its ends and a jade pendant hanging to his knees; great sleeves lined in black. Over his
+shoulders three tiers of a centipede's armoured segments, umber-black and gold-rimmed.
+
+And the eyes: dozens of them set through the silk, on his chest, his sleeves, his skirt and his
+back, each a heavy-lidded golden eye half-shut and dull; when he casts his golden light they all
+blaze open. His face long and sallow, the cheeks sunken under high cheekbones, narrow slanting eyes
+under a heavy brow, a third eye shut on his forehead; a long thin moustache, a beard falling to his
+sash in three locks; his hair in a topknot under a tall gold guan, a jade pin through it, ribbons
+behind, and two long centipede feelers sweeping back from his crown; poison claws curled at the
+corners of his jaw. Small centipede legs fringe his flanks through the robe's seams, run along the
+backs of his arms and scuttle round his hem; a ridge of armoured plates runs down his back through a
+slit in the robe; and from under the back of his robe a long segmented centipede tail trails behind
+him on many legs to two hooked tail-spines. In his right hand his Daoist sword (剑): a ridged blade
+inlaid with the seven stars of the Dipper, a gold guard of cloud-wings, a bound grip, a long red
+tassel. Thrown off, the robe shows what it hid: a torso of glossy black-umber segments, each ringed
+with golden eyes, arms the same.
+
+The skin is painted at four texels to the model pixel (his face and eyes need the room).
 
 Run from the repository root: python assets_source/hundred_eyed.py"""
 import math
 
 import beastgen as bg
-from silk_court import (part, mirrored, paint, emit, SilkPainter, SIDES, LIGHTS, k, mixc, noisy, each, chitin, cloth, sheen_silk,
-                        edges, vedges, gold, gem_eye, cut_point, extent, JAVA)
+from silk_court import (part, mirrored, paint, emit, SilkPainter, SIDES, LIGHTS, k, mixc, noisy, each, chitin, cloth,
+                        edges, vedges, gold, cut_point, extent, JAVA)
 from sea_court import aim
 
 bg.UNITS = 256
+bg.S = 4
 bg.TEX = bg.UNITS * bg.S
+S = bg.S
 
-YELLOW = (214, 168, 52)
-YELLOW_DEEP = (150, 106, 30)
-BLACK = (26, 20, 18)
-GOLD = (236, 190, 76)
-SKIN = (196, 168, 110)        # sallow
-SKIN_SHADE = (150, 120, 76)
-HAIR = (20, 16, 18)
-HAIR_SHEEN = (80, 70, 74)
-UMBER = (132, 78, 32)
-UMBER_DARK = (56, 30, 14)
-SEG_BAND = (186, 132, 46)
-EYE = (255, 206, 70)
-EYE_HOT = (255, 250, 210)
-JADE = (120, 200, 160)
-RED = (176, 30, 30)
-STEEL = (200, 206, 214)
+YELLOW = (220, 170, 46)
+YELLOW_LIGHT = (252, 216, 112)
+YELLOW_DEEP = (150, 100, 22)
+OCHRE = (178, 104, 22)
+BLACK = (24, 18, 18)
+BLACK_SHEEN = (62, 52, 50)
+GOLD = (238, 194, 82)
+GOLD_DEEP = (150, 100, 32)
+CRIMSON = (138, 22, 30)
+CRIMSON_DEEP = (82, 10, 18)
+WHITE = (238, 230, 208)
+JADE = (110, 196, 156)
+JADE_DEEP = (44, 120, 92)
+SKIN = (196, 176, 124)        # sallow
+SKIN_LIGHT = (222, 204, 154)
+SKIN_SHADE = (138, 116, 76)
+SKIN_HOLLOW = (96, 76, 50)
+HAIR = (18, 14, 18)
+HAIR_SHEEN = (74, 66, 76)
+HAIR_GREY = (120, 116, 118)
+CHITIN = (44, 26, 18)         # his own hide: glossy black-umber
+CHITIN_SHEEN = (170, 120, 70)
+UMBER = (110, 62, 26)
+BAND = (186, 132, 44)
+EYE = (255, 200, 60)
+EYE_DULL = (126, 86, 26)
+EYE_HOT = (255, 248, 200)
+LID = (150, 116, 70)
+STEEL = (206, 212, 222)
+STEEL_DEEP = (120, 128, 142)
+RED = (186, 28, 30)
+CELADON = (150, 196, 170)
 
-ARM, FOREARM = (0.05, 0, 0.12), (-0.9, -0.35, 0)
+ARM, FOREARM = (0.06, 0, 0.1), (-0.6, -0.25, 0)
 LARM, LFOREARM = ((x, -y, -z) for x, y, z in (ARM, FOREARM))
-SEGMENTS = 7
+TAIL = 9
+RINGS = 6
+
+
+def ring_dims(i):
+    """The i-th of his torso's segments, from the shoulders down: (top, height, width, depth)."""
+    return -14.4 + i * 2.4, 2.7, 11.4 - i * 0.65, 6.6 - i * 0.2
 
 
 def lord_parts():
-    ps = [
-        # the centipede's first segment carries him: its pivot under his waist
-        part('seg_0', 'root', (0, 18, 0), (0, 0, 0), [(-6.5, -4.5, -4.5, 13, 9, 9, 'segment_0'),
-                                                       (-5.5, -5.2, -4, 11, 1, 8, 'seg_plate')]),
-        part('waist', 'seg_0', (0, -4.5, -1.5), (0, 0, 0), [(-5.4, -3, -3.4, 10.8, 3.4, 6.8, 'belly')]),
-        # a gaunt torso, broad at the shoulders and narrowing to the waist: his own plated hide, set with eyes
-        part('torso', 'waist', (0, -2.6, 0), (0, 0, 0), [
-            (-5.2, -8, -3.2, 10.4, 8, 6.4, 'torso_low'),
-            (-6.8, -16, -3.8, 13.6, 8.2, 7.6, 'torso'),
-            (-3.4, -17.2, -2.2, 6.8, 1.6, 4.4, 'neck_base'),
-            (-1.2, -14.6, -4.3, 2.4, 13, 0.6, 'sternum'),
-        ] + [(-7.1, -15 + 2.3 * i, -2.6 + (i % 2) * 2.4, 0.7, 1.5, 1.8, 'flank_eye') for i in range(4)]
-          + [(6.4, -15 + 2.3 * i, -2.6 + (i % 2) * 2.4, 0.7, 1.5, 1.8, 'flank_eye') for i in range(4)]
-          + [(-5.6, -7 + 2.3 * i, -2.2 + (i % 2) * 2.2, 0.7, 1.4, 1.6, 'flank_eye') for i in range(3)]
-          + [(4.9, -7 + 2.3 * i, -2.2 + (i % 2) * 2.2, 0.7, 1.4, 1.6, 'flank_eye') for i in range(3)]
-          + [(-5.6 + 2.6 * i, -14.2 + (i % 2) * 2.0, -4.25, 1.8, 1.3, 0.5, 'chest_eye') for i in range(5)]
-          + [(-4.2 + 2.8 * i, -6.8 + (i % 2) * 2.2, -3.65, 1.7, 1.2, 0.5, 'chest_eye') for i in range(4)]),
-        # the robe over it: chest and waist, the black cross collar folded left over right, a belt of black and jade
-        part('robe', 'torso', (0, 0, 0), (0, 0, 0), [
-            (-7.3, -16.5, -4.3, 14.6, 8.8, 8.6, 'robe_chest'),
-            (-5.9, -8, -3.8, 11.8, 8.2, 7.6, 'robe_waist'),
-            (-6.3, -3.2, -4.3, 12.6, 2.6, 8.6, 'robe_belt'),
-            (-1.4, -3.6, -4.8, 2.8, 3.4, 0.6, 'belt_jade'),
-            (-3.8, -17.3, -3.4, 7.6, 1.6, 6.8, 'inner_collar'),
-        ]),
-        part('collar_over', 'robe', (3.6, -16.4, -4.45), (0, 0, 0.62), [(-1.1, 0, -0.35, 2.2, 13.5, 0.7, 'robe_collar')]),
-        part('collar_under', 'robe', (-3.6, -16.4, -4.4), (0, 0, -0.62), [(-1.1, 0, -0.3, 2.2, 7, 0.6, 'robe_collar')]),
-        part('belt_tail', 'robe', (2.6, -1, -4.6), (-0.05, 0, -0.05), [(-0.8, 0, -0.3, 1.6, 9, 0.5, 'belt_tail')]),
-        # the robe's skirt over the centipede's foremost segment, falling in panels
-        part('skirt', 'waist', (0, 0, 0), (0, 0, 0), [
-            (-7.4, -0.6, -5, 14.8, 5.4, 10, 'robe_skirt1'),
-            (-8.6, 4.4, -5.9, 17.2, 4.6, 11.8, 'robe_skirt2'),
-        ]),
-        part('apron', 'skirt', (0, -0.4, -5.2), (-0.14, 0, 0), [(-3.4, 0, -0.5, 6.8, 11, 0.5, 'robe_apron')]),
-        part('right_skirt_panel', 'skirt', (-6.4, -0.4, -4.9), (-0.08, 0.4, 0.1), [(-2.6, 0, -0.4, 5.2, 10, 0.4, 'robe_panel')]),
-        part('back_panel', 'skirt', (0, -0.5, 5.6), (0.12, 0, 0), [(-5, 0, 0, 10, 10.5, 0.5, 'robe_back_panel')]),
-        # a long, gaunt head
-        part('head', 'torso', (0, -17, -0.4), (0, 0, 0), [
-            (-1.7, -2, -1.7, 3.4, 2.6, 3.4, 'neck'),
-            (-3.1, -10.2, -3.2, 6.2, 8.6, 6, 'face'),
-            (-3.5, -6.2, -2.4, 7, 2, 4.4, 'cheekbones'),
-            (-1.1, -6, -3.9, 2.2, 3, 1, 'nose'),
-            (-3.4, -10.6, -0.2, 6.8, 7.4, 3.6, 'hair_back'),
-            (-3.4, -10.8, -3.4, 6.8, 1.4, 6.6, 'hair_top'),
-        ]),
-        part('right_brow', 'head', (-0.5, -7.7, -3.3), (0, 0.1, 0.38), [(-3.1, -0.5, -0.4, 3.1, 0.9, 0.9, 'brow')]),
-        part('right_fang', 'head', (-2.1, -2.4, -2.9), (0.2, 0, 0.3), [(-0.45, 0, -0.45, 0.9, 2.8, 0.9, 'venom_claw')]),
-        part('right_moustache', 'head', (-0.7, -3.6, -3.5), (0.05, 0.15, 0.12), [(-0.35, 0, -0.35, 0.7, 9, 0.7, 'moustache')]),
-        part('right_moustache_tip', 'right_moustache', (0, 8.8, 0), (0.1, 0, 0.15), [(-0.3, 0, -0.3, 0.6, 5, 0.6, 'moustache')]),
-        part('beard', 'head', (0, -1.8, -3.0), (0.1, 0, 0), [(-0.8, 0, -0.6, 1.6, 10, 1.2, 'beard')]),
-        part('beard_tip', 'beard', (0, 9.8, 0), (-0.12, 0, 0), [(-0.55, 0, -0.45, 1.1, 7, 0.9, 'beard_tip')]),
-        part('right_sideburn', 'head', (-3.2, -6, -1.4), (0.05, 0, 0.12), [(-0.4, 0, -0.6, 0.8, 6, 1.2, 'moustache')]),
-        # the lotus crown (莲花冠) over his topknot, a jade pin through it
-        part('crown', 'head', (0, -10.8, 0.2), (0, 0, 0), [
-            (-1.5, -2.6, -1.5, 3, 2.8, 3, 'topknot'),
-            (-2.4, -2.2, -2.4, 4.8, 1.4, 4.8, 'crown_base'),
-            (-5.6, -2.0, -0.3, 11.2, 0.6, 0.6, 'hairpin'),
-        ]),
+    ps = []
+    # ── his body from the waist up: his own hide, glossy segments ringed with eyes ──
+    body = [(-1.7, -16.6, -1.6, 3.4, 2.6, 3.2, 'neck')]
+    for i in range(RINGS):
+        y, h, w, d = ring_dims(i)
+        body.append((-w / 2, y, -d / 2, w, h, d, 'ring'))
+        # eyes round the ring: four across the front, two down each flank, three across the back
+        for c in range(4):
+            x = -w / 2 + w * (c + 0.5) / 4 - 1.1 + (0.5 if i % 2 else -0.3)
+            if abs(x + 1.1) < 1.6 and i < 4:
+                continue                                         # the sternum's plates run there
+            body.append((x, y + 0.6, -d / 2 - 0.45, 2.2, 1.5, 0.5, 'hide_eye'))
+        for side in (-1, 1):
+            for c in range(2):
+                z = -d / 2 + d * (c + 0.5) / 2 - 1.0
+                body.append((w / 2 - 0.05 if side > 0 else -w / 2 - 0.4, y + 0.6, z, 0.45, 1.5, 2.0, 'hide_eye_side'))
+        for c in range(3):
+            x = -w / 2 + w * (c + 0.5) / 3 - 1.0
+            body.append((x, y + 0.6, d / 2 - 0.05, 2.0, 1.4, 0.45, 'hide_eye'))
+    for i in range(5):                                           # the sternum: a column of gold-rimmed plates
+        body.append((-1.3, -14.0 + i * 2.4, -3.95 + i * 0.22, 2.6, 2.1, 0.7, 'sternum'))
+    for i in range(7):                                           # the ridge of plates down his back, through the robe's slit
+        body.append((-2.2 + i * 0.12, -14.6 + i * 2.15, 3.55 - i * 0.12, 4.4 - i * 0.24, 2.3, 1.5, 'dorsal'))
+    ps.append(part('body', 'root', (0, 3, 0), (0, 0, 0), body))
+
+    # the robe over it (thrown off in his rage): chest and waist, a high collar, the cross collar, eyes through the silk
+    robe = [
+        (-6.8, -15.2, -3.9, 13.6, 8.8, 7.8, 'robe_chest'),
+        (-5.6, -6.6, -3.6, 11.2, 7.0, 7.2, 'robe_waist'),
+        (-7.2, -15.6, -4.1, 14.4, 1.4, 8.2, 'robe_yoke'),
+        (-3.6, -16.4, -3.0, 7.2, 1.6, 6.2, 'inner_collar'),
     ]
-    for i in range(5):
-        a = -math.pi / 2 + (i - 2) * 0.62
-        ps.append(part('crown_petal_%d' % i, 'crown', (2.0 * math.sin(a), -2.2, -2.0 * math.cos(a) * 0.9), (-0.32 * math.cos(a), a, 0.32 * math.sin(a)), [
-            (-1.2, -3.4, -0.3, 2.4, 3.4, 0.6, 'crown_petal')]))
+    for r, n, y in ((0, 3, -13.0), (1, 4, -10.3), (2, 3, -7.4)):        # eyes across his breast
+        for c in range(n):
+            x = -6.0 + (12.0 - 2.8) * (c + 0.5) / n - 0.2 + (0.5 if r == 1 else 0)
+            if r == 0 and c == 1:
+                continue
+            robe.append((x, y, -4.35 - (0.3 if r == 2 else 0), 2.8, 1.7, 0.5, 'robe_eye'))
+    for r in range(2):
+        for side in (-1, 1):                                       # and down his flanks
+            robe.append((6.75 if side > 0 else -7.25, -13.4 + r * 3.6, -1.8 + r * 1.2, 0.5, 1.7, 2.8, 'robe_eye_side'))
+    for c in range(3):                                             # and across his back, under the collar
+        robe.append((-5.0 + c * 3.4, -11.4 + (c % 2) * 1.6, 3.85, 2.6, 1.6, 0.5, 'robe_eye'))
+    ps.append(part('robe', 'body', (0, 0, 0), (0, 0, 0), robe))
     ps += [
-        part('right_feeler', 'crown', (-1.0, -2.4, -1.2), (-0.95, 0.4, -0.3), [(-0.3, -10, -0.3, 0.6, 10, 0.6, 'feeler')]),
-        part('right_feeler_tip', 'right_feeler', (0, -10, 0), (-0.8, 0, -0.12), [(-0.25, -12, -0.25, 0.5, 12, 0.5, 'feeler')]),
-        part('right_arm', 'torso', (-7.0, -14.6, 0), ARM, [(-3.2, -1.4, -2.2, 4, 9, 4.4, 'arm')]
-             + [(-3.6, 0.8 + 2.2 * i, -1.6 + (i % 2) * 1.8, 0.6, 1.4, 1.5, 'arm_eye') for i in range(4)]),
-        part('right_robe_sleeve', 'right_arm', (0, 0, 0), (0, 0, 0), [(-3.8, -2.0, -2.8, 5.2, 9.8, 5.6, 'robe_sleeve'),
-                                                                  (-4.2, -2.6, -3.2, 5.6, 3, 6.4, 'robe_shoulder')]),
-        part('right_forearm', 'right_arm', (-1.1, 7.8, 0), FOREARM, [
-            (-1.6, 0, -1.6, 3.2, 7.6, 3.2, 'forearm'),
-            (-2.0, 6.8, -2.0, 4, 1.6, 4, 'cuff_plate'),
-        ] + [(-1.9, 1.6 + 2.6 * i, -0.6, 0.4, 1.2, 1.2, 'arm_eye') for i in range(2)]),
-        part('right_great_sleeve', 'right_forearm', (0, 0.4, 0.8), aim([ARM, FOREARM], (0.05, -0.3, 0.12)), [
-            (-3.8, -1, -10, 7.6, 14, 10.6, 'robe_sleeve_big')]),
-        part('right_hand', 'right_forearm', (0, 8.2, 0), (0, 0, 0), [(-1.7, 0, -1.7, 3.4, 3, 3.4, 'claw_hand'),
-                                                                     (-1.5, 2.8, -1.9, 0.8, 1.8, 0.8, 'talon'),
-                                                                     (0.6, 2.8, -1.9, 0.8, 1.8, 0.8, 'talon')]),
-        # his Daoist sword in his right hand, point up
-        part('sword', 'right_hand', (0, 1.6, -0.4), aim([ARM, FOREARM], (-0.15, 0, 0)), [
-            (-0.3, -26, -0.9, 0.6, 22, 1.8, 'blade'),
-            (-0.25, -28, -0.6, 0.5, 2, 1.2, 'blade_tip'),
-            (-0.8, -4.4, -2.2, 1.6, 1, 4.4, 'guard'),
-            (-0.6, -3.4, -0.6, 1.2, 5, 1.2, 'grip'),
-            (-0.8, 1.6, -0.8, 1.6, 1.2, 1.6, 'pommel'),
+        part('collar_over', 'robe', (3.3, -15.6, -4.15), (0, 0, 0.6), [(-1.2, 0, -0.4, 2.4, 13.2, 0.8, 'robe_collar')]),
+        part('collar_under', 'robe', (-3.3, -15.6, -4.1), (0, 0, -0.6), [(-1.2, 0, -0.3, 2.4, 6.8, 0.6, 'robe_collar')]),
+        # the stiff high collar standing behind his head, black, gold-rimmed, lined white
+        part('high_collar', 'robe', (0, -15.4, 0.6), (0.3, 0, 0), [
+            (-5.6, -7.4, 2.0, 11.2, 7.8, 0.9, 'high_collar'),
+            (-5.6, -5.6, -2.0, 0.9, 6.0, 4.2, 'high_collar_side'),
+            (4.7, -5.6, -2.0, 0.9, 6.0, 4.2, 'high_collar_side'),
         ]),
-        part('tassel', 'sword', (0, 2.8, 0), (0.1, 0, 0), [(-0.4, 0, -0.4, 0.8, 5, 0.8, 'tassel')]),
     ]
-    # the centipede's body, behind him, segment on segment, each with its pair of legs
-    prev = 'seg_0'
-    for s in range(SEGMENTS + 1):
-        name = 'seg_0' if s == 0 else 'seg_%d' % s
-        if s > 0:
-            w = 12.4 - s * 0.9
-            ps.append(part(name, prev, (0, 0, 4.4 if s == 1 else 6.2), (0, 0, 0), [
-                (-w / 2, -4 + s * 0.25, 0, w, 8 - s * 0.5, 6.6, 'segment'),
-                (-w / 2 + 0.6, -4.6 + s * 0.25, 0.6, w - 1.2, 0.8, 5.2, 'seg_plate')]))
-            prev = name
-        lx = (12.4 - s * 0.9) / 2 if s > 0 else 6.5
-        z = 3.3 if s > 0 else 0
-        ps += [
-            part('right_cleg_%d' % s, name, (-lx + 0.4, 1.6, z), (0, 0.15 * (s - 3) / 3, 0.45), [
-                (-5.5, -0.8, -0.8, 5.5, 1.6, 1.6, 'cleg')]),
-            part('right_cleg_tip_%d' % s, 'right_cleg_%d' % s, (-5.5, 0, 0), (0, 0, -1.25), [
-                (-8.2, -0.55, -0.55, 8.2, 1.1, 1.1, 'cleg_tip'),
-                (-1, -1, -1, 1.4, 2, 2, 'cleg_knee')]),
-        ]
-    ps.append(part('right_tailspine', prev, (-1.8, -0.5, 6.4), (0.15, -0.3, 0), [(-0.5, -0.5, 0, 1, 1, 9, 'tailspine')]))
+    # the sash: crimson, gold-edged, knotted before him, its ends and a jade pendant hanging (it ties the skirt: it stays)
+    ps += [
+        part('sash', 'body', (0, 0, 0), (0, 0, 0), [
+            (-6.4, -1.6, -3.95, 12.8, 2.8, 7.9, 'sash'),
+            (-1.6, -2.0, -4.6, 3.2, 3.4, 1.0, 'sash_knot'),
+        ]),
+        part('right_sash_end', 'sash', (-1.0, 0.6, -4.5), (-0.1, 0, 0.07), [(-0.9, 0, -0.25, 1.8, 13, 0.5, 'sash_end')]),
+        part('sash_end_short', 'sash', (1.1, 0.8, -4.4), (-0.08, 0, -0.04), [(-0.8, 0, -0.25, 1.6, 10, 0.5, 'sash_end_short')]),
+        part('pendant', 'sash', (-4.2, 0.6, -4.3), (-0.08, 0, 0.03), [
+            (-0.25, 0, -0.25, 0.5, 4, 0.5, 'cord'), (-1.5, 4, -0.5, 3, 3, 1, 'jade_disc'), (-0.5, 7, -0.4, 1, 4.5, 0.8, 'tassel')]),
+    ]
+    # ── the robe's skirt, to the ground in three flaring tiers ──
+    skirt = [
+        (-6.4, 0.8, -4.5, 12.8, 7.6, 9.0, 'skirt1'),
+        (-8.0, 8.0, -5.6, 16.0, 7.0, 11.2, 'skirt2'),
+        (-10.0, 14.6, -7.0, 20.0, 6.4, 14.0, 'skirt3'),
+        (-10.4, 19.7, -7.4, 20.8, 1.3, 14.8, 'hem'),
+    ]
+    for c in range(5):                                             # eyes in the skirt's silk
+        x = -8.6 + c * 3.7
+        skirt.append((x, 16.0 + (c % 2) * 1.4, -7.45, 2.6, 1.6, 0.5, 'skirt_eye'))
+    for c in range(4):
+        skirt.append((-6.6 + c * 3.7 + (c % 2) * 0.4, 9.6 + (c % 2) * 1.8, -6.05, 2.6, 1.6, 0.5, 'skirt_eye'))
+    ps.append(part('skirt', 'body', (0, 0, 0), (0, 0, 0), skirt))
+    ps += [
+        part('apron', 'skirt', (0, 1.4, -4.8), (-0.165, 0, 0), [(-3.4, 0, -0.45, 6.8, 19.6, 0.45, 'apron')]),
+        part('right_back_panel', 'skirt', (-2.3, 1.0, 4.7), (0.18, 0, 0.04), [(-3.4, 0, 0, 3.6, 19.6, 0.5, 'back_panel')]),
+        part('right_over_panel', 'skirt', (-6.1, 1.2, -1.0), (0, 0, 0.24), [(-0.5, 0, -4.2, 0.5, 18.6, 8.4, 'over_panel')]),
+    ]
+    # the little legs round his hem, scuttling (they carry him)
+    for i in range(6):
+        z = -4.6 + i * 2.1
+        ps.append(part('right_hem_leg_%d' % i, 'skirt', (-9.8 + abs(i - 2.5) * 0.3, 19.9, z * 1.1), (0, -0.5 + i * 0.2, 0.55),
+                       [(-2.6, -0.4, -0.4, 2.6, 0.8, 0.8, 'fleg')]))
+        ps.append(part('right_hem_leg_tip_%d' % i, 'right_hem_leg_%d' % i, (-2.5, 0, 0), (0, 0, -1.0),
+                       [(-2.4, -0.3, -0.3, 2.4, 0.6, 0.6, 'fleg_tip')]))
+    # the little legs along his flanks, out through the robe's seams
+    for i in range(RINGS):
+        y, h, w, d = ring_dims(i)
+        ps.append(part('right_flank_leg_%d' % i, 'body', (-w / 2 + 0.2, y + 1.3, 1.4), (0, -0.55 - i * 0.06, 0.25 + i * 0.04),
+                       [(-4.8, -0.5, -0.5, 4.8, 1.0, 1.0, 'fleg_big')]))
+        ps.append(part('right_flank_leg_tip_%d' % i, 'right_flank_leg_%d' % i, (-4.7, 0, 0), (0, 0.2, -1.1),
+                       [(-4.2, -0.35, -0.35, 4.2, 0.7, 0.7, 'fleg_tip')]))
+    # ── the head: long, gaunt ──
+    ps += [
+        part('head', 'body', (0, -16.0, -0.3), (0, 0, 0), [
+            (-3.0, -11.4, -3.0, 6, 9.6, 6, 'face'),
+            (-2.2, -2.4, -2.7, 4.4, 1.2, 4.2, 'chin'),
+            (-3.35, -7.0, -2.5, 6.7, 1.3, 4.0, 'cheekbone'),
+            (-3.15, -8.5, -3.45, 6.3, 0.9, 1.0, 'brow_ridge'),
+            (-0.6, -7.9, -3.75, 1.2, 3.6, 0.8, 'nose'),
+            (-3.3, -11.8, -0.4, 6.6, 8.4, 3.7, 'hair_back'),
+            (-3.3, -12.1, -3.3, 6.6, 1.2, 6.5, 'hair_top'),
+        ]),
+        part('right_ear', 'head', (-3.0, -7.4, -0.4), (0, 0.2, 0), [(-0.6, -1.2, -0.5, 0.6, 3.6, 1.3, 'ear')]),
+        # the beard in three long locks to his sash, a thin moustache drooping past his chin
+        part('beard', 'head', (0, -1.7, -3.0), (-0.42, 0, 0), [(-1.1, 0, -0.55, 2.2, 7.5, 1.1, 'beard')]),
+        part('beard_mid', 'beard', (0, 7.3, 0), (0.36, 0, 0), [(-0.9, 0, -0.5, 1.8, 6.5, 1.0, 'beard_mid')]),
+        part('beard_tip', 'beard_mid', (0, 6.3, 0), (0.08, 0, 0), [(-0.55, 0, -0.4, 1.1, 5, 0.8, 'beard_tip')]),
+        part('right_beard_lock', 'head', (-1.7, -2.3, -2.7), (-0.36, 0.05, 0.12), [(-0.55, 0, -0.45, 1.1, 6.5, 0.9, 'beard_lock')]),
+        part('right_beard_lock_tip', 'right_beard_lock', (0, 6.3, 0), (0.3, 0, -0.08), [(-0.4, 0, -0.35, 0.8, 4, 0.7, 'beard_tip')]),
+        part('right_moustache', 'head', (-0.5, -4.0, -3.35), (0.06, 0.1, 0.32), [(-0.3, 0, -0.3, 0.6, 4.5, 0.6, 'moustache')]),
+        part('right_moustache_tip', 'right_moustache', (0, 4.3, 0), (0.05, 0, -0.25), [(-0.25, 0, -0.25, 0.5, 6.5, 0.5, 'moustache')]),
+        part('right_fang', 'head', (-1.9, -2.6, -2.5), (0.25, 0.2, 0.3), [(-0.4, 0, -0.4, 0.8, 2.2, 0.8, 'venom_claw')]),
+        part('right_fang_tip', 'right_fang', (0, 2.1, 0), (-0.3, 0, -0.7), [(-0.3, 0, -0.3, 0.6, 1.8, 0.6, 'venom_tip')]),
+        # the guan: a tall gold crown over his topknot, a jade pin through it, ribbons behind
+        part('crown', 'head', (0, -12.0, 0.4), (0, 0, 0), [
+            (-1.4, -2.0, -1.4, 2.8, 2.2, 2.8, 'topknot'),
+            (-2.3, -1.4, -2.3, 4.6, 1.3, 4.6, 'crown_band'),
+            (-1.9, -4.9, -2.1, 3.8, 3.6, 4.2, 'guan'),
+            (-0.7, -6.0, -2.6, 1.4, 1.3, 5.2, 'guan_ridge'),
+            (-5.4, -3.6, -0.3, 10.8, 0.6, 0.6, 'hairpin'),
+            (-1.0, -4.0, -2.45, 2.0, 2.0, 0.5, 'guan_gem'),
+        ]),
+        part('right_ribbon', 'crown', (-1.8, -1.0, 1.8), (0.32, 0, 0.12), [(-0.6, 0, -0.1, 1.2, 8, 0.2, 'ribbon')]),
+        part('right_ribbon_tail', 'right_ribbon', (0, 7.9, 0), (0.25, 0, 0.05), [(-0.6, 0, -0.1, 1.2, 7, 0.2, 'ribbon_tail')]),
+        part('right_feeler', 'crown', (-1.0, -4.4, -0.8), (-1.0, 0.35, -0.3), [(-0.3, -10, -0.3, 0.6, 10, 0.6, 'feeler')]),
+        part('right_feeler_tip', 'right_feeler', (0, -10, 0), (-0.75, 0, -0.1), [(-0.25, -13, -0.25, 0.5, 13, 0.5, 'feeler')]),
+    ]
+    for i in range(5):                                             # lotus petals round the guan's foot
+        a = -math.pi / 2 + (i - 2) * 0.66
+        ps.append(part('crown_petal_%d' % i, 'crown', (2.0 * math.sin(a), -1.6, -2.0 * math.cos(a) * 0.95),
+                       (-0.3 * math.cos(a), a, 0.3 * math.sin(a)), [(-1.0, -2.6, -0.25, 2.0, 2.6, 0.5, 'crown_petal')]))
+    # ── the arms ──
+    ps += [
+        part('right_arm', 'body', (-6.6, -13.6, 0), ARM, [
+            (-2.8, -1.2, -2.0, 3.8, 4.6, 4.0, 'arm_ring'),
+            (-2.6, 3.2, -1.9, 3.4, 4.8, 3.8, 'arm_ring'),
+            (-3.25, 0.2, -1.2, 0.5, 1.4, 2.0, 'hide_eye_side'),
+            (-3.05, 4.8, -0.6, 0.5, 1.4, 2.0, 'hide_eye_side'),
+            (-1.6, 1.4, -2.45, 2.0, 1.4, 0.5, 'hide_eye'),
+        ]),
+        part('right_robe_sleeve', 'right_arm', (0, 0, 0), (0, 0, 0), [
+            (-3.4, -1.8, -2.6, 5.0, 10.0, 5.2, 'robe_sleeve'),
+            (-3.9, 2.0, -1.4, 0.5, 1.7, 2.8, 'robe_eye_side'),
+        ]),
+        # three tiers of armoured segments over his shoulder, each with its eye
+        part('right_pauldron', 'right_arm', (-0.4, -2.0, 0), (0, 0, 0.55), [
+            (-3.4, -1.6, -3.4, 5.2, 1.8, 6.8, 'plate1'),
+            (-4.2, 0.0, -3.8, 5.6, 1.9, 7.6, 'plate2'),
+            (-5.0, 1.7, -4.2, 6.0, 2.1, 8.4, 'plate3'),
+            (-5.5, 1.9, -1.0, 0.5, 1.6, 2.2, 'hide_eye_side'),
+            (-5.3, 3.6, -4.0, 1.0, 1.6, 8.0, 'plate_lip'),
+        ]),
+        part('right_forearm', 'right_arm', (-0.9, 7.8, 0), FOREARM, [
+            (-1.6, 0, -1.6, 3.2, 7.8, 3.2, 'forearm'),
+            (-2.0, 6.6, -2.0, 4.0, 1.6, 4.0, 'cuff_plate'),
+            (-2.05, 2.0, -0.7, 0.5, 1.4, 1.6, 'hide_eye_side'),
+        ]),
+        # the great sleeve hanging from his forearm, lined black, eyes through its silk
+        part('right_great_sleeve', 'right_forearm', (0, 0.4, 0.6), aim([ARM, FOREARM], (0.04, -0.28, 0.12)), [
+            (-3.4, -1.2, -8.6, 6.8, 8.8, 9.4, 'great_sleeve'),
+            (-3.9, 7.4, -10.6, 7.8, 7.6, 11.4, 'great_sleeve_low'),
+            (-4.2, 14.8, -10.9, 8.4, 1.3, 12.0, 'sleeve_cuff'),
+            (-3.85, 1.4, -6.8, 0.5, 1.7, 2.8, 'robe_eye_side'),
+            (-3.85, 4.0, -2.8, 0.5, 1.7, 2.8, 'robe_eye_side'),
+            (-4.35, 9.0, -8.8, 0.5, 1.7, 2.8, 'robe_eye_side'),
+            (-4.35, 10.6, -4.6, 0.5, 1.7, 2.8, 'robe_eye_side'),
+            (-1.4, 9.6, -11.05, 2.8, 1.7, 0.5, 'robe_eye'),
+        ]),
+        part('right_hand', 'right_forearm', (0, 8.0, 0), (0, 0, 0), [
+            (-1.5, 0, -1.5, 3.0, 2.4, 3.0, 'palm'),
+            (-1.55, 2.2, -1.5, 0.8, 3.4, 0.8, 'finger'),
+            (-0.4, 2.2, -1.6, 0.8, 3.8, 0.8, 'finger'),
+            (0.75, 2.2, -1.5, 0.8, 3.2, 0.8, 'finger'),
+            (-1.4, 1.0, -2.2, 0.8, 2.2, 0.8, 'finger'),
+        ]),
+    ]
+    # little legs down the backs of his arms
+    for i in range(3):
+        ps.append(part('right_arm_leg_%d' % i, 'right_arm', (-2.4, 1.0 + i * 2.6, 2.2), (0.3, -0.9, 0.4),
+                       [(-2.8, -0.35, -0.35, 2.8, 0.7, 0.7, 'fleg')]))
+        ps.append(part('right_arm_leg_tip_%d' % i, 'right_arm_leg_%d' % i, (-2.7, 0, 0), (0, 0, -0.8),
+                       [(-2.2, -0.25, -0.25, 2.2, 0.5, 0.5, 'fleg_tip')]))
+    for i in range(2):
+        ps.append(part('right_forearm_leg_%d' % i, 'right_forearm', (-1.4, 1.6 + i * 3.0, 1.4), (0.2, -0.8, 0.3),
+                       [(-2.4, -0.3, -0.3, 2.4, 0.6, 0.6, 'fleg')]))
+    # his sword in his right hand, point up and forward
+    ps += [
+        part('sword', 'right_hand', (0, 2.0, -0.5), aim([ARM, FOREARM], (-0.08, 1.35, -0.28)), [
+            (-0.3, -27.5, -1.25, 0.6, 23.5, 2.5, 'blade'),
+            (-0.45, -27.0, -0.3, 0.9, 23.0, 0.6, 'blade_ridge'),
+            (-0.25, -30.0, -0.8, 0.5, 2.6, 1.6, 'blade_tip'),
+            (-0.2, -31.4, -0.3, 0.4, 1.5, 0.6, 'blade_tip'),
+            (-0.9, -4.6, -2.4, 1.8, 1.2, 4.8, 'guard'),
+            (-0.7, -5.4, -1.2, 1.4, 0.9, 2.4, 'guard_crown'),
+            (-0.6, -3.4, -0.6, 1.2, 5.2, 1.2, 'grip'),
+            (-0.9, 1.8, -0.9, 1.8, 1.4, 1.8, 'pommel'),
+        ]),
+        part('guard_wing_front', 'sword', (0, -4.0, -2.3), (0.55, 0, 0), [(-0.45, 0, -0.4, 0.9, 1.8, 0.8, 'guard_wing')]),
+        part('guard_wing_back', 'sword', (0, -4.0, 2.3), (-0.55, 0, 0), [(-0.45, 0, -0.4, 0.9, 1.8, 0.8, 'guard_wing')]),
+        part('tassel', 'sword', (0, 3.2, 0), (0.1, 0, 0), [(-0.3, 0, -0.3, 0.6, 2.2, 0.6, 'cord'), (-0.6, 2.2, -0.6, 1.2, 1.2, 1.2, 'tassel_bead'),
+                                                         (-0.55, 3.4, -0.55, 1.1, 5.5, 1.1, 'tassel')]),
+        # the teacup in his left hand (only while he pours)
+        part('teacup', 'left_hand', (0, 2.6, -1.0), aim([LARM, LFOREARM], (0, 0, 0)), [
+            (-1.2, -0.2, -1.2, 2.4, 1.8, 2.4, 'cup'), (-1.5, -0.6, -1.5, 3.0, 0.5, 3.0, 'cup_rim'), (-0.8, 1.6, -0.8, 1.6, 0.4, 1.6, 'cup_foot')]),
+    ]
+    # ── the centipede's tail, trailing from under the back of his robe ──
+    prev = 'root'
+    for s in range(TAIL):
+        t = s / (TAIL - 1)
+        w, h, L = 7.4 - 4.6 * t, 3.8 - 1.9 * t, 4.4 - 0.8 * t
+        name = 'tail_%d' % s
+        pivot = (0, 21.6, 4.6) if s == 0 else (0, 0.1, 4.0 - 0.8 * (s - 1) / (TAIL - 1))
+        ps.append(part(name, prev, pivot, (0.04 if s == 0 else -0.02, 0, 0), [
+            (-w / 2, -h / 2, 0, w, h, L, 'tseg'),
+            (-w / 2 - 0.35, -h / 2 - 0.45, 0.35, w + 0.7, 1.0, L - 0.5, 'tplate'),
+            (-w / 2 - 0.4, -0.4, L / 2 - 0.8, 0.45, 1.2, 1.6, 'hide_eye_side'),
+            (w / 2 - 0.05, -0.4, L / 2 - 0.8, 0.45, 1.2, 1.6, 'hide_eye_side'),
+        ]))
+        ps.append(part('right_tleg_%d' % s, name, (-w / 2 + 0.2, h / 2 - 0.6, L / 2), (0, -0.25 + 0.5 * t, 0.45),
+                       [(-3.4 + t, -0.4, -0.4, 3.4 - t, 0.8, 0.8, 'fleg')]))
+        ps.append(part('right_tleg_tip_%d' % s, 'right_tleg_%d' % s, (-3.3 + t, 0, 0), (0, 0, -1.15),
+                       [(-3.0, -0.3, -0.3, 3.0, 0.6, 0.6, 'fleg_tip')]))
+        prev = name
+    ps.append(part('right_tail_spine', prev, (-0.8, -0.2, 3.4), (0.18, -0.35, 0), [(-0.4, -0.4, 0, 0.8, 0.8, 6.5, 'tail_spine')]))
+    ps.append(part('right_tail_hook', 'right_tail_spine', (0, 0, 6.3), (0.3, 0.6, 0), [(-0.3, -0.3, 0, 0.6, 0.6, 3.2, 'tail_hook')]))
     return mirrored(ps)
 
 
-def eye_box(p, f, dims):
-    """A domed golden eye on his plating: its iris and slit facing out, blazing in his glare."""
+# ── Painting ─────────────────────────────────────────────────────────────────
+
+def lid_eye(p, rect, iris_calm=0.0, lid=LID, rim=(60, 34, 16), open_=0.45):
+    """A heavy-lidded eye over a face: a dark rim round an almond, the upper lid drooping over a dull
+    golden iris slit black; ablaze, the whole almond burns open (the blaze skin) round its slit."""
+    fx, fy, fw, fh = rect
+    cx, cy = fw / 2, fh / 2
+    for i, j, xy in each(rect):
+        u, v = (i + 0.5 - cx) / (fw / 2), (j + 0.5 - cy) / (fh / 2)
+        almond = abs(v) <= (1 - u * u) ** 0.8 * 1.02
+        if not almond:
+            p.px(xy, noisy(p, rim, 3))
+            continue
+        edge = abs(v) > (1 - u * u) ** 0.8 * 0.72
+        slit = abs(u) < 0.13 and abs(v) < 0.9
+        lidded = v < -1 + 2 * (1 - open_)
+        if edge:
+            p.px(xy, (40, 20, 10))
+            continue
+        if slit and not lidded:
+            p.px(xy, (12, 6, 4))
+            continue
+        if lidded:
+            base = mixc(lid, (230, 200, 150), 0.25 * (1 + v))
+            hot = mixc(EYE, EYE_HOT, max(0, 1 - abs(u) * 1.5))
+            p.lit(xy, base, calm=0.0, blaze=1.0, hot=hot, skin=noisy(p, base, 3))
+            continue
+        d = math.hypot(u, v * 0.9)
+        if abs(u) > 0.6:                                         # the white of the eye, yellowed, bloodshot at its corner
+            sc = (228, 212, 160) if abs(u) < 0.85 or p.rnd.random() < 0.7 else (200, 90, 70)
+            p.lit(xy, sc, calm=0.0, blaze=0.8, hot=mixc(EYE, EYE_HOT, 0.3), skin=noisy(p, k(sc, 0.95), 3))
+            continue
+        iris = mixc(mixc(EYE, EYE_DULL, 0.45), (90, 52, 14), d)
+        hot = mixc(EYE_HOT, EYE, min(1, d * 1.3))
+        p.lit(xy, iris if iris_calm == 0 else mixc(EYE, (150, 90, 20), d), calm=iris_calm, blaze=1.0, hot=hot, skin=noisy(p, iris, 3))
+    # the lash line, a hard dark curve along the lid's edge
+    for i in range(fw):
+        u = (i + 0.5 - cx) / (fw / 2)
+        top = (1 - u * u) ** 0.8
+        y = cy + (-1 + 2 * (1 - open_)) * (fh / 2) * top
+        j = int(min(fh - 1, max(0, y)))
+        if abs(u) < 0.95:
+            p.px((fx + i, fy + j), (30, 14, 8))
+
+
+def eye_box(p, f, open_=0.45, calm=0.0, lid=LID, rim=(60, 34, 16), back=CHITIN):
+    """A domed eye set in a socket: its face outward (whichever that is) an eye, its sides a rim."""
+    big = max(f[s][2] * f[s][3] for s in SIDES)
     for s, r in f.items():
-        fx, fy, fw, fh = r
-        for i, j, xy in each(r):
-            if s in ('right', 'left', 'front'):
-                u, v = (i + 0.5) / fw, (j + 0.5) / fh
-                edge = min(u, 1 - u, v, 1 - v)
-                if edge < 0.2:
-                    p.px(xy, (60, 30, 14))
-                elif abs(u - 0.5) < 0.14:
-                    p.px(xy, (20, 8, 4))
-                else:
-                    p.lit(xy, k(EYE, 0.8 + 0.3 * (1 - v)), calm=0.55, blaze=1.0, hot=EYE_HOT)
-            else:
-                p.px(xy, noisy(p, UMBER_DARK, 3))
-
-
-def painted_eyes(p, rect, n, seed=0, size=(3, 2)):
-    """Rows of golden eyes over a face of plating, glowing faintly; ablaze in his glare."""
-    fx, fy, fw, fh = rect
-    w, h = size
-    placed = 0
-    for row in range(1, fh - h, h + 2):
-        for col in range(1 + (row // (h + 2)) % 2 * 2, fw - w, w + 2):
-            if placed >= n:
-                return
-            if (col * 7 + row * 3 + seed) % 5 == 0:
-                continue
-            for j in range(-1, h + 1):
-                for i in range(-1, w + 1):
-                    p.px((fx + col + i, fy + row + j), (54, 26, 12))
-            gem_eye(p, fx + col, fy + row, EYE, w=w, h=h, calm=0.45)
-            placed += 1
-
-
-def lord_painter():
-    def paint_box(p, style, f, dims):
-        if style in ('torso', 'torso_low', 'arm', 'forearm', 'belly', 'neck_base'):
-            # his own hide under the robe: plated umber, banded gold at the seams, set with eyes
-            chitin(p, f, UMBER, (220, 170, 110), plate=4)
-            for s in ('front', 'right', 'left', 'back'):
-                painted_eyes(p, f[s], 16 if style.startswith('torso') else 6, seed=len(s))
-        elif style in ('flank_eye', 'chest_eye', 'arm_eye'):
-            eye_box(p, f, dims)
-        elif style == 'sternum':
-            chitin(p, f, SEG_BAND, (250, 220, 150), plate=3)
-        elif style in ('cuff_plate', 'claw_hand', 'talon'):
-            chitin(p, f, UMBER_DARK if style != 'cuff_plate' else SEG_BAND, (230, 190, 130))
-        elif style in ('robe_chest', 'robe_waist', 'robe_sleeve', 'robe_shoulder', 'robe_skirt1', 'robe_skirt2', 'robe_apron', 'robe_sleeve_big', 'robe_panel', 'robe_back_panel'):
-            for s, r in f.items():
-                sheen_silk(p, r, k(YELLOW, LIGHTS[s]), k((250, 220, 120), LIGHTS[s]), step=5)
-            if style == 'robe_back_panel':
-                taiji(p, f['back'])
-                taiji(p, f['front'])
-            if style == 'robe_chest':
-                taiji(p, f['back'])
-            if style in ('robe_panel', 'robe_back_panel'):
-                for s2 in ('front', 'back'):
-                    vedges(p, f[s2], BLACK, 2)
-                    fx, fy, fw, fh = f[s2]
-                    for i in range(fw):
-                        p.px((fx + i, fy + fh - 1), GOLD)
-                        p.px((fx + i, fy + fh - 2), BLACK)
-            if False:
-                fx, fy, fw, fh = f['front']                           # the black cross collar running down to the belt
-                for i, j, xy in each(f['front']):
-                    if abs((i - fw / 2) + (j - fh * 0.15) * 0.5) < 2.2 and i < fw / 2 + 2 or abs((fw / 2 - i) + (j - fh * 0.15) * 0.5) < 2.2 and i > fw / 2 - 2:
-                        if j < fh * 0.7:
-                            p.px(xy, noisy(p, BLACK, 3))
-            if style == 'robe_skirt2':
-                for s in SIDES:
-                    trigrams(p, f[s])
-            if style == 'robe_apron':
-                fx, fy, fw, fh = f['front']
-                vedges(p, f['front'], BLACK, 2)
-                taiji(p, (fx, fy + fh // 3, fw, fw))
-            if style == 'robe_sleeve_big':
-                for s in SIDES:
-                    fx, fy, fw, fh = f[s]
-                    for i in range(fw):
-                        for j in range(fh - 4, fh):
-                            p.px((fx + i, fy + j), noisy(p, BLACK if j < fh - 1 else GOLD, 3))
-                fx, fy, fw, fh = f['bottom']
-                for i, j, xy in each(f['bottom']):
-                    p.px(xy, k(YELLOW_DEEP, 0.4))
-        elif style == 'inner_collar':
-            cloth(p, f, (238, 230, 210))
-        elif style == 'belt_jade':
-            for s2, r in f.items():
-                for i, j, xy in each(r):
-                    p.px(xy, noisy(p, k(JADE, LIGHTS[s2] * (1.15 if (i + j) % 4 == 0 else 1)), 3))
-        elif style == 'belt_tail':
-            cloth(p, f, BLACK)
-            for s2 in SIDES:
-                fx, fy, fw, fh = f[s2]
-                for i in range(fw):
-                    p.px((fx + i, fy + fh - 1), GOLD)
-        elif style in ('robe_collar', 'robe_belt'):
-            cloth(p, f, BLACK)
-            edges(p, f, GOLD)
-            if style == 'robe_belt':
-                fx, fy, fw, fh = f['front']
-                for i in range(fw // 2 - 2, fw // 2 + 2):
-                    for j in range(fh):
-                        p.px((fx + i, fy + j), JADE)
-        elif style == 'face':
-            paint_lord_face(p, f)
-        elif style in ('neck', 'cheekbones', 'nose'):
-            cloth(p, f, SKIN, folds=False, fall=0.15)
-        elif style in ('hair_back', 'hair_top', 'topknot'):
-            for s, r in f.items():
-                for i, j, xy in each(r):
-                    c = HAIR_SHEEN if (i + j // 3) % 4 == 0 else HAIR
-                    p.px(xy, noisy(p, k(c, LIGHTS[s]), 3))
-            if style == 'hair_back':
-                for i, j, xy in each(f['front']):
-                    p.px(xy, HAIR)
-        elif style in ('crown', 'crown_petal', 'crown_base'):
-            gold(p, f, GOLD)
-            if style == 'crown':
-                for s in SIDES:
-                    fx, fy, fw, fh = f[s]
-                    for i in range(0, fw, 3):
-                        p.px((fx + i, fy), (255, 240, 180))
-                        p.px((fx + i + 1, fy + fh - 1), (140, 96, 30))
-        elif style == 'hairpin':
-            for s, r in f.items():
-                for i, j, xy in each(r):
-                    p.px(xy, noisy(p, k(JADE, LIGHTS[s]), 3))
-        elif style == 'brow':
-            for s, r in f.items():
-                for i, j, xy in each(r):
-                    p.px(xy, noisy(p, (30, 24, 22), 3))
-        elif style in ('moustache', 'beard', 'beard_tip'):
-            for s, r in f.items():
-                for i, j, xy in each(r):
-                    c = HAIR_SHEEN if i % 2 else (14, 12, 14)
-                    p.px(xy, noisy(p, c, 3))
-            for s in SIDES:
-                cut_point(p, f[s], keep=0.5, sharp=0.35)
-        elif style == 'venom_claw':
-            for s, r in f.items():
-                for i, j, xy in each(r):
-                    p.px(xy, noisy(p, mixc((120, 30, 20), (230, 210, 170), (j + 0.5) / r[3]), 3))
-        elif style == 'feeler':
-            chitin(p, f, (70, 36, 18), gloss=False)
-            for s in SIDES:
-                for i, j, xy in each(f[s]):
-                    if j % 3 == 0:
-                        p.px(xy, SEG_BAND)
-        elif style.startswith('segment'):
-            chitin(p, f, UMBER, (230, 180, 110))
-            for s in SIDES:                                          # a gold band round the segment's fore edge, eyes down its flanks
-                fx, fy, fw, fh = f[s]
-                for i in range(fw):
-                    for j in range(2):
-                        p.px((fx + i, fy + j), noisy(p, SEG_BAND, 4))
-                if s in ('right', 'left'):
-                    gem_eye(p, fx + fw // 2 - 1, fy + fh // 2, EYE, w=3, h=2, calm=0.4)
-            fx, fy, fw, fh = f['top']
-            for i, j, xy in each(f['top']):
-                if abs(i - fw / 2 + 0.5) < 1:
-                    p.px(xy, k(UMBER_DARK, 1))
-        elif style == 'seg_plate':
-            chitin(p, f, UMBER_DARK, (200, 160, 110))
-            fx, fy, fw, fh = f['top']
-            for i in range(1, fw - 1, 4):
-                gem_eye(p, fx + i, fy + fh // 2 - 1, EYE, w=2, h=2, pupil=False, calm=0.4)
-        elif style in ('cleg', 'cleg_tip', 'cleg_knee', 'tailspine'):
-            chitin(p, f, (150, 96, 40) if style == 'cleg' else (110, 60, 26), (240, 200, 140))
-            if style in ('cleg_tip', 'tailspine'):
-                for s in ('right', 'left', 'top', 'bottom'):
-                    fx, fy, fw, fh = f[s]
-                    for i, j, xy in each(f[s]):
-                        t = (i + 0.5) / fw if s in ('top', 'bottom') else 0
-                        if s in ('top', 'bottom') and ((style == 'cleg_tip' and t < 0.3) or (style == 'tailspine' and t > 0.7)):
-                            p.px(xy, (230, 190, 90))
-        elif style in ('blade', 'blade_tip'):
-            for s, r in f.items():
-                fx, fy, fw, fh = r
-                for i, j, xy in each(r):
-                    c = k(STEEL, LIGHTS[s] * (1.15 if s in ('right', 'left') and abs(i - fw / 2) < 1 else 1.0))
-                    p.px(xy, noisy(p, c, 3))
-        elif style in ('guard', 'pommel'):
-            gold(p, f, GOLD)
-        elif style == 'grip':
-            cloth(p, f, (60, 20, 24), folds=False)
-            for s in SIDES:
-                fx, fy, fw, fh = f[s]
-                for j in range(0, fh, 2):
-                    for i in range(fw):
-                        p.px((fx + i, fy + j), (30, 10, 12))
-        elif style == 'tassel':
-            cloth(p, f, RED)
+        if r[2] * r[3] >= big and s in SIDES:
+            lid_eye(p, r, iris_calm=calm, lid=lid, rim=rim, open_=open_)
         else:
-            cloth(p, f, YELLOW)
-    return paint_box
+            for i, j, xy in each(r):
+                p.px(xy, noisy(p, k(rim, LIGHTS[s]), 3))
 
 
-def taiji(p, rect):
-    """The taiji, white and black, in a black ring, set in the middle of a face."""
+def silk_robe(p, rect, s, base=YELLOW, light=1.0, damask=True, folds=6):
+    """Yellow silk: lit by its face, soft folds running down it catching the light, a damask lozenge
+    woven through it a shade deeper."""
     fx, fy, fw, fh = rect
-    r = min(fw, fh) * 0.3
-    cx, cy = fw / 2, fh * 0.42
+    L = LIGHTS[s] * light
+    period = max(8, fw // folds) if s in SIDES else 9999
+    for i, j, xy in each(rect):
+        c = k(base, L * (1.04 - 0.12 * j / max(1, fh)))
+        if s in SIDES:
+            ph = ((i + 0.15 * j) % period) / period
+            fold = math.cos(ph * 2 * math.pi)
+            c = mixc(c, k(YELLOW_LIGHT, L), max(0, fold) ** 4 * 0.45) if fold > 0 else mixc(c, k(YELLOW_DEEP, L), (-fold) ** 3 * 0.35)
+        if damask:
+            a, b = (i + 2 * S) % (6 * S), (j + 3 * S) % (6 * S)
+            if abs(a - 3 * S) + abs(b - 3 * S) == 2 * S:
+                c = mixc(c, k(OCHRE, L), 0.3)
+        p.px(xy, noisy(p, c, 2))
+
+
+def band(p, rect, y, h, colour=BLACK, pipe=GOLD):
+    """A band of black (or another colour) across a face, piped gold at its edges."""
+    fx, fy, fw, fh = rect
+    for j in range(max(0, y), min(fh, y + h)):
+        for i in range(fw):
+            c = pipe if j in (y, y + h - 1) else colour
+            p.px((fx + i, fy + j), noisy(p, c, 3))
+
+
+def clouds(p, rect, y, h, colour=OCHRE, period=None, light=1.0):
+    """A band of auspicious clouds: rolling three-lobed heads with a curl, outlined in thread."""
+    fx, fy, fw, fh = rect
+    period = period or max(12, int(h * 2.2))
+    for j in range(max(0, y), min(fh, y + h)):
+        for i in range(fw):
+            u = (i % period) / period
+            v = (j - y) / h
+            top = 0.55 - 0.4 * abs(math.sin(u * math.pi * 3)) if u < 0.66 else 0.45
+            r = math.hypot((u - 0.8) * period / h, v - 0.55)
+            inside = (v > top and v < 0.92 and u < 0.7) or r < 0.32
+            outline = (inside and (abs(v - top) < 1.5 / h or abs(v - 0.92) < 1.5 / h)) or abs(r - 0.32) < 1.2 / h \
+                or (u < 0.7 and inside and abs(math.sin(u * math.pi * 3)) < 0.12)
+            if outline:
+                p.px((fx + i, fy + j), k(mixc(colour, BLACK, 0.3), light))
+            elif inside:
+                p.px((fx + i, fy + j), noisy(p, k(mixc(colour, YELLOW_LIGHT, 0.45), light), 2))
+
+
+TRIGRAMS = ['111', '011', '101', '001', '110', '010', '100', '000']
+
+
+def trigrams(p, rect, y, h, start=0):
+    """The eight trigrams in black on yellow, between gold rules."""
+    fx, fy, fw, fh = rect
+    band(p, rect, y, S, GOLD, GOLD)
+    band(p, rect, y + h - S, S, GOLD, GOLD)
+    bar_h = max(1, h // 8)
+    step = max(6 * S, fw // 4)
+    w = int(step * 0.6)
+    for n, x0 in enumerate(range(S, fw - w, step)):
+        t = TRIGRAMS[(n + start) % 8]
+        for row, bit in enumerate(t):
+            yy = fy + y + 2 * S + row * bar_h * 2
+            for i in range(w):
+                if bit == '1' or i < w * 0.42 or i > w * 0.58:
+                    for b in range(bar_h):
+                        p.px((fx + x0 + i, yy + b), BLACK)
+
+
+def taiji(p, rect, cx=None, cy=None, r=None):
+    fx, fy, fw, fh = rect
+    r = r or min(fw, fh) * 0.3
+    cx = fw / 2 if cx is None else cx
+    cy = fh * 0.42 if cy is None else cy
     for i, j, xy in each(rect):
         x, y = i + 0.5 - cx, j + 0.5 - cy
         d = math.hypot(x, y)
-        if d > r + 1:
+        if d > r + 1.5 * S:
             continue
         if d > r:
-            p.px(xy, BLACK)
+            p.px(xy, GOLD if d > r + S else BLACK)
             continue
-        upper = y < 0
         white = x > 0
         if math.hypot(x, y + r / 2) < r / 2:
             white = True
@@ -382,72 +463,557 @@ def taiji(p, rect):
             white = False
         if math.hypot(x, y - r / 2) < r / 7:
             white = True
-        p.px(xy, (244, 236, 214) if white else BLACK)
+        p.px(xy, WHITE if white else BLACK)
 
 
-TRIGRAMS = ['111', '011', '101', '001', '110', '010', '100', '000']
+def eye_motif(p, x, y, w=None):
+    """An eye embroidered in gold thread on the silk: shut, a line of lashes; ablaze, it burns open."""
+    w = w or 5 * S
+    h = max(3, w // 2)
+    for i in range(w):
+        u = (i + 0.5) / w * 2 - 1
+        top = int(round((1 - u * u) * h / 2))
+        for j in range(-top, top + 1):
+            xy = (x + i, y + j)
+            if abs(j) == top:
+                p.px(xy, GOLD_DEEP)
+            elif abs(u) < 0.15:
+                p.px(xy, (40, 20, 8))
+            else:
+                p.lit(xy, YELLOW_DEEP, calm=0.0, blaze=1.0, hot=mixc(EYE_HOT, EYE, abs(u)), skin=mixc(YELLOW, GOLD_DEEP, 0.5))
+        if (i % 3 == 0) and abs(u) < 0.8:
+            p.px((x + i, y + h // 2 + 1), GOLD_DEEP)
 
 
-def trigrams(p, rect):
-    """The eight trigrams in black round the hem, between gold lines."""
-    fx, fy, fw, fh = rect
-    for i in range(fw):
-        p.px((fx + i, fy + fh - 1), GOLD)
-        p.px((fx + i, fy + 1), GOLD)
-    step = max(6, fw // 4)
-    for n, x0 in enumerate(range(2, fw - 4, step)):
-        t = TRIGRAMS[n % 8]
-        for row, bit in enumerate(t):
-            y = fy + 3 + row * 2
-            for i in range(4):
-                if bit == '1' or i in (0, 3):
-                    p.px((fx + x0 + i, y), BLACK)
+def hide(p, f, base=CHITIN, ring=True):
+    """His own hide: glossy black-umber segments, a gold seam at each one's lower edge."""
+    chitin(p, f, base, CHITIN_SHEEN)
+    if ring:
+        for s in SIDES:
+            fx, fy, fw, fh = f[s]
+            for i in range(fw):
+                for j in range(fh - S, fh):
+                    p.px((fx + i, fy + j), noisy(p, k(BAND, LIGHTS[s] * (0.7 if j == fh - 1 else 1)), 4))
+                p.px((fx + i, fy), k(CHITIN, 0.5))
+
+
+def hair(p, f, grey=0.0):
+    for s, r in f.items():
+        for i, j, xy in each(r):
+            c = HAIR_SHEEN if (i + j // 4) % 5 == 0 else HAIR
+            if grey and p.rnd.random() < grey:
+                c = HAIR_GREY
+            p.px(xy, noisy(p, k(c, LIGHTS[s]), 3))
+
+
+def lord_painter():
+    def paint_box(p, style, f, dims):
+        fr = f['front']
+        if style in ('ring', 'arm_ring', 'forearm', 'neck_hide'):
+            hide(p, f)
+            if style == 'ring':                                   # painted eyes between the raised ones, a dim glow
+                for s in SIDES:
+                    fx, fy, fw, fh = f[s]
+                    for x0 in range(S, fw - 3 * S, 7 * S):
+                        lid_eye(p, (fx + x0 + 3 * S, fy + S, 3 * S, 2 * S), iris_calm=0.35, open_=0.6)
+        elif style in ('hide_eye', 'hide_eye_side'):
+            eye_box(p, f, open_=0.75, calm=0.8, lid=(90, 56, 30))
+        elif style in ('robe_eye', 'robe_eye_side', 'skirt_eye'):
+            eye_box(p, f, open_=0.62, calm=0.3, lid=mixc(SKIN, YELLOW_DEEP, 0.3), rim=YELLOW)
+        elif style == 'sternum':
+            chitin(p, f, BAND, (255, 230, 160))
+            edges(p, f, k(CHITIN, 1), width=S // 2)
+        elif style == 'dorsal' or style.startswith('plate'):
+            chitin(p, f, CHITIN, CHITIN_SHEEN)
+            for s in SIDES + ('top',):
+                fx, fy, fw, fh = f[s]
+                for i in range(fw):
+                    for j in range(S):
+                        p.px((fx + i, fy + fh - 1 - j), noisy(p, k(GOLD, LIGHTS[s] * (0.85 if j else 1.0)), 4))
+            if style == 'dorsal':                                  # a ridge-spine down the plate's middle
+                fx, fy, fw, fh = f['back']
+                for j in range(fh - S):
+                    for i in range(fw // 2 - S // 2, fw // 2 + S // 2):
+                        p.px((fx + i, fy + j), (200, 150, 70))
+        elif style in ('robe_chest', 'robe_waist', 'robe_yoke', 'robe_sleeve', 'skirt1', 'skirt2', 'skirt3', 'great_sleeve',
+                       'apron', 'back_panel', 'over_panel', 'great_sleeve_low'):
+            for s, r in f.items():
+                silk_robe(p, r, s, folds=3 if style in ('robe_sleeve', 'apron', 'back_panel') else 5)
+            if style == 'robe_chest':
+                fx, fy, fw, fh = f['back']
+                taiji(p, f['back'], cy=fh * 0.55, r=fh * 0.34)
+                band(p, f['back'], 0, S, GOLD_DEEP, GOLD_DEEP)
+                # the slit down his back, the ridge through it: dark at its middle
+                for j in range(fh):
+                    for i in range(fw // 2 - S, fw // 2 + S):
+                        p.px((fx + i, fy + j), k(BLACK, 1))
+                for s in ('right', 'left'):
+                    eye_motif(p, f[s][0] + S, f[s][1] + f[s][3] - 4 * S, w=f[s][2] - 2 * S)
+                eye_motif(p, fr[0] + fr[2] // 2 - 3 * S, fr[1] + 4 * S, w=6 * S)
+            elif style == 'robe_waist':
+                fx, fy, fw, fh = f['back']
+                for j in range(fh):
+                    for i in range(fw // 2 - S, fw // 2 + S):
+                        p.px((fx + i, fy + j), k(BLACK, 1))
+                for s in ('front',):
+                    clouds(p, f[s], f[s][3] - 6 * S, 5 * S)
+            elif style == 'robe_yoke':
+                for s in SIDES:
+                    band(p, f[s], 0, f[s][3], BLACK, GOLD)
+                fx, fy, fw, fh = f['top']
+                for i, j, xy in each(f['top']):
+                    if j < S or j >= fh - S or i < S or i >= fw - S:
+                        p.px(xy, GOLD)
+            elif style == 'robe_sleeve':
+                for s in SIDES:
+                    clouds(p, f[s], 3 * S, 5 * S)
+            elif style == 'skirt1':
+                for s in SIDES:
+                    clouds(p, f[s], f[s][3] - 7 * S, 6 * S)
+                fx, fy, fw, fh = f['back']
+                for j in range(fh):
+                    for i in range(fw // 2 - S, fw // 2 + S):
+                        p.px((fx + i, fy + j), BLACK)
+            elif style == 'skirt2':
+                for s in SIDES:
+                    band(p, f[s], 0, S, GOLD_DEEP, GOLD_DEEP)
+                    clouds(p, f[s], f[s][3] - 7 * S, 6 * S)
+                    for x0 in range(4 * S, f[s][2] - 6 * S, 11 * S):
+                        eye_motif(p, f[s][0] + x0, f[s][1] + 3 * S, w=4 * S)
+            elif style == 'skirt3':
+                for n, s in enumerate(SIDES):
+                    band(p, f[s], 0, S, GOLD_DEEP, GOLD_DEEP)
+                    trigrams(p, f[s], f[s][3] - 13 * S, 9 * S, start=n * 2)
+                    band(p, f[s], f[s][3] - 2 * S, 2 * S, BLACK, GOLD)
+            elif style == 'great_sleeve':
+                for s in SIDES:
+                    clouds(p, f[s], f[s][3] - 8 * S, 6 * S)
+                    eye_motif(p, f[s][0] + f[s][2] // 2 - 3 * S, f[s][1] + 3 * S, w=6 * S)
+            elif style == 'great_sleeve_low':
+                for s in SIDES:
+                    band(p, f[s], 0, S, GOLD_DEEP, GOLD_DEEP)
+                    trigrams(p, f[s], f[s][3] - 11 * S, 9 * S, start=SIDES.index(s) * 3)
+                for i, j, xy in each(f['bottom']):                    # its mouth: the black lining, dark within
+                    fx, fy, fw, fh = f['bottom']
+                    inner = S < i < fw - S and S < j < fh - S
+                    p.px(xy, noisy(p, (20, 14, 14) if inner else BLACK, 3))
+            elif style == 'apron':
+                fx, fy, fw, fh = fr
+                vedges(p, fr, BLACK, S)
+                vedges(p, (fx + S, fy, fw - 2 * S, fh), GOLD, S // 2)
+                taiji(p, fr, cy=fh * 0.28, r=fw * 0.3)
+                for n in range(3):
+                    eye_motif(p, fx + fw // 2 - 3 * S, fy + int(fh * 0.48) + n * 7 * S, w=6 * S)
+                band(p, fr, fh - 4 * S, 4 * S, BLACK, GOLD)
+            elif style == 'back_panel':
+                fx, fy, fw, fh = f['back']
+                vedges(p, f['back'], BLACK, S)
+                trigrams(p, f['back'], fh - 16 * S, 9 * S, start=5)
+                band(p, f['back'], fh - 4 * S, 4 * S, BLACK, GOLD)
+                eye_motif(p, fx + fw // 2 - 3 * S, fy + 8 * S, w=6 * S)
+            elif style == 'over_panel':
+                for s in ('right', 'left'):
+                    fx, fy, fw, fh = f[s]
+                    vedges(p, f[s], BLACK, S)
+                    band(p, f[s], fh - 4 * S, 4 * S, BLACK, GOLD)
+                    eye_motif(p, fx + fw // 2 - 3 * S, fy + 6 * S, w=6 * S)
+                    eye_motif(p, fx + fw // 2 - 3 * S, fy + 18 * S, w=6 * S)
+        elif style == 'sleeve_cuff':
+            cloth(p, f, BLACK, folds=False)
+            for s in SIDES:
+                fx, fy, fw, fh = f[s]
+                for i in range(fw):
+                    p.px((fx + i, fy), GOLD)
+                    p.px((fx + i, fy + fh - 1), GOLD_DEEP)
+            for i, j, xy in each(f['bottom']):
+                fx, fy, fw, fh = f['bottom']
+                inner = S < i < fw - S and S < j < fh - S
+                p.px(xy, (14, 10, 10) if inner else BLACK)
+                if inner:
+                    p.clear(xy)
+        elif style == 'hem':
+            cloth(p, f, BLACK, folds=False)
+            for s in SIDES:
+                fx, fy, fw, fh = f[s]
+                for i in range(fw):
+                    p.px((fx + i, fy), GOLD)
+                    if (i // S) % 4 == 0:
+                        p.px((fx + i, fy + fh // 2), GOLD_DEEP)
+        elif style == 'inner_collar':
+            cloth(p, f, WHITE, folds=False)
+        elif style in ('robe_collar', 'high_collar', 'high_collar_side'):
+            cloth(p, f, BLACK, folds=False)
+            for s in SIDES:
+                fx, fy, fw, fh = f[s]
+                for i, j, xy in each(f[s]):
+                    if i < S or i >= fw - S or (style != 'robe_collar' and (j < S)):
+                        p.px(xy, GOLD)
+            if style == 'robe_collar':                            # trigrams worked down it in gold
+                fx, fy, fw, fh = fr
+                for n in range(0, fh // (6 * S)):
+                    t = TRIGRAMS[n % 8]
+                    for row, bit in enumerate(t):
+                        y = fy + 3 * S + n * 6 * S + row * S * 3 // 2
+                        for i in range(2 * S, fw - 2 * S):
+                            if bit == '1' or abs(i - fw / 2) > S * 0.6:
+                                p.px((fx + i, y), GOLD_DEEP)
+            if style == 'high_collar':
+                fx, fy, fw, fh = f['front']                      # its inside, toward his head: white lining
+                for i, j, xy in each(f['front']):
+                    if S <= i < fw - S and j >= S:
+                        p.px(xy, noisy(p, WHITE, 3))
+                fx, fy, fw, fh = f['back']
+                taiji(p, f['back'], cy=fh * 0.55, r=fh * 0.3)
+        elif style in ('sash', 'sash_knot', 'sash_end', 'sash_end_short'):
+            cloth(p, f, CRIMSON, folds=style != 'sash')
+            for s in SIDES:
+                fx, fy, fw, fh = f[s]
+                if style == 'sash':
+                    for i in range(fw):
+                        p.px((fx + i, fy), GOLD)
+                        p.px((fx + i, fy + fh - 1), GOLD)
+                        if (i // S) % 6 == 0:
+                            for j in range(S, fh - S):
+                                p.px((fx + i, fy + j), CRIMSON_DEEP)
+                elif style.startswith('sash_end'):
+                    vedges(p, f[s], GOLD_DEEP, 1)
+                    for i in range(fw):
+                        for j in range(fh - 2 * S, fh):
+                            p.px((fx + i, fy + j), GOLD if j < fh - S else BLACK)
+        elif style in ('jade_disc', 'hairpin'):
+            for s, r in f.items():
+                fx, fy, fw, fh = r
+                for i, j, xy in each(r):
+                    c = mixc(JADE, JADE_DEEP, 0.5 + 0.5 * math.sin((i + j) * 0.7))
+                    if style == 'jade_disc' and s in ('front', 'back') and math.hypot(i - fw / 2 + 0.5, j - fh / 2 + 0.5) < fw * 0.18:
+                        c = (20, 20, 20)
+                    p.px(xy, noisy(p, k(c, LIGHTS[s]), 3))
+            if style == 'hairpin':
+                for s in SIDES:
+                    fx, fy, fw, fh = f[s]
+                    for i in list(range(2 * S)) + list(range(fw - 2 * S, fw)):
+                        for j in range(fh):
+                            p.px((fx + i, fy + j), GOLD)
+        elif style == 'cord':
+            cloth(p, f, RED, folds=False)
+        elif style == 'tassel':
+            for s, r in f.items():
+                for i, j, xy in each(r):
+                    p.px(xy, noisy(p, k(RED if i % 2 else (140, 18, 20), LIGHTS[s]), 4))
+            for s in SIDES:
+                cut_point(p, f[s], keep=1.5, sharp=1.2)
+        elif style == 'tassel_bead':
+            gold(p, f, GOLD)
+        elif style == 'face':
+            paint_lord_face(p, f)
+        elif style in ('chin', 'cheekbone', 'nose', 'ear', 'palm', 'finger'):
+            cloth(p, f, SKIN, folds=False, fall=0.2)
+            if style == 'cheekbone':                               # lit along its top, hollow beneath
+                for s in SIDES:
+                    fx, fy, fw, fh = f[s]
+                    for i in range(fw):
+                        for j in range(fh // 2):
+                            p.px((fx + i, fy + j), SKIN_LIGHT)
+                        p.px((fx + i, fy + fh - 1), SKIN_HOLLOW)
+                fx, fy, fw, fh = f['bottom']
+                for i, j, xy in each(f['bottom']):
+                    p.px(xy, SKIN_HOLLOW)
+            if style == 'nose':
+                fx, fy, fw, fh = fr
+                for j in range(fh):
+                    p.px((fx, fy + j), SKIN_SHADE)
+                    p.px((fx + fw - 1, fy + j), SKIN_SHADE)
+                for i in range(fw):
+                    p.px((fx + i, fy + fh - 1), SKIN_HOLLOW)
+            if style == 'finger':                                  # long, knuckled, a dark nail like a claw
+                for s in SIDES:
+                    fx, fy, fw, fh = f[s]
+                    for i in range(fw):
+                        for j in range(fh - 3 * S, fh):
+                            p.px((fx + i, fy + j), noisy(p, (40, 26, 20), 3))
+                        p.px((fx + i, fy + fh // 3), SKIN_SHADE)
+            if style == 'chin':
+                for s in SIDES:
+                    fx, fy, fw, fh = f[s]
+                    for i in range(fw):
+                        p.px((fx + i, fy), SKIN_SHADE)
+            if style == 'ear':
+                for s in SIDES:
+                    fx, fy, fw, fh = f[s]
+                    for j in range(fh):
+                        for i in range(fw):
+                            if j > fh * 0.6 and (i in (0, fw - 1)):
+                                p.px((fx + i, fy + j), SKIN_SHADE)
+        elif style == 'brow_ridge':
+            for s, r in f.items():
+                fx, fy, fw, fh = r
+                for i, j, xy in each(r):
+                    p.px(xy, noisy(p, k(SKIN_SHADE if s != 'top' else SKIN, LIGHTS[s]), 3))
+            # the brows: black, heavy at the bridge, slanting up and out, cruel
+            fx, fy, fw, fh = fr
+            for i in range(fw):
+                u = abs(i + 0.5 - fw / 2) / (fw / 2)
+                if u < 0.12:
+                    continue
+                thick = int(fh * (1.0 - 0.55 * u)) + 1
+                top = int((fh - thick) * (1 - u) * 0.4)
+                for j in range(top, min(fh, top + thick)):
+                    p.px((fx + i, fy + j), noisy(p, (16, 12, 14), 2))
+            for s in ('bottom',):
+                for i, j, xy in each(f[s]):
+                    p.px(xy, SKIN_HOLLOW)
+        elif style in ('hair_back', 'hair_top', 'topknot'):
+            hair(p, f, grey=0.05)
+            if style == 'hair_back':
+                for i, j, xy in each(fr):
+                    p.px(xy, HAIR)
+        elif style in ('crown_band', 'guan', 'guan_ridge', 'crown_petal'):
+            gold(p, f, GOLD)
+            if style == 'guan':                                    # cloud scrolls chased into its sides
+                for s in SIDES:
+                    fx, fy, fw, fh = f[s]
+                    for i, j, xy in each(f[s]):
+                        if (abs(math.sin((i + j * 0.5) / S * 0.9)) < 0.15) and S < j < fh - S:
+                            p.px(xy, GOLD_DEEP)
+                    for i in range(fw):
+                        p.px((fx + i, fy + fh - 1), GOLD_DEEP)
+            if style == 'crown_petal':
+                for s in ('front', 'back'):
+                    cut_point(p, f[s], keep=0.5, down=False, sharp=0.6)
+                    fx, fy, fw, fh = f[s]
+                    for j in range(fh):
+                        p.px((fx + fw // 2, fy + j), GOLD_DEEP)
+        elif style == 'guan_gem':
+            for s, r in f.items():
+                for i, j, xy in each(r):
+                    p.lit(xy, (60, 200, 150), calm=0.3, blaze=0.6, skin=k(JADE, 0.8 + 0.4 * ((i + j) % 3 == 0)))
+        elif style in ('ribbon', 'ribbon_tail'):
+            cloth(p, f, BLACK)
+            for s in ('front', 'back'):
+                vedges(p, f[s], GOLD, 1)
+            if style == 'ribbon_tail':
+                for s in ('front', 'back'):
+                    cut_point(p, f[s], keep=1, down=True, sharp=0.9)
+        elif style in ('moustache', 'beard', 'beard_mid', 'beard_tip', 'beard_lock'):
+            for s, r in f.items():
+                fx, fy, fw, fh = r
+                for i, j, xy in each(r):
+                    c = HAIR_SHEEN if (i + j // 5) % 3 == 0 else (12, 10, 12)
+                    if style in ('beard_tip', 'beard_mid') and p.rnd.random() < 0.18 + 0.2 * (j / fh):
+                        c = HAIR_GREY
+                    p.px(xy, noisy(p, k(c, LIGHTS[s]), 3))
+            if style in ('beard_tip', 'moustache'):
+                for s in SIDES:
+                    cut_point(p, f[s], keep=0.5, sharp=0.3 if style == 'beard_tip' else 0.12)
+        elif style in ('venom_claw', 'venom_tip'):
+            for s, r in f.items():
+                for i, j, xy in each(r):
+                    t = (j + 0.5) / r[3]
+                    c = mixc((60, 22, 14), (110, 20, 16), t) if style == 'venom_claw' else mixc((110, 20, 16), (236, 220, 180), t)
+                    p.px(xy, noisy(p, k(c, LIGHTS[s]), 3))
+            if style == 'venom_tip':
+                for s in SIDES:
+                    cut_point(p, f[s], keep=0.5, sharp=0.5)
+        elif style == 'feeler':
+            chitin(p, f, (70, 36, 18), gloss=False)
+            for s in SIDES:
+                for i, j, xy in each(f[s]):
+                    if (j // S) % 3 == 0:
+                        p.px(xy, BAND)
+        elif style in ('fleg', 'fleg_big', 'fleg_tip'):
+            chitin(p, f, (120, 70, 28) if style != 'fleg_tip' else (64, 34, 16), (240, 200, 140))
+            for s in SIDES + ('top', 'bottom'):
+                fx, fy, fw, fh = f[s]
+                along = fw if s in ('front', 'back', 'top', 'bottom') else fh
+                for i, j, xy in each(f[s]):
+                    a = i if s in ('front', 'back', 'top', 'bottom') else j
+                    if style != 'fleg_tip' and (a // S) % 4 == 3:
+                        p.px(xy, BAND)
+                    if style == 'fleg_tip' and a < along * 0.3:
+                        p.px(xy, (230, 190, 100))
+        elif style in ('tseg', 'tplate'):
+            if style == 'tseg':
+                chitin(p, f, CHITIN, CHITIN_SHEEN)
+                for s in SIDES:
+                    fx, fy, fw, fh = f[s]
+                    for i in range(fw):
+                        for j in range(fh):
+                            if (s in ('right', 'left') and i < S) or (s in ('front', 'back') and j < S):
+                                p.px((fx + i, fy + j), BAND)
+            else:
+                chitin(p, f, UMBER, (230, 180, 110))
+                fx, fy, fw, fh = f['top']
+                for i, j, xy in each(f['top']):
+                    if abs(i - fw / 2 + 0.5) < S * 0.6:
+                        p.px(xy, k(CHITIN, 1))
+                    elif j >= fh - S:
+                        p.px(xy, GOLD)
+                for x0 in (S, fw - 4 * S):                         # an eye on each side of its back
+                    lid_eye(p, (fx + x0, fy + fh // 2 - S, 3 * S, 2 * S), iris_calm=0.4, open_=0.6)
+        elif style in ('tail_spine', 'tail_hook'):
+            chitin(p, f, (90, 44, 20) if style == 'tail_spine' else (170, 120, 60), (240, 200, 140))
+        elif style == 'cuff_plate':
+            chitin(p, f, BAND, (255, 230, 160))
+        elif style in ('blade', 'blade_tip', 'blade_ridge'):
+            for s, r in f.items():
+                fx, fy, fw, fh = r
+                for i, j, xy in each(r):
+                    t = (i + 0.5) / fw
+                    c = mixc(STEEL, STEEL_DEEP, abs(t - 0.5) * 1.4) if s in ('right', 'left') else STEEL_DEEP
+                    if style == 'blade_ridge':
+                        c = k(STEEL, 1.1)
+                    p.px(xy, noisy(p, k(c, LIGHTS[s]), 2))
+            if style == 'blade':                                    # the seven stars of the Dipper inlaid in gold, glinting
+                for s in ('right', 'left'):
+                    fx, fy, fw, fh = f[s]
+                    stars = [(0.3, 0.70), (0.7, 0.66), (0.62, 0.58), (0.35, 0.55), (0.5, 0.45), (0.38, 0.36), (0.55, 0.26)]
+                    for a, b in stars:
+                        for di in range(-1, 2):
+                            for dj in range(-1, 2):
+                                if abs(di) + abs(dj) < 2:
+                                    p.lit((fx + int(a * fw) + di, fy + int(b * fh) + dj), GOLD, calm=0.6, blaze=1.0, hot=EYE_HOT)
+                    for j in range(int(fh * 0.25), int(fh * 0.72)):
+                        if j % (2 * S) == 0:
+                            pass
+            if style == 'blade_tip':
+                for s in ('right', 'left'):
+                    cut_point(p, f[s], keep=0.5, down=False, sharp=0.5)
+        elif style in ('guard', 'guard_crown', 'pommel', 'guard_wing'):
+            gold(p, f, GOLD)
+            if style == 'guard':
+                for s in ('right', 'left'):                         # a taotie mask in the guard
+                    fx, fy, fw, fh = f[s]
+                    for i, j, xy in each(f[s]):
+                        u = abs(i + 0.5 - fw / 2) / (fw / 2)
+                        if (0.25 < u < 0.45 and j < fh * 0.6) or (u < 0.15 and j > fh * 0.4):
+                            p.px(xy, GOLD_DEEP)
+            if style == 'pommel':
+                for s in SIDES:
+                    fx, fy, fw, fh = f[s]
+                    p.lit((fx + fw // 2, fy + fh // 2), RED, calm=0.3, blaze=0.5)
+        elif style == 'grip':
+            cloth(p, f, (60, 20, 24), folds=False)
+            for s in SIDES:
+                fx, fy, fw, fh = f[s]
+                for j in range(fh):
+                    for i in range(fw):
+                        if (i + j) % (2 * S) < S // 2:
+                            p.px((fx + i, fy + j), (120, 40, 36))
+        elif style in ('cup', 'cup_rim', 'cup_foot'):
+            for s, r in f.items():
+                for i, j, xy in each(r):
+                    c = CELADON if s != 'top' or style != 'cup' else (110, 140, 60)
+                    p.px(xy, noisy(p, k(c, LIGHTS[s] * (1.1 if (i // S) % 3 == 0 else 1)), 3))
+        elif style == 'neck':
+            hide(p, f, ring=False)
+            fx, fy, fw, fh = fr
+            for i, j, xy in each(fr):
+                p.px(xy, noisy(p, k(SKIN_SHADE, 0.9), 3))
+        else:
+            cloth(p, f, YELLOW)
+    return paint_box
 
 
 def paint_lord_face(p, f):
-    """A long sallow face: hollow cheeks, narrow slanting eyes glinting gold, a shut third eye on his
-    brow (open and burning in his glare), a thin mouth, black hair over his temples."""
+    """A long sallow face: sunken cheeks under high bones, narrow slanting eyes glinting gold under a
+    heavy brow, a third eye shut on his forehead (burning open in his glare), a long nose, a thin
+    hard mouth turned down, black hair swept back from a peak."""
     for s, r in f.items():
+        fx, fy, fw, fh = r
         for i, j, xy in each(r):
-            p.px(xy, noisy(p, k(SKIN, LIGHTS[s] * (1.05 - 0.15 * j / max(1, r[3]))), 3))
-    for s in ('right', 'left'):
+            t = j / max(1, fh)
+            p.px(xy, noisy(p, k(SKIN, LIGHTS[s] * (1.06 - 0.12 * t)), 3))
+    for s in ('right', 'left'):                                      # hair over the temples and back of his head
         fx, fy, fw, fh = f[s]
         for i, j, xy in each(f[s]):
-            if j < 4 or (i > fw * 0.5 and j < fh * 0.7):
+            back = (i > fw * 0.45) if s == 'right' else (i < fw * 0.55)
+            if j < fh * 0.22 or (back and j < fh * 0.75):
                 p.px(xy, noisy(p, HAIR, 3))
+            elif j > fh * 0.55 and not back:                         # the hollow under the cheekbone
+                p.px(xy, noisy(p, mixc(SKIN, SKIN_HOLLOW, 0.5), 3))
     for i, j, xy in each(f['top']):
         p.px(xy, noisy(p, HAIR, 3))
-    fx, fy, fw, fh = f['front']                                      # 14 x 16
+    fx, fy, fw, fh = f['front']                                      # 24 x 38 at four texels
+    U = lambda x: int(round(x * fw / 24))
+    V = lambda y: int(round(y * fh / 38))
+    P = lambda x, y, c: p.px((fx + U(x), fy + V(y)), c)
+    cx = fw / 2
+    # the hairline, a peak at the middle
     for i in range(fw):
-        for j in range(3):
-            if j < 2 or i < 2 or i >= fw - 2:
-                p.px((fx + i, fy + j), HAIR)
-    cx = fw // 2
-    # the third eye, shut (a gold line), blazing open in his glare
-    for i in (-1, 0):
-        p.lit((fx + cx + i, fy + 4), (120, 80, 30), calm=0.0, blaze=1.0, hot=EYE_HOT)
-    p.lit((fx + cx - 1, fy + 5), (90, 60, 30), calm=0.0, blaze=1.0, hot=EYE)
-    p.lit((fx + cx, fy + 5), (90, 60, 30), calm=0.0, blaze=1.0, hot=EYE)
-    # eyes: narrow, slanting up and out, gold irises in a dark rim
-    for side in (0, 1):
-        x0 = fx + (1 if side == 0 else fw - 5)
-        y0 = fy + 8
-        for i in range(4):
-            slope = (3 - i) // 2 if side == 0 else i // 2
-            p.px((x0 + i, y0 - slope), (20, 14, 10))
-            if 0 < i < 3:
-                p.lit((x0 + i, y0 + 1 - slope), EYE, calm=0.8, blaze=1.0, hot=EYE_HOT)
-        p.px((x0 + (1 if side == 0 else 2), y0 + 1 - (1 if side == 0 else 1)), (20, 10, 6))
-    # hollow cheeks, a long nose, the thin mouth
-    for j in range(11, 15):
-        p.px((fx + 1, fy + j), SKIN_SHADE)
-        p.px((fx + fw - 2, fy + j), SKIN_SHADE)
-    for j in range(9, 12):
-        p.px((fx + cx, fy + j), mixc(SKIN, SKIN_SHADE, 0.5))
-    p.px((fx + cx - 1, fy + 12), SKIN_SHADE)
-    p.px((fx + cx + 1, fy + 12), SKIN_SHADE)
-    for i in range(-2, 2):
-        p.px((fx + cx + i, fy + 14), (90, 40, 34))
+        u = abs(i + 0.5 - cx) / cx
+        line = V(5) + int(V(3) * (1 - u)) * (-1) + V(2)
+        line = V(7) - int(V(4) * (1 - u) ** 2) if u < 0.9 else fh // 2
+        for j in range(0, max(0, line)):
+            p.px((fx + i, fy + j), noisy(p, HAIR if (i + j // 3) % 6 else HAIR_SHEEN, 2))
+        if u > 0.82:
+            for j in range(0, int(fh * 0.55)):
+                p.px((fx + i, fy + j), noisy(p, HAIR, 2))
+    # shading: temples, the deep hollows under the cheekbones, the long jaw
+    for i, j, xy in each(f['front']):
+        u = (i + 0.5 - cx) / cx
+        v = (j + 0.5) / fh
+        if abs(u) > 0.82 and v < 0.55:
+            continue
+        if 0.58 < v < 0.84 and 0.48 < abs(u) < 0.9:
+            p.px(xy, noisy(p, mixc(SKIN, SKIN_HOLLOW, 0.55 + 0.3 * (abs(u) - 0.48)), 2))
+        elif 0.48 < v < 0.56 and 0.4 < abs(u) < 0.95:
+            p.px(xy, noisy(p, SKIN_LIGHT, 2))                          # light along the cheekbones
+        elif v > 0.86 and abs(u) > 0.55:
+            p.px(xy, noisy(p, SKIN_SHADE, 2))
+    # the third eye: a shut vertical slit, gold-lidded; open and burning in his glare
+    for j in range(V(9), V(14)):
+        for i in range(-U(1), U(1)):
+            t = abs((j - (V(9) + V(14)) / 2) / ((V(14) - V(9)) / 2))
+            w = U(1) * (1 - t * t)
+            if abs(i + 0.5) <= w + 0.5:
+                xy = (fx + int(cx) + i, fy + j)
+                if abs(i + 0.5) < 1:
+                    p.lit(xy, (60, 30, 12), calm=0.0, blaze=1.0, hot=EYE_HOT, skin=(60, 30, 12))
+                else:
+                    p.lit(xy, (150, 110, 60), calm=0.0, blaze=1.0, hot=EYE, skin=(150, 110, 60))
+    for j in range(V(8), V(15)):
+        p.px((fx + int(cx) - U(1) - 1, fy + j), SKIN_SHADE)
+        p.px((fx + int(cx) + U(1), fy + j), SKIN_SHADE)
+    # the sockets: shadowed under the brow
+    for side in (-1, 1):
+        for i in range(U(2), U(11)):
+            for j in range(V(17), V(19)):
+                x = fx + (int(cx) - 1 - i if side < 0 else int(cx) + i)
+                p.px((x, fy + j), noisy(p, SKIN_SHADE, 2))
+    # the eyes: long, narrow, slanting up to their outer corners; a thin line of gold iris and a black slit
+    for side in (-1, 1):
+        n = U(8)
+        for i in range(n):
+            x = fx + (int(cx) - U(2) - 1 - i if side < 0 else int(cx) + U(2) + i)
+            t = i / max(1, n - 1)
+            y = fy + V(20) - int(t * V(3))
+            lidh = max(1, int(V(2) * (1 - abs(t - 0.45) * 1.3)))
+            p.px((x, y - 1), (18, 10, 8))
+            for j in range(lidh):
+                if 0.25 < t < 0.65:
+                    if abs(t - 0.42) < 0.06:
+                        p.px((x, y + j), (10, 4, 2))
+                    else:
+                        p.lit((x, y + j), EYE, calm=0.85, blaze=1.0, hot=EYE_HOT)
+                else:
+                    p.px((x, y + j), (210, 196, 150))
+            p.px((x, y + lidh), (60, 40, 24))
+            if t > 0.85:
+                p.px((x + side, y - 2), (18, 10, 8))                    # the outer corner flicked up
+    # the long nose's shadow, the nasolabial lines cut deep
+    for j in range(V(19), V(28)):
+        p.px((fx + int(cx) - U(1) - 1, fy + j), mixc(SKIN, SKIN_SHADE, 0.6))
+    for j in range(V(27), V(33)):
+        t = (j - V(27)) / max(1, V(33) - V(27))
+        for side in (-1, 1):
+            x = fx + int(cx) + side * (U(3) + int(t * U(1.5))) - (1 if side < 0 else 0)
+            p.px((x, fy + j), SKIN_HOLLOW)
+    # the mouth: thin, hard, turned down at its corners
+    for i in range(-U(3), U(3)):
+        t = abs(i + 0.5) / U(3)
+        y = fy + V(32) + int(t * t * V(1.5))
+        p.px((fx + int(cx) + i, y), (70, 30, 32))
+        p.px((fx + int(cx) + i, y + 1), (130, 92, 76))
 
 
 if __name__ == '__main__':
@@ -456,4 +1022,4 @@ if __name__ == '__main__':
     slots = paint(ps, p, lord_painter())
     p.save('hundred_eyed_demon')
     emit(ps, slots, JAVA, 'lord')
-    print('hundred-eyed demon', len(ps), 'parts', {a: round(b, 2) for a, b in extent(ps, 1.0).items()})
+    print('hundred-eyed demon', len(ps), 'parts', {a: round(b, 2) for a, b in extent(ps, 1.15).items()})
