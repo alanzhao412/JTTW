@@ -328,8 +328,8 @@ public final class Zones {
             Vertical.WHOLE_COLUMN, 78, 88, 145).hostSampledAt(256);
 
     /** Every zone, in order: a later one keeps clear of an earlier one sharing its heights. Append new ones. */
-    public static final List<Zone> ALL = List.of(WHITE_BONE, BOTTOMLESS, MYSTICAL_WATERS, HELL, FIRE_MOUNTAIN, MOUNT_WUZHUANG, LION_CAMEL, FENGDU,
-            KUNLUN, SPIDER_CAVE);
+    public static final List<Zone> ALL = List.of(WHITE_BONE, BOTTOMLESS, MYSTICAL_WATERS, HELL, FIRE_MOUNTAIN, MOUNT_WUZHUANG, SPIDER_CAVE, LION_CAMEL, FENGDU,
+            KUNLUN);
 
     /** Where the overworld zones of {@link #ALL} lie. */
     public static final ZoneMap MAP = new ZoneMap(ALL);

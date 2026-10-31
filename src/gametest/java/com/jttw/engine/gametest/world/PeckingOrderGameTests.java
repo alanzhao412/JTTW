@@ -48,8 +48,8 @@ public class PeckingOrderGameTests {
     /** A miniboss's blow, at least and at most; and the least any boss's. */
     public static final double MINIBOSS_LEAST = 0.17, MINIBOSS_MOST = 0.20, BOSS_LEAST = ZoneBoss.LEAST_BLOW, BOSS_MOST = ZoneBoss.MOST_BLOW;
     /** The most a lair makes a miniboss's health over a captain's. */
-    public static final double MINIBOSS_OVER_CAPTAIN = Math.max(1, Math.max(CaveHousehold.GUARDIAN_HEALTH,
-            Math.max(CaveGarrison.GUARDIAN_HEALTH, LionCamelCityFeature.WARDEN_HEALTH)));
+    public static final double MINIBOSS_OVER_CAPTAIN = Math.max(1, Math.max(Math.max(CaveHousehold.GUARDIAN_HEALTH,
+            Math.max(CaveGarrison.GUARDIAN_HEALTH, LionCamelCityFeature.WARDEN_HEALTH)), com.jttw.engine.entity.spider.SpiderSpiritEntity.BOWER_HEALTH));
     /** The most ordinary hits a regular mob takes to kill. */
     public static final double MOB_HITS_MOST = 12;
     private static final double EPS = 1e-6;
@@ -57,7 +57,8 @@ public class PeckingOrderGameTests {
     /** The kinds a lair makes its floor wardens, gate keepers and guardians of: each must land a miniboss's blow. */
     private static final Set<EntityType<?>> MINIBOSS_KINDS = Set.of(ModEntities.BONE_SERVANT.get(), ModEntities.WRAITH.get(),
             ModEntities.MOUSE_SPIRIT.get(), ModEntities.FLOWER_MAID.get(), ModEntities.FURNACE_BRUTE.get(), ModEntities.STRONG_GENERAL.get(),
-            ModEntities.LION_DEMON.get(), ModEntities.ELEPHANT_DEMON.get(), ModEntities.PENG_DEMON.get());
+            ModEntities.LION_DEMON.get(), ModEntities.ELEPHANT_DEMON.get(), ModEntities.PENG_DEMON.get(),
+            com.jttw.engine.registry.SpiderCaveRegistry.SPIDER_SPIRIT.get());
 
     private static List<Entity> every(GameTestHelper h) {
         List<Entity> out = new ArrayList<>();
@@ -133,7 +134,7 @@ public class PeckingOrderGameTests {
                 if (e instanceof ZoneMonster m) {
                     zone++;
                     String n = name(m);
-                    boolean general = m instanceof StrongGeneralEntity;
+                    boolean general = m instanceof StrongGeneralEntity || m instanceof com.jttw.engine.entity.spider.SpiderSpiritEntity;
                     if (!general) {
                         // a regular: its blow and its hardest hit (its specials too) within a mob's; its health a mob's
                         int lv = m.regularLevel();
@@ -164,7 +165,7 @@ public class PeckingOrderGameTests {
                     if (general) {
                         // whoever brings him, a miniboss
                         m.become(m.captainLevel(), false);
-                        check(h, m.isCaptain() && m.isMiniboss() && share(m, m.mobLevel()) > CAPTAIN_CAP, "a Strong General always a miniboss");
+                        check(h, m.isCaptain() && m.isMiniboss() && share(m, m.mobLevel()) > CAPTAIN_CAP, n + " always a miniboss");
                     }
                 } else if (e instanceof WildYaoguai y) {
                     wild++;

@@ -74,6 +74,11 @@ public final class Morality {
      */
     public static final int SLAY_RED_BOY = SLAY_LADY;
     /**
+     * The Hundred-Eyed Demon Lord, who poisoned the Tang Monk's tea (chapter 73): subduing him is a
+     * good deed, as Red Boy. The Seven Spider Spirits are captains (+5 each).
+     */
+    public static final int SLAY_HUNDRED_EYED = SLAY_LADY;
+    /**
      * Mount Wuzhuang's household is righteous: the Great Immortal Zhenyuan and his disciples.
      * Killing a disciple is a bad deed, captain or not; one of his youths a worse one; and Zhenyuan
      * himself (who comes only for whoever killed the last of his disciples) a grave wrong. Bringing a
@@ -159,6 +164,7 @@ public final class Morality {
         if (victim instanceof LadyWhiteBoneEntity) return SLAY_LADY;
         if (victim instanceof LadyEarthFlowEntity) return SLAY_EARTH_FLOW;
         if (victim instanceof com.jttw.engine.entity.fire.RedBoyEntity) return SLAY_RED_BOY;
+        if (victim instanceof com.jttw.engine.entity.spider.HundredEyedDemonEntity) return SLAY_HUNDRED_EYED;
         if (victim instanceof com.jttw.engine.entity.lion.AzureLionEntity) return SLAY_AZURE_LION;
         if (victim instanceof com.jttw.engine.entity.lion.WhiteElephantEntity) return SLAY_WHITE_ELEPHANT;
         if (victim instanceof com.jttw.engine.entity.waters.DragonKingEntity) return SLAY_DRAGON_KING;
@@ -188,6 +194,8 @@ public final class Morality {
         if (deed == SLAY_MONSTER && victim instanceof com.jttw.engine.entity.hell.WanderingGhostEntity) return "you laid a wandering ghost to rest";
         if (deed == SLAY_CAPTAIN && victim instanceof com.jttw.engine.entity.fire.StrongGeneralEntity) return "you struck down one of Red Boy's Six Strong Generals";
         if (victim instanceof com.jttw.engine.entity.fire.RedBoyEntity) return "you subdued Red Boy, the Holy Child King";
+        if (victim instanceof com.jttw.engine.entity.spider.HundredEyedDemonEntity) return "you subdued the Hundred-Eyed Demon Lord, who poisoned the Tang Monk's tea";
+        if (deed == SLAY_CAPTAIN && victim instanceof com.jttw.engine.entity.spider.SpiderSpiritEntity) return "you struck down one of the Seven Spider Spirits";
         if (victim instanceof com.jttw.engine.entity.lion.AzureLionEntity) return "you struck down the Azure Lion, who ate a kingdom";
         if (victim instanceof com.jttw.engine.entity.lion.WhiteElephantEntity) return "you struck down the White Elephant, who ate a kingdom";
         if (deed == SLAY_CAPTAIN && victim instanceof com.jttw.engine.entity.lion.LionCamelMonster) return "you slew a captain of Lion-Camel Ridge";

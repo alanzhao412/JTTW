@@ -50,9 +50,9 @@ public final class SilkRidgeWorks {
     /** The spring's middle, its pool's half-widths. */
     public static final int SPRING_X = 100, SPRING_Z = 82, POOL_RX = 11, POOL_RZ = 8, SPRING_LEVEL = 24;
     /** The temple's middle, its walls' half-width and its north and south walls (from its middle). */
-    public static final int TEMPLE_X = -112, TEMPLE_Z = 92, TEMPLE_HALF = 24, TEMPLE_N = -30, TEMPLE_S = 30;
+    public static final int TEMPLE_X = -96, TEMPLE_Z = 74, TEMPLE_HALF = 24, TEMPLE_N = -30, TEMPLE_S = 30;
     /** The canopy: an ellipsoid over the temple, these half-widths and this high. */
-    public static final int CANOPY_RX = 32, CANOPY_RZ = 38, CANOPY_H = 26;
+    public static final int CANOPY_RX = 36, CANOPY_RZ = 44, CANOPY_H = 27;
     /** Where the Demon Lord stands, from the temple's middle: in its court. */
     public static final int COURT_X = 0, COURT_Z = 12;
 
