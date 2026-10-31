@@ -38,7 +38,7 @@ public class FightingBuddhaLayer extends RenderLayer<AbstractClientPlayer, Playe
     /** How much larger than a man he is drawn, about his feet. */
     public static final float SIZE = 1.1f;
 
-    private final ModelPart root, head, body, rightArm, leftArm, rightLeg, leftLeg, halo, mandorla, staff;
+    private final ModelPart root, head, body, rightArm, leftArm, rightLeg, leftLeg, halo, mandorla, staff, staffRest;
 
     public FightingBuddhaLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> parent, EntityModelSet models) {
         super(parent);
@@ -52,6 +52,7 @@ public class FightingBuddhaLayer extends RenderLayer<AbstractClientPlayer, Playe
         halo = body.getChild("halo");
         mandorla = body.getChild("mandorla");
         staff = rightArm.getChild("right_hand").getChild("staff");
+        staffRest = body.getChild("staff_rest");
     }
 
     /** Whether he holds the Ruyi Jingu Bang in his hand now (not at rest across his shoulders): this draws it then. */
@@ -72,6 +73,8 @@ public class FightingBuddhaLayer extends RenderLayer<AbstractClientPlayer, Playe
         rightLeg.copyFrom(m.rightLeg);
         leftLeg.copyFrom(m.leftLeg);
         staff.visible = holdsStaff(p);
+        staffRest.visible = p.getMainHandItem().getItem() instanceof com.jttw.engine.item.RuyiJinguBangItem
+                && com.jttw.engine.client.StaffStance.resting(p);
         // the halo turns slowly; the mandorla breathes
         halo.zRot = age * 0.01f;
         float breath = 1.0f + 0.03f * (float) Math.sin(age * 0.07f);
@@ -97,16 +100,16 @@ public class FightingBuddhaLayer extends RenderLayer<AbstractClientPlayer, Playe
         PartDefinition leftLeg = root.addOrReplaceChild("left_leg", CubeListBuilder.create(), PartPose.offsetAndRotation(1.9f, 12, 0, 0, 0, 0));
         PartDefinition skull = head.addOrReplaceChild("skull", CubeListBuilder.create()
                 .texOffs(118, 0).mirror(false).addBox(-4.4f, -8.7f, -4.2f, 8.8f, 8.8f, 8.6f)
-                .texOffs(20, 62).mirror(false).addBox(-2.4f, -3.95f, -5.6f, 4.8f, 2.9f, 1.6f)
-                .texOffs(73, 62).mirror(false).addBox(-1.9f, -1.15f, -5, 3.8f, 1.2f, 1.1f)
-                .texOffs(161, 62).mirror(false).addBox(-0.85f, -4.75f, -5.95f, 1.7f, 1.1f, 0.6f)
+                .texOffs(20, 62).mirror(false).addBox(-2.3f, -4, -6, 4.6f, 2.9f, 2)
+                .texOffs(73, 62).mirror(false).addBox(-1.8f, -1.15f, -5.4f, 3.6f, 1.2f, 1.4f)
+                .texOffs(198, 62).mirror(false).addBox(-0.8f, -4.7f, -6.35f, 1.6f, 1, 0.6f)
                 .texOffs(86, 62).mirror(false).addBox(-3.9f, -6.55f, -4.95f, 7.8f, 1.15f, 1.1f)
                 .texOffs(0, 53).mirror(false).addBox(-3.2f, -9.9f, -2.4f, 6.4f, 1.4f, 6)
                 .texOffs(189, 39).mirror(false).addBox(-4, -8.6f, 3.9f, 8, 7, 1.4f), PartPose.offsetAndRotation(0, 0, 0, 0, 0, 0));
         PartDefinition rightEye = head.addOrReplaceChild("right_eye", CubeListBuilder.create()
-                .texOffs(168, 62).mirror(false).addBox(-0.95f, -0.55f, -0.25f, 1.9f, 1.1f, 0.4f), PartPose.offsetAndRotation(-1.95f, -5.15f, -4.4f, 0, 0.08f, 0));
+                .texOffs(205, 62).mirror(false).addBox(-0.8f, -0.45f, -0.2f, 1.6f, 0.9f, 0.35f), PartPose.offsetAndRotation(-1.85f, -5.1f, -4.35f, 0, 0.08f, 0));
         PartDefinition leftEye = head.addOrReplaceChild("left_eye", CubeListBuilder.create()
-                .texOffs(168, 62).mirror(true).addBox(-0.95f, -0.55f, -0.25f, 1.9f, 1.1f, 0.4f), PartPose.offsetAndRotation(1.95f, -5.15f, -4.4f, 0, -0.08f, 0));
+                .texOffs(205, 62).mirror(true).addBox(-0.8f, -0.45f, -0.2f, 1.6f, 0.9f, 0.35f), PartPose.offsetAndRotation(1.85f, -5.1f, -4.35f, 0, -0.08f, 0));
         PartDefinition rightEar = head.addOrReplaceChild("right_ear", CubeListBuilder.create()
                 .texOffs(186, 53).mirror(false).addBox(-1.1f, -1.5f, -1.2f, 1.1f, 3, 2.4f), PartPose.offsetAndRotation(-4.4f, -4.9f, -0.4f, 0, -0.35f, 0));
         PartDefinition leftEar = head.addOrReplaceChild("left_ear", CubeListBuilder.create()
@@ -145,7 +148,7 @@ public class FightingBuddhaLayer extends RenderLayer<AbstractClientPlayer, Playe
                 .texOffs(162, 0).mirror(false).addBox(-4.85f, -0.15f, -2.95f, 9.7f, 11, 5.9f)
                 .texOffs(88, 53).mirror(false).addBox(-2.3f, -0.9f, -2.3f, 4.6f, 1.2f, 4.6f)
                 .texOffs(210, 39).mirror(false).addBox(-5.1f, 9.6f, -3.2f, 10.2f, 1.4f, 6.4f)
-                .texOffs(175, 62).mirror(false).addBox(-1, 9.3f, -3.8f, 2, 2, 0.9f), PartPose.offsetAndRotation(0, 0, 0, 0, 0, 0));
+                .texOffs(161, 62).mirror(false).addBox(-1, 9.3f, -3.8f, 2, 2, 0.9f), PartPose.offsetAndRotation(0, 0, 0, 0, 0, 0));
         PartDefinition edgeFront = body.addOrReplaceChild("edge_front", CubeListBuilder.create()
                 .texOffs(155, 0).mirror(false).addBox(-0.95f, -8.8f, -0.5f, 1.9f, 17, 1), PartPose.offsetAndRotation(0.2f, 5, -3.05f, 0, 0, -0.66f));
         PartDefinition edgeBack = body.addOrReplaceChild("edge_back", CubeListBuilder.create()
@@ -159,9 +162,9 @@ public class FightingBuddhaLayer extends RenderLayer<AbstractClientPlayer, Playe
         PartDefinition clasp = body.addOrReplaceChild("clasp", CubeListBuilder.create()
                 .texOffs(212, 62).mirror(false).addBox(-1.1f, -1.1f, -0.3f, 2.2f, 0.5f, 0.6f)
                 .texOffs(212, 62).mirror(false).addBox(-1.1f, 0.6f, -0.3f, 2.2f, 0.5f, 0.6f)
-                .texOffs(182, 62).mirror(false).addBox(-1.1f, -0.6f, -0.3f, 0.5f, 1.2f, 0.6f)
-                .texOffs(182, 62).mirror(false).addBox(0.6f, -0.6f, -0.3f, 0.5f, 1.2f, 0.6f)
-                .texOffs(182, 62).mirror(false).addBox(-0.25f, 1, -0.25f, 0.5f, 1.4f, 0.5f), PartPose.offsetAndRotation(2.7f, 2.4f, -3.35f, 0, 0, 0));
+                .texOffs(168, 62).mirror(false).addBox(-1.1f, -0.6f, -0.3f, 0.5f, 1.2f, 0.6f)
+                .texOffs(168, 62).mirror(false).addBox(0.6f, -0.6f, -0.3f, 0.5f, 1.2f, 0.6f)
+                .texOffs(168, 62).mirror(false).addBox(-0.25f, 1, -0.25f, 0.5f, 1.4f, 0.5f), PartPose.offsetAndRotation(2.7f, 2.4f, -3.35f, 0, 0, 0));
         PartDefinition tasselRight = body.addOrReplaceChild("tassel_right", CubeListBuilder.create()
                 .texOffs(213, 53).mirror(false).addBox(-0.3f, 0, -0.3f, 0.6f, 5, 0.6f), PartPose.offsetAndRotation(-0.5f, 10.9f, -3.6f, -0.05f, 0, 0.06f));
         PartDefinition tasselLeft = body.addOrReplaceChild("tassel_left", CubeListBuilder.create()
@@ -200,10 +203,16 @@ public class FightingBuddhaLayer extends RenderLayer<AbstractClientPlayer, Playe
                 .texOffs(0, 0).mirror(false).addBox(-0.65f, -23, -0.65f, 1.3f, 36, 1.3f)
                 .texOffs(44, 62).mirror(false).addBox(-1, -25.2f, -1, 2, 2.6f, 2)
                 .texOffs(44, 62).mirror(false).addBox(-1, 12.6f, -1, 2, 2.6f, 2)
-                .texOffs(187, 62).mirror(false).addBox(-0.85f, -21.4f, -0.85f, 1.7f, 0.8f, 1.7f)
-                .texOffs(187, 62).mirror(false).addBox(-0.85f, 10.6f, -0.85f, 1.7f, 0.8f, 1.7f)
-                .texOffs(187, 62).mirror(false).addBox(-0.8f, -1.4f, -0.8f, 1.6f, 0.5f, 1.6f)
-                .texOffs(187, 62).mirror(false).addBox(-0.8f, 3, -0.8f, 1.6f, 0.5f, 1.6f), PartPose.offsetAndRotation(0, 1.6f, -0.2f, 1.5708f, 0, 0));
+                .texOffs(173, 62).mirror(false).addBox(-0.85f, -21.4f, -0.85f, 1.7f, 0.8f, 1.7f)
+                .texOffs(173, 62).mirror(false).addBox(-0.85f, 10.6f, -0.85f, 1.7f, 0.8f, 1.7f)
+                .texOffs(173, 62).mirror(false).addBox(-0.8f, -1.4f, -0.8f, 1.6f, 0.5f, 1.6f)
+                .texOffs(173, 62).mirror(false).addBox(-0.8f, 3, -0.8f, 1.6f, 0.5f, 1.6f), PartPose.offsetAndRotation(0, 1.4f, -0.2f, 0.22f, 0, 0.05f));
+        PartDefinition staffRest = body.addOrReplaceChild("staff_rest", CubeListBuilder.create()
+                .texOffs(0, 0).mirror(false).addBox(-0.65f, -23, -0.65f, 1.3f, 36, 1.3f)
+                .texOffs(44, 62).mirror(false).addBox(-1, -25.2f, -1, 2, 2.6f, 2)
+                .texOffs(44, 62).mirror(false).addBox(-1, 12.6f, -1, 2, 2.6f, 2)
+                .texOffs(173, 62).mirror(false).addBox(-0.85f, -21.4f, -0.85f, 1.7f, 0.8f, 1.7f)
+                .texOffs(173, 62).mirror(false).addBox(-0.85f, 10.6f, -0.85f, 1.7f, 0.8f, 1.7f), PartPose.offsetAndRotation(-5, -0.5f, 0.6f, -0.785f, 0, -0.21f));
         PartDefinition rightRobeLeg = rightLeg.addOrReplaceChild("right_robe_leg", CubeListBuilder.create()
                 .texOffs(75, 39).mirror(false).addBox(-2.65f, -0.2f, -2.65f, 5.3f, 6.4f, 5.3f)
                 .texOffs(160, 39).mirror(false).addBox(-3.1f, 5.8f, -3.1f, 6.2f, 4.7f, 6.2f)
@@ -306,61 +315,61 @@ public class FightingBuddhaLayer extends RenderLayer<AbstractClientPlayer, Playe
         PartDefinition haloInner19 = halo.addOrReplaceChild("halo_inner_19", CubeListBuilder.create()
                 .texOffs(231, 62).mirror(false).addBox(-0.95f, -0.45f, -0.1f, 1.9f, 0.9f, 0.5f), PartPose.offsetAndRotation(-1.6378f, -5.0406f, 0, 0, 0, 5.969f));
         PartDefinition haloOuter0 = halo.addOrReplaceChild("halo_outer_0", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(0, -8.6f, 0, 0, 0, 0));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(0, -8.6f, 0, 0, 0, 0));
         PartDefinition haloOuter1 = halo.addOrReplaceChild("halo_outer_1", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(1.9137f, -8.3844f, 0, 0, 0, 0.2244f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(1.9137f, -8.3844f, 0, 0, 0, 0.2244f));
         PartDefinition haloOuter2 = halo.addOrReplaceChild("halo_outer_2", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(3.7314f, -7.7483f, 0, 0, 0, 0.4488f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(3.7314f, -7.7483f, 0, 0, 0, 0.4488f));
         PartDefinition haloOuter3 = halo.addOrReplaceChild("halo_outer_3", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(5.362f, -6.7238f, 0, 0, 0, 0.6732f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(5.362f, -6.7238f, 0, 0, 0, 0.6732f));
         PartDefinition haloOuter4 = halo.addOrReplaceChild("halo_outer_4", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(6.7238f, -5.362f, 0, 0, 0, 0.8976f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(6.7238f, -5.362f, 0, 0, 0, 0.8976f));
         PartDefinition haloOuter5 = halo.addOrReplaceChild("halo_outer_5", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(7.7483f, -3.7314f, 0, 0, 0, 1.122f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(7.7483f, -3.7314f, 0, 0, 0, 1.122f));
         PartDefinition haloOuter6 = halo.addOrReplaceChild("halo_outer_6", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(8.3844f, -1.9137f, 0, 0, 0, 1.3464f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(8.3844f, -1.9137f, 0, 0, 0, 1.3464f));
         PartDefinition haloOuter7 = halo.addOrReplaceChild("halo_outer_7", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(8.6f, -0, 0, 0, 0, 1.5708f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(8.6f, -0, 0, 0, 0, 1.5708f));
         PartDefinition haloOuter8 = halo.addOrReplaceChild("halo_outer_8", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(8.3844f, 1.9137f, 0, 0, 0, 1.7952f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(8.3844f, 1.9137f, 0, 0, 0, 1.7952f));
         PartDefinition haloOuter9 = halo.addOrReplaceChild("halo_outer_9", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(7.7483f, 3.7314f, 0, 0, 0, 2.0196f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(7.7483f, 3.7314f, 0, 0, 0, 2.0196f));
         PartDefinition haloOuter10 = halo.addOrReplaceChild("halo_outer_10", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(6.7238f, 5.362f, 0, 0, 0, 2.244f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(6.7238f, 5.362f, 0, 0, 0, 2.244f));
         PartDefinition haloOuter11 = halo.addOrReplaceChild("halo_outer_11", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(5.362f, 6.7238f, 0, 0, 0, 2.4684f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(5.362f, 6.7238f, 0, 0, 0, 2.4684f));
         PartDefinition haloOuter12 = halo.addOrReplaceChild("halo_outer_12", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(3.7314f, 7.7483f, 0, 0, 0, 2.6928f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(3.7314f, 7.7483f, 0, 0, 0, 2.6928f));
         PartDefinition haloOuter13 = halo.addOrReplaceChild("halo_outer_13", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(1.9137f, 8.3844f, 0, 0, 0, 2.9172f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(1.9137f, 8.3844f, 0, 0, 0, 2.9172f));
         PartDefinition haloOuter14 = halo.addOrReplaceChild("halo_outer_14", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(0, 8.6f, 0, 0, 0, 3.1416f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(0, 8.6f, 0, 0, 0, 3.1416f));
         PartDefinition haloOuter15 = halo.addOrReplaceChild("halo_outer_15", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-1.9137f, 8.3844f, 0, 0, 0, 3.366f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-1.9137f, 8.3844f, 0, 0, 0, 3.366f));
         PartDefinition haloOuter16 = halo.addOrReplaceChild("halo_outer_16", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-3.7314f, 7.7483f, 0, 0, 0, 3.5904f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-3.7314f, 7.7483f, 0, 0, 0, 3.5904f));
         PartDefinition haloOuter17 = halo.addOrReplaceChild("halo_outer_17", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-5.362f, 6.7238f, 0, 0, 0, 3.8148f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-5.362f, 6.7238f, 0, 0, 0, 3.8148f));
         PartDefinition haloOuter18 = halo.addOrReplaceChild("halo_outer_18", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-6.7238f, 5.362f, 0, 0, 0, 4.0392f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-6.7238f, 5.362f, 0, 0, 0, 4.0392f));
         PartDefinition haloOuter19 = halo.addOrReplaceChild("halo_outer_19", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-7.7483f, 3.7314f, 0, 0, 0, 4.2636f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-7.7483f, 3.7314f, 0, 0, 0, 4.2636f));
         PartDefinition haloOuter20 = halo.addOrReplaceChild("halo_outer_20", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-8.3844f, 1.9137f, 0, 0, 0, 4.488f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-8.3844f, 1.9137f, 0, 0, 0, 4.488f));
         PartDefinition haloOuter21 = halo.addOrReplaceChild("halo_outer_21", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-8.6f, 0, 0, 0, 0, 4.7124f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-8.6f, 0, 0, 0, 0, 4.7124f));
         PartDefinition haloOuter22 = halo.addOrReplaceChild("halo_outer_22", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-8.3844f, -1.9137f, 0, 0, 0, 4.9368f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-8.3844f, -1.9137f, 0, 0, 0, 4.9368f));
         PartDefinition haloOuter23 = halo.addOrReplaceChild("halo_outer_23", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-7.7483f, -3.7314f, 0, 0, 0, 5.1612f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-7.7483f, -3.7314f, 0, 0, 0, 5.1612f));
         PartDefinition haloOuter24 = halo.addOrReplaceChild("halo_outer_24", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-6.7238f, -5.362f, 0, 0, 0, 5.3856f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-6.7238f, -5.362f, 0, 0, 0, 5.3856f));
         PartDefinition haloOuter25 = halo.addOrReplaceChild("halo_outer_25", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-5.362f, -6.7238f, 0, 0, 0, 5.61f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-5.362f, -6.7238f, 0, 0, 0, 5.61f));
         PartDefinition haloOuter26 = halo.addOrReplaceChild("halo_outer_26", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-3.7314f, -7.7483f, 0, 0, 0, 5.8344f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-3.7314f, -7.7483f, 0, 0, 0, 5.8344f));
         PartDefinition haloOuter27 = halo.addOrReplaceChild("halo_outer_27", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-1.9137f, -8.3844f, 0, 0, 0, 6.0588f));
+                .texOffs(182, 62).mirror(false).addBox(-1.05f, -0.6f, -0.2f, 2.1f, 1.2f, 0.7f), PartPose.offsetAndRotation(-1.9137f, -8.3844f, 0, 0, 0, 6.0588f));
         PartDefinition haloFlame0 = halo.addOrReplaceChild("halo_flame_0", CubeListBuilder.create()
                 .texOffs(0, 62).mirror(false).addBox(-1.6f, -4.6f, -0.1f, 3.2f, 4.6f, 0.2f)
                 .texOffs(177, 53).mirror(false).addBox(-0.1f, -3.91f, -1.2f, 0.2f, 3.91f, 2.4f), PartPose.offsetAndRotation(0, -9.2f, 0.2f, 0, 0, 0));
@@ -434,83 +443,83 @@ public class FightingBuddhaLayer extends RenderLayer<AbstractClientPlayer, Playe
         PartDefinition mandorla = body.addOrReplaceChild("mandorla", CubeListBuilder.create()
                 .texOffs(9, 0).mirror(false).addBox(-13, -18, 0.4f, 26, 36, 0.2f), PartPose.offsetAndRotation(0, 7.5f, 7.6f, 0, 0, 0));
         PartDefinition mandorlaRim0 = mandorla.addOrReplaceChild("mandorla_rim_0", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.0986f, -0.55f, -0.25f, 2.1971f, 1.1f, 0.6f), PartPose.offsetAndRotation(-6.0778f, 14.8085f, 0.1f, 0, 0, -2.4923f));
+                .texOffs(182, 62).mirror(false).addBox(-1.0986f, -0.55f, -0.25f, 2.1971f, 1.1f, 0.6f), PartPose.offsetAndRotation(-6.0778f, 14.8085f, 0.1f, 0, 0, -2.4923f));
         PartDefinition mandorlaRim1 = mandorla.addOrReplaceChild("mandorla_rim_1", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.14f, -0.55f, -0.25f, 2.2801f, 1.1f, 0.6f), PartPose.offsetAndRotation(-7.5233f, 13.525f, 0.1f, 0, 0, -2.342f));
+                .texOffs(182, 62).mirror(false).addBox(-1.14f, -0.55f, -0.25f, 2.2801f, 1.1f, 0.6f), PartPose.offsetAndRotation(-7.5233f, 13.525f, 0.1f, 0, 0, -2.342f));
         PartDefinition mandorlaRim2 = mandorla.addOrReplaceChild("mandorla_rim_2", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.1831f, -0.55f, -0.25f, 2.3661f, 1.1f, 0.6f), PartPose.offsetAndRotation(-8.8247f, 11.9823f, 0.1f, 0, 0, -2.2041f));
+                .texOffs(182, 62).mirror(false).addBox(-1.1831f, -0.55f, -0.25f, 2.3661f, 1.1f, 0.6f), PartPose.offsetAndRotation(-8.8247f, 11.9823f, 0.1f, 0, 0, -2.2041f));
         PartDefinition mandorlaRim3 = mandorla.addOrReplaceChild("mandorla_rim_3", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.2243f, -0.55f, -0.25f, 2.4487f, 1.1f, 0.6f), PartPose.offsetAndRotation(-9.957f, 10.21f, 0.1f, 0, 0, -2.077f));
+                .texOffs(182, 62).mirror(false).addBox(-1.2243f, -0.55f, -0.25f, 2.4487f, 1.1f, 0.6f), PartPose.offsetAndRotation(-9.957f, 10.21f, 0.1f, 0, 0, -2.077f));
         PartDefinition mandorlaRim4 = mandorla.addOrReplaceChild("mandorla_rim_4", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.2611f, -0.55f, -0.25f, 2.5222f, 1.1f, 0.6f), PartPose.offsetAndRotation(-10.8984f, 8.2419f, 0.1f, 0, 0, -1.9589f));
+                .texOffs(182, 62).mirror(false).addBox(-1.2611f, -0.55f, -0.25f, 2.5222f, 1.1f, 0.6f), PartPose.offsetAndRotation(-10.8984f, 8.2419f, 0.1f, 0, 0, -1.9589f));
         PartDefinition mandorlaRim5 = mandorla.addOrReplaceChild("mandorla_rim_5", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.2911f, -0.55f, -0.25f, 2.5821f, 1.1f, 0.6f), PartPose.offsetAndRotation(-11.6309f, 6.1159f, 0.1f, 0, 0, -1.8478f));
+                .texOffs(182, 62).mirror(false).addBox(-1.2911f, -0.55f, -0.25f, 2.5821f, 1.1f, 0.6f), PartPose.offsetAndRotation(-11.6309f, 6.1159f, 0.1f, 0, 0, -1.8478f));
         PartDefinition mandorlaRim6 = mandorla.addOrReplaceChild("mandorla_rim_6", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.3126f, -0.55f, -0.25f, 2.6251f, 1.1f, 0.6f), PartPose.offsetAndRotation(-12.1405f, 3.8727f, 0.1f, 0, 0, -1.7416f));
+                .texOffs(182, 62).mirror(false).addBox(-1.3126f, -0.55f, -0.25f, 2.6251f, 1.1f, 0.6f), PartPose.offsetAndRotation(-12.1405f, 3.8727f, 0.1f, 0, 0, -1.7416f));
         PartDefinition mandorlaRim7 = mandorla.addOrReplaceChild("mandorla_rim_7", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.3245f, -0.55f, -0.25f, 2.649f, 1.1f, 0.6f), PartPose.offsetAndRotation(-12.4175f, 1.5552f, 0.1f, 0, 0, -1.6384f));
+                .texOffs(182, 62).mirror(false).addBox(-1.3245f, -0.55f, -0.25f, 2.649f, 1.1f, 0.6f), PartPose.offsetAndRotation(-12.4175f, 1.5552f, 0.1f, 0, 0, -1.6384f));
         PartDefinition mandorlaRim8 = mandorla.addOrReplaceChild("mandorla_rim_8", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.328f, -0.55f, -0.25f, 2.6561f, 1.1f, 0.6f), PartPose.offsetAndRotation(-12.419f, -0.7921f, 0.1f, 0, 0, -1.5047f));
+                .texOffs(182, 62).mirror(false).addBox(-1.328f, -0.55f, -0.25f, 2.6561f, 1.1f, 0.6f), PartPose.offsetAndRotation(-12.419f, -0.7921f, 0.1f, 0, 0, -1.5047f));
         PartDefinition mandorlaRim9 = mandorla.addOrReplaceChild("mandorla_rim_9", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.3435f, -0.55f, -0.25f, 2.6871f, 1.1f, 0.6f), PartPose.offsetAndRotation(-12.0466f, -3.1241f, 0.1f, 0, 0, -1.3214f));
+                .texOffs(182, 62).mirror(false).addBox(-1.3435f, -0.55f, -0.25f, 2.6871f, 1.1f, 0.6f), PartPose.offsetAndRotation(-12.0466f, -3.1241f, 0.1f, 0, 0, -1.3214f));
         PartDefinition mandorlaRim10 = mandorla.addOrReplaceChild("mandorla_rim_10", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.366f, -0.55f, -0.25f, 2.7321f, 1.1f, 0.6f), PartPose.offsetAndRotation(-11.2681f, -5.3964f, 0.1f, 0, 0, -1.1615f));
+                .texOffs(182, 62).mirror(false).addBox(-1.366f, -0.55f, -0.25f, 2.7321f, 1.1f, 0.6f), PartPose.offsetAndRotation(-11.2681f, -5.3964f, 0.1f, 0, 0, -1.1615f));
         PartDefinition mandorlaRim11 = mandorla.addOrReplaceChild("mandorla_rim_11", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.3761f, -0.55f, -0.25f, 2.7522f, 1.1f, 0.6f), PartPose.offsetAndRotation(-10.1563f, -7.5651f, 0.1f, 0, 0, -1.0332f));
+                .texOffs(182, 62).mirror(false).addBox(-1.3761f, -0.55f, -0.25f, 2.7522f, 1.1f, 0.6f), PartPose.offsetAndRotation(-10.1563f, -7.5651f, 0.1f, 0, 0, -1.0332f));
         PartDefinition mandorlaRim12 = mandorla.addOrReplaceChild("mandorla_rim_12", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.3565f, -0.55f, -0.25f, 2.7129f, 1.1f, 0.6f), PartPose.offsetAndRotation(-8.8119f, -9.5889f, 0.1f, 0, 0, -0.9348f));
+                .texOffs(182, 62).mirror(false).addBox(-1.3565f, -0.55f, -0.25f, 2.7129f, 1.1f, 0.6f), PartPose.offsetAndRotation(-8.8119f, -9.5889f, 0.1f, 0, 0, -0.9348f));
         PartDefinition mandorlaRim13 = mandorla.addOrReplaceChild("mandorla_rim_13", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.2975f, -0.55f, -0.25f, 2.595f, 1.1f, 0.6f), PartPose.offsetAndRotation(-7.3464f, -11.4289f, 0.1f, 0, 0, -0.8597f));
+                .texOffs(182, 62).mirror(false).addBox(-1.2975f, -0.55f, -0.25f, 2.595f, 1.1f, 0.6f), PartPose.offsetAndRotation(-7.3464f, -11.4289f, 0.1f, 0, 0, -0.8597f));
         PartDefinition mandorlaRim14 = mandorla.addOrReplaceChild("mandorla_rim_14", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.1991f, -0.55f, -0.25f, 2.3981f, 1.1f, 0.6f), PartPose.offsetAndRotation(-5.8656f, -13.0499f, 0.1f, 0, 0, -0.7986f));
+                .texOffs(182, 62).mirror(false).addBox(-1.1991f, -0.55f, -0.25f, 2.3981f, 1.1f, 0.6f), PartPose.offsetAndRotation(-5.8656f, -13.0499f, 0.1f, 0, 0, -0.7986f));
         PartDefinition mandorlaRim15 = mandorla.addOrReplaceChild("mandorla_rim_15", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.0694f, -0.55f, -0.25f, 2.1389f, 1.1f, 0.6f), PartPose.offsetAndRotation(-4.4541f, -14.4207f, 0.1f, 0, 0, -0.739f));
+                .texOffs(182, 62).mirror(false).addBox(-1.0694f, -0.55f, -0.25f, 2.1389f, 1.1f, 0.6f), PartPose.offsetAndRotation(-4.4541f, -14.4207f, 0.1f, 0, 0, -0.739f));
         PartDefinition mandorlaRim16 = mandorla.addOrReplaceChild("mandorla_rim_16", CubeListBuilder.create()
-                .texOffs(205, 62).mirror(false).addBox(-0.9234f, -0.55f, -0.25f, 1.8468f, 1.1f, 0.6f), PartPose.offsetAndRotation(-3.1643f, -15.5152f, 0.1f, 0, 0, -0.6616f));
+                .texOffs(191, 62).mirror(false).addBox(-0.9234f, -0.55f, -0.25f, 1.8468f, 1.1f, 0.6f), PartPose.offsetAndRotation(-3.1643f, -15.5152f, 0.1f, 0, 0, -0.6616f));
         PartDefinition mandorlaRim17 = mandorla.addOrReplaceChild("mandorla_rim_17", CubeListBuilder.create()
-                .texOffs(205, 62).mirror(false).addBox(-0.7813f, -0.55f, -0.25f, 1.5627f, 1.1f, 0.6f), PartPose.offsetAndRotation(-2.0111f, -16.3123f, 0.1f, 0, 0, -0.5351f));
+                .texOffs(191, 62).mirror(false).addBox(-0.7813f, -0.55f, -0.25f, 1.5627f, 1.1f, 0.6f), PartPose.offsetAndRotation(-2.0111f, -16.3123f, 0.1f, 0, 0, -0.5351f));
         PartDefinition mandorlaRim18 = mandorla.addOrReplaceChild("mandorla_rim_18", CubeListBuilder.create()
-                .texOffs(205, 62).mirror(false).addBox(-0.6711f, -0.55f, -0.25f, 1.3422f, 1.1f, 0.6f), PartPose.offsetAndRotation(-0.9729f, -16.7967f, 0.1f, 0, 0, -0.3172f));
+                .texOffs(191, 62).mirror(false).addBox(-0.6711f, -0.55f, -0.25f, 1.3422f, 1.1f, 0.6f), PartPose.offsetAndRotation(-0.9729f, -16.7967f, 0.1f, 0, 0, -0.3172f));
         PartDefinition mandorlaRim19 = mandorla.addOrReplaceChild("mandorla_rim_19", CubeListBuilder.create()
-                .texOffs(205, 62).mirror(false).addBox(-0.6278f, -0.55f, -0.25f, 1.2555f, 1.1f, 0.6f), PartPose.offsetAndRotation(-0, -16.9592f, 0.1f, 0, 0, 0));
+                .texOffs(191, 62).mirror(false).addBox(-0.6278f, -0.55f, -0.25f, 1.2555f, 1.1f, 0.6f), PartPose.offsetAndRotation(-0, -16.9592f, 0.1f, 0, 0, 0));
         PartDefinition mandorlaRim20 = mandorla.addOrReplaceChild("mandorla_rim_20", CubeListBuilder.create()
-                .texOffs(205, 62).mirror(false).addBox(-0.6711f, -0.55f, -0.25f, 1.3422f, 1.1f, 0.6f), PartPose.offsetAndRotation(0.9729f, -16.7967f, 0.1f, 0, 0, 0.3172f));
+                .texOffs(191, 62).mirror(false).addBox(-0.6711f, -0.55f, -0.25f, 1.3422f, 1.1f, 0.6f), PartPose.offsetAndRotation(0.9729f, -16.7967f, 0.1f, 0, 0, 0.3172f));
         PartDefinition mandorlaRim21 = mandorla.addOrReplaceChild("mandorla_rim_21", CubeListBuilder.create()
-                .texOffs(205, 62).mirror(false).addBox(-0.7813f, -0.55f, -0.25f, 1.5627f, 1.1f, 0.6f), PartPose.offsetAndRotation(2.0111f, -16.3123f, 0.1f, 0, 0, 0.5351f));
+                .texOffs(191, 62).mirror(false).addBox(-0.7813f, -0.55f, -0.25f, 1.5627f, 1.1f, 0.6f), PartPose.offsetAndRotation(2.0111f, -16.3123f, 0.1f, 0, 0, 0.5351f));
         PartDefinition mandorlaRim22 = mandorla.addOrReplaceChild("mandorla_rim_22", CubeListBuilder.create()
-                .texOffs(205, 62).mirror(false).addBox(-0.9234f, -0.55f, -0.25f, 1.8468f, 1.1f, 0.6f), PartPose.offsetAndRotation(3.1643f, -15.5152f, 0.1f, 0, 0, 0.6616f));
+                .texOffs(191, 62).mirror(false).addBox(-0.9234f, -0.55f, -0.25f, 1.8468f, 1.1f, 0.6f), PartPose.offsetAndRotation(3.1643f, -15.5152f, 0.1f, 0, 0, 0.6616f));
         PartDefinition mandorlaRim23 = mandorla.addOrReplaceChild("mandorla_rim_23", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.0694f, -0.55f, -0.25f, 2.1389f, 1.1f, 0.6f), PartPose.offsetAndRotation(4.4541f, -14.4207f, 0.1f, 0, 0, 0.739f));
+                .texOffs(182, 62).mirror(false).addBox(-1.0694f, -0.55f, -0.25f, 2.1389f, 1.1f, 0.6f), PartPose.offsetAndRotation(4.4541f, -14.4207f, 0.1f, 0, 0, 0.739f));
         PartDefinition mandorlaRim24 = mandorla.addOrReplaceChild("mandorla_rim_24", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.1991f, -0.55f, -0.25f, 2.3981f, 1.1f, 0.6f), PartPose.offsetAndRotation(5.8656f, -13.0499f, 0.1f, 0, 0, 0.7986f));
+                .texOffs(182, 62).mirror(false).addBox(-1.1991f, -0.55f, -0.25f, 2.3981f, 1.1f, 0.6f), PartPose.offsetAndRotation(5.8656f, -13.0499f, 0.1f, 0, 0, 0.7986f));
         PartDefinition mandorlaRim25 = mandorla.addOrReplaceChild("mandorla_rim_25", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.2975f, -0.55f, -0.25f, 2.595f, 1.1f, 0.6f), PartPose.offsetAndRotation(7.3464f, -11.4289f, 0.1f, 0, 0, 0.8597f));
+                .texOffs(182, 62).mirror(false).addBox(-1.2975f, -0.55f, -0.25f, 2.595f, 1.1f, 0.6f), PartPose.offsetAndRotation(7.3464f, -11.4289f, 0.1f, 0, 0, 0.8597f));
         PartDefinition mandorlaRim26 = mandorla.addOrReplaceChild("mandorla_rim_26", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.3565f, -0.55f, -0.25f, 2.7129f, 1.1f, 0.6f), PartPose.offsetAndRotation(8.8119f, -9.5889f, 0.1f, 0, 0, 0.9348f));
+                .texOffs(182, 62).mirror(false).addBox(-1.3565f, -0.55f, -0.25f, 2.7129f, 1.1f, 0.6f), PartPose.offsetAndRotation(8.8119f, -9.5889f, 0.1f, 0, 0, 0.9348f));
         PartDefinition mandorlaRim27 = mandorla.addOrReplaceChild("mandorla_rim_27", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.3761f, -0.55f, -0.25f, 2.7522f, 1.1f, 0.6f), PartPose.offsetAndRotation(10.1563f, -7.5651f, 0.1f, 0, 0, 1.0332f));
+                .texOffs(182, 62).mirror(false).addBox(-1.3761f, -0.55f, -0.25f, 2.7522f, 1.1f, 0.6f), PartPose.offsetAndRotation(10.1563f, -7.5651f, 0.1f, 0, 0, 1.0332f));
         PartDefinition mandorlaRim28 = mandorla.addOrReplaceChild("mandorla_rim_28", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.366f, -0.55f, -0.25f, 2.7321f, 1.1f, 0.6f), PartPose.offsetAndRotation(11.2681f, -5.3964f, 0.1f, 0, 0, 1.1615f));
+                .texOffs(182, 62).mirror(false).addBox(-1.366f, -0.55f, -0.25f, 2.7321f, 1.1f, 0.6f), PartPose.offsetAndRotation(11.2681f, -5.3964f, 0.1f, 0, 0, 1.1615f));
         PartDefinition mandorlaRim29 = mandorla.addOrReplaceChild("mandorla_rim_29", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.3435f, -0.55f, -0.25f, 2.6871f, 1.1f, 0.6f), PartPose.offsetAndRotation(12.0466f, -3.1241f, 0.1f, 0, 0, 1.3214f));
+                .texOffs(182, 62).mirror(false).addBox(-1.3435f, -0.55f, -0.25f, 2.6871f, 1.1f, 0.6f), PartPose.offsetAndRotation(12.0466f, -3.1241f, 0.1f, 0, 0, 1.3214f));
         PartDefinition mandorlaRim30 = mandorla.addOrReplaceChild("mandorla_rim_30", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.328f, -0.55f, -0.25f, 2.6561f, 1.1f, 0.6f), PartPose.offsetAndRotation(12.419f, -0.7921f, 0.1f, 0, 0, 1.5047f));
+                .texOffs(182, 62).mirror(false).addBox(-1.328f, -0.55f, -0.25f, 2.6561f, 1.1f, 0.6f), PartPose.offsetAndRotation(12.419f, -0.7921f, 0.1f, 0, 0, 1.5047f));
         PartDefinition mandorlaRim31 = mandorla.addOrReplaceChild("mandorla_rim_31", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.3245f, -0.55f, -0.25f, 2.649f, 1.1f, 0.6f), PartPose.offsetAndRotation(12.4175f, 1.5552f, 0.1f, 0, 0, 1.6384f));
+                .texOffs(182, 62).mirror(false).addBox(-1.3245f, -0.55f, -0.25f, 2.649f, 1.1f, 0.6f), PartPose.offsetAndRotation(12.4175f, 1.5552f, 0.1f, 0, 0, 1.6384f));
         PartDefinition mandorlaRim32 = mandorla.addOrReplaceChild("mandorla_rim_32", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.3126f, -0.55f, -0.25f, 2.6251f, 1.1f, 0.6f), PartPose.offsetAndRotation(12.1405f, 3.8727f, 0.1f, 0, 0, 1.7416f));
+                .texOffs(182, 62).mirror(false).addBox(-1.3126f, -0.55f, -0.25f, 2.6251f, 1.1f, 0.6f), PartPose.offsetAndRotation(12.1405f, 3.8727f, 0.1f, 0, 0, 1.7416f));
         PartDefinition mandorlaRim33 = mandorla.addOrReplaceChild("mandorla_rim_33", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.2911f, -0.55f, -0.25f, 2.5821f, 1.1f, 0.6f), PartPose.offsetAndRotation(11.6309f, 6.1159f, 0.1f, 0, 0, 1.8478f));
+                .texOffs(182, 62).mirror(false).addBox(-1.2911f, -0.55f, -0.25f, 2.5821f, 1.1f, 0.6f), PartPose.offsetAndRotation(11.6309f, 6.1159f, 0.1f, 0, 0, 1.8478f));
         PartDefinition mandorlaRim34 = mandorla.addOrReplaceChild("mandorla_rim_34", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.2611f, -0.55f, -0.25f, 2.5222f, 1.1f, 0.6f), PartPose.offsetAndRotation(10.8984f, 8.2419f, 0.1f, 0, 0, 1.9589f));
+                .texOffs(182, 62).mirror(false).addBox(-1.2611f, -0.55f, -0.25f, 2.5222f, 1.1f, 0.6f), PartPose.offsetAndRotation(10.8984f, 8.2419f, 0.1f, 0, 0, 1.9589f));
         PartDefinition mandorlaRim35 = mandorla.addOrReplaceChild("mandorla_rim_35", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.2243f, -0.55f, -0.25f, 2.4487f, 1.1f, 0.6f), PartPose.offsetAndRotation(9.957f, 10.21f, 0.1f, 0, 0, 2.077f));
+                .texOffs(182, 62).mirror(false).addBox(-1.2243f, -0.55f, -0.25f, 2.4487f, 1.1f, 0.6f), PartPose.offsetAndRotation(9.957f, 10.21f, 0.1f, 0, 0, 2.077f));
         PartDefinition mandorlaRim36 = mandorla.addOrReplaceChild("mandorla_rim_36", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.1831f, -0.55f, -0.25f, 2.3661f, 1.1f, 0.6f), PartPose.offsetAndRotation(8.8247f, 11.9823f, 0.1f, 0, 0, 2.2041f));
+                .texOffs(182, 62).mirror(false).addBox(-1.1831f, -0.55f, -0.25f, 2.3661f, 1.1f, 0.6f), PartPose.offsetAndRotation(8.8247f, 11.9823f, 0.1f, 0, 0, 2.2041f));
         PartDefinition mandorlaRim37 = mandorla.addOrReplaceChild("mandorla_rim_37", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.14f, -0.55f, -0.25f, 2.2801f, 1.1f, 0.6f), PartPose.offsetAndRotation(7.5233f, 13.525f, 0.1f, 0, 0, 2.342f));
+                .texOffs(182, 62).mirror(false).addBox(-1.14f, -0.55f, -0.25f, 2.2801f, 1.1f, 0.6f), PartPose.offsetAndRotation(7.5233f, 13.525f, 0.1f, 0, 0, 2.342f));
         PartDefinition mandorlaRim38 = mandorla.addOrReplaceChild("mandorla_rim_38", CubeListBuilder.create()
-                .texOffs(196, 62).mirror(false).addBox(-1.0986f, -0.55f, -0.25f, 2.1971f, 1.1f, 0.6f), PartPose.offsetAndRotation(6.0778f, 14.8085f, 0.1f, 0, 0, 2.4923f));
+                .texOffs(182, 62).mirror(false).addBox(-1.0986f, -0.55f, -0.25f, 2.1971f, 1.1f, 0.6f), PartPose.offsetAndRotation(6.0778f, 14.8085f, 0.1f, 0, 0, 2.4923f));
         PartDefinition mandorlaFlame1 = mandorla.addOrReplaceChild("mandorla_flame_1", CubeListBuilder.create()
                 .texOffs(0, 62).mirror(false).addBox(-1.7f, -4.2f, -0.1f, 3.4f, 4.2f, 0.2f), PartPose.offsetAndRotation(-6.8333f, 14.235f, 0.3f, 0, 0, -2.4155f));
         PartDefinition mandorlaFlame3 = mandorla.addOrReplaceChild("mandorla_flame_3", CubeListBuilder.create()

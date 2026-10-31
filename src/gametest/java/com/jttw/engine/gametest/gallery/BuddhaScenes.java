@@ -40,6 +40,11 @@ final class BuddhaScenes {
         p.setItemSlot(EquipmentSlot.FEET, armour ? new ItemStack(Items.NETHERITE_BOOTS) : ItemStack.EMPTY);
     }
 
+    /** The staff in his hand grown large, so he holds it rather than carrying it across his shoulders. */
+    static void heldStaff(ServerPlayer p) {
+        com.jttw.engine.item.StackData.putBoolean(p.getMainHandItem(), com.jttw.engine.item.RuyiJinguBangItem.TAG_LARGE_MODE, true);
+    }
+
     /** Him, from {@code cam} (x, y, z it stands at and x, y, z it looks at, heights over the ground), facing {@code facing}. */
     private static AbilityScenes.Scene shot(String name, boolean armour, float facing, double[] cam) {
         return new AbilityScenes.Scene(name, p -> {
@@ -66,6 +71,12 @@ final class BuddhaScenes {
                 shot("buddha_side", false, 90f, front),
                 shot("buddha_back", false, 180f, new double[]{0.5, 1.7, 4.4, 0.5, 1.3, 0.5}),
                 shot("buddha_afar", false, -25f, new double[]{3.5, 2.6, 6.5, 0.5, 1.2, 0.5}),
+                // the staff in hand (grown, so it is held, not carried at ease), and mid-swing
+                new AbilityScenes.Scene("buddha_staff_held", p -> { buddha(p, false); heldStaff(p); AbilityScenes.facing = -50f;
+                    AbilityScenes.sceneCam = new double[]{2.8, 1.8, 3.6, 0.5, 1.25, 0.5}; }, p -> {}, 1, false),
+                new AbilityScenes.Scene("buddha_staff_swing", p -> { buddha(p, false); heldStaff(p); AbilityScenes.facing = -50f;
+                    AbilityScenes.sceneCam = new double[]{2.8, 1.8, 3.6, 0.5, 1.25, 0.5}; },
+                        p -> p.swing(InteractionHand.MAIN_HAND, true), 3, false),
                 shot("buddha_face", false, -15f, new double[]{0.9, 1.85, 1.75, 0.5, 1.72, 0.5}),
                 shot("buddha_face_side", false, 70f, new double[]{0.9, 1.85, 1.75, 0.5, 1.72, 0.5}),
                 // in netherite: his robes are drawn, not his armour

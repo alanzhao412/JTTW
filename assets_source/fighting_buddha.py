@@ -49,9 +49,9 @@ FUR = (212, 156, 56)
 FUR_LIGHT = (248, 208, 112)
 FUR_DARK = (140, 88, 28)
 FUR_DEEP = (96, 58, 20)
-SKIN = (238, 192, 152)
-SKIN_SHADE = (196, 140, 108)
-SKIN_LIGHT = (252, 216, 182)
+SKIN = (226, 172, 128)
+SKIN_SHADE = (184, 126, 90)
+SKIN_LIGHT = (242, 198, 156)
 OPERA_RED = (204, 44, 32)
 MOUTH = (120, 34, 30)
 CRIMSON = (150, 26, 30)
@@ -73,9 +73,9 @@ JADE = (90, 176, 132)
 BEAD = (86, 48, 30)
 BEAD_LIGHT = (150, 98, 60)
 SHOE = (40, 30, 34)
-LIGHT_HOT = (255, 248, 214)
-LIGHT = (255, 222, 130)
-LIGHT_DEEP = (250, 170, 60)
+LIGHT_HOT = (255, 236, 160)
+LIGHT = (255, 200, 90)
+LIGHT_DEEP = (236, 136, 34)
 
 
 class BuddhaPainter(Painter):
@@ -217,14 +217,14 @@ BUDDHA = mirrored([
     # ── the Monkey King's head ──
     part('skull', 'head', (0, 0, 0), (0, 0, 0), [
         (-4.4, -8.7, -4.2, 8.8, 8.8, 8.6, 'head'),
-        (-2.4, -3.95, -5.6, 4.8, 2.9, 1.6, 'muzzle'),
-        (-1.9, -1.15, -5.0, 3.8, 1.2, 1.1, 'jaw'),
-        (-0.85, -4.75, -5.95, 1.7, 1.1, 0.6, 'nose'),
+        (-2.3, -4.0, -6.0, 4.6, 2.9, 2.0, 'muzzle'),
+        (-1.8, -1.15, -5.4, 3.6, 1.2, 1.4, 'jaw'),
+        (-0.8, -4.7, -6.35, 1.6, 1.0, 0.6, 'nose'),
         (-3.9, -6.55, -4.95, 7.8, 1.15, 1.1, 'brow'),
         (-3.2, -9.9, -2.4, 6.4, 1.4, 6.0, 'fur_crown'),
         (-4.0, -8.6, 3.9, 8.0, 7.0, 1.4, 'fur_mane'),
     ]),
-    part('right_eye', 'head', (-1.95, -5.15, -4.4), (0, 0.08, 0), [(-0.95, -0.55, -0.25, 1.9, 1.1, 0.4, 'eye')]),
+    part('right_eye', 'head', (-1.85, -5.1, -4.35), (0, 0.08, 0), [(-0.8, -0.45, -0.2, 1.6, 0.9, 0.35, 'eye')]),
     part('right_ear', 'head', (-4.4, -4.9, -0.4), (0, -0.35, 0), [(-1.1, -1.5, -1.2, 1.1, 3.0, 2.4, 'ear')]),
     part('right_ruff_0', 'head', (-3.9, -3.6, -3.2), (0.1, 0.2, 0.55), [(-0.7, 0, -0.9, 1.4, 3.6, 1.8, 'ruff')]),
     part('right_ruff_1', 'head', (-4.2, -2.6, -1.8), (0.2, 0.3, 0.85), [(-0.7, 0, -0.9, 1.4, 3.4, 1.8, 'ruff')]),
@@ -276,7 +276,8 @@ BUDDHA = mirrored([
     part('left_kasaya_sleeve', 'left_arm', (0, 0, 0), (0, 0, 0), [(-1.55, -2.7, -2.85, 5.3, 7.2, 5.7, 'kasaya_sleeve')]),
     part('left_drape', 'left_arm', (3.6, -1.8, 0), ARM_DRAPE, [(0, 0, -2.9, 0.7, 13.5, 5.8, 'drape')]),
     # the Ruyi Jingu Bang, while he holds it (the layer shows it then): red lacquer banded in gold, gold caps
-    part('staff', 'right_hand', (0, 1.6, -0.2), (1.5708, 0, 0), [
+    # held upright through the fist, a little forward, as a monk holds his staff
+    part('staff', 'right_hand', (0, 1.4, -0.2), (0.22, 0, 0.05), [
         (-0.65, -23, -0.65, 1.3, 36, 1.3, 'staff_shaft'),
         (-1.0, -25.2, -1.0, 2.0, 2.6, 2.0, 'staff_cap'),
         (-1.0, 12.6, -1.0, 2.0, 2.6, 2.0, 'staff_cap'),
@@ -284,6 +285,13 @@ BUDDHA = mirrored([
         (-0.85, 10.6, -0.85, 1.7, 0.8, 1.7, 'staff_band'),
         (-0.8, -1.4, -0.8, 1.6, 0.5, 1.6, 'staff_band'),
         (-0.8, 3.0, -0.8, 1.6, 0.5, 1.6, 'staff_band')]),
+
+    part('staff_rest', 'body', (-5.0, -0.5, 0.6), (-0.785, 0, -0.21), [
+        (-0.65, -23, -0.65, 1.3, 36, 1.3, 'staff_shaft'),
+        (-1.0, -25.2, -1.0, 2.0, 2.6, 2.0, 'staff_cap'),
+        (-1.0, 12.6, -1.0, 2.0, 2.6, 2.0, 'staff_cap'),
+        (-0.85, -21.4, -0.85, 1.7, 0.8, 1.7, 'staff_band'),
+        (-0.85, 10.6, -0.85, 1.7, 0.8, 1.7, 'staff_band')]),
 
     # ── the legs: the robe falling past the knees, flared and hemmed, to cloud shoes ──
     part('right_robe_leg', 'right_leg', (0, 0, 0), (0, 0, 0), [
@@ -339,10 +347,7 @@ def heart_face(p, rect):
     # the sockets: dark, lined in red, under the brow
     for side in (-1, 1):
         ex = int(cx + side * r * 0.95)
-        for j in range(int(fh * 0.48), int(fh * 0.64)):
-            for i in range(ex - 3, ex + 3):
-                p.px((fx + i, fy + j), (62, 22, 18))
-        for i in range(ex - 4, ex + 4):
+        for i in range(ex - 3, ex + 3):
             p.px((fx + i, fy + int(fh * 0.65)), OPERA_RED)
 
 
@@ -444,7 +449,7 @@ def disc(p, rect, rx, ry, pointed=False):
             if r > 1:
                 p.clear((fx + i, fy + j))
                 continue
-            glow = 0.32 + 0.5 * math.exp(-((r - 0.82) / 0.1) ** 2) + 0.28 * math.exp(-(r / 0.35) ** 2)
+            glow = 0.14 + 0.55 * math.exp(-((r - 0.84) / 0.08) ** 2) + 0.18 * math.exp(-(r / 0.3) ** 2)
             # rays of light, faintly, from the middle
             ang = math.atan2(y, x)
             glow += 0.1 * max(0.0, math.cos(ang * 12)) * (r > 0.3)
@@ -485,8 +490,8 @@ def paint_box(p, style, f, dims):
         if style == 'muzzle':      # the nostrils, and the line of the lip
             for i in (fw // 2 - 2, fw // 2 + 1):
                 p.px((fx + i, fy + 1), (90, 50, 40))
-            for i in range(1, fw - 1):
-                p.px((fx + i, fy + fh - 1 - (1 if 2 < i < fw - 3 else 0)), MOUTH)
+            for i in range(0, fw):
+                p.px((fx + i, fy + fh - 1 - (0 if 1 < i < fw - 2 else 1)), MOUTH)
         if style == 'jaw':
             for i in range(fw):
                 p.px((fx + i, fy), MOUTH)

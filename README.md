@@ -195,14 +195,27 @@ neither does Wukong below level 100.
   3 seconds.
 
 He looks the part ([`FightingBuddhaLayer`](src/main/java/com/jttw/engine/client/renderer/FightingBuddhaLayer.java),
-model and skins from [`assets_source/fighting_buddha.py`](assets_source/fighting_buddha.py)). Over
-his own body and his armour he wears:
-- a golden patched kasaya worn over the left shoulder, with a red-and-gold sash and its ring
-- a gold-ringed fillet with a jewel and temple rings
-- a gold armlet
-
-Behind his head a halo of golden light slowly turns, and behind his body an aura of golden flame
-breathes. Both are drawn full-bright, and motes of gold drift round him.
+model and skins from [`assets_source/fighting_buddha.py`](assets_source/fighting_buddha.py)). Once he
+ascends, his own body is no longer drawn. His armour and cape are hidden too (`BuddhaArmourMixin`,
+`BuddhaCapeMixin`). In their place he is drawn as the Monkey King made Buddha, a little larger than a
+man:
+- **Head:** golden fur, a heart-shaped face of bare skin ringed in red, glowing red-gold eyes, a short
+  muzzle, round ears and ruffs of fur.
+- **Crown:** the golden fillet, now a jewelled Buddha's crown of five lotus-petal plaques, with red
+  silk ribbons flaring behind.
+- **Robe:** a crimson monk's robe with a crossed white collar and wide gold-hemmed sleeves, falling
+  past the knees to cloud shoes.
+- **Kasaya:** worn over the left shoulder with the right bare. It is patched in saffron and gold
+  between gold-thread seams, with a rolled edge and folds across the breast and back, a gold ring
+  clasp, a hanging panel on the left arm, and a gold-thread cord with tassels. Its apron and panels
+  hang past the knees.
+- **Ornaments:** prayer beads of bodhi wood with a jade guru bead, wrist malas and a gold armlet.
+- **Staff:** the Ruyi Jingu Bang in red lacquer banded in gold, with gold end caps. He holds it
+  upright in his hand, or carries it across his shoulder when at ease.
+- **Light:** behind his head a halo with a disc of light, an inner and a beaded outer ring of gold,
+  and two layers of golden flame. Behind his body is an almond-shaped mandorla of light, pointed at
+  the top, edged in gold and fringed with flame. The light is drawn full-bright, and motes of gold
+  drift round him.
 
 ### The 18, 36 and 72 Transformations
 
