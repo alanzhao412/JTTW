@@ -91,6 +91,11 @@ public class SpiderDemonEntity extends SilkMonster {
         return entityData.get(REARING);
     }
 
+    /** Shows it reared or not (the gallery's pose). */
+    public void showRearing(boolean rearing) {
+        entityData.set(REARING, rearing);
+    }
+
     @Override
     protected void registerGoals() {
         goalSelector.addGoal(0, new FloatGoal(this));

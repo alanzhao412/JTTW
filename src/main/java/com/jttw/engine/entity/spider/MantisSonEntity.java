@@ -94,6 +94,11 @@ public class MantisSonEntity extends SilkMonster {
         return entityData.get(RAISED);
     }
 
+    /** Shows its scythes raised or not (the gallery's pose). */
+    public void showRaised(boolean raised) {
+        entityData.set(RAISED, raised);
+    }
+
     @Override
     protected void registerGoals() {
         goalSelector.addGoal(0, new FloatGoal(this));

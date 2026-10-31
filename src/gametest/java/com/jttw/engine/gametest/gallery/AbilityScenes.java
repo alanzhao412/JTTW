@@ -77,7 +77,7 @@ final class AbilityScenes {
     }
 
     /** Scenes that take longer to come right than the rest, and by how many more ticks: a fall, and its smoke clearing. */
-    static final java.util.Map<String, Integer> LONG = java.util.Map.ofEntries(java.util.Map.entry("staff_fallen", 150),
+    static final java.util.Map<String, Integer> LONG = withSpider(java.util.Map.ofEntries(java.util.Map.entry("staff_fallen", 150),
             java.util.Map.entry("staff_crossed", 150), java.util.Map.entry("staff_obsidian", 150), java.util.Map.entry("staff_obsidian_mighty", 150),
             // a palace's worth of water and glass for the client to draw from a new place
             java.util.Map.entry("waters_palace", 100), java.util.Map.entry("waters_palace_hall", 100), java.util.Map.entry("waters_palace_treasury", 100),
@@ -131,7 +131,14 @@ final class AbilityScenes {
             // the White Bone Cave's inside, laid south of the stage
             java.util.Map.entry("ridge_cave_ossuary", 300), java.util.Map.entry("ridge_cave_bone_forge", 200),
             java.util.Map.entry("ridge_cave_borrowed_faces", 200), java.util.Map.entry("ridge_cave_seal", 200),
-            java.util.Map.entry("ridge_cave_throne_lady", 200), java.util.Map.entry("ridge_cave_throne_hall", 160));
+            java.util.Map.entry("ridge_cave_throne_lady", 200), java.util.Map.entry("ridge_cave_throne_hall", 160)));
+
+    /** The scenes' long waits, with Silk-Web Ridge's. */
+    private static java.util.Map<String, Integer> withSpider(java.util.Map<String, Integer> base) {
+        java.util.Map<String, Integer> all = new java.util.HashMap<>(base);
+        all.putAll(SpiderScenes.LONG);
+        return java.util.Map.copyOf(all);
+    }
 
         /** Set by a scene that photographs a screen (a furnace's, say), so the gallery leaves it open. */
     static volatile boolean keepScreen;
@@ -149,6 +156,7 @@ final class AbilityScenes {
         all.addAll(WildScenes.all());
         all.addAll(CaveScenes.all());
         all.addAll(RidgeScenes.all());
+        all.addAll(SpiderScenes.all());
         return all;
     }
 
@@ -1227,6 +1235,7 @@ final class AbilityScenes {
         LionScenes.clear(p);
         VillageScenes.clear(p);
         WildScenes.clear(p);
+        SpiderScenes.clear(p);
         keepScreen = false;
         topSpeed = false;
         com.jttw.engine.client.renderer.GoldenEyesRenderer.setMode(p.getUUID(), 0);

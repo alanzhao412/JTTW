@@ -161,6 +161,12 @@ public class HundredEyedDemonEntity extends ZoneBoss implements SilkKin {
         return entityData.get(ACT);
     }
 
+    /** Shows him in one of his arts, robed or not (the gallery's pose). */
+    public void showAct(int act, boolean unrobed) {
+        entityData.set(ACT, act);
+        entityData.set(UNROBED, unrobed);
+    }
+
     /** Whether he has thrown off his robe, his eyes bared. */
     public boolean unrobed() {
         return entityData.get(UNROBED);

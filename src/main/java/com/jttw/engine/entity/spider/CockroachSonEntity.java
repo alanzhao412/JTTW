@@ -98,6 +98,11 @@ public class CockroachSonEntity extends SilkMonster {
         return entityData.get(STATE);
     }
 
+    /** Shows it walking, scraping or charging (the gallery's pose). */
+    public void showChargeState(int state) {
+        entityData.set(STATE, state);
+    }
+
     @Override
     protected void registerGoals() {
         goalSelector.addGoal(0, new FloatGoal(this));

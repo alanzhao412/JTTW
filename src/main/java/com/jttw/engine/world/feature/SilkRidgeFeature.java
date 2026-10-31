@@ -92,7 +92,7 @@ public class SilkRidgeFeature extends Feature<NoneFeatureConfiguration> {
     }
 
     /** What the cave's code {@code code} is, as a block, at (x, y, z) of bower {@code bower} (-1 elsewhere). */
-    static BlockState caveBlock(int code, int x, int y, int z, int bower) {
+    public static BlockState caveBlock(int code, int x, int y, int z, int bower) {
         return switch (code) {
             case SpiderCavePlan.AIR -> s(Blocks.AIR);
             case SpiderCavePlan.FLOOR -> {

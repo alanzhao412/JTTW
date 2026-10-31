@@ -117,7 +117,7 @@ public class StingerSonEntity extends SilkMonster {
         return entityData.get(MODE);
     }
 
-    void setMode(int mode) {
+    public void setMode(int mode) {
         entityData.set(MODE, mode);
     }
 

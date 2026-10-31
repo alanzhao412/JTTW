@@ -171,6 +171,12 @@ public class SpiderSpiritEntity extends SilkMonster {
         return entityData.get(WEAVING);
     }
 
+    /** Shows her spinning, weaving, or neither (the gallery's pose). */
+    public void showArt(boolean spinning, boolean weaving) {
+        entityData.set(SPINNING, spinning);
+        entityData.set(WEAVING, weaving);
+    }
+
     @Nullable
     public SpiderCave.Bower bower() {
         return bower;
