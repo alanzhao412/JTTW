@@ -289,13 +289,13 @@ public final class IslandShape {
     @Nullable
     public static Pillar pillar(long seed, int i, int j) {
         Pillar p = PILLARS.computeIfAbsent(seed * 961 + i * 65599L + j, k -> {
-            if (unit(seed, i, j, 1) > 0.42) return NONE;
+            if (unit(seed, i, j, 1) > 0.32) return NONE;
             int x = i * PILLAR_CELL + 6 + (int) (unit(seed, i, j, 2) * (PILLAR_CELL - 12));
             int z = j * PILLAR_CELL + 6 + (int) (unit(seed, i, j, 3) * (PILLAR_CELL - 12));
             double u = out(seed, x, z);
             if (u < 0.3 || u > 1.3 || inFallsCountry(x, z) || CavePlan.near(x, z, 14)) return NONE;
             if (Math.hypot(x - SUMMIT_X, z - SUMMIT_Z) < PEAK_RADIUS + 10) return NONE;
-            double r = 2.6 + unit(seed, i, j, 4) * 3.6;
+            double r = 3.4 + unit(seed, i, j, 4) * 4.4;
             boolean sea = u > 0.97;
             double base = sea ? SEA - 2 : body(seed, x, z);
             int head = (int) Math.round(base + (sea ? 18 : 22) + unit(seed, i, j, 5) * (sea ? 30 : 46) + (1 - Math.min(1, u)) * 10);

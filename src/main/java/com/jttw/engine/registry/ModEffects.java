@@ -39,6 +39,10 @@ public final class ModEffects {
     public static final DeferredHolder<MobEffect, MobEffect> SAMADHI_FIRE = EFFECTS.register("samadhi_fire",
             com.jttw.engine.world.fire.SamadhiFire.Burning::new);
 
+    /** The Fiery Golden Eyes' fire (see {@link com.jttw.engine.character.wukong.FieryGaze}): burns until death; no water, rain, Fire Resistance nor milk puts it out. */
+    public static final DeferredHolder<MobEffect, MobEffect> FIERY_GAZE = EFFECTS.register("fiery_gaze",
+            com.jttw.engine.character.wukong.FieryGaze.Burning::new);
+
     /** Stunned (see {@link com.jttw.engine.world.Stun}): cannot move, jump or strike. */
     public static final DeferredHolder<MobEffect, MobEffect> STUNNED = EFFECTS.register("stunned",
             () -> new com.jttw.engine.world.Stun.Held("stunned", 0xE8D44A, true));

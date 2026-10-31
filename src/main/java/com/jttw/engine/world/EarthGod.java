@@ -143,6 +143,8 @@ public final class EarthGod {
         if (zone == Zones.FLOWER_FRUIT) return "Over the sea stands Flower-Fruit Mountain, where the Six-Eared Macaque, the false Great Sage, has taken the Water Curtain Cave";
         if (zone == Zones.BLACK_WIND) return "Under the black winds of Black Wind Mountain, past the burnt Guanyin Chan Temple, the Black Bear Demon keeps the Tang Monk's stolen kasaya in the Black Wind Cave, behind the great door in the cliff of the peak";
         if (zone == Zones.MOUNT_WUZHUANG) return "Over the clouds floats Mount Longevity, where the Great Immortal Zhenyuan tends his ginseng tree";
+        if (zone == Zones.SPIDER_CAVE) return "Under Silk-Web Ridge a thatched cottage hides the Spider Cave, where the Seven Spider Spirits keep their "
+                + "bowers; their sworn brother, the Hundred-Eyed Demon Lord, keeps the Yellow Flower Temple under a canopy of their silk";
         if (zone == Zones.LION_CAMEL) return "Lion-Camel Ridge: eight hundred li of demons, and the city they devoured. Its kings sit at the "
                 + "bottom of the Lion-Camel Cave, behind the great door in the mountain north of the city";
         return "There the demons of your strength dwell";
@@ -269,6 +271,8 @@ public final class EarthGod {
         if (zone == Zones.FLOWER_FRUIT) return new BlockPos(c[0], com.jttw.engine.world.flowerfruit.IslandShape.BASIN_Y + 1,
                 c[1] + com.jttw.engine.world.flowerfruit.IslandShape.CLIFF_Z + 1); // the cave's mouth, behind the falls
         if (zone == Zones.BLACK_WIND) return com.jttw.engine.world.blackwind.BlackWindCave.doorTarget(c); // the cave's door
+        if (zone == Zones.SPIDER_CAVE) return new BlockPos(c[0] + com.jttw.engine.world.spider.SilkRidgeWorks.COTTAGE_X, 64,
+                c[1] + com.jttw.engine.world.spider.SilkRidgeWorks.COTTAGE_Z); // the cottage over the cave's mouth
         return new BlockPos(c[0], 64, c[1]);
     }
 

@@ -82,11 +82,18 @@ public record ZoneLayout(int near, int far, int radius, int wobble, long salt, b
     public static final ZoneLayout KUNLUN = new ZoneLayout(5000, 8000, 465, 30, 0x6B0A1F5EL, false, WEST);
 
     /**
-     * Flower-Fruit Mountain: a region about 640 blocks across (never under 580), the island and the
-     * sea round it; a band of the first levels, so near spawn, 1.8-3.2 km out (clear of White Bone
-     * Ridge and every zone before it, in the sea).
+     * Flower-Fruit Mountain, in White Bone Ridge's band and ring: a region about 640 blocks across
+     * (never under 580), the island and the sea round it; 1-2 km out, in the sea, clear of the ridge
+     * and Black Wind Mountain.
      */
-    public static final ZoneLayout FLOWER_FRUIT = new ZoneLayout(1800, 3200, 320, 30, 0xF10E7F2BL, false);
+    public static final ZoneLayout FLOWER_FRUIT = new ZoneLayout(1000, 2000, 320, 30, 0xF10E7F2BL, false);
+
+    /**
+     * Silk-Web Ridge and the Spider Cave, Mount Wuzhuang's band on the ground: a region about 480 blocks
+     * across (never under 430), its valley, the ridge across it with the cave inside, the cottage, the
+     * spring and the temple; 6-7.5 km out, as Mount Wuzhuang (whose region it keeps clear of).
+     */
+    public static final ZoneLayout SPIDER_CAVE = new ZoneLayout(6000, 7500, 240, 24, 0x5B1DC0FEL, false);
 
     /**
      * Black Wind Mountain, in White Bone Ridge's band and ring: a region about 700 blocks across (never

@@ -328,4 +328,150 @@ public class EyeLaserGameTests {
         check(h, farGot.stream().noneMatch(EyeLaserBeamPacket.class::isInstance), "the far player is not told");
         h.succeed();
     }
+
+    // ── its fire, and furnaces ────────────────────────────────────────────
+
+    /** What it strikes burns on, at the output's beat by his power, with Slowness by the output; water, Fire Resistance and milk do nothing to it. */
+    @GameTest(template = PLATFORM, setupTicks = 100, skyAccess = true, timeoutTicks = 200, batch = "eyeLaserSetsWhatItHitsBurningForGood")
+    public static void eyeLaserSetsWhatItHitsBurningForGood(GameTestHelper h) {
+        ServerPlayer p = wukong(h);
+        PlayerLevel.setLevel(p, 20);
+        Pig pig = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(2, 5, 2));
+        pig.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(1000);
+        pig.setHealth(1000);
+        EyeLaser.setOutput(p, 3);
+        ready(p, 200f);
+        EyeLaser.fire(p);
+        var burn = pig.getEffect(com.jttw.engine.registry.ModEffects.FIERY_GAZE);
+        check(h, burn != null, "it burns");
+        check(h, burn.isInfiniteDuration(), "for good");
+        eq(h, 2, burn.getAmplifier(), "at output III");
+        near(h, com.jttw.engine.character.wukong.FieryGaze.BEAT[2] * LevelPower.of(p), com.jttw.engine.character.wukong.FieryGaze.beatOf(pig), "a beat of 1.2 at level 1, by his power");
+        var slow = pig.getEffect(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN);
+        check(h, slow != null && slow.getAmplifier() == 1, "Slowness II at output III");
+        // nothing puts it out
+        pig.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE, 1000));
+        pig.removeEffectsCuredBy(net.neoforged.neoforge.common.EffectCures.MILK);
+        List<BlockPos> placed = new ArrayList<>();
+        place(h, placed, new BlockPos(2, 5, 2), Blocks.WATER);
+        place(h, placed, new BlockPos(2, 6, 2), Blocks.WATER);
+        float after = pig.getHealth();
+        float beat = com.jttw.engine.character.wukong.FieryGaze.beatOf(pig);
+        h.runAfterDelay(50, () -> {
+            check(h, pig.isInWaterOrBubble(), "in water");
+            check(h, com.jttw.engine.character.wukong.FieryGaze.burning(pig), "still burning, in water, under Fire Resistance, after milk");
+            check(h, shownBurning(pig), "and seen burning (the flag the clients draw fire by)");
+            check(h, pig.getHealth() <= after - 2 * beat + 0.01f, "two beats or more taken: " + (after - pig.getHealth()) + " of " + beat + " each");
+            check(h, pig.hasEffect(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN), "still slowed");
+            h.succeed();
+        });
+    }
+
+    /** It burns until the burning one dies. */
+    @GameTest(template = PLATFORM, setupTicks = 100, skyAccess = true, timeoutTicks = 400, batch = "eyeLaserFireBurnsUntilDeath")
+    public static void eyeLaserFireBurnsUntilDeath(GameTestHelper h) {
+        ServerPlayer p = wukong(h);
+        Pig pig = h.spawnWithNoFreeWill(EntityType.PIG, new BlockPos(2, 5, 2));
+        pig.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE, 10000));
+        EyeLaser.setOutput(p, 1);
+        ready(p, 200f);
+        EyeLaser.fire(p); // 8 of its 10 health
+        check(h, pig.isAlive(), "the shot leaves it alive");
+        h.succeedWhen(() -> h.assertTrue(!pig.isAlive(), "burnt to death"));
+    }
+
+    /** Each output's beat and Slowness. */
+    @GameTest(template = PLATFORM, setupTicks = 100, batch = "eyeLaserFireByOutput")
+    public static void eyeLaserFireByOutput(GameTestHelper h) {
+        float[] beat = {0.5f, 0.8f, 1.2f, 1.8f, 2.5f};
+        int[] slow = {0, 0, 1, 1, 2};
+        for (int lv = 1; lv <= 5; lv++) {
+            near(h, beat[lv - 1], com.jttw.engine.character.wukong.FieryGaze.BEAT[lv - 1], "output " + lv + " beat");
+            eq(h, slow[lv - 1], com.jttw.engine.character.wukong.FieryGaze.slowness(lv), "output " + lv + " Slowness");
+        }
+        h.succeed();
+    }
+
+    /** Whether clients are told it is on fire (Entity's shared flag 0, which they draw the flames by). */
+    private static boolean shownBurning(net.minecraft.world.entity.Entity e) {
+        try {
+            var m = net.neoforged.fml.util.ObfuscationReflectionHelper.findMethod(net.minecraft.world.entity.Entity.class, "getSharedFlag", int.class);
+            return (boolean) m.invoke(e, 0);
+        } catch (ReflectiveOperationException ex) {
+            throw new IllegalStateException(ex);
+        }
+    }
+
+    private static int burnTime(GameTestHelper h, BlockPos rel) {
+        var be = h.getLevel().getBlockEntity(h.absolutePos(rel));
+        return be == null ? -1 : be.saveWithoutMetadata(h.getLevel().registryAccess()).getShort("BurnTime");
+    }
+
+    /** At outputs I and II a furnace, blast furnace or smoker is lit, a lava bucket's worth, not cut; and the beam stops there. */
+    @GameTest(template = PLATFORM, setupTicks = 100, skyAccess = true, batch = "eyeLaserLightsFurnacesAtLowOutput")
+    public static void eyeLaserLightsFurnacesAtLowOutput(GameTestHelper h) {
+        ServerPlayer p = wukong(h);
+        List<BlockPos> placed = new ArrayList<>();
+        BlockPos at = new BlockPos(2, 8, 2), above = new BlockPos(2, 10, 2);
+        Object[][] kinds = {{Blocks.FURNACE, 20000}, {Blocks.BLAST_FURNACE, 10000}, {Blocks.SMOKER, 10000}};
+        for (int lv = 1; lv <= 2; lv++) for (Object[] k : kinds) {
+            place(h, placed, at, (Block) k[0]);
+            place(h, placed, above, Blocks.STONE);
+            EyeLaser.setOutput(p, lv);
+            ready(p, 200f);
+            EyeLaser.Shot shot = EyeLaser.fire(p);
+            String what = k[0] + " at output " + lv;
+            check(h, h.getBlockState(at).is((Block) k[0]), what + " stands");
+            check(h, h.getBlockState(at).getValue(net.minecraft.world.level.block.AbstractFurnaceBlock.LIT), what + " is lit");
+            eq(h, (int) k[1], burnTime(h, at), what + ": a lava bucket of burn");
+            check(h, shot.stopped() && shot.lit().contains(h.absolutePos(at)), what + " stops the beam");
+            check(h, !gone(h, above), "past " + what + ", the stone stands");
+        }
+        h.succeed();
+    }
+
+    /** From output III a furnace is cut as any block. */
+    @GameTest(template = PLATFORM, setupTicks = 100, skyAccess = true, batch = "eyeLaserCutsFurnacesAtHighOutput")
+    public static void eyeLaserCutsFurnacesAtHighOutput(GameTestHelper h) {
+        ServerPlayer p = wukong(h);
+        List<BlockPos> placed = new ArrayList<>();
+        BlockPos at = new BlockPos(2, 8, 2);
+        for (int lv = 3; lv <= 5; lv++) {
+            place(h, placed, at, Blocks.FURNACE);
+            EyeLaser.setOutput(p, lv);
+            ready(p, 200f);
+            EyeLaser.fire(p);
+            check(h, gone(h, at), "output " + lv + " cuts the furnace");
+        }
+        h.succeed();
+    }
+
+    /** At outputs I and II the Eight Trigrams Furnace is lit, as true fire lights it; from III it is cut. */
+    @GameTest(template = PLATFORM, setupTicks = 100, skyAccess = true, batch = "eyeLaserLightsTheEightTrigramsFurnace")
+    public static void eyeLaserLightsTheEightTrigramsFurnace(GameTestHelper h) {
+        ServerPlayer p = wukong(h);
+        BlockPos core = new BlockPos(2, 12, 2);
+        var level = h.getLevel();
+        GT.onEnd(h, () -> {
+            for (int x = -1; x <= 1; x++) for (int y = 0; y <= 4; y++) for (int z = -1; z <= 1; z++)
+                level.setBlock(h.absolutePos(core.offset(x, y, z)), Blocks.AIR.defaultBlockState(), 3);
+            level.getEntitiesOfClass(ItemEntity.class, new AABB(h.absolutePos(core)).inflate(10)).forEach(ItemEntity::discard);
+        });
+        for (int lv = 1; lv <= 3; lv++) {
+            for (int x = -1; x <= 1; x++) for (int y = 0; y <= 4; y++) for (int z = -1; z <= 1; z++)
+                level.setBlock(h.absolutePos(core.offset(x, y, z)), Blocks.AIR.defaultBlockState(), 3);
+            var furnace = com.jttw.engine.world.furnace.TrigramsFurnaceBlock.build(level, h.absolutePos(core));
+            check(h, !furnace.isLit(), "cold to begin with");
+            EyeLaser.setOutput(p, lv);
+            ready(p, 200f);
+            EyeLaser.fire(p);
+            if (lv <= 2) {
+                check(h, furnace.isLit(), "output " + lv + " lights it");
+                check(h, !gone(h, core), "and leaves it standing");
+            } else {
+                check(h, !(level.getBlockEntity(h.absolutePos(core)) instanceof com.jttw.engine.world.furnace.TrigramsFurnaceBlockEntity), "output III cuts it");
+            }
+        }
+        h.succeed();
+    }
 }

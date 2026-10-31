@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:block",
+  "random_sequence": "jttw_engine:blocks/binding_web",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jttw_engine:spider_silk"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.35
+        }
+      ]
+    }
+  ]
+}

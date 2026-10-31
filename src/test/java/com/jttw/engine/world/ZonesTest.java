@@ -44,31 +44,17 @@ class ZonesTest {
         }
     }
 
-    /** Whether an earlier zone of {@link Zones#ALL} has a band overlapping this one's. */
-    private static boolean sharesAnEarlierBand(Zones.Zone zone) {
-        for (Zones.Zone z : Zones.ALL) {
-            if (z == zone) return false;
-            if (z.hasLevelBand() && zone.hasLevelBand() && z.minLevel() <= zone.maxLevel() && zone.minLevel() <= z.maxLevel()) return true;
-        }
-        return false;
-    }
-
     @Test
     void eachLiesInItsRingFartherOutTheHigherItsLevels() {
-        int prevFar = 0;
-        for (Zones.Zone zone : Zones.MAP.zones()) {
+        // by level band: each band's ring beyond the band's before it (zones of one band share its ring); places past every band
+        int prevFar = 0, bandNear = 0, bandMin = -1;
+        List<Zones.Zone> ordered = new java.util.ArrayList<>(Zones.MAP.zones());
+        ordered.sort(java.util.Comparator.comparingInt(z -> z.hasLevelBand() ? z.minLevel() : Integer.MAX_VALUE));
+        for (Zones.Zone zone : ordered) {
             ZoneLayout l = zone.layout();
-            if (zone == Zones.FLOWER_FRUIT) {
-                // of the first band (in White Bone Ridge's), its ring a little past the ridge's, out over the sea
-                assertTrue(sharesAnEarlierBand(zone), zone.id() + ": a band an earlier zone holds");
-                assertTrue(l.near() > ZoneLayout.WHITE_BONE.near() && l.far() <= ZoneLayout.BOTTOMLESS_CAVE.far() + 200, zone.id());
-                assertTrue(l.near() > l.margin(), zone.id() + ": clear of spawn");
-                continue;
-            }
-            if (zone == Zones.BLACK_WIND) {
-                // a zone sharing White Bone Ridge's band shares its ring
-                assertEquals(ZoneLayout.WHITE_BONE.near(), l.near(), zone.id());
-                assertEquals(ZoneLayout.WHITE_BONE.far(), l.far(), zone.id());
+            if (zone.hasLevelBand() && zone.minLevel() == bandMin) {
+                assertEquals(bandNear, l.near(), zone.id() + ": its band's ring");
+                prevFar = Math.max(prevFar, l.far());
                 continue;
             }
             if (zone == Zones.KUNLUN) {
@@ -79,6 +65,8 @@ class ZonesTest {
             assertTrue(l.near() >= prevFar, zone.id() + ": its ring beyond the last zone's");
             assertTrue(l.near() > l.margin(), zone.id() + ": clear of spawn");
             prevFar = l.far();
+            bandNear = l.near();
+            bandMin = zone.hasLevelBand() ? zone.minLevel() : -1;
         }
         for (long seed : SEEDS) {
             for (ZoneMap.Placement p : List.of(Zones.MAP.placement(seed), Zones.MAP.place(seed, PATCHES))) {

@@ -44,7 +44,8 @@ class FlowerFruitPlacementTest {
         assertEquals(Zones.Vertical.WHOLE_COLUMN, Z.vertical());
         assertSame(ZoneAllies.WUKONG, Z.allies());
         assertSame(Z, Zones.byBiome(Zones.FLOWER_FRUIT_BIOME));
-        assertEquals(Zones.ALL.size() - 1, Zones.ALL.indexOf(Z), "appended: it keeps clear of every zone before it");
+        assertTrue(Zones.ALL.indexOf(Z) > Zones.ALL.indexOf(Zones.BLACK_WIND) && Zones.ALL.indexOf(Z) < Zones.ALL.indexOf(Zones.LION_CAMEL),
+                "after the ridge's band's zones, before the last band's: it keeps clear of every zone before it");
     }
 
     @Test

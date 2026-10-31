@@ -123,15 +123,15 @@ final class FlowerFruitBench {
         if (ticks == 1) {
             switch (name) {
                 case "from_the_sea" -> look(p, level, x0 + 60, IslandShape.SEA + 26, z0 + 245, new BlockPos(x0, b + 70, z0 + 20));
-                case "aerial" -> look(p, level, x0 + 170, IslandShape.SUMMIT_Y + 60, z0 + 170, new BlockPos(x0, b + 40, z0));
-                case "summit_egg" -> look(p, level, x0 + IslandShape.SUMMIT_X + 13.5, IslandShape.SUMMIT_Y + 7, z0 + IslandShape.SUMMIT_Z + 13.5,
+                case "aerial" -> look(p, level, x0 + 150, IslandShape.SUMMIT_Y - 40, z0 + 190, new BlockPos(x0, b + 60, z0 - 10));
+                case "summit_egg" -> look(p, level, x0 + IslandShape.SUMMIT_X + 0.5, IslandShape.SUMMIT_Y + 6, z0 + IslandShape.SUMMIT_Z + 15.5,
                         new BlockPos(x0 + IslandShape.SUMMIT_X, IslandShape.SUMMIT_Y + 8, z0 + IslandShape.SUMMIT_Z));
                 case "falls" -> look(p, level, x0 + 0.5, b + 24, z0 + cl + 72, new BlockPos(x0, b + 32, z0 + cl));
-                case "falls_close" -> look(p, level, x0 - 16.5, b + 6, z0 + cl + 24, new BlockPos(x0, b + 18, z0 + cl + 2));
+                case "falls_close" -> look(p, level, x0 + 0.5, b + 5, z0 + cl + 34, new BlockPos(x0, b + 22, z0 + cl + 2));
                 case "behind_the_curtain" -> look(p, level, x0 - 13.5, b + 3, z0 + cl + 2.5, new BlockPos(x0, b + 5, z0 + cl + 1));
                 case "iron_bridge" -> look(p, level, x0 - 11.5, b + 6, z0 + CavePlan.BRIDGE_Z1 + 0.5, new BlockPos(x0, b, z0 + (CavePlan.CHASM_Z0 + CavePlan.CHASM_Z1) / 2));
                 case "tablet" -> look(p, level, x0 + 0.5, b + 9, z0 + CavePlan.GATE_Z + 9.5, new BlockPos(x0, b + 12, z0 + CavePlan.GATE_Z));
-                case "great_hall" -> look(p, level, x0 + 0.5, b + 13, z0 + CavePlan.COURT_Z0 - 1.5, new BlockPos(x0, b + 3, z0 - 20));
+                case "great_hall" -> look(p, level, x0 - 6.5, b + 9, z0 + CavePlan.COURT_Z0 - 3.5, new BlockPos(x0, b + 3, z0 - 22));
                 case "sanctum" -> look(p, level, x0 + 12.5, b + 9, z0 + CavePlan.SANCTUM_Z + 18.5, new BlockPos(x0, b + 3, z0 + CavePlan.SANCTUM_Z - 4));
                 case "camp" -> {
                     var camp = IslandShape.camps(level.getSeed()).get(0);

@@ -77,7 +77,7 @@ final class AbilityScenes {
     }
 
     /** Scenes that take longer to come right than the rest, and by how many more ticks: a fall, and its smoke clearing. */
-    static final java.util.Map<String, Integer> LONG = java.util.Map.ofEntries(java.util.Map.entry("staff_fallen", 150),
+    static final java.util.Map<String, Integer> LONG = withSpider(java.util.Map.ofEntries(java.util.Map.entry("staff_fallen", 150),
             java.util.Map.entry("staff_crossed", 150), java.util.Map.entry("staff_obsidian", 150), java.util.Map.entry("staff_obsidian_mighty", 150),
             // a palace's worth of water and glass for the client to draw from a new place
             java.util.Map.entry("waters_palace", 100), java.util.Map.entry("waters_palace_hall", 100), java.util.Map.entry("waters_palace_treasury", 100),
@@ -142,9 +142,18 @@ final class AbilityScenes {
             java.util.Map.entry("bw_cave_door", 300), java.util.Map.entry("bw_cave_door_close", 80), java.util.Map.entry("bw_cave_keepers", 80),
             java.util.Map.entry("bw_cave_court", 300), java.util.Map.entry("bw_cave_feast", 80), java.util.Map.entry("bw_cave_throne", 300),
             java.util.Map.entry("bw_cave_king_on_his_floor", 80), java.util.Map.entry("bw_temple", 160), java.util.Map.entry("bw_temple_hall", 60),
-            java.util.Map.entry("bw_king_whirlwinds", 40));
+            java.util.Map.entry("bw_king_whirlwinds", 40),
+            // the clones given time to walk to the face and dig (a scene's trigger must come within its wait)
+            java.util.Map.entry("clones_mining", 40), java.util.Map.entry("clones_mining_later", 170)));
 
-        /** Set by a scene that photographs a screen (a furnace's, say), so the gallery leaves it open. */
+    /** The scenes' long waits, with Silk-Web Ridge's. */
+    private static java.util.Map<String, Integer> withSpider(java.util.Map<String, Integer> base) {
+        java.util.Map<String, Integer> all = new java.util.HashMap<>(base);
+        all.putAll(SpiderScenes.LONG);
+        return java.util.Map.copyOf(all);
+    }
+
+    /** Set by a scene that photographs a screen (a furnace's, say), so the gallery leaves it open. */
     static volatile boolean keepScreen;
 
     static List<Scene> all() {
@@ -165,6 +174,7 @@ final class AbilityScenes {
         all.addAll(BlackWindScenes.all());
         all.addAll(CloneScenes.all());
         all.addAll(EyeLaserScenes.all());
+        all.addAll(SpiderScenes.all());
         return all;
     }
 
@@ -1246,6 +1256,7 @@ final class AbilityScenes {
         VillageScenes.clear(p);
         WildScenes.clear(p);
         CloneScenes.clear(p);
+        SpiderScenes.clear(p);
         keepScreen = false;
         topSpeed = false;
         com.jttw.engine.client.renderer.GoldenEyesRenderer.setMode(p.getUUID(), 0);

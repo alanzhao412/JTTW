@@ -43,7 +43,8 @@ final class EyeLaserScenes {
         ImmortalItems.grantFieryGoldenEyes(p);
         QiData.setMax(p, 5000f);
         QiData.setCurrent(p, 5000f);
-        EyeLaser.setOutput(p, output);
+        p.getPersistentData().putInt(EyeLaser.KEY_OUTPUT, output); // set quietly: no action-bar line over the picture
+        EyeLaser.sync(p);
         p.getPersistentData().remove(EyeLaser.KEY_READY_AT);
         if (hud) p.setGameMode(GameType.SURVIVAL); // the skill bar shows only out of creative
         range(p);
@@ -86,25 +87,25 @@ final class EyeLaserScenes {
             wukong(p, level, output, first);
             AbilityScenes.facing = 0f;
             AbilityScenes.sceneCam = cam;
-        }, EyeLaser::fire, before, first);
+        }, EyeLaser::fire, first ? before + 1 : before, first);
     }
 
     static List<AbilityScenes.Scene> all() {
-        double[] side = {12.5, 3.2, 8.0, 0.5, 1.4, 9.5};
+        double[] side = {13.0, 3.4, 8.5, 0.0, 1.4, 9.5};
         double[] shoulder = {-2.3, 2.7, -3.2, 0.6, 1.4, 9.0};
-        double[] face = {2.9, 2.0, 2.6, 0.5, 1.55, 1.0};
+        double[] face = {0.9, 2.7, 2.2, 0.5, 1.55, 0.6};
         double[] front = {4.5, 2.4, 6.0, 0.5, 1.5, 1.5};
         return List.of(
                 shot("eye_laser_1_side", 40, 1, 3, side),
                 shot("eye_laser_3_side", 40, 3, 3, side),
                 shot("eye_laser_3_side_fading", 40, 3, 7, side),
-                shot("eye_laser_5_side", 40, 5, 3, side),
-                shot("eye_laser_3_shoulder", 40, 3, 3, shoulder),
-                shot("eye_laser_5_shoulder", 40, 5, 3, shoulder),
+                shot("eye_laser_5_side", 40, 5, 4, side),
+                shot("eye_laser_3_shoulder", 40, 3, 4, shoulder),
+                shot("eye_laser_5_shoulder", 40, 5, 5, shoulder),
                 shot("eye_laser_2_face", 40, 2, 3, face),
                 shot("eye_laser_4_front", 40, 4, 3, front),
                 shot("eye_laser_2_first_person", 40, 2, 3, null),
-                shot("eye_laser_5_first_person", 40, 5, 3, null),
+                shot("eye_laser_5_first_person", 40, 5, 4, null),
                 shot("eye_laser_buddha_3_side", 100, 3, 3, side));
     }
 }
