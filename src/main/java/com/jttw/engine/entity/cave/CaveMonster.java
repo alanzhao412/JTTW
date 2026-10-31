@@ -39,14 +39,14 @@ public abstract class CaveMonster extends ZoneMonster {
         return k < 0 ? LEVEL : LEVEL + 1 + (k * 6 + 3) / 7;
     }
 
-    /** A captain's level on floor k: 44 outside, 43 to 49 down the floors. */
+    /** A captain's level on floor k: 44 outside, 43 to the band's top (46) down the floors. */
     public static int captainOn(int k) {
-        return k < 0 ? CAPTAIN_LEVEL : regularOn(k) + 5;
+        return k < 0 ? CAPTAIN_LEVEL : Math.min(Zones.BOTTOMLESS.maxLevel(), regularOn(k) + 5);
     }
 
-    /** The level of floor k's guardian, who holds its way down: 40 to 47. */
+    /** The level of floor k's guardian, who holds its way down: 39 to the band's top (46). */
     public static int guardianOn(int k) {
-        return 40 + k;
+        return Math.min(Zones.BOTTOMLESS.maxLevel(), 39 + k);
     }
 
     /** The floor it was put on (0-7; 8 the throne level), or -1 if none. */

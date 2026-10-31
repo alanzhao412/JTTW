@@ -96,7 +96,8 @@ public final class CaveHousehold {
         BlockPos stand = standing(level, m, spot);
         m.moveTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, random.nextFloat() * 360f, 0f);
         m.finalizeSpawn(level, level.getCurrentDifficultyAt(stand), range >= 0 ? MobSpawnType.STRUCTURE : MobSpawnType.MOB_SUMMONED, null);
-        int lv = captain ? CaveMonster.captainOn(k) - 1 + random.nextInt(3) : CaveMonster.regularOn(k) - 1 + random.nextInt(3);
+        int lv = Math.min(com.jttw.engine.world.Zones.BOTTOMLESS.maxLevel(), // never past the band: its lady stands 15 over it
+                captain ? CaveMonster.captainOn(k) - 1 + random.nextInt(3) : CaveMonster.regularOn(k) - 1 + random.nextInt(3));
         m.become(lv, captain);
         if (k >= 0) m.getPersistentData().putInt(BottomlessCave.KEY_FLOOR, k + 1);
         if (range >= 0) {

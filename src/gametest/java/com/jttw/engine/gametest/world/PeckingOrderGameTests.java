@@ -138,6 +138,36 @@ public class PeckingOrderGameTests {
             else if (e instanceof ZoneMonster m) minions.merge(m.zone().id(), Math.max(m.zone().maxLevel(), m.captainLevel()), Math::max);
             if (!(e instanceof ZoneBoss) || e instanceof TempleYouthEntity) e.discard();
         }
+        // and the posts of every fortress and garrison, at whatever level each is put there
+        String ridge = com.jttw.engine.world.Zones.WHITE_BONE.id(), cave = com.jttw.engine.world.Zones.BOTTOMLESS.id(),
+                fire = com.jttw.engine.world.Zones.FIRE_MOUNTAIN.id(), lion = com.jttw.engine.world.Zones.LION_CAMEL.id();
+        var bone = com.jttw.engine.world.ridge.WhiteBoneCave.of(h.getLevel().getSeed());
+        for (int k = 0; k <= com.jttw.engine.world.ridge.WhiteBoneCave.FLOORS; k++) {
+            for (var post : bone.posts(k)) minions.merge(ridge, post.level(), Math::max);
+        }
+        for (var post : bone.outside()) minions.merge(ridge, post.level(), Math::max);
+        int caveTop = com.jttw.engine.world.Zones.BOTTOMLESS.maxLevel();
+        for (int k = -1; k < com.jttw.engine.world.feature.Labyrinth.LEVELS; k++) {
+            // a household's are put a level either side of their floor's, never past the band (CaveHousehold.put)
+            minions.merge(cave, Math.min(caveTop, com.jttw.engine.entity.cave.CaveMonster.captainOn(k) + 1), Math::max);
+            minions.merge(cave, Math.min(caveTop, com.jttw.engine.entity.cave.CaveMonster.regularOn(k) + 1), Math::max);
+            if (k >= 0) minions.merge(cave, com.jttw.engine.entity.cave.CaveMonster.guardianOn(k), Math::max);
+        }
+        for (int f = 0; f <= com.jttw.engine.world.fire.FortressPlan.FLOORS + 1; f++) {
+            minions.merge(fire, com.jttw.engine.world.fire.FortressPlan.regularLevel(f), Math::max);
+            minions.merge(fire, com.jttw.engine.world.fire.FortressPlan.captainLevel(f), Math::max);
+            minions.merge(fire, com.jttw.engine.world.fire.FortressPlan.guardianLevel(f), Math::max);
+        }
+        for (int k = 0; k <= com.jttw.engine.world.lion.LionFortress.FLOORS; k++) {
+            for (int role : new int[]{com.jttw.engine.world.lion.LionFortress.REGULAR, com.jttw.engine.world.lion.LionFortress.CAPTAIN,
+                    com.jttw.engine.world.lion.LionFortress.WARDEN}) {
+                minions.merge(lion, com.jttw.engine.world.lion.LionFortress.levelOf(k, role), Math::max);
+            }
+        }
+        for (var z : List.of(com.jttw.engine.world.Zones.WHITE_BONE, com.jttw.engine.world.Zones.BOTTOMLESS,
+                com.jttw.engine.world.Zones.FIRE_MOUNTAIN, com.jttw.engine.world.Zones.LION_CAMEL)) {
+            check(h, minions.get(z.id()) <= z.maxLevel(), z.id() + "'s posts within its band: up to " + minions.get(z.id()));
+        }
         for (ZoneBoss b : bosses) {
             com.jttw.engine.world.Zones.Zone z = b.zone();
             zones.put(z.id(), z);

@@ -544,7 +544,7 @@ pecking order holds it to a boss's blow:
 
 | Boss | Its blow on all | Telegraph (wind-up) | Area | Share (hits that kill) | Every |
 |---|---|---|---|---|---|
-| Lady White Bone | bone shards, three in a fan; the veil blinds all within 24 | — | a 20° fan | 25% (4) | at range |
+| Lady White Bone | **the bone storm**: the bones of her dead burst out from her, cutting and slowing; besides, shards in a fan and the blinding veil | arms flung wide, head thrown back, bones whirling round her, the ring marked in ash (30) | 8 round her | 22% (5) | 11 s |
 | Lady Earth Flow | **the whirl**: spins on her heel, both blades out; thrown back, slowed | sinks low, blades swept back, petals drawn in (20 ticks) | 4.5 round her | 22% (5) | 9 s |
 | The Dragon Kings | their sea's wrath (surge, boiling sea, whirlpool, frozen abyss) | — | round him / the whirlpool | as their wrath | a few seconds |
 | Qinguang | **the mirror's flash**, weighed by karma; dazzles | mirror held high, light gathering, the ground glinting (30) | a 90° cone, 10 before him | 20% (5); 12% the good, 26% (4) the wicked | 12 s |
@@ -576,7 +576,8 @@ health: `JTTWEngine` lifts the cap (and attack's) to a billion.
 `PeckingOrderGameTests` makes every creature of the mod in each of its ranks and fails if any hits
 out of its place, any boss is under 250 hits, or any boss's life is no more than the toughest miniboss's;
 any boss's special hit is harder than a boss's blow may be; or any boss is not above everything else
-of its zone, its head boss at its band's top and 15.
+of its zone (fortress and garrison posts counted: White Bone Cave's, the Bottomless Cave's
+households, the Fire Cloud Cave's, Lion-Camel's floors), its head boss at its band's top and 15.
 
 To add a zone:
 
@@ -636,8 +637,8 @@ mountain and the road by `BoneMassifFeature`), so it comes out whole whichever c
   bone over it). Each way down is a corridor in the hall's wall behind a **seal** of iron bars, then
   a stair in the rock; the stairs alternate north and south, so every floor is crossed end to end.
 - **Who holds them.** Each floor has 8 + k regulars and 1 + k/2 captains (k from 0), regulars from
-  level 21 on the first to 33 on the last, captains five over, placed at fixed posts (laid by the
-  seed); and before its seal its **Warden** (a Bone Servant miniboss six levels over its floor, with
+  level 21 on the first to 33 on the last, captains five over (never past the band's top, 36), placed at fixed posts (laid by the
+  seed); and before its seal its **Warden** (a Bone Servant miniboss six levels over its floor, no higher than 36, with
   60% more health). A Warden's death breaks its seal for good. Every one of them is kept (never
   despawned) and held near its post. One found off its floor with no one to fight is put back at its
   post, and none is ever let into the throne room.
@@ -652,7 +653,11 @@ mountain and the road by `BoneMassifFeature`), so it comes out whole whichever c
   ribcage, two rows of bone pillars, braziers of soul fire, walls of stacked bone set with skulls, a
   great skull over a stepped dais and a throne of bone. Lady White Bone (level 51) is put there when the land is
   made, passing for one of her court of six; her fight is as it was (found out by a blow or by
-  truth-seeing eyes, her blinks, her false deaths, her veil, her boss bar only while she is herself),
+  truth-seeing eyes, her blinks, her false deaths, her veil, her boss bar only while she is herself;
+  and, herself, every 11 s with a foe within 8 blocks, **the bone storm**: she flings her arms wide
+  and throws her head back, jaw agape, while the bones of her dead rise and whirl round her and the
+  ring they will reach is marked in ash (1.5 s; she neither throws nor vanishes meanwhile), then they
+  burst outward: everyone within 8 blocks struck for 22% (five kill), cut and slowed),
   but she never leaves the room: a blink that would take her out of it is not taken, and if she is
   ever outside it (thrown, pulled) she is back in its middle at once. She persists and, once killed,
   does not come back.
@@ -770,7 +775,7 @@ of the world.
     (about 14 on the first floor to 30 on the eighth), and its **guardian** before its way down: a
     miniboss (twice a captain's health, a miniboss's bite), named for the floor ("Warden of the
     Granaries"), mice on odd floors, maids on even (who mend the rest). **Stronger the deeper**:
-    regulars level 38 on the first floor to 44 on the eighth, captains 43 to 49, guardians 40 to 47
+    regulars level 38 on the first floor to 44 on the eighth, captains 43 to 46, guardians 39 to 46 (never past the band's top, so their lady stands 15 over all of them)
     (the mountain's 37 and 44). The posted are kept (never despawned, even on Peaceful) and keep to
     their floor: idle and off it (having chased someone up or down a stair, or fallen), they go back
     to their post. **Respawn**: the posted, the guardians and the gate's guard do not come back once
