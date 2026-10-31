@@ -342,10 +342,13 @@ public final class Zones {
             TagKey.create(Registries.BIOME, id("black_wind_mountain_hosts")), ZoneLayout.BLACK_WIND, Vertical.WHOLE_COLUMN,
             20, 36, 80).hostSampledAt(256);
 
-    /** Every zone, in order: a later one keeps clear of an earlier one sharing its heights. Append new ones. */
-    public static final List<Zone> ALL = List.of(WHITE_BONE, BOTTOMLESS, MYSTICAL_WATERS, HELL, FIRE_MOUNTAIN, MOUNT_WUZHUANG, SPIDER_CAVE, LION_CAMEL, FENGDU,
-            KUNLUN,
-            BLACK_WIND);
+    /**
+     * Every zone, in order: a later one keeps clear of an earlier one sharing its heights. A new zone of a
+     * band goes before Lion-Camel Ridge (the last band's), so the places of no band (Fengdu, Mount
+     * Kunlun) stay last and keep clear of every zone.
+     */
+    public static final List<Zone> ALL = List.of(WHITE_BONE, BOTTOMLESS, MYSTICAL_WATERS, HELL, FIRE_MOUNTAIN, MOUNT_WUZHUANG, SPIDER_CAVE,
+            BLACK_WIND, LION_CAMEL, FENGDU, KUNLUN);
 
     /** Where the overworld zones of {@link #ALL} lie. */
     public static final ZoneMap MAP = new ZoneMap(ALL);
