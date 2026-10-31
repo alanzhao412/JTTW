@@ -52,7 +52,9 @@ public final class EyeLaserRenderer {
     private EyeLaserRenderer() {}
 
     /** How long a beam shows, in ticks: a flash at once, then fading. */
-    public static final int DURATION = 11;
+    public static final int DURATION = 12;
+    /** How long it holds at full brightness before it fades, in ticks. */
+    private static final float HOLD = 3;
     /** How long a scorch lasts, in ticks: glowing for the first part, charred after. */
     private static final int SCORCH_TICKS = 140, SCORCH_GLOW = 30;
 
@@ -130,7 +132,7 @@ public final class EyeLaserRenderer {
         int lv = p.output;
 
         // sparks and flames along it, thrown out from its axis
-        for (double t = 1.0; t < len; t += 0.55 - 0.05 * lv) {
+        for (double t = 2.5; t < len; t += 0.55 - 0.05 * lv) { // not in his face
             Vec3 at = p.from.add(dir.scale(t));
             double a = rnd.nextDouble() * Mth.TWO_PI;
             Vec3 out = basis[0].scale(Math.cos(a)).add(basis[1].scale(Math.sin(a)));
@@ -262,8 +264,8 @@ public final class EyeLaserRenderer {
 
     /** How bright the beam is, by its age: a flash, then fading out. */
     private static float fade(float age) {
-        if (age < 2) return 1f;
-        float f = 1 - (age - 2) / (DURATION - 2);
+        if (age < HOLD) return 1f;
+        float f = 1 - (age - HOLD) / (DURATION - HOLD);
         return Mth.clamp(f * f * (3 - 2 * f), 0, 1);
     }
 
@@ -287,9 +289,9 @@ public final class EyeLaserRenderer {
             Vector3f lk = cam.getLookVector(), up = cam.getUpVector(), left = cam.getLeftVector();
             look = new Vec3(lk.x(), lk.y(), lk.z());
             Vec3 u = new Vec3(up.x(), up.y(), up.z()), l = new Vec3(left.x(), left.y(), left.z());
-            Vec3 base = cam.getPosition().add(look.scale(0.3)).subtract(u.scale(0.1));
-            eyes = new Vec3[]{base.add(l.scale(0.11)), base.subtract(l.scale(0.11))};
-            eyeR = 0.012f + 0.003f * lv;
+            Vec3 base = cam.getPosition().add(look.scale(0.55)).subtract(u.scale(0.1));
+            eyes = new Vec3[]{base.add(l.scale(0.17)), base.subtract(l.scale(0.17))};
+            eyeR = 0.013f + 0.003f * lv;
         } else if (owner != null) {
             float s = Mth.clamp(owner.getBbHeight() / 1.8f, 0.3f, 6f);
             look = owner.getViewVector(partial);
@@ -313,9 +315,10 @@ public final class EyeLaserRenderer {
 
         // the two beams from his eyes, each a fine core in a little glow
         for (Vec3 eye : eyes) {
-            layers(m, vc, eye, meet, eyeR * width, eyeR * width * 1.6f, fade, age, 0, false);
-            flare(m, vc, eye, cam, eyeR * (firstPerson ? 2.2f : 4.5f) * (1 + flash), 1f, 0.85f, 0.4f, 0.9f * fade);
+            layers(m, vc, eye, meet, eyeR * width, eyeR * width * 1.6f, fade, age, 0, false, cam);
+            if (!firstPerson) flare(m, vc, eye, cam, eyeR * 4.5f * (1 + flash), 1f, 0.85f, 0.4f, 0.9f * fade);
         }
+        if (firstPerson) flare(m, vc, meet, cam, 0.35f + 0.08f * lv, 1f, 0.85f, 0.4f, 0.55f * fade); // where they meet, before his eyes
         if (reach <= conv + 0.05) return;
 
         // the shaft: flaring out from where they meet to its full width over two blocks, then on to its end
@@ -323,69 +326,80 @@ public final class EyeLaserRenderer {
         double len = p.to.distanceTo(meet);
         double flareLen = Math.min(len, 2.0);
         Vec3 full = meet.add(dir.scale(flareLen));
-        layers(m, vc, meet, full, eyeR * width * 1.8f, r, fade, age, 0, true);
-        if (len > flareLen) layers(m, vc, full, p.to, r, r, fade, age, (float) flareLen, true);
+        layers(m, vc, meet, full, eyeR * width * 1.8f, r, fade, age, 0, true, cam);
+        if (len > flareLen) layers(m, vc, full, p.to, r, r, fade, age, (float) flareLen, true, cam);
 
         // where it ends: a flare with rays, brightest as it fires
-        float tipR = (r * 2.4f + 0.6f) * (1 + 0.8f * flash);
+        float tipR = (r * 2.4f + 0.9f) * (1 + 0.8f * flash);
         flare(m, vc, p.to, cam, tipR, 1f, 0.7f, 0.25f, 0.85f * fade);
         flare(m, vc, p.to, cam, tipR * 0.45f, 1f, 0.97f, 0.85f, fade);
-        rays(m, vc, p.to, cam, tipR * (1.6f + 0.15f * lv), age, 0.55f * fade);
+        rays(m, vc, p.to, cam, tipR * (1.0f + 0.1f * lv), age, 0.35f * fade);
         if (flash > 0) flare(m, vc, p.to, cam, tipR * 2.2f, 1f, 0.8f, 0.4f, 0.5f * flash);
     }
 
     /**
-     * The beam's layers between two points, nested tubes from a white-hot core to a red haze,
-     * radius {@code r0} at {@code a} to {@code r1} at {@code b}; pulses run along it from his eyes.
+     * The beam's layers between two points, soft bands of light turned to the camera: a white-hot
+     * core, gold, orange and a red haze, each bright down its middle and fading to nothing at its
+     * edges; half-width {@code r0} at {@code a} to {@code r1} at {@code b}. Pulses run along it
+     * from his eyes. Seen end-on (down the beam, as from his own eyes) a band is a line, so there
+     * it is drawn as glowing discs along it instead.
      */
     private static void layers(Matrix4f m, VertexConsumer vc, Vec3 a, Vec3 b, float r0, float r1,
-                               float fade, float age, float offset, boolean haze) {
-        //                       radius, r, g, b, alpha
+                               float fade, float age, float offset, boolean haze, Camera cam) {
+        //                       half-width, r, g, b, alpha
         float[][] shells = haze ? new float[][]{
-                {0.22f, 1f, 1f, 0.93f, 0.95f},
-                {0.45f, 1f, 0.93f, 0.6f, 0.55f},
-                {0.75f, 1f, 0.74f, 0.22f, 0.36f},
-                {1.15f, 1f, 0.5f, 0.08f, 0.2f},
-                {1.8f, 0.9f, 0.26f, 0.03f, 0.09f}}
+                {0.36f, 1f, 1f, 0.94f, 1f},
+                {0.75f, 1f, 0.88f, 0.48f, 0.85f},
+                {1.35f, 1f, 0.6f, 0.14f, 0.55f},
+                {2.20f, 1f, 0.33f, 0.04f, 0.22f}}
                 : new float[][]{
-                {0.35f, 1f, 1f, 0.9f, 0.95f},
-                {1.0f, 1f, 0.8f, 0.3f, 0.45f}};
+                {0.5f, 1f, 1f, 0.9f, 1f},
+                {1.4f, 1f, 0.78f, 0.28f, 0.5f}};
         Vec3 d = b.subtract(a);
         double len = d.length();
         if (len < 1e-3) return;
+        Vec3 dir = d.scale(1 / len);
+        Vec3 eye = cam.getPosition();
         int segs = Math.max(1, (int) Math.ceil(len / 0.75));
-        for (float[] sh : shells) {
-            for (int i = 0; i < segs; i++) {
-                float u0 = i / (float) segs, u1 = (i + 1) / (float) segs;
-                float p0 = pulse(offset + u0 * (float) len, age), p1 = pulse(offset + u1 * (float) len, age);
-                float rr0 = Mth.lerp(u0, r0, r1) * sh[0], rr1 = Mth.lerp(u1, r0, r1) * sh[0];
-                tube(m, vc, a.add(d.scale(u0)), a.add(d.scale(u1)), Math.max(rr0, 0.004f), Math.max(rr1, 0.004f),
-                        sh[1], sh[2], sh[3], sh[4] * fade * p0, sh[4] * fade * p1);
+        for (int i = 0; i < segs; i++) {
+            float u0 = i / (float) segs, u1 = (i + 1) / (float) segs;
+            Vec3 pa = a.add(d.scale(u0)), pb = a.add(d.scale(u1)), mid = pa.add(pb).scale(0.5);
+            Vec3 toCam = eye.subtract(mid);
+            double dist = toCam.length();
+            Vec3 side = dir.cross(toCam);
+            // how nearly it is seen end-on: 0 across, 1 straight down it
+            float endOn = dist < 1e-3 ? 1 : Mth.clamp(((float) Math.abs(dir.dot(toCam) / dist) - 0.92f) / 0.07f, 0, 1);
+            if (side.lengthSqr() < 1e-8) side = basis(dir)[0];
+            side = side.normalize();
+            float p0 = pulse(offset + u0 * (float) len, age), p1 = pulse(offset + u1 * (float) len, age);
+            for (float[] sh : shells) {
+                float w0 = Math.max(Mth.lerp(u0, r0, r1) * sh[0], 0.004f), w1 = Math.max(Mth.lerp(u1, r0, r1) * sh[0], 0.004f);
+                float a0 = sh[4] * fade * p0 * (1 - endOn), a1 = sh[4] * fade * p1 * (1 - endOn);
+                if (a0 > 0.002f || a1 > 0.002f) band(m, vc, pa, pb, side, w0, w1, sh[1], sh[2], sh[3], a0, a1);
+                // end-on: discs, every other segment, faint so many together do not drown the view
+                if (endOn > 0 && i % 2 == 0) flare(m, vc, mid, cam, (w0 + w1) * 0.8f, sh[1], sh[2], sh[3], sh[4] * fade * p0 * endOn * 0.9f);
             }
+        }
+    }
+
+    /** Across a band: its edge, between, middle, between, edge; and how bright at each. */
+    private static final float[] ACROSS = {-1f, -0.4f, 0f, 0.4f, 1f};
+    private static final float[] BRIGHT = {0f, 0.5f, 1f, 0.5f, 0f};
+
+    /** A band of light from {@code a} to {@code b}, spread along {@code side}, fading to its edges. */
+    private static void band(Matrix4f m, VertexConsumer vc, Vec3 a, Vec3 b, Vec3 side, float w0, float w1,
+                             float cr, float cg, float cb, float alpha0, float alpha1) {
+        for (int k = 0; k < ACROSS.length - 1; k++) {
+            vertex(m, vc, a.add(side.scale(ACROSS[k] * w0)), cr, cg, cb, alpha0 * BRIGHT[k]);
+            vertex(m, vc, a.add(side.scale(ACROSS[k + 1] * w0)), cr, cg, cb, alpha0 * BRIGHT[k + 1]);
+            vertex(m, vc, b.add(side.scale(ACROSS[k + 1] * w1)), cr, cg, cb, alpha1 * BRIGHT[k + 1]);
+            vertex(m, vc, b.add(side.scale(ACROSS[k] * w1)), cr, cg, cb, alpha1 * BRIGHT[k]);
         }
     }
 
     /** Brightness running along the beam: pulses racing out from his eyes, and a flicker. */
     private static float pulse(float along, float age) {
         return 0.82f + 0.18f * Mth.sin(along * 1.1f - age * 3.2f) + 0.06f * Mth.sin(along * 3.7f + age * 7f);
-    }
-
-    private static final int SIDES = 12;
-
-    /** A tube from {@code a} (radius r0) to {@code b} (r1), open at its ends. */
-    private static void tube(Matrix4f m, VertexConsumer vc, Vec3 a, Vec3 b, float r0, float r1,
-                             float cr, float cg, float cb, float alpha0, float alpha1) {
-        Vec3 dir = b.subtract(a).normalize();
-        Vec3[] bs = basis(dir);
-        for (int i = 0; i < SIDES; i++) {
-            double t0 = i * Mth.TWO_PI / SIDES, t1 = (i + 1) * Mth.TWO_PI / SIDES;
-            Vec3 o0 = bs[0].scale(Math.cos(t0)).add(bs[1].scale(Math.sin(t0)));
-            Vec3 o1 = bs[0].scale(Math.cos(t1)).add(bs[1].scale(Math.sin(t1)));
-            vertex(m, vc, a.add(o0.scale(r0)), cr, cg, cb, alpha0);
-            vertex(m, vc, a.add(o1.scale(r0)), cr, cg, cb, alpha0);
-            vertex(m, vc, b.add(o1.scale(r1)), cr, cg, cb, alpha1);
-            vertex(m, vc, b.add(o0.scale(r1)), cr, cg, cb, alpha1);
-        }
     }
 
     /** A soft round glow facing the camera: bright at its heart, nothing at its rim. */
@@ -421,7 +435,7 @@ public final class EyeLaserRenderer {
         int n = 8;
         for (int i = 0; i < n; i++) {
             double t = i * Mth.TWO_PI / n + age * 0.05 + (i % 2) * 0.2;
-            float len = length * (i % 2 == 0 ? 1f : 0.55f);
+            float len = length * (i % 2 == 0 ? 0.8f : 0.55f);
             Vec3 out = l.scale(Math.cos(t)).add(u.scale(Math.sin(t)));
             Vec3 side = l.scale(-Math.sin(t)).add(u.scale(Math.cos(t))).scale(len * 0.035);
             Vec3 tip = at.add(out.scale(len));

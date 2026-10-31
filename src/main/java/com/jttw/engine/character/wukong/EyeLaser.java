@@ -70,9 +70,10 @@ public final class EyeLaser {
      * @param damage   its hit at level 1, scaled by his power
      * @param drops    whether what it cuts drops, as mined, or is burnt away
      * @param melts    whether it burns through obsidian-hard blocks
+     * @param lights   whether it lights the furnaces it meets (stopping there) rather than cutting them
      */
     public record Output(int level, String name, float qi, double range, double radius, float damage,
-                         int burnTicks, int cooldownTicks, float fireChance, boolean drops, boolean melts) {
+                         int burnTicks, int cooldownTicks, float fireChance, boolean drops, boolean melts, boolean lights) {
         public String numeral() { return NUMERALS[level - 1]; }
     }
 
@@ -80,11 +81,11 @@ public final class EyeLaser {
 
     /** The five outputs, weakest first. The first is the laser as it was: 10 Qi, a hit of 8. */
     public static final List<Output> OUTPUTS = List.of(
-            new Output(1, "Glint",    10f, 20, 0.0,  8f,  60,  60, 0.20f, true,  false),
-            new Output(2, "Gaze",     20f, 30, 0.5, 13f,  80,  80, 0.30f, true,  false),
-            new Output(3, "Glare",    35f, 40, 1.0, 20f, 100, 100, 0.40f, true,  false),
-            new Output(4, "Blaze",    55f, 52, 1.8, 32f, 140, 140, 0.50f, false, false),
-            new Output(5, "Sunfire",  80f, 64, 2.8, 50f, 200, 200, 0.60f, false, true));
+            new Output(1, "Glint",    10f, 20, 0.0,  8f,  60,  60, 0.20f, true,  false, true),
+            new Output(2, "Gaze",     20f, 30, 0.5, 13f,  80,  80, 0.30f, true,  false, true),
+            new Output(3, "Glare",    35f, 40, 1.0, 20f, 100, 100, 0.40f, true,  false, false),
+            new Output(4, "Blaze",    55f, 52, 1.8, 32f, 140, 140, 0.50f, false, false, false),
+            new Output(5, "Sunfire",  80f, 64, 2.8, 50f, 200, 200, 0.60f, false, true,  false));
 
     public static final int MIN = 1, MAX = OUTPUTS.size();
 
@@ -150,7 +151,7 @@ public final class EyeLaser {
     }
 
     /** What a shot did: where it began and ended, whether something stopped it, what it cut and struck. */
-    public record Shot(Output output, Vec3 from, Vec3 to, boolean stopped, Set<BlockPos> cut, List<LivingEntity> struck) {
+    public record Shot(Output output, Vec3 from, Vec3 to, boolean stopped, Set<BlockPos> cut, List<LivingEntity> struck, Set<BlockPos> lit) {
         public double length() { return from.distanceTo(to); }
     }
 
@@ -192,7 +193,7 @@ public final class EyeLaser {
         for (double t = START; t <= o.range(); t += STEP) {
             BlockPos at = BlockPos.containing(eye.add(look.scale(t)));
             BlockState state = level.getBlockState(at);
-            if (!state.isAir() && !breaks(level, at, state, o, unstoppable)) {
+            if (!state.isAir() && (lights(o, state) || !breaks(level, at, state, o, unstoppable))) {
                 length = Math.max(START, exitDistance(eye, look, at, t));
                 stopped = true;
                 break;
@@ -202,6 +203,11 @@ public final class EyeLaser {
         // what it cuts: every block within its radius of the axis, up to where it stopped
         AABB self = player.getBoundingBox().expandTowards(0, -1, 0).inflate(0.2, 0, 0.2);
         Set<BlockPos> cut = new LinkedHashSet<>();
+        Set<BlockPos> lit = new LinkedHashSet<>();
+        if (stopped) {
+            BlockPos at = BlockPos.containing(eye.add(look.scale(length + 0.01)));
+            if (lights(o, level.getBlockState(at))) lit.add(at);
+        }
         // nothing past what stopped it goes (its end is flat there, not rounded)
         double farthest = length + (stopped ? 0 : 0.5);
         for (double t = START; t <= length + 1e-6; t += STEP) {
@@ -217,6 +223,7 @@ public final class EyeLaser {
                 if (new AABB(b).intersects(self)) continue;
                 BlockState state = level.getBlockState(b);
                 if (state.isAir() || state.getBlock() instanceof LiquidBlock) continue;
+                if (lights(o, state)) { lit.add(b.immutable()); continue; } // lit, not cut
                 if (!breaks(level, b, state, o, unstoppable)) continue;
                 cut.add(b.immutable());
             }
@@ -260,6 +267,7 @@ public final class EyeLaser {
             if (d > hitRadius) continue;
             e.hurt(level.damageSources().magic(), damage);
             e.setRemainingFireTicks(Math.max(e.getRemainingFireTicks(), o.burnTicks()));
+            FieryGaze.ignite(e, player, o.level()); // and it burns on, until it dies
             struck.add(e);
         }
 
@@ -271,8 +279,61 @@ public final class EyeLaser {
         level.playSound(null, end.x, end.y, end.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 1.0f + 0.3f * lv, 0.5f);
         if (o.level() >= 3) level.playSound(null, end.x, end.y, end.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.4f * lv, 0.7f);
 
-        return new Shot(o, eye, end, stopped, cut, struck);
+        Set<BlockPos> lighted = new LinkedHashSet<>();
+        for (BlockPos b : lit) if (lightFurnace(level, b)) lighted.add(b);
+
+        return new Shot(o, eye, end, stopped, cut, struck, lighted);
     }
+
+    /** Whether the beam at this output lights the block rather than cutting it: a furnace (any kind, the Eight Trigrams Furnace too) at outputs I and II. */
+    static boolean lights(Output o, BlockState state) {
+        if (!o.lights()) return false;
+        var block = state.getBlock();
+        return block instanceof net.minecraft.world.level.block.AbstractFurnaceBlock
+                || block instanceof com.jttw.engine.world.furnace.TrigramsFurnaceBlock
+                || block instanceof com.jttw.engine.world.furnace.FurnacePartBlock;
+    }
+
+    /**
+     * Lights the furnace at {@code pos}: a furnace, blast furnace or smoker takes as much fuel as a
+     * lava bucket gives it (a furnace 20,000 ticks, a hundred items; the others half the time, the
+     * same hundred items, as they burn twice as fast), if it has less; the Eight Trigrams Furnace
+     * is lit as true fire lights it ({@link com.jttw.engine.world.furnace.TrigramsFurnaceBlockEntity#ignite}).
+     * Returns whether it was a furnace.
+     */
+    static boolean lightFurnace(ServerLevel level, BlockPos pos) {
+        BlockState state = level.getBlockState(pos);
+        BlockPos core = state.getBlock() instanceof com.jttw.engine.world.furnace.FurnacePartBlock
+                ? com.jttw.engine.world.furnace.FurnacePartBlock.corePos(state, pos) : pos;
+        BlockEntity be = level.getBlockEntity(core);
+        if (be instanceof com.jttw.engine.world.furnace.TrigramsFurnaceBlockEntity trigrams) {
+            trigrams.ignite(com.jttw.engine.world.furnace.TrigramsFurnaceBlockEntity.IGNITED_BURN);
+            return true;
+        }
+        if (!(be instanceof net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity furnace)) return false;
+        try {
+            int lava = (int) LAVA_BURN.invoke(furnace, new ItemStack(net.minecraft.world.item.Items.LAVA_BUCKET));
+            if ((int) LIT_TIME.get(furnace) < lava) {
+                LIT_TIME.set(furnace, lava);
+                LIT_DURATION.set(furnace, lava);
+            }
+        } catch (ReflectiveOperationException ex) {
+            throw new IllegalStateException(ex);
+        }
+        if (state.hasProperty(net.minecraft.world.level.block.AbstractFurnaceBlock.LIT) && !state.getValue(net.minecraft.world.level.block.AbstractFurnaceBlock.LIT)) {
+            level.setBlock(core, state.setValue(net.minecraft.world.level.block.AbstractFurnaceBlock.LIT, true), Block.UPDATE_ALL);
+        }
+        furnace.setChanged();
+        return true;
+    }
+
+    /** A furnace's fire left (litTime) and its fuel's whole (litDuration), and what an item burns in it (getBurnDuration). */
+    private static final java.lang.reflect.Field LIT_TIME = net.neoforged.fml.util.ObfuscationReflectionHelper.findField(
+            net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity.class, "litTime");
+    private static final java.lang.reflect.Field LIT_DURATION = net.neoforged.fml.util.ObfuscationReflectionHelper.findField(
+            net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity.class, "litDuration");
+    private static final java.lang.reflect.Method LAVA_BURN = net.neoforged.fml.util.ObfuscationReflectionHelper.findMethod(
+            net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity.class, "getBurnDuration", ItemStack.class);
 
     /** Whether the beam at this output breaks the block: everything for the Fighting Buddha. */
     static boolean breaks(ServerLevel level, BlockPos pos, BlockState state, Output o, boolean unstoppable) {
@@ -288,9 +349,9 @@ public final class EyeLaser {
         return Math.min(o.radius(), Math.max(0, (t - START) * FLARE));
     }
 
-    /** How wide the beam is drawn: a little more than half its cut, never a hair. */
+    /** How wide the beam is drawn: its bright heart three quarters of its cut, its glow beyond; never a hair. */
     static double visualRadius(Output o) {
-        return 0.12 + o.radius() * 0.55;
+        return 0.15 + o.radius() * 0.75;
     }
 
     /** How far along the axis it reaches a block that stops it: its near face. */
