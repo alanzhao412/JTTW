@@ -28,7 +28,7 @@ import beastgen as bg
 import wild_paint as w
 from wild_paint import part, mirrored, aim, paint, Painter, k, mix
 
-bg.UNITS = 256
+bg.UNITS = 384
 bg.TEX = bg.UNITS * bg.S
 
 JAVA = 'src/main/java/com/jttw/engine/client/renderer/BlackWindRenderers.java'
@@ -65,131 +65,165 @@ BRONZE = (176, 120, 56)
 
 LACES = {False: ((176, 30, 28), (96, 14, 18)), True: ((150, 72, 206), (78, 30, 116))}
 
-BODY = (0.1, 0, 0)
-ARM, FOREARM, HAND = (-0.12, 0, 0.16), (-0.7, -0.1, 0), (0, 0, 0)
+BODY = (0.24, 0, 0)          # hunched forward over his belly
+ARM, FOREARM, HAND = (-0.2, 0, 0.2), (-0.7, -0.1, 0), (0, 0, 0)
+
+
+def kasaya_strips(side, W, D):
+    """The kasaya over his breast (side -1) or back (+1): thrown over the left shoulder and down across him to the
+    right hip, its breadth laid as four long folds side by side along the slant, each lying out a little from the
+    next, so the cloth falls in folds; the folds lower on his left side, shorter, covering the left of his belly."""
+    out = []
+    z = -D - 2.2 if side < 0 else D + 1.8
+    ang = -0.62
+    ux, uy = 0.58, 0.81                                  # across the slant, toward his left hip
+    for k in range(4):
+        cx, cy = 1.2 + ux * 4.0 * k, -18.5 + uy * 4.0 * k
+        length = 36 - 7 * k
+        fold = (0.5 if k % 2 else 0.0) + 0.15 * k
+        out.append(part('kasaya_%s_%d' % ('front' if side < 0 else 'back', k), 'body', (cx, cy, z + side * fold), (side * -0.05, 0, ang + 0.03 * (k % 2)),
+                        [(-length / 2, -2.3, -0.7, length, 4.6, 1.4, 'kasaya_band' if k % 2 == 0 else 'kasaya_band_seam')]))
+    return out
 
 
 def bear(king):
-    """The frame: a black bear on its hind legs, armoured. The king's grander."""
-    W, D = (11, 7.5) if king else (10, 7)          # half the chest's breadth and depth
-    sx = W + 2.5
+    """The frame: a black bear on its hind legs, armoured, hunched over his belly, his shoulders a great hump of
+    muscle and fur. The king's grander, and robed in the kasaya."""
+    W, D = (13, 9) if king else (10.5, 7.5)     # half the chest's breadth and depth
+    sx = W + 3.2
+    arm = 1.25 if king else 1.0
     parts = [
         # the legs: a heavy furred thigh, a greaved shin, a broad paw with its claws
-        part('right_leg', 'root', (-6.2, 6, 1), (-0.12, 0, 0.04), [(-4.3, -1, -4.3, 8.6, 11, 8.6, 'thigh')]),
-        part('right_shin', 'right_leg', (0, 9.6, 0.4), (0.22, 0, 0), [
-            (-3.7, 0, -3.7, 7.4, 8.6, 7.4, 'shin'),
-            (-4.2, 0.4, -4.4, 8.4, 6.4, 3.2, 'greave'),
-            (-4, -1.4, -4.8, 8, 2.6, 1.4, 'kneeguard')]),
+        part('right_leg', 'root', (-W * 0.5, 6, 1.5), (-0.2, 0, 0.05), [(-5, -1, -5, 10, 11.5, 10, 'thigh')]),
+        part('right_shin', 'right_leg', (0, 10, 0.4), (0.3, 0, 0), [
+            (-4.2, 0, -4.2, 8.4, 8.6, 8.4, 'shin'),
+            (-4.7, 0.4, -4.9, 9.4, 6.4, 3.4, 'greave'),
+            (-4.5, -1.6, -5.3, 9, 2.8, 1.6, 'kneeguard')]),
         part('right_foot', 'right_shin', (0, 8, 0), (-0.1, 0, 0), [
-            (-4.3, 0, -6.2, 8.6, 3.6, 9.6, 'paw'),
-            (-4.1, 1.2, -7.6, 1.5, 2, 1.8, 'claw'), (-2.0, 1.2, -7.9, 1.5, 2, 2.0, 'claw'),
-            (0.4, 1.2, -7.9, 1.5, 2, 2.0, 'claw'), (2.5, 1.2, -7.6, 1.5, 2, 1.8, 'claw')]),
+            (-4.8, 0, -6.8, 9.6, 3.8, 10.4, 'paw'),
+            (-4.6, 1.2, -8.3, 1.7, 2.2, 2.0, 'claw'), (-2.3, 1.2, -8.6, 1.7, 2.2, 2.2, 'claw'),
+            (0.6, 1.2, -8.6, 1.7, 2.2, 2.2, 'claw'), (2.9, 1.2, -8.3, 1.7, 2.2, 2.0, 'claw')]),
 
-        # the body from the hips up: belly, chest, the armour over them; its pivot the hips
-        part('body', 'root', (0, 6, 1), BODY, [
-            (-W + 1.5, -11, -D + 0.5, 2 * W - 3, 12, 2 * D - 1, 'belly'),
-            (-W, -25, -D, 2 * W, 15, 2 * D, 'chest'),
-            (-W - 0.6, -25.6, -D - 0.8, 2 * W + 1.2, 12.4, 2 * D + 1.6, 'breastplate'),
-            (-W + 0.4, -13.4, -D - 0.4, 2 * W - 0.8, 7.6, 2 * D + 0.8, 'abdomen'),
-            (-W + 0.2, -6.2, -D - 0.6, 2 * W - 0.4, 3.4, 2 * D + 1.2, 'belt'),
-            (-3.2, -7.4, -D - 1.6, 6.4, 5.6, 1.4, 'buckle'),
-            (-W + 0.9, -24.6, -D - 1.5, 5.6, 5.6, 0.8, 'mirror'),
-            (W - 6.5, -24.6, -D - 1.5, 5.6, 5.6, 0.8, 'mirror'),
-            (-W + 1, -32, -D + 1, 2 * W - 2, 8, 2 * D - 1, 'ruff'),
-            (-6.5, -28.6, -D - 0.2, 13, 3.6, 1, 'crescent'),
-            (-W - 1.2, -31, -2, 2 * W + 2.4, 6, 9.5, 'hump'),
+        # the body from the hips up: a great belly, a barrel of a chest, the armour over them; the hump of his shoulders
+        part('body', 'root', (0, 6, 1.5), BODY, [
+            (-W + 1, -12, -D + 0.2, 2 * W - 2, 13, 2 * D - 0.4, 'belly'),
+            (-W, -27, -D, 2 * W, 16, 2 * D, 'chest'),
+            (-W - 0.7, -27.6, -D - 0.8, 2 * W + 1.4, 13.4, 2 * D + 1.6, 'breastplate'),
+            (-W + 0.2, -14.4, -D - 0.5, 2 * W - 0.4, 8, 2 * D + 1, 'abdomen'),
+            (-W, -6.6, -D - 0.7, 2 * W, 3.6, 2 * D + 1.4, 'belt'),
+            (-3.4, -7.8, -D - 1.8, 6.8, 6, 1.4, 'buckle'),
+            (-W + 1, -26.4, -D - 1.6, 6, 6, 0.8, 'mirror'),
+            (W - 7, -26.4, -D - 1.6, 6, 6, 0.8, 'mirror'),
+            (-W - 2.2, -35, -4, 2 * W + 4.4, 9.5, 12, 'hump'),
+            (-W + 1.5, -34, -D + 0.5, 2 * W - 3, 8, 9, 'ruff'),
+            (-7, -30.4, -D - 0.3, 14, 3.8, 1, 'crescent'),
         ]),
-        # the tassets: before (two), at the hips, behind
-        part('right_tasset', 'body', (-W / 2, -3.4, -D - 0.6), (-0.1, 0.05, 0.05), [(-4.4, 0, -0.6, 8.8, 10.5, 1.2, 'tasset')]),
-        part('right_side_tasset', 'body', (-W + 0.4, -3.4, 0), (0, 0, 0.16), [(-1.2, 0, -D + 0.8, 1.2, 9.5, 2 * D - 1.6, 'tasset_side')]),
-        part('back_tasset', 'body', (0, -3.4, D + 0.4), (0.12, 0, 0), [(-W + 1, 0, -0.6, 2 * W - 2, 11, 1.2, 'tasset_back')]),
-        part('tail', 'body', (0, -3, D - 0.4), (-0.6, 0, 0), [(-2.4, -2.4, 0, 4.8, 4.8, 3.6, 'tailfur')]),
+        part('right_tasset', 'body', (-W / 2, -3.4, -D - 0.7), (-0.12, 0.05, 0.05), [(-W / 2 + 0.6, 0, -0.6, W - 1.2, 11, 1.2, 'tasset')]),
+        part('right_side_tasset', 'body', (-W + 0.2, -3.4, 0), (0, 0, 0.18), [(-1.2, 0, -D + 0.8, 1.2, 10, 2 * D - 1.6, 'tasset_side')]),
+        part('back_tasset', 'body', (0, -3.4, D + 0.5), (0.14, 0, 0), [(-W + 1, 0, -0.6, 2 * W - 2, 11.5, 1.2, 'tasset_back')]),
+        part('tail', 'body', (0, -3, D - 0.4), (-0.6, 0, 0), [(-2.6, -2.6, 0, 5.2, 5.2, 3.8, 'tailfur')]),
 
-        # the arms: furred, under tiered pauldrons; bracers; great paws
-        part('right_arm', 'body', (-sx, -24, 0), ARM, [(-4.2, -2.2, -4.2, 8.4, 12, 8.4, 'upperarm')]),
-        part('right_pauldron', 'right_arm', (-0.6, -2.4, 0), (0, 0, 0.42), [
-            (-5.2, -1.6, -5.2, 8.6, 2, 10.4, 'pauldron1'),
-            (-6.0, 0.4, -5.8, 9.4, 2.2, 11.6, 'pauldron2'),
-            (-6.8, 2.6, -6.4, 10, 2.4, 12.8, 'pauldron3'),
-            (-7.6, 0, -2.6, 1.2, 5, 5.2, 'bearface')]),
-        part('right_forearm', 'right_arm', (0, 9.4, 0), FOREARM, [
-            (-3.8, 0, -3.8, 7.6, 10, 7.6, 'forearm'),
-            (-4.3, 1.2, -4.3, 8.6, 6.4, 8.6, 'bracer')]),
-        part('right_hand', 'right_forearm', (0, 9.6, 0), HAND, [
-            (-4, 0, -4.2, 8, 5, 8.4, 'hand'),
-            (-4, 4.4, -4.6, 1.6, 2.4, 1.6, 'claw'), (-1.9, 4.4, -4.8, 1.6, 2.6, 1.6, 'claw'),
-            (0.3, 4.4, -4.8, 1.6, 2.6, 1.6, 'claw'), (2.4, 4.4, -4.6, 1.6, 2.4, 1.6, 'claw')]),
+        # the arms: massive, furred, under tiered pauldrons; bracers; great paws
+        part('right_arm', 'body', (-sx, -27.5, 0), ARM, [(-5.2 * arm / 1.25 - 0.4, -2.4, -5.0, 10 * arm / 1.25 + 0.4, 13.5, 10, 'upperarm')]),
+        part('right_pauldron', 'right_arm', (-0.8, -2.6, 0), (0, 0, 0.42), [
+            (-6.0, -1.8, -6.0, 9.6, 2.2, 12.0, 'pauldron1'),
+            (-6.8, 0.4, -6.6, 10.4, 2.4, 13.2, 'pauldron2'),
+            (-7.6, 2.8, -7.2, 11, 2.6, 14.4, 'pauldron3'),
+            (-8.4, 0, -2.9, 1.2, 5.6, 5.8, 'bearface')]),
+        part('right_forearm', 'right_arm', (0, 10.4, 0), FOREARM, [
+            (-4.4, 0, -4.4, 8.8, 10.5, 8.8, 'forearm'),
+            (-4.9, 1.4, -4.9, 9.8, 6.8, 9.8, 'bracer'),
+            (-5.4, -1.0, -3.0, 2, 3.4, 6, 'elbowfur')]),
+        part('right_hand', 'right_forearm', (0, 10, 0), HAND, [
+            (-4.6, 0, -4.8, 9.2, 5.6, 9.6, 'hand'),
+            (-4.6, 4.8, -5.2, 1.8, 2.8, 1.8, 'claw'), (-2.2, 4.8, -5.4, 1.8, 3.0, 1.8, 'claw'),
+            (0.4, 4.8, -5.4, 1.8, 3.0, 1.8, 'claw'), (2.8, 4.8, -5.2, 1.8, 2.8, 1.8, 'claw')]),
 
-        # the head: a broad skull, a long muzzle, round ears; the jaw apart
-        part('head', 'body', (0, -31, -3), (0.08, 0, 0), [
-            (-7, -11, -6.5, 14, 11.5, 12.5, 'skull'),
-            (-4.8, -6.4, -10.6, 9.6, 6.2, 4.6, 'muzzle'),
-            (-3.6, -6.0, -14.4, 7.2, 5.0, 4.0, 'muzzle_tip'),
-            (-2.8, -7.5, -12.2, 5.6, 1.6, 6.2, 'bridge'),
-            (-2.6, -7.0, -15.4, 5.2, 3.0, 1.6, 'nose'),
-            (-3.7, -1.6, -14.6, 7.4, 1.2, 4.4, 'lip'),
-            (-9.4, -8.6, -4.8, 3.2, 8, 9, 'cheek'), (6.2, -8.6, -4.8, 3.2, 8, 9, 'cheek'),
-            (-6.0, -13.2, -3.5, 12, 3, 10, 'forelock'),
-            (-3.2, -1.2, -14.0, 1.1, 2.6, 1.1, 'fang'), (2.1, -1.2, -14.0, 1.1, 2.6, 1.1, 'fang'),
+        # the head: a broad domed skull, heavy jowls, a long muzzle tapering to a wet black nose
+        part('head', 'body', (0, -33.5, -4), (-0.12, 0, 0), [
+            (-7.6, -11.4, -6.8, 15.2, 11, 12.6, 'skull'),
+            (-6.0, -13.4, -5.4, 12, 2.4, 9.6, 'dome'),
+            (-5.2, -6.8, -10.2, 10.4, 6.6, 4.2, 'muzzle_base'),
+            (-4.0, -6.2, -13.6, 8, 5.4, 3.8, 'muzzle'),
+            (-3.0, -5.6, -16.2, 6, 4.4, 3.0, 'muzzle_tip'),
+            (-2.6, -6.4, -17.2, 5.2, 3.0, 1.8, 'nose'),
+            (-3.4, -1.6, -16.0, 6.8, 1.6, 5.8, 'lip'),
+            (-3.0, -1.0, -15.4, 1.1, 2.6, 1.1, 'fang'), (1.9, -1.0, -15.4, 1.1, 2.6, 1.1, 'fang'),
+            (-7.2, -14.6, -4.4, 14.4, 2.6, 4, 'forelock'),
         ]),
-        part('jaw', 'head', (0, -0.6, -6), (0.16, 0, 0), [
-            (-3.9, 0, -8.2, 7.8, 2.8, 8.4, 'jaw'),
-            (-3.6, -1.0, -8.0, 7.2, 1.0, 1.2, 'lowteeth'),
-            (-3.1, -2.4, -7.6, 1, 2.4, 1, 'fang'), (2.1, -2.4, -7.6, 1, 2.4, 1, 'fang')]),
-        part('right_ear', 'head', (-5.4, -11.4, -0.6), (-0.1, 0.25, -0.38), [(-2.6, -4.8, -1.3, 5.2, 5.2, 2.6, 'ear')]),
-        part('right_brow', 'head', (-0.6, -9.8, -6.8), (0.1, 0.15, 0.32), [(-5.2, -1.2, -1.1, 5.4, 2.2, 2.4, 'brow')]),
-        part('right_eye', 'head', (-3.5, -8.0, -6.6), (0, 0.22, 0), [(-1.3, -0.7, -0.5, 2.6, 1.5, 0.7, 'eye')]),
+        part('bridge', 'head', (0, -6.6, -9.4), (-0.18, 0, 0), [(-3.2, -1.4, -6.6, 6.4, 1.6, 6.8, 'bridge')]),
+        part('right_jowl', 'head', (-7.0, -4.6, -4.6), (0, 0.25, 0.22), [(-2.6, -2.8, -3.6, 3.4, 6.8, 8.6, 'jowl')]),
+        part('right_face_ruff', 'head', (-7.6, -8.4, 1.6), (0, -0.35, 0.3), [(-3.0, -4.0, -1.2, 3.2, 9.6, 5.2, 'face_ruff')]),
+        part('jaw', 'head', (0, -0.6, -6.4), (0.16, 0, 0), [
+            (-4.0, 0, -9.0, 8, 2.9, 9.2, 'jaw'),
+            (-3.7, -1.0, -8.8, 7.4, 1.0, 1.2, 'lowteeth'),
+            (-3.2, -2.4, -8.4, 1, 2.4, 1, 'fang'), (2.2, -2.4, -8.4, 1, 2.4, 1, 'fang')]),
+        part('right_ear', 'head', (-6.0, -11.8, -0.8), (-0.12, 0.25, -0.36), [
+            (-2.8, -4.4, -1.3, 5.6, 4.6, 2.6, 'ear'), (-2.0, -5.6, -1.1, 4, 1.4, 2.2, 'ear_top')]),
+        part('right_brow', 'head', (-0.6, -10.2, -7.0), (0.1, 0.15, 0.3), [(-5.6, -1.3, -1.2, 5.8, 2.4, 2.6, 'brow')]),
+        part('right_eye', 'head', (-3.7, -8.2, -6.9), (0, 0.22, 0), [(-1.3, -0.7, -0.5, 2.6, 1.5, 0.7, 'eye')]),
     ]
     if king:
         parts += [
             # his diadem of gold, a flame peak over the brow; rings in his ears
-            part('crown', 'head', (0, -11, -0.5), (0, 0, 0), [
-                (-7.4, -1.6, -6.6, 14.8, 2, 13, 'crown_band'),
-                (-1.6, -6.8, -7.2, 3.2, 5.4, 1.2, 'crown_peak'),
-                (-6.4, -4.2, -6.9, 2.4, 2.8, 1, 'crown_plate'), (4.0, -4.2, -6.9, 2.4, 2.8, 1, 'crown_plate'),
-                (-0.9, -3.8, -7.6, 1.8, 1.8, 0.6, 'crown_gem')]),
-            part('right_earring', 'right_ear', (-1.2, 0.2, 0), (0, 0, 0), [(-0.3, 0, -1.1, 0.6, 2.4, 2.2, 'ring')]),
-            # the war cloak, gold-bordered, from his shoulders
-            part('cloak', 'body', (0, -29, D + 1.2), (0.12, 0, 0), [(-W - 1, 0, -0.6, 2 * W + 2, 17, 1.2, 'cloak')]),
-            part('cloak_lower', 'cloak', (0, 16.6, 0), (0.06, 0, 0), [(-W - 1.6, 0, -0.6, 2 * W + 3.2, 16, 1.2, 'cloak_lower')]),
-            # the kasaya: thrown across his breast from the left shoulder to the right hip, over his back too, its end at his hip
-            part('kasaya_front', 'body', (1.0, -17.0, -D - 2.3), (0, 0, -0.62), [(-16, -7, -0.6, 32, 14, 1.2, 'kasaya')]),
-            part('kasaya_skirt', 'body', (W / 2 - 1, -5.6, -D - 2.6), (-0.1, 0, -0.08), [(-6.5, 0, -0.6, 13, 15, 1.2, 'kasaya_panel')]),
-            part('kasaya_back', 'body', (1.0, -17.0, D + 2.1), (0, 0, -0.62), [(-16, -7, -0.6, 32, 14, 1.2, 'kasaya')]),
-            part('kasaya_shoulder', 'body', (W + 1.5, -27.5, 0), (0, 0, -0.35), [(-5, -1.2, -D - 2.6, 9, 2.4, 2 * D + 5.2, 'kasaya_drape')]),
-            part('kasaya_tail', 'body', (-W + 2.6, -10, -D - 2.6), (-0.06, 0, 0.08), [(-4.2, 0, -0.6, 8.4, 20, 1.2, 'kasaya_end')]),
-            part('jade_ring', 'body', (W - 3.4, -24.8, -D - 3.1), (0, 0, 0), [(-1.8, -1.8, -0.5, 3.6, 3.6, 1, 'jade')]),
-            # the black-tasselled spear, upright in his right paw
-            part('spear', 'right_hand', (0, 2.6, -0.2), aim([BODY, ARM, FOREARM, HAND], (0.02, 0, 0)), [
-                (-0.75, -46, -0.75, 1.5, 70, 1.5, 'shaft'),
-                (-1.2, -47.6, -1.2, 2.4, 2, 2.4, 'collar'),
-                (-1.6, -49.4, -0.5, 3.2, 2.2, 1, 'guard'),
-                (-2.4, -63, -0.45, 4.8, 14, 0.9, 'spearhead'),
-                (-1.1, 22, -1.1, 2.2, 3, 2.2, 'butt'),
-                (-1.0, -28, -1.0, 2, 1.2, 2, 'band'), (-1.0, 8, -1.0, 2, 1.2, 2, 'band')]),
-            part('tassel', 'spear', (0, -46.2, 0), (0, 0, 0), [(-3.2, 0, -3.2, 6.4, 9, 6.4, 'tassel'), (-4.0, 4, -4.0, 8, 6, 8, 'tassel_flare'), (-2.4, 9, -2.4, 4.8, 4, 4.8, 'tassel_tip')]),
+            part('crown', 'head', (0, -12.6, -0.5), (0, 0, 0), [
+                (-7.6, -1.4, -6.8, 15.2, 2, 13.2, 'crown_band'),
+                (-1.7, -7.4, -7.4, 3.4, 6, 1.2, 'crown_peak'),
+                (-6.6, -4.4, -7.1, 2.6, 3.2, 1, 'crown_plate'), (4.0, -4.4, -7.1, 2.6, 3.2, 1, 'crown_plate'),
+                (-0.9, -4.0, -7.8, 1.8, 1.8, 0.6, 'crown_gem')]),
+            part('right_earring', 'right_ear', (-2.2, -0.4, 0), (0, 0, 0), [(-0.3, 0, -1.2, 0.6, 2.6, 2.4, 'ring')]),
+            # the war cloak, black, gold-bordered, from his shoulders under the kasaya
+            part('cloak', 'body', (0, -32, D + 2.4), (0.14, 0, 0), [(-W - 1.5, 0, -0.6, 2 * W + 3, 19, 1.2, 'cloak')]),
+            part('cloak_lower', 'cloak', (0, 18.6, 0), (0.06, 0, 0), [(-W - 2.2, 0, -0.6, 2 * W + 4.4, 17, 1.2, 'cloak_lower')]),
+            # the kasaya: over the left shoulder, across breast and back to the right hip in folding bands; its
+            # skirt hanging from the belt over his left side and before him in folds; its corner falling from the
+            # shoulder down his front; its long fall down his back from the shoulder, lifting as he moves
+            part('kasaya_shoulder', 'body', (W + 1.8, -30.5, 0), (0, 0, -0.38), [(-5.5, -1.6, -D - 3.0, 10, 3.2, 2 * D + 6.0, 'kasaya_drape'),
+                                                                                (-5.5, 1.4, -D - 3.0, 2.0, 5, 2 * D + 6.0, 'kasaya_drape')]),
+            part('kasaya_skirt', 'body', (W * 0.35, -4.4, -D - 2.4), (-0.12, 0, -0.04), [(-W * 0.75, 0, -0.7, W * 1.5, 9, 1.4, 'kasaya_panel')]),
+            part('kasaya_skirt_hem', 'kasaya_skirt', (0, 8.6, 0), (-0.14, 0, 0), [(-W * 0.8, 0, -0.7, W * 1.6, 8, 1.4, 'kasaya_hem')]),
+            part('kasaya_side', 'body', (W + 0.8, -4.4, 0), (0, 0, -0.1), [(-0.7, 0, -D - 1.6, 1.4, 15, 2 * D + 2.8, 'kasaya_side')]),
+            part('kasaya_tail', 'body', (W - 2.0, -24.5, -D - 2.6), (-0.08, 0, 0.04), [(-3.2, 0, -0.6, 6.4, 22, 1.2, 'kasaya_end')]),
+            part('kasaya_cape', 'body', (W - 3, -31, D + 2.6), (0.16, 0, -0.06), [(-6.5, 0, -0.6, 13, 16, 1.2, 'kasaya_panel')]),
+            part('kasaya_cape_lower', 'kasaya_cape', (0, 15.6, 0), (0.08, 0, 0), [(-7, 0, -0.6, 14, 14, 1.2, 'kasaya_hem')]),
+            part('jade_ring', 'body', (W - 3.0, -27.0, -D - 3.4), (0, 0, 0), [(-2.2, -2.2, -0.6, 4.4, 4.4, 1.2, 'jade')]),
+        ] + kasaya_strips(-1, W, D) + kasaya_strips(1, W, D) + [
+            # the black-tasselled spear, upright in his right paw: a leaf blade with its spine, a gold beast's
+            # mouth biting it, a guard, and under it a great tassel of red horsehair
+            part('spear', 'right_hand', (0, 2.8, -0.2), aim([BODY, ARM, FOREARM, HAND], (0.02, 0, 0)), [
+                (-0.8, -48, -0.8, 1.6, 74, 1.6, 'shaft'),
+                (-1.4, -50, -1.4, 2.8, 2.4, 2.8, 'collar'),
+                (-2.4, -51.6, -0.7, 4.8, 1.8, 1.4, 'guard'),
+                (-1.3, -54.4, -1.3, 2.6, 3, 2.6, 'beastmouth'),
+                (-3.0, -70, -0.45, 6, 16, 0.9, 'spearhead'),
+                (-0.5, -70.6, -0.9, 1, 17, 1.8, 'spine'),
+                (-1.2, 24, -1.2, 2.4, 3.2, 2.4, 'butt'),
+                (-1.1, -30, -1.1, 2.2, 1.2, 2.2, 'band'), (-1.1, 8, -1.1, 2.2, 1.2, 2.2, 'band')]),
+            part('tassel', 'spear', (0, -48.4, 0), (0, 0, 0), [(-1.8, 0, -1.8, 3.6, 2.2, 3.6, 'knot')]),
         ]
+        for k in range(8):
+            a = k * math.pi / 4
+            parts.append(part('tassel_strand_%d' % k, 'tassel', (math.cos(a) * 1.3, 1.8, math.sin(a) * 1.3),
+                              (math.sin(a) * 0.32, 0, -math.cos(a) * 0.32), [(-0.75, 0, -0.75, 1.5, 9 + (k % 3) * 1.5, 1.5, 'tassel_strand')]))
     else:
         parts += [
             # a horned iron helm, cheek guards, a red plume
-            part('helm', 'head', (0, -11, -0.5), (0, 0, 0), [
-                (-7.4, -2.6, -6.8, 14.8, 3.6, 13.2, 'helm_bowl'),
-                (-6.6, -4.4, -5.6, 13.2, 2, 11, 'helm_top'),
-                (-7.6, 0.4, -6.9, 15.2, 1.2, 13.4, 'helm_rim'),
-                (-1.2, -7.4, -1.2, 2.4, 3.2, 2.4, 'plume_socket'),
-                (-8.2, 0.6, -5, 1.4, 6, 6, 'cheekguard'), (6.8, 0.6, -5, 1.4, 6, 6, 'cheekguard')]),
-            part('plume', 'helm', (0, -7, 0.6), (0.7, 0, 0), [(-1.2, -1, 0, 2.4, 2.4, 7, 'plume')]),
-            part('right_horn', 'helm', (-6.4, -2.6, -2), (0, 0.2, -0.7), [(-1, -6, -1, 2, 6, 2, 'horn'), (-0.7, -9, -0.6, 1.4, 3.4, 1.4, 'horn_tip')]),
-            # his round shield, on his back
-            part('shield', 'body', (0, -18, D + 0.8), (0.1, 0, 0), [(-8, -8, 0, 16, 16, 1.4, 'shield'), (-2, -2, 1.2, 4, 4, 1, 'shield_boss')]),
-            # the great iron mace, studded with spikes
-            part('mace', 'right_hand', (0, 2.6, -0.2), aim([BODY, ARM, FOREARM, HAND], (0.5, 0, 0)), [
-                (-0.8, -20, -0.8, 1.6, 28, 1.6, 'haft'),
-                (-2.8, -31, -2.8, 5.6, 11, 5.6, 'macehead'),
-                (-3.4, -29, -0.5, 6.8, 1, 1, 'spike'), (-0.5, -29, -3.4, 1, 1, 6.8, 'spike'),
-                (-3.4, -24, -0.5, 6.8, 1, 1, 'spike'), (-0.5, -24, -3.4, 1, 1, 6.8, 'spike'),
-                (-0.6, -33, -0.6, 1.2, 2.4, 1.2, 'spike_top'),
-                (-1.2, 7, -1.2, 2.4, 2, 2.4, 'pommel')]),
+            part('helm', 'head', (0, -12.6, -0.5), (0, 0, 0), [
+                (-7.8, -2.6, -7.0, 15.6, 3.8, 13.6, 'helm_bowl'),
+                (-7.0, -4.6, -5.8, 14, 2.2, 11.4, 'helm_top'),
+                (-8.0, 0.6, -7.1, 16, 1.2, 13.8, 'helm_rim'),
+                (-1.2, -7.6, -1.2, 2.4, 3.2, 2.4, 'plume_socket'),
+                (-8.6, 0.8, -5.2, 1.4, 6.4, 6.4, 'cheekguard'), (7.2, 0.8, -5.2, 1.4, 6.4, 6.4, 'cheekguard')]),
+            part('plume', 'helm', (0, -7.2, 0.6), (0.7, 0, 0), [(-1.3, -1, 0, 2.6, 2.6, 8, 'plume')]),
+            part('right_horn', 'helm', (-6.8, -2.6, -2), (0, 0.2, -0.7), [(-1.1, -6.5, -1.1, 2.2, 6.5, 2.2, 'horn'), (-0.8, -9.8, -0.7, 1.6, 3.6, 1.6, 'horn_tip')]),
+            part('shield', 'body', (0, -20, D + 0.9), (0.1, 0, 0), [(-8.5, -8.5, 0, 17, 17, 1.4, 'shield'), (-2, -2, 1.2, 4, 4, 1, 'shield_boss')]),
+            part('mace', 'right_hand', (0, 2.8, -0.2), aim([BODY, ARM, FOREARM, HAND], (0.5, 0, 0)), [
+                (-0.9, -21, -0.9, 1.8, 30, 1.8, 'haft'),
+                (-3.0, -33, -3.0, 6, 12, 6, 'macehead'),
+                (-3.7, -31, -0.55, 7.4, 1.1, 1.1, 'spike'), (-0.55, -31, -3.7, 1.1, 1.1, 7.4, 'spike'),
+                (-3.7, -25.5, -0.55, 7.4, 1.1, 1.1, 'spike'), (-0.55, -25.5, -3.7, 1.1, 1.1, 7.4, 'spike'),
+                (-0.6, -35.4, -0.6, 1.2, 2.6, 1.2, 'spike_top'),
+                (-1.3, 7.6, -1.3, 2.6, 2.2, 2.6, 'pommel')]),
         ]
     out = mirrored(parts)
     return w.settle(out, ('right_foot', 'left_foot'))
@@ -275,6 +309,60 @@ def paint_bear(king, lace):
 
     def paint_box(p, style, f, dims):
         S = w.SIDES
+        # the second pass's: the bear's dome, jowls and ruffs; the kasaya's bands and folds; the spear's beast and tassel
+        if style in ('dome', 'jowl', 'face_ruff', 'elbowfur'):
+            pelt(p, f, base=mix(FUR, FUR_SHEEN, 0.25) if style != 'dome' else FUR, density=0.6)
+            for s in S:
+                w.tufts(p, f[s], depth=3 if style == 'dome' else 4, every=2, down=style != 'dome')
+            if style == 'jowl':                                   # the brown of the muzzle creeping onto the jowl
+                fx, fy, fw, fh = f['front']
+                for i, j, xy in w.each(p, f['front']):
+                    if j > fh * 0.5:
+                        p.px(xy, mix(p.get(xy), MUZZLE_DARK, 0.5))
+        if style == 'ear_top':
+            pelt(p, f, density=0.5)
+            for s in S + ('top',):
+                fx, fy, fw, fh = f[s]
+                p.clear((fx, fy))
+                p.clear((fx + fw - 1, fy))
+        if style in ('kasaya_band', 'kasaya_band_seam', 'kasaya_hem', 'kasaya_side'):
+            for s in f:
+                fx, fy, fw, fh = f[s]
+                brocade(p, f[s], light=w.LIGHT[s], cell=7)
+                for i, j, xy in w.each(p, f[s]):              # the fold: the cloth rounding over, shadowed beneath
+                    t = j / max(1, fh - 1)
+                    p.px(xy, k(p.get(xy), 1.12 - 0.42 * t * t))
+                if s in ('front', 'back'):
+                    w.hline(p, f[s], 0, GOLD_LIGHT)
+                    if style == 'kasaya_band_seam':
+                        w.hline(p, f[s], fh // 2, GOLD)
+                    w.vline(p, f[s], 0, GOLD_LIGHT)
+                    w.vline(p, f[s], fw - 1, GOLD_DEEP)
+                    if style == 'kasaya_hem':                     # a hem of gold, a fringe below it
+                        w.hline(p, f[s], fh - 2, GOLD)
+                        for i in range(fw):
+                            p.px((fx + i, fy + fh - 1), GOLD_LIGHT if i % 2 == 0 else SILK_DEEP)
+            w.flat(p, f, GOLD_DEEP, faces=('right', 'left'))
+        if style == 'beastmouth':                                 # a gold beast's mouth (吞口) biting the blade's root
+            w.iron(p, f, GOLD, rivets=0, rim=False, dents=0)
+            for s in w.SIDES:
+                bear_face(p, f[s], glow=False)
+        if style == 'spine':                                      # the blade's raised spine
+            for s in f:
+                fx, fy, fw, fh = f[s]
+                for i, j, xy in w.each(p, f[s]):
+                    p.px(xy, k(mix(STEEL, (250, 252, 255), 0.3 if i == 0 else 0), w.LIGHT[s]))
+            for s in w.SIDES:
+                w.point(p, f[s], down=False, keep=0.2, sharp=0.4)
+        if style == 'knot':
+            w.iron(p, f, GOLD, rivets=0, dents=0)
+            for s in w.SIDES:
+                w.hline(p, f[s], f[s][3] - 1, (150, 20, 24))
+        if style == 'tassel_strand':                              # the tassel's red horsehair, darker at the root, ragged at the end
+            for s in f:
+                w.strands(p, f[s], k((196, 30, 32), w.LIGHT[s]), k((96, 10, 16), w.LIGHT[s]), k((240, 90, 70), w.LIGHT[s]), density=0.5)
+            for s in w.SIDES:
+                w.tufts(p, f[s], depth=3, every=2)
         if style in ('thigh', 'shin', 'upperarm', 'forearm', 'belly', 'tailfur', 'hand', 'paw'):
             pelt(p, f, density=0.55)
             if style == 'paw':
@@ -388,14 +476,14 @@ def paint_bear(king, lace):
                 for j in range(fh):
                     if j > fh - 1 - (1 - d) * 2:
                         p.px((fx + i, fy + j), k(FUR_DARK, 0.6))
-        if style in ('muzzle', 'bridge', 'muzzle_tip', 'lip'):                         # the tan muzzle, darker along its lips, whisker spots
+        if style in ('muzzle', 'bridge', 'muzzle_tip', 'lip', 'muzzle_base'):                         # the tan muzzle, darker along its lips, whisker spots
             for s in f:
                 fx, fy, fw, fh = f[s]
                 for i, j, xy in w.each(p, f[s]):
                     t = j / max(1, fh - 1)
                     c = mix(MUZZLE, MUZZLE_DARK, 0.25 + 0.5 * t if s in ('right', 'left') else 0.2)
                     p.px(xy, [v * w.LIGHT[s] + p.rnd.randint(-5, 5) for v in c])
-            if style in ('muzzle', 'muzzle_tip'):
+            if style in ('muzzle', 'muzzle_tip', 'muzzle_base'):
                 for s in ('right', 'left'):
                     fx, fy, fw, fh = f[s]
                     for i in range(fw):
@@ -411,8 +499,13 @@ def paint_bear(king, lace):
                 fx, fy, fw, fh = f['front']
                 for i in range(fw):
                     p.px((fx + i, fy + fh - 1), (30, 18, 16))
+        if style == 'lip':
+            w.flat(p, f, (40, 26, 22), faces=('front', 'right', 'left', 'bottom'))
         if style == 'nose':                                       # the wet black nose, its nostrils, a gleam
             w.flat(p, f, NOSE)
+            fx, fy, fw, fh = f['top']
+            for i in range(1, fw - 1):
+                p.px((fx + i, fy + fh // 2), (150, 146, 158))
             fx, fy, fw, fh = f['front']
             p.px((fx + 1, fy + fh - 2), (2, 2, 2))
             p.px((fx + fw - 2, fy + fh - 2), (2, 2, 2))

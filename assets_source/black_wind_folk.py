@@ -113,6 +113,7 @@ BOAR = mirrored([
     part('right_hand', 'right_forearm', (0, 7.2, 0), BHAND, [(-2.2, 0, -2.4, 4.4, 3.6, 4.8, 'boar_hand')]),
     part('head', 'body', (0, -21.4, -3.6), (0.0, 0, 0), [
         (-4.6, -6.4, -5, 9.2, 8, 8.4, 'boar_skull'),
+        (-3.8, -5.4, -8.2, 7.6, 6.6, 3.6, 'boar_snout'),
         (-3, -4.6, -11.6, 6, 5.6, 7, 'boar_snout'),
         (-2.9, -4.4, -12.4, 5.8, 4.6, 1, 'snout_disc'),
         (-5, -6.8, -3, 10, 2, 7, 'boar_brow'),
@@ -122,6 +123,7 @@ BOAR = mirrored([
     part('right_tusk', 'head', (-3.0, -1.4, -10.4), (-0.25, 0, 0.45), [(-0.8, -3.6, -0.8, 1.6, 4, 1.6, 'tusk')]),
     part('right_tusk_tip', 'right_tusk', (0, -3.4, 0), (-0.7, 0, -0.35), [(-0.6, -3.2, -0.6, 1.2, 3.4, 1.2, 'tusk_tip')]),
     part('right_ear', 'head', (-4.4, -6, -1), (0.3, 0.4, -0.7), [(-1.6, -4, -0.6, 3.2, 4.2, 1.2, 'boar_ear')]),
+    part('right_cheek_bristle', 'head', (-5.0, -2.0, -2.6), (0, 0.3, 0.35), [(-1.4, -2, -2.4, 1.6, 5.6, 5, 'bristles')]),
     part('right_eye', 'head', (-3.1, -4.4, -5.0), (0, 0.3, 0), [(-0.8, -0.5, -0.4, 1.6, 1.1, 0.6, 'boar_eye')]),
 ])
 BOAR += [
@@ -462,18 +464,19 @@ WOLF = mirrored([
     part('right_hand', 'right_forearm', (0, 6, 0), (0, 0, 0), [(-1.4, 0, -1.5, 2.8, 2.6, 3, 'wpaw'), (-1.3, 2.4, -1.5, 2.6, 0.8, 0.6, 'wclaws')]),
     part('head', 'body', (0, -16.2, -1.4), (0, 0, 0), [
         (-4, -7.6, -4, 8, 7.4, 7.2, 'wskull'),
-        (-2.2, -4.8, -11.4, 4.4, 3.2, 7.6, 'wmuzzle'),
-        (-1.2, -5.4, -12.0, 2.4, 1.6, 0.9, 'wnose'),
+        (-2.3, -5.0, -12.4, 4.6, 3.4, 8.6, 'wmuzzle'),
+        (-1.7, -4.7, -14.6, 3.4, 2.8, 2.4, 'wmuzzle'),
+        (-1.2, -5.2, -15.3, 2.4, 1.6, 0.9, 'wnose'),
         (-4.2, -7.8, 1.4, 8.4, 7.4, 2.2, 'wnape'),
     ]),
-    part('jaw', 'head', (0, -1.6, -3.8), (0.06, 0, 0), [(-2.0, 0, -7.4, 4, 1.8, 7.4, 'wjaw')]),
+    part('jaw', 'head', (0, -1.6, -3.8), (0.06, 0, 0), [(-2.0, 0, -10.4, 4, 1.8, 10.4, 'wjaw')]),
     part('beard', 'jaw', (0, 1.4, -4.6), (0.15, 0, 0), [(-1.6, 0, -1.2, 3.2, 8.5, 2.4, 'beard')]),
     part('beard_tip', 'beard', (0, 6.6, 0), (-0.1, 0, 0), [(-0.9, 0, -0.8, 1.8, 4, 1.6, 'beard_tip')]),
     part('right_beard', 'jaw', (-1.8, 1.0, -2.4), (0.1, 0, 0.2), [(-1.1, 0, -0.9, 2.2, 7.5, 1.8, 'beard_side')]),
     part('right_cheekfur', 'head', (-3.7, -3.2, -1.6), (0, 0.5, 0.3), [(-2.2, -2, -1.2, 2.6, 4.4, 4.2, 'wcheek')]),
     part('right_brow', 'head', (-2.1, -6.4, -4.1), (0.35, 0.3, 0.35), [(-2.0, -0.6, -1.2, 3.6, 1.2, 2.2, 'white_brow')]),
     part('right_eye', 'head', (-2.3, -5.4, -4.1), (0, 0.32, -0.1), [(-1.2, -0.55, -0.3, 2.4, 1.1, 0.45, 'weye')]),
-    part('right_ear', 'head', (-2.6, -7.2, 0), (-0.15, 0.1, -0.3), [(-1.6, -5.2, -0.7, 3.2, 5.4, 1.4, 'wear')]),
+    part('right_ear', 'head', (-2.5, -7.2, 0.4), (-0.35, 0.15, -0.28), [(-1.8, -3.6, -0.8, 3.6, 3.8, 1.6, 'wear'), (-1.1, -6.0, -0.6, 2.2, 2.6, 1.2, 'wear_tip')]),
     part('topknot', 'head', (0, -7.8, 0.4), (0, 0, 0), [(-1.6, -2.6, -1.6, 3.2, 2.8, 3.2, 'hair_bun'), (-2, -3.6, -2.2, 4, 1.4, 4.4, 'lotus_crown'),
                                                         (-2.8, -2.8, -0.3, 5.6, 0.6, 0.6, 'hairpin')]),
 ])
@@ -502,7 +505,7 @@ def paint_wolf(p, style, f, dims):
             b = base if s != 'bottom' else GREY_LIGHT
             w.strands(p, f[s], k(b, w.LIGHT[s]), k(GREY_DARK, w.LIGHT[s]), k(GREY_LIGHT, w.LIGHT[s]), density=density, lean=0.2)
 
-    if style in ('warm', 'wpaw', 'wskull', 'wnape', 'wjaw', 'wtail1', 'wtail2', 'wtail3', 'wruff', 'wcheek', 'wear', 'wmuzzle'):
+    if style in ('warm', 'wpaw', 'wskull', 'wnape', 'wjaw', 'wtail1', 'wtail2', 'wtail3', 'wruff', 'wcheek', 'wear', 'wear_tip', 'wmuzzle'):
         pelt(base=GREY_LIGHT if style in ('wcheek', 'wruff', 'wtail3') else GREY)
         if style in ('wruff', 'wcheek', 'wtail3', 'wnape'):
             for s in S:
@@ -523,6 +526,9 @@ def paint_wolf(p, style, f, dims):
                 w.hline(p, f[s], fh - 1, (24, 22, 26))
                 p.px((fx + fw // 3, fy + fh - 1), IVORY)
             w.flat(p, f, (70, 30, 34), faces=('bottom',))
+        if style == 'wear_tip':
+            for s_ in S:
+                w.point(p, f[s_], down=False, keep=0.3, sharp=0.5)
         if style == 'wear':
             fx, fy, fw, fh = f['front']
             for i, j, xy in w.each(p, f['front']):
@@ -575,6 +581,20 @@ def paint_wolf(p, style, f, dims):
                 for j in range(fh - 2, fh):
                     w.hline(p, f[s], j, k(COLLAR, w.LIGHT[s]))
                 w.hline(p, f[s], fh - 3, k((150, 160, 170), w.LIGHT[s]))
+        if style in ('robe_chest', 'robe_hem'):                   # the eight trigrams (八卦) worked in silver round the hem and on the breast
+            TRI = ['111', '110', '101', '100', '011', '010', '001', '000']
+            for s_ in (('front',) if style == 'robe_chest' else S):
+                fx, fy, fw, fh = f[s_]
+                y0 = fy + (fh - 9 if style == 'robe_hem' else 3)
+                n = 0
+                for x0 in range(fx + 1, fx + fw - 4, 6):
+                    if style == 'robe_chest' and abs(x0 + 2 - (fx + fw / 2)) < 4:
+                        continue
+                    for r, bit in enumerate(TRI[n % 8]):
+                        for i in range(5):
+                            if bit == '1' or i != 2:
+                                p.px((x0 + i, y0 + r * 2), (214, 214, 206))
+                    n += 1
         if style == 'robe_chest':                                 # the trigram 乾 worked on his back
             fx, fy, fw, fh = f['back']
             for n, y in enumerate((fy + 4, fy + 7, fy + 10)):
@@ -670,55 +690,71 @@ SLARM, SLFORE = (0.35, 0, -0.1), (-0.4, 0.3, -0.4)
 
 
 def tail_parts():
-    """The serpent's tail from under the back of his robe, lying in a long curve across the ground."""
+    """The serpent's tail, thick as a man's thigh where it comes out from under the back of his robe, lying
+    along the ground and curling round to his right in a long coil, tapering to its tip."""
     out = []
-    parent, n = 'body', 8
+    parent, n = 'body', 10
+    length_prev = 0
     for kk in range(n):
-        wdt = 6.0 - kk * 0.6
-        length = 7.0 - kk * 0.3
-        pivot = (0, 12.6, 3.0) if kk == 0 else (0, 0, length_prev - 0.4)
-        rot = (0.0, 0.15, 0) if kk == 0 else (0.0, 0.36 + 0.03 * kk, 0)
+        wdt = 8.0 - kk * 0.62
+        length = 7.4 - kk * 0.3
+        pivot = (0, 12.2, 2.4) if kk == 0 else (0, 0, length_prev - 0.5)
+        rot = (0.12, 0.1, 0) if kk == 0 else (-0.03 if kk < 3 else 0.0, 0.40 + 0.02 * kk, 0)
         name = 'tail_%d' % kk
-        out.append(part(name, parent, pivot, rot, [(-wdt / 2, 2.4 - wdt * 0.62, 0, wdt, wdt * 0.62, length, 'snake' if kk < n - 1 else 'snake_tip')]))
+        out.append(part(name, parent, pivot, rot, [(-wdt / 2, 2.6 - wdt * 0.66, 0, wdt, wdt * 0.66, length, 'snake' if kk < n - 1 else 'snake_tip')]))
         parent, length_prev = name, length
     return out
 
 
 SCHOLAR = mirrored([
     part('right_leg', 'root', (-2.2, 9, 0), (0, 0, 0), [(-1.6, 0, -1.6, 3.2, 14, 3.2, 'sleg')]),
-    part('right_shoe', 'right_leg', (0, 14, 0), (0, 0, 0), [(-1.8, 0, -3.4, 3.6, 1.2, 4.8, 'sshoe')]),
+    part('right_shoe', 'right_leg', (0, 14, 0), (0, 0, 0), [(-1.8, 0, -3.6, 3.6, 1.2, 5.0, 'sshoe'), (-1.0, -0.6, -4.1, 2, 1.4, 0.8, 'sshoe')]),
     part('body', 'root', (0, 9, 0), (0, 0, 0), [
-        (-4.6, -15, -3.0, 9.2, 15, 6, 'srobe_chest'),
-        (-4.6, -6.2, -3, 9.2, 2.2, 6, 'ssash'),
-        (-1, -6.6, -3.5, 2, 3, 0.6, 'ssash_knot'),
-        (-1.4, -17, -1.4, 2.8, 2.6, 2.8, 'sneck'),
+        (-4.4, -15, -2.8, 8.8, 15, 5.6, 'srobe_chest'),
+        (-2.0, -15.2, -3.1, 4, 6, 0.4, 'inner_collar'),
+        (-4.9, -7.0, -3.3, 9.8, 3.2, 6.6, 'ssash'),
+        (-1.4, -7.6, -3.9, 2.8, 3.6, 0.8, 'ssash_knot'),
+        (-1.4, -17.2, -1.4, 2.8, 2.8, 2.8, 'sneck'),
+        (-4.6, -15.4, -2.9, 9.2, 1.2, 5.8, 'shoulder_seam'),
     ]),
-    part('scollar_right', 'body', (-1, -15.2, -2.8), (0, 0, -0.5), [(-1, 0, -0.25, 2, 9, 0.5, 'scollar')]),
-    part('scollar_left', 'body', (1, -15.2, -2.9), (0, 0, 0.5), [(-1, 0, -0.25, 2, 9, 0.5, 'scollar')]),
-    part('skirt', 'body', (0, -4.2, 0), (0, 0, 0), [(-5.2, 0, -3.5, 10.4, 9, 7, 'srobe_skirt'), (-6.8, 8.6, -4.6, 13.6, 10.2, 9.2, 'srobe_hem')]),
-    part('skirt_back', 'skirt', (0, 2, 3.4), (0.16, 0, 0), [(-5, 0, -0.4, 10, 17, 0.8, 'srobe_back')]),
-    part('ssash_tail', 'body', (-1.6, -5, -3.2), (-0.05, 0, 0.05), [(-0.8, 0, -0.2, 1.6, 9, 0.4, 'ssash_tail')]),
-    part('spendant', 'body', (2.6, -4.4, -3.2), (0, 0, 0), [(-0.2, 0, -0.2, 0.4, 3, 0.4, 'spcord'), (-1, 3, -0.4, 2, 2.6, 0.8, 'sjade')]),
-    part('right_arm', 'body', (-5.2, -13.8, 0), SARM, [(-1.4, -1, -1.4, 2.8, 7, 2.8, 'swarm')]),
+    part('scollar_right', 'body', (-0.6, -15.3, -3.0), (0, 0, -0.52), [(-1.3, 0, -0.3, 2.6, 9.4, 0.6, 'scollar')]),
+    part('scollar_left', 'body', (0.6, -15.3, -3.1), (0, 0, 0.52), [(-1.3, 0, -0.3, 2.6, 9.4, 0.6, 'scollar')]),
+    part('skirt', 'body', (0, -4.2, 0), (0, 0, 0), [
+        (-5.2, 0, -3.4, 10.4, 8, 6.8, 'srobe_skirt'),
+        (-6.2, 7.6, -4.2, 12.4, 6.4, 8.4, 'srobe_skirt2'),
+        (-7.0, 13.6, -4.8, 14, 4.6, 9.6, 'srobe_hem')]),
+    part('skirt_front', 'skirt', (0, 0.2, -3.6), (-0.06, 0, 0), [(-2.2, 0, -0.3, 4.4, 18, 0.6, 'srobe_panel')]),
+    part('skirt_back', 'skirt', (0, 1.4, 3.6), (0.12, 0, 0), [(-5.6, 0, -0.4, 11.2, 17.6, 0.8, 'srobe_back')]),
+    part('ssash_tail', 'body', (-1.4, -4.6, -3.6), (-0.05, 0, 0.05), [(-0.9, 0, -0.2, 1.8, 12, 0.4, 'ssash_tail')]),
+    part('ssash_tail_short', 'body', (0.4, -4.6, -3.7), (-0.04, 0, -0.03), [(-0.8, 0, -0.2, 1.6, 8.5, 0.4, 'ssash_tail')]),
+    part('spendant', 'body', (3.2, -4.2, -3.4), (0, 0, 0), [(-0.2, 0, -0.2, 0.4, 3, 0.4, 'spcord'), (-1, 3, -0.4, 2, 2.6, 0.8, 'sjade'),
+                                                          (-0.6, 5.6, -0.4, 1.2, 3.4, 0.8, 'stassel')]),
+    part('right_arm', 'body', (-5.4, -13.8, 0), SARM, [(-1.4, -1, -1.4, 2.8, 7, 2.8, 'swarm')]),
     part('right_forearm', 'right_arm', (0, 6.4, 0), SFORE, [(-1.3, 0, -1.3, 2.6, 6, 2.6, 'swarm')]),
-    part('right_sleeve', 'right_forearm', (0, 0.4, 0.8), aim([SARM, SFORE], (0.1, 0, 0.1)), [(-2.6, -1, -6.8, 5.2, 13, 7.8, 'sbigsleeve')]),
-    part('right_hand', 'right_forearm', (0, 6, 0), (0, 0, 0), [(-1.1, 0, -1.2, 2.2, 2.6, 2.4, 'shand')]),
-    part('head', 'body', (0, -17, -0.6), (0, 0, 0), [
-        (-2.8, -7.2, -3.2, 5.6, 7.2, 6, 'sface'),
-        (-2.2, -1.2, -3.4, 4.4, 1.4, 4.6, 'schin'),
-        (-0.6, -4.2, -3.8, 1.2, 2, 0.6, 'snose'),
-        (-3, -7.4, -1.4, 6, 5, 4.6, 'shair'),
+    part('right_sleeve', 'right_forearm', (0, 0.4, 0.8), aim([SARM, SFORE], (0.1, 0, 0.1)), [
+        (-2.9, -1, -7.4, 5.8, 12.8, 8.4, 'sbigsleeve'),
+        (-1.8, 11.4, -3.4, 3.6, 2.2, 3.8, 'scuff')]),
+    part('right_hand', 'right_forearm', (0, 6, 0), (0, 0, 0), [(-1.1, 0, -1.2, 2.2, 2.8, 2.4, 'shand')]),
+    part('head', 'body', (0, -17.2, -0.6), (0, 0, 0), [
+        (-2.6, -7.6, -3.0, 5.2, 4.8, 5.8, 'sface'),
+        (-2.0, -2.8, -2.8, 4.0, 2.6, 4.8, 'sjawface'),
+        (-1.0, -0.4, -2.7, 2, 0.8, 2.2, 'schin'),
+        (-0.5, -5.4, -3.5, 1, 2.4, 0.6, 'snose'),
+        (-2.9, -7.8, -0.6, 5.8, 6.2, 3.8, 'shair'),
+        (-2.8, -6.4, -2.4, 0.4, 3.6, 1.6, 'shair'), (2.4, -6.4, -2.4, 0.4, 3.6, 1.6, 'shair'),
     ]),
-    part('tongue', 'head', (0, -1.4, -3.3), (0.1, 0, 0), [(-0.3, 0, -3.6, 0.6, 0.2, 3.6, 'stongue')]),
-    part('right_eye', 'head', (-1.3, -4.6, -3.25), (0, 0.15, -0.12), [(-0.9, -0.4, -0.2, 1.8, 0.8, 0.3, 'seye')]),
-    part('cap', 'head', (0, -7.2, 0), (0, 0, 0), [(-3.2, -3.8, -3.4, 6.4, 3.8, 6.4, 'scap'), (-2.4, -5.8, -0.2, 4.8, 2.4, 3.4, 'scap_back')]),
-    part('right_cap_wing', 'cap', (-3, -3.2, 2.6), (0, 0.1, 0.04), [(-9, -0.5, -0.2, 9, 1.0, 0.4, 'scap_wing')]),
+    part('tongue', 'head', (0, -1.6, -2.9), (0.1, 0, 0), [(-0.3, 0, -3.8, 0.6, 0.2, 3.8, 'stongue')]),
+    part('right_eye', 'head', (-1.25, -4.9, -3.05), (0, 0.15, 0.22), [(-1.0, -0.3, -0.2, 2.0, 0.6, 0.3, 'seye')]),
+    part('right_brow', 'head', (-1.2, -5.7, -3.1), (0, 0.15, 0.4), [(-1.3, -0.25, -0.2, 2.4, 0.5, 0.4, 'sbrow')]),
+    part('cap', 'head', (0, -7.6, 0), (0, 0, 0), [(-2.9, -3.6, -3.2, 5.8, 3.8, 6.2, 'scap'), (-2.3, -6.0, -0.2, 4.6, 2.8, 3.4, 'scap_back'),
+                                                  (-3.0, -0.6, -3.3, 6, 0.8, 6.4, 'scap_band')]),
+    part('right_cap_wing', 'cap', (-2.9, -2.6, 2.4), (0, 0.06, -0.08), [(-11, -0.45, -0.2, 11, 0.9, 0.4, 'scap_wing')]),
 ] + tail_parts())
 SCHOLAR += [
-    # the fan, open in his right hand
-    part('fan', 'right_hand', (0, 2.2, -0.4), aim([SARM, SFORE], (0.2, 0.5, 0)), [
+    # the fan, open in his right hand, held up before him
+    part('fan', 'right_hand', (0, 2.4, -0.4), aim([SARM, SFORE], (0.2, 0.5, 0)), [
         (-0.4, -1, -0.4, 0.8, 2, 0.8, 'fan_rivet'),
-        (-6, -8.4, -0.15, 12, 8, 0.3, 'fan_leaf')]),
+        (-6.5, -9.0, -0.15, 13, 8.6, 0.3, 'fan_leaf')]),
 ]
 SCHOLAR = [(n, par, pv, (SLARM if n == 'left_arm' else SLFORE if n == 'left_forearm' else aim([SLARM, SLFORE], (0.1, 0, -0.1)) if n == 'left_sleeve' else r), b, m)
            for n, par, pv, r, b, m in SCHOLAR]
@@ -727,14 +763,32 @@ SCHOLAR = w.settle(SCHOLAR, ('right_shoe', 'left_shoe'))
 
 def paint_scholar(p, style, f, dims):
     S = w.SIDES
-    if style in ('srobe_chest', 'srobe_skirt', 'srobe_hem', 'srobe_back', 'sbigsleeve', 'swarm'):   # the white robe, bordered black, a faint cloud pattern
+    if style in ('inner_collar', 'scuff', 'srobe_hem'):                          # the inner robe, pale blue-grey, a fine woven ground
+        w.cloth(p, f, (196, 210, 222), (140, 156, 170), fold=4, coarse=False)
+        for s_ in S:
+            w.hline(p, f[s_], f[s_][3] - 1, (110, 126, 142))
+        return
+    if style == 'shoulder_seam':
+        w.flat(p, f, WHITE_DEEP)
+        return
+    if style == 'sbrow':
+        w.flat(p, f, (24, 22, 26))
+        return
+    if style == 'stassel':
+        for s_ in f:
+            w.strands(p, f[s_], k((176, 30, 34), w.LIGHT[s_]), (90, 14, 18), density=0.4)
+        return
+    if style == 'scap_band':
+        w.flat(p, f, (60, 56, 66))
+        return
+    if style in ('srobe_chest', 'srobe_skirt', 'srobe_skirt2', 'srobe_back', 'srobe_panel', 'sbigsleeve', 'swarm'):   # the white robe, bordered black, a faint cloud pattern
         w.cloth(p, f, WHITE, WHITE_DEEP, fold=5, coarse=False)
         for s in S:
             fx, fy, fw, fh = f[s]
             for i, j, xy in w.each(p, f[s]):
                 if w.vnoise(fx + i, fy + j, 3.0, 17) > 0.74:
                     p.px(xy, k(p.get(xy), 0.9))
-        if style in ('srobe_hem', 'sbigsleeve', 'srobe_back'):
+        if style in ('srobe_skirt2', 'sbigsleeve', 'srobe_back', 'srobe_panel'):
             for s in S:
                 fx, fy, fw, fh = f[s]
                 for j in range(fh - 2, fh):
@@ -752,21 +806,19 @@ def paint_scholar(p, style, f, dims):
         w.flat(p, f, BLACK_EDGE)
         for s in S:
             w.hline(p, f[s], f[s][3] - 1, WHITE)
-    if style in ('sface', 'schin', 'sneck', 'snose', 'shand'):  # pale skin, scaled faintly at the cheeks and the backs of the hands
+    if style in ('sface', 'schin', 'sneck', 'snose', 'shand', 'sjawface'):  # pale skin, scaled faintly at the cheeks and the backs of the hands
         w.hide(p, f, SKIN, SKIN_SHADE, mottle=0.25, seed=13, fall=0.15)
         for s in (('right', 'left') if style != 'shand' else S):
             fx, fy, fw, fh = f[s]
             for i, j, xy in w.each(p, f[s]):
                 if (i + (j // 2) % 2) % 2 == 0 and j % 2 == 0 and (style == 'shand' or j > fh * 0.3):
                     p.px(xy, k(p.get(xy), 0.88))
-        if style == 'sface':                                     # thin lips, a long shadowed nose line; his scales along the jaw
+        if style == 'sjawface':                                  # a thin-lipped smile, sly, curling up at one corner; scales along the jaw
             fx, fy, fw, fh = f['front']
-            w.hline(p, f['front'], fh - 2, (130, 120, 130), 2, fw - 2)
-            for j in range(3, fh - 3):
-                p.px((fx + fw // 2, fy + j), k(SKIN_SHADE, 0.95))
-            for i in range(fw):                                  # his brows, fine and black, rising
-                if 0 < i < fw // 2 - 1 or fw // 2 + 1 < i < fw - 1:
-                    p.px((fx + i, fy + 4 - (abs(i - fw / 2) > 3)), (30, 28, 30))
+            for i in range(1, fw - 1):
+                p.px((fx + i, fy + 2 - (1 if i >= fw - 3 else 0)), (120, 100, 116))
+            for s_ in ('right', 'left'):
+                w.scale_tiles(p, f[s_], k((200, 214, 196), w.LIGHT[s_]), k((140, 160, 138), w.LIGHT[s_]), cw=2, ch=2)
     if style == 'shair':
         for s in f:
             w.strands(p, f[s], k((24, 22, 26), w.LIGHT[s]), (6, 6, 8), (70, 66, 76), density=0.3)
@@ -795,7 +847,7 @@ def paint_scholar(p, style, f, dims):
         w.flat(p, f, (40, 120, 90))
     if style == 'sjade':
         jade(p, f)
-    if style in ('snake', 'snake_tip'):                          # the white-flower snake: white scales, a cream belly in bands, dark flowers
+    if style in ('snake', 'snake_tip'):                         # (the white-flower snake's tail)                          # the white-flower snake: white scales, a cream belly in bands, dark flowers
         for s in f:
             fx, fy, fw, fh = f[s]
             if s == 'bottom':
