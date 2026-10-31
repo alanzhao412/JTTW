@@ -55,9 +55,9 @@ public final class FlowerFruitRegistry {
     public static final DeferredHolder<EntityType<?>, EntityType<FakePilgrimEntity>> FAKE_PILGRIM = ENTITIES.register("fake_pilgrim",
             () -> EntityType.Builder.<FakePilgrimEntity>of(FakePilgrimEntity::new, MobCategory.MONSTER).sized(0.85F, 2.1F).clientTrackingRange(10).build(key("fake_pilgrim")));
     public static final DeferredHolder<EntityType<?>, EntityType<SixEaredMacaqueEntity>> SIX_EARED_MACAQUE = ENTITIES.register("six_eared_macaque",
-            () -> EntityType.Builder.<SixEaredMacaqueEntity>of(SixEaredMacaqueEntity::new, MobCategory.MONSTER).sized(0.8F, 2.3F).clientTrackingRange(12).fireImmune().build(key("six_eared_macaque")));
+            () -> EntityType.Builder.<SixEaredMacaqueEntity>of(SixEaredMacaqueEntity::new, MobCategory.MONSTER).sized(1.0F, 3.2F).clientTrackingRange(12).fireImmune().build(key("six_eared_macaque")));
     public static final DeferredHolder<EntityType<?>, EntityType<MacaqueCloneEntity>> MACAQUE_CLONE = ENTITIES.register("macaque_clone",
-            () -> EntityType.Builder.<MacaqueCloneEntity>of(MacaqueCloneEntity::new, MobCategory.MONSTER).sized(0.8F, 2.3F).clientTrackingRange(10).fireImmune().build(key("macaque_clone")));
+            () -> EntityType.Builder.<MacaqueCloneEntity>of(MacaqueCloneEntity::new, MobCategory.MONSTER).sized(1.0F, 3.2F).clientTrackingRange(10).fireImmune().build(key("macaque_clone")));
     public static final DeferredHolder<EntityType<?>, EntityType<ThrownStoneEntity>> THROWN_STONE = ENTITIES.register("thrown_stone",
             () -> EntityType.Builder.<ThrownStoneEntity>of(ThrownStoneEntity::new, MobCategory.MISC).sized(0.3F, 0.3F).clientTrackingRange(6).updateInterval(5).build(key("thrown_stone")));
 
