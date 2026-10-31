@@ -41,6 +41,21 @@ public final class FightingBuddhaClient {
         return p != null && (STATE.getOrDefault(p.getId(), 0) & 2) != 0;
     }
 
+    /**
+     * Ascended, his own body is not drawn: the Buddha (FightingBuddhaLayer) is drawn in its place. The
+     * player renderer has just made the model's parts visible for this frame; they are hidden again.
+     * (His armour and cape are kept back by BuddhaArmourMixin.)
+     */
+    @SubscribeEvent
+    public static void onRenderPlayer(net.neoforged.neoforge.client.event.RenderPlayerEvent.Pre event) {
+        if (ascended(event.getEntity()) && !event.getEntity().isInvisible()) event.getRenderer().getModel().setAllVisible(false);
+    }
+
+    /** Whether this entity's armour, cape and held staff are not drawn as usual: the Buddha wears and holds his own. */
+    public static boolean drawnAsBuddha(Entity e) {
+        return e instanceof AbstractClientPlayer p && ascended(p) && !p.isInvisible();
+    }
+
     /** While he is vanished, his HUD says so, faintly, under the crosshair. */
     @SubscribeEvent
     public static void onRenderGui(net.neoforged.neoforge.client.event.RenderGuiEvent.Post event) {

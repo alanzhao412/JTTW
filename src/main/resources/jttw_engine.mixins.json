@@ -26,6 +26,8 @@
   ],
   "client": [
     "AbstractClientPlayerMixin",
+    "BuddhaArmourMixin",
+    "BuddhaCapeMixin",
     "CameraMixin",
     "EntityTurnMixin",
     "HumanoidModelMixin",
