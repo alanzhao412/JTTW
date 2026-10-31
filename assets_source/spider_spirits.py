@@ -69,7 +69,7 @@ def sister_parts():
             (-2.2, -6.2, -2.3, 4.4, 5, 4.4, 'face'),
             (-2.5, -6.6, -0.4, 5, 5.8, 2.9, 'hair_back'),
             (-2.5, -6.8, -2.5, 5, 1.3, 4.8, 'hair_top'),
-            (-2.35, -6.35, -2.55, 4.7, 1, 0.4, 'diadem'),
+            (-2.35, -6.25, -2.55, 4.7, 0.6, 0.4, 'diadem'),
         ]),
         part('right_lock', 'head', (-2.3, -5.8, -1.5), (0, 0, 0.06), [(-0.45, 0, -0.45, 0.8, 5, 1.1, 'lock')]),
         part('bun', 'head', (0, -6.7, 0.6), (-0.15, 0, 0), [
@@ -99,9 +99,9 @@ def sister_parts():
     # eight slender legs folded behind her shoulders like a fan: each rises, turns out, bends down at its knee
     for i in range(4):
         ps += [
-            part('right_sleg_%d' % i, 'legs_mount', (-0.9, -0.4 + i * 1.4, 0), (-(1.25 - i * 0.32), -(0.62 + i * 0.26), 0), [
+            part('right_sleg_%d' % i, 'legs_mount', (-0.9, -0.4 + i * 1.4, 0), (1.15 - i * 0.3, -(0.5 + i * 0.3), 0), [
                 (-0.6, -0.6, 0, 1.2, 1.2, 11.5 - i * 0.6, 'sleg_a')]),
-            part('right_sleg_tip_%d' % i, 'right_sleg_%d' % i, (0, 0, 11.2 - i * 0.6), (1.45 - i * 0.12, 0, 0), [
+            part('right_sleg_tip_%d' % i, 'right_sleg_%d' % i, (0, 0, 11.2 - i * 0.6), (-(1.5 - i * 0.15), 0, 0), [
                 (-0.45, -0.45, 0, 0.9, 0.9, 12.5 - i * 0.6, 'sleg_b'),
                 (-0.7, -0.7, -0.4, 1.4, 1.4, 1.4, 'sleg_knee')]),
         ]

@@ -34,6 +34,27 @@ public class SilkWebsFeature extends Feature<NoneFeatureConfiguration> {
         return (int) Math.floorMod(Mth.getSeed(x, salt * 53 + 17, z), 1000L);
     }
 
+    /**
+     * Keeps the works' grounds and the paths open: the trees that grew over them (their leaves and
+     * logs, and great mushrooms) cleared from the column, never the works' own timber.
+     */
+    private static boolean clearTrees(WorldGenLevel level, int x, int z, int lx, int lz, BlockPos.MutableBlockPos p) {
+        boolean works = SilkRidgeWorks.covers(lx, lz);
+        int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z);
+        int ground = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+        boolean any = false;
+        for (int y = top; y > ground - 24 && y > level.getMinBuildHeight(); y--) {
+            BlockState st = level.getBlockState(p.set(x, y, z));
+            boolean tree = st.is(BlockTags.LEAVES) || st.is(Blocks.MUSHROOM_STEM) || st.is(Blocks.RED_MUSHROOM_BLOCK) || st.is(Blocks.BROWN_MUSHROOM_BLOCK)
+                    || !works && st.is(BlockTags.LOGS) || st.is(Blocks.COBWEB);
+            if (tree) {
+                level.setBlock(p, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+                any = true;
+            }
+        }
+        return any;
+    }
+
     @Override
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
         WorldGenLevel level = context.level();
@@ -46,7 +67,10 @@ public class SilkWebsFeature extends Feature<NoneFeatureConfiguration> {
         for (int dx = 0; dx < 16; dx++) for (int dz = 0; dz < 16; dz++) {
             int x = x0 + dx, z = z0 + dz, lx = x - c[0], lz = z - c[1];
             if (Zones.SPIDER_CAVE.depth(seed, x, z) <= 0 || SilkRidgeShape.valley(lx, lz) < 1) continue;
-            if (SilkRidgeShape.pathDistance(lx, lz) < 3 || SilkRidgeWorks.levelShare(lx, lz) > 0.05) continue;
+            if (SilkRidgeShape.pathDistance(lx, lz) < 4 || SilkRidgeWorks.levelShare(lx, lz) > 0.05) {
+                any |= clearTrees(level, x, z, lx, lz, p);
+                continue;
+            }
             int roll = fine(x, z, 1);
             if (roll >= 90) continue;
             int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z);

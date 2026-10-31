@@ -98,7 +98,7 @@ final class SpiderBench {
                 int f = region.floor();
                 double cx = centre[0] + 0.5, cz = centre[1] + 0.5;
                 if (ticks == 1) level.setDayTime(5000);
-                shot(p, level, 1, "spider_valley_afar", cx + 40, f + 70, cz + 260, cx, f + 20, cz);
+                shot(p, level, 1, "spider_valley_afar", cx + 30, f + 48, cz + 235, cx, f + 38, cz - 20);
                 shot(p, level, 2, "spider_valley_above", cx + 10, f + 160, cz + 150, cx, f, cz + 10);
                 shot(p, level, 3, "spider_ridge", cx - 160, f + 35, cz + 70, cx, f + 40, cz - 20);
                 shot(p, level, 4, "spider_cottage_real", cx + 12, f + 6, cz + SilkRidgeWorks.COTTAGE_Z + 26, cx, f + 4, cz + SilkRidgeWorks.COTTAGE_Z);

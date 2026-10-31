@@ -358,6 +358,12 @@ public class SpiderSpiritEntity extends SilkMonster {
         }
     }
 
+    /** Kept even on Peaceful: the canopy over the temple falls only with the last of the seven. */
+    @Override
+    protected boolean shouldDespawnInPeaceful() {
+        return false;
+    }
+
     @Override
     public void die(DamageSource source) {
         super.die(source);
