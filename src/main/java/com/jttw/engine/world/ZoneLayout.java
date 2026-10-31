@@ -82,6 +82,13 @@ public record ZoneLayout(int near, int far, int radius, int wobble, long salt, b
     public static final ZoneLayout KUNLUN = new ZoneLayout(5000, 8000, 465, 30, 0x6B0A1F5EL, false, WEST);
 
     /**
+     * Flower-Fruit Mountain: a region about 640 blocks across (never under 580), the island and the
+     * sea round it; a band of the first levels, so near spawn, 1.8-3.2 km out (clear of White Bone
+     * Ridge and every zone before it, in the sea).
+     */
+    public static final ZoneLayout FLOWER_FRUIT = new ZoneLayout(1800, 3200, 320, 30, 0xF10E7F2BL, false);
+
+    /**
      * Each quarter's half-width, in degrees, a sea's region (or one kept to a quarter) is tried in:
      * well inside its 45, so the four lie plainly round the compass.
      */

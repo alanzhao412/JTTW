@@ -44,13 +44,23 @@ class ZonesTest {
         }
     }
 
+    /** Whether an earlier zone of {@link Zones#ALL} has a band overlapping this one's. */
+    private static boolean sharesAnEarlierBand(Zones.Zone zone) {
+        for (Zones.Zone z : Zones.ALL) {
+            if (z == zone) return false;
+            if (z.hasLevelBand() && zone.hasLevelBand() && z.minLevel() <= zone.maxLevel() && zone.minLevel() <= z.maxLevel()) return true;
+        }
+        return false;
+    }
+
     @Test
     void eachLiesInItsRingFartherOutTheHigherItsLevels() {
         int prevFar = 0;
         for (Zones.Zone zone : Zones.MAP.zones()) {
             ZoneLayout l = zone.layout();
-            if (zone == Zones.KUNLUN) {
-                // a place of no band, kept to the west in the middle rings, not past the last
+            if (zone == Zones.KUNLUN || sharesAnEarlierBand(zone)) {
+                // a place of no band, kept to the west in the middle rings, not past the last; or a zone
+                // of a band an earlier one already holds (Flower-Fruit Mountain, the first band's), in that band's rings
                 assertTrue(l.near() > l.margin(), zone.id() + ": clear of spawn");
                 continue;
             }

@@ -88,6 +88,11 @@ public final class Morality {
      * are captains (+5), the rest monsters (+1). (Their brother the Peng, a player, they never fight.)
      */
     public static final int SLAY_AZURE_LION = SLAY_LADY, SLAY_WHITE_ELEPHANT = SLAY_LADY;
+    /**
+     * The Six-Eared Macaque beat the Tang Monk senseless, stole his luggage and meant to take the
+     * scriptures in his place (chapters 56-58): striking him down is a good deed, as Lady White Bone.
+     */
+    public static final int SLAY_MACAQUE = SLAY_LADY;
     /** How recently a victim must have struck their killer for the kill to be a fight, not a murder: 10 s. */
     public static final int PROVOKED_TICKS = 200;
 
@@ -160,6 +165,7 @@ public final class Morality {
         if (victim instanceof LadyEarthFlowEntity) return SLAY_EARTH_FLOW;
         if (victim instanceof com.jttw.engine.entity.fire.RedBoyEntity) return SLAY_RED_BOY;
         if (victim instanceof com.jttw.engine.entity.lion.AzureLionEntity) return SLAY_AZURE_LION;
+        if (victim instanceof com.jttw.engine.entity.flowerfruit.SixEaredMacaqueEntity) return SLAY_MACAQUE;
         if (victim instanceof com.jttw.engine.entity.lion.WhiteElephantEntity) return SLAY_WHITE_ELEPHANT;
         if (victim instanceof com.jttw.engine.entity.waters.DragonKingEntity) return SLAY_DRAGON_KING;
         if (victim instanceof com.jttw.engine.entity.hell.KingYamaEntity) return SLAY_KING_YAMA;
@@ -188,6 +194,7 @@ public final class Morality {
         if (deed == SLAY_MONSTER && victim instanceof com.jttw.engine.entity.hell.WanderingGhostEntity) return "you laid a wandering ghost to rest";
         if (deed == SLAY_CAPTAIN && victim instanceof com.jttw.engine.entity.fire.StrongGeneralEntity) return "you struck down one of Red Boy's Six Strong Generals";
         if (victim instanceof com.jttw.engine.entity.fire.RedBoyEntity) return "you subdued Red Boy, the Holy Child King";
+        if (victim instanceof com.jttw.engine.entity.flowerfruit.SixEaredMacaqueEntity) return "you struck down the Six-Eared Macaque, the false Great Sage";
         if (victim instanceof com.jttw.engine.entity.lion.AzureLionEntity) return "you struck down the Azure Lion, who ate a kingdom";
         if (victim instanceof com.jttw.engine.entity.lion.WhiteElephantEntity) return "you struck down the White Elephant, who ate a kingdom";
         if (deed == SLAY_CAPTAIN && victim instanceof com.jttw.engine.entity.lion.LionCamelMonster) return "you slew a captain of Lion-Camel Ridge";

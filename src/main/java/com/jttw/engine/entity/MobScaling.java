@@ -28,7 +28,19 @@ public final class MobScaling {
         return ORDINARY_HIT * median(level, StatBlock::attackDamage);
     }
 
+    /**
+     * Past the players' cap (level {@value com.jttw.engine.progression.level.LevelConstants#MAX_LEVEL})
+     * no character's stats grow; a creature set above it (the Six-Eared Macaque, a level-120 superboss)
+     * is measured against a character extrapolated past the cap, each level worth this much more than
+     * the one before: gentler than the campaign's backbone ({@code LevelPower.GROWTH}, 1.10), so that
+     * twenty levels over the cap are about 1.8x a level-100 character, not 6.7x (which no group of
+     * capped players could ever outlast).
+     */
+    public static final double PAST_CAP_GROWTH = 1.03;
+
     private static double median(int level, java.util.function.ToDoubleFunction<StatBlock> stat) {
+        int cap = com.jttw.engine.progression.level.LevelConstants.MAX_LEVEL;
+        if (level > cap) return median(cap, stat) * Math.pow(PAST_CAP_GROWTH, level - cap);
         double[] v = Arrays.stream(ProgressionClass.values()).mapToDouble(c -> stat.applyAsDouble(StatBlock.compute(c, level))).sorted().toArray();
         return v.length % 2 == 1 ? v[v.length / 2] : (v[v.length / 2 - 1] + v[v.length / 2]) / 2;
     }
