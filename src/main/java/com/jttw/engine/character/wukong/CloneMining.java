@@ -152,7 +152,7 @@ public final class CloneMining {
         @Nullable private BlockPos target;
         @Nullable private BlockPos spot;
         private Phase phase = Phase.PLAN;
-        private int targetTicks, phaseTicks, fails, approaches, pillars;
+        private int targetTicks, phaseTicks, fails, approaches, pillars, waitTicks;
         private final Map<Long, Long> shunned = new HashMap<>();
 
         // breaking
@@ -452,6 +452,10 @@ public final class CloneMining {
         }
 
         private void think() {
+            if (waitTicks > 0) {
+                waitTicks--;
+                return;
+            }
             Level level = clone.level();
             if (target != null && !CloneWork.workable(level.getBlockState(target))) {
                 vein.remove(target);
@@ -497,7 +501,12 @@ public final class CloneMining {
             if (approaches < 3 && approach(target)) return;
             if (tunnels() && pillarUp(target)) return;
             if (tunnels() && digToward(target)) return;
-            giveUp(target);
+            // nothing will do from here: wait a moment and look again (things move), then give it up
+            if (++fails >= 4) giveUp(target);
+            else {
+                approaches = 0;
+                waitTicks = 20;
+            }
         }
 
         private void setPhase(Phase p) {
@@ -596,6 +605,9 @@ public final class CloneMining {
         // ── Breaking ────────────────────────────────────────────────
 
         private void beginBreak(BlockPos b, boolean ownPillar) {
+            // stand still to work: no last step of a path carrying it on (onto the block)
+            clone.getNavigation().stop();
+            clone.getMoveControl().setWantedPosition(clone.getX(), clone.getY(), clone.getZ(), 0);
             breaking = b;
             breakingOwnPillar = ownPillar;
             needed = progress = 0;
@@ -645,6 +657,12 @@ public final class CloneMining {
             if (progress % 5 == 0) clone.swing(InteractionHand.MAIN_HAND);
             level.destroyBlockProgress(clone.getId(), b, (int) (progress * 10f / needed));
             if (++progress < needed) return;
+            if (!breakingOwnPillar && standingOnIt(b)) { // it has come to stand on it: from elsewhere, then
+                level.destroyBlockProgress(clone.getId(), b, -1);
+                breaking = null;
+                setPhase(Phase.PLAN);
+                return;
+            }
             if (!safe(b)) { // something changed while it worked (lava flowed in)
                 level.destroyBlockProgress(clone.getId(), b, -1);
                 if (target != null) giveUp(target);
@@ -718,9 +736,10 @@ public final class CloneMining {
             }
             for (Direction d : Direction.Plane.HORIZONTAL) if (!dirs.contains(d)) dirs.add(d); // round, if it must
             int rise = dy >= 2 ? 1 : dy <= -2 ? -1 : 0;
+            // the way it wants first; else level, or up or down a step (out of a hole, round a ledge)
+            int[] rises = rise == 0 ? new int[]{0, dy > 0 ? 1 : -1, dy > 0 ? -1 : 1} : new int[]{rise, 0, -rise};
             for (Direction d : dirs) {
-                if (planStep(f, d, rise)) return true;
-                if (rise != 0 && dirs.indexOf(d) < 2 && Math.abs(dx) + Math.abs(dz) > 2 && planStep(f, d, 0)) return true;
+                for (int r : rises) if (planStep(f, d, r)) return true;
             }
             return false;
         }
