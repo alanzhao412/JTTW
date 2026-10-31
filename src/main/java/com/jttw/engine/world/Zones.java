@@ -314,9 +314,22 @@ public final class Zones {
     public static final Zone KUNLUN = Zone.place(KUNLUN_BIOME,
             TagKey.create(Registries.BIOME, id("kunlun_hosts")), ZoneLayout.KUNLUN, Vertical.WHOLE_COLUMN).hostSampledAt(256);
 
+    public static final ResourceKey<Biome> SPIDER_CAVE_BIOME = ResourceKey.create(Registries.BIOME, id("silk_web_ridge"));
+
+    /**
+     * Levels 78-88, on the ground (Mount Wuzhuang's band is in the sky): Silk-Web Ridge (盘丝岭) and the
+     * Spider Cave (盘丝洞, chapters 72-73), where the Seven Spider Spirits keep their bowers and bathe
+     * in the Purifying Spring, and their sworn brother the Hundred-Eyed Demon Lord keeps the Yellow
+     * Flower Temple; over dark, overgrown country (dark forest, taiga, old growth, jungle, swamp),
+     * the whole column, host judged at y 256. It keeps clear of every zone before it.
+     */
+    public static final Zone SPIDER_CAVE = Zone.overworld(SPIDER_CAVE_BIOME,
+            TagKey.create(Registries.BIOME, id("silk_web_ridge_hosts")), ZoneLayout.SPIDER_CAVE,
+            Vertical.WHOLE_COLUMN, 78, 88, 145).hostSampledAt(256);
+
     /** Every zone, in order: a later one keeps clear of an earlier one sharing its heights. Append new ones. */
     public static final List<Zone> ALL = List.of(WHITE_BONE, BOTTOMLESS, MYSTICAL_WATERS, HELL, FIRE_MOUNTAIN, MOUNT_WUZHUANG, LION_CAMEL, FENGDU,
-            KUNLUN);
+            KUNLUN, SPIDER_CAVE);
 
     /** Where the overworld zones of {@link #ALL} lie. */
     public static final ZoneMap MAP = new ZoneMap(ALL);

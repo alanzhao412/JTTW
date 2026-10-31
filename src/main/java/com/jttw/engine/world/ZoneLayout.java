@@ -82,6 +82,13 @@ public record ZoneLayout(int near, int far, int radius, int wobble, long salt, b
     public static final ZoneLayout KUNLUN = new ZoneLayout(5000, 8000, 465, 30, 0x6B0A1F5EL, false, WEST);
 
     /**
+     * Silk-Web Ridge and the Spider Cave, Mount Wuzhuang's band on the ground: a region about 480 blocks
+     * across (never under 430), its valley, the ridge across it with the cave inside, the cottage, the
+     * spring and the temple; 6-7.5 km out, as Mount Wuzhuang (whose region it keeps clear of).
+     */
+    public static final ZoneLayout SPIDER_CAVE = new ZoneLayout(6000, 7500, 240, 24, 0x5B1DC0FEL, false);
+
+    /**
      * Each quarter's half-width, in degrees, a sea's region (or one kept to a quarter) is tried in:
      * well inside its 45, so the four lie plainly round the compass.
      */
