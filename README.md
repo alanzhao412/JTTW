@@ -286,6 +286,48 @@ Abilities and items are drawn from the source material rather than invented:
   - **Banana-Leaf Fan**: one a world, in the treasure chest of the palace on Mount Kunlun's summit (see Mount Kunlun).
 - **Wu Clones** — Wukong's hair-clone technique, implemented as summoned entities with their own
   pathfinding goals ([`WuCloneManager`](src/main/java/com/jttw/engine/character/wukong/WuCloneManager.java))
+- **Fiery Golden Eyes** (火眼金睛) — Wukong's eyes from the Eight Trigrams Furnace, on N once he
+  has them. They always show the true name and health of whoever he looks at. **Shift + N** turns
+  the x-ray on and off (ores through stone, 1 Qi a second). **Tap N** to fire the laser: it fires
+  the moment the key comes up, with no charge-up. **Hold N and turn the mouse wheel** to set its
+  output instead: up for more, down for less. Nothing fires while you do it, and the hotbar stays
+  where it is. The new output is shown on the action bar, and five pips over slot N show it all
+  the time. The output is saved with him and kept through death. It starts at I.
+  ([`EyeLaser`](src/main/java/com/jttw/engine/character/wukong/EyeLaser.java))
+
+  | Output | Qi | Range | Cut | Hit at level 1 | Same-level character, hits to kill | Sets burning | Cooldown |
+  |---|---|---|---|---|---|---|---|
+  | I, Glint | 10 | 20 | 1 block (the line itself) | 8 | 4 | 3 s | 3 s |
+  | II, Gaze | 20 | 30 | a cross 3 wide, 2 tall when level | 13 | 3 | 4 s | 4 s |
+  | III, Glare | 35 | 40 | 3 × 3 | 20 | 2 | 5 s | 5 s |
+  | IV, Blaze | 55 | 52 | a round bore 5 wide | 32 | 1 | 7 s | 7 s |
+  | V, Sunfire | 80 | 64 | a round bore 7 wide | 50 | 1, with room to spare | 10 s | 10 s |
+
+  - **Damage.** The hit scales with his power (`LevelPower.scaled`), so the table's hits-to-kill
+    hold from level 1 to about 60. They count a typical character of his own level, before
+    resistance. For comparison, an ordinary weapon hit takes about 3. Past level 60 the hits grow
+    fewer, because Wukong's own power outgrows a typical character's (output I kills in 2 at level 80). Each creature in the beam is struck once.
+    His own clones are spared.
+  - **Cutting.** Every block within the cut of the beam's axis goes. The cut flares out from his
+    eyes over the first few blocks, so it never takes the ground from under his feet. Fire is left
+    along the floor of the bore and all round where the beam ends. Up to output III the blocks drop
+    as if mined. At IV and V they are burnt away to nothing.
+  - **What stops it.** Bedrock and other unbreakable blocks always stop the beam. Obsidian-hard
+    blocks (hardness 50 or more) stop it below output V, and V burns through them. Nothing past the
+    block that stopped it is touched. Liquids do not stop it, and it leaves them as they are. As the
+    Victorious Fighting Buddha, his beam breaks anything at every output and nothing stops it.
+  - **How it looks.** Every player within 160 blocks is told of the shot (`EyeLaserBeamPacket`) and
+    draws it at once ([`EyeLaserRenderer`](src/main/java/com/jttw/engine/client/renderer/EyeLaserRenderer.java)).
+    Two fine golden beams leave his two eyes and follow his head, including a transformed form's
+    head height. In his own first-person view they leave from just below and either side of the
+    view. They meet a little ahead of him in one shaft of fire that runs to where the beam stopped.
+    The shaft has a white-hot core inside gold, orange and a red haze, with pulses racing down it.
+    It flashes as it fires, then fades and narrows over about half a second. Along it fly sparks,
+    flames and lava. Chunks of the burnt blocks fly off in their own colour, red-hot and cooling,
+    with crumbs. Where the beam ends there is a flare with rays and a burst of light, and the faces
+    there glow and then char, cooling over seven seconds. The sound is a deep, searing roar (a sonic
+    boom with a blaze's shot under it), deeper at higher outputs, with a hiss and, from III up, a
+    blast where it ends.
 - **Xiaotian Quan** — Erlang Shen's hound, a custom entity with hand-authored model and animation.
   Every bite slows (Slowness I, 2 s). Its own branch: I summons it; II gives it +25% health and
   attack and tracking sense (the nearest hostile glows for him); III +50%, its bites' Slowness I
