@@ -66,11 +66,6 @@ public class BlackWindGameTests {
         check(h, Math.abs(expected - actual) <= Math.abs(expected) * 1e-3 + 1e-3, what + ": expected " + expected + " but was " + actual);
     }
 
-    /** A hit landed in full: what the golem lost, its knock against the ground aside, at least the hit and not much over it. */
-    private static void atLeast(GameTestHelper h, double expected, double actual, String what) {
-        check(h, actual >= expected * 0.999 && actual <= expected * 1.12 + 3, what + ": expected " + expected + " but was " + actual);
-    }
-
     private static void sweepAround(GameTestHelper h, Entity... held) {
         AABB bounds = h.getBounds().inflate(2);
         onEnd(h, () -> {
@@ -100,7 +95,7 @@ public class BlackWindGameTests {
         var g = h.spawn(EntityType.IRON_GOLEM, at);
         g.goalSelector.removeAllGoals(x -> true);
         g.targetSelector.removeAllGoals(x -> true);
-        g.getAttribute(Attributes.MAX_HEALTH).setBaseValue(100_000_000);
+        g.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1_000_000); // a float's health; any more and a hit is rounded to whole points
         g.getAttribute(Attributes.ARMOR).setBaseValue(0);
         g.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(0);
         g.setHealth(g.getMaxHealth());
@@ -171,7 +166,7 @@ public class BlackWindGameTests {
         eq(h, BoarDemonEntity.PAWING, boar.state(), "it paws the ground first");
         float before = g.getHealth();
         check(h, boar.gore(g), "its tusks strike");
-        atLeast(h, boar.goreDamage(), taken(g, before), "a gore of 10%");
+        close(h, boar.goreDamage(), taken(g, before), "a gore of 10%");
         check(h, g.getDeltaMovement().y > 0.2, "thrown up");
         h.succeed();
     }
@@ -281,8 +276,8 @@ public class BlackWindGameTests {
         float ha = a.getHealth(), hb = b.getHealth();
         List<LivingEntity> hit = k.blackWind();
         check(h, hit.contains(a) && hit.contains(b), "all round him");
-        atLeast(h, k.windDamage(), taken(a, ha), "22% of a level-51 character's health");
-        atLeast(h, k.windDamage(), taken(b, hb), "on each");
+        close(h, k.windDamage(), taken(a, ha), "22% of a level-51 character's health");
+        close(h, k.windDamage(), taken(b, hb), "on each");
         check(h, a.hasEffect(MobEffects.BLINDNESS) && b.hasEffect(MobEffects.BLINDNESS), "blinded");
         Vec3 away = a.position().subtract(k.position());
         check(h, a.getDeltaMovement().dot(away) > 0 && a.getDeltaMovement().y > 0.3, "hurled away and up: " + a.getDeltaMovement());
@@ -298,6 +293,7 @@ public class BlackWindGameTests {
         List<LivingEntity> mauled = k.maul();
         check(h, mauled.contains(front) && mauled.contains(behind), "the maul all round");
         close(h, k.slamDamage(), taken(front, f), "26%");
+        front.invulnerableTime = 0; // the maul's hurt-time past, as it would be by the gale's wind-up
         f = front.getHealth();
         b = behind.getHealth();
         List<LivingEntity> blown = k.gale(front);

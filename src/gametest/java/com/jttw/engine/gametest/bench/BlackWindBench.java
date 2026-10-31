@@ -143,6 +143,8 @@ final class BlackWindBench {
         shot("bw_world_temple_hall", 8, ty + 6, tz + 4, -2, ty + 3, tz - 28, false);
         shot("bw_world_forecourt_and_door", 14, 14, f + 46, 0, 12, f, false);
         shot("bw_world_great_door", -6, 5, f + 18, 0, 9, f, false);
+        shot("bw_world_forecourt_pavilion", 6, 6, 92, 17, 3, 80, false);
+        shot("bw_world_summit", 70, 230, 40, 0, 190, -40, false);
         shot("bw_world_cliff_over_the_door", 0, 50, f + 90, 0, 40, f - 10, false);
         shot("bw_world_black_wind_court", 0, 14, 24, 0, 4, -30, true);
         shot("bw_world_feast", 12, 7, -20, 0, 3, -42, true);

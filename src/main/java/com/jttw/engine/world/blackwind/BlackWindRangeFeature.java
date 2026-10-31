@@ -39,7 +39,7 @@ public class BlackWindRangeFeature extends Feature<NoneFeatureConfiguration> {
     private static final int STEEP = 2;
     private static final int FACE = 0, SLOPE = 1, HOLLOW = 2, SUMMIT = 3, VALLEY = 4, COURT = 5;
     /** How high over the forecourt the bare summit begins. */
-    public static final int SUMMIT_OVER = 120;
+    public static final int SUMMIT_OVER = 85;
 
     public BlackWindRangeFeature(Codec<NoneFeatureConfiguration> codec) {
         super(codec);
