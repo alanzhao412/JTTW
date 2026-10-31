@@ -288,9 +288,9 @@ public final class EyeLaser {
         return Math.min(o.radius(), Math.max(0, (t - START) * FLARE));
     }
 
-    /** How wide the beam is drawn: a little more than half its cut, never a hair. */
+    /** How wide the beam is drawn: its bright heart three quarters of its cut, its glow beyond; never a hair. */
     static double visualRadius(Output o) {
-        return 0.12 + o.radius() * 0.55;
+        return 0.15 + o.radius() * 0.75;
     }
 
     /** How far along the axis it reaches a block that stops it: its near face. */
