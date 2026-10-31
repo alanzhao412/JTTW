@@ -97,6 +97,12 @@ public class WhiteRobedScholarEntity extends BlackWindChief {
         return entityData.get(STATE);
     }
 
+    /** Holds it in {@code state} (the gallery's pictures; its own wind-ups set it as they go). */
+    public void pose(int state) {
+        entityData.set(STATE, state);
+    }
+
+
     @Override
     protected void registerGoals() {
         goalSelector.addGoal(0, new FloatGoal(this));

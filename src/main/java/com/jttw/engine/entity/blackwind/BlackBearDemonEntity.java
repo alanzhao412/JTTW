@@ -166,6 +166,12 @@ public class BlackBearDemonEntity extends ZoneBoss {
         return entityData.get(ACTION);
     }
 
+    /** Holds him in {@code action} (the gallery's pictures; his own wind-ups set it as they go). */
+    public void pose(int action) {
+        entityData.set(ACTION, action);
+    }
+
+
     /** How far through his wind-up he is, 0..1 (on the server). */
     public int stage() {
         return stage;

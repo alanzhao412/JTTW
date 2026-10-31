@@ -131,7 +131,12 @@ final class AbilityScenes {
             // the White Bone Cave's inside, laid south of the stage
             java.util.Map.entry("ridge_cave_ossuary", 300), java.util.Map.entry("ridge_cave_bone_forge", 200),
             java.util.Map.entry("ridge_cave_borrowed_faces", 200), java.util.Map.entry("ridge_cave_seal", 200),
-            java.util.Map.entry("ridge_cave_throne_lady", 200), java.util.Map.entry("ridge_cave_throne_hall", 160));
+            java.util.Map.entry("ridge_cave_throne_lady", 200), java.util.Map.entry("ridge_cave_throne_hall", 160),
+            // Black Wind Mountain's cave and temple, laid off the stage; the king's whirlwinds rising
+            java.util.Map.entry("bw_cave_door", 300), java.util.Map.entry("bw_cave_door_close", 80), java.util.Map.entry("bw_cave_keepers", 80),
+            java.util.Map.entry("bw_cave_court", 300), java.util.Map.entry("bw_cave_feast", 80), java.util.Map.entry("bw_cave_throne", 300),
+            java.util.Map.entry("bw_cave_king_on_his_floor", 80), java.util.Map.entry("bw_temple", 160), java.util.Map.entry("bw_temple_hall", 60),
+            java.util.Map.entry("bw_king_whirlwinds", 40));
 
         /** Set by a scene that photographs a screen (a furnace's, say), so the gallery leaves it open. */
     static volatile boolean keepScreen;
@@ -149,6 +154,7 @@ final class AbilityScenes {
         all.addAll(WildScenes.all());
         all.addAll(CaveScenes.all());
         all.addAll(RidgeScenes.all());
+        all.addAll(BlackWindScenes.all());
         return all;
     }
 
@@ -1223,6 +1229,7 @@ final class AbilityScenes {
         WatersScenes.clear(p);
         HellScenes.clear(p);
         FireScenes.clear(p);
+        BlackWindScenes.clear(p);
         WuzhuangScenes.clear(p);
         LionScenes.clear(p);
         VillageScenes.clear(p);
