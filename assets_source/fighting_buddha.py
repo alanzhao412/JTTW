@@ -75,8 +75,11 @@ def aura():
         a = math.radians(deg)
         r = 13.0
         tall = 3.2 if k % 2 == 0 else 2.2
+        # a tongue of light: a broad root, a narrower body, a point, each a little further out
         out.append(part('aura_flame_%d' % k, 'aura', (r * math.sin(a), -r * math.cos(a), 0), (0, 0, a),
-                        [(-1.1, -tall, -0.15, 2.2, tall, 0.3, 'aura' if k % 2 == 0 else 'aura_small')]))
+                        [(-1.2, -1.2, -0.15, 2.4, 1.2, 0.3, 'aura_root'),
+                         (-0.8, -1.2 - tall * 0.55, -0.12, 1.6, tall * 0.55, 0.24, 'aura'),
+                         (-0.4, -1.2 - tall, -0.1, 0.8, tall * 0.45, 0.2, 'aura_tip')]))
     for k, deg in enumerate(range(-150, 151, 10)):
         a = math.radians(deg)
         r = 12.0
@@ -196,26 +199,17 @@ def paint_box(p, style, f, dims):
                     if inner and i == 1 and j == 1:
                         c = (255, 140, 140)
                     p.px((fx + i, fy + j), k(c, light))
-    elif style in ('halo', 'ray', 'petal', 'aura', 'aura_small', 'aura_rim'):
-        base = {'halo': HALO, 'ray': HALO_HOT, 'petal': HALO, 'aura': AURA, 'aura_small': AURA, 'aura_rim': HALO}[style]
+    elif style in ('halo', 'ray', 'petal', 'aura', 'aura_root', 'aura_tip', 'aura_rim'):
+        # light: whole faces, the flame's root hottest, its tip deepest in colour
+        top, bottom = {'halo': (HALO, HALO), 'ray': (HALO_HOT, HALO), 'petal': (HALO, HALO_HOT),
+                       'aura_root': (HALO_HOT, HALO_HOT), 'aura': (AURA, HALO_HOT), 'aura_tip': (GOLD_DEEP, AURA),
+                       'aura_rim': (HALO, HALO)}[style]
         for side in ('front', 'back', 'right', 'left', 'top', 'bottom'):
             fx, fy, fw, fh = f[side]
             for j in range(fh):
                 for i in range(fw):
                     t = j / max(1, fh - 1)
-                    if style.startswith('aura') and style != 'aura_rim':
-                        # a tongue of light: hot at its root (the bottom of the face), thinning to its tip
-                        half = (fw / 2) * (0.25 + 0.75 * t)
-                        if abs(i + 0.5 - fw / 2) > half:
-                            continue
-                        c = tuple(int(a + (b - a) * t) for a, b in zip(AURA, HALO_HOT))
-                    elif style == 'petal':
-                        half = (fw / 2) * (0.35 + 0.65 * t)
-                        if abs(i + 0.5 - fw / 2) > half:
-                            continue
-                        c = HALO
-                    else:
-                        c = base
+                    c = tuple(int(a + (b - a) * t) for a, b in zip(top, bottom))
                     p.px((fx + i, fy + j), k(c, 1.0 + p.rnd.uniform(-0.05, 0.05)), glow=True)
     else:
         raise ValueError(style)

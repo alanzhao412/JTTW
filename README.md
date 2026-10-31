@@ -142,6 +142,68 @@ Unstoppable Force III, Primordial Smite III, the Bell of Taiyi. Pinned: Territor
 Wave III's bubble, the Frost Head's shard (and, against players, Biancheng's bell and the Daoist
 disciples' binding talismans).
 
+### The Victorious Fighting Buddha (斗战胜佛)
+
+At level 100, the cap, Sun Wukong becomes the Victorious Fighting Buddha, as the Buddha names him at
+the journey's end ([`FightingBuddha`](src/main/java/com/jttw/engine/character/wukong/FightingBuddha.java)).
+It is a free milestone, reached by level alone. It is announced once, with a title, a chat message,
+a bell and a burst of gold, and the server is told too. A save that is already at level 100 gets the
+announcement on its next login. The character screen's Skills tab (H) lists the milestone and its four
+powers, and the skill tree (K) shows them beneath the tree. No other character gets any of this, and
+neither does Wukong below level 100.
+
+- **Indestructible Body.** Nothing damages him: other players, mobs, bosses, arrows, fire, lava,
+  falling, drowning, the void, magic, poison, wither, explosions, lightning and anything else. The hit
+  is refused before it lands, so he loses no health, does not flinch and is not knocked back.
+  Explosions do not push him either. No harmful effect takes hold, including the mod's Stunned and
+  Pinned. Anything that gets past the events anyway (health set down directly, fire, frost, lost air)
+  is undone every tick. In the void he is unharmed and is left where he is: he can fall through it or
+  stay in it. Only an operator's `/kill` still kills him.
+- **Appear and Disappear** (Shift + B, a toggle,
+  [`BuddhaVanish`](src/main/java/com/jttw/engine/character/wukong/BuddhaVanish.java)). The server
+  holds this state and saves it. While he is vanished, no other player's game is told he exists
+  (`ServerPlayerVanishMixin` stops the server pairing him with their clients, as for a spectator), so
+  they see no body, armour, held item, name tag, shadow or particles. He is also silent. Every mob
+  that was targeting him lets go: its target, its brain's attack target and grudge, and a neutral
+  mob's anger. No mob can take him as a target, and mob senses count him as unseen. When he
+  reappears, the other players' games are told at once, with a golden flash and a chime. His own HUD
+  shows that he is vanished.
+- **Breaks Anything** ([`BuddhaBreaking`](src/main/java/com/jttw/engine/character/wukong/BuddhaBreaking.java)).
+  Every block his abilities break ignores hardness and every protection. This covers the Ruyi Jingu
+  Bang's blasts, its growing and its fall, the Qi Wave and the Fiery Golden Eyes' laser. It includes
+  bedrock (the world's floor too), obsidian, reinforced deepslate, the mod's tough stone, the
+  Bottomless Cave's rock, Lion-Camel's fabric and gates, and the technical blocks: command, structure
+  and jigsaw blocks, barriers, light blocks, and end portals and gateways. There are no exceptions.
+  - Carving budgets still apply, but no block costs him more than stone does.
+  - No block resists his blasts more than stone, so they make the crater they would make in stone.
+- **Somersault Anywhere** (Shift + M, a menu,
+  [`SomersaultTravel`](src/main/java/com/jttw/engine/character/wukong/SomersaultTravel.java)). The key
+  asks the server for the menu, which lists:
+  - every online player, in any realm
+  - the world spawn and his respawn point
+  - each realm
+  - each zone's region (the four seas each) and its boss's lair
+  - Fengdu's Gate of Ghosts, and Mount Kunlun's palace and Jade Pool
+  - Hell's arrival and each of the Ten Courts
+  - Heaven's arrival and the Jade Palace
+  - typed coordinates (x, y, z and a realm)
+
+  The server finds where the choice is and sets him down at the nearest spot with solid ground and
+  room for his body. If there is none, it uses the nearest open space, then the top of the column. If
+  he is enclosed in rock, room is cleared for him. He never lands inside a block. A golden streak
+  rises where he leaves and falls where he lands (nothing shows if he is vanished). The cooldown is
+  3 seconds.
+
+He looks the part ([`FightingBuddhaLayer`](src/main/java/com/jttw/engine/client/renderer/FightingBuddhaLayer.java),
+model and skins from [`assets_source/fighting_buddha.py`](assets_source/fighting_buddha.py)). Over
+his own body and his armour he wears:
+- a golden patched kasaya worn over the left shoulder, with a red-and-gold sash and its ring
+- a gold-ringed fillet with a jewel and temple rings
+- a gold armlet
+
+Behind his head a halo of golden light slowly turns, and behind his body an aura of golden flame
+breathes. Both are drawn full-bright, and motes of gold drift round him.
+
 ### The 18, 36 and 72 Transformations
 
 Three transformation arts, each with its own menu and its own forms per level. A character practises

@@ -86,6 +86,7 @@ public class SomersaultScreen extends Screen {
             case "minecraft:the_end" -> "The End";
             case "jttw_engine:hell" -> "Hell";
             case "jttw_engine:heaven" -> "Heaven";
+            case "jttw_engine:great_void" -> "Great Void";
             default -> r.substring(r.indexOf(':') + 1);
         };
     }

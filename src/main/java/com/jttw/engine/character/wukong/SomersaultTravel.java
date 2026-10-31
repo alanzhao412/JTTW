@@ -117,6 +117,7 @@ public final class SomersaultTravel {
         if (dim.equals(Level.END)) return "The End";
         if (dim.equals(JTTWDimensions.HELL)) return "Hell (Diyu)";
         if (dim.equals(JTTWDimensions.HEAVEN)) return "Heaven";
+        if (dim.location().getPath().equals("great_void")) return "The Great Void";
         return dim.location().toString();
     }
 
