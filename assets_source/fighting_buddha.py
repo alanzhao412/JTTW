@@ -258,7 +258,8 @@ BUDDHA = mirrored([
     part('armlet', 'right_arm', (0, 0, 0), (0, 0, 0), [(-3.95, 0.4, -2.85, 5.8, 1.0, 5.7, 'gold_band')]),
     part('right_sleeve_wide', 'right_arm', (-1, 3.8, 0), (0.08, 0, 0.05), [
         (-2.9, 0, -3.3, 5.8, 6.0, 6.6, 'wide_sleeve'), (-3.05, 5.4, -3.45, 6.1, 0.9, 6.9, 'sleeve_hem')]),
-    part('right_hand', 'right_arm', (-1, 8.0, 0), (0, 0, 0), [(-1.8, 0, -1.9, 3.6, 2.8, 3.8, 'hand'),
+    # the hand hangs from the wide sleeve (the forearm), which bends at the elbow to grip the staff at rest
+    part('right_hand', 'right_sleeve_wide', (0, 4.2, 0), (-0.08, 0, -0.05), [(-1.8, 0, -1.9, 3.6, 2.8, 3.8, 'hand'),
                                                             (-2.05, -0.5, -2.15, 4.1, 0.8, 4.3, 'mala')]),
     part('left_kasaya_sleeve', 'left_arm', (0, 0, 0), (0, 0, 0), [(-1.55, -2.7, -2.85, 5.3, 7.2, 5.7, 'kasaya_sleeve')]),
     part('left_drape', 'left_arm', (3.6, -1.8, 0), ARM_DRAPE, [(0, 0, -2.9, 0.7, 13.5, 5.8, 'drape')]),

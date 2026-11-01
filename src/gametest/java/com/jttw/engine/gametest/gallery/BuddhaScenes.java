@@ -69,6 +69,8 @@ final class BuddhaScenes {
                 shot("buddha_front", false, 0f, front),
                 shot("buddha_quarter", false, -35f, new double[]{2.8, 1.8, 3.6, 0.5, 1.25, 0.5}),
                 shot("buddha_side", false, 90f, front),
+                // his right side: the staff at ease across the shoulder, gripped
+                shot("buddha_grip", false, -90f, new double[]{0.5, 1.8, 3.0, 0.5, 1.5, 0.5}),
                 shot("buddha_back", false, 180f, new double[]{0.5, 1.7, 4.4, 0.5, 1.3, 0.5}),
                 shot("buddha_afar", false, -25f, new double[]{3.5, 2.6, 6.5, 0.5, 1.2, 0.5}),
                 // the staff in hand (grown, so it is held, not carried at ease), and mid-swing

@@ -31,6 +31,7 @@ public class MonkeyKingLayer extends RenderLayer<AbstractClientPlayer, PlayerMod
                        float swing, float swingAmount, float partial, float age, float headYaw, float headPitch) {
         if (!FightingBuddhaClient.drawnAsMonkey(p)) return;
         model.pose(getParentModel(), age, swingAmount);
+        if (com.jttw.engine.client.StaffGrip.gripping(p)) model.gripStaff();
         model.render(pose, buffers, light, LivingEntityRenderer.getOverlayCoords(p, 0));
     }
 }

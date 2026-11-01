@@ -112,6 +112,8 @@ public class HumanoidModelMixin<T extends LivingEntity> {
      */
     private void jttw$staffAtEase(net.minecraft.world.entity.player.Player p) {
         if (!com.jttw.engine.client.StaffStance.resting(p)) return;
+        // drawn as the Monkey King or the Buddha: the arm raised, the forearm folded to grip it (StaffGrip)
+        if (com.jttw.engine.client.StaffGrip.poseUpperArm(p, rightArm)) return;
         rightArm.xRot = GRIP_FORWARD;
         rightArm.yRot = GRIP_IN;
         rightArm.zRot = 0.05f;
