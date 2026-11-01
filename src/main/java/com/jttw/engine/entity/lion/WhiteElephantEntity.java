@@ -68,12 +68,14 @@ import java.util.List;
 public class WhiteElephantEntity extends DemonKingEntity {
 
     public static final int LEVEL = com.jttw.engine.entity.zone.ZoneBoss.levelOver(com.jttw.engine.world.Zones.LION_CAMEL) - 2;
+    /** The level of character he is measured against, past the cap's reach ({@link com.jttw.engine.entity.zone.ZoneBoss#measuredAt}). */
+    public static final int MEASURED = com.jttw.engine.entity.zone.ZoneBoss.measuredAt(LEVEL);
     public static final int LANCE_PERCENT = 28, CRUSH_PERCENT = 8, STAMP_PERCENT = 16, GORE_PERCENT = 22;
     /** What a held foe must deal his trunk, in ordinary hits of a level-113 character, to be dropped. */
     public static final double ESCAPE_HITS = 3.4;
     public static final double HITS = 330, LANCE = LANCE_PERCENT / 100.0, CRUSH = CRUSH_PERCENT / 100.0,
             STAMP = STAMP_PERCENT / 100.0, GORE = GORE_PERCENT / 100.0;
-    public static final double HEALTH = HITS * MobScaling.typicalHit(LEVEL);
+    public static final double HEALTH = HITS * MobScaling.typicalHit(MEASURED);
     public static final int GRAB_EVERY = 200, GRAB_ENRAGED = 130, TRUNK_WINDUP = 15, SQUEEZE_EVERY = 15, MAX_HOLD = 60;
     public static final int STAMP_EVERY = 140, STAMP_WINDUP = 12, CHARGE_EVERY = 200, CHARGE_TICKS = 24, FOLLOWERS = 2;
     public static final double GRAB_REACH = 6, STAMP_RANGE = 5, CHARGE_NEAR = 5, CHARGE_FAR = 14;
@@ -104,7 +106,7 @@ public class WhiteElephantEntity extends DemonKingEntity {
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, HEALTH)
-                .add(Attributes.ATTACK_DAMAGE, LANCE * MobScaling.typicalHealth(LEVEL))
+                .add(Attributes.ATTACK_DAMAGE, LANCE * MobScaling.typicalHealth(MEASURED))
                 .add(Attributes.MOVEMENT_SPEED, 0.25)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0)
                 .add(Attributes.ARMOR, 16)
@@ -289,7 +291,7 @@ public class WhiteElephantEntity extends DemonKingEntity {
     }
 
     public float crushDamage() {
-        return (float) (CRUSH * MobScaling.typicalHealth(LEVEL));
+        return (float) (CRUSH * MobScaling.typicalHealth(MEASURED));
     }
 
     /** His trunk crushes what it holds. */
@@ -332,7 +334,7 @@ public class WhiteElephantEntity extends DemonKingEntity {
     // ── Stamping and charging ───────────────────────────────────────────
 
     public float stampDamage() {
-        return (float) (STAMP * MobScaling.typicalHealth(LEVEL));
+        return (float) (STAMP * MobScaling.typicalHealth(MEASURED));
     }
 
     /** How far round him his stamping (his trampling, in his true form) strikes. */
@@ -360,7 +362,7 @@ public class WhiteElephantEntity extends DemonKingEntity {
     }
 
     public float goreDamage() {
-        return (float) (GORE * MobScaling.typicalHealth(LEVEL));
+        return (float) (GORE * MobScaling.typicalHealth(MEASURED));
     }
 
     /** He charges toward {@code target}, tusks down. Returns whether he set off. */

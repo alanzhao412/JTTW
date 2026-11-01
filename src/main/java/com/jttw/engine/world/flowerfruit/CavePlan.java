@@ -179,7 +179,7 @@ public final class CavePlan {
     public static final List<Sign> SIGNS = List.of(
             new Sign(-1, 13, GATE_Z + 1, Direction.SOUTH, new String[]{"花果山福地", "Blessed Land of", "Flower-Fruit", "Mountain"}),
             new Sign(1, 13, GATE_Z + 1, Direction.SOUTH, new String[]{"水帘洞洞天", "Cave Heaven of", "Water Curtain", "Cave"}),
-            new Sign(TUNNEL_X + 4, 3, -11, Direction.SOUTH, new String[]{"Beyond sits one", "who calls himself", "the Great Sage", "§4Lv 80 — beware"}));
+            new Sign(TUNNEL_X + 4, 3, -11, Direction.SOUTH, new String[]{"Beyond sits one", "who calls himself", "the Great Sage", "§4Lv 120 — beware"}));
 
     // ── The blocks ──────────────────────────────────────────────────────
 

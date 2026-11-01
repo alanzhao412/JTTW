@@ -71,6 +71,31 @@ public abstract class ZoneBoss extends Monster implements MobLevel {
         return zone.maxLevel() + LEVELS_ABOVE_BAND;
     }
 
+    /** Up to this level a boss is measured against a character of its own level; past it, see {@link #measuredAt}. */
+    public static final int MEASURED_OWN_UP_TO = 92;
+    /** The boss level at which the measure reaches the players' cap. */
+    public static final int MEASURED_CAP_AT = 115;
+
+    /**
+     * The level of character a boss of {@code level} is measured against, its health and its blows: its
+     * own up to {@value #MEASURED_OWN_UP_TO} (Red Boy); past it, levels count for less, reaching the
+     * players' cap of 100 at {@value #MEASURED_CAP_AT} (the Azure Lion) and holding there (the
+     * Six-Eared Macaque). So Zhenyuan and the Hundred-Eyed Demon Lord (103) are a level-96 group's
+     * fight, the White Elephant (113) a level-99 one's, and every boss past them a capped group's:
+     * none is out of reach of players at the cap, and none one-shots them.
+     */
+    public static int measuredAt(int level) {
+        int cap = com.jttw.engine.progression.level.LevelConstants.MAX_LEVEL;
+        if (level <= MEASURED_OWN_UP_TO) return level;
+        double over = (level - MEASURED_OWN_UP_TO) * (cap - MEASURED_OWN_UP_TO) / (double) (MEASURED_CAP_AT - MEASURED_OWN_UP_TO);
+        return (int) Math.min(cap, Math.round(MEASURED_OWN_UP_TO + over));
+    }
+
+    /** The level of character it is measured against: see {@link #measuredAt}. */
+    public int measuredLevel() {
+        return measuredAt(mobLevel());
+    }
+
     /** The least ordinary hits of a same-level character a boss takes to kill, all its lives together. */
     public static final double LEAST_HITS = 250;
     /** A boss's main blow, at least and at most, as a share of a same-level character's health: three or four kill. */
@@ -148,9 +173,9 @@ public abstract class ZoneBoss extends Monster implements MobLevel {
         return new double[0];
     }
 
-    /** A hit of {@code share} of a same-level character's health, as it lands from it, at its level. */
+    /** A hit of {@code share} of a same-level character's health, as it lands from it, at its measured level. */
     public float hitOf(double share) {
-        return (float) (share * MobScaling.typicalHealth(mobLevel()));
+        return (float) (share * MobScaling.typicalHealth(measuredLevel()));
     }
 
     /**

@@ -2,9 +2,6 @@ package com.jttw.engine.entity.flowerfruit;
 
 import com.jttw.engine.entity.MobScaling;
 import com.jttw.engine.entity.zone.ZoneBoss;
-import com.jttw.engine.progression.stats.ProgressionClass;
-import com.jttw.engine.progression.stats.StatBlock;
-import com.jttw.engine.reincarnation.ReincarnationOutcome;
 import com.jttw.engine.entity.zone.ZoneMonster;
 import com.jttw.engine.registry.FlowerFruitRegistry;
 import com.jttw.engine.world.Zones;
@@ -51,13 +48,13 @@ import java.util.List;
  * ears hear all things a thousand li off. He beat the Tang Monk, stole his luggage and took
  * Flower-Fruit Mountain, meaning to go west himself with a false pilgrimage of his own.
  *
- * <p>An optional boss, the Monkey King's double: <b>level {@value #LEVEL}</b>, and as strong as the
- * Monkey King himself at that level, so measured not against a typical character but against a
- * level-{@value #LEVEL} Wukong (some twice a typical one's health and hit there); in a sanctum of his
- * own at the back of the Water Curtain Cave (no one has to face him to have the rest of the
- * mountain). {@value #HITS} of that Wukong's ordinary hits, his staff's blow {@value #STAFF} of that
- * Wukong's health: a group of level-80 Wukongs' fight, and some 150 hits of a typical level-100
- * character, his blow a tenth of one's health. His kit is the Monkey King's own, mirrored:
+ * <p>The strongest boss in the world, and an optional one: <b>level {@value #LEVEL}</b>, past the
+ * players' cap, in a sanctum of his own at the back of the Water Curtain Cave (no one has to face him
+ * to have the rest of the mountain). Measured against a capped character ({@link ZoneBoss#measuredAt}):
+ * {@value #HITS} of a level-100 character's ordinary hits, more than any other boss; his staff's blow
+ * {@value #STAFF} of one's health, the top of a boss's band, so three or four kill and none one-shots.
+ * A group of capped players' fight, and out of reach below the cap. His kit is the Monkey King's own,
+ * mirrored:
  * <ul>
  *   <li>his <b>iron staff</b>, banded in gold: blows of a third of a character's health;</li>
  *   <li><b>the whirling staff</b>: he spins it over his head ({@value #SPIN_WINDUP} ticks, the
@@ -79,13 +76,12 @@ import java.util.List;
  */
 public class SixEaredMacaqueEntity extends ZoneBoss {
 
-    public static final int LEVEL = 80;
-    /** What he is measured against: the Monkey King at his level (no furnace boon), his health and his ordinary hit. */
-    private static final StatBlock WUKONG = StatBlock.compute(ProgressionClass.PRIMORDIAL, ReincarnationOutcome.CELESTIAL_PRIMATE, LEVEL);
-    public static final double WUKONG_HEALTH = WUKONG.maxHealth(), WUKONG_HIT = MobScaling.ORDINARY_HIT * WUKONG.attackDamage();
-    /** 430 ordinary hits of a level-80 Wukong; his staff's blow 33% of that Wukong's health, his specials no harder. */
+    public static final int LEVEL = 120;
+    /** The level of character he is measured against: the players' cap ({@link ZoneBoss#measuredAt}). */
+    public static final int MEASURED = ZoneBoss.measuredAt(LEVEL);
+    /** The hardest boss there is: 430 ordinary hits of a capped character; his staff's blow 33% of one's health, his specials no harder. */
     public static final double HITS = 430, STAFF = 0.33, SPIN = 0.30, DASH = 0.28, SLAM = 0.33;
-    public static final double HEALTH = HITS * WUKONG_HIT;
+    public static final double HEALTH = HITS * MobScaling.typicalHit(MEASURED);
     public static final int SPIN_WINDUP = 20, SPIN_EVERY = 120, DASH_WINDUP = 12, DASH_EVERY = 150,
             CLONE_WINDUP = 16, CLONE_EVERY = 600, CLONES = 3, CLONES_LATE = 5, SLAM_WINDUP = 26, SLAM_EVERY = 140, BREATHER = 30;
     public static final double SPIN_RANGE = 5.5, DASH_REACH = 16, DASH_STEP = 2.2, DASH_WIDTH = 1.6, SLAM_LENGTH = 14, SLAM_WIDTH = 1.6;
@@ -113,7 +109,7 @@ public class SixEaredMacaqueEntity extends ZoneBoss {
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, HEALTH)
-                .add(Attributes.ATTACK_DAMAGE, STAFF * WUKONG_HEALTH)
+                .add(Attributes.ATTACK_DAMAGE, STAFF * MobScaling.typicalHealth(MEASURED))
                 .add(Attributes.MOVEMENT_SPEED, 0.32)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0)
                 .add(Attributes.ARMOR, 12)
@@ -240,15 +236,15 @@ public class SixEaredMacaqueEntity extends ZoneBoss {
     }
 
     public float spinDamage() {
-        return (float) (SPIN * WUKONG_HEALTH);
+        return (float) (SPIN * MobScaling.typicalHealth(MEASURED));
     }
 
     public float dashDamage() {
-        return (float) (DASH * WUKONG_HEALTH);
+        return (float) (DASH * MobScaling.typicalHealth(MEASURED));
     }
 
     public float slamDamage() {
-        return (float) (SLAM * WUKONG_HEALTH);
+        return (float) (SLAM * MobScaling.typicalHealth(MEASURED));
     }
 
     private double scaled(double d) {

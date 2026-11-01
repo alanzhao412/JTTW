@@ -74,6 +74,8 @@ import java.util.UUID;
 public class ZhenyuanEntity extends TempleImmortal {
 
     public static final int LEVEL = com.jttw.engine.entity.zone.ZoneBoss.levelOver(com.jttw.engine.world.Zones.MOUNT_WUZHUANG);
+    /** The level of character he is measured against, past the cap's reach ({@link com.jttw.engine.entity.zone.ZoneBoss#measuredAt}). */
+    public static final int MEASURED = com.jttw.engine.entity.zone.ZoneBoss.measuredAt(LEVEL);
     /**
      * 280 of a level-103 character's ordinary hits, a group's fight (more, hand to hand: he brushes
      * one blow in four aside); a whisk stroke of 28% of their health. No blow takes more than
@@ -110,8 +112,8 @@ public class ZhenyuanEntity extends TempleImmortal {
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
-                .add(Attributes.MAX_HEALTH, HITS * MobScaling.typicalHit(LEVEL))
-                .add(Attributes.ATTACK_DAMAGE, BLOW * MobScaling.typicalHealth(LEVEL))
+                .add(Attributes.MAX_HEALTH, HITS * MobScaling.typicalHit(MEASURED))
+                .add(Attributes.ATTACK_DAMAGE, BLOW * MobScaling.typicalHealth(MEASURED))
                 .add(Attributes.MOVEMENT_SPEED, 0.28)
                 .add(Attributes.ARMOR, 16)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0)

@@ -716,7 +716,7 @@ public class WuzhuangGameTests {
         }
         for (IronGolem g : List.of(a, b, steps, far)) eq(h, full, g.getHealth(), "nothing struck while it whirls");
         zh.tickSweep();
-        double gale = ZhenyuanEntity.SWEEP * MobScaling.typicalHealth(ZhenyuanEntity.LEVEL);
+        double gale = ZhenyuanEntity.SWEEP * MobScaling.typicalHealth(ZhenyuanEntity.MEASURED);
         close(h, gale, full - a.getHealth(), "the gale strikes the one");
         close(h, gale, full - b.getHealth(), "and the other");
         eq(h, full, steps.getHealth(), "not the one who stepped back in time");
@@ -745,7 +745,7 @@ public class WuzhuangGameTests {
         openAir(h);
         ServerPlayer p = player(h);
         ZhenyuanEntity zh = immortal(h, ModEntities.ZHENYUAN.get(), new BlockPos(2, 2, 2), false);
-        close(h, ZhenyuanEntity.HITS * MobScaling.typicalHit(ZhenyuanEntity.LEVEL), zh.getMaxHealth(), "280 hits of a character of his level");
+        close(h, ZhenyuanEntity.HITS * MobScaling.typicalHit(ZhenyuanEntity.MEASURED), zh.getMaxHealth(), "280 hits of a character of the level he is measured at");
         eq(h, BossEvent.BossBarColor.YELLOW, zh.bossBar().getColor(), "his bar");
         check(h, zh.getDisplayName().getString().endsWith("· Lv 103"), "named: " + zh.getDisplayName().getString());
         zh.stagger();

@@ -6,9 +6,6 @@ import com.jttw.engine.entity.flowerfruit.FakePilgrimEntity;
 import com.jttw.engine.entity.flowerfruit.FlowerFruitMonster;
 import com.jttw.engine.entity.flowerfruit.GreatBaboonEntity;
 import com.jttw.engine.entity.flowerfruit.MacaqueCloneEntity;
-import com.jttw.engine.progression.stats.ProgressionClass;
-import com.jttw.engine.progression.stats.StatBlock;
-import com.jttw.engine.reincarnation.ReincarnationOutcome;
 import com.jttw.engine.entity.flowerfruit.SixEaredMacaqueEntity;
 import com.jttw.engine.entity.flowerfruit.SpearApeEntity;
 import com.jttw.engine.entity.flowerfruit.StoneGibbonEntity;
@@ -62,12 +59,12 @@ import static com.jttw.engine.gametest.character.CharTest.as;
  * Flower-Fruit Mountain: its monkeys (their ranks and their warned attacks: the gibbon's stones, the
  * spear ape's lunge, the great baboon's pound), the monkey truce (they spare the true Monkey King and
  * kneel to him; the fake pilgrims and the Macaque do not), the fake pilgrims' tricks, the Six-Eared
- * Macaque (level 80, a level-80 Wukong's equal, his whirling staff, cloud somersault, hair clones, Dharma image and
+ * Macaque (level 120, his whirling staff, cloud somersault, hair clones, Dharma image and
  * heaven-splitting blow, kept to his sanctum), what they leave, the band's XP and karma, and the
  * Water Curtain Cave's plan in blocks. The island's placement and shape: {@code FlowerFruitPlacementTest}.
  *
- * <p>Each test runs in a batch of its own: the monkeys rouse each other, and a boss of his
- * strength is nothing to share a world with.
+ * <p>Each test runs in a batch of its own: the monkeys rouse each other, and a level-120 boss is
+ * nothing to share a world with.
  */
 @GameTestHolder(JTTWEngine.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -310,22 +307,19 @@ public class FlowerFruitGameTests {
     // ── The Six-Eared Macaque ───────────────────────────────────────────
 
     @GameTest(batch = "ff_macaque", template = PLATFORM)
-    public static void theSixEaredMacaqueIsALevel80WukongsEqual(GameTestHelper h) {
+    public static void theSixEaredMacaqueIsALevel120Superboss(GameTestHelper h) {
         SixEaredMacaqueEntity m = macaque(h, new BlockPos(2, 2, 2));
         m.setNoAi(true);
-        eq(h, 80, m.mobLevel(), "level 80");
-        check(h, m.getDisplayName().getString().contains("Six-Eared Macaque") && m.getDisplayName().getString().contains("Lv 80"), m.getDisplayName().getString());
+        eq(h, 120, m.mobLevel(), "level 120");
+        check(h, m.getDisplayName().getString().contains("Six-Eared Macaque") && m.getDisplayName().getString().contains("Lv 120"), m.getDisplayName().getString());
         eq(h, BossEvent.BossBarColor.YELLOW, m.bossBar().getColor(), "a yellow bar");
-        // measured against the Monkey King at 80, not a typical character of 80
-        var wukong = StatBlock.compute(ProgressionClass.PRIMORDIAL, ReincarnationOutcome.CELESTIAL_PRIMATE, 80);
-        close(h, SixEaredMacaqueEntity.HITS * MobScaling.ORDINARY_HIT * wukong.attackDamage(), m.getMaxHealth(), "430 hits of a level-80 Wukong");
-        close(h, SixEaredMacaqueEntity.STAFF * wukong.maxHealth(), m.getAttributeValue(Attributes.ATTACK_DAMAGE), "his staff a third of that Wukong's health");
-        check(h, wukong.maxHealth() > MobScaling.typicalHealth(80) * 1.5, "a level-80 Wukong far over a typical character of 80");
-        // beatable: a group of capped players' fight, not an endless one
-        double capped = m.getMaxHealth() / MobScaling.typicalHit(100), blow = m.getAttributeValue(Attributes.ATTACK_DAMAGE) / MobScaling.typicalHealth(100);
-        check(h, capped >= 100 && capped <= 250, "a group of level-100 players' fight: " + capped + " of their hits");
-        check(h, blow >= 0.05 && blow <= 0.2, "his blow no one-shot of a level-100 player: " + blow);
-        check(h, Zones.FLOWER_FRUIT.minLevel() == 20 && m.mobLevel() > Zones.FLOWER_FRUIT.maxLevel() + 40, "far past his zone's band");
+        // measured against a capped character: a group of level-100 players' fight, no one-shot
+        eq(h, 100, SixEaredMacaqueEntity.MEASURED, "measured at the cap");
+        close(h, SixEaredMacaqueEntity.HITS * MobScaling.typicalHit(100), m.getMaxHealth(), "430 hits of a level-100 character");
+        close(h, SixEaredMacaqueEntity.STAFF * MobScaling.typicalHealth(100), m.getAttributeValue(Attributes.ATTACK_DAMAGE), "his staff a third of a level-100 character's health");
+        // and out of reach below the cap: a level-90 character dies to one blow
+        check(h, m.getAttributeValue(Attributes.ATTACK_DAMAGE) > MobScaling.typicalHealth(90) * 0.8, "near enough a level-90 character's whole health");
+        check(h, Zones.FLOWER_FRUIT.minLevel() == 20 && m.mobLevel() > Zones.FLOWER_FRUIT.maxLevel() + 80, "far past his zone's band");
         h.succeed();
     }
 
@@ -339,7 +333,7 @@ public class FlowerFruitGameTests {
         float ha = a.getHealth(), hb = b.getHealth();
         List<LivingEntity> hit = m.spin();
         check(h, hit.contains(a) && hit.contains(b) && a.getHealth() < ha && b.getHealth() < hb, "all round him struck");
-        check(h, m.spinDamage() <= SixEaredMacaqueEntity.STAFF * SixEaredMacaqueEntity.WUKONG_HEALTH + 1e-3, "no harder than his blow");
+        check(h, m.spinDamage() <= SixEaredMacaqueEntity.STAFF * MobScaling.typicalHealth(SixEaredMacaqueEntity.MEASURED) + 1e-3, "no harder than his blow");
         h.succeed();
     }
 
@@ -367,8 +361,8 @@ public class FlowerFruitGameTests {
         MacaqueCloneEntity c = clones.get(0);
         check(h, c.getDisplayName().getString().contains("Six-Eared Macaque"), "in his very likeness: " + c.getDisplayName().getString());
         check(h, !c.getPersistentData().contains(ZoneMonster.KEY_TIER), "a hair pays nothing");
-        close(h, MacaqueCloneEntity.HITS * MobScaling.typicalHit(SixEaredMacaqueEntity.LEVEL), c.getMaxHealth(), "frail");
-        check(h, c.getAttributeValue(Attributes.ATTACK_DAMAGE) <= 0.07 * MobScaling.typicalHealth(SixEaredMacaqueEntity.LEVEL), "a light mob's blow");
+        close(h, MacaqueCloneEntity.HITS * MobScaling.typicalHit(SixEaredMacaqueEntity.MEASURED), c.getMaxHealth(), "frail");
+        check(h, c.getAttributeValue(Attributes.ATTACK_DAMAGE) <= 0.07 * MobScaling.typicalHealth(SixEaredMacaqueEntity.MEASURED), "a light mob's blow");
         clones.forEach(x -> x.setNoAi(true));
         h.runAfterDelay(MacaqueCloneEntity.LIFE + 5, () -> {
             check(h, clones.stream().noneMatch(Entity::isAlive), "gone in half a minute");
@@ -503,7 +497,7 @@ public class FlowerFruitGameTests {
         check(h, CavePlan.at(15, CavePlan.STREAM_TOP, mid).is(Blocks.WATER), "the stream under it");
         check(h, CavePlan.at(0, 1, CavePlan.GATE_Z).isAir() && !CavePlan.at(10, 1, CavePlan.GATE_Z).isAir(), "the stone gate's doorway in its wall");
         check(h, CavePlan.at(0, 13, CavePlan.GATE_Z).is(Blocks.POLISHED_BLACKSTONE) && CavePlan.at(4, 13, CavePlan.GATE_Z).is(Blocks.GOLD_BLOCK), "the tablet's dark face over it, framed in gold");
-        check(h, CavePlan.SIGNS.stream().anyMatch(s -> String.join(" ", s.lines()).contains("Lv 80")), "a warning at the sanctum's way");
+        check(h, CavePlan.SIGNS.stream().anyMatch(s -> String.join(" ", s.lines()).contains("Lv 120")), "a warning at the sanctum's way");
         check(h, CavePlan.at(0, 1, 0).isAir(), "the hall open");
         check(h, CavePlan.at(0, 3, CavePlan.SANCTUM_THRONE_Z - 1) != null, "the false king's throne");
         check(h, CavePlan.at(0, 0, CavePlan.SANCTUM_Z).isSolid(), "the sanctum's floor");

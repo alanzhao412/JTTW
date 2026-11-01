@@ -46,8 +46,8 @@ public class MacaqueCloneEntity extends ZoneMonster {
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
-                .add(Attributes.MAX_HEALTH, HITS * MobScaling.typicalHit(SixEaredMacaqueEntity.LEVEL))
-                .add(Attributes.ATTACK_DAMAGE, BLOW * MobScaling.typicalHealth(SixEaredMacaqueEntity.LEVEL))
+                .add(Attributes.MAX_HEALTH, HITS * MobScaling.typicalHit(SixEaredMacaqueEntity.MEASURED))
+                .add(Attributes.ATTACK_DAMAGE, BLOW * MobScaling.typicalHealth(SixEaredMacaqueEntity.MEASURED))
                 .add(Attributes.MOVEMENT_SPEED, 0.33)
                 .add(Attributes.FOLLOW_RANGE, 40)
                 .add(Attributes.ENTITY_INTERACTION_RANGE, 3.5);
@@ -92,6 +92,17 @@ public class MacaqueCloneEntity extends ZoneMonster {
     @Override
     public Predicate<Player> allies() {
         return ZoneAllies.NONE;
+    }
+
+    /** Measured as he is, against a character of the level he is measured at ({@link com.jttw.engine.entity.zone.ZoneBoss#measuredAt}). */
+    @Override
+    public double healthAt(int level, boolean captain) {
+        return super.healthAt(com.jttw.engine.entity.zone.ZoneBoss.measuredAt(level), false);
+    }
+
+    @Override
+    protected int measuredLevel() {
+        return com.jttw.engine.entity.zone.ZoneBoss.measuredAt(mobLevel());
     }
 
     /** A hair: it pays no XP and leaves nothing. */

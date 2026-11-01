@@ -389,9 +389,9 @@ public class SpiderCaveGameTests {
         HundredEyedDemonEntity b = lord(h, new BlockPos(2, 2, 2));
         eq(h, 103, b.mobLevel(), "his band's top and fifteen");
         check(h, b.getDisplayName().getString().endsWith("· Lv 103"), b.getDisplayName().getString());
-        double hits = b.getMaxHealth() / MobScaling.typicalHit(103);
-        check(h, hits >= ZoneBoss.LEAST_HITS && hits <= 350, "a group's fight at his level: " + hits);
-        double blow = b.getAttributeValue(Attributes.ATTACK_DAMAGE) / MobScaling.typicalHealth(103);
+        double hits = b.getMaxHealth() / MobScaling.typicalHit(HundredEyedDemonEntity.MEASURED);
+        check(h, hits >= ZoneBoss.LEAST_HITS && hits <= 350, "a group's fight at the level he is measured at: " + hits);
+        double blow = b.getAttributeValue(Attributes.ATTACK_DAMAGE) / MobScaling.typicalHealth(HundredEyedDemonEntity.MEASURED);
         check(h, blow >= ZoneBoss.LEAST_BLOW && blow <= ZoneBoss.MOST_BLOW, "a boss's blow: " + blow);
         for (double special : new double[]{HundredEyedDemonEntity.LIGHT, HundredEyedDemonEntity.TEA, HundredEyedDemonEntity.SWEEP}) {
             check(h, special <= HundredEyedDemonEntity.SWORD, "no art harder than his blow: " + special);
@@ -427,7 +427,7 @@ public class SpiderCaveGameTests {
         float hp = g.getHealth();
         List<LivingEntity> caught = b.burstTea();
         check(h, caught.contains(g), "it bursts there");
-        close(h, HundredEyedDemonEntity.TEA * MobScaling.typicalHealth(103), hp - g.getHealth(), "the tea's hurt");
+        close(h, HundredEyedDemonEntity.TEA * MobScaling.typicalHealth(HundredEyedDemonEntity.MEASURED), hp - g.getHealth(), "the tea's hurt");
         check(h, g.hasEffect(SpiderCaveRegistry.VENOM), "and its venom");
         LivingEntity near = golem(h, new BlockPos(0, 2, 2));
         near.setDeltaMovement(Vec3.ZERO);

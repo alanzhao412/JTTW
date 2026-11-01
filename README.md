@@ -700,8 +700,8 @@ Ghosts is the way down to Hell for everyone who comes to it by an Ancient City a
 Far to the west stands Mount Kunlun, another such place: a towering sacred massif with the Queen
 Mother of the West's palace on its summit, where the Banana-Leaf Fan lies. Out in the sea near
 spawn rises Flower-Fruit Mountain, the Monkey King's old island, of the first band's levels; at the
-back of its Water Curtain Cave sits the Six-Eared Macaque, an optional superboss of level 80, as
-strong as the Monkey King himself at 80.
+back of its Water Curtain Cave sits the Six-Eared Macaque, an optional level-120 superboss, the
+strongest boss of all.
 
 **One of each a world.** Every boss lives in one place: each overworld zone has a single region a
 world (`ZoneMap`), except the Mystical Waters, which have one in each of the Four Seas, east, south,
@@ -712,7 +712,7 @@ west lengthens with the pilgrim: the higher a zone's levels, the farther out its
 |---|---|---|---|---|
 | White Bone Ridge | 20–36 | Lady White Bone 51 | 1–2 km | one, ~840 blocks across (never under 720) |
 | Black Wind Mountain | 20–36 (the ridge's band) | the Black Bear Demon 51 | 1–2 km | one, ~700 (never under 640), clear of the ridge |
-| Flower-Fruit Mountain (an island in the sea) | 20–30 (the ridge's band) | the Six-Eared Macaque 80 (a level-80 Wukong's equal), an optional superboss | 1–2 km | one, ~640, clear of the ridge and Black Wind |
+| Flower-Fruit Mountain (an island in the sea) | 20–30 (the ridge's band) | the Six-Eared Macaque 120, an optional superboss | 1–2 km | one, ~640, clear of the ridge and Black Wind |
 | Bottomless Cave (Pit-Hole Mountain and under it) | 37–46 | Lady Earth Flow 61 | 2–3 km | one, ~380 |
 | Mystical Waters (deep ocean) | 47–56 | the four Dragon Kings 71 | 3–4.5 km | four, one per sea (within 30° of east, south, west, north), ~440 |
 | Hell (a dimension, entered through Fengdu) | 57–66 | the Ten Kings 72–80, King Yama 81 | — | the Ten Courts |
@@ -727,9 +727,22 @@ west lengthens with the pilgrim: the higher a zone's levels, the farther out its
 `ZoneBoss.LEVELS_ABOVE_BAND` (15) more (`ZoneBoss.levelOver(zone)`), whatever its minions, captains
 and minibosses are (they keep within the band). Under him, a zone's lesser bosses keep their places:
 Hell's Ten Kings are King Yama's level less ten, one more each court (72 to 80), and the White Elephant
-is two under the Azure Lion. Past the players' cap of 100 a typical character's health and hits go on
-growing as they grew over the ten levels to the cap (`MobScaling`), so a boss's hits and blows are
-measured at its own level there as anywhere. Its kill pays a Boss's XP of its zone, as before.
+is two under the Azure Lion. **But no boss is out of reach of capped players**: a boss's hits and
+blows are measured against a character of its own level up to Red Boy's 92, and past it against a
+lower one, climbing to the cap of 100 at the Azure Lion's 115 and holding there
+(`ZoneBoss.measuredAt`):
+
+| Boss | Level | Measured at: the group that beats it |
+|---|---|---|
+| Red Boy and every boss under him | his own | his own level |
+| Zhenyuan, the Hundred-Eyed Demon Lord | 103 | 96 |
+| The White Elephant | 113 | 99 |
+| The Azure Lion | 115 | 100 |
+| The Six-Eared Macaque | 120 | 100, with more hits and his superboss's kit |
+
+So no boss one-shots a capped player (its blows at most a third of one's health), while a boss
+measured past a group's level is still far beyond it (the Macaque's blow is near enough a level-90
+character's whole health). Its kill pays a Boss's XP of its zone, as before.
 
 Where in its ring follows from the world seed and its biomes: earliest zone first, the places its
 layout offers (spread evenly over the ring by the seed) are tried in turn, and it takes the first on
@@ -831,20 +844,16 @@ A boss's lives are its `ZoneBoss.lives()` (Lady White Bone's four, whole each ti
 Zhuanlun's 200, and born again at half). By boss, in hits all lives together: Lady White Bone 300,
 Lady Earth Flow 270, the Dragon Kings 270, the Ten Kings 280 (Zhuanlun 300), King Yama 350, Red Boy
 320, the Black Bear Demon 300, Zhenyuan 280 (more hand to hand: he brushes one blow in four aside), the Hundred-Eyed Demon Lord 300, the White Elephant 330, the
-Azure Lion 350. Their health runs to tens of millions at level 100 and beyond, past vanilla's cap of 1024 max
+Azure Lion 350 (of a character of the level each is measured at). Their health runs to tens of millions, past vanilla's cap of 1024 max
 health: `JTTWEngine` lifts the cap (and attack's) to a billion.
-**One superboss** stands apart: the Six-Eared Macaque of Flower-Fruit Mountain, an optional fight at
-**level 80** (the only boss not at its band's top and 15), measured not against a typical character
-of 80 but against the Monkey King at 80, who has about twice a typical one's health and hit there:
-430 of a level-80 Wukong's hits, and a blow of 33% of that Wukong's health. A typical level-80
-character needs some 985 hits and dies to two blows; a typical level-90 one, some 400 hits and four
-blows; a typical level-100 one, some 150 hits, and takes ten. So a group of capped players beats
-him. He is over every boss of his level and below, in health and blow, about Red Boy's match (92),
-and short of the bosses past level 100.
+**One superboss** stands over them all: the Six-Eared Macaque of Flower-Fruit Mountain, an optional
+fight at **level 120** (past the players' cap and every head boss, the only boss not at its band's
+top and 15), measured at the cap: 430 hits of a level-100 character and a blow of 33% of one's
+health, so three or four kill: the strongest boss there is. He is meant for a group of capped
+characters; below the cap he is out of reach.
 `PeckingOrderGameTests` makes every creature of the mod in each of its ranks and fails if any hits
 out of its place, any boss is under 250 hits (or over 360, but for the one named superboss exception,
-the Macaque, up to 460 of a level-80 Wukong's hits, whom it checks is over every boss up to his
-level and a fight for capped players), or any boss's life is no more than the toughest miniboss's;
+the Macaque, up to 460, whom it checks is the strongest boss there is), or any boss's life is no more than the toughest miniboss's;
 any boss's special hit is harder than a boss's blow may be; or any boss is not above everything else
 of its zone (fortress and garrison posts counted: White Bone Cave's, the Bottomless Cave's
 households, the Fire Cloud Cave's, Lion-Camel's floors), its head boss at its band's top and 15.
@@ -1719,7 +1728,7 @@ left to its host.
   temple's disciples and fight to the death; struck down, Clear Wind always leaves the **Golden
   Striker**, Bright Moon the **Silk-Lined Tray**: the two things it takes to bring a fruit down whole.
   Each pays as a General.
-- **The Great Immortal Zhenyuan** (镇元大仙, `ZhenyuanEntity`, a `ZoneBoss`, level 103, 280 hits,
+- **The Great Immortal Zhenyuan** (镇元大仙, `ZhenyuanEntity`, a `ZoneBoss`, level 103, 280 hits of a level-96 character (the level he is measured at),
   28%, yellow bar). **Not at his temple**: as in the novel, he is away (hearing the Primordial Lord
   lecture), and no lair puts him there. **He comes back for whoever kills the last of his
   disciples** (`TempleRecord`, saved data of the overworld keyed by the temple's region centre, so it
@@ -1883,7 +1892,7 @@ Mount Wuzhuang's band, on the ground (Wuzhuang is in the sky).
   fresh binding web springs up where each stood. At half her health she **calls her sons**: two insect
   demons come (once). Her death loosens her bower's seal, and is remembered.
 - **The Hundred-Eyed Demon Lord** (百眼魔君, `HundredEyedDemonEntity`, a `ZoneBoss`, level **103**: his
-  band's top and fifteen, towering over the ridge he keeps; 300 hits of a character of his level, a
+  band's top and fifteen, towering over the ridge he keeps; 300 hits of a level-96 character, the level he is measured at, a
   yellow bar), a centipede spirit in a Daoist's yellow robe, sworn brother of the seven, who poisoned
   the Tang Monk's tea. His blow, a cut of his Daoist sword: 28% (four kill). Every art is shown first:
   - **the golden light of his thousand eyes** (金光): every 16 s (11 s once his robe is off) he flings
@@ -2067,7 +2076,7 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   falls away (smoke, fire, the ground shaking; no blow lands on him nor does he strike; a captive is
   let go), then the beast stands in his place, in another model and a larger body, and the players
   near are told what he is. The true form is synced and saved; the fight goes on in it.
-- **The Azure Lion** (青狮, Manjushri's lion; `AzureLionEntity`, a `ZoneBoss`, level 115, 350 hits,
+- **The Azure Lion** (青狮, Manjushri's lion; `AzureLionEntity`, a `ZoneBoss`, level 115, 350 hits of a level-100 character (the level he is measured at),
   an azure bar, in the throne room): a hulking demon king in dark lacquered armour, a wild green-blue
   mane bristling about a snarling maw, clawed hands, a giant's broadsword: blows of 30%. Every 9 s he throws back his head
   and **roars**: a cone 12 blocks long, 12%, Slowness II and Weakness, thrown back. Every 13 s, a foe
@@ -2082,7 +2091,7 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   twice as often and from 6 blocks, and **pounces** on a foe 5–13 blocks off, jaws first: if they
   reach the foe as he lands, it is swallowed (inside the lion as inside the demon king, and fought
   out of him the same way).
-- **The White Elephant** (白象, Samantabhadra's six-tusked elephant; `WhiteElephantEntity`, level 113,
+- **The White Elephant** (白象, Samantabhadra's six-tusked elephant; `WhiteElephantEntity`, level 113, measured at 99,
   330 hits, a white bar, in the throne room): a giant in ivory-and-gold plate, a great domed
   elephant's head under a gold war-frontlet, ears like sails, a heavy trunk, six tusks, a giant's
   lance held upright: thrusts of 28%. Every 10 s, a foe within 6
@@ -2407,7 +2416,7 @@ the axis of the world, the reason the Overworld's sky was raised (see **The tall
 
 ---
 
-#### Flower-Fruit Mountain (levels 20–30; the Six-Eared Macaque, level 80)
+#### Flower-Fruit Mountain (levels 20–30; the Six-Eared Macaque, level 120)
 
 Flower-Fruit Mountain (花果山, the Monkey King's old kingdom) and the Water Curtain Cave (水帘洞)
 behind its waterfall, taken by the Six-Eared Macaque (六耳猕猴, chapters 56–58), who wore the Monkey
@@ -2489,16 +2498,16 @@ luggage and made himself a false pilgrimage to fetch the scriptures in his place
   likeness, a monkey's tail under his robe; struck down, the likeness falls away. You kill one in
   **40 hits** (a captain's 25, and 1.6x); a blow is 19% (6 kill you), a trick 13%. (The novel's fake
   white horse is left out.)
-- **The Six-Eared Macaque** (`SixEaredMacaqueEntity`, a level-80 Wukong's equal, and
-  **optional**): level **80**, in **his sanctum** at the back of the cave, a
+- **The Six-Eared Macaque** (`SixEaredMacaqueEntity`, the strongest boss in the world, and
+  **optional**): level **120**, past the players' cap, in **his sanctum** at the back of the cave, a
   tunnel off the great hall with a warning at its mouth ("Beyond sits one who calls himself the Great
-  Sage", Lv 80); no one has to face him to have the rest of the mountain, its army, its pilgrims and
+  Sage", Lv 120); no one has to face him to have the rest of the mountain, its army, its pilgrims and
   its cave. The sanctum: a round hall under a 30-high vault, six gold-banded black pillars (one for
   each ear) with soul fire at their feet, his throne of black stone and gold on its steps under torn
   yellow banners. He is the Monkey King's mirror: the phoenix-plumed cap, the gold fillet, golden chain
   mail, a tiger-skin kilt, a red cloak, an iron staff banded in gold, and three ears a side. **430
-  hits of a level-80 Wukong**, his staff a third of a level-80 Wukong's health (about 150 hits of a
-  level-100 character, and a tenth of one's health); a yellow bar; he speaks. His kit,
+  hits of a level-100 character**, his staff a third of a level-100 character's health (measured at
+  the cap, `ZoneBoss.measuredAt`: a capped group's fight, and three or four of his blows kill); a yellow bar; he speaks. His kit,
   each part warned:
   - **the whirling staff**: he spins it over his head (1 s), then sweeps it round him: 30%, all within
     5.5 blocks thrown back;
@@ -2529,7 +2538,7 @@ luggage and made himself a false pilgrimage to fetch the scriptures in his place
   the pilgrims' tricks, the Macaque's level, kit, phases and lair, loot, XP and karma, the cave in
   blocks), `FlowerFruitGarrisonGameTests` (the cave's garrison and a camp's band: marked, cleared,
   kept empty while someone is in it, mustered again when its time comes round),
-  `PeckingOrderGameTests` (the superboss exception, measured against a level-80 Wukong);
+  `PeckingOrderGameTests` (the superboss exception, and that he is the strongest boss);
   gallery scenes `-Pgallery.only=scene__ff_`; the island, its falls and its cave in a real world with
   `./gradlew runWorldgenBench -Pbench.mode=flowerfruit`.
 

@@ -73,11 +73,13 @@ import java.util.List;
 public class AzureLionEntity extends DemonKingEntity {
 
     public static final int LEVEL = com.jttw.engine.entity.zone.ZoneBoss.levelOver(com.jttw.engine.world.Zones.LION_CAMEL);
+    /** The level of character he is measured against, past the cap's reach ({@link com.jttw.engine.entity.zone.ZoneBoss#measuredAt}). */
+    public static final int MEASURED = com.jttw.engine.entity.zone.ZoneBoss.measuredAt(LEVEL);
     public static final int SWORD_PERCENT = 30, ROAR_PERCENT = 12, BELLY_PERCENT = 5;
     /** His health, in ordinary hits of a level-115 character; what a captive must deal from inside him (counted half again) to be retched up. */
     public static final double HITS = 350, ESCAPE_HITS = 5.4;
     public static final double SWORD = SWORD_PERCENT / 100.0, ROAR = ROAR_PERCENT / 100.0, BELLY = BELLY_PERCENT / 100.0;
-    public static final double HEALTH = HITS * MobScaling.typicalHit(LEVEL);
+    public static final double HEALTH = HITS * MobScaling.typicalHit(MEASURED);
     public static final int ROAR_EVERY = 180, ROAR_WINDUP = 15, SWALLOW_EVERY = 260, SWALLOW_ENRAGED = 130, GAPE = 20, MAX_HOLD = 200, KIN = 3;
     public static final double ROAR_RANGE = 12, ROAR_ANGLE = 55, SWALLOW_REACH = 4.5, TRUE_SWALLOW_REACH = 6;
     /** His pounce, in his true form: how near and how far a foe it is made at, and how long he may be in the air. */
@@ -109,7 +111,7 @@ public class AzureLionEntity extends DemonKingEntity {
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, HEALTH)
-                .add(Attributes.ATTACK_DAMAGE, SWORD * MobScaling.typicalHealth(LEVEL))
+                .add(Attributes.ATTACK_DAMAGE, SWORD * MobScaling.typicalHealth(MEASURED))
                 .add(Attributes.MOVEMENT_SPEED, 0.28)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.9)
                 .add(Attributes.ARMOR, 14)
@@ -258,7 +260,7 @@ public class AzureLionEntity extends DemonKingEntity {
     // ── The roar ────────────────────────────────────────────────────────
 
     public float roarDamage() {
-        return (float) (ROAR * MobScaling.typicalHealth(LEVEL));
+        return (float) (ROAR * MobScaling.typicalHealth(MEASURED));
     }
 
     /** Whether {@code e} is a foe his roar or his swallowing may touch: no ally, none of the ridge's, none out of play. */
@@ -331,7 +333,7 @@ public class AzureLionEntity extends DemonKingEntity {
 
     /** What his belly takes from what is in it each second. */
     public float bellyDamage() {
-        return (float) (BELLY * MobScaling.typicalHealth(LEVEL));
+        return (float) (BELLY * MobScaling.typicalHealth(MEASURED));
     }
 
     /** His belly works on what is in it, once a second. */

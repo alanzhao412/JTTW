@@ -189,7 +189,12 @@ public abstract class ZoneMonster extends Monster implements MobLevel {
     }
 
     private double hitAt(double share) {
-        return share * MobScaling.typicalHealth(mobLevel()) * damageScale();
+        return share * MobScaling.typicalHealth(measuredLevel()) * damageScale();
+    }
+
+    /** The level of character its hits are measured against: its own (the Macaque's hair, his). */
+    protected int measuredLevel() {
+        return mobLevel();
     }
 
     /** Sets what it is: its level, whether a captain, and the health and damage and XP that go with them. */

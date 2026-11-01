@@ -321,7 +321,7 @@ public final class Zones {
      * Curtain Cave (水帘洞), the Monkey King's old kingdom, an island raised out of the sea (ocean,
      * the whole column, its host judged just under the waves), held by the Six-Eared Macaque
      * (六耳猕猴, chapters 57-58), his monkey army and his fake pilgrims. The Macaque himself is far
-     * past the band: level 80 and as strong as the Monkey King at 80, an optional fight in his own sanctum. Its monkeys know
+     * past the band: a level-120 superboss, an optional fight in his own sanctum. Its monkeys know
      * the true Monkey King: they spare a Wukong player ({@link ZoneAllies#WUKONG}); the fake
      * pilgrims and the Macaque do not. It keeps clear of every zone before it.
      */

@@ -379,7 +379,7 @@ public class LionCamelGameTests {
         List<LivingEntity> caught = lion.roar(before);
         check(h, caught.contains(before) && !caught.contains(aside), "the one before him, not the one at his side");
         close(h, lion.roarDamage(), hp - before.getHealth(), "its blow");
-        close(h, AzureLionEntity.ROAR * MobScaling.typicalHealth(AzureLionEntity.LEVEL), lion.roarDamage(), "12% of a level-100 character's health");
+        close(h, AzureLionEntity.ROAR * MobScaling.typicalHealth(AzureLionEntity.MEASURED), lion.roarDamage(), "12% of a level-100 character's health");
         check(h, before.hasEffect(MobEffects.MOVEMENT_SLOWDOWN) && before.hasEffect(MobEffects.WEAKNESS), "slowed and weakened");
         eq(h, asideHp, aside.getHealth(), "untouched at his side");
         h.succeed();
