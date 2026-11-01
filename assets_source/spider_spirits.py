@@ -80,7 +80,10 @@ def sister_parts():
         part('apron', 'skirt', (0, -1.2, -3), (-0.1, 0, 0), [(-2.2, 0, -0.4, 4.4, 16.4, 0.4, 'apron')]),
         part('train', 'skirt', (0, 8.5, 4.2), (0.42, 0, 0), [(-5.0, 0, 0, 10, 7.6, 0.6, 'train')]),
         # the open long coat over it, to her knees
-        part('right_coat', 'body', (-2.6, -10.6, -2.2), (-0.04, 0.06, 0.1), [(-1.6, 0, -0.35, 2.4, 19.5, 0.5, 'coat_front')]),
+        # the coat's open front: down over her breast to her sash, then hanging open, falling away from her in a drape
+        part('right_coat', 'body', (-2.6, -10.6, -2.2), (-0.04, 0.06, 0.1), [(-1.6, 0, -0.35, 2.4, 10.4, 0.5, 'coat_front')]),
+        part('right_coat_drape', 'right_coat', (-0.2, 10.2, 0), (-0.14, 0.42, 0.06), [(-2.0, 0, -0.35, 3.0, 9.6, 0.5, 'coat_drape')]),
+        part('right_coat_lapel', 'right_coat_drape', (0.9, 0.2, 0), (0, -0.9, 0), [(-0.1, 0, -0.3, 1.3, 9.0, 0.4, 'coat_lapel')]),
         part('right_coat_side', 'body', (-3.5, -10.4, 0.0), (0, 0, 0.12), [(-0.5, 0, -2.2, 0.5, 19.0, 4.4, 'coat_side')]),
         part('coat_back', 'body', (0, -10.8, 2.0), (0.1, 0, 0), [(-3.8, 0, 0, 7.6, 19.8, 0.5, 'coat_back')]),
         part('right_sash_end', 'body', (-1.6, -2.4, -2.9), (-0.06, 0, 0.06), [(-0.6, 0, -0.2, 1.2, 13, 0.4, 'sash_end')]),
@@ -295,14 +298,20 @@ def sister_painter(name, coat, accent, skirt, stole, eye, kind):
             draw_motif(p, fx + fw // 2, fy + int(fh * 0.3), kind, coat, skirt, r=int(fw * 0.2))
             vedges(p, f['front'], accent, S // 2)
             border(p, f['front'], coat, kind, accent, width=3 * S)
-        elif style in ('coat_front', 'coat_side', 'coat_back'):
+        elif style == 'coat_lapel':                                    # its edge turned back: her accent, lined
+            cloth(p, f, accent)
+            for s in SIDES:
+                fx, fy, fw, fh = f[s]
+                for j in range(fh):
+                    p.px((fx, fy + j), k(accent, 0.7))
+        elif style in ('coat_front', 'coat_drape', 'coat_side', 'coat_back'):
             silk(p, f, coat, density=1.2)
             for s in SIDES:
                 fx, fy, fw, fh = f[s]
                 if fw < 4 * S or fh < 4 * S:
                     continue
                 border(p, f[s], accent, kind, coat, width=3 * S)
-                if style == 'coat_front' and s == 'front':           # the open edge, bordered all down it
+                if style in ('coat_front', 'coat_drape') and s == 'front':           # the open edge, bordered all down it
                     border(p, f[s], accent, kind, coat, width=3 * S, vertical=True)
             if style == 'coat_back':
                 fx, fy, fw, fh = f['back']
@@ -507,17 +516,17 @@ def paint_face(p, f, eye):
     mx, my = fx + int(cx), fy + int(fh * 0.24)
     for di, dj in ((-1, 0), (0, 0), (0, -1), (-1, -1), (-1, 1), (0, 1), (-2, 0), (1, 0)):
         p.px((mx + di, my + dj), (220, 36, 60) if abs(di + 0.5) + abs(dj) < 2 else (240, 110, 120))
-    # brows: fine, long, arched, dark violet
+    # brows: fine willow-leaf arcs, soft, high above the eyes, fading at their tails
     for side in (-1, 1):
-        for t in range(int(fw * 0.32)):
+        n = int(fw * 0.3)
+        for t in range(n):
             x = int(cx) + side * (2 + t) - (1 if side < 0 else 0)
-            y = fy + int(fh * 0.34) - int(1.6 * math.sin(math.pi * t / (fw * 0.32)))
-            p.px((x, y), (64, 40, 58))
-            if t < fw * 0.2:
-                p.px((x, y + 1), mixc(SKIN, (64, 40, 58), 0.5))
+            y = fy + int(fh * 0.27) - int(round(1.8 * math.sin(math.pi * (t + 1) / (n + 1))))
+            fade = 0.85 if t < n - 2 else 0.5
+            p.px((x, y), mixc(SKIN, (92, 62, 80), fade))
     # the eyes: too large, too dark, black-lashed, a gleam of her colour, a white point of light
     for side in (-1, 1):
-        ew, eh = int(fw * 0.3), max(3, int(fh * 0.17))
+        ew, eh = int(fw * 0.3), max(3, int(fh * 0.21))
         x0 = int(cx) + side * 2 - (ew if side < 0 else 0) + (0 if side < 0 else 0)
         y0 = fy + int(fh * 0.42)
         for i in range(ew):
@@ -537,10 +546,6 @@ def paint_face(p, f, eye):
                         p.glow.putpixel((int(xy[0]), int(xy[1])), tuple(int(v * 0.6) for v in eye) + (255,))
                 else:
                     p.px(xy, (240, 232, 228))
-            if abs(u) > 0.7:                                          # the lashes flick out at the outer corner
-                outer = (side < 0 and u < 0) or (side > 0 and u > 0)
-                if outer:
-                    p.px((fx + x0 + i, y0 + eh // 2 - int(half) - 2), (20, 10, 16))
         gx = fx + x0 + ew // 2 + (-1 if side < 0 else 0)
         p.px((gx, y0 + eh // 2 - 1), (255, 255, 255))                  # the point of light
         for i in range(ew):                                            # a soft shadow under, a hint of colour over the lid

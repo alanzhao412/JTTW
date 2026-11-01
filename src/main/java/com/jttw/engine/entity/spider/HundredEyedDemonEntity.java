@@ -426,7 +426,12 @@ public class HundredEyedDemonEntity extends ZoneBoss implements SilkKin {
     private void telegraph(ServerLevel server, int act) {
         if (act == GLARING) {
             float grow = 0.6f + 2f * acting / GLARE;
-            server.sendParticles(new DustParticleOptions(new Vector3f(1f, 0.85f, 0.3f), grow), getX(), getY(0.65), getZ(), 8, 0.5, 0.6, 0.5, 0);
+            // the glow gathering round him, behind and to his sides, so the eyes on his breast show through it
+            for (int k = 0; k < 3; k++) {
+                double ang = Math.toRadians(yBodyRot) + Math.PI * (0.5 + random.nextDouble());
+                server.sendParticles(new DustParticleOptions(new Vector3f(1f, 0.85f, 0.3f), grow), getX() - Math.sin(ang) * 1.3,
+                        getY(0.35 + random.nextDouble() * 0.5), getZ() + Math.cos(ang) * 1.3, 1, 0.1, 0.2, 0.1, 0);
+            }
             if (acting % 10 == 0) playSound(SoundEvents.BEACON_AMBIENT, 2f, 1.2f + acting / 30f);
         } else if (act == POURING) {
             if (acting % 3 == 0) {
@@ -474,8 +479,11 @@ public class HundredEyedDemonEntity extends ZoneBoss implements SilkKin {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (level().isClientSide && (unrobed() || act() == GLARING) && random.nextInt(unrobed() ? 3 : 1) == 0) {
-            level().addParticle(ParticleTypes.END_ROD, getRandomX(0.6), getY(0.4 + random.nextDouble() * 0.4), getRandomZ(0.6), 0, 0.01, 0);
+        if (level().isClientSide && (unrobed() || act() == GLARING) && random.nextInt(unrobed() ? 4 : 2) == 0) {
+            // motes of his golden light, drifting up round his flanks and back (not before his breast, where the eyes are)
+            double ang = Math.toRadians(yBodyRot) + Math.PI * (0.45 + random.nextDouble() * 1.1);
+            level().addParticle(ParticleTypes.END_ROD, getX() - Math.sin(ang) * 1.1, getY(0.35 + random.nextDouble() * 0.5),
+                    getZ() + Math.cos(ang) * 1.1, 0, 0.01, 0);
         }
     }
 
