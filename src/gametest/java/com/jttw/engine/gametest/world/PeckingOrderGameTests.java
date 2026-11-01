@@ -4,6 +4,7 @@ import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.entity.MobScaling;
 import com.jttw.engine.entity.cave.LadyEarthFlowEntity;
 import com.jttw.engine.entity.fire.StrongGeneralEntity;
+import com.jttw.engine.entity.flowerfruit.SixEaredMacaqueEntity;
 import com.jttw.engine.entity.heaven.HeavenlySoldierEntity;
 import com.jttw.engine.entity.hell.ImpermanenceEntity;
 import com.jttw.engine.entity.wild.WildYaoguai;
@@ -66,8 +67,9 @@ public class PeckingOrderGameTests {
             com.jttw.engine.registry.SpiderCaveRegistry.SPIDER_SPIRIT.get());
 
     /**
-     * The one superboss, past every rule a boss keeps but the least: the Six-Eared Macaque, level 120,
-     * an optional fight, the strongest boss there is. Up to this many hits, all his lives together.
+     * The one superboss, the Six-Eared Macaque, an optional fight: level 80 but measured against a
+     * level-80 Wukong, not a typical character of 80. Up to this many of that Wukong's hits, all his
+     * lives together.
      */
     public static final double SUPERBOSS_HITS_MOST = 460;
 
@@ -99,6 +101,11 @@ public class PeckingOrderGameTests {
         return e.getMaxHealth() / MobScaling.typicalHit(level);
     }
 
+    /** A boss's health in the hits it is measured by: a same-level character's, or for the superboss, a level-80 Wukong's. */
+    private static double bossHits(ZoneBoss b) {
+        return superboss(b) ? b.getMaxHealth() / SixEaredMacaqueEntity.WUKONG_HIT : hits(b, b.mobLevel());
+    }
+
     @GameTest(template = PLATFORM)
     public static void aBossTakesAGroupAndEachOfItsLivesOutlastsAnyMiniboss(GameTestHelper h) {
         // the toughest miniboss there is, in hits: any kind a lair could make one of, at the most a lair gives one, and the temple youths
@@ -127,7 +134,7 @@ public class PeckingOrderGameTests {
         }
         check(h, miniboss >= 60, "the minibosses measured: the toughest " + toughest + ", " + miniboss);
         for (ZoneBoss b : bosses) {
-            double full = hits(b, b.mobLevel()), all = 0, least = Double.MAX_VALUE;
+            double full = bossHits(b), all = 0, least = Double.MAX_VALUE;
             for (double life : b.lives()) {
                 all += full * life;
                 least = Math.min(least, full * life);
@@ -142,35 +149,31 @@ public class PeckingOrderGameTests {
     }
 
     @GameTest(template = PLATFORM)
-    public static void theSixEaredMacaqueIsTheStrongestBossThereIs(GameTestHelper h) {
+    public static void theSixEaredMacaqueIsALevel80WukongAsABoss(GameTestHelper h) {
         var macaque = com.jttw.engine.registry.FlowerFruitRegistry.SIX_EARED_MACAQUE.get().create(h.getLevel());
         check(h, macaque != null, "made");
         int lv = macaque.mobLevel();
-        eq(h, 120, lv, "level 120, past the players' cap");
-        check(h, macaque.getDisplayName().getString().contains("Lv 120"), macaque.getDisplayName().getString());
-        double his = hits(macaque, lv), blow = share(macaque, lv);
-        check(h, his >= 400 && his <= SUPERBOSS_HITS_MOST, "some 400-450 hits at his level: " + his);
-        check(h, blow >= BOSS_MOST - 0.005 && blow <= BOSS_MOST + EPS, "his blow the top of a boss's band: " + blow);
-        // a level past the cap is measured against a character grown on past it, gently
-        check(h, MobScaling.typicalHealth(120) > MobScaling.typicalHealth(100) * 1.5 && MobScaling.typicalHit(120) > MobScaling.typicalHit(100) * 1.5,
-                "his level counts past 100");
+        eq(h, 80, lv, "level 80");
+        check(h, macaque.getDisplayName().getString().contains("Lv 80"), macaque.getDisplayName().getString());
+        double his = bossHits(macaque), blow = macaque.getAttributeValue(Attributes.ATTACK_DAMAGE) / SixEaredMacaqueEntity.WUKONG_HEALTH;
+        check(h, his >= 400 && his <= SUPERBOSS_HITS_MOST, "some 400-450 hits of a level-80 Wukong: " + his);
+        check(h, blow >= BOSS_MOST - 0.005 && blow <= BOSS_MOST + EPS, "his blow the top of a boss's band, of that Wukong's health: " + blow);
+        // capped players can beat him: a group's fight, and his blow no one-shot
+        check(h, hits(macaque, 100) <= 250 && share(macaque, 100) <= 0.2, "a fight for level-100 players: "
+                + hits(macaque, 100) + " hits, a blow of " + share(macaque, 100));
         int others = 0;
         for (Entity e : every(h)) {
             try {
-                if (!(e instanceof ZoneBoss b) || superboss(b) || b instanceof TempleYouthEntity) continue;
+                if (!(e instanceof ZoneBoss b) || superboss(b) || b instanceof TempleYouthEntity || b.mobLevel() > lv) continue;
                 others++;
-                double all = 0;
-                for (double life : b.lives()) all += hits(b, b.mobLevel()) * life;
-                check(h, his > all, "more hits than " + name(b) + " (" + all + "): " + his);
-                check(h, blow >= share(b, b.mobLevel()) - EPS || b instanceof LadyEarthFlowEntity, "a blow no lighter than " + name(b) + "'s");
-                check(h, lv > b.mobLevel(), "higher than " + name(b));
-                // and in plain health, far over any: he is the strongest
+                // over every boss of his level or below: in health and in blow, as the Monkey King's equal is
                 check(h, macaque.getMaxHealth() > b.getMaxHealth() * java.util.Arrays.stream(b.lives()).sum(), "more health than " + name(b));
+                check(h, macaque.getAttributeValue(Attributes.ATTACK_DAMAGE) > b.getAttributeValue(Attributes.ATTACK_DAMAGE), "a harder blow than " + name(b));
             } finally {
                 e.discard();
             }
         }
-        check(h, others >= 15, "weighed against every other boss: " + others);
+        check(h, others >= 10, "weighed against every boss up to his level: " + others);
         macaque.discard();
         h.succeed();
     }
@@ -221,7 +224,7 @@ public class PeckingOrderGameTests {
         for (ZoneBoss b : bosses) {
             com.jttw.engine.world.Zones.Zone z = b.zone();
             if (superboss(b)) {
-                // the one superboss stands past every band and every head boss (theSixEaredMacaqueIsTheStrongestBossThereIs)
+                // the one superboss stands past every band and every head boss (theSixEaredMacaqueIsALevel80WukongAsABoss)
                 check(h, b.mobLevel() > ZoneBoss.levelOver(z), name(b) + " far past his zone's head boss's level: " + b.mobLevel());
                 b.discard();
                 continue;
@@ -299,7 +302,8 @@ public class PeckingOrderGameTests {
                     double g = share(s, 40);
                     check(h, g >= MINIBOSS_LEAST - EPS && g <= MINIBOSS_MOST + EPS, "a heavenly general's blow, a miniboss's: " + g);
                 } else if (e instanceof ZoneBoss b) {
-                    double blow = share(b, b.mobLevel());
+                    // the superboss's blow is of a level-80 Wukong's health, as he is measured
+                    double blow = superboss(b) ? b.getAttributeValue(Attributes.ATTACK_DAMAGE) / SixEaredMacaqueEntity.WUKONG_HEALTH : share(b, b.mobLevel());
                     if (b instanceof TempleYouthEntity) {
                         // Clear Wind and Bright Moon are minibosses
                         check(h, blow >= MINIBOSS_LEAST - EPS && blow <= MINIBOSS_MOST + EPS, name(b) + "'s blow, a miniboss's: " + blow);

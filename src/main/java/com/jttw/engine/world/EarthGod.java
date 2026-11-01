@@ -267,7 +267,7 @@ public final class EarthGod {
 
     /** Said of Flower-Fruit Mountain wherever it is named: its monkeys are of the band, its master beyond any. */
     private static final String MACAQUE_WARNING = "its monkeys and the false pilgrims are of your strength; but the false Great Sage who "
-            + "sits deep in the Water Curtain Cave is beyond any mortal band.";
+            + "sits deep in the Water Curtain Cave is the Monkey King's equal, and beyond any mortal band.";
 
     /** Said after every answer in the world of the living: how to ask the way to Mount Kunlun. */
     public static final String KUNLUN_HINT = " §7(Sneak as you ask, for the way to Mount Kunlun.)";
