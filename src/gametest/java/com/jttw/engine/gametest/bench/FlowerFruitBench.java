@@ -111,10 +111,27 @@ final class FlowerFruitBench {
                 top, IslandShape.SUMMIT_Y, monkeys, CavePlan.POSTS.size() - 3, pilgrims,
                 macaque.isEmpty() ? "NO Macaque" : "the Macaque (Lv " + macaque.get(0).mobLevel() + ") at " + macaque.get(0).blockPosition().toShortString(),
                 all, IslandShape.camps(level.getSeed()).size(), IslandShape.pillars(level.getSeed()).size()));
+        report.addAll(ZoneAudit.audit(level, "Flower-Fruit Mountain", c[0], c[1], IslandShape.COAST + 20, IslandShape.SEA - 24, IslandShape.SUMMIT_Y + 40,
+                q -> ZONE.depth(level.getSeed(), q.getX(), q.getZ()) > 0));
+        if (!macaque.isEmpty()) {
+            report.add(ZoneAudit.route(level, "from the basin, behind the falls, to the Macaque", new BlockPos(c[0], IslandShape.BASIN_Y + 1, c[1] + IslandShape.CLIFF_Z + 24),
+                    macaque.get(0).blockPosition(), cave.inflate(0, 0, 60), (st -> st.is(net.minecraft.tags.BlockTags.DOORS) || st.is(net.minecraft.tags.BlockTags.TRAPDOORS) || st.is(net.minecraft.tags.BlockTags.FENCE_GATES))));
+        }
+        var pilgrimsAt = level.getEntitiesOfClass(FakePilgrimEntity.class, cave);
+        if (!pilgrimsAt.isEmpty()) report.add(ZoneAudit.route(level, "from the basin to the fake pilgrims", new BlockPos(c[0], IslandShape.BASIN_Y + 1, c[1] + IslandShape.CLIFF_Z + 24),
+                pilgrimsAt.get(0).blockPosition(), cave.inflate(0, 0, 60), (st -> st.is(net.minecraft.tags.BlockTags.DOORS) || st.is(net.minecraft.tags.BlockTags.TRAPDOORS) || st.is(net.minecraft.tags.BlockTags.FENCE_GATES))));
+        var camps = IslandShape.camps(level.getSeed());
+        for (int i = 0; i < camps.size(); i++) {
+            var k = camps.get(i);
+            BlockPos at = new BlockPos(c[0] + k.x(), IslandShape.campBase(level.getSeed(), k) + 1, c[1] + k.z());
+            if (level.getChunkSource().getChunkNow(at.getX() >> 4, at.getZ() >> 4) == null) continue;
+            report.add(ZoneAudit.route(level, "from the shore to camp " + i, new BlockPos(c[0], IslandShape.SEA + 1, c[1] + IslandShape.COAST - 4),
+                    at, island, (st -> st.is(net.minecraft.tags.BlockTags.DOORS) || st.is(net.minecraft.tags.BlockTags.TRAPDOORS) || st.is(net.minecraft.tags.BlockTags.FENCE_GATES))));
+        }
     }
 
     private static final String[] SHOTS = {"from_the_sea", "aerial", "summit_egg", "falls", "falls_close", "behind_the_curtain", "iron_bridge",
-            "tablet", "great_hall", "sanctum", "camp", "pillars", "orchard"};
+            "tablet", "great_hall", "sanctum", "camp", "pillars", "orchard", "east_coast"};
 
     private static boolean shoot(ServerPlayer p, ServerLevel level) {
         if (shot >= SHOTS.length) return true;
@@ -142,6 +159,7 @@ final class FlowerFruitBench {
                     var pil = IslandShape.pillars(level.getSeed()).stream().filter(q -> !q.sea()).findFirst().orElse(IslandShape.pillars(level.getSeed()).get(0));
                     look(p, level, x0 + pil.x() + 40.5, pil.head() - 6, z0 + pil.z() + 30.5, new BlockPos(x0 + pil.x(), pil.head() - 12, z0 + pil.z()));
                 }
+                case "east_coast" -> look(p, level, x0 + 262.5, IslandShape.SEA + 30, z0 + 95.5, new BlockPos(x0 + 223, IslandShape.SEA + 20, z0 + 105)); // a sea cliff the audit found on a chunk's edge
                 case "orchard" -> {
                     int ox = x0 - 110, oz = z0 - 30;
                     int oy = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ox, oz);

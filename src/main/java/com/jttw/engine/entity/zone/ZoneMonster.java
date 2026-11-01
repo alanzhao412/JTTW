@@ -287,6 +287,28 @@ public abstract class ZoneMonster extends Monster implements MobLevel {
         return at;
     }
 
+    /**
+     * Where a creature of {@code type} can stand near {@code at}: its own column first (a few blocks
+     * over to a few under, ground beneath, room for its body, no liquid), then the columns round it,
+     * ring by ring out to {@code radius}; else {@code at}. For bands and posts put among props (a camp's
+     * logs and lean-tos, a hall's tables), so none is born inside a block.
+     */
+    public static BlockPos roomNear(net.minecraft.world.level.LevelReader level, EntityType<?> type, BlockPos at, int radius) {
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        for (int r = 0; r <= radius; r++) {
+            for (int dx = -r; dx <= r; dx++) for (int dz = -r; dz <= r; dz++) {
+                if (Math.max(Math.abs(dx), Math.abs(dz)) != r) continue;
+                for (int dy : new int[]{0, 1, -1, 2, -2, 3, -3}) {
+                    p.set(at.getX() + dx, at.getY() + dy, at.getZ() + dz);
+                    if (!level.getBlockState(p.below()).blocksMotion()) continue;
+                    var box = type.getDimensions().makeBoundingBox(p.getX() + 0.5, p.getY(), p.getZ() + 0.5);
+                    if (level.noCollision(box) && !level.containsAnyLiquid(box)) return p.immutable();
+                }
+            }
+        }
+        return at;
+    }
+
     // ── Allies ──────────────────────────────────────────────────────────
 
     /** Whether it is allied to {@code player}: it never targets them nor fights them back. */

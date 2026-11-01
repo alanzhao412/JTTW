@@ -39,20 +39,72 @@ public class SilkWebsFeature extends Feature<NoneFeatureConfiguration> {
      * logs, and great mushrooms) cleared from the column, never the works' own timber.
      */
     private static boolean clearTrees(WorldGenLevel level, int x, int z, int lx, int lz, BlockPos.MutableBlockPos p) {
-        boolean works = SilkRidgeWorks.covers(lx, lz);
         int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z);
         int ground = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
         boolean any = false;
         for (int y = top; y > ground - 24 && y > level.getMinBuildHeight(); y--) {
             BlockState st = level.getBlockState(p.set(x, y, z));
+            // a tree's wood here: the whole tree felled, not only this column of it (no half-trunks, no boughs left in the air)
+            if (st.is(BlockTags.LOGS) && !worksTimber(level, x - lx, z - lz, p)) any |= fell(level, p.immutable(), x - lx, z - lz);
             boolean tree = st.is(BlockTags.LEAVES) || st.is(Blocks.MUSHROOM_STEM) || st.is(Blocks.RED_MUSHROOM_BLOCK) || st.is(Blocks.BROWN_MUSHROOM_BLOCK)
-                    || !works && st.is(BlockTags.LOGS) || st.is(Blocks.COBWEB);
+                    || st.is(BlockTags.LOGS) && !worksTimber(level, x - lx, z - lz, p) || st.is(Blocks.COBWEB);
             if (tree) {
                 level.setBlock(p, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
                 any = true;
             }
         }
         return any;
+    }
+
+    /**
+     * Whether the wood at {@code w} is the works' own (the cottage's posts, the temple's columns, the
+     * woodpile), by what the works put there; a tree grown in the yard or the court is not.
+     */
+    private static boolean worksTimber(WorldGenLevel level, int cx, int cz, BlockPos w) {
+        int lx = w.getX() - cx, lz = w.getZ() - cz;
+        if (!SilkRidgeWorks.covers(lx, lz)) return false;
+        BlockState want = SilkRidgeWorks.at(lx, w.getY() - com.jttw.engine.world.spider.SpiderCave.floor(level, cx, cz), lz, true);
+        return want != null && want.is(BlockTags.LOGS);
+    }
+
+    /** How far from where it was struck a tree is felled. */
+    private static final int FELL_REACH = 9;
+
+    /**
+     * Fells the tree whose wood is at {@code start}: every log joined to it (within {@link #FELL_REACH}
+     * and the chunks this one may write), never the works' own timber nor anything under the ground
+     * there, and the leaves round what was felled.
+     */
+    private static boolean fell(WorldGenLevel level, BlockPos start, int cx, int cz) {
+        java.util.ArrayDeque<BlockPos> queue = new java.util.ArrayDeque<>();
+        java.util.Set<BlockPos> wood = new java.util.HashSet<>();
+        queue.add(start);
+        wood.add(start);
+        int floor = start.getY() - 40; // down the trunk to its foot, joined wood only
+        while (!queue.isEmpty() && wood.size() < 400) {
+            BlockPos q = queue.poll();
+            for (int dx = -1; dx <= 1; dx++) for (int dy = -1; dy <= 1; dy++) for (int dz = -1; dz <= 1; dz++) {
+                BlockPos n = q.offset(dx, dy, dz);
+                if (wood.contains(n) || n.getY() < floor || Math.abs(n.getX() - start.getX()) > FELL_REACH || Math.abs(n.getZ() - start.getZ()) > FELL_REACH) continue;
+                if (!level.ensureCanWrite(n) || !level.getBlockState(n).is(BlockTags.LOGS) || worksTimber(level, cx, cz, n)) continue;
+                wood.add(n);
+                queue.add(n);
+            }
+        }
+        BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
+        for (BlockPos w : wood) {
+            level.setBlock(w, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+            for (int dx = -3; dx <= 3; dx++) for (int dy = -1; dy <= 3; dy++) for (int dz = -3; dz <= 3; dz++) {
+                m.set(w.getX() + dx, w.getY() + dy, w.getZ() + dz);
+                if (!level.ensureCanWrite(m)) continue;
+                BlockState st = level.getBlockState(m);
+                if (st.is(BlockTags.LEAVES) && !(st.hasProperty(net.minecraft.world.level.block.LeavesBlock.PERSISTENT)
+                        && st.getValue(net.minecraft.world.level.block.LeavesBlock.PERSISTENT))) {
+                    level.setBlock(m, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+                }
+            }
+        }
+        return true;
     }
 
     @Override

@@ -476,11 +476,13 @@ public class WhiteBoneCaveGameTests {
     public static void theLuopanPointsToTheGreatDoor(GameTestHelper h) {
         long seed = h.getLevel().getSeed();
         int[] c = Zones.WHITE_BONE.centres(seed)[0];
-        var a = EarthGod.answer(Level.OVERWORLD, new Vec3(c[0] + 2000, 70, c[1]), 25, seed, Set.of());
-        eq(h, Zones.WHITE_BONE, a.zone(), "the ridge for 25");
-        eq(h, new BlockPos(c[0], 64, c[1] + WhiteBoneCave.THRESHOLD_Z + 2), a.target().pos(), "to the great door");
-        check(h, a.words().getString().contains("White Bone Cave"), "he names it: " + a.words().getString());
+        var far = EarthGod.answer(Level.OVERWORLD, new Vec3(c[0] + 2000, 70, c[1]), 25, seed, Set.of());
+        check(h, far.words().getString().contains("White Bone"), "far off, the ridge named for 25 (sent there, or to a nearer of its band): "
+                + far.words().getString());
         var near = EarthGod.answer(Level.OVERWORLD, new Vec3(c[0], 70, c[1] + 200), 25, seed, Set.of());
+        eq(h, Zones.WHITE_BONE, near.zone(), "in the ridge's country: the ridge for 25");
+        eq(h, new BlockPos(c[0], 64, c[1] + WhiteBoneCave.THRESHOLD_Z + 2), near.target().pos(), "to the great door");
+        check(h, near.words().getString().contains("White Bone Cave"), "he names it: " + near.words().getString());
         check(h, near.words().getString().contains("great door"), "near, he speaks of its door: " + near.words().getString());
         h.succeed();
     }

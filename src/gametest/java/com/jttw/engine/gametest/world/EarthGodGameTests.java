@@ -100,9 +100,10 @@ public class EarthGodGameTests {
         luopan.getItem().use(h.getLevel(), p, InteractionHand.MAIN_HAND);
         LodestoneTracker t = luopan.get(DataComponents.LODESTONE_TRACKER);
         check(h, t != null && t.target().isPresent(), "it points somewhere");
-        int[] ridge = Zones.WHITE_BONE.centres(seed)[0];
-        eq(h, new BlockPos(ridge[0], 64, ridge[1] + com.jttw.engine.world.ridge.WhiteBoneCave.THRESHOLD_Z + 2), t.target().get().pos(),
-                "to White Bone Ridge at 25: the great door of the White Bone Cave");
+        Zones.Zone chosen = EarthGod.chosenFor(p.position(), 25, seed, Set.of());
+        check(h, EarthGod.zonesFor(25).contains(chosen), "at 25, a zone of the first band: " + chosen);
+        eq(h, EarthGod.targetOf(chosen, seed, chosen.centres(seed)[0]), t.target().get().pos(),
+                "at 25, to the nearest zone of the band (" + chosen.id() + "), where its needle marks");
         eq(h, Level.OVERWORLD, t.target().get().dimension(), "in the overworld");
         check(h, p.getCooldowns().isOnCooldown(ModItems.EARTH_GOD_LUOPAN.get()), "a pause before the next calling");
         // held at another level, its needle turns as it ticks
@@ -157,6 +158,60 @@ public class EarthGodGameTests {
         var diyu = EarthGod.answer(Level.OVERWORLD, Vec3.ZERO, 60, seed, Set.of());
         eq(h, Zones.FENGDU, diyu.zone(), "Hell's band in the overworld: Fengdu, the way down");
         check(h, diyu.words().getString().contains("Diyu") && diyu.words().getString().contains("Fengdu"), "told of Diyu, and of Fengdu");
+        h.succeed();
+    }
+    @GameTest(template = PLATFORM)
+    public static void theEarthGodNamesEveryZoneOfTheBand(GameTestHelper h) {
+        long seed = h.getLevel().getSeed();
+        eq(h, Set.of(Zones.WHITE_BONE, Zones.FLOWER_FRUIT, Zones.BLACK_WIND), Set.copyOf(EarthGod.zonesFor(25)), "25: the ridge, the island, Black Wind");
+        eq(h, Set.of(Zones.WHITE_BONE, Zones.FLOWER_FRUIT, Zones.BLACK_WIND), Set.copyOf(EarthGod.zonesFor(5)), "under the bands: the first band's");
+        eq(h, Set.of(Zones.WHITE_BONE, Zones.BLACK_WIND), Set.copyOf(EarthGod.zonesFor(33)), "33: past the island's band");
+        eq(h, Set.of(Zones.MOUNT_WUZHUANG, Zones.SPIDER_CAVE), Set.copyOf(EarthGod.zonesFor(80)), "80: Mount Wuzhuang and Silk-Web Ridge");
+        eq(h, java.util.List.of(Zones.LION_CAMEL), EarthGod.zonesFor(95), "95: one zone");
+        check(h, EarthGod.zonesFor(60).isEmpty(), "Hell's band: no zone of the living");
+        if (Zones.SPIDER_CAVE.centres(seed).length == 0) { // a flat test world places no zones
+            h.succeed();
+            return;
+        }
+        for (Vec3 at : new Vec3[]{Vec3.ZERO, new Vec3(3000, 70, -2500), new Vec3(-6800, 70, 1200)}) {
+            for (int lv : new int[]{25, 33, 80}) {
+                if (EarthGod.zonesFor(lv).stream().anyMatch(z -> z.depth(seed, (int) at.x, (int) at.z) > 0)) continue; // in one: that one, below
+                var a = EarthGod.answer(Level.OVERWORLD, at, lv, seed, Set.of());
+                String words = a.words().getString();
+                // sent to the nearest, by where its needle marks
+                Zones.Zone nearest = null;
+                double best = Double.MAX_VALUE;
+                for (Zones.Zone z : EarthGod.zonesFor(lv)) {
+                    BlockPos t = EarthGod.targetOf(z, seed, z.centres(seed)[0]);
+                    double d = Math.hypot(t.getX() + 0.5 - at.x, t.getZ() + 0.5 - at.z);
+                    if (d < best) { best = d; nearest = z; }
+                }
+                eq(h, nearest, a.zone(), "level " + lv + " at " + at + ": the nearest zone of the band");
+                eq(h, EarthGod.targetOf(nearest, seed, nearest.centres(seed)[0]), a.target().pos(), "its needle to it");
+                for (Zones.Zone z : EarthGod.zonesFor(lv)) {
+                    String name = z == Zones.WHITE_BONE ? "White Bone" : z == Zones.BLACK_WIND ? "Black Wind" : z == Zones.FLOWER_FRUIT ? "Flower-Fruit"
+                            : z == Zones.SPIDER_CAVE ? "Silk-Web Ridge" : "Mount Longevity";
+                    check(h, words.contains(name), "level " + lv + " at " + at + ": " + name + " named: " + words);
+                }
+                check(h, words.contains("Others of your strength") && words.contains("blocks to the"), "the others' ways told: " + words);
+                check(h, words.contains("Flower-Fruit") == words.contains("beyond any mortal band"), "the island's master warned of: " + words);
+            }
+        }
+        // standing in a zone of the band: that one, whichever is nearer
+        int[] bw = Zones.BLACK_WIND.centres(seed)[0];
+        var inBw = EarthGod.answer(Level.OVERWORLD, new Vec3(bw[0] + 0.5, 90, bw[1] + 0.5), 25, seed, Set.of());
+        eq(h, Zones.BLACK_WIND, inBw.zone(), "in Black Wind's country: Black Wind");
+        check(h, inBw.words().getString().contains("You stand in that country") && inBw.words().getString().contains("White Bone Ridge"),
+                "there, and the ridge named besides: " + inBw.words().getString());
+        int[] sp = Zones.SPIDER_CAVE.centres(seed)[0];
+        var inSp = EarthGod.answer(Level.OVERWORLD, new Vec3(sp[0] + 0.5, 70, sp[1] + 0.5), 80, seed, Set.of());
+        eq(h, Zones.SPIDER_CAVE, inSp.zone(), "on Silk-Web Ridge at 80: the Spider Cave");
+        eq(h, EarthGod.needle(Zones.SPIDER_CAVE, sp), inSp.target().pos(), "its needle to the cottage");
+        check(h, inSp.words().getString().contains("Mount Longevity"), "and Mount Wuzhuang named besides: " + inSp.words().getString());
+        int[] ff = Zones.FLOWER_FRUIT.centres(seed)[0];
+        var inFf = EarthGod.answer(Level.OVERWORLD, new Vec3(ff[0] + 0.5, 80, ff[1] + 0.5), 22, seed, Set.of());
+        eq(h, Zones.FLOWER_FRUIT, inFf.zone(), "on the island at 22: Flower-Fruit");
+        check(h, inFf.words().getString().contains("beyond any mortal band"), "its master warned of: " + inFf.words().getString());
         h.succeed();
     }
 }

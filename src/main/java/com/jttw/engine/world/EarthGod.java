@@ -33,7 +33,10 @@ import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -44,7 +47,11 @@ import java.util.Set;
  * ({@code EarthGodLuopanItem}): asked, the Earth God names the zone for its asker's level (the one
  * whose band holds it; under 20 White Bone Ridge, over 100 Lion-Camel Ridge), and which way and how
  * far its one region lies; for the Mystical Waters, the nearest of the Four Seas whose Dragon King
- * still lives ({@link FallenKings}). The luopan's needle then points there.
+ * still lives ({@link FallenKings}). The luopan's needle then points there. Where a band holds more
+ * than one zone (White Bone Ridge, Black Wind Mountain and Flower-Fruit Mountain; Mount Wuzhuang and
+ * Silk-Web Ridge), he speaks of the one whose country the asker stands in, or else the nearest, and the
+ * needle points to it; then he names the others too, nearest first, each with its way and distance
+ * ({@link #zonesFor}, {@link #chosenFor}).
  *
  * <p>Hell (levels 57-66) is no Earth God's ground: in the overworld they tell its band that the way
  * down is through Fengdu, the Ghost City, whose Gate of Ghosts is sealed to those who walk there,
@@ -192,23 +199,75 @@ public final class EarthGod {
         }
         if (wayOut) return toKunlun(at, seed);
         Answer a = forLevel(at, level, seed, fallen, city);
-        return new Answer(a.target(), a.zone(), a.words().copy().append(Component.literal(flowerFruit(at, level, seed) + KUNLUN_HINT)));
+        return new Answer(a.target(), a.zone(), a.words().copy().append(Component.literal(KUNLUN_HINT)));
     }
 
     /**
-     * For a player of Flower-Fruit Mountain's band (it shares the first band with White Bone Ridge,
-     * where the needle points): a word on the island too, its way, and its master past all bands.
+     * Every zone of the world of the living whose band holds this level (clamped into the bands, as
+     * {@link #zoneFor} is): White Bone Ridge, Black Wind Mountain and Flower-Fruit Mountain for 20-30
+     * (and under); the ridge and Black Wind for 31-36; Mount Wuzhuang and Silk-Web Ridge for 78-88;
+     * one zone otherwise. In {@link Zones#ALL}'s order; empty for Hell's band (no ground of its own).
      */
-    public static String flowerFruit(Vec3 at, int level, long seed) {
-        Zones.Zone ff = Zones.FLOWER_FRUIT;
-        if (level < ff.minLevel() || level > ff.maxLevel()) return "";
-        int[] c = ff.centres(seed).length == 0 ? null : ff.centres(seed)[0];
-        if (c == null) return "";
-        String where = ff.depth(seed, (int) Math.floor(at.x), (int) Math.floor(at.z)) > 0 ? "you stand on it now"
-                : "it lies some " + roughly(Math.hypot(c[0] - at.x, c[1] - at.z)) + " blocks to the " + wind(at.x, at.z, c[0], c[1]) + ", over the sea";
-        return " §7\"Or there is Flower-Fruit Mountain, the Monkey King's old island: " + where + ". Its monkeys and the false pilgrims are of your "
-                + "strength; but the false Great Sage who sits deep in the Water Curtain Cave is beyond any mortal band.\"";
+    public static List<Zones.Zone> zonesFor(int level) {
+        Zones.Zone band = zoneFor(level);
+        int lv = Math.max(band.minLevel(), Math.min(band.maxLevel(), level));
+        List<Zones.Zone> out = new ArrayList<>();
+        for (Zones.Zone zone : Zones.ALL) {
+            if (zone.hasLevelBand() && zone.hasFootprint() && zone.minLevel() <= lv && lv <= zone.maxLevel()) out.add(zone);
+        }
+        return out;
     }
+
+    /**
+     * Where the needle points for a zone's region centred at {@code c}: {@link #needle}, and for White
+     * Bone Ridge the great door of its cave (when the world has one), for the Bottomless Cave its door.
+     */
+    public static BlockPos targetOf(Zones.Zone zone, long seed, int[] c) {
+        if (zone == Zones.WHITE_BONE && com.jttw.engine.world.ridge.CaveSites.fortress(seed)) {
+            return new BlockPos(c[0], 64, c[1] + com.jttw.engine.world.ridge.WhiteBoneCave.THRESHOLD_Z + 2);
+        }
+        if (zone == Zones.BOTTOMLESS) return needle(zone, com.jttw.engine.world.feature.Labyrinth.doorOf(seed, c[0], c[1]));
+        return needle(zone, c);
+    }
+
+    /**
+     * Of the zones for this level ({@link #zonesFor}), the one the Earth God sends the asker to: the
+     * one whose country they stand in (where an aerial one floats over a ground one, the one whose
+     * heights hold them); otherwise the nearest, by where its needle would point. Null for Hell's band.
+     */
+    @Nullable
+    public static Zones.Zone chosenFor(Vec3 at, int level, long seed, Set<Sea> fallen) {
+        int x = (int) Math.floor(at.x), z = (int) Math.floor(at.z);
+        Zones.Zone in = null, best = null;
+        double bestD = Double.MAX_VALUE;
+        for (Zones.Zone zone : zonesFor(level)) {
+            int y = (int) Math.floor(at.y);
+            if (zone.depth(seed, x, z) > 0 && (in == null || !in.vertical().contains(y) && zone.vertical().contains(y))) in = zone;
+            int[] c = regionFor(zone, seed, x, z, fallen);
+            if (c == null) continue;
+            BlockPos t = targetOf(zone, seed, c);
+            double d = Math.hypot(t.getX() + 0.5 - at.x, t.getZ() + 0.5 - at.z);
+            if (d < bestD) {
+                bestD = d;
+                best = zone;
+            }
+        }
+        return in != null ? in : best;
+    }
+
+    /** A zone's name and master, briefly, for the Earth God's word on the others of a band. */
+    private static String brief(Zones.Zone zone) {
+        if (zone == Zones.WHITE_BONE) return "White Bone Ridge, where Lady White Bone waits for pilgrims";
+        if (zone == Zones.BLACK_WIND) return "Black Wind Mountain, where the Black Bear Demon keeps the stolen kasaya";
+        if (zone == Zones.FLOWER_FRUIT) return "Flower-Fruit Mountain, the Monkey King's old island over the sea";
+        if (zone == Zones.MOUNT_WUZHUANG) return "Mount Longevity over the clouds, where Zhenyuan tends his ginseng tree";
+        if (zone == Zones.SPIDER_CAVE) return "Silk-Web Ridge, where the Spider Spirits and the Hundred-Eyed Demon Lord keep the Spider Cave";
+        return zone.id();
+    }
+
+    /** Said of Flower-Fruit Mountain wherever it is named: its monkeys are of the band, its master beyond any. */
+    private static final String MACAQUE_WARNING = "its monkeys and the false pilgrims are of your strength; but the false Great Sage who "
+            + "sits deep in the Water Curtain Cave is beyond any mortal band.";
 
     /** Said after every answer in the world of the living: how to ask the way to Mount Kunlun. */
     public static final String KUNLUN_HINT = " §7(Sneak as you ask, for the way to Mount Kunlun.)";
@@ -233,34 +292,59 @@ public final class EarthGod {
         return new Answer(GlobalPos.of(Level.OVERWORLD, new BlockPos(c[0], 64, c[1])), Zones.KUNLUN, Component.literal(words.toString()));
     }
 
-    /** What the Earth God answers a player at their place and level in the world of the living, of the zone for it. */
+    /**
+     * What the Earth God answers a player at their place and level in the world of the living: of the
+     * zone chosen for them ({@link #chosenFor}: the one they stand in, or the nearest of the band), and
+     * then, in grey, a word on every other zone of the band, nearest first, its way and distance.
+     */
     private static Answer forLevel(Vec3 at, int level, long seed, Set<Sea> fallen, @Nullable BlockPos city) {
-        Zones.Zone zone = overworldZoneFor(level);
-        // a zone sharing the band, whose country the asker stands in, is the one named (Black Wind Mountain, in the ridge's band)
-        for (Zones.Zone other : Zones.ALL) {
-            if (other != zone && other.hasFootprint() && other.minLevel() == zone.minLevel() && other.maxLevel() == zone.maxLevel()
-                    && other.depth(seed, (int) Math.floor(at.x), (int) Math.floor(at.z)) > 0) zone = other;
+        Zones.Zone chosen = chosenFor(at, level, seed, fallen);
+        Answer a = forZone(chosen != null ? chosen : overworldZoneFor(level), at, level, seed, fallen, city);
+        if (chosen == null || a.target() == null) return a;
+        int x = (int) Math.floor(at.x), z = (int) Math.floor(at.z);
+        record Other(Zones.Zone zone, BlockPos to, double d) {}
+        List<Other> others = new ArrayList<>();
+        for (Zones.Zone zone : zonesFor(level)) {
+            if (zone == chosen) continue;
+            int[] c = regionFor(zone, seed, x, z, fallen);
+            if (c == null) continue;
+            BlockPos t = targetOf(zone, seed, c);
+            others.add(new Other(zone, t, Math.hypot(t.getX() + 0.5 - at.x, t.getZ() + 0.5 - at.z)));
         }
+        if (others.isEmpty()) return a;
+        others.sort(Comparator.comparingDouble(Other::d));
+        StringBuilder more = new StringBuilder(" §7\"Others of your strength dwell elsewhere: ");
+        for (int i = 0; i < others.size(); i++) {
+            Other o = others.get(i);
+            if (i > 0) more.append(i == others.size() - 1 ? "; and " : "; ");
+            more.append(brief(o.zone())).append(", some ").append(roughly(o.d())).append(" blocks to the ")
+                    .append(wind(at.x, at.z, o.to().getX(), o.to().getZ()));
+        }
+        more.append('.');
+        if (others.stream().anyMatch(o -> o.zone() == Zones.FLOWER_FRUIT)) more.append(" On the island, ").append(MACAQUE_WARNING);
+        more.append('"');
+        return new Answer(a.target(), a.zone(), a.words().copy().append(Component.literal(more.toString())));
+    }
+
+    /** What the Earth God answers of this zone (the zone for the level, or another of its band) at the asker's place. */
+    private static Answer forZone(Zones.Zone zone, Vec3 at, int level, long seed, Set<Sea> fallen, @Nullable BlockPos city) {
         int[] c = regionFor(zone, seed, (int) Math.floor(at.x), (int) Math.floor(at.z), fallen);
         if (zone == Zones.FENGDU && c != null) return wayIn(at, seed, c, city);
         if (c == null) return new Answer(null, null, Component.literal("The Earth God scratches his head: he knows of no such place."));
         if (zone == Zones.BOTTOMLESS) c = com.jttw.engine.world.feature.Labyrinth.doorOf(seed, c[0], c[1]); // its great door
-        StringBuilder words = new StringBuilder();
-        if (!zoneFor(level).hasFootprint()) {
-            words.append("\"Your trials lie in Diyu, the underworld, below any Earth God's ground. ");
-        } else {
-            words.append('"');
-        }
+        StringBuilder words = new StringBuilder("\"");
         if (zone == Zones.MYSTICAL_WATERS && fallen.size() >= 4) words.append("All four Dragon Kings have fallen, yet their seas remain. ");
         words.append(whoDwells(zone, c));
         if (zone == Zones.WHITE_BONE) return com.jttw.engine.world.ridge.CaveSites.toTheDoor(at, seed, c, words);
         double d = Math.hypot(c[0] - at.x, c[1] - at.z);
         if (zone.depth(seed, (int) Math.floor(at.x), (int) Math.floor(at.z)) > 0) {
-            words.append(zone == Zones.FENGDU ? ". You stand in the Ghost City's country now; its Gate of Ghosts is on the terrace at the city's heart.\""
-                    : ". You stand in that country now; its master is near.\"");
+            words.append(zone == Zones.FENGDU ? ". You stand in the Ghost City's country now; its Gate of Ghosts is on the terrace at the city's heart."
+                    : ". You stand in that country now; its master is near.");
         } else {
-            words.append(". It lies some ").append(roughly(d)).append(" blocks to the ").append(wind(at.x, at.z, c[0], c[1])).append(".\"");
+            words.append(". It lies some ").append(roughly(d)).append(" blocks to the ").append(wind(at.x, at.z, c[0], c[1])).append('.');
         }
+        if (zone == Zones.FLOWER_FRUIT) words.append(" There ").append(MACAQUE_WARNING);
+        words.append('"');
         return new Answer(GlobalPos.of(Level.OVERWORLD, needle(zone, c)), zone, Component.literal(words.toString()));
     }
 

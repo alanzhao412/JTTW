@@ -29,6 +29,7 @@
     "BuddhaArmourMixin",
     "BuddhaCapeMixin",
     "CameraMixin",
+    "ClientLevelMixin",
     "EntityTurnMixin",
     "HumanoidModelMixin",
     "ItemRendererMixin",
