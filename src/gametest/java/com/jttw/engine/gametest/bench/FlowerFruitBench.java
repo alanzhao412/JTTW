@@ -131,7 +131,7 @@ final class FlowerFruitBench {
     }
 
     private static final String[] SHOTS = {"from_the_sea", "aerial", "summit_egg", "falls", "falls_close", "behind_the_curtain", "iron_bridge",
-            "tablet", "great_hall", "sanctum", "camp", "pillars", "orchard"};
+            "tablet", "great_hall", "sanctum", "camp", "pillars", "orchard", "east_coast"};
 
     private static boolean shoot(ServerPlayer p, ServerLevel level) {
         if (shot >= SHOTS.length) return true;
@@ -159,6 +159,7 @@ final class FlowerFruitBench {
                     var pil = IslandShape.pillars(level.getSeed()).stream().filter(q -> !q.sea()).findFirst().orElse(IslandShape.pillars(level.getSeed()).get(0));
                     look(p, level, x0 + pil.x() + 40.5, pil.head() - 6, z0 + pil.z() + 30.5, new BlockPos(x0 + pil.x(), pil.head() - 12, z0 + pil.z()));
                 }
+                case "east_coast" -> look(p, level, x0 + 262.5, IslandShape.SEA + 30, z0 + 95.5, new BlockPos(x0 + 223, IslandShape.SEA + 20, z0 + 105)); // a sea cliff the audit found on a chunk's edge
                 case "orchard" -> {
                     int ox = x0 - 110, oz = z0 - 30;
                     int oy = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ox, oz);

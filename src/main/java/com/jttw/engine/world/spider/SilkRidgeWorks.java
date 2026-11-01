@@ -104,8 +104,9 @@ public final class SilkRidgeWorks {
      */
     @Nullable
     public static BlockState at(int lx, int ly, int lz, boolean canopy) {
+        if (Math.hypot(lx - SPRING_X, lz - SPRING_Z) <= SPRING_LEVEL && !inCottage(lx, lz)) return spring(lx - SPRING_X, ly, lz - SPRING_Z);
+        if (ly < -1) return null; // under the cottage's and the temple's floors: the ground the land was brought to (only the spring's pool goes deeper)
         if (inCottage(lx, lz)) return cottage(lx - COTTAGE_X, ly, lz - COTTAGE_Z);
-        if (Math.hypot(lx - SPRING_X, lz - SPRING_Z) <= SPRING_LEVEL) return spring(lx - SPRING_X, ly, lz - SPRING_Z);
         int tx = lx - TEMPLE_X, tz = lz - TEMPLE_Z;
         if (Math.abs(tx) <= CANOPY_RX + 1 && Math.abs(tz) <= CANOPY_RZ + 1) {
             if (canopy && inCanopy(tx, ly, tz)) return SpiderCaveRegistry.SILK_SEAL.get().defaultBlockState();

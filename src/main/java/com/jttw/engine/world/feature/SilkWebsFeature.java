@@ -39,22 +39,32 @@ public class SilkWebsFeature extends Feature<NoneFeatureConfiguration> {
      * logs, and great mushrooms) cleared from the column, never the works' own timber.
      */
     private static boolean clearTrees(WorldGenLevel level, int x, int z, int lx, int lz, BlockPos.MutableBlockPos p) {
-        boolean works = SilkRidgeWorks.covers(lx, lz);
         int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z);
         int ground = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
         boolean any = false;
         for (int y = top; y > ground - 24 && y > level.getMinBuildHeight(); y--) {
             BlockState st = level.getBlockState(p.set(x, y, z));
             // a tree's wood here: the whole tree felled, not only this column of it (no half-trunks, no boughs left in the air)
-            if (!works && st.is(BlockTags.LOGS)) any |= fell(level, p.immutable(), x - lx, z - lz);
+            if (st.is(BlockTags.LOGS) && !worksTimber(level, x - lx, z - lz, p)) any |= fell(level, p.immutable(), x - lx, z - lz);
             boolean tree = st.is(BlockTags.LEAVES) || st.is(Blocks.MUSHROOM_STEM) || st.is(Blocks.RED_MUSHROOM_BLOCK) || st.is(Blocks.BROWN_MUSHROOM_BLOCK)
-                    || !works && st.is(BlockTags.LOGS) || st.is(Blocks.COBWEB);
+                    || st.is(BlockTags.LOGS) && !worksTimber(level, x - lx, z - lz, p) || st.is(Blocks.COBWEB);
             if (tree) {
                 level.setBlock(p, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
                 any = true;
             }
         }
         return any;
+    }
+
+    /**
+     * Whether the wood at {@code w} is the works' own (the cottage's posts, the temple's columns, the
+     * woodpile), by what the works put there; a tree grown in the yard or the court is not.
+     */
+    private static boolean worksTimber(WorldGenLevel level, int cx, int cz, BlockPos w) {
+        int lx = w.getX() - cx, lz = w.getZ() - cz;
+        if (!SilkRidgeWorks.covers(lx, lz)) return false;
+        BlockState want = SilkRidgeWorks.at(lx, w.getY() - com.jttw.engine.world.spider.SpiderCave.floor(level, cx, cz), lz, true);
+        return want != null && want.is(BlockTags.LOGS);
     }
 
     /** How far from where it was struck a tree is felled. */
@@ -76,8 +86,7 @@ public class SilkWebsFeature extends Feature<NoneFeatureConfiguration> {
             for (int dx = -1; dx <= 1; dx++) for (int dy = -1; dy <= 1; dy++) for (int dz = -1; dz <= 1; dz++) {
                 BlockPos n = q.offset(dx, dy, dz);
                 if (wood.contains(n) || n.getY() < floor || Math.abs(n.getX() - start.getX()) > FELL_REACH || Math.abs(n.getZ() - start.getZ()) > FELL_REACH) continue;
-                if (!level.ensureCanWrite(n) || SilkRidgeWorks.covers(n.getX() - cx, n.getZ() - cz)) continue;
-                if (!level.getBlockState(n).is(BlockTags.LOGS)) continue;
+                if (!level.ensureCanWrite(n) || !level.getBlockState(n).is(BlockTags.LOGS) || worksTimber(level, cx, cz, n)) continue;
                 wood.add(n);
                 queue.add(n);
             }

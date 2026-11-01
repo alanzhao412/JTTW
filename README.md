@@ -841,6 +841,13 @@ To add a zone:
    in the Earth Gods' words (`EarthGod`). See where it lands with `./gradlew runWorldgenBench
    -Pbench.mode=zones -Pbench.seed=<seed>` (`ZoneBench`: each zone's place, distance and host, a
    map of the 20 km square round spawn, and a visit to each region: its biome, its bosses, a picture).
+   The Black Wind, Silk-Web and Flower-Fruit benches also run `ZoneAudit` over the loaded zone: the
+   mod's creatures inside blocks, trunks hanging over nothing or left bare, water and lava standing
+   over or beside air, cliffs only at chunk borders (against a count of the same half-way across the
+   chunks, which the land has anyway), and whether the ways to the zone's masters can be walked (a
+   body's search: stepping up one, dropping three, swimming and climbing, through doors and seals);
+   every finding in `run-bench/audit-<zone>.txt`. A band or post put among props is put where its
+   body has room (`ZoneMonster.roomNear`).
 
 #### White Bone Ridge (levels 20–36)
 
@@ -1042,7 +1049,9 @@ Cave. In [`world/blackwind/`](src/main/java/com/jttw/engine/world/blackwind/) an
   (the door, the grate, the arena, a way on foot from the door to the king that the grate shuts, the
   garrisons on open floor, the temple, the peak and the valley), `ZonesTest`; gallery scenes
   `-Pgallery.only=bw_`; the mountain, the temple, a camp, the cave and the king in a real world with
-  `./gradlew runWorldgenBench -Pbench.mode=blackwind`.
+  `./gradlew runWorldgenBench -Pbench.mode=blackwind`. (Its audit found bear soldiers born inside a
+  camp's chopping log, now put where they have room, and the feast pavilion's middle posts stopping
+  short of its roof, now hung from it; the way from the forecourt to the Black Bear walks.)
 
 #### The Bottomless Cave (levels 37–46)
 
@@ -1887,7 +1896,14 @@ Mount Wuzhuang's band, on the ground (Wuzhuang is in the sky).
   scenes `-Pgallery.only=spider_` (every creature from the front, side and back, close, and in each
   telegraphed art; a piece of the valley laid off the stage: the cottage, the passage, the hall and
   its web, a bower, a seal, the spring and its pavilion, the temple under its canopy and without it);
-  the region in a real world with `./gradlew runWorldgenBench -Pbench.mode=spider`.
+  the region in a real world with `./gradlew runWorldgenBench -Pbench.mode=spider`. (Its audit found
+  the works hollowing three blocks of the ground out under the temple's and the cottage's floors, so
+  the temple's paving was a crust over a void and its court could not be walked to; the works now
+  leave the ground under their floors to the land, only the spring's pool going deeper. And the
+  clearing of the paths and the works' grounds cut the forest's dark oaks to the column, leaving
+  half-trunks and boughs in the air, and spared any tree standing in the yard: it now fells a tree
+  whole, the works' own timber told from the forest's by what the works put there. The ways from the
+  cottage to the Demon Lord and to every sister walk.)
 
 #### Lion-Camel Ridge (levels 89–100)
 
@@ -2392,6 +2408,10 @@ luggage and made himself a false pilgrimage to fetch the scriptures in his place
   (`IslandShape.camps`): a ring of mossy stones, a fire and stools, a lean-to, a pole flying the
   Great Sage's yellow banner; each with its band put there and kept (a captain and three or
   four; about one in three roams), and mustered again as the cave's garrison is (below).
+- **In a real world** (the bench's audit): the bands round the camps' fires were born inside the
+  stools; they are now put where they have room. The cliffs it finds on chunk borders are the rock
+  pillars' sheer sides out of the sea (as many lie half-way across the chunks); the water it finds
+  beside air is the falls and the river's edges.
 - **The Water Curtain Cave** (`CavePlan`, the same in every world, pure and unit-tested, laid with
   the island): the mouth, an arch in the cliff behind the falling water; **the iron bridge** (铁板桥)
   across the chasm the cave's stream runs in, chains for its rails, lanterns at its ends; the gate
