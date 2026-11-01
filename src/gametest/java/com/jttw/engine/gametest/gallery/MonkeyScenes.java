@@ -56,6 +56,8 @@ final class MonkeyScenes {
                 shot("monkey_front", "", 0f, front),
                 shot("monkey_quarter", "", -35f, new double[]{2.5, 1.6, 3.2, 0.5, 1.05, 0.5}),
                 shot("monkey_side", "", 90f, front),
+                // his right side: the staff at ease across the shoulder, gripped
+                shot("monkey_grip", "", -90f, new double[]{0.5, 1.7, 2.6, 0.5, 1.4, 0.5}),
                 shot("monkey_back", "", 180f, front),
                 shot("monkey_face", "", -15f, new double[]{0.85, 1.7, 1.65, 0.5, 1.6, 0.5}),
                 shot("monkey_profile", "", 90f, new double[]{0.5, 1.65, 2.1, 0.5, 1.55, 0.5}),

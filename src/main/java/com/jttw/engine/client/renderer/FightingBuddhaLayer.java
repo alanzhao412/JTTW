@@ -42,7 +42,7 @@ public class FightingBuddhaLayer extends RenderLayer<AbstractClientPlayer, Playe
     /** How much larger than a man he is drawn, about his feet. */
     public static final float SIZE = 1.1f;
 
-    private final ModelPart headRoot, monkeyHead, root, head, body, rightArm, leftArm, rightLeg, leftLeg, halo, mandorla, staff, staffRest;
+    private final ModelPart headRoot, monkeyHead, root, head, body, rightArm, leftArm, rightLeg, leftLeg, halo, mandorla, staff, staffRest, rightSleeve;
 
     public FightingBuddhaLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> parent, EntityModelSet models) {
         super(parent);
@@ -57,7 +57,8 @@ public class FightingBuddhaLayer extends RenderLayer<AbstractClientPlayer, Playe
         leftLeg = root.getChild("left_leg");
         halo = body.getChild("halo");
         mandorla = body.getChild("mandorla");
-        staff = rightArm.getChild("right_hand").getChild("staff");
+        rightSleeve = rightArm.getChild("right_sleeve_wide");
+        staff = rightSleeve.getChild("right_hand").getChild("staff");
         staffRest = body.getChild("staff_rest");
     }
 
@@ -83,6 +84,9 @@ public class FightingBuddhaLayer extends RenderLayer<AbstractClientPlayer, Playe
         staffRest.visible = p.getMainHandItem().getItem() instanceof com.jttw.engine.item.RuyiJinguBangItem
                 && com.jttw.engine.client.StaffStance.resting(p);
         // the halo turns slowly; the mandorla breathes
+        // carrying the staff at ease, his forearm folds at the elbow to grip it (StaffGrip)
+        rightSleeve.resetPose();
+        if (com.jttw.engine.client.StaffGrip.gripping(p)) rightSleeve.xRot += com.jttw.engine.client.StaffGrip.BUDDHA_ELBOW;
         halo.zRot = age * 0.01f;
         float breath = 1.0f + 0.03f * (float) Math.sin(age * 0.07f);
         mandorla.xScale = mandorla.yScale = breath;
@@ -170,12 +174,12 @@ public class FightingBuddhaLayer extends RenderLayer<AbstractClientPlayer, Playe
         PartDefinition leftSleeveWide = leftArm.addOrReplaceChild("left_sleeve_wide", CubeListBuilder.create()
                 .texOffs(0, 39).mirror(true).addBox(-2.9f, 0, -3.3f, 5.8f, 6, 6.6f)
                 .texOffs(195, 39).mirror(true).addBox(-3.05f, 5.4f, -3.45f, 6.1f, 0.9f, 6.9f), PartPose.offsetAndRotation(1, 3.8f, 0, 0.08f, 0, -0.05f));
-        PartDefinition rightHand = rightArm.addOrReplaceChild("right_hand", CubeListBuilder.create()
+        PartDefinition rightHand = rightSleeveWide.addOrReplaceChild("right_hand", CubeListBuilder.create()
                 .texOffs(51, 53).mirror(false).addBox(-1.8f, 0, -1.9f, 3.6f, 2.8f, 3.8f)
-                .texOffs(110, 53).mirror(false).addBox(-2.05f, -0.5f, -2.15f, 4.1f, 0.8f, 4.3f), PartPose.offsetAndRotation(-1, 8, 0, 0, 0, 0));
-        PartDefinition leftHand = leftArm.addOrReplaceChild("left_hand", CubeListBuilder.create()
+                .texOffs(110, 53).mirror(false).addBox(-2.05f, -0.5f, -2.15f, 4.1f, 0.8f, 4.3f), PartPose.offsetAndRotation(0, 4.2f, 0, -0.08f, 0, -0.05f));
+        PartDefinition leftHand = leftSleeveWide.addOrReplaceChild("left_hand", CubeListBuilder.create()
                 .texOffs(51, 53).mirror(true).addBox(-1.8f, 0, -1.9f, 3.6f, 2.8f, 3.8f)
-                .texOffs(110, 53).mirror(true).addBox(-2.05f, -0.5f, -2.15f, 4.1f, 0.8f, 4.3f), PartPose.offsetAndRotation(1, 8, 0, 0, 0, 0));
+                .texOffs(110, 53).mirror(true).addBox(-2.05f, -0.5f, -2.15f, 4.1f, 0.8f, 4.3f), PartPose.offsetAndRotation(0, 4.2f, 0, -0.08f, 0, 0.05f));
         PartDefinition leftKasayaSleeve = leftArm.addOrReplaceChild("left_kasaya_sleeve", CubeListBuilder.create()
                 .texOffs(173, 0).mirror(false).addBox(-1.55f, -2.7f, -2.85f, 5.3f, 7.2f, 5.7f), PartPose.offsetAndRotation(0, 0, 0, 0, 0, 0));
         PartDefinition leftDrape = leftArm.addOrReplaceChild("left_drape", CubeListBuilder.create()

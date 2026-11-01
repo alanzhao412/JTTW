@@ -150,7 +150,7 @@ From the start, a Wukong player is drawn as the Monkey King himself, not in the 
 - **Head:** the sculpted head the Fighting Buddha also wears
   ([`assets_source/fighting_buddha_head.py`](assets_source/fighting_buddha_head.py)), without the crown.
 - **Body:** a lean, muscular monkey's build in golden-brown fur, broad at the shoulders and narrow at
-  the waist ([`assets_source/monkey_king.py`](assets_source/monkey_king.py)). The chest and belly are
+  the waist, the flanks and upper back rounded ([`assets_source/monkey_king.py`](assets_source/monkey_king.py)). The chest and belly are
   bare tan skin.
 - **Limbs:** long arms ending in monkey hands, and bowed legs ending in long monkey feet.
 - **Tail:** curling up behind him and swaying.
@@ -161,6 +161,14 @@ hands as usual. Everyone sees him this way: the server tells each client which p
 first person his arms are the Monkey King's. His shadow clones are drawn as he is. A transformation
 (the 72 and the rest) wins: its form is drawn. At level 100 the Victorious Fighting Buddha takes his
 place.
+
+Carrying the staff at ease across his right shoulder (`StaffStance`), the Monkey King and the Buddha both
+hold it: the right arm raised, bent at the elbow, the hand closed round the shaft in front of the shoulder
+([`StaffGrip`](src/main/java/com/jttw/engine/client/StaffGrip.java)). The player model's arm takes the
+upper arm's pose, so armour sleeves follow it, and the drawn forearm folds at the elbow. The pose was
+solved so the hand lies on the staff. While he strikes, uses the staff, or holds anything else, his arm
+is his own again. In first person his monkey arm is drawn a little smaller, so the long hand doesn't
+fill the view.
 
 ### The Victorious Fighting Buddha (斗战胜佛)
 

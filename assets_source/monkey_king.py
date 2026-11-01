@@ -70,17 +70,23 @@ MONKEY = mirrored([
         (-3.7, 0.4, 2.05, 7.4, 5.2, 0.5, 'fur_back'),
     ]),
     part('right_pec', 'body', (0, 0, 0), (0, 0, 0), [(-3.35, 0.55, -2.75, 3.25, 3.7, 0.55, 'pec')]),
+    # the flanks and back rounded: the lats swelling at the sides, the upper back over the shoulder blades
+    part('right_flank', 'body', (0, 0, 0), (0, 0, 0), [(-4.6, 0.7, -1.7, 0.45, 4.4, 3.5, 'fur_flank')]),
+    part('upper_back', 'body', (0, 0, 0), (0, 0, 0), [(-3.2, 0.3, 2.5, 6.4, 4.0, 0.4, 'fur_back')]),
 
     # ── the arms: long, furred, a round shoulder and a bulge of muscle, to bare monkey hands ──
     part('right_upper_arm', 'right_arm', (0, 0, 0), (0, 0, 0), [
         (-3.65, -2.6, -2.4, 4.6, 3.1, 4.8, 'fur_shoulder'),
         (-3.05, -0.2, -1.95, 3.8, 4.6, 3.9, 'fur_arm'),
         (-2.65, 0.4, -2.35, 2.9, 3.1, 0.5, 'fur_arm'),
-        (-3.0, 4.2, -2.0, 3.8, 3.0, 4.0, 'fur_forearm'),
-        (-2.8, 7.0, -1.8, 3.4, 3.4, 3.6, 'fur_forearm'),
-        (-2.85, 10.2, -1.85, 3.5, 2.3, 3.7, 'hand'),
-        (-2.8, 12.3, -1.95, 3.4, 1.0, 2.9, 'fingers'),
-        (-0.15, 10.5, -2.4, 0.9, 1.7, 0.9, 'thumb'),
+    ]),
+    # the forearm and hand, from the elbow: it bends there (MonkeyKingModel folds it to grip the staff at rest)
+    part('right_forearm', 'right_upper_arm', (-1, 4.2, 0), (0, 0, 0), [
+        (-2.0, 0, -2.0, 3.8, 3.0, 4.0, 'fur_forearm'),
+        (-1.8, 2.8, -1.8, 3.4, 3.4, 3.6, 'fur_forearm'),
+        (-1.85, 6.0, -1.85, 3.5, 2.3, 3.7, 'hand'),
+        (-1.8, 8.1, -1.95, 3.4, 1.0, 2.9, 'fingers'),
+        (0.85, 6.3, -2.4, 0.9, 1.7, 0.9, 'thumb'),
     ]),
 
     # ── the legs: bowed a little, furred, a heavy thigh and calf, to long monkey feet ──
@@ -106,7 +112,7 @@ def skin_box(p, f, base=SKIN):
 
 
 def paint_box(p, style, f, dims):
-    if style in ('fur_torso', 'fur_waist', 'fur_hips', 'fur_arm', 'fur_shoulder', 'fur_forearm', 'fur_thigh', 'fur_shin'):
+    if style in ('fur_torso', 'fur_flank', 'fur_waist', 'fur_hips', 'fur_arm', 'fur_shoulder', 'fur_forearm', 'fur_thigh', 'fur_shin'):
         furred(p, f, 1.0, base=FUR, slant=0.15)
     elif style == 'fur_back':
         furred(p, f, 0.92, base=FUR_DARK)
