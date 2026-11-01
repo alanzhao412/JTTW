@@ -328,29 +328,49 @@ public final class SilkRidgeWorks {
         return x * x + y * y + z * z < 1;
     }
 
-    /** The canopy's radii, the spokes of its web from the knot at its crown; every other one runs on to the ground as a cable. */
-    static final int SPOKES = 16;
+    /** The canopy's radii, the spokes of its web from the knot at its crown; every third is held down by a cable. */
+    static final int SPOKES = 24, ANCHOR_EVERY = 3;
     /** The polar angle (from the crown) of the canopy's hub, of the clear ring round it, and of its rim at an anchor. */
     static final double HUB = 0.085, FREE = 0.2, RIM = 1.03;
     /** How far the rim sags between two anchors, and the swags under it. */
     static final double RIM_SAG = 0.10, SWAG = 0.17, SWAG_SAG = 0.16;
-    /** The spiral's pitch (polar angle a turn). */
-    static final double PITCH = 0.15;
+    /** How far apart the rings of the web are, over the shell (blocks). */
+    static final double RING_GAP = 3.4;
 
     /**
      * What the sisters' canopy puts at temple-local (tx, ly, tz), or null where it puts nothing. Its
-     * shell ({@link #inCanopy}) is whole, so none passes it; but it is a web: radii from the knot at
-     * its crown, a spiral of silk round them, a heavy rim sagging between the cables that hold it,
-     * swags and drapes hanging from that, all in sealing silk; and between the strands only the
-     * sisters' gauze, which one sees through. Past it, from every other radius, a cable runs down to
-     * an anchor of silk on the ground.
+     * shell ({@link #inCanopy}) is whole, gauze in every cell of it (or, at the knot of its crown,
+     * sealing silk), so none passes it; but it is a web: through the gauze run cords of silk
+     * ({@link SilkVeilBlock}), radii from the knot at its crown, rings round them, a heavy rim
+     * sagging between the cables that hold it, swags and drapes hanging from that. Past it, from
+     * every third radius, a cable runs down and splays into three tethers, each pinned to the ground
+     * by a peg of sealing silk, cobwebs tufted round.
      */
     @Nullable
     public static BlockState canopyAt(int tx, int ly, int tz) {
         if (ly < 0 || ly > CANOPY_H) return null;
-        if (inCanopy(tx, ly, tz)) return (strand(tx, ly, tz) ? SpiderCaveRegistry.SILK_SEAL : SpiderCaveRegistry.SILK_VEIL).get().defaultBlockState();
-        if (insideCanopy(tx, ly, tz)) return null;
-        return cable(tx, ly, tz);
+        int c = Web.cell(tx, ly, tz);
+        if (c == 0) return inCanopy(tx, ly, tz) ? SpiderCaveRegistry.SILK_VEIL.get().defaultBlockState() : null;
+        if ((c & Web.PEG) != 0) return SpiderCaveRegistry.SILK_SEAL.get().defaultBlockState();
+        boolean thick = (c & Web.THICK) != 0;
+        if ((c & Web.BARE) == 0) return SpiderCaveRegistry.SILK_VEIL.get().with(c & Web.FACES, c >> 6 & 0xFFF, thick);
+        // out in the air: a cable in by one way and on by another; where it splits, a knot of web
+        SilkCableBlock.Way from = SilkCableBlock.Way.NONE, to = SilkCableBlock.Way.NONE;
+        int ways = 0;
+        for (int i = 0; i < Web.WAYS.length; i++) {
+            if ((c & 1 << i) == 0) continue;
+            ways++;
+            if (from == SilkCableBlock.Way.NONE) from = Web.WAYS[i];
+            else to = Web.WAYS[i];
+        }
+        if (ways > 2 || (c & Web.TUFT) != 0) return s(Blocks.COBWEB);
+        return SpiderCaveRegistry.SILK_CABLE.get().with(from, to, thick);
+    }
+
+    /** Whether the shell's cell at (tx, ly, tz) carries one of the web's strands (else it is bare gauze). */
+    public static boolean strand(int tx, int ly, int tz) {
+        int c = Web.cell(tx, ly, tz);
+        return (c & (Web.FACES | Web.PEG)) != 0 && inCanopy(tx, ly, tz);
     }
 
     /** The canopy's half-width (blocks) out along azimuth {@code theta} at its foot. */
@@ -367,93 +387,246 @@ public final class SilkRidgeWorks {
 
     /** The rim's polar angle along azimuth {@code theta}: highest at the anchors, sagging between. */
     static double rimAt(double theta) {
-        return RIM + RIM_SAG * Math.sin(Math.PI * between(theta, 4 * Math.PI / SPOKES));
+        return RIM + RIM_SAG * Math.sin(Math.PI * between(theta, ANCHOR_EVERY * 2 * Math.PI / SPOKES));
     }
 
-    /** Whether the shell's block at (tx, ly, tz) is one of the web's strands (else gauze). */
-    public static boolean strand(int tx, int ly, int tz) {
-        double x = tx / (double) CANOPY_RX, y = (ly + 0.4) / CANOPY_H, z = tz / (double) CANOPY_RZ;
-        double rho = Math.hypot(x, z), phi = Math.atan2(rho, y), theta = Math.atan2(z, x);
-        if (phi < HUB) return true; // the knot at the crown
-        double foot = footRadius(theta);
-        // blocks of the shell per radian of polar angle, here
-        double meridian = Math.hypot(CANOPY_H * Math.sin(phi), foot * Math.cos(phi));
-        double across = Math.hypot(tx, tz); // blocks per radian of azimuth
-        double step = 2 * Math.PI / SPOKES;
-        double d = Math.abs(Math.IEEEremainder(theta, step));
-        int k = (int) Math.round(theta / step);
-        boolean anchor = Math.floorMod(k, 2) == 0;
-        if (d * across < (anchor ? 1.05 : 0.62)) return true; // a radius (the anchors' doubled)
-        double rim = rimAt(theta);
-        if (Math.abs(phi - rim) * meridian < 0.95) return true;
-        double sag = Math.sin(Math.PI * between(theta, step));
-        if (phi < rim) {
-            if (phi < FREE) return false; // the clear ring round the knot
-            // the spiral: wound out from the crown, each turn sagging a little between radii
-            double u = (phi - FREE - 0.03 * sag) / PITCH - (theta + Math.PI) / (2 * Math.PI);
-            return Math.abs(u - Math.rint(u)) * PITCH * meridian < 0.52;
-        }
-        // under the rim: swags looping down between the anchors, and drapes hanging from both
-        double ba = between(theta, 2 * step);
-        double swag = rim + SWAG + SWAG_SAG * Math.sin(Math.PI * ba);
-        if (Math.abs(phi - swag) * meridian < 0.6) return true;
-        double drapeStep = 2 * Math.PI / 24;
-        int j = (int) Math.round(theta / drapeStep);
-        if (Math.abs(theta - j * drapeStep) * across < 0.5) {
-            int h = hash(j, 0, 0, 40);
-            if (h < 45) return false; // only here and there a drape
-            double end = (h < 55 ? swag : rim) + 0.06 + (h % 13) * 0.035;
-            return phi <= end;
-        }
-        return false;
+    /** The swag's polar angle along azimuth {@code theta}: looping down under the rim from anchor to anchor. */
+    static double swagAt(double theta) {
+        return rimAt(theta) + SWAG + SWAG_SAG * Math.sin(Math.PI * between(theta, ANCHOR_EVERY * 2 * Math.PI / SPOKES));
     }
 
-    /** The cables from the canopy's rim to its anchors on the ground, and the anchors (null where there are none). */
-    @Nullable
-    private static BlockState cable(int tx, int ly, int tz) {
-        double step = 2 * Math.PI / SPOKES;
-        BlockState out = null;
-        for (int k = 0; k < SPOKES; k += 2) {
-            double theta = k * step;
-            if (theta > Math.PI) theta -= 2 * Math.PI;
-            double phi = rimAt(theta);
-            double c = Math.cos(theta), sn = Math.sin(theta);
-            double px = CANOPY_RX * Math.sin(phi) * c, pz = CANOPY_RZ * Math.sin(phi) * sn, py = CANOPY_H * Math.cos(phi);
-            // two stays from each anchor point, splayed, or one straight down the radius
-            int stays = k % 4 == 0 ? 2 : 1;
-            for (int st = 0; st < stays; st++) {
-                double ft = theta + (stays == 1 ? 0 : (st == 0 ? -0.075 : 0.075));
-                double reach = footRadius(ft) + ANCHOR_OUT - (stays == 1 ? 2 : 0);
-                double fx = Math.cos(ft) * reach, fz = Math.sin(ft) * reach;
-                BlockState b = stay(tx, ly, tz, px, py, pz, fx, fz);
-                if (b != null) {
-                    if (b.is(SpiderCaveRegistry.SILK_SEAL.get())) return b;
-                    out = b;
+    /**
+     * The canopy's web, worked out once: each cell it touches, temple-local, and what is there: the
+     * ways a cord runs out ({@link #WAYS}: through its faces, or for a cable across its edges), whether that
+     * cord is heavy, whether it is out past the gauze; or a peg of sealing silk, or a tuft of cobweb.
+     * Every strand is traced as a curve over the shell and laid cell to cell through their faces, so
+     * it runs on unbroken, a line and not a stair of blocks.
+     */
+    static final class Web {
+        /** The ways a cord leaves a cell, by bit: through its faces (the first six, by {@link Direction#get3DDataValue}), then across its edges. */
+        static final SilkCableBlock.Way[] WAYS = java.util.Arrays.copyOfRange(SilkCableBlock.Way.values(), 1, 19);
+        static final int FACES = 63, WAYS_MASK = (1 << 18) - 1, THICK = 1 << 18, BARE = 1 << 19, PEG = 1 << 20, TUFT = 1 << 21, SET = 1 << 22;
+        private static final int[][] ORDERS = {{1, 0, 2}, {1, 2, 0}, {0, 1, 2}, {2, 1, 0}, {0, 2, 1}, {2, 0, 1}};
+        private static final java.util.Map<Long, Integer> CELLS = new java.util.HashMap<>();
+
+        static {
+            build();
+        }
+
+        private Web() {}
+
+        static int cell(int x, int y, int z) {
+            Integer c = CELLS.get(key(x, y, z));
+            return c == null ? 0 : c;
+        }
+
+        private static long key(int x, int y, int z) {
+            return ((long) (x & 0xFFFFF) << 40) | ((long) (y & 0xFFFFF) << 20) | (z & 0xFFFFF);
+        }
+
+        private static void put(int x, int y, int z, int bits) {
+            if (y < 0 || y > CANOPY_H) return;
+            if (!inCanopy(x, y, z)) {
+                if (insideCanopy(x, y, z)) return; // nothing of the web inside it
+                bits |= BARE;
+            }
+            CELLS.merge(key(x, y, z), bits | SET, (a, b) -> a | b);
+        }
+
+        /** A point on the shell's surface: polar angle {@code phi} from the crown, azimuth {@code theta}. */
+        private static double[] surface(double phi, double theta) {
+            return new double[]{CANOPY_RX * Math.sin(phi) * Math.cos(theta), CANOPY_H * Math.cos(phi), CANOPY_RZ * Math.sin(phi) * Math.sin(theta)};
+        }
+
+        private static double polar(int x, int y, int z) {
+            return Math.atan2(Math.hypot(x / (double) CANOPY_RX, z / (double) CANOPY_RZ), y / (double) CANOPY_H);
+        }
+
+        /** The shell's cell nearest point p, or null if none is near. */
+        private static int[] shellCell(double[] p) {
+            int bx = (int) Math.round(p[0]), by = (int) Math.round(p[1]), bz = (int) Math.round(p[2]);
+            int[] best = null;
+            double bd = Double.MAX_VALUE;
+            for (int i = -1; i <= 1; i++) for (int j = -1; j <= 1; j++) for (int k = -1; k <= 1; k++) {
+                int x = bx + i, y = by + j, z = bz + k;
+                if (y < 0 || !inCanopy(x, y, z)) continue;
+                double d = (x - p[0]) * (x - p[0]) + (y - p[1]) * (y - p[1]) + (z - p[2]) * (z - p[2]);
+                if (d < bd) {
+                    bd = d;
+                    best = new int[]{x, y, z};
+                }
+            }
+            return best;
+        }
+
+        /** Lays a strand through the cells {@code curve} passes (over the shell, or free in the air), at {@code samples} points along it. */
+        private static void trace(java.util.function.DoubleFunction<double[]> curve, int samples, boolean onShell, int bits) {
+            java.util.List<int[]> run = new java.util.ArrayList<>();
+            for (int i = 0; i <= samples; i++) {
+                double[] p = curve.apply(i / (double) samples);
+                if (p == null) {
+                    lay(run, onShell, bits);
+                    run.clear();
+                    continue;
+                }
+                int[] c;
+                if (onShell) c = shellCell(p);
+                else {
+                    c = new int[]{(int) Math.round(p[0]), (int) Math.round(p[1]), (int) Math.round(p[2])};
+                    if (c[1] < 0 || insideCanopy(c[0], c[1], c[2]) && !inCanopy(c[0], c[1], c[2])) c = null;
+                }
+                if (c == null) continue;
+                if (!run.isEmpty()) {
+                    int[] last = run.get(run.size() - 1);
+                    if (last[0] == c[0] && last[1] == c[1] && last[2] == c[2]) continue;
+                    run.addAll(between(last, c, onShell));
+                }
+                run.add(c);
+            }
+            lay(run, onShell, bits);
+        }
+
+        /** The cells between a and b (neither), stepped face to face, over the shell where it can. */
+        private static java.util.List<int[]> between(int[] a, int[] b, boolean onShell) {
+            int[] d = {b[0] - a[0], b[1] - a[1], b[2] - a[2]};
+            int[] order = ORDERS[0];
+            for (int[] o : ORDERS) {
+                if (fits(a, d, o, onShell)) {
+                    order = o;
+                    break;
+                }
+            }
+            java.util.List<int[]> out = new java.util.ArrayList<>();
+            int[] at = a.clone();
+            for (int axis : order) {
+                while (at[axis] != b[axis]) {
+                    at[axis] += Integer.signum(b[axis] - at[axis]);
+                    if (at[0] != b[0] || at[1] != b[1] || at[2] != b[2]) out.add(at.clone());
+                }
+            }
+            return out;
+        }
+
+        /**
+         * Lays a run of cells, each a face from the next, as one cord: where it steps one way and then
+         * another (a stair), it runs across the edge between instead, the corner cell left out, so a
+         * slant line runs on as a slant line.
+         */
+        private static void lay(java.util.List<int[]> run, boolean onShell, int bits) {
+            if (run.isEmpty()) return;
+            put(run.get(0)[0], run.get(0)[1], run.get(0)[2], bits);
+            int i = 0;
+            while (i + 1 < run.size()) {
+                int[] a = run.get(i);
+                if (i + 2 < run.size()) {
+                    int[] c = run.get(i + 2);
+                    int dx = c[0] - a[0], dy = c[1] - a[1], dz = c[2] - a[2];
+                    int axes = (dx != 0 ? 1 : 0) + (dy != 0 ? 1 : 0) + (dz != 0 ? 1 : 0);
+                    if (axes == 2 && Math.abs(dx) <= 1 && Math.abs(dy) <= 1 && Math.abs(dz) <= 1 && join(a, c, onShell, bits)) {
+                        i += 2;
+                        continue;
+                    }
+                }
+                join(a, run.get(i + 1), onShell, bits);
+                i++;
+            }
+        }
+
+        /** Joins neighbouring cells a and b (across a face, or an edge if both can take it): whether it could. */
+        private static boolean join(int[] a, int[] b, boolean onShell, int bits) {
+            int dx = b[0] - a[0], dy = b[1] - a[1], dz = b[2] - a[2];
+            int w = SilkCableBlock.Way.toward(dx, dy, dz).ordinal() - 1, back = SilkCableBlock.Way.toward(-dx, -dy, -dz).ordinal() - 1;
+            if (w < 0) return false;
+            if (w >= 6) {
+                // across an edge: in the gauze, only where the cell has no other slant through it but the one this goes on (a cable takes any two ways)
+                if (!slantFits(a, w) || !slantFits(b, back)) return false;
+            }
+            put(a[0], a[1], a[2], bits | 1 << w);
+            put(b[0], b[1], b[2], bits | 1 << back);
+            return true;
+        }
+
+        /** Whether cell a can take a slant cord out across edge {@code w}: free of slants, or holding only the one straight on from it. */
+        private static boolean slantFits(int[] a, int w) {
+            int edges = cell(a[0], a[1], a[2]) >> 6 & 0xFFF;
+            if (!inCanopy(a[0], a[1], a[2])) return true; // a cable takes any two ways
+            if (edges == 0 || edges == 1 << (w - 6)) return true;
+            SilkCableBlock.Way way = WAYS[w];
+            int opp = SilkCableBlock.Way.toward(-way.dx, -way.dy, -way.dz).ordinal() - 1;
+            return edges == 1 << (opp - 6);
+        }
+
+        /** Whether the cells between a and a + d, stepped axis by axis in {@code order}, all lie where the strand may run. */
+        private static boolean fits(int[] a, int[] d, int[] order, boolean onShell) {
+            int[] at = a.clone();
+            for (int axis : order) {
+                for (int n = 0; n < Math.abs(d[axis]); n++) {
+                    at[axis] += Integer.signum(d[axis]);
+                    boolean ok = onShell ? inCanopy(at[0], at[1], at[2]) : !insideCanopy(at[0], at[1], at[2]) || inCanopy(at[0], at[1], at[2]);
+                    if (!ok) return false;
+                }
+            }
+            return true;
+        }
+
+        private static void build() {
+            double step = 2 * Math.PI / SPOKES;
+            // the knot at the crown
+            for (int x = -8; x <= 8; x++) for (int z = -8; z <= 8; z++) for (int y = CANOPY_H - 3; y <= CANOPY_H; y++)
+                if (inCanopy(x, y, z) && polar(x, y, z) < HUB) put(x, y, z, PEG);
+            // the radii: those the cables hold heavy, and on down to the ground; the rest on down under the rim as drapes
+            for (int k = 0; k < SPOKES; k++) {
+                double theta = k * step;
+                boolean anchor = k % ANCHOR_EVERY == 0;
+                int h = hash(k, 0, 0, 40);
+                double end = anchor || h < 30 ? Math.PI / 2 : Math.min(Math.PI / 2, swagAt(theta) + 0.04 + (h % 9) * 0.04);
+                double from = HUB * 0.7;
+                trace(u -> surface(from + (end - from) * u, theta), 500, true, anchor ? THICK : 0);
+            }
+            // the rim, heavy; the swags under it
+            trace(u -> surface(rimAt(u * 2 * Math.PI), u * 2 * Math.PI), 4000, true, THICK);
+            trace(u -> {
+                double theta = u * 2 * Math.PI, phi = swagAt(theta);
+                return phi < Math.PI / 2 ? surface(phi, theta) : null;
+            }, 4000, true, 0);
+            // the rings round the knot, level all round (so each runs on as one straight line, seen from the side), out to the rim
+            double arc = 0, avg = (CANOPY_RX + CANOPY_RZ) / 2.0;
+            int lastY = Integer.MAX_VALUE;
+            for (double phi = FREE; phi < RIM - 0.04; phi += 0.002) {
+                arc += Math.hypot(avg * Math.cos(phi), CANOPY_H * Math.sin(phi)) * 0.002;
+                if (arc < RING_GAP) continue;
+                int y = (int) Math.round(CANOPY_H * Math.cos(phi));
+                if (y >= lastY) continue;
+                arc = 0;
+                lastY = y;
+                double ring = Math.acos(y / (double) CANOPY_H);
+                trace(u -> surface(ring, u * 2 * Math.PI), 4000, true, 0);
+            }
+            // the cables: from the rim at each anchor out and down, splaying near the ground into three tethers, each pinned by a peg
+            for (int k = 0; k < SPOKES; k += ANCHOR_EVERY) {
+                double theta = k * step, c = Math.cos(theta), sn = Math.sin(theta);
+                double[] top = surface(rimAt(theta), theta);
+                double reach = footRadius(theta) + ANCHOR_OUT;
+                double[] split = {c * (reach - 2.0), 3.0, sn * (reach - 2.0)};
+                trace(u -> new double[]{top[0] + (split[0] - top[0]) * u, top[1] + (split[1] - top[1]) * u - 1.4 * 4 * u * (1 - u),
+                        top[2] + (split[2] - top[2]) * u}, 600, false, THICK);
+                double[][] pins = {{reach + 0.3, -2.6}, {reach + 1.6, 0}, {reach + 0.3, 2.6}};
+                for (double[] pin : pins) {
+                    int px = (int) Math.round(c * pin[0] - sn * pin[1]), pz = (int) Math.round(sn * pin[0] + c * pin[1]);
+                    put(px, 0, pz, PEG);
+                    // the knot of web where the cable splits
+                    put((int) Math.round(split[0]), (int) Math.round(split[1]), (int) Math.round(split[2]), TUFT);
+                    double[] end = {px, 0.3, pz};
+                    trace(u -> new double[]{split[0] + (end[0] - split[0]) * u, split[1] + (end[1] - split[1]) * u, split[2] + (end[2] - split[2]) * u},
+                            200, false, 0);
+                    // a tuft or two of cobweb round the peg
+                    for (int[] n : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
+                        int qx = px + n[0], qz = pz + n[1];
+                        if (hash(qx, 0, qz, 43) < 35 && !CELLS.containsKey(key(qx, 0, qz)) && !insideCanopy(qx, 0, qz)) put(qx, 0, qz, TUFT);
+                    }
                 }
             }
         }
-        return out;
-    }
-
-    /** One stay: a cable from (px, py, pz) on the rim down to the ground at (fx, fz), sagging a little, and the knot of silk anchoring it. */
-    @Nullable
-    private static BlockState stay(int tx, int ly, int tz, double px, double py, double pz, double fx, double fz) {
-        double dx = fx - px, dz = fz - pz, len = Math.hypot(dx, dz);
-        double qx = tx - px, qz = tz - pz;
-        double t = (qx * dx + qz * dz) / (len * len);
-        double off = Math.abs(qx * dz - qz * dx) / len;
-        double fd = Math.hypot(tx - fx, tz - fz);
-        if (fd < 1.6 && ly == 0 || fd < 0.9 && ly == 1) return SpiderCaveRegistry.SILK_SEAL.get().defaultBlockState();
-        if (fd < 2.6 && ly == 0 && hash(tx, 0, tz, 41) < 45) return s(Blocks.COBWEB);
-        if (t < 0 || t > 1 || off > 0.62) return null;
-        double half = 0.7 / len;
-        double y0 = cableY(Math.max(0, t - half), py), y1 = cableY(Math.min(1, t + half), py);
-        int lo = (int) Math.round(Math.min(y0, y1)), hi = (int) Math.round(Math.max(y0, y1));
-        return ly >= lo && ly <= hi ? SpiderCaveRegistry.SILK_SEAL.get().defaultBlockState() : null;
-    }
-
-    private static double cableY(double t, double py) {
-        return py * (1 - t) - 1.6 * 4 * t * (1 - t);
     }
 
     /** The main hall: its half-width, its back and front (from the temple's middle). */

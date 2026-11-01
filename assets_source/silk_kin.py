@@ -311,8 +311,8 @@ CRIMSON = (150, 26, 34)
 
 def mantis_parts():
     ps = [
-        part('waist', 'root', (0, 6.5, 0), (0, 0, 0), [(-2.6, -2.2, -2.6, 5.2, 4.4, 5.2, 'meso'),
-                                                       (-3, -1.4, -3, 6, 1.6, 6, 'sash')]),
+        part('waist', 'root', (0, 6.5, 0), (0, 0, 0), [(-3.4, -2.6, -3.2, 6.8, 5.2, 6.4, 'meso'),
+                                                       (-3.8, -1.4, -3.6, 7.6, 1.6, 7.2, 'sash')]),
         part('sash_tail', 'waist', (1.6, 0, -3), (-0.1, 0, -0.1), [(-0.9, 0, -0.3, 1.8, 7, 0.4, 'sash_tail')]),
         part('abdomen', 'waist', (0, -0.6, 2.2), (-0.32, 0, 0), [
             (-3.6, -2.4, 0, 7.2, 5.2, 7.5, 'abdomen_a'),
@@ -324,7 +324,8 @@ def mantis_parts():
         part('right_hindwing', 'wings', (-0.3, 0.5, 0.6), (0, 0, 0.62), [(-4.4, -0.2, 0, 4.4, 0.4, 15.5, 'hindwing')]),
         part('prothorax', 'waist', (0, -2, -0.5), (0.14, 0, 0), [
             (-1.9, -17, -1.9, 3.8, 17, 3.8, 'prothorax'),
-            (-2.9, -14.6, -2.6, 5.8, 4.2, 5.0, 'pronotum_lobe'),
+            (-2.8, -8.0, -2.7, 5.6, 8.2, 5.4, 'prothorax_low'),
+            (-3.4, -15.0, -2.9, 6.8, 4.8, 5.6, 'pronotum_lobe'),
             (-2.6, -17.6, -2.6, 5.2, 2.6, 5.2, 'collar'),
             (-2.2, -15, -2.3, 4.4, 1.2, 0.8, 'collar_plate'),
             (-2.25, -9.5, -0.4, 0.5, 0.5, 0.9, 'thorn'), (1.75, -9.5, -0.4, 0.5, 0.5, 0.9, 'thorn'),
@@ -332,13 +333,14 @@ def mantis_parts():
             (-2.25, -2.5, -0.4, 0.5, 0.5, 0.9, 'thorn'), (1.75, -2.5, -0.4, 0.5, 0.5, 0.9, 'thorn'),
         ]),
         part('head', 'prothorax', (0, -17.6, -0.4), (-0.1, 0, 0), [
-            (-4.4, -4, -2.8, 8.8, 4, 4.6, 'head_top'),
-            (-2.9, 0, -2.9, 5.8, 3, 3.6, 'head_mid'),
-            (-1.4, 2.8, -2.7, 2.8, 2.2, 2.4, 'mouthparts'),
+            (-5.4, -4.4, -2.9, 10.8, 4.4, 4.8, 'head_top'),
+            (-3.6, 0, -2.9, 7.2, 2.6, 3.8, 'head_mid'),
+            (-2.2, 2.4, -2.8, 4.4, 1.8, 3.0, 'head_low'),
+            (-1.2, 4.0, -2.7, 2.4, 2.0, 2.4, 'mouthparts'),
         ]),
-        part('right_eye', 'head', (-4.0, -2.6, -0.4), (0, 0.15, 0.15), [(-2.8, -2.4, -2.4, 3.4, 4.6, 4.6, 'compound')]),
+        part('right_eye', 'head', (-4.9, -2.8, -0.5), (0, 0.15, 0.15), [(-3.0, -2.8, -2.8, 4.0, 5.6, 5.6, 'compound')]),
         part('right_antenna', 'head', (-0.8, -3.2, -2), (0.85, 0.25, -0.2), [(-0.25, -12, -0.25, 0.5, 12, 0.5, 'antenna')]),
-        part('right_coxa', 'prothorax', (-1.9, -14.5, -1.4), (-0.2, 0, 0.1), [(-1, 0, -1, 2, 7, 2, 'coxa'),
+        part('right_coxa', 'prothorax', (-2.6, -14.0, -1.6), (-0.85, 0.15, 0.3), [(-1, 0, -1, 2, 7, 2, 'coxa'),
                                                                            (-1.4, 0.5, -1.4, 2.8, 1.6, 2.8, 'armlet')]),
         part('right_femur', 'right_coxa', (0, 7, 0), (-2.55, 0, 0), [
             (-1.4, -0.2, -1.4, 2.8, 11, 2.8, 'femur'),
@@ -364,7 +366,7 @@ def mantis_parts():
 
 def mantis_painter():
     def paint_box(p, style, f, dims):
-        if style in ('meso', 'prothorax', 'head_top', 'head_mid', 'coxa', 'femur', 'leg', 'leg_shin', 'knee'):
+        if style in ('meso', 'prothorax', 'prothorax_low', 'head_top', 'head_mid', 'head_low', 'coxa', 'femur', 'leg', 'leg_shin', 'knee'):
             chitin(p, f, MANTIS_GREEN, MANTIS_PALE, gloss=style in ('head_top', 'femur', 'prothorax'))
             if style == 'prothorax':                                  # a pale seam down its front, and ridges
                 fx, fy, fw, fh = f['front']

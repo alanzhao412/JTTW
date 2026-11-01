@@ -87,26 +87,47 @@ def silk_seal():
 
 
 def silk_veil():
-    """The sisters' gauze: silk spun so fine it is all but clear: a milky haze, a few fine threads
-    across it catching the light, a glint of dew."""
+    """The sisters' gauze: silk spun so fine it is all but clear: a milky haze, soft and even (no
+    seam where one cell meets the next), a few fine threads across it catching the light."""
     rnd = random.Random(31)
     img = Image.new('RGBA', (16, 16))
     for y in range(16):
         for x in range(16):
-            img.putpixel((x, y), rgba((244, 244, 248), a=rnd.randint(58, 78)))
-    for _ in range(7):
+            img.putpixel((x, y), rgba((246, 246, 250), a=rnd.randint(72, 88)))
+    for _ in range(4):
         x0, y0 = rnd.uniform(0, 16), rnd.uniform(0, 16)
         a = rnd.uniform(0, math.pi)
-        length = rnd.uniform(7, 16)
-        line(img, x0, y0, x0 + math.cos(a) * length, y0 + math.sin(a) * length, rgba((252, 252, 255), a=rnd.randint(110, 160)), wrap=True)
-    # its edges a little thicker, as gauze gathers on the strand it hangs from
-    for i in range(16):
-        for x, y in ((i, 0), (i, 15), (0, i), (15, i)):
-            if rnd.random() < 0.5:
-                put(img, x, y, rgba((250, 250, 252), a=60))
-    for _ in range(3):
-        put(img, rnd.randrange(16), rnd.randrange(16), rgba((255, 255, 255), a=200))
+        line(img, x0, y0, x0 + math.cos(a) * 16, y0 + math.sin(a) * 16, rgba((252, 252, 255), a=rnd.randint(105, 125)), wrap=True)
     img.save(T + 'block/silk_veil.png')
+
+
+def silk_cord():
+    """A cord of silk, as the canopy's strands are spun: white threads twisted round one another,
+    a pearly sheen along the twist, a little shade in its grooves."""
+    img = Image.new('RGBA', (16, 16))
+    for y in range(16):
+        for x in range(16):
+            twist = (x + y * 0.75) % 4
+            k = 1.0 if twist < 2.2 else 0.86
+            c = (250, 249, 244) if twist < 1 else (238, 236, 230)
+            img.putpixel((x, y), rgba(c, k))
+    for y in range(0, 16, 4):
+        put(img, (y * 3) % 16, y, rgba((255, 252, 246)))
+    img.save(T + 'block/silk_cord.png')
+
+
+def shaft_light():
+    """A haze of light: all but clear, a few soft streaks running down it, warm."""
+    rnd = random.Random(53)
+    img = Image.new('RGBA', (16, 16))
+    streaks = [rnd.uniform(0.5, 1.0) for _ in range(16)]
+    for x in range(16):
+        # soften the streaks into one another
+        s = (streaks[x - 1] + 2 * streaks[x] + streaks[(x + 1) % 16]) / 4
+        for y in range(16):
+            a = int(34 + 44 * s + rnd.randint(-4, 4))
+            img.putpixel((x, y), rgba((255, 244, 206), a=a))
+    img.save(T + 'block/shaft_light.png')
 
 
 def woven_silk():
@@ -207,7 +228,69 @@ def models():
     w(B + 'silk_seal.json', {'variants': {'': {'model': 'jttw_engine:block/silk_seal'}}})
     w(M + 'block/silk_seal.json', {'parent': 'minecraft:block/cube_all', 'render_type': 'minecraft:cutout',
                                    'textures': {'all': 'jttw_engine:block/silk_seal'}})
-    w(B + 'silk_veil.json', {'variants': {'': {'model': 'jttw_engine:block/silk_veil'}}})
+    # the gauze, and the cord through it out through any of its faces: an arm (from the middle out
+    # through its north face) turned to each
+    turns = {'north': {}, 'east': {'y': 90}, 'south': {'y': 180}, 'west': {'y': 270}, 'up': {'x': 270}, 'down': {'x': 90}}
+    parts = [{'apply': {'model': 'jttw_engine:block/silk_veil'}}]
+    for face, turn in turns.items():
+        for thick in ('false', 'true'):
+            arm = 'jttw_engine:block/silk_cord_arm' + ('_thick' if thick == 'true' else '')
+            parts.append({'when': {face: 'true', 'thick': thick}, 'apply': dict({'model': arm}, **turn)})
+    # and across its edges: out across one, or straight through from one to the one opposite
+    slants = {'north_up': ('up', 0), 'east_up': ('up', 90), 'south_up': ('up', 180), 'west_up': ('up', 270),
+              'north_down': ('down', 0), 'east_down': ('down', 90), 'south_down': ('down', 180), 'west_down': ('down', 270),
+              'north_east': ('level', 0), 'south_east': ('level', 90), 'south_west': ('level', 180), 'north_west': ('level', 270)}
+    through = ['north_up_south_down', 'east_up_west_down', 'south_up_north_down', 'west_up_east_down', 'north_east_south_west', 'south_east_north_west']
+    for edge, (kind, y) in slants.items():
+        values = '|'.join([edge] + [t for t in through if t.startswith(edge + '_') or t.endswith('_' + edge)])
+        for thick in ('false', 'true'):
+            model = 'jttw_engine:block/silk_cord_slant_' + kind + ('_thick' if thick == 'true' else '')
+            parts.append({'when': {'slant': values, 'thick': thick}, 'apply': dict({'model': model}, **({'y': y} if y else {}))})
+    w(B + 'silk_veil.json', {'multipart': parts})
+    # the cable: a cord in from one way and on by another, each through a face or across an edge
+    # (an arm from the middle to the north face, to the north edge above or below, or the
+    # north-east edge, turned to each)
+    ways = dict(turns)
+    for i, side in enumerate(('north', 'east', 'south', 'west')):
+        ways[side + '_up'] = {'model': 'up', 'y': 90 * i}
+        ways[side + '_down'] = {'model': 'down', 'y': 90 * i}
+    for i, corner in enumerate(('north_east', 'south_east', 'south_west', 'north_west')):
+        ways[corner] = {'model': 'level', 'y': 90 * i}
+    cable = []
+    for prop in ('from', 'to'):
+        for way, turn in ways.items():
+            rot = {k: v for k, v in turn.items() if k != 'model'}
+            kind = turn.get('model')
+            for thick in ('false', 'true'):
+                model = 'jttw_engine:block/silk_cord_' + ('arm' if kind is None else 'slant_' + kind) + ('_thick' if thick == 'true' else '')
+                cable.append({'when': {prop: way, 'thick': thick}, 'apply': dict({'model': model}, **rot)})
+    w(B + 'silk_cable.json', {'multipart': cable})
+    slant = 8 * math.sqrt(2)
+    for half, suffix in ((1.75, ''), (2.75, '_thick')):
+        lo, hi = 8 - half, 8 + half
+        tex = {'cord': 'jttw_engine:block/silk_cord', 'particle': 'jttw_engine:block/silk_cord'}
+
+        def faces(length, cull):
+            f = {d: {'texture': '#cord', 'uv': [lo, 0, hi, min(16, length)], 'shade': False} for d in ('east', 'west', 'up', 'down')}
+            f['north'] = dict({'texture': '#cord', 'uv': [lo, lo, hi, hi], 'shade': False}, **({'cullface': 'north'} if cull else {}))
+            f['south'] = {'texture': '#cord', 'uv': [lo, lo, hi, hi], 'shade': False}
+            return f
+        w(M + 'block/silk_cord_arm%s.json' % suffix, {'render_type': 'minecraft:cutout', 'ambientocclusion': False, 'textures': tex,
+                                                    'elements': [{'from': [lo, lo, 0], 'to': [hi, hi, hi], 'faces': faces(hi, True)}]})
+        # slant arms: from the middle out to the north edge above or below, or the north-east edge;
+        # beads of cord, one a pixel on from the last, so it reads as one slant line
+        for kind, (sx, sy) in (('up', (0, 1)), ('down', (0, -1)), ('level', (1, 0))):
+            beads = []
+            for t in range(0, 9):
+                cx, cy, cz = 8 + sx * t, 8 + sy * t, 8 - t
+                cube = {'from': [cx - half, cy - half, cz - half], 'to': [cx + half, cy + half, cz + half],
+                        'faces': {d: {'texture': '#cord', 'uv': [lo, lo, hi, hi], 'shade': False} for d in ('north', 'south', 'east', 'west', 'up', 'down')}}
+                beads.append(cube)
+            w(M + 'block/silk_cord_slant_%s%s.json' % (kind, suffix), {
+                'render_type': 'minecraft:cutout', 'ambientocclusion': False, 'textures': tex, 'elements': beads})
+    w(B + 'shaft_light.json', {'variants': {'': {'model': 'jttw_engine:block/shaft_light'}}})
+    w(M + 'block/shaft_light.json', {'parent': 'minecraft:block/cube_all', 'render_type': 'minecraft:translucent',
+                                     'ambientocclusion': False, 'textures': {'all': 'jttw_engine:block/shaft_light'}})
     w(M + 'block/silk_veil.json', {'parent': 'minecraft:block/cube_all', 'render_type': 'minecraft:translucent',
                                    'textures': {'all': 'jttw_engine:block/silk_veil'}})
     w(B + 'woven_silk.json', {'variants': {'': {'model': 'jttw_engine:block/woven_silk'}}})
@@ -223,6 +306,8 @@ if __name__ == '__main__':
     binding_web()
     silk_seal()
     silk_veil()
+    silk_cord()
+    shaft_light()
     woven_silk()
     spider_silk()
     carapace()

@@ -255,7 +255,7 @@ final class SpiderScenes {
                         }
                 canopyDown = false;
             }
-            camera(p, cam);
+            camera(p, cam, name);
         }, p -> {}, 1, false);
     }
 
@@ -276,16 +276,28 @@ final class SpiderScenes {
                         }
                 canopyDown = true;
             }
-            camera(p, cam);
+            camera(p, cam, name);
         }, p -> {}, 1, false);
     }
 
-    /** Sets the camera (local to the valley's centre) and takes the player up over it, out of the picture, so the ground round it is sent. */
-    private static void camera(ServerPlayer p, double[] cam) {
+    /** Where the player waits, unseen, in the Silk Hall's scenes (local): among its shafts of light, so their motes of dust drift (a block's own animation plays only near the player). */
+    private static final double[] IN_THE_HALL = {-8.0, 12.0, 0.0};
+
+    /**
+     * Sets the camera (local to the valley's centre) and takes the player up over it, out of the
+     * picture, so the ground round it is sent; or, in the Silk Hall, sets him unseen among its
+     * shafts of light.
+     */
+    private static void camera(ServerPlayer p, double[] cam, String name) {
         double[] c = {VX + cam[0], cam[1], VZ + cam[2], VX + cam[3], cam[4], VZ + cam[5]};
         AbilityScenes.sceneCam = c;
         p.getAbilities().flying = true;
         p.onUpdateAbilities();
+        if (name.equals("spider_cave_hall") || name.equals("spider_cave_web")) {
+            p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.INVISIBILITY, 20 * 60, 0, false, false));
+            p.teleportTo(p.serverLevel(), VX + IN_THE_HALL[0], ground(p) + IN_THE_HALL[1], VZ + IN_THE_HALL[2], 0f, 0f);
+            return;
+        }
         p.teleportTo(p.serverLevel(), c[0], ground(p) + Math.max(c[1], c[4]) + 60, c[2], 0f, 0f);
     }
 

@@ -85,7 +85,16 @@ public final class FormGallery {
     private static List<Shot> shots;
     private static int next;
     private static int wait;
-    private static UUID cameraId;
+    private static volatile UUID cameraId;
+    /**
+     * Whether this shot's setup has run on the server (set there, read here). Until it has, and until
+     * the client has the camera it set, the shot's wait does not run down: a scene that lays a whole
+     * valley first (the first of its kind in a run) takes the server longer than the wait.
+     */
+    private static volatile boolean setUp;
+    /** How long a shot may wait past its own wait for its setup and its camera, before it is taken anyway. */
+    private static final int MAX_HOLD_TICKS = 1200;
+    private static int heldTicks;
     private static final List<String> index = new ArrayList<>();
     /** Each run gets its own folder, so pictures from different runs never mix. */
     private static final String RUN_DIR = "gallery-" + new java.text.SimpleDateFormat("yyyyMMdd-HHmmss").format(new java.util.Date());
@@ -181,6 +190,13 @@ public final class FormGallery {
             for (Entity e : mc.level.entitiesForRendering()) {
                 if (e.getUUID().equals(cameraId)) mc.setCameraEntity(e);
             }
+        }
+        // held (the wait not running down, nor the scene triggered) until set up and on its camera
+        boolean cameraPending = cameraId != null && mc.getCameraEntity() == mc.player;
+        if ((!setUp || cameraPending) && heldTicks < MAX_HOLD_TICKS && (wait <= SETTLE_TICKS || !setUp)) {
+            heldTicks++;
+            if (heldTicks == MAX_HOLD_TICKS) JTTWEngine.LOGGER.warn("FormGallery: {} never got {}", shot.key(), setUp ? "its camera" : "set up");
+            return;
         }
         if (shot.kind() == Kind.SCENE && wait == scene(shot).triggerBefore()) {
             mc.gui.getChat().clearMessages(false); // setup chatter would cover a first-person HUD
@@ -282,10 +298,26 @@ public final class FormGallery {
         boolean firstPerson = shot.kind() == Kind.SCENE && scene(shot).firstPerson();
         mc.options.hideGui = !firstPerson; // first-person scenes show the HUD
         cameraId = null; // the last shot's camera may still stand: wait for this one's (a slow setup is still running when the client looks)
+        setUp = false;
+        heldTicks = 0;
         UUID playerId = mc.player.getUUID();
         mc.getSingleplayerServer().execute(() -> {
             ServerPlayer sp = mc.getSingleplayerServer().getPlayerList().getPlayer(playerId);
-            if (sp == null) return;
+            if (sp == null) {
+                setUp = true;
+                return;
+            }
+            try {
+                setUpShot(mc, shot, sp);
+            } finally {
+                setUp = true;
+            }
+        });
+    }
+
+    /** On the server: resets the stage, sets the shot up and places its camera. */
+    private static void setUpShot(Minecraft mc, Shot shot, ServerPlayer sp) {
+        {
             ServerLevel level = sp.serverLevel();
             level.setDayTime(6000);
             level.setWeatherParameters(6000, 0, false, false);
@@ -368,7 +400,7 @@ public final class FormGallery {
             if (shot.view() == View.SIDE) { cx += dist; yaw = 90f; } else { cz += dist; yaw = 180f; }
             float pitch = (float) Math.toDegrees(Math.atan2(camY - centreY, dist));
             placeCamera(level, cx, camY, cz, yaw, pitch);
-        });
+        }
     }
 
     /** An invisible marker armor stand as the camera: its eye is at its feet. */

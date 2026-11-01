@@ -1,0 +1,85 @@
+{
+  "render_type": "minecraft:cutout",
+  "ambientocclusion": false,
+  "textures": {
+    "cord": "jttw_engine:block/silk_cord",
+    "particle": "jttw_engine:block/silk_cord"
+  },
+  "elements": [
+    {
+      "from": [
+        6.25,
+        6.25,
+        0
+      ],
+      "to": [
+        9.75,
+        9.75,
+        9.75
+      ],
+      "faces": {
+        "east": {
+          "texture": "#cord",
+          "uv": [
+            6.25,
+            0,
+            9.75,
+            9.75
+          ],
+          "shade": false
+        },
+        "west": {
+          "texture": "#cord",
+          "uv": [
+            6.25,
+            0,
+            9.75,
+            9.75
+          ],
+          "shade": false
+        },
+        "up": {
+          "texture": "#cord",
+          "uv": [
+            6.25,
+            0,
+            9.75,
+            9.75
+          ],
+          "shade": false
+        },
+        "down": {
+          "texture": "#cord",
+          "uv": [
+            6.25,
+            0,
+            9.75,
+            9.75
+          ],
+          "shade": false
+        },
+        "north": {
+          "texture": "#cord",
+          "uv": [
+            6.25,
+            6.25,
+            9.75,
+            9.75
+          ],
+          "shade": false,
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#cord",
+          "uv": [
+            6.25,
+            6.25,
+            9.75,
+            9.75
+          ],
+          "shade": false
+        }
+      }
+    }
+  ]
+}

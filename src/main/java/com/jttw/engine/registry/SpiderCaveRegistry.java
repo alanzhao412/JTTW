@@ -10,6 +10,9 @@ import com.jttw.engine.entity.spider.SpiderDemonEntity;
 import com.jttw.engine.entity.spider.SpiderSpiritEntity;
 import com.jttw.engine.entity.spider.StingerSonEntity;
 import com.jttw.engine.world.spider.BindingWebBlock;
+import com.jttw.engine.world.spider.ShaftLightBlock;
+import com.jttw.engine.world.spider.SilkCableBlock;
+import com.jttw.engine.world.spider.SilkVeilBlock;
 import com.jttw.engine.world.spider.Venom;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.effect.MobEffect;
@@ -21,7 +24,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.TransparentBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -67,10 +69,20 @@ public final class SpiderCaveRegistry {
      * The sisters' gauze: the sealing silk spun so fine it is all but clear, a veil between the
      * strands of their canopy (one sees through it, none passes it); it falls with the canopy.
      */
-    public static final DeferredHolder<Block, Block> SILK_VEIL = BLOCKS.register("silk_veil", () -> new TransparentBlock(BlockBehaviour.Properties.of()
+    public static final DeferredHolder<Block, SilkVeilBlock> SILK_VEIL = BLOCKS.register("silk_veil", () -> new SilkVeilBlock(BlockBehaviour.Properties.of()
             .mapColor(MapColor.SNOW).sound(SoundType.WOOL).strength(-1.0F, 3_600_000.0F).noLootTable().noOcclusion()
             .isValidSpawn((s, l, p, t) -> false).isRedstoneConductor((s, l, p) -> false).isSuffocating((s, l, p) -> false)
             .isViewBlocking((s, l, p) -> false).pushReaction(PushReaction.BLOCK)));
+    /** The stays that hold the canopy down: cords of sealing silk in the air (see {@link SilkCableBlock}). */
+    public static final DeferredHolder<Block, SilkCableBlock> SILK_CABLE = BLOCKS.register("silk_cable", () -> new SilkCableBlock(BlockBehaviour.Properties.of()
+            .mapColor(MapColor.SNOW).sound(SoundType.WOOL).strength(-1.0F, 3_600_000.0F).noLootTable().noOcclusion()
+            .isValidSpawn((s, l, p, t) -> false).isRedstoneConductor((s, l, p) -> false).isSuffocating((s, l, p) -> false)
+            .isViewBlocking((s, l, p) -> false).pushReaction(PushReaction.BLOCK)));
+    /** A shaft of light let into the Silk Hall through its vault: a lit haze, dust drifting in it (see {@link ShaftLightBlock}). */
+    public static final DeferredHolder<Block, ShaftLightBlock> SHAFT_LIGHT = BLOCKS.register("shaft_light", () -> new ShaftLightBlock(BlockBehaviour.Properties.of()
+            .mapColor(MapColor.NONE).replaceable().noCollission().noOcclusion().noLootTable().lightLevel(s -> 13).sound(SoundType.WOOL)
+            .isValidSpawn((s, l, p, t) -> false).isRedstoneConductor((s, l, p) -> false).isSuffocating((s, l, p) -> false)
+            .isViewBlocking((s, l, p) -> false).pushReaction(PushReaction.DESTROY)));
     /** Woven silk: the cave's pillars and drapes, the cocoons hung from the trees. */
     public static final DeferredHolder<Block, Block> WOVEN_SILK = BLOCKS.register("woven_silk", () -> new Block(BlockBehaviour.Properties.of()
             .mapColor(MapColor.SNOW).sound(SoundType.WOOL).strength(0.8F).ignitedByLava()));

@@ -31,7 +31,7 @@ public final class SpiderCavePlan {
     // ...and the Silk Hall's own: its floor, what lies on it, its egg sacs, its victims, the light let in
     public static final int MUD = 15, MOSS = 16, MOSS_CARPET = 17, COARSE = 18, WATER = 19, BONE_FLOOR = 20, SKULL = 21, BONE_LYING = 22,
             SILK_FLOOR = 23, STRAND = 24, MEMBRANE = 25, EGG = 26, EGG_GOLD = 27, WOOL = 28, LICHEN_UP = 29, LICHEN_DOWN = 30,
-            CRACK = 31, BEAM = 32, LIGHT = 33, MUSHROOM = 34, ROOTS = 35, GRASS = 36;
+            CRACK = 31, BEAM = 32, LIGHT = 33, MUSHROOM = 34, ROOTS = 35, GRASS = 36, SHROOM = 37;
 
     public static final int PASSAGE_HALF = 2, PASSAGE_H = 5, PASSAGE_N = 22, PASSAGE_S = 45;
     public static final int HALL_X = 0, HALL_Z = 4, HALL_RX = 34, HALL_RZ = 22, HALL_H = 26;
@@ -287,6 +287,11 @@ public final class SpiderCavePlan {
         return ((a + (b - a) * fx) * (1 - fz) + (c + (d - c) * fx) * fz) / 1000.0;
     }
 
+    /** How wide a shaft of light is at height {@code ly} under a vault at {@code roof}: narrow at the crack, wider at the floor. */
+    static double shaftRadius(int ly, int roof) {
+        return 1.25 + 0.55 * (1 - ly / (double) Math.max(1, roof));
+    }
+
     /** How far (lx, lz) is from the middle of the nearest shaft of light. */
     static double toShaft(int lx, int lz) {
         double best = Double.MAX_VALUE;
@@ -344,34 +349,26 @@ public final class SpiderCavePlan {
             if (d > 6) continue;
             double r = pillarRadius(k, ly, fromRoof);
             if (d <= r) return SILK;
-            if (d <= r + 1 && hash(lx, ly, lz, 62) < (ly < 3 ? 120 : fromRoof < 5 ? 60 : 30)) return COBWEB;
+            if (d <= r + 1 && hash(lx, ly, lz, 62) < (ly < 3 ? 60 : fromRoof < 5 ? 15 : 15)) return COBWEB;
         }
-        // the shafts of light, falling from the cracks in the vault and thinning as they fall
+        // the shafts of light, falling from the cracks in the vault: a haze of light in the air, widening as it falls
         for (double[] sh : SHAFTS) {
             double d = Math.hypot(cx - sh[0], cz - sh[1]);
             if (d > 3) continue;
-            // its heart a ray all the way down; about it shorter streaks of light, dust in the beam
-            if (d < 0.75) return ly >= 2 ? BEAM : AIR;
-            if (d < 2.3) {
-                int c = hash(lx, 0, lz, 63);
-                if (c < 230) {
-                    int top = roof - 1 - c % 5, len = 3 + c % 7;
-                    if (ly <= top && ly > top - len) return BEAM;
-                    int low = top - len - 3 - c % 4, len2 = 2 + c % 3;
-                    if (c < 120 && ly <= low && ly > low - len2 && ly >= 3) return BEAM;
-                }
-            }
+            if (d < shaftRadius(ly, roof)) return BEAM;
             // light round it, so it shines all the way down, and pooled round its foot
-            if (d >= 1.6 && d < 2.6 && ly % 4 == 1 && hash(lx, ly, lz, 66) < 450) return LIGHT;
+            if (d < 2.6 && (ly % 4 == 1 || ly == 0) && hash(lx, ly, lz, 66) < 450) return LIGHT;
         }
         // egg sacs
         for (Sac sac : SACS) {
             double d = Math.sqrt((cx - sac.x) * (cx - sac.x) + (cy - sac.y) * (cy - sac.y) + (cz - sac.z) * (cz - sac.z));
-            if (d < sac.r - 0.5) return sac.code;
+            if (d < sac.r - 0.5) return hash(lx, ly, lz, 73) < 150 ? SHROOM : sac.code;
             if (d < sac.r + 0.25) {
                 int h = hash(lx, ly, lz, 67);
-                return h < 620 ? COBWEB : h < 760 ? MEMBRANE : AIR; // wrapped in web, the eggs glowing through
+                return h < 260 ? COBWEB : h < 420 ? MEMBRANE : AIR; // loosely wrapped in web, the eggs glowing through
             }
+            // glow lichen creeping over the floor round a clutch heaped there
+            if (ly == 0 && sac.y < 3 && Math.hypot(cx - sac.x, cz - sac.z) < sac.r + 2.2 && hash(lx, 0, lz, 74) < 420) return LICHEN_DOWN;
         }
         for (int[] st : SAC_STRANDS) if (lx == st[0] && lz == st[1] && ly >= st[2] && fromRoof >= 1) return STRAND;
         // the cocooned, hung up to keep
@@ -389,11 +386,12 @@ public final class SpiderCavePlan {
         if (fromRoof == 1) {
             int h = hash(lx, ly, lz, 3);
             if (h < 8) return GLOW;
+            if (toShaft(lx, lz) < 4.5 && h < 500) return LICHEN_UP; // lichen thick round the cracks, in the light
             if (h < 70) return LICHEN_UP;
             if (h < 100) return ROOTS;
         }
-        if (fromRoof <= 2 && hash(lx, ly, lz, 4) < 80) return COBWEB;
-        if (fromRoof <= 6 && fromRoof >= 3 && hash(lx, 0, lz, 5) < 14 && hash(lx, ly, lz, 68) < 600) return COBWEB; // wisps hanging lower
+        if (fromRoof <= 2 && hash(lx, ly, lz, 4) < 15 && toShaft(lx, lz) > 5) return COBWEB;
+        if (fromRoof <= 6 && fromRoof >= 3 && hash(lx, 0, lz, 5) < 3 && hash(lx, ly, lz, 68) < 600) return COBWEB; // wisps hanging lower
         if (ly == 0) return floorLitter(lx, lz, roof);
         return AIR;
     }
@@ -420,26 +418,34 @@ public final class SpiderCavePlan {
         }
     }
 
-    /** Cocoon {@code c} at (lx, ly, lz): a victim bound upright in silk, hung from the vault by a strand; NONE where it is not. */
+    /** A cocoon's girth, row by row from its foot up: a spindle (a great bundle fatter). */
+    private static final double[] SPINDLE = {0, 1, 1, 1, 0}, GREAT_SPINDLE = {0.8, 1.6, 1.6, 1.6, 1.6, 0.8};
+
+    /**
+     * Cocoon {@code c} at (lx, ly, lz): a victim bound upright in silk, hung from the vault by a
+     * strand; NONE where it is not. A spindle of silk, a wisp trailing under it, fuzzed with web
+     * round its girth; over it a narrow neck and the head (a skull looking out, or wrapped whole).
+     */
     static int cocoon(int[] c, int lx, int ly, int lz, int fromRoof) {
         int x = c[0], z = c[1], bottom = c[2], kind = c[3];
         int dx = lx - x, dz = lz - z;
-        if (Math.abs(dx) > 2 || Math.abs(dz) > 2 || ly < bottom - 1) return NONE;
+        if (Math.abs(dx) > 3 || Math.abs(dz) > 3 || ly < bottom - 1) return NONE;
         boolean great = kind == 2;
-        boolean body = great ? dx >= 0 && dx <= 1 && dz >= 0 && dz <= 1 : dx == 0 && dz == 0;
-        int top = bottom + (great ? 3 : 2);
-        if (body && ly >= bottom && ly < top) {
-            // a great bundle is rounded off: its lowest and highest corners a wisp of web
-            if (great && (ly == bottom || ly == top - 1) && dx == 1 && dz == 1) return COBWEB;
-            return SILK;
+        double[] girth = great ? GREAT_SPINDLE : SPINDLE;
+        double ox = great ? x + 1.0 : x + 0.5, oz = great ? z + 1.0 : z + 0.5;
+        boolean axis = dx == 0 && dz == 0;
+        int row = ly - bottom;
+        if (row == -1) return axis ? STRAND : NONE; // a trailing wisp
+        if (row < girth.length) {
+            double d = Math.hypot(lx + 0.5 - ox, lz + 0.5 - oz), r = girth[row];
+            if (d <= r + 0.01 || r == 0 && axis) return WOOL;
+            if (d <= r + (r < 0.5 ? 1.01 : 0.45) && hash(lx, ly, lz, 70) < 420) return COBWEB; // the silk loose about it
+            return NONE;
         }
-        if (dx == 0 && dz == 0 && ly == top) return kind == 1 ? SKULL : WOOL; // the head
-        if (dx == 0 && dz == 0 && ly > top) return fromRoof >= 1 ? STRAND : NONE;
-        if (dx == 0 && dz == 0 && ly == bottom - 1) return hash(x, 0, z, 69) < 500 ? COBWEB : NONE; // a trailing wisp
-        // loose silk caught round the bundle
-        boolean beside = Math.abs(dx) + Math.abs(dz) == 1 || great && dx >= -1 && dx <= 2 && dz >= -1 && dz <= 2;
-        if (beside && !body && ly >= bottom && ly < top && hash(lx, ly, lz, 70) < 260) return COBWEB;
-        return NONE;
+        if (!axis) return NONE;
+        if (row == girth.length) return kind == 1 ? WOOL : STRAND; // the neck
+        if (row == girth.length + 1) return kind == 1 ? SKULL : SILK; // the head
+        return fromRoof >= 1 ? STRAND : NONE;
     }
 
     /** A curtain of silk between pillars at a and b: a sagging cord, a torn sheet of web hanging from it, ragged at its foot. */
@@ -456,7 +462,7 @@ public final class SpiderCavePlan {
         int foot = (int) Math.round(top - 6 - 4 * sag - (col % 5));
         if (ly < Math.max(4, foot)) return NONE;
         if (col % 4 == 0) return STRAND; // a long thread run down it
-        return hash(lx, ly, lz, 72) < 170 ? NONE : COBWEB; // torn here and there
+        return hash(lx, ly, lz, 72) < 740 ? NONE : COBWEB; // torn, hanging in rags
     }
 
     /** The hall's pillars: whether (lx, lz) is in one at the floor (for the ways across it). */

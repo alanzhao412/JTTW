@@ -1,0 +1,720 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "from": "north",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_arm"
+      }
+    },
+    {
+      "when": {
+        "from": "north",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_arm_thick"
+      }
+    },
+    {
+      "when": {
+        "from": "east",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_arm",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "from": "east",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_arm_thick",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "from": "south",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_arm",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "from": "south",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_arm_thick",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "from": "west",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_arm",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "from": "west",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_arm_thick",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "from": "up",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_arm",
+        "x": 270
+      }
+    },
+    {
+      "when": {
+        "from": "up",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_arm_thick",
+        "x": 270
+      }
+    },
+    {
+      "when": {
+        "from": "down",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_arm",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "from": "down",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_arm_thick",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "from": "north_up",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_up",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "from": "north_up",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_up_thick",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "from": "north_down",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_down",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "from": "north_down",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_down_thick",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "from": "east_up",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_up",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "from": "east_up",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_up_thick",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "from": "east_down",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_down",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "from": "east_down",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_down_thick",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "from": "south_up",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_up",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "from": "south_up",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_up_thick",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "from": "south_down",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_down",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "from": "south_down",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_down_thick",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "from": "west_up",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_up",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "from": "west_up",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_up_thick",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "from": "west_down",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_down",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "from": "west_down",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_down_thick",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "from": "north_east",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_level",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "from": "north_east",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_level_thick",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "from": "south_east",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_level",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "from": "south_east",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_level_thick",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "from": "south_west",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_level",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "from": "south_west",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_level_thick",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "from": "north_west",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_level",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "from": "north_west",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_level_thick",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "to": "north",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_arm"
+      }
+    },
+    {
+      "when": {
+        "to": "north",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_arm_thick"
+      }
+    },
+    {
+      "when": {
+        "to": "east",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_arm",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "to": "east",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_arm_thick",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "to": "south",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_arm",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "to": "south",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_arm_thick",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "to": "west",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_arm",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "to": "west",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_arm_thick",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "to": "up",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_arm",
+        "x": 270
+      }
+    },
+    {
+      "when": {
+        "to": "up",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_arm_thick",
+        "x": 270
+      }
+    },
+    {
+      "when": {
+        "to": "down",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_arm",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "to": "down",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_arm_thick",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "to": "north_up",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_up",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "to": "north_up",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_up_thick",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "to": "north_down",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_down",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "to": "north_down",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_down_thick",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "to": "east_up",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_up",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "to": "east_up",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_up_thick",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "to": "east_down",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_down",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "to": "east_down",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_down_thick",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "to": "south_up",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_up",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "to": "south_up",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_up_thick",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "to": "south_down",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_down",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "to": "south_down",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_down_thick",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "to": "west_up",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_up",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "to": "west_up",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_up_thick",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "to": "west_down",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_down",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "to": "west_down",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_down_thick",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "to": "north_east",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_level",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "to": "north_east",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_level_thick",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "to": "south_east",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_level",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "to": "south_east",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_level_thick",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "to": "south_west",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_level",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "to": "south_west",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_level_thick",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "to": "north_west",
+        "thick": "false"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_level",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "to": "north_west",
+        "thick": "true"
+      },
+      "apply": {
+        "model": "jttw_engine:block/silk_cord_slant_level_thick",
+        "y": 270
+      }
+    }
+  ]
+}

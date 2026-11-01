@@ -79,110 +79,129 @@ RINGS = 6
 
 def ring_dims(i):
     """The i-th of his torso's segments, from the shoulders down: (top, height, width, depth)."""
-    return -14.4 + i * 2.4, 2.7, 11.4 - i * 0.65, 6.6 - i * 0.2
+    return -14.4 + i * 2.4, 2.7, 10.4 - i * 0.55, 6.2 - i * 0.2
+
+
+TIERS = 9
+
+
+def tier_dims(t):
+    """The t-th tier of his robe's bell, from the waist down: (top, width, depth, centre z): flaring
+    faster toward the hem, and trailing back a little."""
+    q = t / (TIERS - 1)
+    return 0.6 + t * 2.25, 10.2 + 12.0 * q ** 1.5, 7.2 + 8.4 * q ** 1.5, 1.2 * q * q
 
 
 def lord_parts():
     ps = []
-    # ── his body from the waist up: his own hide, glossy segments ringed with eyes ──
-    body = [(-1.7, -16.6, -1.6, 3.4, 2.6, 3.2, 'neck')]
+    # ── his body from the waist up: lean, his own hide, glossy segments ringed with eyes; a long neck ──
+    body = [(-1.5, -19.2, -1.6, 3.0, 5.0, 2.8, 'neck')]
     for i in range(RINGS):
         y, h, w, d = ring_dims(i)
-        body.append((-w / 2, y, -d / 2, w, h, d, 'ring'))
-        # eyes round the ring: four across the front, two down each flank, three across the back
-        for c in range(4):
-            x = -w / 2 + w * (c + 0.5) / 4 - 1.1 + (0.5 if i % 2 else -0.3)
-            if abs(x + 1.1) < 1.6 and i < 4:
-                continue                                         # the sternum's plates run there
-            body.append((x, y + 0.6, -d / 2 - 0.45, 2.2, 1.5, 0.5, 'hide_eye'))
-        for side in (-1, 1):
-            for c in range(2):
-                z = -d / 2 + d * (c + 0.5) / 2 - 1.0
-                body.append((w / 2 - 0.05 if side > 0 else -w / 2 - 0.4, y + 0.6, z, 0.45, 1.5, 2.0, 'hide_eye_side'))
+        body.append((-w / 2, y, -d / 2, w, h, d, 'ring' if i % 2 == 0 else 'ring_red'))
+        # eyes round the ring: across the front, down each flank, across the back
         for c in range(3):
-            x = -w / 2 + w * (c + 0.5) / 3 - 1.0
-            body.append((x, y + 0.6, d / 2 - 0.05, 2.0, 1.4, 0.45, 'hide_eye'))
+            x = -w / 2 + w * (c + 0.5) / 3 - 1.4 + (0.5 if i % 2 else -0.4)
+            if abs(x + 1.4) < 1.5 and i < 4:
+                continue                                         # the sternum's plates run there
+            body.append((x, y + 0.7, -d / 2 - 0.3, 2.8, 1.3, 0.35, 'hide_eye'))
+        for side in (-1, 1):
+            body.append((w / 2 - 0.05 if side > 0 else -w / 2 - 0.3, y + 0.7, -1.3 + (i % 2) * 0.8, 0.35, 1.3, 2.6, 'hide_eye_side'))
+        for c in range(2):
+            x = -w / 2 + w * (c + 0.5) / 2 - 1.3
+            body.append((x, y + 0.7, d / 2 - 0.05, 2.6, 1.3, 0.35, 'hide_eye'))
     for i in range(5):                                           # the sternum: a column of gold-rimmed plates
-        body.append((-1.3, -14.0 + i * 2.4, -3.95 + i * 0.22, 2.6, 2.1, 0.7, 'sternum'))
+        body.append((-1.2, -14.0 + i * 2.4, -3.75 + i * 0.22, 2.4, 2.1, 0.7, 'sternum'))
     for i in range(7):                                           # the ridge of plates down his back, through the robe's slit
-        body.append((-2.2 + i * 0.12, -14.6 + i * 2.15, 3.55 - i * 0.12, 4.4 - i * 0.24, 2.3, 1.5, 'dorsal'))
+        body.append((-2.0 + i * 0.12, -14.6 + i * 2.15, 3.3 - i * 0.12, 4.0 - i * 0.24, 2.3, 1.5, 'dorsal'))
     ps.append(part('body', 'root', (0, 3, 0), (0, 0, 0), body))
 
-    # the robe over it (thrown off in his rage): chest and waist, a high collar, the cross collar, eyes through the silk
+    # the robe over it (thrown off in his rage): narrow at the shoulders, a high collar, the cross collar, eyes through the silk
     robe = [
-        (-6.8, -15.2, -3.9, 13.6, 8.8, 7.8, 'robe_chest'),
-        (-5.6, -6.6, -3.6, 11.2, 7.0, 7.2, 'robe_waist'),
-        (-7.2, -15.6, -4.1, 14.4, 1.4, 8.2, 'robe_yoke'),
-        (-3.6, -16.4, -3.0, 7.2, 1.6, 6.2, 'inner_collar'),
+        (-5.6, -15.2, -3.6, 11.2, 8.8, 7.2, 'robe_chest'),
+        (-4.8, -6.6, -3.4, 9.6, 7.0, 6.8, 'robe_waist'),
+        (-6.0, -15.6, -3.8, 12.0, 1.4, 7.6, 'robe_yoke'),
+        (-3.2, -16.4, -2.8, 6.4, 1.6, 5.6, 'inner_collar'),
     ]
-    for r, n, y in ((0, 3, -13.0), (1, 4, -10.3), (2, 3, -7.4)):        # eyes across his breast
-        for c in range(n):
-            x = -6.0 + (12.0 - 2.8) * (c + 0.5) / n - 0.2 + (0.5 if r == 1 else 0)
-            if r == 0 and c == 1:
-                continue
-            robe.append((x, y, -4.35 - (0.3 if r == 2 else 0), 2.8, 1.7, 0.5, 'robe_eye'))
+    for r, xs, y in ((0, (-4.6, 1.0), -12.8), (1, (-4.9, -1.6, 1.7), -10.0), (2, (-4.0, 0.4), -7.2)):   # eyes across his breast
+        for x in xs:
+            robe.append((x, y, -3.85 - (0.2 if r == 2 else 0), 3.6, 1.6, 0.3, 'robe_eye'))
     for r in range(2):
         for side in (-1, 1):                                       # and down his flanks
-            robe.append((6.75 if side > 0 else -7.25, -13.4 + r * 3.6, -1.8 + r * 1.2, 0.5, 1.7, 2.8, 'robe_eye_side'))
-    for c in range(3):                                             # and across his back, under the collar
-        robe.append((-5.0 + c * 3.4, -11.4 + (c % 2) * 1.6, 3.85, 2.6, 1.6, 0.5, 'robe_eye'))
+            robe.append((5.55 if side > 0 else -5.85, -13.4 + r * 3.6, -1.9 + r * 1.2, 0.3, 1.6, 3.6, 'robe_eye_side'))
+    for x in (-4.6, 1.0):                                          # and across his back, under the collar
+        robe.append((x, -11.0, 3.55, 3.6, 1.6, 0.3, 'robe_eye'))
     ps.append(part('robe', 'body', (0, 0, 0), (0, 0, 0), robe))
     ps += [
-        part('collar_over', 'robe', (3.3, -15.6, -4.15), (0, 0, 0.6), [(-1.2, 0, -0.4, 2.4, 13.2, 0.8, 'robe_collar')]),
-        part('collar_under', 'robe', (-3.3, -15.6, -4.1), (0, 0, -0.6), [(-1.2, 0, -0.3, 2.4, 6.8, 0.6, 'robe_collar')]),
+        part('collar_over', 'robe', (2.8, -15.6, -3.85), (0, 0, 0.6), [(-1.1, 0, -0.4, 2.2, 12.6, 0.8, 'robe_collar')]),
+        part('collar_under', 'robe', (-2.8, -15.6, -3.8), (0, 0, -0.6), [(-1.1, 0, -0.3, 2.2, 6.4, 0.6, 'robe_collar')]),
         # the stiff high collar standing behind his head, black, gold-rimmed, lined white
         part('high_collar', 'robe', (0, -15.4, 0.6), (0.3, 0, 0), [
-            (-5.6, -7.4, 2.0, 11.2, 7.8, 0.9, 'high_collar'),
-            (-5.6, -5.6, -2.0, 0.9, 6.0, 4.2, 'high_collar_side'),
-            (4.7, -5.6, -2.0, 0.9, 6.0, 4.2, 'high_collar_side'),
+            (-5.2, -7.4, 1.8, 10.4, 7.8, 0.9, 'high_collar'),
+            (-5.2, -5.6, -2.0, 0.9, 6.0, 4.0, 'high_collar_side'),
+            (4.3, -5.6, -2.0, 0.9, 6.0, 4.0, 'high_collar_side'),
         ]),
     ]
     # the sash: crimson, gold-edged, knotted before him, its ends and a jade pendant hanging (it ties the skirt: it stays)
     ps += [
         part('sash', 'body', (0, 0, 0), (0, 0, 0), [
-            (-6.4, -1.6, -3.95, 12.8, 2.8, 7.9, 'sash'),
-            (-1.6, -2.0, -4.6, 3.2, 3.4, 1.0, 'sash_knot'),
+            (-5.4, -1.6, -3.75, 10.8, 2.8, 7.5, 'sash'),
+            (-1.6, -2.0, -4.4, 3.2, 3.4, 1.0, 'sash_knot'),
         ]),
-        part('right_sash_end', 'sash', (-1.0, 0.6, -4.5), (-0.1, 0, 0.07), [(-0.9, 0, -0.25, 1.8, 13, 0.5, 'sash_end')]),
-        part('sash_end_short', 'sash', (1.1, 0.8, -4.4), (-0.08, 0, -0.04), [(-0.8, 0, -0.25, 1.6, 10, 0.5, 'sash_end_short')]),
-        part('pendant', 'sash', (-4.2, 0.6, -4.3), (-0.08, 0, 0.03), [
+        part('right_sash_end', 'sash', (-1.0, 0.6, -4.3), (-0.12, 0, 0.07), [(-0.9, 0, -0.25, 1.8, 13, 0.5, 'sash_end')]),
+        part('sash_end_short', 'sash', (1.1, 0.8, -4.2), (-0.1, 0, -0.04), [(-0.8, 0, -0.25, 1.6, 10, 0.5, 'sash_end_short')]),
+        part('pendant', 'sash', (-3.8, 0.6, -4.1), (-0.12, 0, 0.03), [
             (-0.25, 0, -0.25, 0.5, 4, 0.5, 'cord'), (-1.5, 4, -0.5, 3, 3, 1, 'jade_disc'), (-0.5, 7, -0.4, 1, 4.5, 0.8, 'tassel')]),
     ]
-    # ── the robe's skirt, to the ground in three flaring tiers ──
-    skirt = [
-        (-6.4, 0.8, -4.5, 12.8, 7.6, 9.0, 'skirt1'),
-        (-8.0, 8.0, -5.6, 16.0, 7.0, 11.2, 'skirt2'),
-        (-10.0, 14.6, -7.0, 20.0, 6.4, 14.0, 'skirt3'),
-        (-10.4, 19.7, -7.4, 20.8, 1.3, 14.8, 'hem'),
-    ]
-    for c in range(5):                                             # eyes in the skirt's silk
-        x = -8.6 + c * 3.7
-        skirt.append((x, 16.0 + (c % 2) * 1.4, -7.45, 2.6, 1.6, 0.5, 'skirt_eye'))
-    for c in range(4):
-        skirt.append((-6.6 + c * 3.7 + (c % 2) * 0.4, 9.6 + (c % 2) * 1.8, -6.05, 2.6, 1.6, 0.5, 'skirt_eye'))
+    # ── the robe's skirt: a bell flaring from his waist to the ground in thin stepped tiers, each a little
+    # wider and further back than the last, trimmed gold; split up the front over the centipede's belly ──
+    skirt = []
+    for t in range(TIERS):
+        y0, w, d, zc = tier_dims(t)
+        skirt.append((-w / 2, y0, zc - d / 2, w, 2.4, d, 'tier_%d' % t))
+    for t, xs in ((3, (-6.0, 2.4)), (5, (-8.2, -3.3, 4.6)), (7, (-6.6, 3.0))):  # eyes in the skirt's silk
+        y0, w, d, zc = tier_dims(t)
+        for x in xs:
+            skirt.append((x, y0 + 0.4, zc - d / 2 - 0.3, 3.6, 1.6, 0.3, 'robe_eye'))
     ps.append(part('skirt', 'body', (0, 0, 0), (0, 0, 0), skirt))
+    # draped folds: thin panels hanging round the bell at angles, flaring with it
+    for k_, th in enumerate((0.42, 0.95, 1.6, 2.3, 2.8)):
+        rx, rz = 5.2, 4.3
+        ps.append(part('right_fold_%d' % k_, 'skirt', (-math.sin(th) * rx, 0.9, -math.cos(th) * rz + 0.3), (-0.25 - 0.04 * k_, -th, 0),
+                       [(-1.7, 0, -0.45, 3.4, 20.2 - 0.3 * abs(k_ - 2), 0.4, 'fold' if k_ % 2 == 0 else 'fold_dark')]))
     ps += [
-        part('apron', 'skirt', (0, 1.4, -4.8), (-0.165, 0, 0), [(-3.4, 0, -0.45, 6.8, 19.6, 0.45, 'apron')]),
-        part('right_back_panel', 'skirt', (-2.3, 1.0, 4.7), (0.18, 0, 0.04), [(-3.4, 0, 0, 3.6, 19.6, 0.5, 'back_panel')]),
-        part('right_over_panel', 'skirt', (-6.1, 1.2, -1.0), (0, 0, 0.24), [(-0.5, 0, -4.2, 0.5, 18.6, 8.4, 'over_panel')]),
+        part('right_back_panel', 'skirt', (-2.1, 1.0, 4.4), (0.3, 0, 0.05), [(-3.2, 0, 0, 3.4, 20.0, 0.5, 'back_panel')]),
     ]
+    # the centipede's belly in the robe's front slit, and its little legs reaching out of it
+    belly = []
+    for t in range(1, TIERS - 1):
+        y0, w, d, zc = tier_dims(t)
+        belly.append((-1.3 + 0.05 * t, y0, zc - d / 2 - 0.15, 2.6 - 0.1 * t, 2.2, 0.4, 'belly_plate' if t % 2 else 'belly_plate_red'))
+    ps.append(part('belly', 'skirt', (0, 0, 0), (0, 0, 0), belly))
+    for i, t in enumerate((2, 4, 6)):
+        y0, w, d, zc = tier_dims(t)
+        ps.append(part('right_slit_leg_%d' % i, 'skirt', (-1.2, y0 + 1.2, zc - d / 2), (0.5, 0.6, 0.5),
+                       [(-2.6, -0.35, -0.35, 2.6, 0.7, 0.7, 'fleg')]))
+        ps.append(part('right_slit_leg_tip_%d' % i, 'right_slit_leg_%d' % i, (-2.5, 0, 0), (0, 0, -1.0),
+                       [(-2.0, -0.25, -0.25, 2.0, 0.5, 0.5, 'fleg_tip')]))
     # the little legs round his hem, scuttling (they carry him)
+    y0, w, d, zc = tier_dims(TIERS - 1)
     for i in range(6):
-        z = -4.6 + i * 2.1
-        ps.append(part('right_hem_leg_%d' % i, 'skirt', (-9.8 + abs(i - 2.5) * 0.3, 19.9, z * 1.1), (0, -0.5 + i * 0.2, 0.55),
+        z = -d / 2 + 1.5 + i * (d - 3) / 5 + zc
+        ps.append(part('right_hem_leg_%d' % i, 'skirt', (-w / 2 + 0.6 + abs(i - 2.5) * 0.4, 20.2, z), (0, -0.5 + i * 0.2, 0.55),
                        [(-2.6, -0.4, -0.4, 2.6, 0.8, 0.8, 'fleg')]))
         ps.append(part('right_hem_leg_tip_%d' % i, 'right_hem_leg_%d' % i, (-2.5, 0, 0), (0, 0, -1.0),
                        [(-2.4, -0.3, -0.3, 2.4, 0.6, 0.6, 'fleg_tip')]))
     # the little legs along his flanks, out through the robe's seams
     for i in range(RINGS):
         y, h, w, d = ring_dims(i)
-        ps.append(part('right_flank_leg_%d' % i, 'body', (-w / 2 + 0.2, y + 1.3, 1.4), (0, -0.55 - i * 0.06, 0.25 + i * 0.04),
-                       [(-4.8, -0.5, -0.5, 4.8, 1.0, 1.0, 'fleg_big')]))
-        ps.append(part('right_flank_leg_tip_%d' % i, 'right_flank_leg_%d' % i, (-4.7, 0, 0), (0, 0.2, -1.1),
-                       [(-4.2, -0.35, -0.35, 4.2, 0.7, 0.7, 'fleg_tip')]))
+        ps.append(part('right_flank_leg_%d' % i, 'body', (-w / 2 + 0.2, y + 1.3, 1.2), (0, -0.55 - i * 0.06, 0.25 + i * 0.04),
+                       [(-4.6, -0.45, -0.45, 4.6, 0.9, 0.9, 'fleg_big')]))
+        ps.append(part('right_flank_leg_tip_%d' % i, 'right_flank_leg_%d' % i, (-4.5, 0, 0), (0, 0.2, -1.1),
+                       [(-4.0, -0.3, -0.3, 4.0, 0.6, 0.6, 'fleg_tip')]))
     # ── the head: long, gaunt ──
     ps += [
-        part('head', 'body', (0, -16.0, -0.3), (0, 0, 0), [
+        part('head', 'body', (0, -18.6, -1.3), (0.14, 0, 0), [
             (-3.0, -11.4, -3.0, 6, 9.6, 6, 'face'),
             (-2.2, -2.4, -2.7, 4.4, 1.2, 4.2, 'chin'),
             (-3.35, -7.0, -2.5, 6.7, 1.3, 4.0, 'cheekbone'),
@@ -222,40 +241,51 @@ def lord_parts():
                        (-0.3 * math.cos(a), a, 0.3 * math.sin(a)), [(-1.0, -2.6, -0.25, 2.0, 2.6, 0.5, 'crown_petal')]))
     # ── the arms ──
     ps += [
-        part('right_arm', 'body', (-6.6, -13.6, 0), ARM, [
-            (-2.8, -1.2, -2.0, 3.8, 4.6, 4.0, 'arm_ring'),
-            (-2.6, 3.2, -1.9, 3.4, 4.8, 3.8, 'arm_ring'),
-            (-3.25, 0.2, -1.2, 0.5, 1.4, 2.0, 'hide_eye_side'),
-            (-3.05, 4.8, -0.6, 0.5, 1.4, 2.0, 'hide_eye_side'),
-            (-1.6, 1.4, -2.45, 2.0, 1.4, 0.5, 'hide_eye'),
+        part('right_arm', 'body', (-5.6, -13.6, 0), ARM, [
+            (-2.6, -1.2, -1.9, 3.4, 4.6, 3.8, 'arm_ring'),
+            (-2.4, 3.2, -1.8, 3.0, 4.8, 3.6, 'arm_ring_red'),
+            (-2.9, 0.4, -1.3, 0.35, 1.3, 2.6, 'hide_eye_side'),
+            (-2.7, 5.0, -0.8, 0.35, 1.3, 2.6, 'hide_eye_side'),
         ]),
         part('right_robe_sleeve', 'right_arm', (0, 0, 0), (0, 0, 0), [
-            (-3.4, -1.8, -2.6, 5.0, 10.0, 5.2, 'robe_sleeve'),
-            (-3.9, 2.0, -1.4, 0.5, 1.7, 2.8, 'robe_eye_side'),
+            (-3.1, -1.8, -2.4, 4.6, 10.0, 4.8, 'robe_sleeve'),
+            (-3.4, 2.4, -1.8, 0.3, 1.6, 3.6, 'robe_eye_side'),
         ]),
         # three tiers of armoured segments over his shoulder, each with its eye
-        part('right_pauldron', 'right_arm', (-0.4, -2.0, 0), (0, 0, 0.55), [
-            (-3.4, -1.6, -3.4, 5.2, 1.8, 6.8, 'plate1'),
-            (-4.2, 0.0, -3.8, 5.6, 1.9, 7.6, 'plate2'),
-            (-5.0, 1.7, -4.2, 6.0, 2.1, 8.4, 'plate3'),
-            (-5.5, 1.9, -1.0, 0.5, 1.6, 2.2, 'hide_eye_side'),
-            (-5.3, 3.6, -4.0, 1.0, 1.6, 8.0, 'plate_lip'),
+        part('right_pauldron', 'right_arm', (-0.4, -1.8, 0), (0, 0, 0.6), [
+            (-2.6, -1.4, -2.6, 4.0, 1.5, 5.2, 'plate1'),
+            (-3.2, -0.1, -2.9, 4.2, 1.6, 5.8, 'plate2'),
+            (-3.8, 1.3, -3.2, 4.5, 1.7, 6.4, 'plate3'),
+            (-4.1, 1.5, -1.0, 0.35, 1.3, 2.6, 'hide_eye_side'),
+            (-4.0, 2.8, -3.0, 0.8, 1.3, 6.0, 'plate_lip'),
         ]),
         part('right_forearm', 'right_arm', (-0.9, 7.8, 0), FOREARM, [
-            (-1.6, 0, -1.6, 3.2, 7.8, 3.2, 'forearm'),
-            (-2.0, 6.6, -2.0, 4.0, 1.6, 4.0, 'cuff_plate'),
-            (-2.05, 2.0, -0.7, 0.5, 1.4, 1.6, 'hide_eye_side'),
+            (-1.5, 0, -1.5, 3.0, 7.8, 3.0, 'forearm'),
+            (-1.9, 6.6, -1.9, 3.8, 1.6, 3.8, 'cuff_plate'),
+            (-1.85, 2.0, -1.3, 0.35, 1.3, 2.6, 'hide_eye_side'),
         ]),
-        # the great sleeve hanging from his forearm, lined black, eyes through its silk
-        part('right_great_sleeve', 'right_forearm', (0, 0.4, 0.6), aim([ARM, FOREARM], (0.04, -0.28, 0.12)), [
-            (-3.4, -1.2, -8.6, 6.8, 8.8, 9.4, 'great_sleeve'),
-            (-3.9, 7.4, -10.6, 7.8, 7.6, 11.4, 'great_sleeve_low'),
-            (-4.2, 14.8, -10.9, 8.4, 1.3, 12.0, 'sleeve_cuff'),
-            (-3.85, 1.4, -6.8, 0.5, 1.7, 2.8, 'robe_eye_side'),
-            (-3.85, 4.0, -2.8, 0.5, 1.7, 2.8, 'robe_eye_side'),
-            (-4.35, 9.0, -8.8, 0.5, 1.7, 2.8, 'robe_eye_side'),
-            (-4.35, 10.6, -4.6, 0.5, 1.7, 2.8, 'robe_eye_side'),
-            (-1.4, 9.6, -11.05, 2.8, 1.7, 0.5, 'robe_eye'),
+        # the great sleeve hanging from his forearm: long thin panels of silk, flaring wider to the cuff,
+        # lined black, eyes through the silk
+        part('right_great_sleeve', 'right_forearm', (0, 0.4, 0.6), aim([ARM, FOREARM], (0.04, -0.28, 0.12)), []),
+        part('right_sleeve_outer', 'right_great_sleeve', (-2.9, -1.0, -0.6), (0, 0, 0.12), [
+            (-0.25, 0, -5.4, 0.5, 6.0, 6.6, 'sleeve_a'), (-0.25, 5.8, -7.0, 0.5, 5.6, 8.4, 'sleeve_b'),
+            (-0.25, 11.2, -8.8, 0.5, 6.0, 10.4, 'sleeve_c'),
+            (0.25, 0.4, -5.2, 0.3, 5.6, 6.2, 'lining'), (0.25, 5.8, -6.8, 0.3, 5.6, 8.0, 'lining'), (0.25, 11.2, -8.6, 0.3, 5.6, 10.0, 'lining'),
+            (-0.55, 7.0, -4.8, 0.3, 1.6, 3.6, 'robe_eye_side'), (-0.55, 12.8, -7.4, 0.3, 1.6, 3.6, 'robe_eye_side'),
+        ]),
+        part('right_sleeve_inner', 'right_great_sleeve', (2.7, -1.0, -0.6), (0, 0, -0.05), [
+            (-0.25, 0, -5.4, 0.5, 6.0, 6.6, 'sleeve_a'), (-0.25, 5.8, -7.0, 0.5, 5.6, 8.4, 'sleeve_b'),
+            (-0.25, 11.2, -8.8, 0.5, 5.2, 10.4, 'sleeve_c_short'),
+            (-0.55, 0.4, -5.2, 0.3, 5.6, 6.2, 'lining'), (-0.55, 5.8, -6.8, 0.3, 5.6, 8.0, 'lining'),
+        ]),
+        part('right_sleeve_front', 'right_great_sleeve', (0, -1.0, -5.9), (-0.22, 0, 0), [
+            (-2.9, 0, -0.25, 5.8, 6.0, 0.5, 'sleeve_fa'), (-3.3, 5.8, -0.25, 6.6, 5.6, 0.5, 'sleeve_fb'),
+            (-3.8, 11.2, -0.25, 7.6, 5.8, 0.5, 'sleeve_fc'),
+            (-1.8, 6.6, -0.55, 3.6, 1.6, 0.3, 'robe_eye'),
+        ]),
+        part('right_sleeve_back', 'right_great_sleeve', (0, -1.0, 0.9), (0.06, 0, 0), [
+            (-2.9, 0, -0.25, 5.8, 6.0, 0.5, 'sleeve_fa'), (-3.2, 5.8, -0.25, 6.4, 5.6, 0.5, 'sleeve_fb'),
+            (-3.5, 11.2, -0.25, 7.0, 5.4, 0.5, 'sleeve_fc_short'),
         ]),
         part('right_hand', 'right_forearm', (0, 8.0, 0), (0, 0, 0), [
             (-1.5, 0, -1.5, 3.0, 2.4, 3.0, 'palm'),
@@ -320,46 +350,42 @@ def lord_parts():
 # ── Painting ─────────────────────────────────────────────────────────────────
 
 def lid_eye(p, rect, iris_calm=0.0, lid=LID, rim=(60, 34, 16), open_=0.45):
-    """A heavy-lidded eye over a face: a dark rim round an almond, the upper lid drooping over a dull
-    golden iris slit black; ablaze, the whole almond burns open (the blaze skin) round its slit."""
+    """An eye set into a face: a pointed almond outlined dark, a heavy upper lid with its crease above
+    it, yellowed whites, a round golden iris slit black with a point of light; ablaze, it burns open
+    (the blaze skin) round its slit."""
     fx, fy, fw, fh = rect
     cx, cy = fw / 2, fh / 2
     for i, j, xy in each(rect):
         u, v = (i + 0.5 - cx) / (fw / 2), (j + 0.5 - cy) / (fh / 2)
-        almond = abs(v) <= (1 - u * u) ** 0.8 * 1.02
-        if not almond:
-            p.px(xy, noisy(p, rim, 3))
+        hgt = max(0.0, 1 - abs(u) ** 1.5) ** 1.1 * 0.82
+        if abs(u) > 0.97 or abs(v) > hgt + 0.3:
+            crease = -hgt - 0.55 < v < -hgt - 0.3 and abs(u) < 0.75     # the lid's crease, a shadow in the cloth above it
+            p.px(xy, noisy(p, k(rim, 0.72) if crease else rim, 3))
             continue
-        edge = abs(v) > (1 - u * u) ** 0.8 * 0.72
-        slit = abs(u) < 0.13 and abs(v) < 0.9
-        lidded = v < -1 + 2 * (1 - open_)
-        if edge:
-            p.px(xy, (40, 20, 10))
+        if abs(v) > hgt:
+            p.px(xy, (34, 16, 8))                                      # the lids' rims
             continue
-        if slit and not lidded:
-            p.px(xy, (12, 6, 4))
+        lid_line = -hgt + 2 * hgt * (1 - open_)
+        if v < lid_line:
+            base = mixc(lid, (236, 206, 160), 0.3 * (1 + v))
+            p.lit(xy, base, calm=0.0, blaze=0.9, hot=mixc(EYE, EYE_HOT, 0.3), skin=noisy(p, base, 2))
             continue
-        if lidded:
-            base = mixc(lid, (230, 200, 150), 0.25 * (1 + v))
-            hot = mixc(EYE, EYE_HOT, max(0, 1 - abs(u) * 1.5))
-            p.lit(xy, base, calm=0.0, blaze=1.0, hot=hot, skin=noisy(p, base, 3))
+        if v < lid_line + 0.22:
+            p.px(xy, (24, 10, 6))                                      # the lash line
             continue
-        d = math.hypot(u, v * 0.9)
-        if abs(u) > 0.6:                                         # the white of the eye, yellowed, bloodshot at its corner
-            sc = (228, 212, 160) if abs(u) < 0.85 or p.rnd.random() < 0.7 else (200, 90, 70)
-            p.lit(xy, sc, calm=0.0, blaze=0.8, hot=mixc(EYE, EYE_HOT, 0.3), skin=noisy(p, k(sc, 0.95), 3))
+        d = math.hypot(u / 0.42, v / 0.95)
+        if d > 1:
+            sc = (226, 210, 160) if abs(u) < 0.8 or p.rnd.random() < 0.6 else (196, 92, 70)
+            p.lit(xy, sc, calm=0.0, blaze=0.7, hot=mixc(EYE, EYE_HOT, 0.3), skin=noisy(p, sc, 3))
             continue
-        iris = mixc(mixc(EYE, EYE_DULL, 0.45), (90, 52, 14), d)
-        hot = mixc(EYE_HOT, EYE, min(1, d * 1.3))
-        p.lit(xy, iris if iris_calm == 0 else mixc(EYE, (150, 90, 20), d), calm=iris_calm, blaze=1.0, hot=hot, skin=noisy(p, iris, 3))
-    # the lash line, a hard dark curve along the lid's edge
-    for i in range(fw):
-        u = (i + 0.5 - cx) / (fw / 2)
-        top = (1 - u * u) ** 0.8
-        y = cy + (-1 + 2 * (1 - open_)) * (fh / 2) * top
-        j = int(min(fh - 1, max(0, y)))
-        if abs(u) < 0.95:
-            p.px((fx + i, fy + j), (30, 14, 8))
+        if abs(u) < 0.09:
+            p.px(xy, (10, 4, 2))                                       # the slit
+            continue
+        iris = mixc(mixc(EYE, EYE_DULL, 0.3), (110, 60, 12), d * d)
+        if d < 0.5 and u < -0.15 and v < 0:
+            iris = mixc(iris, (255, 250, 220), 0.6)                    # the point of light
+        hot = mixc(EYE_HOT, EYE, min(1, d * 1.2))
+        p.lit(xy, iris, calm=iris_calm, blaze=1.0, hot=hot, skin=noisy(p, iris, 2))
 
 
 def eye_box(p, f, open_=0.45, calm=0.0, lid=LID, rim=(60, 34, 16), back=CHITIN):
@@ -373,18 +399,21 @@ def eye_box(p, f, open_=0.45, calm=0.0, lid=LID, rim=(60, 34, 16), back=CHITIN):
                 p.px(xy, noisy(p, k(rim, LIGHTS[s]), 3))
 
 
-def silk_robe(p, rect, s, base=YELLOW, light=1.0, damask=True, folds=6):
-    """Yellow silk: lit by its face, soft folds running down it catching the light, a damask lozenge
-    woven through it a shade deeper."""
+def silk_robe(p, rect, s, base=YELLOW, light=1.0, damask=True, folds=6, deep=0.35):
+    """Yellow silk: lit by its face, folds running down it, catching the light along their ridges and
+    falling into ochre-brown in their troughs, darkening down the face; a damask lozenge woven through it."""
     fx, fy, fw, fh = rect
     L = LIGHTS[s] * light
     period = max(8, fw // folds) if s in SIDES else 9999
     for i, j, xy in each(rect):
-        c = k(base, L * (1.04 - 0.12 * j / max(1, fh)))
+        c = k(base, L * (1.06 - 0.18 * j / max(1, fh)))
         if s in SIDES:
-            ph = ((i + 0.15 * j) % period) / period
+            ph = ((i + 0.1 * j) % period) / period
             fold = math.cos(ph * 2 * math.pi)
-            c = mixc(c, k(YELLOW_LIGHT, L), max(0, fold) ** 4 * 0.45) if fold > 0 else mixc(c, k(YELLOW_DEEP, L), (-fold) ** 3 * 0.35)
+            if fold > 0:
+                c = mixc(c, k(YELLOW_LIGHT, L), fold ** 4 * 0.5)
+            else:
+                c = mixc(c, k((104, 60, 16), L), (-fold) ** 2 * deep)
         if damask:
             a, b = (i + 2 * S) % (6 * S), (j + 3 * S) % (6 * S)
             if abs(a - 3 * S) + abs(b - 3 * S) == 2 * S:
@@ -509,9 +538,9 @@ def hair(p, f, grey=0.0):
 def lord_painter():
     def paint_box(p, style, f, dims):
         fr = f['front']
-        if style in ('ring', 'arm_ring', 'forearm', 'neck_hide'):
-            hide(p, f)
-            if style == 'ring':                                   # painted eyes between the raised ones, a dim glow
+        if style in ('ring', 'ring_red', 'arm_ring', 'arm_ring_red', 'forearm', 'neck_hide'):
+            hide(p, f, base=(92, 18, 20) if style.endswith('red') else CHITIN)
+            if style.startswith('ring'):                                   # painted eyes between the raised ones, a dim glow
                 for s in SIDES:
                     fx, fy, fw, fh = f[s]
                     for x0 in range(S, fw - 3 * S, 7 * S):
@@ -519,7 +548,7 @@ def lord_painter():
         elif style in ('hide_eye', 'hide_eye_side'):
             eye_box(p, f, open_=0.75, calm=0.8, lid=(90, 56, 30))
         elif style in ('robe_eye', 'robe_eye_side', 'skirt_eye'):
-            eye_box(p, f, open_=0.62, calm=0.3, lid=mixc(SKIN, YELLOW_DEEP, 0.3), rim=YELLOW)
+            eye_box(p, f, open_=0.7, calm=0.3, lid=mixc(SKIN, YELLOW_DEEP, 0.25), rim=YELLOW)
         elif style == 'sternum':
             chitin(p, f, BAND, (255, 230, 160))
             edges(p, f, k(CHITIN, 1), width=S // 2)
@@ -618,6 +647,75 @@ def lord_painter():
                     band(p, f[s], fh - 4 * S, 4 * S, BLACK, GOLD)
                     eye_motif(p, fx + fw // 2 - 3 * S, fy + 6 * S, w=6 * S)
                     eye_motif(p, fx + fw // 2 - 3 * S, fy + 18 * S, w=6 * S)
+        elif style.startswith('tier_'):
+            # one of the bell's tiers: silk deepening toward the hem from yellow into ochre, deep folds, a
+            # gold-trimmed hem over a line of shadow; the slit up its front over the centipede's belly
+            t = int(style[5:])
+            q = t / (TIERS - 1)
+            base = mixc(YELLOW, OCHRE, 0.12 + 0.4 * q)
+            for s, r in f.items():
+                silk_robe(p, r, s, base=base, light=1.0 - 0.15 * q, folds=7, deep=0.6)
+            for s in SIDES:
+                fx, fy, fw, fh = f[s]
+                for i in range(fw):
+                    p.px((fx + i, fy), noisy(p, k(YELLOW_DEEP, 0.55 * LIGHTS[s]), 2))
+                    for j in range(fh - S, fh):
+                        p.px((fx + i, fy + j), noisy(p, k(GOLD if j >= fh - S // 2 else GOLD_DEEP, LIGHTS[s]), 3))
+                if t == TIERS - 1:
+                    band(p, f[s], 0, fh, BLACK, GOLD)
+                    for i in range(2 * S, fw - 2 * S, 3 * S):
+                        for di in range(S + S // 2):
+                            p.px((fx + i + di, fy + fh // 2 - 1), GOLD_DEEP if (i // (3 * S)) % 3 else GOLD)
+                elif t in (2, 5):
+                    clouds(p, f[s], S // 2, fh - 2 * S, light=LIGHTS[s])
+                if s == 'front' and 0 < t < TIERS - 1:              # the slit, dark, its edges piped gold
+                    half = int((1.4 - 0.05 * t) * S)
+                    for i in range(fw // 2 - half - S // 2, fw // 2 + half + S // 2):
+                        for j in range(fh):
+                            edge = abs(i + 0.5 - fw / 2) > half
+                            p.px((fx + i, fy + j), GOLD if edge else noisy(p, (26, 12, 10), 2))
+        elif style in ('fold', 'fold_dark'):
+            base = mixc(YELLOW, OCHRE, 0.35) if style == 'fold' else mixc(OCHRE, (96, 52, 16), 0.35)
+            for s, r in f.items():
+                fx, fy, fw, fh = r
+                for i, j, xy in each(r):
+                    v = j / max(1, fh)
+                    c = k(base, LIGHTS[s] * (1.06 - 0.3 * v))
+                    if s in SIDES:
+                        c = mixc(c, k((90, 50, 14), 1), 0.35 * (0.5 + 0.5 * math.cos((i / max(1, fw)) * math.pi * 2)) ** 2)
+                    p.px(xy, noisy(p, c, 2))
+            for s in ('front', 'back'):
+                fx, fy, fw, fh = f[s]
+                vedges(p, f[s], GOLD, S // 2)
+                band(p, f[s], fh - 2 * S, 2 * S, BLACK, GOLD)
+                if style == 'fold':
+                    eye_motif(p, fx + fw // 2 - 3 * S, fy + int(fh * 0.4), w=6 * S)
+                else:
+                    clouds(p, f[s], int(fh * 0.25), 5 * S, light=0.9)
+        elif style in ('belly_plate', 'belly_plate_red'):
+            chitin(p, f, CHITIN if style == 'belly_plate' else (96, 20, 18), (230, 170, 120))
+            for s in SIDES:
+                fx, fy, fw, fh = f[s]
+                for i in range(fw):
+                    p.px((fx + i, fy + fh - 1), BAND)
+                    p.px((fx + i, fy), k(CHITIN, 0.5))
+        elif style.startswith('sleeve_'):
+            for s, r in f.items():
+                silk_robe(p, r, s, base=mixc(YELLOW, OCHRE, 0.18 if style[-1] != 'c' and not style.endswith('short') else 0.3),
+                          folds=3, deep=0.6)
+            if style.endswith('c') or style.endswith('c_short'):   # the cuff: black, gold-piped
+                for s in SIDES:
+                    band(p, f[s], f[s][3] - 3 * S, 3 * S, BLACK, GOLD)
+            elif style.endswith('b'):
+                for s in SIDES:
+                    clouds(p, f[s], S, 4 * S)
+            else:
+                for s in SIDES:
+                    band(p, f[s], 0, S, GOLD_DEEP, GOLD_DEEP)
+            for s in SIDES:
+                vedges(p, f[s], GOLD_DEEP, S // 2)
+        elif style == 'lining':
+            cloth(p, f, (28, 20, 20), folds=True)
         elif style == 'sleeve_cuff':
             cloth(p, f, BLACK, folds=False)
             for s in SIDES:
@@ -1022,4 +1120,4 @@ if __name__ == '__main__':
     slots = paint(ps, p, lord_painter())
     p.save('hundred_eyed_demon')
     emit(ps, slots, JAVA, 'lord')
-    print('hundred-eyed demon', len(ps), 'parts', {a: round(b, 2) for a, b in extent(ps, 1.15).items()})
+    print('hundred-eyed demon', len(ps), 'parts', {a: round(b, 2) for a, b in extent(ps, 1.05).items()})
