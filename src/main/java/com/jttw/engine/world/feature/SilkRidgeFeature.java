@@ -132,7 +132,8 @@ public class SilkRidgeFeature extends Feature<NoneFeatureConfiguration> {
             case SpiderCavePlan.LICHEN_UP -> s(Blocks.GLOW_LICHEN).setValue(MultifaceBlock.getFaceProperty(net.minecraft.core.Direction.UP), true);
             case SpiderCavePlan.LICHEN_DOWN -> s(Blocks.GLOW_LICHEN).setValue(MultifaceBlock.getFaceProperty(net.minecraft.core.Direction.DOWN), true);
             case SpiderCavePlan.CRACK -> s(Blocks.PEARLESCENT_FROGLIGHT);
-            case SpiderCavePlan.BEAM -> s(Blocks.END_ROD);
+            case SpiderCavePlan.BEAM -> SpiderCaveRegistry.SHAFT_LIGHT.get().defaultBlockState();
+            case SpiderCavePlan.SHROOM -> s(Blocks.SHROOMLIGHT);
             case SpiderCavePlan.LIGHT -> s(Blocks.LIGHT);
             case SpiderCavePlan.MUSHROOM -> fine(x, z, 30) < 700 ? s(Blocks.BROWN_MUSHROOM) : s(Blocks.RED_MUSHROOM);
             case SpiderCavePlan.ROOTS -> s(Blocks.HANGING_ROOTS);
