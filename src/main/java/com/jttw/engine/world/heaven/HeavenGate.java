@@ -29,24 +29,39 @@ public final class HeavenGate {
 
     /** How far from one's own level the island one is set down on may be. */
     public static final int WITHIN = 2;
-    /** How many directions are tried for such an island before one is laid. */
-    public static final int TRIES = 24;
     /** The height a cloud is laid at where no island will do. */
     public static final int LAID_Y = 64;
 
-    /** The island a traveller of {@code level} is set down on, or null if none was found. */
+    /** The most an island's road may stand from one's level when none is within {@value #WITHIN}: else a cloud is laid. */
+    public static final int NEAR_ENOUGH = 6;
+
+    /**
+     * The island a traveller of {@code level} is set down on: one at random of those whose road is within
+     * {@value #WITHIN} of their level; failing any, the nearest in level if within {@value #NEAR_ENOUGH}; else null.
+     */
     @Nullable
     public static Island islandFor(long seed, int level, RandomSource r) {
         int lv = Mth.clamp(level, HeavenRegions.BOTTOM, HeavenRegions.TOP);
-        double d = HeavenRegions.distanceFor(lv);
-        for (int i = 0; i < TRIES; i++) {
-            double[] at = HeavenRegions.toward(seed, r.nextDouble() * 360, d);
-            Island island = HeavenRegions.islandNear(seed, at[0], at[1], null);
-            if (island == null) continue;
-            int road = HeavenRegions.roadLevel(seed, island.x(), island.z());
-            if (Math.abs(road - lv) <= WITHIN || lv == HeavenRegions.BOTTOM && road <= HeavenRegions.BOTTOM + WITHIN) return island;
+        BlockPos palace = HeavenRegions.palace(seed);
+        int cell = com.jttw.engine.dimension.CelestialIslandsDensityFunction.CELL;
+        int reach = (int) HeavenRegions.distanceFor(lv) + 2 * cell;
+        int cx0 = Math.floorDiv(palace.getX() - reach, cell), cx1 = Math.floorDiv(palace.getX() + reach, cell);
+        int cz0 = Math.floorDiv(palace.getZ() - reach, cell), cz1 = Math.floorDiv(palace.getZ() + reach, cell);
+        java.util.List<Island> fit = new java.util.ArrayList<>();
+        Island nearest = null;
+        int nearestOff = Integer.MAX_VALUE;
+        for (int cx = cx0; cx <= cx1; cx++) for (int cz = cz0; cz <= cz1; cz++) {
+            Island i = com.jttw.engine.dimension.CelestialIslandsDensityFunction.island(cx, cz);
+            if (i == null) continue;
+            int off = Math.abs(HeavenRegions.roadLevel(seed, i.x(), i.z()) - lv);
+            if (off <= WITHIN) fit.add(i);
+            if (off < nearestOff) {
+                nearestOff = off;
+                nearest = i;
+            }
         }
-        return null;
+        if (!fit.isEmpty()) return fit.get(r.nextInt(fit.size()));
+        return nearestOff <= NEAR_ENOUGH ? nearest : null;
     }
 
     /** Where a traveller of {@code level} stands on arriving: on an island of their road's level, or a cloud laid for them there. */
