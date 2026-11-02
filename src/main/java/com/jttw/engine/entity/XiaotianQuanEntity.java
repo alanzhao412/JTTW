@@ -90,8 +90,8 @@ public class XiaotianQuanEntity extends PathfinderMob {
             } else {
                 walkAnimState.stop();
             }
-            // Black smoke trail
-            this.level().addParticle(
+            // Black smoke trail: thick behind it as it runs, a wisp now and then while it stands (so its form shows)
+            if (this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-6 || this.tickCount % 8 == 0) this.level().addParticle(
                     net.minecraft.core.particles.ParticleTypes.LARGE_SMOKE,
                     this.getRandomX(0.5), this.getY() + 0.2, this.getRandomZ(0.5),
                     0.0, 0.02, 0.0);

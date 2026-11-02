@@ -2,6 +2,7 @@ package com.jttw.engine.gametest.gallery;
 
 import com.jttw.engine.entity.heaven.HeavenBoss;
 import com.jttw.engine.registry.HeavenRegistry;
+import com.jttw.engine.registry.ModEntities;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -12,7 +13,7 @@ import static com.jttw.engine.gametest.gallery.HeavenScenes.*;
 
 /**
  * Heaven's great names in the gallery: the Four Heavenly Kings (each alone, the four in a line, the four
- * winding up), Li Jing, Nezha on his wheels, Erlang Shen with his hound; each alone from the front, the
+ * winding up), Li Jing, Nezha on his wheels, Erlang Shen with his hound (and the hound alone); each alone from the front, the
  * side, the back and at the face, and winding up his great blow.
  */
 final class HeavenGreatScenes {
@@ -75,6 +76,14 @@ final class HeavenGreatScenes {
         // Erlang with his hound at his heel, from three-quarters
         all.add(scene("heaven_erlang_hound", p -> great(p, HeavenRegistry.ERLANG_SHEN.get(), 0.5, 9.5, 145f),
                 new double[]{-2.4, 1.8, 5.2, 0.5, 1.0, 9.5}));
+        // his hound Xiaotian Quan alone (the summoned hound's own size): front, side, back, face, three-quarters, berserk
+        all.addAll(views("hound", 1.2, (p, yaw) -> great(p, ModEntities.XIAOTIAN_QUAN.get(), 0.5, 9.5, yaw)));
+        all.add(scene("heaven_hound_quarter", p -> great(p, ModEntities.XIAOTIAN_QUAN.get(), 0.5, 9.5, 100f),
+                new double[]{-1.2, 1.15, 7.4, 0.5, 0.55, 9.5}));
+        all.add(scene("heaven_hound_berserk", p -> {
+            var h = great(p, ModEntities.XIAOTIAN_QUAN.get(), 0.5, 9.5, 100f);
+            if (h != null) h.setBerserk(true);
+        }, new double[]{-1.2, 1.15, 7.4, 0.5, 0.55, 9.5}));
         // the great names together: the Four Kings behind, Li Jing, Nezha and Erlang before them
         all.add(scene("heaven_great_all", p -> {
             for (int k = 0; k < 4; k++) great(p, kings.get(k), -4.0 + 3.0 * k, 13.5, 180f);
