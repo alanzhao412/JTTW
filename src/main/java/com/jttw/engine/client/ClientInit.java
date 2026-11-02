@@ -197,7 +197,6 @@ public final class ClientInit {
         // White Bone Ridge
         event.registerEntityRenderer(ModEntities.BONE_SERVANT.get(), com.jttw.engine.client.renderer.RidgeRenderers.BoneServantRenderer::new);
         event.registerEntityRenderer(ModEntities.WRAITH.get(), com.jttw.engine.client.renderer.RidgeRenderers.WraithRenderer::new);
-        event.registerEntityRenderer(ModEntities.HEAVENLY_SOLDIER.get(), com.jttw.engine.client.renderer.HeavenRenderers.SoldierRenderer::new);
         event.registerEntityRenderer(ModEntities.GREAT_WHITE_BULL.get(), com.jttw.engine.client.renderer.GreatWhiteBullRenderer::new);
         event.registerEntityRenderer(ModEntities.NINE_HEADED_LION.get(), com.jttw.engine.client.renderer.NineHeadedLionRenderer::new);
         event.registerEntityRenderer(ModEntities.WHITE_TIGER.get(), com.jttw.engine.client.renderer.WhiteTigerRenderer::new);
