@@ -2941,17 +2941,18 @@ White Bone's 150 is the most any deed pays).
 A Tang village a band of yaoguai has sacked and holds (`RaidedVillage`, laid by `RaidedVillagePiece` as a
 Tang village is, its folk left out).
 
-- **Where.** A structure set of its own (`structure_set/raided_villages`): **spacing 34 chunks,
-  separation 12**, vanilla's own, in the Tang villages' three kinds and biomes (plains, mountain,
-  oasis), by their rules (`TangVillageStructure.site`: near-level dry ground over the sea, never within
-  a zone's region nor 108 blocks of one, `VillageSites`), **8 chunks clear of every Tang village** (the
-  set's exclusion zone) **and of vanilla's** (`RaidedVillageStructure`, from vanilla's placement). So
-  they are about as common as vanilla's villages: on an all-plains test world two in every three sites
-  stand, some 1.6 to 2.4 a square kilometre; a real world, where only the village biomes take them,
-  has fewer. That is enough because the rings put the right levels near the player: the ring 1–2 km
-  out, some 9 square kilometres, holds a dozen or more, each band of seven levels covered several
-  times over, so one freed (only once) leaves the next not far. How many stand, ring by ring, on a real
-  seed: `./gradlew runWorldgenBench -Pbench.mode=raided` (`RaidBench`, by each site's own test).
+- **Where.** A structure set of its own (`structure_set/raided_villages`): **spacing 16 chunks,
+  separation 6** (a village's width, so two never overlap), in the Tang villages' three kinds and
+  biomes (plains, mountain, oasis), by their rules (`TangVillageStructure.site`: near-level dry ground
+  over the sea, never within a zone's region nor 108 blocks of one, `VillageSites`), **6 chunks clear
+  of every Tang village** (the set's exclusion zone) **and of vanilla's** (`RaidedVillageStructure`,
+  from vanilla's placement). Its grid is finer than vanilla's (34) because so few sites pass those
+  rules: on seed 12345 (`./gradlew runWorldgenBench -Pbench.mode=raided`, `RaidBench`, each site by its
+  own test) 3 stand within 1 km, 4 at 1–2 km (the first zones' ring, much of it the zones' own), 20 at
+  2–3 km, 37 at 3–4.5 km, 45 at 4.5–6 km: some 0.4 to 1.3 a square kilometre, about as common as
+  vanilla's villages. That is enough because the rings put the right levels near the player: each
+  band of seven levels is held by several villages of its ring, so one freed (only once) leaves the
+  next not far.
 - **How it looks.** Every door smashed; lanterns, awnings and pots torn down; where the fire took (a
   little under half the village, in patches) timbers burnt to basalt or gone, roofs fallen in, walls
   sooted and broken, the ground scorched to coarse dirt and basalt, embers still smouldering
@@ -3024,6 +3025,12 @@ Some of the overworld's mountains, forests and jungles crawl with yaoguai (`Infe
 - **Ranks.** Regulars and captains as the raided villages' (above); a miniboss takes **32 hits and kills
   you in seven** (an ogre warlord's slam in nine), whatever its kind.
 
+A fault in a raided village's piece or the infestation marks is logged and the chunk goes on
+(`RaidedVillagePiece`, `InfestationMarks`): an exception there would leave its chunk unfinished, never
+saved, and the server spinning at "Saving worlds" when it stops. (One did: a Tang plan picked its
+herbalist's pots with `(u + salt) % 5`, and half of all layouts give a negative salt; it is
+`Math.floorMod` now, for the Tang villages as well.)
+
 **Tests and pictures**: `GrindRulesTest` (the rings' levels, a band seven wide round its ring and fixed
 by place, the patches' size, share and clearance of spawn and zones); `GrindGameTests` (a raided
 village's band, its sack, signs, banners, totems, emptied chests and hoard; its fifteen raiders kept at
@@ -3031,7 +3038,8 @@ their posts, its captains and chief; a post held again 20 minutes after it falls
 then freed for good: karma, raiders gone, posts forgotten, none put back, its folk home in their beds and
 trading, its marks down; a kill's XP at its level, the cap past the band, under 20; no raided village in
 or beside a zone; the infested themes by land, the patches clear of villages, zones and spawn; a heart
-held, fallen, not back at once nor under someone's nose, back after 20 minutes; the chief's stomp);
+held, fallen, not back at once nor under someone's nose, back after 20 minutes; the chief's stomp;
+every village plan laid from negative seeds);
 `PeckingOrderGameTests.theGrindingGroundsKeepThePeckingOrder` (every kind as regular, captain and
 miniboss at levels 3 to 101, every chief of every band). Gallery scenes `-Pgallery.only=raid_,infested_`;
 in a real world `./gradlew runWorldgenBench -Pbench.mode=raided`.

@@ -37,7 +37,7 @@ final class RaidScenes {
     private RaidScenes() {}
 
     /** Where the raided village is laid: its crossroads, from the stage's origin. */
-    private static final int VX = 340, VZ = 150;
+    private static final int VX = -340, VZ = 150;
     private static final long LAYOUT = 5L << 3;
     /** The chief's stage: east of the wild patch. */
     private static final int CX = 30, CZ = 8;
