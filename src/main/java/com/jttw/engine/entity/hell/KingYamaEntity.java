@@ -49,8 +49,8 @@ import java.util.List;
 public class KingYamaEntity extends KingOfHellEntity {
 
     public static final int LEVEL = com.jttw.engine.entity.zone.ZoneBoss.levelOver(com.jttw.engine.world.Zones.HELL);
-    /** 350 of a level-81 character's ordinary hits to kill, the most of the Ten; his blows 27% of their health (in his wrath, 32.4%). */
-    public static final double YAMA_HITS = 350, YAMA_BLOW = 0.27;
+    /** 78 of a level-66 character's ordinary hits to kill (Hell's band's top: the one he is built for), the most of the Ten; his blows 18.5% of their health (in his wrath, 20%). */
+    public static final double YAMA_HITS = 78, YAMA_BLOW = 0.185;
     public static final int COURT_AT_PERCENT = 66, WRATH_AT_PERCENT = 33;
     /** His hall: he keeps within this of his throne. */
     public static final int GREAT_HALL = 18;
@@ -58,10 +58,10 @@ public class KingYamaEntity extends KingOfHellEntity {
     public static final int WRIT_EVERY = 200;
     /** A sentence: how long between its mark and its fall; how wide; what share of health it takes; how often, and in his wrath. */
     public static final int SENTENCE_DELAY = 30, SENTENCE_EVERY = 120, WRATH_SENTENCE_EVERY = 70;
-    public static final double SENTENCE_RADIUS = 2.5, SENTENCE_SHARE = 1 / 3.0;
+    public static final double SENTENCE_RADIUS = 2.5, SENTENCE_SHARE = 0.2;
     /** His wrath: how much larger, how much stronger and quicker; the soul fire round him, how near and how hot. */
     public static final float WRATH_SCALE = 1.35f;
-    public static final double WRATH_POWER = 0.2, WRATH_SPEED = 0.3, AURA = 3.5, AURA_SHARE = 0.25;
+    public static final double WRATH_POWER = 0.08, WRATH_SPEED = 0.3, AURA = 3.5, AURA_SHARE = 0.25;
 
     private static final EntityDataAccessor<Boolean> WRATH = SynchedEntityData.defineId(KingYamaEntity.class, EntityDataSerializers.BOOLEAN);
 
@@ -78,8 +78,8 @@ public class KingYamaEntity extends KingOfHellEntity {
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
-                .add(Attributes.MAX_HEALTH, YAMA_HITS * com.jttw.engine.entity.MobScaling.typicalHit(LEVEL))
-                .add(Attributes.ATTACK_DAMAGE, YAMA_BLOW * com.jttw.engine.entity.MobScaling.typicalHealth(LEVEL))
+                .add(Attributes.MAX_HEALTH, YAMA_HITS * com.jttw.engine.entity.MobScaling.typicalHit(MEASURED))
+                .add(Attributes.ATTACK_DAMAGE, YAMA_BLOW * com.jttw.engine.entity.MobScaling.typicalHealth(MEASURED))
                 .add(Attributes.MOVEMENT_SPEED, 0.27)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.9)
                 .add(Attributes.ARMOR, 14)

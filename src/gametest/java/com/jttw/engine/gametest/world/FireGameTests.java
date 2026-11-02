@@ -492,7 +492,7 @@ public class FireGameTests {
         check(h, captain.getDisplayName().getString().contains("Captain") && captain.getDisplayName().getString().contains("Lv 74"), captain.getDisplayName().getString());
         check(h, regular.getDisplayName().getString().contains("Lv 67"), regular.getDisplayName().getString());
         close(h, FurnaceBruteEntity.HITS * MobScaling.typicalHit(74) * ZoneMonster.CAPTAIN_HEALTH, captain.getMaxHealth(), "a captain's health");
-        eq(h, FireMonster.LEVEL + ZoneMonster.CAPTAIN_OVER, captain.captainLevel(), "captains about 74");
+        eq(h, FireMonster.LEVEL + ZoneMonster.CAPTAIN_OVER, captain.captainLevel(), "captains about 71 at the mountains' edge");
         captain.bringEscorts(h.getLevel());
         List<FurnaceBruteEntity> escorts = h.getLevel().getEntitiesOfClass(FurnaceBruteEntity.class, captain.getBoundingBox().inflate(6), e -> e != captain);
         eq(h, captain.escorts(), escorts.size(), "escorts");
@@ -563,7 +563,7 @@ public class FireGameTests {
         StrongGeneralEntity egg = h.spawn(ModEntities.STRONG_GENERAL.get(), new BlockPos(2, 2, 2));
         sweepAround(h, egg);
         egg.finalizeSpawn(h.getLevel(), h.getLevel().getCurrentDifficultyAt(egg.blockPosition()), net.minecraft.world.entity.MobSpawnType.SPAWN_EGG, null);
-        check(h, egg.isCaptain() && Math.abs(egg.mobLevel() - 74) <= 1, "however he comes, a captain's strength: " + egg.mobLevel());
+        check(h, egg.isCaptain() && egg.mobLevel() >= egg.regularLevel() + 3 && egg.mobLevel() <= egg.topLevel(), "however he comes, a captain's strength, over the road's regulars: " + egg.mobLevel());
         eq(h, EnemyTier.GENERAL.name(), egg.getPersistentData().getString(ZoneMonster.KEY_TIER), "a General's pay");
         eq(h, 0, egg.escorts(), "and alone");
         h.succeed();

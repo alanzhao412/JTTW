@@ -496,6 +496,16 @@ public final class SpiderCavePlan {
     /** A post: who stands there (a kind above), at local (x, z) on the floor, captain or not, its level; the bower it is in (-1 the hall). */
     public record Post(int kind, int x, int z, boolean captain, int level, int bower) {}
 
+    /**
+     * The hall's garrison's level: the ridge's road goes on in from its land's top (84,
+     * {@link com.jttw.engine.entity.spider.SilkMonster#LAND} of the band), on through the bowers to the
+     * band's top; a captain four over, never past {@link #TOP}.
+     */
+    public static final int HALL_LEVEL = com.jttw.engine.world.Zones.SPIDER_CAVE.levelAlong(com.jttw.engine.entity.spider.SilkMonster.LAND);
+    /** The most any keeper of the cave is, a captain's or a sister's: the band's top and one. */
+    public static final int TOP = com.jttw.engine.world.Zones.SPIDER_CAVE.maxLevel() + com.jttw.engine.entity.zone.ZoneMonster.CAPTAIN_ABOVE_BAND;
+    private static final int CAPTAIN_OVER = com.jttw.engine.entity.zone.ZoneMonster.CAPTAIN_OVER;
+
     public static final List<Post> POSTS;
 
     static {
@@ -503,7 +513,8 @@ public final class SpiderCavePlan {
         // the hall's garrison, round its floor
         int[][] hall = {{-14, 12}, {14, 12}, {-22, 2}, {22, 2}, {0, 16}, {-8, -2}, {8, -2}, {-18, -8}, {18, -8}, {0, 6}};
         int[] kinds = {SPIDER, SPIDER, MANTIS, MANTIS, COCKROACH, SPIDER, SPIDER, STINGER, STINGER, SPIDER};
-        for (int i = 0; i < hall.length; i++) p.add(new Post(kinds[i], HALL_X + hall[i][0], HALL_Z + hall[i][1], i == 0 || i == 4, i == 0 || i == 4 ? 85 : 79, -1));
+        for (int i = 0; i < hall.length; i++) p.add(new Post(kinds[i], HALL_X + hall[i][0], HALL_Z + hall[i][1], i == 0 || i == 4,
+                i == 0 || i == 4 ? Math.min(TOP, HALL_LEVEL + CAPTAIN_OVER) : HALL_LEVEL, -1));
         // each bower: its sister at its heart, her sons round her
         for (int b = 0; b < BOWERS.size(); b++) {
             Chamber c = BOWERS.get(b);
@@ -513,16 +524,22 @@ public final class SpiderCavePlan {
                 double a = s * Math.PI * 2 / sons + b;
                 int kind = new int[]{STINGER, MANTIS, SPIDER, COCKROACH}[(b + s) % 4];
                 boolean captain = b >= 3 && s == 0;
+                int lv = bowerLevel(b);
                 p.add(new Post(kind, c.x() + (int) Math.round(Math.cos(a) * c.rx() * 0.55), c.z() + (int) Math.round(Math.sin(a) * c.rz() * 0.55),
-                        captain, captain ? 86 : 80 + b / 2, b));
+                        captain, captain ? Math.min(TOP, lv + CAPTAIN_OVER) : lv, b));
             }
         }
         POSTS = List.copyOf(p);
     }
 
-    /** The level of bower {@code b}'s sister: 82 for the youngest, in the first, to 88 for the eldest, in the last. */
+    /** The level of bower {@code b}'s sister, an elite of the cave: 86 for the youngest, in the first, to 89 (the band's top and one) for the eldest, in the last. */
     public static int sisterLevel(int b) {
-        return 82 + b;
+        return Math.min(TOP, 86 + b / 2);
+    }
+
+    /** The level of the sons in bower {@code b}: on from the hall's, to the band's top (88) in the last. */
+    public static int bowerLevel(int b) {
+        return HALL_LEVEL + (b * (com.jttw.engine.world.Zones.SPIDER_CAVE.maxLevel() - HALL_LEVEL) + BOWERS.size() / 2) / (BOWERS.size() - 1);
     }
 
     /** Which sister keeps bower {@code b} (0 the eldest): the youngest the first, the eldest the last. */

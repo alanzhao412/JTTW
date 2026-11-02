@@ -274,7 +274,7 @@ public class RidgeGameTests {
         for (var g : golems) eq(h, full, g.getHealth(), "nothing struck while it gathers");
         lady.tickStorm();
         check(h, !lady.storming(), "it bursts");
-        double hit = LadyWhiteBoneEntity.STORM * MobScaling.typicalHealth(LadyWhiteBoneEntity.LEVEL);
+        double hit = LadyWhiteBoneEntity.STORM * MobScaling.typicalHealth(LadyWhiteBoneEntity.MEASURED);
         check(h, Math.abs(hit - (full - a.getHealth())) <= hit * 1e-3 + 0.1, "the one struck: " + (full - a.getHealth()) + " of " + hit);
         check(h, Math.abs(hit - (full - b.getHealth())) <= hit * 1e-3 + 0.1, "and the other: " + (full - b.getHealth()));
         check(h, a.hasEffect(MobEffects.MOVEMENT_SLOWDOWN) && b.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "cut and slowed");
@@ -370,11 +370,11 @@ public class RidgeGameTests {
         LadyWhiteBoneEntity lady = lady(h, new BlockPos(4, 2, 4));
         lady.setNoAi(true);
         lady.setDisguise(LadyWhiteBoneEntity.SERVANT_CAPTAIN);
-        check(h, lady.getDisplayName().getString().startsWith("Bone Servant Captain · Lv " + RidgeMonster.CAPTAIN_LEVEL), "named as a servant captain: " + lady.getDisplayName().getString());
+        check(h, lady.getDisplayName().getString().startsWith("Bone Servant Captain · Lv " + LadyWhiteBoneEntity.DISGUISE_CAPTAIN_LEVEL), "named as a servant captain: " + lady.getDisplayName().getString());
         close(h, ModEntities.BONE_SERVANT.get().getDimensions().height() * RidgeMonster.CAPTAIN_SCALE, lady.getBbHeight(), "a captain's height");
         lady.setDisguise(LadyWhiteBoneEntity.WRAITH);
         check(h, lady.isNoGravity() && lady.getNavigation() instanceof net.minecraft.world.entity.ai.navigation.FlyingPathNavigation, "as a Wraith she drifts");
-        check(h, lady.getDisplayName().getString().startsWith("Wraith · Lv " + RidgeMonster.LEVEL), "and is named one");
+        check(h, lady.getDisplayName().getString().startsWith("Wraith · Lv " + LadyWhiteBoneEntity.DISGUISE_LEVEL), "and is named one");
         var golem = h.spawn(EntityType.IRON_GOLEM, new BlockPos(1, 2, 1));
         golem.setNoAi(true);
         lady.hurt(h.getLevel().damageSources().mobAttack(golem), 1);

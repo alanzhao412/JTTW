@@ -145,20 +145,29 @@ public final class FortressPlan {
         return n >= 9 ? THRONE_Y : FLOOR_Y[n - 1];
     }
 
-    /** A floor's regulars' level: from 68 on the first to 75 on the eighth (the forecourt's 67). */
+    /**
+     * A floor's regulars' level: the mountains' road goes on down the cave from its land's top (71, at
+     * the forecourt: {@link com.jttw.engine.entity.fire.FireMonster#LAND} of the band), to the band's
+     * top, 77, on the eighth.
+     */
     public static int regularLevel(int floor) {
-        return 67 + Math.min(8, floor);
+        return LAND_TOP + (Math.min(8, floor) * (com.jttw.engine.world.Zones.FIRE_MOUNTAIN.maxLevel() - LAND_TOP) + 4) / 8;
     }
 
-    /** Its captains': four over, no higher than the band's top. */
+    /** Its captains': four over, no higher than the band's top and one ({@link #TOP}). */
     public static int captainLevel(int floor) {
-        return Math.min(77, regularLevel(floor) + 4);
+        return Math.min(TOP, regularLevel(floor) + com.jttw.engine.entity.zone.ZoneMonster.CAPTAIN_OVER);
     }
 
-    /** Its guardian's: from 71 on the first floor to the band's top, 77, on the seventh and eighth. */
+    /** Its guardian's, an elite of the floor: five over its regulars, from 76 on the first floor to {@link #TOP} from the sixth. */
     public static int guardianLevel(int floor) {
-        return Math.min(77, 70 + floor);
+        return Math.min(TOP, regularLevel(floor) + 5);
     }
+
+    /** The level the mountains' land climbs to, at the cave's forecourt. */
+    public static final int LAND_TOP = com.jttw.engine.world.Zones.FIRE_MOUNTAIN.levelAlong(com.jttw.engine.entity.fire.FireMonster.LAND);
+    /** The most any of the cave's garrison is: the band's top and one. */
+    public static final int TOP = com.jttw.engine.world.Zones.FIRE_MOUNTAIN.maxLevel() + com.jttw.engine.entity.zone.ZoneMonster.CAPTAIN_ABOVE_BAND;
 
     /** The plan, built. */
     public static final class Built {

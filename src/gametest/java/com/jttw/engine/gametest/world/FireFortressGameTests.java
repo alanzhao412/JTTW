@@ -313,7 +313,7 @@ public class FireFortressGameTests {
                 eq(h, 1, guards, "floor " + k + ": one guardian");
                 check(h, captains >= (k >= 4 ? 4 : 2), "floor " + k + ": captains " + captains);
                 double mean = sum / g.size();
-                check(h, mean > last, "floor " + k + " harder than the one over it: " + mean + " after " + last);
+                check(h, mean >= last, "floor " + k + " never easier than the one over it: " + mean + " after " + last);
                 last = mean;
                 Mob guard = g.stream().filter(FireFortress::guards).findFirst().orElseThrow();
                 if (k <= 6) check(h, guard instanceof StrongGeneralEntity, "floor " + k + " held by one of the Six Strong Generals");

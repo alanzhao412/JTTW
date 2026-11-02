@@ -573,7 +573,7 @@ public class WuzhuangGameTests {
     public static void theYouthsAreMiniBossesWhoFightAsAPair(GameTestHelper h) {
         var wind = immortal(h, ModEntities.CLEAR_WIND.get(), new BlockPos(1, 2, 1), false);
         var moon = immortal(h, ModEntities.BRIGHT_MOON.get(), new BlockPos(1, 2, 3), false);
-        close(h, TempleYouthEntity.HITS * MobScaling.typicalHit(TempleYouthEntity.LEVEL), wind.getMaxHealth(), "seventy hits of a level-84 character");
+        close(h, TempleYouthEntity.HITS * MobScaling.typicalHit(TempleYouthEntity.LEVEL), wind.getMaxHealth(), "32 hits of a level-84 character: an elite trainer's");
         check(h, wind.getDisplayName().getString().endsWith("· Lv 84"), "named: " + wind.getDisplayName().getString());
         eq(h, BossEvent.BossBarColor.GREEN, wind.bossBar().getColor(), "his bar");
         eq(h, moon, wind.partner(), "each other's partner");
@@ -745,13 +745,13 @@ public class WuzhuangGameTests {
         openAir(h);
         ServerPlayer p = player(h);
         ZhenyuanEntity zh = immortal(h, ModEntities.ZHENYUAN.get(), new BlockPos(2, 2, 2), false);
-        close(h, ZhenyuanEntity.HITS * MobScaling.typicalHit(ZhenyuanEntity.MEASURED), zh.getMaxHealth(), "280 hits of a character of the level he is measured at");
+        close(h, ZhenyuanEntity.HITS * MobScaling.typicalHit(ZhenyuanEntity.MEASURED), zh.getMaxHealth(), "60 hits of a level-88 character, the one he is built for");
         eq(h, BossEvent.BossBarColor.YELLOW, zh.bossBar().getColor(), "his bar");
-        check(h, zh.getDisplayName().getString().endsWith("· Lv 103"), "named: " + zh.getDisplayName().getString());
+        check(h, zh.getDisplayName().getString().endsWith("· Lv 91"), "named: " + zh.getDisplayName().getString());
         zh.stagger();
         float full = zh.getHealth();
         zh.hurt(h.getLevel().damageSources().playerAttack(p), 1e9f);
-        check(h, full - zh.getHealth() <= zh.getMaxHealth() * ZhenyuanEntity.HIT_CAP_PERMILLE / 1000.0 + 1e-3, "no blow takes more than 1.4%");
+        check(h, full - zh.getHealth() <= zh.getMaxHealth() * ZhenyuanEntity.HIT_CAP_PERMILLE / 1000.0 + 1e-3, "no blow takes more than 6.5%");
         check(h, zh.isAlive(), "and he stands");
         // at 60% his household near him come to his side; he makes none
         DaoistDiscipleEntity d = mob(h, ModEntities.DAOIST_DISCIPLE.get(), 78, false, new BlockPos(0, 2, 4));

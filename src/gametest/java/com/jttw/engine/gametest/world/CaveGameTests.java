@@ -109,7 +109,7 @@ public class CaveGameTests {
         eq(h, ZoneMonster.PURPLE, captain.getDisplayName().getStyle().getColor().getValue(), "a captain's purple");
         check(h, captain.getDisplayName().getString().equals("Mouse Spirit Captain · Lv 44"), "named: " + captain.getDisplayName().getString());
         eq(h, 37, regular.regularLevel(), "regulars about 37");
-        eq(h, 44, regular.captainLevel(), "captains about 44");
+        eq(h, 41, regular.captainLevel(), "captains about 41 at the mountain's foot");
         close(h, MouseSpiritEntity.HITS * MobScaling.typicalHit(37), regular.getMaxHealth(), "two ordinary hits of a level-37 character");
         close(h, MouseSpiritEntity.HITS * MobScaling.typicalHit(44) * ZoneMonster.CAPTAIN_HEALTH, captain.getMaxHealth(), "a captain's health");
         close(h, MouseSpiritEntity.BITE * MobScaling.typicalHealth(44) * ZoneMonster.CAPTAIN_DAMAGE,
@@ -333,7 +333,7 @@ public class CaveGameTests {
         for (var g : List.of(a, b, steps, far)) eq(h, full, g.getHealth(), "no cut while she winds up");
         lady.tickWhirl();
         check(h, lady.whirling() && !lady.windingUp(), "she spins");
-        double cut = LadyEarthFlowEntity.WHIRL * MobScaling.typicalHealth(LadyEarthFlowEntity.LEVEL);
+        double cut = LadyEarthFlowEntity.WHIRL * MobScaling.typicalHealth(LadyEarthFlowEntity.MEASURED);
         close(h, cut, full - a.getHealth(), "the one cut");
         close(h, cut, full - b.getHealth(), "and the other");
         check(h, a.hasEffect(MobEffects.MOVEMENT_SLOWDOWN) && b.hasEffect(MobEffects.MOVEMENT_SLOWDOWN), "and slowed");

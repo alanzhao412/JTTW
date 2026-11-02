@@ -141,6 +141,15 @@ public final class Zones {
             return vertical.contains(y) && covers(seed, x, z);
         }
 
+        /**
+         * The level of its road {@code depth} along it (0 to 1): its band's bottom at its outskirts, its
+         * top at its heart (the middle of its region, a cave's deepest floor). Its regulars stand at it.
+         */
+        public int levelAlong(double depth) {
+            double d = Math.max(0, Math.min(1, depth));
+            return minLevel + (int) Math.round(d * (maxLevel - minLevel));
+        }
+
         /** How far into one of its regions (x, z) lies: 0 at the edge or outside, 1 at the centre. */
         public double depth(long seed, int x, int z) {
             return MAP.depth(this, seed, x, z);

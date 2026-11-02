@@ -48,16 +48,21 @@ import java.util.List;
  * for {@value #AREA_WIND_UP} ticks (his court's sign gathering round him, a sound rising), and then
  * brings it down on everyone within {@link #areaReach()} at once ({@link #release}).
  *
- * <p>The First Court's king is level 72, and each after one more, King Yama passed over (the Sixth
- * 76, the Tenth 80); King Yama is 81, the top of Hell's band and {@link ZoneBoss#LEVELS_ABOVE_BAND}.
+ * <p>Each king is a gym's leader of his court, built for a character of Hell's band's top (66,
+ * {@link #MEASURED}). The nine under King Yama are level 68, the top of Hell's band and
+ * {@link ZoneBoss#LESSER_ABOVE_BAND}; King Yama is 69, its top and {@link ZoneBoss#LEVELS_ABOVE_BAND}.
  */
 public abstract class KingOfHellEntity extends ZoneBoss {
 
+    /** The character every king is built for: one of the top of Hell's band ({@link ZoneBoss#challengerOf}). */
+    public static final int MEASURED = ZoneBoss.challengerOf(com.jttw.engine.world.Zones.HELL);
+
     /**
-     * 280 of his level's ordinary hits to kill, a group's fight (the Tenth, who is born again at
-     * half, {@value #ZHUANLUN_HITS} and half that again); his tablet strikes for a quarter of their health.
+     * 64 ordinary hits of a level-66 character to kill, one's hard fight (the Tenth, who is born again
+     * at half, {@value #ZHUANLUN_HITS} and half that again); his tablet strikes for 18% of their
+     * health (five or six kill).
      */
-    public static final double HITS = 280, ZHUANLUN_HITS = 200, BLOW = 0.25;
+    public static final double HITS = 64, ZHUANLUN_HITS = 45, BLOW = 0.18;
     /** How far he keeps from his throne, how close one must be for his judgement, how often he strikes. */
     public static final int HALL = 13, STRIKE_EVERY = 30;
     public static final double JUDGES_WITHIN = 14;
@@ -94,12 +99,11 @@ public abstract class KingOfHellEntity extends ZoneBoss {
     }
 
     /**
-     * The level of a king of this court: King Yama's ({@link ZoneBoss#levelOver} Hell: 81, the
-     * strongest), and the others under him, 72 to 80 from the First to the Tenth, Yama passed over.
+     * The level of a king of this court: King Yama's ({@link ZoneBoss#levelOver} Hell: 69, the
+     * strongest), and the nine others one under him, lesser bosses ({@link ZoneBoss#lesserLevelOver}: 68).
      */
     public static int levelOf(int court) {
-        int yama = KingYamaEntity.LEVEL;
-        return court == 5 ? yama : court < 5 ? yama - 10 + court : yama - 11 + court;
+        return court == 5 ? KingYamaEntity.LEVEL : lesserLevelOver(com.jttw.engine.world.Zones.HELL);
     }
 
     /** The ordinary hits of his level a king of this court takes to kill (his first life, for the Tenth). */
@@ -107,12 +111,11 @@ public abstract class KingOfHellEntity extends ZoneBoss {
         return court == 5 ? KingYamaEntity.YAMA_HITS : court == 10 ? ZHUANLUN_HITS : HITS;
     }
 
-    /** A king's attributes, of his court's level. */
+    /** A king's attributes, measured against the character he is built for ({@link #MEASURED}). */
     public static AttributeSupplier.Builder createAttributes(int court) {
-        int level = levelOf(court);
         return Monster.createMonsterAttributes()
-                .add(Attributes.MAX_HEALTH, hitsOf(court) * MobScaling.typicalHit(level))
-                .add(Attributes.ATTACK_DAMAGE, BLOW * MobScaling.typicalHealth(level))
+                .add(Attributes.MAX_HEALTH, hitsOf(court) * MobScaling.typicalHit(MEASURED))
+                .add(Attributes.ATTACK_DAMAGE, BLOW * MobScaling.typicalHealth(MEASURED))
                 .add(Attributes.MOVEMENT_SPEED, 0.26)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.8)
                 .add(Attributes.ARMOR, 10)

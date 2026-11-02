@@ -70,9 +70,11 @@ import java.util.List;
 public abstract class DragonKingEntity extends ZoneBoss implements RangedAttackMob {
 
     public static final int LEVEL = ZoneBoss.levelOver(Zones.MYSTICAL_WATERS);
-    /** 270 of a level-71 character's ordinary hits to kill, a group's fight; a bolt a quarter of their health, a claw 30%, his sea's wrath 22%. */
-    public static final double HITS = 270, BOLT = 0.25, CLAW = 0.30, WRATH = 0.22;
-    public static final double HEALTH = HITS * MobScaling.typicalHit(LEVEL);
+    /** The character he is built for: one of the top of his band, level 56 ({@link ZoneBoss#challengerOf}). */
+    public static final int MEASURED = ZoneBoss.challengerOf(Zones.MYSTICAL_WATERS);
+    /** 62 of a level-56 character's ordinary hits to kill, one's hard fight; a bolt 16% of their health, a claw 19.5% (five or six kill), his sea's wrath 14%. */
+    public static final double HITS = 62, BOLT = 0.16, CLAW = 0.195, WRATH = 0.14;
+    public static final double HEALTH = HITS * MobScaling.typicalHit(MEASURED);
     /** How often his sea's wrath comes, in ticks (and, from a third of his health, how often then). */
     public static final int SIGNATURE_EVERY = 160, SIGNATURE_ENRAGED = 100;
     /** How far his surge, his boiling and his frost reach from him; the whirlpool from its heart. */
@@ -120,7 +122,7 @@ public abstract class DragonKingEntity extends ZoneBoss implements RangedAttackM
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, HEALTH)
-                .add(Attributes.ATTACK_DAMAGE, CLAW * MobScaling.typicalHealth(LEVEL))
+                .add(Attributes.ATTACK_DAMAGE, CLAW * MobScaling.typicalHealth(MEASURED))
                 .add(Attributes.MOVEMENT_SPEED, 0.3)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.9)
                 .add(Attributes.ARMOR, 10)
@@ -227,11 +229,11 @@ public abstract class DragonKingEntity extends ZoneBoss implements RangedAttackM
 
     /** His bolt's hurt; his wrath's. */
     public float boltDamage() {
-        return (float) (BOLT * MobScaling.typicalHealth(LEVEL));
+        return (float) (BOLT * MobScaling.typicalHealth(MEASURED));
     }
 
     public float wrathDamage() {
-        return (float) (WRATH * MobScaling.typicalHealth(LEVEL));
+        return (float) (WRATH * MobScaling.typicalHealth(MEASURED));
     }
 
     /** A bolt of his sea at the target; three, fanned, once his health is past two thirds. */

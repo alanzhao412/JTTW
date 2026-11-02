@@ -124,6 +124,12 @@ public class SixEaredMacaqueEntity extends ZoneBoss {
         return LEVEL;
     }
 
+    /** The one superboss, not his island's gym leader: measured against a capped character, not one of his band's top. */
+    @Override
+    public int nativeMeasured() {
+        return MEASURED;
+    }
+
     @Override
     public Zones.Zone zone() {
         return Zones.FLOWER_FRUIT;

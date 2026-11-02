@@ -34,19 +34,53 @@ public abstract class CaveMonster extends ZoneMonster {
         return Zones.BOTTOMLESS;
     }
 
-    /** A regular one's level on floor k (0-7), or out on the mountain (-1): 37 outside, 38 to 44 down the floors. */
+    /** The share of the cave's road the mountain over it is (37 at its foot to 40 at the pit's mouth); its floors are the rest. */
+    public static final double LAND = 0.3;
+    /** The most any of the household is put at, a captain or a floor's guardian: the band's top and one. */
+    public static final int TOP = 46 + CAPTAIN_ABOVE_BAND;
+
+    /**
+     * A regular one's level on floor k (0-7; 8 the throne level), or out on the mountain (-1): the
+     * mountain's foot's, 37, outside (its land climbs to 40 at the pit's mouth: {@link #LAND}); 41 on the
+     * first floor down to the band's top, 46, on the last.
+     */
     public static int regularOn(int k) {
-        return k < 0 ? LEVEL : LEVEL + 1 + (k * 6 + 3) / 7;
+        return k < 0 ? LEVEL : Math.min(Zones.BOTTOMLESS.maxLevel(), LEVEL + 4 + (k * 5 + 3) / 7);
     }
 
-    /** A captain's level on floor k: 44 outside, 43 to the band's top (46) down the floors. */
+    /** A captain's level on floor k: four over its floor's regulars (41 outside), never past {@link #TOP}. */
     public static int captainOn(int k) {
-        return k < 0 ? CAPTAIN_LEVEL : Math.min(Zones.BOTTOMLESS.maxLevel(), regularOn(k) + 5);
+        return k < 0 ? CAPTAIN_LEVEL : Math.min(TOP, regularOn(k) + CAPTAIN_OVER);
     }
 
-    /** The level of floor k's guardian, who holds its way down: 39 to the band's top (46). */
+    /** The level of floor k's guardian, who holds its way down, an elite of the floor: 45 on the first, then {@link #TOP}. */
     public static int guardianOn(int k) {
-        return Math.min(Zones.BOTTOMLESS.maxLevel(), 39 + k);
+        return Math.min(TOP, regularOn(k) + 4);
+    }
+
+    /** The floor whose heights it stands at, under the mountain (0-8), or -1: out on the mountain, or nowhere in the cave. */
+    private int floorHere() {
+        if (!(level() instanceof ServerLevel server) || zone().depth(server.getSeed(), getBlockX(), getBlockZ()) <= 0) return -1;
+        return Labyrinth.levelAt(getBlockY());
+    }
+
+    /** Out on the mountain, its land's road; in the cave, its floor's (a level either way, within the band). */
+    @Override
+    public int rollRegularLevel(net.minecraft.util.RandomSource r) {
+        int k = floorHere();
+        if (k < 0) return super.rollRegularLevel(r);
+        return Math.max(zone().minLevel(), Math.min(zone().maxLevel(), regularOn(k) - 1 + r.nextInt(3)));
+    }
+
+    @Override
+    public int rollCaptainLevel(net.minecraft.util.RandomSource r) {
+        int k = floorHere();
+        return k < 0 ? super.rollCaptainLevel(r) : captainOver(regularOn(k), r);
+    }
+
+    @Override
+    protected double landShare() {
+        return LAND;
     }
 
     /** The floor it was put on (0-7; 8 the throne level), or -1 if none. */

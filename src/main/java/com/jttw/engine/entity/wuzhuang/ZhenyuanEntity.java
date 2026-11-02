@@ -74,15 +74,15 @@ import java.util.UUID;
 public class ZhenyuanEntity extends TempleImmortal {
 
     public static final int LEVEL = com.jttw.engine.entity.zone.ZoneBoss.levelOver(com.jttw.engine.world.Zones.MOUNT_WUZHUANG);
-    /** The level of character he is measured against, past the cap's reach ({@link com.jttw.engine.entity.zone.ZoneBoss#measuredAt}). */
-    public static final int MEASURED = com.jttw.engine.entity.zone.ZoneBoss.measuredAt(LEVEL);
+    /** The character he is built for: one of the top of his band, level 88 ({@link com.jttw.engine.entity.zone.ZoneBoss#challengerOf}). */
+    public static final int MEASURED = com.jttw.engine.entity.zone.ZoneBoss.challengerOf(com.jttw.engine.world.Zones.MOUNT_WUZHUANG);
     /**
-     * 280 of a level-103 character's ordinary hits, a group's fight (more, hand to hand: he brushes
-     * one blow in four aside); a whisk stroke of 28% of their health. No blow takes more than
-     * {@value #HIT_CAP_PERMILLE}‰ of his health: some four ordinary hits.
+     * 60 of a level-88 character's ordinary hits, one's hard fight (more, hand to hand: he brushes
+     * one blow in four aside, some 80 then); a whisk stroke of 19% of their health (five or six kill).
+     * No blow takes more than {@value #HIT_CAP_PERMILLE}‰ of his health: some four ordinary hits.
      */
-    public static final double HITS = 280, BLOW = 0.28;
-    public static final int HIT_CAP_PERMILLE = 14;
+    public static final double HITS = 60, BLOW = 0.19;
+    public static final int HIT_CAP_PERMILLE = 65;
     public static final float PARRY = 0.25f;
     public static final int HALL = 18;
     public static final int SLEEVE_EVERY = 240, SLEEVE_EVERY_LATE = 140, SLEEVE_WIND_UP = 20;
@@ -90,9 +90,9 @@ public class ZhenyuanEntity extends TempleImmortal {
     /** How far from the one he comes for he arrives (at least, at most), and how far he will go on hunting them. */
     public static final int ARRIVE_NEAR = 4, ARRIVE_FAR = 8, HUNT = 64;
     public static final float DISCIPLES_AT = 0.6f, ALL_AT = 0.3f;
-    /** The sweep of the whisk: how often, how long its wind-up, how long the sweep is shown; how far, how hard (of a level-103 character's health), how far it blows one back. */
+    /** The sweep of the whisk: how often, how long its wind-up, how long the sweep is shown; how far, how hard (of a level-88 character's health), how far it blows one back. */
     public static final int SWEEP_EVERY = 220, SWEEP_WIND_UP = 25, SWEEP_SHOWN = 8;
-    public static final double SWEEP_REACH = 6, SWEEP = 0.25, GALE = 1.2;
+    public static final double SWEEP_REACH = 6, SWEEP = 0.16, GALE = 1.2;
 
     private static final EntityDataAccessor<Integer> SLEEVE_RAISED = SynchedEntityData.defineId(ZhenyuanEntity.class, EntityDataSerializers.INT);
     /** Ticks left of the sweep of his whisk: over {@value #SWEEP_SHOWN} lifted and whirling, then sweeping round (for his pose). */

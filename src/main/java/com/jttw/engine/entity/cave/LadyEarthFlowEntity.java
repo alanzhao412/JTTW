@@ -84,9 +84,11 @@ import java.util.List;
 public class LadyEarthFlowEntity extends ZoneBoss {
 
     public static final int LEVEL = ZoneBoss.levelOver(Zones.BOTTOMLESS);
-    /** 270 of a level-61 character's ordinary hits to kill, a group's fight; each cut 14% of their health (a stroke 28%), before resistance. */
-    public static final double HITS = 270, CUT = 0.14;
-    public static final double HEALTH = HITS * MobScaling.typicalHit(LEVEL), CUT_DAMAGE = CUT * MobScaling.typicalHealth(LEVEL);
+    /** The character she is built for: one of the top of her band, level 46 ({@link ZoneBoss#challengerOf}). */
+    public static final int MEASURED = ZoneBoss.challengerOf(Zones.BOTTOMLESS);
+    /** 62 of a level-46 character's ordinary hits to kill, one's hard fight; each cut 9.5% of their health (a stroke 19%: five or six kill), before resistance. */
+    public static final double HITS = 62, CUT = 0.095;
+    public static final double HEALTH = HITS * MobScaling.typicalHit(MEASURED), CUT_DAMAGE = CUT * MobScaling.typicalHealth(MEASURED);
     public static final int HOUSEHOLD_AT_PERCENT = 60, ESCAPE_AT_PERCENT = 30;
     /** Ticks between her strokes, and from the first cut of a stroke to the second. */
     public static final int STROKE_EVERY = 26, SECOND_CUT = 5;
@@ -102,9 +104,9 @@ public class LadyEarthFlowEntity extends ZoneBoss {
     public static final String KEY_HOUSEHOLD = "jttw_earth_flow_household";
     /** How far beyond her ground she may be drawn before she is back on it, across and up or down. */
     public static final int LEASH = 6;
-    /** The whirl: how often; how long she winds up, how long she spins; how far it reaches, how hard it cuts (of a level-61 character's health). */
+    /** The whirl: how often; how long she winds up, how long she spins; how far it reaches, how hard it cuts (of a level-46 character's health). */
     public static final int WHIRL_EVERY = 180, WHIRL_WIND_UP = 20, WHIRL_SPIN = 10;
-    public static final double WHIRL_REACH = 4.5, WHIRL = 0.22;
+    public static final double WHIRL_REACH = 4.5, WHIRL = 0.14;
 
     private static final EntityDataAccessor<Boolean> FLED = SynchedEntityData.defineId(LadyEarthFlowEntity.class, EntityDataSerializers.BOOLEAN);
     /** Ticks left of her whirl, its wind-up and its spin (for her pose). */

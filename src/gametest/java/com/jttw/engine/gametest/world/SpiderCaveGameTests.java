@@ -175,7 +175,7 @@ public class SpiderCaveGameTests {
         for (EntityType<? extends SilkMonster> kind : kinds) {
             SilkMonster m = silk(h, kind, 78, false, new BlockPos(2, 2, 2));
             eq(h, 78, m.regularLevel(), "regulars about 78");
-            eq(h, 85, m.captainLevel(), "captains about 85");
+            eq(h, 82, m.captainLevel(), "captains about 82 at the ridge's edge");
             check(h, m.rollCaptainLevel(m.getRandom()) <= 88, "never past the band");
             eq(h, Zones.SPIDER_CAVE.id(), m.getPersistentData().getString(ZoneMonster.KEY_ZONE), "the ridge's");
             m.become(85, true);
@@ -304,7 +304,7 @@ public class SpiderCaveGameTests {
         SpiderSpiritEntity egg = h.spawn(SpiderCaveRegistry.SPIDER_SPIRIT.get(), new BlockPos(2, 2, 2));
         sweepAround(h, egg);
         egg.finalizeSpawn(h.getLevel(), h.getLevel().getCurrentDifficultyAt(egg.blockPosition()), net.minecraft.world.entity.MobSpawnType.SPAWN_EGG, null);
-        check(h, egg.isCaptain() && egg.isMiniboss() && Math.abs(egg.mobLevel() - 85) <= 1, "however she comes, a miniboss: " + egg.mobLevel());
+        check(h, egg.isCaptain() && egg.isMiniboss() && egg.mobLevel() >= egg.regularLevel() + 3 && egg.mobLevel() <= egg.topLevel(), "however she comes, a miniboss: " + egg.mobLevel());
         double blow = egg.getAttributeValue(Attributes.ATTACK_DAMAGE) / MobScaling.typicalHealth(egg.mobLevel());
         close(h, ZoneMonster.MINIBOSS_HIT, blow, "a miniboss's blow");
         eq(h, 0, egg.escorts(), "and alone");
@@ -385,12 +385,13 @@ public class SpiderCaveGameTests {
     // ── The Hundred-Eyed Demon Lord ─────────────────────────────────────
 
     @GameTest(template = PLATFORM)
-    public static void theDemonLordTowersOverHisBandAndIsAGroupsFight(GameTestHelper h) {
+    public static void theDemonLordIsHisCavesGymLeader(GameTestHelper h) {
         HundredEyedDemonEntity b = lord(h, new BlockPos(2, 2, 2));
-        eq(h, 103, b.mobLevel(), "his band's top and fifteen");
-        check(h, b.getDisplayName().getString().endsWith("· Lv 103"), b.getDisplayName().getString());
+        eq(h, 91, b.mobLevel(), "his band's top and three");
+        check(h, b.getDisplayName().getString().endsWith("· Lv 91"), b.getDisplayName().getString());
+        eq(h, 88, HundredEyedDemonEntity.MEASURED, "built for a character of his band's top");
         double hits = b.getMaxHealth() / MobScaling.typicalHit(HundredEyedDemonEntity.MEASURED);
-        check(h, hits >= ZoneBoss.LEAST_HITS && hits <= 350, "a group's fight at the level he is measured at: " + hits);
+        check(h, hits >= ZoneBoss.LEAST_HITS && hits <= ZoneBoss.MOST_HITS, "one level-88 character's hard fight: " + hits);
         double blow = b.getAttributeValue(Attributes.ATTACK_DAMAGE) / MobScaling.typicalHealth(HundredEyedDemonEntity.MEASURED);
         check(h, blow >= ZoneBoss.LEAST_BLOW && blow <= ZoneBoss.MOST_BLOW, "a boss's blow: " + blow);
         for (double special : new double[]{HundredEyedDemonEntity.LIGHT, HundredEyedDemonEntity.TEA, HundredEyedDemonEntity.SWEEP}) {
@@ -464,11 +465,12 @@ public class SpiderCaveGameTests {
         eq(h, 1, sisters.size(), "the bower's sister at its heart");
         SpiderSpiritEntity s = sisters.get(0);
         eq(h, SpiderCavePlan.sisterOf(0), s.sister(), "the youngest, in the first bower");
-        eq(h, SpiderCavePlan.sisterLevel(0), s.mobLevel(), "level 82");
+        eq(h, SpiderCavePlan.sisterLevel(0), s.mobLevel(), "level 86");
         check(h, s.bower() != null && s.bower().index() == 0, "keeping it");
         check(h, s.isPersistenceRequired() && s.hasRestriction(), "kept, at her post");
-        double over = s.getMaxHealth() / s.healthAt(s.mobLevel(), true);
-        close(h, SpiderSpiritEntity.BOWER_HEALTH, over, "more than a captain's health");
+        close(h, s.minibossHits(SpiderSpiritEntity.BOWER_HEALTH) * com.jttw.engine.entity.MobScaling.typicalHit(s.mobLevel()), s.getMaxHealth(),
+                "more than a captain's health, within an elite's");
+        check(h, s.getMaxHealth() > s.healthAt(s.mobLevel(), true), "over a captain's");
         h.succeed();
     }
 

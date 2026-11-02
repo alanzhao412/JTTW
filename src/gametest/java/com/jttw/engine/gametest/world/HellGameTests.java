@@ -120,8 +120,8 @@ public class HellGameTests {
         OxHeadEntity ox = hell(h, ModEntities.OX_HEAD.get(), 58, false, new BlockPos(1, 2, 1));
         eq(h, Zones.HELL.id(), ox.getPersistentData().getString(ZoneMonster.KEY_ZONE), "Hell's");
         close(h, OxHeadEntity.HITS * MobScaling.typicalHit(58), ox.getMaxHealth(), "seven hits of a level-58 character");
-        check(h, ox.captainLevel() <= 66, "a captain is never past 66: " + ox.captainLevel());
-        for (int i = 0; i < 30; i++) check(h, ox.rollCaptainLevel(h.getLevel().random) <= 66, "a captain's roll is never past 66");
+        check(h, ox.captainLevel() <= 67, "a captain is never more than one past the band, under its kings: " + ox.captainLevel());
+        for (int i = 0; i < 30; i++) check(h, ox.rollCaptainLevel(h.getLevel().random) <= 67, "a captain's roll is never past 67");
         ImpermanenceEntity white = hell(h, ModEntities.WHITE_IMPERMANENCE.get(), 66, true, new BlockPos(4, 2, 4));
         check(h, white.getDisplayName().getString().equals("White Impermanence Captain · Lv 66"), "named: " + white.getDisplayName().getString());
         eq(h, ZoneMonster.PURPLE, white.getDisplayName().getStyle().getColor().getValue(), "purple");
@@ -277,13 +277,13 @@ public class HellGameTests {
             KingOfHellEntity k = king(h, HellKings.type(n), new BlockPos(2, 2, 2));
             eq(h, n, k.court(), "court");
             int level = KingOfHellEntity.levelOf(n);
-            eq(h, n == 5 ? 81 : n < 5 ? 71 + n : 70 + n, level, "his level: 72 to 80, Yama 81");
+            eq(h, n == 5 ? 69 : 68, level, "his level: 68, Yama 69");
             check(h, k.getDisplayName().getString().endsWith(" · Lv " + level), "named: " + k.getDisplayName().getString());
             eq(h, EnemyTier.BOSS.name(), k.getPersistentData().getString(ZoneMonster.KEY_TIER), "pays as a Boss");
             eq(h, Zones.HELL.id(), k.getPersistentData().getString(ZoneMonster.KEY_ZONE), "of Hell");
             double hits = KingOfHellEntity.hitsOf(n);
             eq(h, n == 5 ? KingYamaEntity.YAMA_HITS : n == 10 ? KingOfHellEntity.ZHUANLUN_HITS : KingOfHellEntity.HITS, hits, "his hits");
-            close(h, hits * MobScaling.typicalHit(level), k.getMaxHealth(), "his health");
+            close(h, hits * MobScaling.typicalHit(KingOfHellEntity.MEASURED), k.getMaxHealth(), "his health, of a level-66 character's hits");
             eq(h, n == 5 ? BossEvent.BossBarColor.PURPLE : BossEvent.BossBarColor.RED, k.bossBar().getColor(), "his bar");
             // struck down (the Tenth twice: the Wheel turns once)
             for (int blow = 0; blow < 2 && !k.isDeadOrDying(); blow++) {

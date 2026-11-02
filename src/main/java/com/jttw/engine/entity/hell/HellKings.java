@@ -86,10 +86,10 @@ public final class HellKings {
     // ── 1 ───────────────────────────────────────────────────────────────
 
     public static class Qinguang extends KingOfHellEntity {
-        /** The mirror's blow, of his: for the good (karma 100 and up), and at most for the wicked (at -1000 and below: a third of their health). */
-        public static final double FOR_THE_GOOD = 0.6, AT_WORST = 1.3;
+        /** The mirror's blow, of his: for the good (karma 100 and up), and at most for the wicked (at -1000 and below: a boss's hardest blow). */
+        public static final double FOR_THE_GOOD = 0.6, AT_WORST = 1.1;
         /** The mirror's flash, of a same-level character's health, for one of no account (weighed by karma as the mirror's blow); at the worst, {@link #AT_WORST} times it. */
-        public static final double FLASH = 0.2;
+        public static final double FLASH = 0.13;
         /** How far the flash reaches before him, and how wide it spreads (each side of where he faced, in degrees). */
         public static final double FLASH_REACH = 10, FLASH_HALF_ANGLE = 45;
         /** How long it dazzles. */
@@ -255,7 +255,7 @@ public final class HellKings {
     public static class Songdi extends KingOfHellEntity {
         public static final double REACH = 14;
         /** The ring of hooks: how far it reaches, how hard it tears (of a same-level character's health), how hard it drags in. */
-        public static final double RING_REACH = 7, RING = 0.22, DRAG = 0.9;
+        public static final double RING_REACH = 7, RING = 0.14, DRAG = 0.9;
 
         public Songdi(EntityType<? extends Songdi> type, Level level) {
             super(type, level);
@@ -358,7 +358,7 @@ public final class HellKings {
         /** The share of the difference he takes. */
         public static final double LEVY = 0.5;
         /** The weight of the scales: how far, how hard (of a same-level character's health); how long it weighs one down. */
-        public static final double WEIGHT_REACH = 6, WEIGHT = 0.24;
+        public static final double WEIGHT_REACH = 6, WEIGHT = 0.155;
         public static final int WEIGHED_DOWN = 60;
 
         public Wuguan(EntityType<? extends Wuguan> type, Level level) {
@@ -446,7 +446,7 @@ public final class HellKings {
         public static final double REACH = 7;
         public static final int KNEEL = 40;
         /** The bell's note, of a same-level character's health: everyone it brings to their knees, it strikes. */
-        public static final double NOTE = 0.15;
+        public static final double NOTE = 0.10;
 
         public Biancheng(EntityType<? extends Biancheng> type, Level level) {
             super(type, level);
@@ -543,7 +543,7 @@ public final class HellKings {
 
     public static class Dushi extends KingOfHellEntity {
         /** His charge's speed; the crush, of his blow (no heavier than a boss's hardest blow); how far it flings. */
-        public static final double SPEED = 0.95, CRUSH = 1.3, FLING = 2.0;
+        public static final double SPEED = 0.95, CRUSH = 1.1, FLING = 2.0;
         public static final int RUN = 14;
         private int run;
         private Vec3 heading = Vec3.ZERO;
@@ -628,7 +628,7 @@ public final class HellKings {
         /** The share of a blow he strikes back. */
         public static final double EQUAL = 1 / 3.0;
         /** His impartial judgement: how far, and how hard (of a same-level character's health: the same on all). */
-        public static final double JUDGEMENT_REACH = 8, JUDGEMENT = 0.25;
+        public static final double JUDGEMENT_REACH = 8, JUDGEMENT = 0.16;
 
         public Pingdeng(EntityType<? extends Pingdeng> type, Level level) {
             super(type, level);
@@ -711,7 +711,7 @@ public final class HellKings {
         public static final double REBORN_AT = 0.5;
         public static final int REELS = 100;
         /** The Wheel turning: how far the shockwave goes, how hard (of a same-level character's health), how far it flings. */
-        public static final double WHEEL_REACH = 8, WHEEL = 0.25, FLING = 1.4;
+        public static final double WHEEL_REACH = 8, WHEEL = 0.16, FLING = 1.4;
         private boolean reborn;
 
         public Zhuanlun(EntityType<? extends Zhuanlun> type, Level level) {

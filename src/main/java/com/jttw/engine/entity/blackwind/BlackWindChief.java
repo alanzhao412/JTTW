@@ -11,7 +11,8 @@ import net.minecraft.world.level.Level;
  */
 public abstract class BlackWindChief extends BlackWindMonster {
 
-    public static final int CHIEF_LEVEL = 30;
+    /** Their level: the forecourt's keepers' ({@link com.jttw.engine.world.blackwind.BlackWindPlan#guardLevel}). */
+    public static final int CHIEF_LEVEL = 34;
     /** Their health over a captain's of their level. */
     public static final double HEALTH_OVER = 1.6;
 
@@ -22,6 +23,12 @@ public abstract class BlackWindChief extends BlackWindMonster {
     @Override
     public int captainLevel() {
         return CHIEF_LEVEL;
+    }
+
+    /** Wherever they are brought, within one of {@link #CHIEF_LEVEL}. */
+    @Override
+    public int rollCaptainLevel(net.minecraft.util.RandomSource r) {
+        return Math.min(topLevel(), CHIEF_LEVEL - 1 + r.nextInt(3));
     }
 
     @Override

@@ -348,7 +348,7 @@ public class WatersGameTests {
         check(h, regular.getDisplayName().getString().contains("Lv 47"), regular.getDisplayName().getString());
         close(h, ShrimpSoldierEntity.HITS * MobScaling.typicalHit(54) * SeaMonster.CAPTAIN_HEALTH, captain.getMaxHealth(), "a captain's health");
         near(h, regular.getBbHeight() * SeaMonster.CAPTAIN_SCALE, captain.getBbHeight(), "it stands taller");
-        eq(h, SeaMonster.LEVEL + SeaMonster.CAPTAIN_OVER, captain.captainLevel(), "captains about 54");
+        eq(h, SeaMonster.LEVEL + SeaMonster.CAPTAIN_OVER, captain.captainLevel(), "captains about 51 at a sea's edge");
         captain.bringEscorts(h.getLevel());
         List<ShrimpSoldierEntity> escorts = h.getLevel().getEntitiesOfClass(ShrimpSoldierEntity.class, captain.getBoundingBox().inflate(6), e -> e != captain && e != regular);
         eq(h, SeaMonster.ESCORTS, escorts.size(), "escorts");

@@ -67,7 +67,7 @@ public class UsurperGameTests {
         check(h, u.isUsurper(), n + " a usurper");
         check(h, Usurpers.candidates().contains(u.getType()), n + " one who may usurp");
         check(h, u.getType() != FlowerFruitRegistry.SIX_EARED_MACAQUE.get(), "never the Six-Eared Macaque");
-        eq(h, zone.maxLevel() + ZoneBoss.USURPER_LEVELS_ABOVE_BAND, u.mobLevel(), n + "'s level: his lair's band's top and 5");
+        eq(h, zone.maxLevel() + ZoneBoss.USURPER_LEVELS_ABOVE_BAND, u.mobLevel(), n + "'s level: his lair's band's top");
         eq(h, zone, u.lairZone(), n + " of the lair's zone");
         eq(h, zone.id(), u.getPersistentData().getString(ZoneMonster.KEY_ZONE), n + "'s kill paid by the lair's zone");
         near(h, ZoneBoss.USURPER_XP, u.getPersistentData().getDouble(ZoneMonster.KEY_XP_SHARE), n + " pays half a boss's XP");
@@ -171,7 +171,7 @@ public class UsurperGameTests {
         made.add(bear);
         bear.setNoAi(true);
         isUsurper(h, bear, Zones.WHITE_BONE, seat, 20);
-        eq(h, 41, bear.mobLevel(), "the Black Bear, usurping White Bone Ridge, at 41");
+        eq(h, 36, bear.mobLevel(), "the Black Bear, usurping White Bone Ridge, at its top, 36");
         bear.kill();
         CompoundTag t = state.get(level.dimension(), seat);
         check(h, t != null, "a usurper's fall leaves the seat empty again");
@@ -232,7 +232,7 @@ public class UsurperGameTests {
         made.add(u);
         u.setNoAi(true);
         isUsurper(h, u, Zones.FLOWER_FRUIT, seat, macaque.homeReach());
-        eq(h, 35, u.mobLevel(), "a usurper of Flower-Fruit's band, at 35");
+        eq(h, 30, u.mobLevel(), "a usurper of Flower-Fruit's band, at its top, 30");
         // the temple's youths are no lair's masters: their fall leaves no seat
         ZoneBoss youth = seated(level, ModEntities.CLEAR_WIND.get(), seat);
         made.add(youth);

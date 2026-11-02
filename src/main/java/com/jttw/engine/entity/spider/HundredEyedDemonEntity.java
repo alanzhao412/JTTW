@@ -78,10 +78,10 @@ public class HundredEyedDemonEntity extends ZoneBoss implements SilkKin {
 
     /** His band's top and {@link ZoneBoss#LEVELS_ABOVE_BAND} more (the rule for every boss). */
     public static final int LEVEL = ZoneBoss.levelOver(Zones.SPIDER_CAVE);
-    /** The level of character he is measured against, past the cap's reach ({@link ZoneBoss#measuredAt}). */
-    public static final int MEASURED = ZoneBoss.measuredAt(LEVEL);
-    /** 300 ordinary hits of a character of his level; his sword 28% of their health; the light 25%, the tea 15%, the sweep 22%. */
-    public static final double HITS = 300, SWORD = 0.28, LIGHT = 0.25, LIGHT_AWAY = 0.08, TEA = 0.15, SWEEP = 0.22;
+    /** The character he is built for: one of the top of his band, level 88 ({@link ZoneBoss#challengerOf}). */
+    public static final int MEASURED = ZoneBoss.challengerOf(Zones.SPIDER_CAVE);
+    /** 68 ordinary hits of a level-88 character; his sword 19% of their health (five or six kill); the light 16%, the tea 10%, the sweep 14%. */
+    public static final double HITS = 68, SWORD = 0.19, LIGHT = 0.16, LIGHT_AWAY = 0.05, TEA = 0.10, SWEEP = 0.14;
     public static final double HEALTH = HITS * MobScaling.typicalHit(MEASURED);
     public static final int LIGHT_EVERY = 320, LIGHT_ENRAGED = 220, GLARE = 30, LIGHT_PIN = 30, LIGHT_BLIND = 100;
     public static final int TEA_EVERY = 240, TEA_ENRAGED = 150, TEA_MARK = 30, TEA_VENOM = 6;

@@ -24,8 +24,9 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import javax.annotation.Nullable;
 
 /**
- * A creature of Lion-Camel Ridge: a {@link ZoneMonster} of the demon host, about level 89, its
- * captains about 96. The ridge's demons are the three demon kings' kin and followers (lions, the
+ * A creature of Lion-Camel Ridge: a {@link ZoneMonster} of the demon host, of level 89 at the ridge's
+ * edge to 92 in the city at its heart, and on down the cave's floors to 100, its captains three to
+ * five over the regulars round them. The ridge's demons are the three demon kings' kin and followers (lions, the
  * Azure Lion's; elephants, the White Elephant's; bird-demons, the Great Peng's), so like everything
  * of the zone they spare a Peng player ({@link Zones#LION_CAMEL}'s allies): they never target him,
  * never fight back, and when he comes near they bow to their Third Great King
@@ -41,8 +42,10 @@ import javax.annotation.Nullable;
  */
 public abstract class LionCamelMonster extends ZoneMonster {
 
-    /** The level a regular one is about, and a captain. */
+    /** The level a regular one is at the ridge's edge, and a captain. */
     public static final int LEVEL = 89, CAPTAIN_LEVEL = LEVEL + CAPTAIN_OVER;
+    /** The share of the ridge's road its land is, to the city in its middle; the Lion-Camel Cave's floors are the rest ({@link com.jttw.engine.world.lion.LionFortress#levelOf}). */
+    public static final double LAND = 0.3;
 
     private static final EntityDataAccessor<Boolean> BOWING = SynchedEntityData.defineId(LionCamelMonster.class, EntityDataSerializers.BOOLEAN);
 
@@ -75,6 +78,11 @@ public abstract class LionCamelMonster extends ZoneMonster {
     @Override
     public int captainLevel() {
         return CAPTAIN_LEVEL;
+    }
+
+    @Override
+    protected double landShare() {
+        return LAND;
     }
 
     @Override

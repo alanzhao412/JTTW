@@ -19,18 +19,19 @@ import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * A creature of the Mystical Waters: a {@link ZoneMonster} of the Four Seas, about level 47, its
- * captains about 54. It is of the sea: it breathes water and never drowns, the current does not
+ * A creature of the Mystical Waters: a {@link ZoneMonster} of the Four Seas, of level 47 at a sea's
+ * edge to 56 over its Dragon King's palace in the middle, its captains three to five over the
+ * regulars round them. It is of the sea: it breathes water and never drowns, the current does not
  * push it about, and (unless it says otherwise, as the Crab General, who walks the floor) it swims,
  * in any direction, as a fish does, hanging in the water where it stops rather than sinking. It
  * comes in any light, as long as it is in deep water (see {@link #checkSeaSpawnRules}).
  */
 public abstract class SeaMonster extends ZoneMonster {
 
-    /** The level a regular one is about: the waters are for players from level 47. */
+    /** The level a regular one is at a sea's edge: the waters are for players from level 47. */
     public static final int LEVEL = 47;
-    /** The level a captain is about. */
-    public static final int CAPTAIN_LEVEL = 54;
+    /** The level a captain is about at a sea's edge. */
+    public static final int CAPTAIN_LEVEL = LEVEL + CAPTAIN_OVER;
     /** How far under the sea's surface the world sends them: the trench's reaches, not the shallows. */
     public static final int SPAWN_DEPTH = 24;
     /** How much of its walking speed it swims at (the move control's in-water share). */
