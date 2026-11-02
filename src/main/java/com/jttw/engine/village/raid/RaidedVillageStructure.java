@@ -16,7 +16,7 @@ import java.util.Optional;
  * A raided village (data: {@code worldgen/structure/raided_village_<variant>.json}, placed by
  * {@code worldgen/structure_set/raided_villages.json}): a Tang village the yaoguai have taken. It
  * stands by a Tang village's rules ({@link TangVillageStructure#site}: its variant's biomes, out of
- * every zone and its margin, on near-level dry ground), and keeps {@value #CLEAR_OF_VILLAGES} chunks
+ * every zone and its margin, on near-level dry ground), and keeps {@value #CLEAR_OF_VILLAGES} chunks (a village's width)
  * clear of vanilla's villages (the set's own exclusion zone keeps it as far from the Tang villages').
  */
 public class RaidedVillageStructure extends Structure {
@@ -27,7 +27,7 @@ public class RaidedVillageStructure extends Structure {
     ).apply(i, RaidedVillageStructure::new));
 
     /** How many chunks it keeps from any of vanilla's villages. */
-    public static final int CLEAR_OF_VILLAGES = 8;
+    public static final int CLEAR_OF_VILLAGES = 6;
 
     private final TangVillage.Variant variant;
 
