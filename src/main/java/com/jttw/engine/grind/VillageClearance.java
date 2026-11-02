@@ -31,10 +31,11 @@ public final class VillageClearance {
 
     /**
      * Whether a village of {@code set} may lie within {@code range} chunks (either way) of {@code chunk}.
-     * With {@code biomeAt} (block x, z → biome) a place whose biome takes none of its structures is passed over.
+     * With {@code stands} (the set, a place: whether a village of it stands there) only a place where
+     * one does counts; without, any place the set may put one.
      */
     public static boolean near(RegistryAccess access, ResourceKey<StructureSet> set, long seed, ChunkPos chunk, int range,
-                               BiFunction<Integer, Integer, Holder<Biome>> biomeAt) {
+                               java.util.function.BiPredicate<StructureSet, ChunkPos> stands) {
         var holder = access.registryOrThrow(Registries.STRUCTURE_SET).getHolder(set).orElse(null);
         if (holder == null || !(holder.value().placement() instanceof RandomSpreadStructurePlacement spread)) return false;
         int step = Math.max(1, spread.spacing() / 2);
@@ -44,10 +45,26 @@ public final class VillageClearance {
                 ChunkPos p = spread.getPotentialStructureChunk(seed, chunk.x + dx, chunk.z + dz);
                 if (!seen.add(p.toLong())) continue;
                 if (Math.abs(p.x - chunk.x) > range || Math.abs(p.z - chunk.z) > range) continue;
-                if (biomeAt == null) return true;
-                Holder<Biome> b = biomeAt.apply(p.getMiddleBlockX(), p.getMiddleBlockZ());
-                for (var entry : holder.value().structures()) if (entry.structure().value().biomes().contains(b)) return true;
+                if (stands == null || stands.test(holder.value(), p)) return true;
             }
+        }
+        return false;
+    }
+
+    /** Whether a village of {@code set} would stand at {@code at}: by biome alone ({@code biomeAt}), the cheap test. */
+    public static boolean byBiome(StructureSet set, ChunkPos at, BiFunction<Integer, Integer, Holder<Biome>> biomeAt) {
+        Holder<Biome> b = biomeAt.apply(at.getMiddleBlockX(), at.getMiddleBlockZ());
+        for (var entry : set.structures()) if (entry.structure().value().biomes().contains(b)) return true;
+        return false;
+    }
+
+    /** Whether a village of {@code set} stands at {@code at} in {@code level} as made by {@code gen}: each of its structures' own test, as the land is made. */
+    public static boolean stands(net.minecraft.server.level.ServerLevel level, net.minecraft.world.level.chunk.ChunkGenerator gen, StructureSet set, ChunkPos at) {
+        for (var entry : set.structures()) {
+            var s = entry.structure().value();
+            var ctx = new net.minecraft.world.level.levelgen.structure.Structure.GenerationContext(level.registryAccess(), gen, gen.getBiomeSource(),
+                    level.getChunkSource().randomState(), level.getStructureManager(), level.getSeed(), at, level, s.biomes()::contains);
+            if (s.findValidGenerationPoint(ctx).isPresent()) return true;
         }
         return false;
     }

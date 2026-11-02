@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiFunction;
 
 /**
  * The infested wilds (妖窟之野): some of the overworld's mountains, forests and jungles crawling with
@@ -35,8 +34,8 @@ import java.util.function.BiFunction;
  * {@code #jttw_engine:infested_mountains}, {@code _forests}, {@code _jungles}): that is its theme. And
  * only if it is clear: of spawn ({@value #SPAWN_CLEAR} blocks and its radius from the origin), of every
  * zone's region (its margin, its radius and {@value #GAP} more), and of every village, vanilla's,
- * the Tang villages' and the raided ones' (any place their sets may put one, whose biome could take
- * one, within its radius and {@value #GAP} more). So about {@value #CHANCE_PERCENT}% of cells x a
+ * the Tang villages' and the raided ones' (any their sets would put, by each site's own test,
+ * within its radius and {@value #GAP} more). So about {@value #CHANCE_PERCENT}% of cells x a
  * disc's share of its cell (some 16%): some 8% of the mountain, forest and jungle country is
  * infested, in patches a few hundred blocks across, several within a ring's walk.
  *
@@ -163,6 +162,11 @@ public final class Infestation {
         @Nullable
         RegistryAccess registries();
 
+        /** Whether a village of {@code set} stands at {@code at}: by biome alone, unless the ground can tell better. */
+        default boolean villageStands(StructureSet set, ChunkPos at) {
+            return VillageClearance.byBiome(set, at, this::biomeAt);
+        }
+
         /** The overworld's own ground, read from its biome source (as the land is made, without making it). */
         static Ground of(ServerLevel level) {
             BiomeSource source = level.getChunkSource().getGenerator().getBiomeSource();
@@ -174,6 +178,9 @@ public final class Infestation {
                 public long seed() { return seed; }
                 public Holder<Biome> biomeAt(int x, int z) { return source.getNoiseBiome(x >> 2, y >> 2, z >> 2, sampler); }
                 public RegistryAccess registries() { return access; }
+                public boolean villageStands(StructureSet set, ChunkPos at) {
+                    return VillageClearance.stands(level, level.getChunkSource().getGenerator(), set, at);
+                }
             };
         }
     }
@@ -184,9 +191,8 @@ public final class Infestation {
         if (access == null) return true;
         int range = (c.radius() + GAP + 63) / 16;
         ChunkPos at = new ChunkPos(c.x() >> 4, c.z() >> 4);
-        BiFunction<Integer, Integer, Holder<Biome>> biome = g::biomeAt;
         for (ResourceKey<StructureSet> set : VillageClearance.ALL) {
-            if (VillageClearance.near(access, set, g.seed(), at, range, biome)) return false;
+            if (VillageClearance.near(access, set, g.seed(), at, range, g::villageStands)) return false;
         }
         return true;
     }

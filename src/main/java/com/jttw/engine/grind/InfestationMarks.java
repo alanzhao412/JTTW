@@ -45,7 +45,7 @@ public class InfestationMarks extends Feature<NoneFeatureConfiguration> {
         ServerLevel server = level.getLevel();
         BlockPos origin = ctx.origin();
         int cx = (origin.getX() >> 4 << 4) + 8, cz = (origin.getZ() >> 4 << 4) + 8;
-        Infestation.Ground ground = groundOf(level, ctx.chunkGenerator().getBiomeSource(), server.getChunkSource().randomState().sampler(), server.getSeaLevel() + 8);
+        Infestation.Ground ground = groundOf(level, server, ctx.chunkGenerator(), server.getChunkSource().randomState().sampler(), server.getSeaLevel() + 8);
         Infestation.Patch patch = Infestation.nearest(ground, cx, cz);
         if (patch == null) return false;
         double d = patch.distance(cx, cz);
@@ -92,13 +92,17 @@ public class InfestationMarks extends Feature<NoneFeatureConfiguration> {
         return at;
     }
 
-    static Infestation.Ground groundOf(WorldGenLevel level, BiomeSource source, Climate.Sampler sampler, int y) {
+    static Infestation.Ground groundOf(WorldGenLevel level, ServerLevel server, net.minecraft.world.level.chunk.ChunkGenerator gen, Climate.Sampler sampler, int y) {
+        BiomeSource source = gen.getBiomeSource();
         long seed = level.getSeed();
         RegistryAccess access = level.registryAccess();
         return new Infestation.Ground() {
             public long seed() { return seed; }
             public Holder<Biome> biomeAt(int x, int z) { return source.getNoiseBiome(x >> 2, y >> 2, z >> 2, sampler); }
             public RegistryAccess registries() { return access; }
+            public boolean villageStands(net.minecraft.world.level.levelgen.structure.StructureSet set, net.minecraft.world.level.ChunkPos at) {
+                return com.jttw.engine.grind.VillageClearance.stands(server, gen, set, at);
+            }
         };
     }
 }

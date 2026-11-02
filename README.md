@@ -2941,15 +2941,17 @@ White Bone's 150 is the most any deed pays).
 A Tang village a band of yaoguai has sacked and holds (`RaidedVillage`, laid by `RaidedVillagePiece` as a
 Tang village is, its folk left out).
 
-- **Where.** A structure set of its own (`structure_set/raided_villages`): **spacing 28 chunks,
-  separation 10**, in the Tang villages' three kinds and biomes (plains, mountain, oasis), by their
-  rules (`TangVillageStructure.site`: near-level dry ground over the sea, never within a zone's region
-  nor 108 blocks of one, `VillageSites`), **8 chunks clear of every Tang village** (the set's exclusion
-  zone) **and of vanilla's** (`RaidedVillageStructure`, from vanilla's placement). Its grid is finer
-  than vanilla's (34 chunks): some 1.5 times as many sites, which is what it takes for every ring, and
-  so every band, to hold several (a village is freed only once; the next should never be far). How many
-  stand, ring by ring, on a seed: `./gradlew runWorldgenBench -Pbench.mode=raided` (`RaidBench`, by each
-  site's own test).
+- **Where.** A structure set of its own (`structure_set/raided_villages`): **spacing 34 chunks,
+  separation 12**, vanilla's own, in the Tang villages' three kinds and biomes (plains, mountain,
+  oasis), by their rules (`TangVillageStructure.site`: near-level dry ground over the sea, never within
+  a zone's region nor 108 blocks of one, `VillageSites`), **8 chunks clear of every Tang village** (the
+  set's exclusion zone) **and of vanilla's** (`RaidedVillageStructure`, from vanilla's placement). So
+  they are about as common as vanilla's villages: on an all-plains test world two in every three sites
+  stand, some 1.6 to 2.4 a square kilometre; a real world, where only the village biomes take them,
+  has fewer. That is enough because the rings put the right levels near the player: the ring 1–2 km
+  out, some 9 square kilometres, holds a dozen or more, each band of seven levels covered several
+  times over, so one freed (only once) leaves the next not far. How many stand, ring by ring, on a real
+  seed: `./gradlew runWorldgenBench -Pbench.mode=raided` (`RaidBench`, by each site's own test).
 - **How it looks.** Every door smashed; lanterns, awnings and pots torn down; where the fire took (a
   little under half the village, in patches) timbers burnt to basalt or gone, roofs fallen in, walls
   sooted and broken, the ground scorched to coarse dirt and basalt, embers still smouldering
@@ -3001,9 +3003,9 @@ Some of the overworld's mountains, forests and jungles crawl with yaoguai (`Infe
   hills: `#jttw_engine:infested_mountains`), forest (forests, birch, dark forest, taiga:
   `infested_forests`) or jungle (`infested_jungles`), and it keeps clear of **spawn** (500 blocks past
   its edge), of every **zone** (its margin and 64 more) and of every **village**, vanilla's, the Tang
-  villages' and the raided ones' (any place their sets may put one whose biome could take one, within
-  its radius and 64). A candidate's disc covers some 16% of its cell, so at most some 8% of the
-  mountain, forest and jungle country is infested (less where villages may stand).
+  villages' and the raided ones' (any village their sets would put within its radius and 64, judged
+  by each site's own test, as the land is made). A candidate's disc covers some 16% of its cell, so at
+  most some 8% of the mountain, forest and jungle country is infested (less where villages stand).
 - **Who.** By its land: the **mountains'** goblins (山魈, the mountain demons) and ogres (山夜叉), an
   ogre heart; the **forests'** wolfmen and goblins, a wolfman heart; the **jungles'** kobolds (the
   lizard-folk) and goblins, a kobold heart. No new kinds yet: the roster is the four open-world kinds.
