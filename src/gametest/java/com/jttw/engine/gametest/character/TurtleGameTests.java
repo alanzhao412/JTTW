@@ -93,7 +93,8 @@ public class TurtleGameTests {
         PlayerLevel.setLevel(p, 100);
         LevelManager.reapplyStats(p);
         double fromLevels = com.jttw.engine.progression.stats.StatBlock
-                .compute(com.jttw.engine.progression.stats.ProgressionClass.DIVINE_BEAST, 100).physicalResistance();
+                .compute(com.jttw.engine.progression.stats.ProgressionClass.DIVINE_BEAST,
+                        com.jttw.engine.reincarnation.ReincarnationOutcome.TURTLE, 100).physicalResistance(); // the Turtle's own build
         near(h, fromLevels + 100.0, pres(p), "level stats + passive");
         h.succeed();
     }

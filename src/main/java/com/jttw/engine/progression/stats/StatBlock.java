@@ -47,8 +47,40 @@ public record StatBlock(
         double magicResistance,
         double qi,
         double will,
-        double strength
+        double strength,
+        double moveSpeed
 ) {
+
+    /**
+     * A character's own build: how its health, attack, resistance and pace stand over its class's, as
+     * multipliers. The Divine Beasts are stat merchants and hit like trucks, each in its own shape:
+     * <ul>
+     *   <li><b>Dragon</b>: moderate health, high defense, high attack;</li>
+     *   <li><b>White Tiger</b>: the hardest hitter and the quickest, with less health;</li>
+     *   <li><b>Turtle</b>: the most health and the most defense of all;</li>
+     *   <li><b>Phoenix</b>: quick and hale (its abilities hit harder besides, in its kit).</li>
+     * </ul>
+     * Everyone else is built as their class. A typical character of a class (what monsters are set
+     * against) has none of this: it is a character's, not a class's.
+     */
+    public record Build(double health, double attack, double resistance, double speed) {
+        public static final Build PLAIN = new Build(1, 1, 1, 1);
+        public static final Build DRAGON = new Build(1.0, 1.3, 1.4, 1.0);
+        public static final Build WHITE_TIGER = new Build(0.8, 1.45, 1.0, 1.2);
+        public static final Build TURTLE = new Build(1.5, 1.1, 1.7, 1.0);
+        public static final Build PHOENIX = new Build(1.25, 1.1, 1.0, 1.15);
+
+        public static Build of(@javax.annotation.Nullable com.jttw.engine.reincarnation.ReincarnationOutcome who) {
+            if (who == null) return PLAIN;
+            return switch (who) {
+                case DRAGON -> DRAGON;
+                case WHITE_TIGER -> WHITE_TIGER;
+                case TURTLE -> TURTLE;
+                case PHOENIX -> PHOENIX;
+                default -> PLAIN;
+            };
+        }
+    }
 
     /** The level a class's shape is read at. */
     private static final int SHAPE_LEVEL = 50;
@@ -101,6 +133,7 @@ public record StatBlock(
     public static final ResourceLocation UUID_DEF = JTTWEngine.id("def");
     public static final ResourceLocation UUID_PRES = JTTWEngine.id("pres");
     public static final ResourceLocation UUID_MRES = JTTWEngine.id("mres");
+    public static final ResourceLocation UUID_SPEED = JTTWEngine.id("build_speed");
 
     private static final String MOD_HP  = "jttw:level_hp";
     private static final String MOD_STR = "jttw:level_str";
@@ -148,15 +181,17 @@ public record StatBlock(
         double bonus = computeBonus(cls, lv);
         double resBonus = computeBonus(cls, rl);
         double power = LevelPower.of(cls, who, lv) * boon; // each class's own curve (it carries the class's late growth and leaps)
+        Build build = Build.of(who);
 
         return new StatBlock(
-                hpShape(base) * HP_NORM * power,                   // class shape x level power
-                atkShape(base) * ATTACK_SHARE * power,
-                rawPres * RES_SCALE  * resBonus,                   // fully earned, to level 40
-                rawMres * RES_SCALE  * resBonus,
+                hpShape(base) * HP_NORM * power * build.health(),  // class shape x level power x the character's build
+                atkShape(base) * ATTACK_SHARE * power * build.attack(),
+                rawPres * RES_SCALE  * resBonus * build.resistance(), // fully earned, to level 40
+                rawMres * RES_SCALE  * resBonus * build.resistance(),
                 rawQi   * QI_SCALE   * bonus,                      // internal stat
                 rawWill * WILL_SCALE * bonus,                      // internal stat
-                1.0 + rawStr * STR_SCALE * bonus                   // STR, for wield requirements
+                1.0 + rawStr * STR_SCALE * bonus,                  // STR, for wield requirements
+                build.speed()
         );
     }
 
@@ -202,6 +237,11 @@ public record StatBlock(
         applyMod(player, ModAttributes.PHYSICAL_RESISTANCE, UUID_PRES, MOD_PRES, physicalResistance);
         applyMod(player, ModAttributes.MAGIC_RESISTANCE,    UUID_MRES, MOD_MRES, magicResistance);
         removeMod(player, Attributes.ARMOR, UUID_DEF); // DEF no longer feeds vanilla armor
+        var speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
+        if (speed != null) {
+            speed.removeModifier(UUID_SPEED);
+            if (moveSpeed != 1.0) speed.addPermanentModifier(new AttributeModifier(UUID_SPEED, moveSpeed - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
+        }
 
         // Clamp current HP to new max (avoids floating above max health after demotion)
         if (player.getHealth() > player.getMaxHealth()) {
@@ -222,6 +262,7 @@ public record StatBlock(
         removeMod(player, Attributes.ARMOR,         UUID_DEF);
         removeMod(player, ModAttributes.PHYSICAL_RESISTANCE, UUID_PRES);
         removeMod(player, ModAttributes.MAGIC_RESISTANCE,    UUID_MRES);
+        removeMod(player, Attributes.MOVEMENT_SPEED,         UUID_SPEED);
     }
 
     // -----------------------------------------------------------------------

@@ -49,6 +49,17 @@ Di once they pull ahead (from about 80; some 115 at 100), and never under Nezha'
 Nezha keeps the plain Heavenly line by stats; his kit (the Samadhi fire and the Fire-Tip Spear) is
 the stronger of the two.
 
+The Divine Beasts are stat merchants who hit like trucks, each built to its own shape
+(`StatBlock.Build`, multipliers on their class's stats; a class's typical character, what monsters
+are set against, has none):
+
+| Beast | Health | Attack | Defense (both resistances) | Pace |
+|---|---|---|---|---|
+| Dragon | ×1.0 (moderate) | ×1.3 | ×1.4 | — |
+| White Tiger | ×0.8 (the least) | ×1.45 (the hardest) | — | +20% |
+| Turtle | ×1.5 (the most) | ×1.1 | ×1.7 (the most) | — |
+| Phoenix | ×1.25 | ×1.1 | — | +15% (and its abilities hit harder) |
+
 Up to level 20, XP comes from ordinary Minecraft mobs, paid as in Pokémon by the level the kill
 is won at ([`LevelManager.vanillaMobXp`](src/main/java/com/jttw/engine/progression/level/LevelManager.java)):
 weight × 3 × level / 5, at least 1. Animals, villagers and anything else that is no monster pay

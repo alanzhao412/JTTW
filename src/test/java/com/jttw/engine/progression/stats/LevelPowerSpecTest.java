@@ -58,7 +58,8 @@ class LevelPowerSpecTest {
             long oneShots = Arrays.stream(h).filter(x -> x <= 1).count();
             String at = "level " + gap[0] + " against " + gap[1];
             assertTrue(median(h) <= 1, at + ": the typical pairing is one hit: " + median(h));
-            assertTrue(oneShots >= h.length * 2 / 3, at + ": two in three pairings or more are one hit: " + oneShots + "/" + h.length);
+            // the tanks (the Turtle, the Phoenix) take a second
+            assertTrue(oneShots >= h.length * 3 / 5, at + ": three in five pairings or more are one hit: " + oneShots + "/" + h.length);
             // the classes' shapes part them (a weak Primordial against a Divine Beast fresh from evolving)
             double[] others = pairings(gap[0], gap[1], true);
             assertTrue(others[others.length - 1] <= 4.5, at + ": and none but Wukong takes more than four or five: " + others[others.length - 1]);
@@ -159,6 +160,21 @@ class LevelPowerSpecTest {
         }
         double gap = Math.log(statIndex(ReincarnationOutcome.GOLD_WINGED_PENG, 100) / statIndex(erlang, 100)) / Math.log(LevelPower.GROWTH);
         assertTrue(gap < 3, "close under the Primordials at the top: " + gap + " levels");
+    }
+
+    @Test
+    void theDivineBeastsAreEachBuiltToTheirShape() {
+        int lv = 60;
+        StatBlock dragon = stats(ReincarnationOutcome.DRAGON, lv), tiger = stats(ReincarnationOutcome.WHITE_TIGER, lv),
+                turtle = stats(ReincarnationOutcome.TURTLE, lv), phoenix = stats(ReincarnationOutcome.PHOENIX, lv);
+        StatBlock beast = StatBlock.compute(ProgressionClass.DIVINE_BEAST, lv);
+        for (StatBlock b : List.of(dragon, tiger, turtle, phoenix)) assertTrue(b.attackDamage() > beast.attackDamage(), "every beast hits like a truck");
+        assertTrue(tiger.attackDamage() > dragon.attackDamage() && dragon.attackDamage() > turtle.attackDamage(), "the tiger hardest, then the dragon");
+        assertTrue(turtle.maxHealth() > phoenix.maxHealth() && phoenix.maxHealth() > dragon.maxHealth() && dragon.maxHealth() > tiger.maxHealth(),
+                "health: turtle, phoenix, dragon, tiger");
+        assertTrue(turtle.physicalResistance() > dragon.physicalResistance() && dragon.physicalResistance() > tiger.physicalResistance(), "defense: turtle, dragon");
+        assertTrue(tiger.moveSpeed() > phoenix.moveSpeed() && phoenix.moveSpeed() > dragon.moveSpeed(), "pace: tiger, phoenix");
+        assertEquals(1.0, beast.moveSpeed(), 1e-9, "a class's typical character has no build");
     }
 
     @Test
