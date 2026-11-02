@@ -141,9 +141,10 @@ public final class LevelPower {
      *       {@value #PENG_PEAK}, gone by the top;</li>
      *   <li><b>Yuan Di</b> the middle: some {@value #YUAN_DI_LEAD} levels ahead about level
      *       {@value #YUAN_DI_PEAK} (passing Peng near 44), settling to his measure at the top;</li>
-     *   <li><b>Wukong</b> trails both, {@value #WUKONG_LAG} levels behind his class, until his late
-     *       surge from level {@value #WUKONG_SURGE}: past Peng near 87 and Yuan Di near 89, and the
-     *       strongest of them at 100.</li>
+     *   <li><b>Wukong</b> is the steepest of all: {@value #WUKONG_LAG} levels behind his class, the
+     *       weakest character there is until the 80s, until his surge from level {@value #WUKONG_SURGE}
+     *       over {@value #WUKONG_SURGE_LENGTH} levels: past everyone by the 90s, and at 100, at his
+     *       measure of 3, far the strongest of all (the furnace's boon besides).</li>
      * </ul>
      */
     public static double measure(@Nullable ReincarnationOutcome who, int level) {
@@ -167,8 +168,8 @@ public final class LevelPower {
     /** Yuan Di's. */
     public static final double YUAN_DI_LEAD = 4, YUAN_DI_PEAK = 55, YUAN_DI_WIDTH = 18;
     /** How many levels Wukong trails his class until his surge, from what level it rises, and over how many. */
-    public static final double WUKONG_LAG = 2;
-    public static final int WUKONG_SURGE = 78, WUKONG_SURGE_LENGTH = 18;
+    public static final double WUKONG_LAG = 10;
+    public static final int WUKONG_SURGE = 75, WUKONG_SURGE_LENGTH = 25;
 
     private static double inLevels(double factor) {
         return Math.log(factor) / Math.log(GROWTH);
@@ -200,7 +201,7 @@ public final class LevelPower {
     public static double characterFactor(@Nullable ReincarnationOutcome who) {
         if (who == null) return 1;
         return switch (who) {
-            case CELESTIAL_PRIMATE -> 1.25;
+            case CELESTIAL_PRIMATE -> 3.0;
             case YUAN_DI -> 1.12;
             case GRAND_SAINT_NINE_SPIRITS -> 4.7; // his class ends behind the backbone; he does not
             case MARSHAL_HEAVENLY_CANOPY -> 0.7;
