@@ -344,7 +344,7 @@ public final class RaidedVillage {
         if (area.isInside(seat)) {
             RaidChiefEntity chief = ModGrinds.RAID_CHIEF.get().create(level.getLevel());
             if (chief != null) {
-                chief.moveTo(seat.getX() + 0.5, seat.getY(), seat.getZ() + 0.5, 180f, 0f);
+                chief.moveTo(seat.getX() + 0.5, seat.getY(), seat.getZ() + 0.5, 0f, 0f); // facing the gate (south)
                 chief.finalizeSpawn(level, level.getCurrentDifficultyAt(seat), MobSpawnType.STRUCTURE, null);
                 chief.become(band.leader());
                 chief.restrictTo(seat, CHIEF_REACH);

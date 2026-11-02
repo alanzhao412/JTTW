@@ -114,7 +114,7 @@ final class RaidScenes {
                         if (level.getBlockState(at).isAir()) level.setBlock(at, Blocks.FIRE.defaultBlockState(), Block.UPDATE_CLIENTS);
                     }
                 }, -3.5, 4.5, -9.5, 0.5, 2.0, 0.5),
-                shot("raid_village_above", -30, 42, 62, 0, 0, 0),
+                shot("raid_village_above", -14, 24, 52, 0, 0, -2),
                 shot("raid_village_gate", 3, 4.5, 50, 0, 3, 20),
                 shot("raid_village_square", 0.5, 9, 14, 0, 1, -4),
                 shot("raid_village_shrine", 2.5, 4, -11, 0, 2.5, -27),
