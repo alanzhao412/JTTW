@@ -279,14 +279,14 @@ public final class RaidedVillage {
         level.setBlock(at, Blocks.BONE_BLOCK.defaultBlockState(), Block.UPDATE_CLIENTS);
         for (int y = 1; y <= 3; y++) {
             BlockState pole = Blocks.NETHER_BRICK_FENCE.defaultBlockState();
-            if (y == 3) pole = pole.setValue(net.minecraft.world.level.block.CrossCollisionBlock.PROPERTY_BY_DIRECTION.get(arm), true);
+            if (y == 3) pole = pole.setValue(net.minecraft.world.level.block.PipeBlock.PROPERTY_BY_DIRECTION.get(arm), true);
             level.setBlock(at.above(y), pole, Block.UPDATE_CLIENTS);
         }
         level.setBlock(at.above(4), Blocks.SKELETON_SKULL.defaultBlockState().setValue(SkullBlock.ROTATION, rot), Block.UPDATE_CLIENTS);
         BlockPos out = at.relative(arm);
         if (level.getBlockState(out.above(3)).isAir() && level.getBlockState(out.above(2)).isAir()) {
             level.setBlock(out.above(3), Blocks.NETHER_BRICK_FENCE.defaultBlockState()
-                    .setValue(net.minecraft.world.level.block.CrossCollisionBlock.PROPERTY_BY_DIRECTION.get(arm.getOpposite()), true), Block.UPDATE_CLIENTS);
+                    .setValue(net.minecraft.world.level.block.PipeBlock.PROPERTY_BY_DIRECTION.get(arm.getOpposite()), true), Block.UPDATE_CLIENTS);
             level.setBlock(out.above(2), Blocks.SOUL_LANTERN.defaultBlockState().setValue(LanternBlock.HANGING, true), Block.UPDATE_CLIENTS);
         }
     }
