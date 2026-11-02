@@ -1763,7 +1763,9 @@ public final class HeavenGreatRenderers {
 
     /** Erlang, and his hound Xiaotian at his heel: its own model and skin, trotting when he walks. */
     static final class ErlangRenderer extends GreatRenderer<ErlangShenEntity, ErlangModel> {
-        private static final ResourceLocation HOUND = tex("xiaotian_quan");
+        private static final ResourceLocation HOUND = tex("xiaotian_quan"), HOUND_GLOW = tex("xiaotian_quan_glow");
+        /** The hound at his heel, against its own size as Erlang's summoned hound: a little smaller, so it is a lean hound at his knee. */
+        private static final float HOUND_SIZE = 0.85f;
         private final XiaotianQuanModel hound;
         private final Vector3f cache = new Vector3f();
 
@@ -1785,13 +1787,14 @@ public final class HeavenGreatRenderers {
                         h.xRot = Math.min(0, Mth.sin(age * 0.05f)) * 0.15f;
                     }
                     pose.pushPose();
-                    // at his left heel, a little ahead, drawn at its own size whatever his
-                    float s = 1f / ERLANG_SIZE;
+                    // at his left heel, a little ahead, drawn at HOUND_SIZE whatever his size
+                    float s = HOUND_SIZE / ERLANG_SIZE;
                     pose.translate(0.85f * s, 1.501f, -0.15f * s);
                     pose.scale(s, s, s);
                     pose.translate(0, -1.501f, 0);
                     hound.renderToBuffer(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(HOUND)), light,
                             LivingEntityRenderer.getOverlayCoords(e, 0f), -1);
+                    hound.renderToBuffer(pose, buffers.getBuffer(RenderType.eyes(HOUND_GLOW)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, -1);
                     pose.popPose();
                 }
             });
