@@ -149,7 +149,7 @@ def paint_archer(p, style, f, dims, c):
             for i, j, xy in each(r):
                 along = i if s in ('right', 'left') else j
                 bar = (along // 3) % 2
-                col = (246, 236, 210) if bar else (176, 112, 58)
+                col = (252, 244, 222) if bar else (196, 132, 70)
                 if s in ('right', 'left') and j in (fh // 2,):
                     col = (90, 60, 40)
                 if s in ('right', 'left') and (j == 0 or j == fh - 1):

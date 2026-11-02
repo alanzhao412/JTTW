@@ -46,8 +46,14 @@ import java.util.function.Function;
 /**
  * How Heaven's rank and file look, each on a small white cloud: the heavenly soldier (a halberdier in
  * gilt Tang armour, azure silk, a red-tasselled helmet, a crescent-bladed halberd; his captain in crimson
- * and gold, cloaked, phoenix-winged, a celestial ribbon arching behind his head). Models and skins:
- * {@code assets_source/heaven_host.py} (with {@code heaven_host_kit.py}).
+ * and gold, cloaked, phoenix-winged, a celestial ribbon arching behind his head), the heavenly archer
+ * (pheasant-feathered cap, quiver, long gilt recurve bow, drawn while he fights), the thunder drummer
+ * (three war drums on a frame at his back, sticks raised overhead in his wind-up), the cloud cavalry
+ * (a white celestial steed in gilt barding treading cloud, its rider's spear couched as it rears) and the
+ * Twenty-Eight Lunar Mansions (one frame in four quarters' colours, each his beast on crest and shield).
+ * Models and skins: {@code assets_source/heaven_host.py} (with {@code heaven_host_kit.py},
+ * {@code heaven_host_ranks.py}, {@code heaven_host_cavalry.py}, {@code heaven_host_mansions.py},
+ * {@code heaven_host_emblems.py}).
  */
 @EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class HeavenHostRenderers {
@@ -912,8 +918,8 @@ public final class HeavenHostRenderers {
                 turn(rightForearm, 0.75f, 0, 0);
                 turn(leftForearm, 0.75f, 0, 0);
                 // the sticks held up, crossed over his head
-                turn(rightStick, 1.4f, 0, 0.5f);
-                turn(leftStick, 1.4f, 0, -0.5f);
+                turn(rightStick, 1.4f, 0, -0.5f);
+                turn(leftStick, 1.4f, 0, 0.5f);
                 head.xRot -= 0.25f;
             }
         }
@@ -1441,7 +1447,7 @@ public final class HeavenHostRenderers {
                 turn(neck, 0.25f, 0, 0);
                 turn(horseHead, -0.3f, 0, 0);
                 turn(tail, 0.2f, 0, Mth.sin(age * 0.3f) * 0.2f);
-                turn(waist, 0.3f, 0, 0);
+                turn(waist, 0.6f, 0, 0);
                 turn(rightArm, 0.25f, 0, 0.1f);
                 turn(lance, 0.55f, 0, 0);
                 head.xRot = -0.5f;
