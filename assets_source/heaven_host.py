@@ -4,7 +4,7 @@ As hell_guards.py and king_yama.py: each one's model and skins come from one lis
 (beastgen): the model is written into HeavenHostRenderers' layers between their GENERATED markers,
 the skins painted to the same box-UV layout at twice the model's resolution, with a glowing skin
 (drawn full-bright over it) for what shines. The common frame and painting are heaven_host_kit.py's;
-the cloud cavalry is heaven_host_cavalry.py's, the Lunar Mansions' beasts heaven_host_emblems.py's.
+the cloud cavalry's rider is heaven_host_cavalry.py's (his horse is vanilla's), the Lunar Mansions' beasts heaven_host_emblems.py's.
 
 The heavenly soldier: a halberdier in the gilt mingguang armour of the Tang (two round mirror plates
 on the breast, a lion's face on the belly, shoulder guards in three tiers bitten by gold beasts'
@@ -240,9 +240,9 @@ def build_mansion():
 
 
 def build_cavalry():
-    from heaven_host_cavalry import CAVALRY, CAVALRY_COLOURS, cavalry_painter, CAVALRY_SIZE
+    from heaven_host_cavalry import CAVALRY, CAVALRY_COLOURS, cavalry_painter, RIDER_SIZE
     save('cavalry', CAVALRY, {'heaven_cavalry': cavalry_painter(CAVALRY_COLOURS[False]),
-                              'heaven_cavalry_captain': cavalry_painter(CAVALRY_COLOURS[True])}, 'cavalry', CAVALRY_SIZE)
+                              'heaven_cavalry_captain': cavalry_painter(CAVALRY_COLOURS[True])}, 'cavalry', RIDER_SIZE)
 
 
 BUILDS = {'soldier': build_soldier, 'cavalry': build_cavalry, 'archer': build_archer, 'drummer': build_drummer, 'mansion': build_mansion}
