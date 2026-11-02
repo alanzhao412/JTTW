@@ -381,7 +381,7 @@ public class PeckingOrderGameTests {
                 }
                 check(h, least <= Math.max(z.minLevel(), m.regularLevel()) + 1, name(m) + " at its band's bottom at the outskirts: " + least);
                 check(h, atEdge <= Math.max(z.minLevel(), m.regularLevel()) + 1, name(m) + " out past the edge, the outskirts': " + atEdge);
-                check(h, atHeart >= m.regularLevel() + 3 || m.regularLevel() >= z.maxLevel() - 3, name(m) + " higher at the heart: " + atHeart);
+                check(h, atHeart >= m.regularLevel() + 2 || m.regularLevel() >= z.maxLevel() - 3, name(m) + " higher at the heart: " + atHeart);
                 check(h, seen.size() >= 4 || m.regularLevel() >= z.maxLevel() - 3, name(m) + " of many levels across its region: " + seen);
                 // a captain three to five over the regulars round it, never past its top
                 for (int d = 0; d <= 400; d += 40) {
