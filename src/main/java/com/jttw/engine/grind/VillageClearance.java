@@ -60,6 +60,8 @@ public final class VillageClearance {
 
     /** Whether a village of {@code set} stands at {@code at} in {@code level} as made by {@code gen}: each of its structures' own test, as the land is made. */
     public static boolean stands(net.minecraft.server.level.ServerLevel level, net.minecraft.world.level.chunk.ChunkGenerator gen, StructureSet set, ChunkPos at) {
+        // the set's own placement first: its frequency, and its exclusion zone (a raided village never within 8 chunks of a Tang one)
+        if (!set.placement().isStructureChunk(level.getChunkSource().getGeneratorState(), at.x, at.z)) return false;
         for (var entry : set.structures()) {
             var s = entry.structure().value();
             var ctx = new net.minecraft.world.level.levelgen.structure.Structure.GenerationContext(level.registryAccess(), gen, gen.getBiomeSource(),

@@ -57,7 +57,12 @@ public class RaidedVillagePiece extends StructurePiece implements PieceBeardifie
     public void postProcess(WorldGenLevel level, StructureManager structures, ChunkGenerator generator, RandomSource random, BoundingBox area,
                             ChunkPos chunk, BlockPos pivot) {
         BlockPos c = centre();
-        RaidedVillage.lay(level, TangVillage.plan(variant, layout), c, area, layout, RaidedVillage.band(level.getSeed(), c), true);
+        try {
+            RaidedVillage.lay(level, TangVillage.plan(variant, layout), c, area, layout, RaidedVillage.band(level.getSeed(), c), true);
+        } catch (RuntimeException e) {
+            // never let a fault here kill the chunk's generation: a chunk left unmade is never saved, and the server never stops
+            com.jttw.engine.JTTWEngine.LOGGER.error("Raided village at {} (layout {}) failed in chunk {}", c, layout, chunk, e);
+        }
     }
 
     @Override

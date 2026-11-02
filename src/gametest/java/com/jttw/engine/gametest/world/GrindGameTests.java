@@ -400,4 +400,28 @@ public class GrindGameTests {
         check(h, Math.abs(chief.slamDamage() - (before - golem.getHealth())) < chief.slamDamage() * 1e-3, "the stomp's hurt: " + (before - golem.getHealth()));
         h.succeed();
     }
+
+    /**
+     * A village's plan lays whole from any seed, negative ones too (a structure's layout is any long:
+     * a negative salt once indexed an array at -1 and killed the chunk's generation, which then never
+     * finished and hung the server's shutdown).
+     */
+    @GameTest(template = PLATFORM, timeoutTicks = 400)
+    public static void aVillagePlanLaysFromAnySeed(GameTestHelper h) {
+        long[] seeds = {-1L, Long.MIN_VALUE, Long.MAX_VALUE, -123456789L, -(5L << 40), 0L, 40L};
+        for (long seed : seeds) {
+            for (TangVillage.Variant v : TangVillage.Variant.values()) {
+                TangVillage.Plan plan = TangVillage.plan(v, seed);
+                try {
+                    for (int x = TangVillage.WEST; x <= TangVillage.EAST; x++) for (int z = TangVillage.NORTH; z <= TangVillage.SOUTH; z++) {
+                        for (int y = TangVillage.BOTTOM; y <= TangVillage.CLEAR; y++) plan.at(x, y, z);
+                        plan.riceAt(x, z);
+                    }
+                } catch (RuntimeException e) {
+                    check(h, false, v + " village of seed " + seed + " fails to lay: " + e);
+                }
+            }
+        }
+        h.succeed();
+    }
 }

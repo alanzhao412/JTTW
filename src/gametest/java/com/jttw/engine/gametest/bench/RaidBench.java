@@ -139,16 +139,7 @@ final class RaidBench {
             int ring = ring(d);
             if (ring < 0) continue;
             tried[ring]++;
-            boolean stands = false;
-            for (var entry : set.structures()) {
-                Structure s = entry.structure().value();
-                var ctx = new Structure.GenerationContext(level.registryAccess(), gen, gen.getBiomeSource(), level.getChunkSource().randomState(),
-                        level.getStructureManager(), seed, at, level, s.biomes()::contains);
-                if (s.findValidGenerationPoint(ctx).isPresent()) {
-                    stands = true;
-                    break;
-                }
-            }
+            boolean stands = VillageClearance.stands(level, gen, set, at);
             if (!stands) continue;
             villages[ring]++;
             if (d < nearest && d > 300) {

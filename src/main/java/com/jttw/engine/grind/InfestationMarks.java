@@ -41,6 +41,16 @@ public class InfestationMarks extends Feature<NoneFeatureConfiguration> {
 
     @Override
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> ctx) {
+        try {
+            return mark(ctx);
+        } catch (RuntimeException e) {
+            // never let a fault here kill the chunk's generation (a chunk left unmade is never saved, and the server never stops)
+            com.jttw.engine.JTTWEngine.LOGGER.error("Infestation marks failed at {}", ctx.origin(), e);
+            return false;
+        }
+    }
+
+    private boolean mark(FeaturePlaceContext<NoneFeatureConfiguration> ctx) {
         WorldGenLevel level = ctx.level();
         ServerLevel server = level.getLevel();
         BlockPos origin = ctx.origin();

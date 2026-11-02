@@ -916,7 +916,7 @@ public final class TangVillage {
             if (v == 1 && u >= 1 && u <= 7) {
                 if (y == 1) return u % 2 == 1 ? s(Blocks.BARREL) : s(Blocks.CHISELED_BOOKSHELF);
                 if (y == 2) return u % 3 == 0 ? s(Blocks.DECORATED_POT) : s(new Block[]{Blocks.POTTED_FERN, Blocks.POTTED_DEAD_BUSH, Blocks.POTTED_BROWN_MUSHROOM,
-                        Blocks.POTTED_RED_MUSHROOM, Blocks.POTTED_CRIMSON_ROOTS}[(u + b.salt) % 5]);
+                        Blocks.POTTED_RED_MUSHROOM, Blocks.POTTED_CRIMSON_ROOTS}[Math.floorMod(u + b.salt, 5)]);
                 if (y == 3) return s(p.slab).setValue(SlabBlock.TYPE, SlabType.TOP);
                 return s(Blocks.AIR);
             }
