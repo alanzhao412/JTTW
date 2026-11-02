@@ -49,4 +49,45 @@ public final class HeavenRenderers {
             return super.shouldShowName(e) && entityRenderDispatcher.distanceToSqr(e) < NAME_RANGE * NAME_RANGE;
         }
     }
+
+    /**
+     * A stand-in for one of the host not yet given its own model: the soldier's figure, scaled to its
+     * height, in gold (crimson for a captain), on its cloud if it rides one.
+     */
+    public static final class Placeholder<T extends net.minecraft.world.entity.Mob> extends HumanoidMobRenderer<T, HumanoidModel<T>> {
+        private final float size;
+        private final boolean cloud;
+
+        public Placeholder(EntityRendererProvider.Context ctx, float size, boolean cloud) {
+            super(ctx, new HumanoidModel<>(ctx.bakeLayer(ModelLayers.ZOMBIE)), 0.5f * size);
+            this.size = size;
+            this.cloud = cloud;
+        }
+
+        @Override
+        protected void scale(T e, PoseStack pose, float partial) {
+            pose.scale(size, size, size);
+        }
+
+        @Override
+        public void render(T e, float yaw, float partial, PoseStack pose, MultiBufferSource buffers, int light) {
+            super.render(e, yaw, partial, pose, buffers, light);
+            if (!cloud) return;
+            pose.pushPose();
+            float s = CLOUD_SIZE * e.getScale() * size;
+            pose.scale(s, s, s);
+            NimbusCloud.draw(pose, buffers, e, 1f, light);
+            pose.popPose();
+        }
+
+        @Override
+        public ResourceLocation getTextureLocation(T e) {
+            return e instanceof com.jttw.engine.entity.zone.ZoneMonster z && z.isCaptain() || e instanceof com.jttw.engine.entity.zone.ZoneBoss ? GENERAL : SOLDIER;
+        }
+
+        @Override
+        protected boolean shouldShowName(T e) {
+            return super.shouldShowName(e) && entityRenderDispatcher.distanceToSqr(e) < NAME_RANGE * NAME_RANGE;
+        }
+    }
 }

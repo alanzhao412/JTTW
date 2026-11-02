@@ -201,6 +201,15 @@ public final class LevelManager {
 
         int killerLevel = PlayerLevel.getLevel(killer);
 
+        // ── Heaven's host: wild grass of every level, paid by the kill's own level ──
+        if (event.getEntity() instanceof com.jttw.engine.entity.heaven.HeavenFolk folk) {
+            if (event.getEntity().isAlliedTo(killer)) return; // his own self he never fought
+            EnemyTier tier = EnemyTier.parse(event.getEntity().getPersistentData().getString(TIER_TAG));
+            long xp = heavenKillXp(com.jttw.engine.entity.zone.MobLevel.of(event.getEntity()), tier, killerLevel, folk.vanillaXpShare());
+            if (xp > 0) grantXp(killer, xp, "heaven:" + tier.displayName);
+            return;
+        }
+
         // ── Phase 1: Vanilla mobs (levels 1–19) ─────────────────────────────
         net.minecraft.nbt.CompoundTag tags = event.getEntity().getPersistentData();
         double share = tags.contains(XP_SHARE_TAG) ? tags.getDouble(XP_SHARE_TAG) : 1;
@@ -414,6 +423,42 @@ public final class LevelManager {
                     "§7" + newStage.transitionMessage));
             // The look follows the level by itself: BeastFormShown sends each stage to the clients.
         }
+    }
+
+    // -----------------------------------------------------------------------
+    // Heaven's host
+    // -----------------------------------------------------------------------
+
+    /** How many levels over a kill of Heaven's host one may be and still be paid for it (a zone's band's overflow). */
+    public static final int HEAVEN_OVER = 5;
+
+    /**
+     * What a kill of Heaven's host pays: as a zone's kill of the same level would. Below level 20, as any
+     * monster's ({@link #VANILLA_XP_PER_LEVEL}), weighing its {@code vanillaShare} (a regular 2, a captain 6,
+     * a miniboss 10, a great name 20). From 20, its tier's XP of the zone band that holds its own level
+     * ({@link #bandHolding}), so Heaven is wild grass worth grinding at any level; nothing to one more than
+     * {@value #HEAVEN_OVER} levels over it.
+     */
+    public static long heavenKillXp(int victimLevel, EnemyTier tier, int killerLevel, int vanillaShare) {
+        if (killerLevel < LevelConstants.VANILLA_CAP_LEVEL) {
+            return Math.max(1, Math.round(vanillaShare * VANILLA_XP_PER_LEVEL * killerLevel));
+        }
+        if (killerLevel > victimLevel + HEAVEN_OVER) return 0;
+        BiomeLevelBand band = bandHolding(victimLevel);
+        return band == null ? 0 : band.xpForTier(tier);
+    }
+
+    /** The zone band holding {@code level} (the first registered that does); under them all the lowest, past them the highest. */
+    @javax.annotation.Nullable
+    public static BiomeLevelBand bandHolding(int level) {
+        BiomeLevelBand lowest = null, highest = null;
+        for (BiomeLevelBand b : BiomeLevelBand.all()) {
+            if (level >= b.minLevel() && level <= b.maxLevel()) return b;
+            if (lowest == null || b.minLevel() < lowest.minLevel()) lowest = b;
+            if (highest == null || b.maxLevel() > highest.maxLevel()) highest = b;
+        }
+        if (lowest != null && level < lowest.minLevel()) return lowest;
+        return highest;
     }
 
     // -----------------------------------------------------------------------

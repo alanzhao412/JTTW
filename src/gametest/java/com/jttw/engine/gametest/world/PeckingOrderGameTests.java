@@ -4,7 +4,6 @@ import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.entity.MobScaling;
 import com.jttw.engine.entity.cave.LadyEarthFlowEntity;
 import com.jttw.engine.entity.fire.StrongGeneralEntity;
-import com.jttw.engine.entity.heaven.HeavenlySoldierEntity;
 import com.jttw.engine.entity.hell.ImpermanenceEntity;
 import com.jttw.engine.entity.wild.WildYaoguai;
 import com.jttw.engine.entity.wuzhuang.TempleYouthEntity;
@@ -66,7 +65,11 @@ public class PeckingOrderGameTests {
             com.jttw.engine.registry.BlackWindRegistry.BEAR_SOLDIER.get(), com.jttw.engine.registry.BlackWindRegistry.LINGXUZI.get(),
             com.jttw.engine.registry.BlackWindRegistry.WHITE_ROBED_SCHOLAR.get(),
             com.jttw.engine.registry.FlowerFruitRegistry.FAKE_PILGRIM.get(),
-            com.jttw.engine.registry.SpiderCaveRegistry.SPIDER_SPIRIT.get());
+            com.jttw.engine.registry.SpiderCaveRegistry.SPIDER_SPIRIT.get(),
+            com.jttw.engine.registry.HeavenRegistry.STAR_LORD.get(), com.jttw.engine.registry.HeavenRegistry.GREAT_SPIRIT_GIANT.get(),
+            com.jttw.engine.registry.HeavenRegistry.THUNDER_LORD.get(), com.jttw.engine.registry.HeavenRegistry.LIGHTNING_MOTHER.get(),
+            com.jttw.engine.registry.HeavenRegistry.THOUSAND_MILE_EYE.get(), com.jttw.engine.registry.HeavenRegistry.WIND_FOLLOWING_EAR.get(),
+            ModEntities.HEAVENLY_SOLDIER.get());
 
     /**
      * The one superboss, past every rule a boss keeps but the least: the Six-Eared Macaque, level 120,
@@ -132,9 +135,6 @@ public class PeckingOrderGameTests {
                 z.becomeMiniboss(z.captainLevel(), 1);
                 double least = hits(z, z.captainLevel());
                 check(h, least >= ZoneMonster.MINIBOSS_LEAST_HITS - HITS_EPS, name(e) + " never under a miniboss's least: " + least);
-            } else if (e instanceof HeavenlySoldierEntity s) {
-                s.become(40, true, null);
-                m = hits(s, 40);
             } else if (e instanceof TempleYouthEntity y) {
                 m = hits(y, y.mobLevel());
                 check(h, m >= ZoneMonster.MINIBOSS_LEAST_HITS - HITS_EPS && m <= ZoneMonster.MINIBOSS_MOST_HITS + HITS_EPS, name(e) + " a miniboss's hits: " + m);
@@ -431,7 +431,8 @@ public class PeckingOrderGameTests {
                     zone++;
                     String n = name(m);
                     boolean general = m instanceof StrongGeneralEntity || m instanceof com.jttw.engine.entity.blackwind.BlackWindChief
-                            || m instanceof com.jttw.engine.entity.spider.SpiderSpiritEntity; // always minibosses
+                            || m instanceof com.jttw.engine.entity.spider.SpiderSpiritEntity
+                            || m instanceof com.jttw.engine.entity.heaven.HeavenMonster hm && hm.alwaysMiniboss(); // always minibosses
                     if (!general) {
                         // a regular: its blow and its hardest hit (its specials too) within a mob's; its health a mob's
                         int lv = m.regularLevel();
@@ -476,12 +477,6 @@ public class PeckingOrderGameTests {
                     check(h, share(y, y.maxLevel()) <= ZoneMonster.MOB_HIT_CAP + EPS, name(y) + "'s blow");
                     check(h, y.hardestShare() <= ZoneMonster.MOB_HIT_CAP + EPS, name(y) + "'s hardest hit");
                     check(h, y.healthAt(y.maxLevel()) / MobScaling.typicalHit(y.maxLevel()) <= MOB_HITS_MOST + EPS, name(y) + "'s hits to kill");
-                } else if (e instanceof HeavenlySoldierEntity s) {
-                    s.become(40, false, null);
-                    check(h, share(s, 40) <= ZoneMonster.MOB_HIT_CAP + EPS, "a heavenly soldier's blow, a mob's: " + share(s, 40));
-                    s.become(40, true, null);
-                    double g = share(s, 40);
-                    check(h, g >= MINIBOSS_LEAST - EPS && g <= MINIBOSS_MOST + EPS, "a heavenly general's blow, a miniboss's: " + g);
                 } else if (e instanceof ZoneBoss b) {
                     double blow = share(b, b.measuredLevel());
                     if (b instanceof TempleYouthEntity) {
