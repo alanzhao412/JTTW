@@ -107,6 +107,7 @@ public final class LevelManager {
         PlayerLevel.setLevel(player, 1);
         PlayerLevel.setXp(player, 0L);
         PlayerLevel.setFormStage(player, 0);
+        com.jttw.engine.character.divinebeast.BeastEvolution.reset(player);
 
         // Set Divine Beast elemental line if applicable
         if (cls == ProgressionClass.DIVINE_BEAST) {
@@ -121,6 +122,8 @@ public final class LevelManager {
 
         // Apply base stats immediately
         reapplyStats(player);
+        // the gated recipes this character may craft, in their recipe book
+        com.jttw.engine.item.craft.GatedRecipeBook.award(player);
         syncToClient(player);
 
         player.sendSystemMessage(Component.literal(
@@ -148,6 +151,10 @@ public final class LevelManager {
 
         // Wukong checkpoint gate — silently block XP at checkpoint levels
         if (com.jttw.engine.character.wukong.WukongCheckpoints.isBlocked(player)) {
+            return;
+        }
+        // A Divine Beast owing an evolution: no XP until its ritual is performed
+        if (com.jttw.engine.character.divinebeast.BeastEvolution.isBlocked(player)) {
             return;
         }
 
@@ -322,7 +329,8 @@ public final class LevelManager {
             var who = com.jttw.engine.reincarnation.ReincarnationOutcome.byId(
                     player.getPersistentData().getString(com.jttw.engine.reincarnation.AlignmentData.KEY_REINCARNATION_OUTCOME));
             StatBlock prevStats = StatBlock.compute(cls, who, prevLevel);
-            StatBlock newStats  = StatBlock.compute(cls, who, level);
+            StatBlock newStats  = StatBlock.compute(cls, who,
+                    com.jttw.engine.character.divinebeast.BeastEvolution.poweredLevel(player, level));
 
             // Apply new stats immediately
             newStats.applyTo(player);
@@ -341,8 +349,10 @@ public final class LevelManager {
             // Class abilities reached at this level can now be bought
             processUnlocks(player, cls, prevLevel, level);
 
-            // Divine Beast form stage transitions
-            if (cls == ProgressionClass.DIVINE_BEAST) {
+            // Divine Beast form stage transitions (an evolution owed waits for its ritual)
+            boolean owes = cls == ProgressionClass.DIVINE_BEAST
+                    && com.jttw.engine.character.divinebeast.BeastEvolution.reach(player, level);
+            if (cls == ProgressionClass.DIVINE_BEAST && !owes) {
                 processFormStage(player, prevLevel, level);
             }
 
@@ -371,6 +381,7 @@ public final class LevelManager {
                 com.jttw.engine.dimension.JTTWDimensions.teleportTo(player,
                         com.jttw.engine.dimension.JTTWDimensions.HELL);
             }
+            if (owes) break; // the evolution's ritual first
         }
 
         if (anyLevelUp) syncToClient(player);

@@ -69,7 +69,7 @@ public class YinYangSwordItem extends Item implements PairedBlade {
     @Override
     public ItemAttributeModifiers getDefaultAttributeModifiers(ItemStack stack) {
         ItemAttributeModifiers.Builder b = ItemAttributeModifiers.builder();
-        double amount = 0.5 * Armaments.refineMultiplier(stack);
+        double amount = ArmamentBonuses.YIN_YANG_SWORD * Armaments.refineMultiplier(stack);
         b.add(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK,
                 amount, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL), EquipmentSlotGroup.MAINHAND);
         b.add(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK_OFFHAND,

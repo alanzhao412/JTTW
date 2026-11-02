@@ -52,10 +52,10 @@ public class ErlangAxeItem extends Item implements Charged {
     @Override
     public ItemAttributeModifiers getDefaultAttributeModifiers(ItemStack stack) {
         ItemAttributeModifiers.Builder b = ItemAttributeModifiers.builder();
-        // Base +50% for everyone (large: twice that, x3); Erlang Shen bonus applied via handler event.
+        // Its own bonus (ArmamentBonuses), raised by its tier; large, far more.
         boolean large = isLarge(stack);
         b.add(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK,
-                (large ? 2.0 : 0.50) * Armaments.refineMultiplier(stack), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL),
+                (large ? ArmamentBonuses.ERLANG_AXE_LARGE : ArmamentBonuses.ERLANG_AXE) * Armaments.refineMultiplier(stack), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL),
                 EquipmentSlotGroup.MAINHAND);
         // Slower attack speed (-20%; large: half speed)
         b.add(Attributes.ATTACK_SPEED, new AttributeModifier(UUID_SPEED,

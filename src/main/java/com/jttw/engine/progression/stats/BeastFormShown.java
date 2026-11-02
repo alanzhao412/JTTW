@@ -39,7 +39,8 @@ public final class BeastFormShown {
         if (PlayerLevel.getProgressionClass(p) != ProgressionClass.DIVINE_BEAST) return -1;
         DivineBeastLine line = PlayerLevel.getBeastLine(p);
         if (line == null) return -1;
-        return line.ordinal() * 8 + stage(PlayerLevel.getLevel(p));
+        // the look follows the evolutions performed: an owed one waits for its ritual
+        return line.ordinal() * 8 + stage(com.jttw.engine.character.divinebeast.BeastEvolution.poweredLevel(p, PlayerLevel.getLevel(p)));
     }
 
     private static void send(ServerPlayer p, int packed) {

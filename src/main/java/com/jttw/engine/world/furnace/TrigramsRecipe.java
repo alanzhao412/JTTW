@@ -32,10 +32,13 @@ import java.util.Map;
  * <pre>{@code
  * {"type": "jttw_engine:trigrams_forging",
  *  "materials": [{"item": "minecraft:iron_ingot", "count": 9}, ...],
- *  "result": {"id": "jttw_engine:nine_tooth_rake"}}
+ *  "result": {"id": "jttw_engine:nine_golden_elixir"},
+ *  "gate": {"class": "heavenly"}}
  * }</pre>
+ * The gate ({@link com.jttw.engine.item.craft.ClassGate}, optional) is held against the furnace's smith,
+ * the last to open it.
  */
-public record TrigramsRecipe(List<Material> materials, ItemStack result) implements Recipe<TrigramsRecipe.Trigrams> {
+public record TrigramsRecipe(List<Material> materials, ItemStack result, com.jttw.engine.item.craft.ClassGate gate) implements Recipe<TrigramsRecipe.Trigrams> {
 
     /** So many of one item. */
     public record Material(Item item, int count) {
@@ -117,11 +120,13 @@ public record TrigramsRecipe(List<Material> materials, ItemStack result) impleme
     public static final class Serializer implements RecipeSerializer<TrigramsRecipe> {
         private static final MapCodec<TrigramsRecipe> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
                 Material.CODEC.listOf().fieldOf("materials").forGetter(TrigramsRecipe::materials),
-                ItemStack.STRICT_CODEC.fieldOf("result").forGetter(TrigramsRecipe::result)
+                ItemStack.STRICT_CODEC.fieldOf("result").forGetter(TrigramsRecipe::result),
+                com.jttw.engine.item.craft.ClassGate.CODEC.optionalFieldOf("gate", com.jttw.engine.item.craft.ClassGate.ANYONE).forGetter(TrigramsRecipe::gate)
         ).apply(i, TrigramsRecipe::new));
         private static final StreamCodec<RegistryFriendlyByteBuf, TrigramsRecipe> STREAM_CODEC = StreamCodec.composite(
                 Material.STREAM_CODEC.apply(ByteBufCodecs.list()), TrigramsRecipe::materials,
-                ItemStack.STREAM_CODEC, TrigramsRecipe::result, TrigramsRecipe::new);
+                ItemStack.STREAM_CODEC, TrigramsRecipe::result,
+                com.jttw.engine.item.craft.ClassGate.STREAM_CODEC, TrigramsRecipe::gate, TrigramsRecipe::new);
 
         @Override public MapCodec<TrigramsRecipe> codec() { return CODEC; }
         @Override public StreamCodec<RegistryFriendlyByteBuf, TrigramsRecipe> streamCodec() { return STREAM_CODEC; }

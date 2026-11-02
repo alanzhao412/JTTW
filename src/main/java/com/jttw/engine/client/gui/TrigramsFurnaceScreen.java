@@ -77,29 +77,29 @@ public class TrigramsFurnaceScreen extends AbstractContainerScreen<TrigramsFurna
         ItemStack centre = menu.furnace().getItem(TrigramsFurnaceBlockEntity.CENTRE);
         Armaments.Armament held = Armaments.of(centre);
         if (held != null) {
-            int level = Armaments.refine(centre);
-            lines.add("§e" + held.displayName() + " §7refined §f" + level + "/" + Armaments.MAX_REFINE);
-            if (level >= Armaments.MAX_REFINE) lines.add("§7Fully refined.");
-            else {
-                lines.add("§7To refine it to " + (level + 1) + ":");
-                lines.add("§f" + Armaments.describe(Armaments.refineCost(level)));
+            int tier = Armaments.tier(centre);
+            lines.add("§e" + held.displayName() + " §7tier §f" + Armaments.roman(tier));
+            var next = com.jttw.engine.item.craft.ArmamentGuide.next(minecraft.level.getRecipeManager(), centre);
+            if (tier >= Armaments.TIERS) lines.add("§7Fully refined.");
+            else if (next == null) lines.add("§7No recipe takes it further.");
+            else if (!next.furnace()) {
+                lines.add("§7Tier " + Armaments.roman(next.tier()) + " is made at a crafting table:");
+                lines.add("§f" + next.materials());
+            } else {
+                lines.add("§7To refine it to tier " + Armaments.roman(next.tier()) + ":");
+                lines.add("§f" + next.materials());
+                lines.add("§8" + next.gate().describe());
             }
         } else {
-            ReincarnationOutcome who = ReincarnationOutcome.byId(
-                    minecraft.player.getPersistentData().getString(AlignmentData.KEY_REINCARNATION_OUTCOME));
-            List<Armaments.Armament> forgeable = Armaments.of(who).isEmpty() ? Armaments.ALL : Armaments.of(who);
             lines.add("§eForge (exactly):");
-            for (Armaments.Armament a : forgeable) {
-                lines.add("§f" + a.displayName());
-                lines.add(" §7" + Armaments.describe(a.forging()));
-            }
-            // and what else it forges, for anyone (the Nine-Tooth Rake)
             for (var r : minecraft.level.getRecipeManager().getAllRecipesFor(com.jttw.engine.registry.ModRecipes.TRIGRAMS_FORGING.get())) {
+                if (!r.value().gate().allows(minecraft.player)) continue;
                 lines.add("§f" + r.value().result().getHoverName().getString());
                 lines.add(" §7" + r.value().describe());
             }
             lines.add("§7Or put an armament in");
-            lines.add("§7the centre to refine it.");
+            lines.add("§7the centre to refine it");
+            lines.add("§7(tiers V to VIII).");
         }
         int h = 6;
         List<net.minecraft.util.FormattedCharSequence> wrapped = new ArrayList<>();

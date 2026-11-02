@@ -178,21 +178,8 @@ public final class ErlangShenAbilityHandler {
         return null;
     }
 
-    /** Erlang Shen gets +100% damage (total +80% on top of the item's +20%) with the spear. */
-    @SubscribeEvent(priority = EventPriority.LOW)
-    public static void onWeaponDamageBonus(LivingIncomingDamageEvent event) {
-        if (!(event.getSource().getEntity() instanceof ServerPlayer sp)) return;
-        if (!isErlangShen(sp)) return;
-
-        // Spear: item gives +20%, we need total +100%, so multiply by 1.667 (1.2 * 1.667 ≈ 2.0)
-        if (sp.getMainHandItem().getItem() instanceof com.jttw.engine.item.ThreePointedSpearItem) {
-            event.setAmount(event.getAmount() * 1.667f);
-        }
-        // Axe: item gives +50%, we need total +150%, so multiply by 1.667 (1.5 * 1.667 ≈ 2.5)
-        if (sp.getMainHandItem().getItem() instanceof com.jttw.engine.item.ErlangAxeItem) {
-            event.setAmount(event.getAmount() * 1.667f);
-        }
-    }
+    // (Erlang Shen's old x1.667 on every blow with his spear or axe in hand is gone: the Heavenly's
+    // strength is now their armaments' tiers, the armory's attunement; see Armory and ClassKit.)
 
     private static boolean isErlangShen(ServerPlayer player) {
         String outcome = player.getPersistentData()
