@@ -72,9 +72,14 @@ public class BlackBearDemonEntity extends ZoneBoss {
     /** Subduing him is a good deed (Guanyin herself came for him), though less than ending a man-eater as Lady White Bone. */
     public static final int KARMA = 100;
     public static final int LEVEL = ZoneBoss.levelOver(Zones.BLACK_WIND);
-    /** 300 ordinary hits of a character of his level; his spear 30% of their health; the black wind 22%, the maul 26%, the gale 25%; a whirlwind's grip 4% each half second. */
-    public static final double HITS = 300, SPEAR = 0.30, WIND = 0.22, SLAM = 0.26, GALE = 0.25, WHIRL = 0.04;
-    public static final double HEALTH = HITS * MobScaling.typicalHit(LEVEL);
+    /** The character he is built for: one of the top of his band ({@link ZoneBoss#challengerOf}). */
+    public static final int MEASURED = ZoneBoss.challengerOf(Zones.BLACK_WIND);
+    /**
+     * 68 ordinary hits of a character of his band's top; his spear 19.5% of their health (five or six
+     * kill); the black wind 14%, the maul 17%, the gale 16%; a whirlwind's grip 2.5% each half second.
+     */
+    public static final double HITS = 68, SPEAR = 0.195, WIND = 0.14, SLAM = 0.17, GALE = 0.16, WHIRL = 0.025;
+    public static final double HEALTH = HITS * MobScaling.typicalHit(MEASURED);
     public static final int WIND_EVERY = 180, WIND_FASTER = 120, WIND_WINDUP = 30, SLAM_EVERY = 110, SLAM_WINDUP = 18, GALE_EVERY = 150, GALE_WINDUP = 22;
     public static final double WIND_RANGE = 9, SLAM_RANGE = 5, GALE_RANGE = 14, GALE_ANGLE = 30;
     /** His whirlwinds: how many at each phase, and how long each lasts. */
@@ -97,7 +102,7 @@ public class BlackBearDemonEntity extends ZoneBoss {
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, HEALTH)
-                .add(Attributes.ATTACK_DAMAGE, SPEAR * MobScaling.typicalHealth(LEVEL))
+                .add(Attributes.ATTACK_DAMAGE, SPEAR * MobScaling.typicalHealth(MEASURED))
                 .add(Attributes.ATTACK_KNOCKBACK, 1.2)
                 .add(Attributes.MOVEMENT_SPEED, 0.27)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.95)
@@ -204,7 +209,7 @@ public class BlackBearDemonEntity extends ZoneBoss {
     }
 
     private double share(double s) {
-        return s * MobScaling.typicalHealth(LEVEL);
+        return s * MobScaling.typicalHealth(MEASURED);
     }
 
     /** Those his area hits catch within {@code range}. */

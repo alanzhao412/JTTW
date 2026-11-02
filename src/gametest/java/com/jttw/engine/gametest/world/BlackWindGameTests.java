@@ -134,7 +134,7 @@ public class BlackWindGameTests {
         for (EntityType<? extends BlackWindMonster> type : List.of(BlackWindRegistry.WIND_IMP.get(), BlackWindRegistry.BOAR_DEMON.get(), BlackWindRegistry.BEAR_SOLDIER.get())) {
             BlackWindMonster r = mob(h, type, 20, false, new BlockPos(1, 2, 1)), c = mob(h, type, 27, true, new BlockPos(3, 2, 3));
             eq(h, 20, r.regularLevel(), "regulars about 20");
-            eq(h, 27, r.captainLevel(), "captains about 27");
+            eq(h, 24, r.captainLevel(), "captains about 24 at the mountain's foot");
             check(h, c.isCaptain() && c.getMaxHealth() > r.getMaxHealth() * 2 && c.getAttributeValue(Attributes.ATTACK_DAMAGE) > r.getAttributeValue(Attributes.ATTACK_DAMAGE),
                     "a captain, stronger");
             check(h, c.getScale() > r.getScale(), "and larger");
@@ -193,7 +193,7 @@ public class BlackWindGameTests {
         for (EntityType<? extends BlackWindChief> type : List.of(BlackWindRegistry.LINGXUZI.get(), BlackWindRegistry.WHITE_ROBED_SCHOLAR.get())) {
             BlackWindChief c = mob(h, type, 20, false, new BlockPos(2, 2, 2));
             check(h, c.isCaptain() && c.isMiniboss(), "a miniboss whoever brings him");
-            check(h, Math.abs(c.mobLevel() - BlackWindChief.CHIEF_LEVEL) <= 1, "about level 30: " + c.mobLevel());
+            check(h, Math.abs(c.mobLevel() - BlackWindChief.CHIEF_LEVEL) <= 1, "about level 34: " + c.mobLevel());
             check(h, c.mobLevel() <= Zones.BLACK_WIND.maxLevel(), "within the band");
             double blow = c.getAttributeValue(Attributes.ATTACK_DAMAGE) / MobScaling.typicalHealth(c.mobLevel());
             close(h, ZoneMonster.MINIBOSS_HIT, c.hardestShare() * c.damageScale(), "his hardest hit a miniboss's");
@@ -255,16 +255,16 @@ public class BlackWindGameTests {
     // ── The Black Bear Demon ────────────────────────────────────────────
 
     @GameTest(template = PLATFORM)
-    public static void theKingTowersOverHisBandAGroupsFight(GameTestHelper h) {
+    public static void theKingIsHisMountainsGymLeader(GameTestHelper h) {
         BlackBearDemonEntity k = king(h, new BlockPos(2, 2, 2));
-        eq(h, 51, k.mobLevel(), "level 51: his band's top and fifteen");
-        eq(h, Zones.BLACK_WIND.maxLevel() + BlackBearDemonEntity.LEVELS_ABOVE_BAND, k.mobLevel(), "the band's top and fifteen");
-        close(h, 300, k.getMaxHealth() / MobScaling.typicalHit(51), "300 ordinary hits of a level-51 character");
-        close(h, 0.30, k.getAttributeValue(Attributes.ATTACK_DAMAGE) / MobScaling.typicalHealth(51), "a spear thrust of 30%");
+        eq(h, 39, k.mobLevel(), "level 39: his band's top and three");
+        eq(h, Zones.BLACK_WIND.maxLevel() + BlackBearDemonEntity.LEVELS_ABOVE_BAND, k.mobLevel(), "the band's top and three");
+        close(h, 68, k.getMaxHealth() / MobScaling.typicalHit(36), "68 ordinary hits of a level-36 character, the one he is built for");
+        close(h, 0.195, k.getAttributeValue(Attributes.ATTACK_DAMAGE) / MobScaling.typicalHealth(36), "a spear thrust of 19.5%: six kill");
         check(h, k.bossBar().getColor() == BossEvent.BossBarColor.PURPLE, "a purple bar");
         check(h, !k.removeWhenFarAway(1000), "never despawned");
         eq(h, EnemyTier.BOSS.name(), k.getPersistentData().getString(ZoneMonster.KEY_TIER), "a boss's kill");
-        for (double s : new double[]{BlackBearDemonEntity.WIND, BlackBearDemonEntity.SLAM, BlackBearDemonEntity.GALE}) check(h, s <= 0.33, "no special over a boss's blow");
+        for (double s : new double[]{BlackBearDemonEntity.WIND, BlackBearDemonEntity.SLAM, BlackBearDemonEntity.GALE}) check(h, s <= com.jttw.engine.entity.zone.ZoneBoss.MOST_BLOW, "no special over a boss's blow");
         h.succeed();
     }
 

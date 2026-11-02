@@ -822,15 +822,26 @@ public final class LionFortress {
 
     public static final int REGULAR = 0, CAPTAIN = 1, WARDEN = 2, KING = 3;
 
-    /** The level a regular of floor {@code k} is (the gate hall and forecourt the zone's least, deeper ever higher), a captain, a warden. */
+    /**
+     * The level a regular of floor {@code k} is, a captain, a warden: the ridge's road goes on in from
+     * its land's top at the city (92, {@link com.jttw.engine.entity.lion.LionCamelMonster#LAND} of the
+     * band), the gate hall and forecourt its least, deeper ever higher, to the band's top (100) on the
+     * last; a captain four over, a warden (the floor's elite) five, never past {@link #POST_TOP}.
+     */
     public static int levelOf(int k, int role) {
         int depth = Math.max(0, Math.min(FLOORS, k));
+        int regular = LAND_TOP + (depth * (com.jttw.engine.world.Zones.LION_CAMEL.maxLevel() - LAND_TOP) + FLOORS / 2) / FLOORS;
         return switch (role) {
-            case REGULAR -> 89 + depth;
-            case CAPTAIN -> Math.min(100, 93 + depth);
-            default -> Math.min(100, 94 + depth);
+            case REGULAR -> regular;
+            case CAPTAIN -> Math.min(POST_TOP, regular + com.jttw.engine.entity.zone.ZoneMonster.CAPTAIN_OVER);
+            default -> Math.min(POST_TOP, regular + 5);
         };
     }
+
+    /** The level the ridge's land climbs to, at the city. */
+    public static final int LAND_TOP = com.jttw.engine.world.Zones.LION_CAMEL.levelAlong(com.jttw.engine.entity.lion.LionCamelMonster.LAND);
+    /** The most any keeper of the cave is: the band's top and one (the White Elephant stands one more, the Azure Lion two). */
+    public static final int POST_TOP = com.jttw.engine.world.Zones.LION_CAMEL.maxLevel() + com.jttw.engine.entity.zone.ZoneMonster.CAPTAIN_ABOVE_BAND;
 
     /** Who keeps each floor (its regulars, in turn), its warden's kind. */
     private static List<Who> keepers(int k) {

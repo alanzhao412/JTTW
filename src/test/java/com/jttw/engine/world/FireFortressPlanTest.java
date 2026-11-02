@@ -78,13 +78,16 @@ class FireFortressPlanTest {
             }
             long captains = f.garrison().stream().filter(s -> s.kind() == IMP_CAPTAIN || s.kind() == BRUTE_CAPTAIN).count();
             assertTrue(captains >= (k >= 4 ? 3 : 1), "floor " + k + " captains: " + captains);
-            assertTrue(regularLevel(k) > last, "harder each floor down");
+            assertTrue(regularLevel(k) >= last, "never easier a floor down");
             last = regularLevel(k);
-            assertTrue(captainLevel(k) <= 77 && guardianLevel(k) <= 77, "within the band");
+            assertTrue(regularLevel(k) <= 77, "regulars within the band");
+            assertTrue(captainLevel(k) <= 78 && guardianLevel(k) <= 78, "captains and guardians at most one over the band");
         }
-        assertEquals(68, regularLevel(1));
-        assertEquals(75, regularLevel(8));
-        assertEquals(77, guardianLevel(8));
+        // the road goes on down from the land's (71 at the door) to the band's top on the last floor
+        assertEquals(71, regularLevel(0));
+        assertEquals(72, regularLevel(1));
+        assertEquals(77, regularLevel(8));
+        assertEquals(78, guardianLevel(8));
     }
 
     @Test

@@ -73,11 +73,11 @@ import java.util.List;
 public class AzureLionEntity extends DemonKingEntity {
 
     public static final int LEVEL = com.jttw.engine.entity.zone.ZoneBoss.levelOver(com.jttw.engine.world.Zones.LION_CAMEL);
-    /** The level of character he is measured against, past the cap's reach ({@link com.jttw.engine.entity.zone.ZoneBoss#measuredAt}). */
-    public static final int MEASURED = com.jttw.engine.entity.zone.ZoneBoss.measuredAt(LEVEL);
-    public static final int SWORD_PERCENT = 30, ROAR_PERCENT = 12, BELLY_PERCENT = 5;
-    /** His health, in ordinary hits of a level-115 character; what a captive must deal from inside him (counted half again) to be retched up. */
-    public static final double HITS = 350, ESCAPE_HITS = 5.4;
+    /** The character he is built for: one of the top of his band, the players' cap ({@link com.jttw.engine.entity.zone.ZoneBoss#challengerOf}). */
+    public static final int MEASURED = com.jttw.engine.entity.zone.ZoneBoss.challengerOf(com.jttw.engine.world.Zones.LION_CAMEL);
+    public static final int SWORD_PERCENT = 19, ROAR_PERCENT = 8, BELLY_PERCENT = 3;
+    /** His health, in ordinary hits of a level-100 character; what a captive must deal from inside him (counted half again) to be retched up. */
+    public static final double HITS = 78, ESCAPE_HITS = 5.4;
     public static final double SWORD = SWORD_PERCENT / 100.0, ROAR = ROAR_PERCENT / 100.0, BELLY = BELLY_PERCENT / 100.0;
     public static final double HEALTH = HITS * MobScaling.typicalHit(MEASURED);
     public static final int ROAR_EVERY = 180, ROAR_WINDUP = 15, SWALLOW_EVERY = 260, SWALLOW_ENRAGED = 130, GAPE = 20, MAX_HOLD = 200, KIN = 3;

@@ -116,7 +116,7 @@ public class BlackWindCaveGameTests {
             check(h, keepers.stream().anyMatch(k -> k instanceof LingxuziEntity) && keepers.stream().anyMatch(k -> k instanceof WhiteRobedScholarEntity),
                     "Lingxuzi and the White-Robed Scholar");
             for (BlackWindChief k : keepers) {
-                check(h, k.isMiniboss() && k.mobLevel() == BlackWindPlan.guardLevel(0), "a miniboss of level 30");
+                check(h, k.isMiniboss() && k.mobLevel() == BlackWindPlan.guardLevel(0), "a miniboss of level 34");
                 check(h, k.mobLevel() <= 36, "within the band");
             }
             ServerPlayer p = player(h);
@@ -161,7 +161,7 @@ public class BlackWindCaveGameTests {
             eq(h, g.size(), BlackWindCave.garrison(level, o, 1).size(), "counted as the court's");
             Mob warden = null;
             for (Mob m : g) {
-                check(h, m instanceof ZoneMonster z && z.mobLevel() >= 20 && z.mobLevel() <= 36, "of the band: " + m);
+                check(h, m instanceof ZoneMonster z && z.mobLevel() >= 20 && z.mobLevel() <= (z.isCaptain() ? z.topLevel() : 36), "of the band (a captain at most one over): " + m);
                 check(h, BlackWindCave.floorOf(o, m) == 1, "on the court's floor");
                 if (BlackWindCave.guards(m)) warden = m;
             }

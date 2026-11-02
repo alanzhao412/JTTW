@@ -277,13 +277,13 @@ public class HellGameTests {
             KingOfHellEntity k = king(h, HellKings.type(n), new BlockPos(2, 2, 2));
             eq(h, n, k.court(), "court");
             int level = KingOfHellEntity.levelOf(n);
-            eq(h, n == 5 ? 81 : n < 5 ? 71 + n : 70 + n, level, "his level: 72 to 80, Yama 81");
+            eq(h, n == 5 ? 69 : 68, level, "his level: 68, Yama 69");
             check(h, k.getDisplayName().getString().endsWith(" · Lv " + level), "named: " + k.getDisplayName().getString());
             eq(h, EnemyTier.BOSS.name(), k.getPersistentData().getString(ZoneMonster.KEY_TIER), "pays as a Boss");
             eq(h, Zones.HELL.id(), k.getPersistentData().getString(ZoneMonster.KEY_ZONE), "of Hell");
             double hits = KingOfHellEntity.hitsOf(n);
             eq(h, n == 5 ? KingYamaEntity.YAMA_HITS : n == 10 ? KingOfHellEntity.ZHUANLUN_HITS : KingOfHellEntity.HITS, hits, "his hits");
-            close(h, hits * MobScaling.typicalHit(level), k.getMaxHealth(), "his health");
+            close(h, hits * MobScaling.typicalHit(KingOfHellEntity.MEASURED), k.getMaxHealth(), "his health, of a level-66 character's hits");
             eq(h, n == 5 ? BossEvent.BossBarColor.PURPLE : BossEvent.BossBarColor.RED, k.bossBar().getColor(), "his bar");
             // struck down (the Tenth twice: the Wheel turns once)
             for (int blow = 0; blow < 2 && !k.isDeadOrDying(); blow++) {

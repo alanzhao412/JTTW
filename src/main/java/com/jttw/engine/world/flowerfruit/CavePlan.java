@@ -148,21 +148,36 @@ public final class CavePlan {
     /** A post of the cave's garrison: where (local x, z, on the floor), what, whether a captain, its level; for a fake pilgrim, which. */
     public record Post(int x, int z, int kind, boolean captain, int level, int variant) {}
 
+    /** The most a post of the cave is (a captain's, the fake pilgrims'): the band's top and one. */
+    public static final int TOP = com.jttw.engine.world.Zones.FLOWER_FRUIT.maxLevel() + com.jttw.engine.entity.zone.ZoneMonster.CAPTAIN_ABOVE_BAND;
+
     /**
      * The garrison, put there once when the land is made and kept: monkeys in the mouth, at the
      * bridge, in the gate court, through the hall and its rooms; and the three fake pilgrims with the
      * stolen luggage before the old throne, the zone's minibosses. Never anyone in the sanctum but him.
      */
     public static final List<Post> POSTS = List.of(
-            new Post(-4, 63, GIBBON, false, 20, 0), new Post(4, 61, GIBBON, false, 21, 0), new Post(0, 59, APE, false, 20, 0),
-            new Post(-5, 41, APE, true, 27, 0), new Post(5, 41, APE, false, 21, 0),
-            new Post(-10, 36, BABOON, false, 21, 0), new Post(10, 34, GIBBON, false, 21, 0),
-            new Post(-14, 10, APE, false, 21, 0), new Post(14, 10, APE, false, 22, 0), new Post(0, 6, APE, true, 27, 0),
-            new Post(-20, -6, GIBBON, false, 21, 0), new Post(20, -6, GIBBON, false, 22, 0), new Post(-8, 18, GIBBON, false, 21, 0),
-            new Post(8, 18, GIBBON, false, 21, 0), new Post(-25, 14, BABOON, false, 22, 0), new Post(25, -12, BABOON, true, 28, 0),
-            new Post(0, -14, PILGRIM, true, 30, 0), new Post(-6, -12, PILGRIM, true, 29, 1), new Post(6, -12, PILGRIM, true, 28, 2),
-            new Post(-SIDE_X, 0, GIBBON, false, 21, 0), new Post(-SIDE_X + 4, 10, GIBBON, false, 22, 0), new Post(-SIDE_X - 3, -8, APE, false, 22, 0),
-            new Post(SIDE_X, -4, BABOON, false, 22, 0), new Post(SIDE_X - 5, 8, GIBBON, false, 21, 0), new Post(SIDE_X + 4, 9, GIBBON, false, 22, 0));
+            new Post(-4, 63, GIBBON, false, deep(63, false), 0), new Post(4, 61, GIBBON, false, deep(61, false), 0), new Post(0, 59, APE, false, deep(59, false), 0),
+            new Post(-5, 41, APE, true, deep(41, true), 0), new Post(5, 41, APE, false, deep(41, false), 0),
+            new Post(-10, 36, BABOON, false, deep(36, false), 0), new Post(10, 34, GIBBON, false, deep(34, false), 0),
+            new Post(-14, 10, APE, false, deep(10, false), 0), new Post(14, 10, APE, false, deep(10, false), 0), new Post(0, 6, APE, true, deep(6, true), 0),
+            new Post(-20, -6, GIBBON, false, deep(-6, false), 0), new Post(20, -6, GIBBON, false, deep(-6, false), 0), new Post(-8, 18, GIBBON, false, deep(18, false), 0),
+            new Post(8, 18, GIBBON, false, deep(18, false), 0), new Post(-25, 14, BABOON, false, deep(14, false), 0), new Post(25, -12, BABOON, true, deep(-12, true), 0),
+            new Post(0, -14, PILGRIM, true, TOP, 0), new Post(-6, -12, PILGRIM, true, TOP, 1), new Post(6, -12, PILGRIM, true, TOP - 1, 2),
+            new Post(-SIDE_X, 0, GIBBON, false, deep(0, false), 0), new Post(-SIDE_X + 4, 10, GIBBON, false, deep(10, false), 0), new Post(-SIDE_X - 3, -8, APE, false, deep(-8, false), 0),
+            new Post(SIDE_X, -4, BABOON, false, deep(-4, false), 0), new Post(SIDE_X - 5, 8, GIBBON, false, deep(8, false), 0), new Post(SIDE_X + 4, 9, GIBBON, false, deep(9, false), 0));
+
+    /**
+     * The level of a post {@code z} along the cave (its mouth at 63, the old throne at -14): the
+     * island's road goes on in from its land's top (26, {@link com.jttw.engine.entity.flowerfruit.FlowerFruitMonster#LAND}
+     * of the band), from 26 at the mouth to the band's top, 30, before the throne; a captain four over,
+     * never past {@link #TOP}.
+     */
+    static int deep(int z, boolean captain) {
+        int land = com.jttw.engine.world.Zones.FLOWER_FRUIT.levelAlong(com.jttw.engine.entity.flowerfruit.FlowerFruitMonster.LAND);
+        int lv = land + (int) Math.round((com.jttw.engine.world.Zones.FLOWER_FRUIT.maxLevel() - land) * Math.max(0, Math.min(1, (63 - z) / 77.0)));
+        return captain ? Math.min(TOP, lv + com.jttw.engine.entity.zone.ZoneMonster.CAPTAIN_OVER) : lv;
+    }
 
     /** The fake pilgrims' health over a captain's, as the lair makes them minibosses. */
     public static final double PILGRIM_HEALTH = 1.6;

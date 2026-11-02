@@ -118,18 +118,26 @@ public final class BlackWindPlan {
     /** The warden of the grand stair's post, before its grate. */
     public static final int[] WARDEN_POST = {0, 1, -36};
 
-    /** The level the members of each floor are about: regulars, captains, and its guards (the keepers, the warden). */
+    /**
+     * The level the members of each floor are about: regulars, captains, and its guards (the keepers,
+     * the warden). The mountain's road goes on in from its land's (28 by the door): the forecourt 31,
+     * the Black Wind Court the band's top, 36; their captains four over, their guards the floor's
+     * elite, all at most one over the band's top.
+     */
     public static int regularLevel(int floor) {
-        return floor == 0 ? 22 : 25;
+        return floor == 0 ? 31 : com.jttw.engine.world.Zones.BLACK_WIND.maxLevel();
     }
 
     public static int captainLevel(int floor) {
-        return floor == 0 ? 28 : 30;
+        return Math.min(TOP, regularLevel(floor) + com.jttw.engine.entity.zone.ZoneMonster.CAPTAIN_OVER);
     }
 
     public static int guardLevel(int floor) {
-        return floor == 0 ? 30 : 33;
+        return floor == 0 ? 34 : TOP;
     }
+
+    /** The most a post of the cave is: the band's top and one. */
+    public static final int TOP = com.jttw.engine.world.Zones.BLACK_WIND.maxLevel() + com.jttw.engine.entity.zone.ZoneMonster.CAPTAIN_ABOVE_BAND;
 
     private static volatile Built built;
 

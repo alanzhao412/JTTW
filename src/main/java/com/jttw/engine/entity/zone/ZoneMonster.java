@@ -42,12 +42,21 @@ import java.util.function.Predicate;
  * them, never fight back against them, and are passed over by their area attacks; and one such a
  * player strikes down leaves him nothing (no loot, XP or karma: it never fought him).
  *
- * <p>Some are <b>minibosses</b>: a lair's floor wardens and gate keepers, the Six Strong Generals.
- * A miniboss is a captain (purple-named, larger, a sigil to leave) whose hardest hit is
- * {@link #MINIBOSS_HIT} of a character's health whatever its kind, and whose health may be more
- * than a captain's ({@link #becomeMiniboss}). So the pecking order holds hit for hit: a regular's
- * hardest is at most {@link #MOB_HIT_CAP}, a captain's that times {@link #CAPTAIN_DAMAGE}, a
- * miniboss's {@link #MINIBOSS_HIT}, and every boss's blow more.
+ * <p><b>Its level is its road's.</b> A zone is walked as a road is: its regulars are its wild
+ * creatures, of any level of its band ({@link #rollRegularLevel}), the band's bottom at its outskirts
+ * and its top at its heart (the middle of its region, a cave's deepest floor, a palace's inmost
+ * hall: {@link #routeDepth()}), fixed as they are put there, whoever is near. Its captains are its
+ * trainers on the road, {@link #CAPTAIN_OVER} levels or so over the regulars round them
+ * ({@link #rollCaptainLevel}), never more than {@link #CAPTAIN_ABOVE_BAND} over the band's top.
+ *
+ * <p>Some are <b>minibosses</b>, its elite trainers: a lair's floor wardens and gate keepers, the Six
+ * Strong Generals. A miniboss is a captain (purple-named, larger, a sigil to leave) whose hardest hit
+ * is {@link #MINIBOSS_HIT} of a character's health whatever its kind, and whose health is
+ * {@link #MINIBOSS_LEAST_HITS} to {@link #MINIBOSS_MOST_HITS} ordinary hits ({@link #becomeMiniboss}),
+ * over any captain's. So the pecking order holds hit for hit: a regular's hardest is at most
+ * {@link #MOB_HIT_CAP}, a captain's that times {@link #CAPTAIN_DAMAGE}, a miniboss's
+ * {@link #MINIBOSS_HIT}, and every boss's blow more; a regular takes 2 to 12 hits, a captain twice its
+ * kind's, a miniboss 25 to 40, a boss 60 to 80.
  *
  * <p>A subclass names its {@link #zone()}, its {@link #hitsToKill()} and {@link #blowShare()}, any
  * special hits in {@link #specialShares()} (each struck with {@link #hitOf}), and may change its
@@ -59,16 +68,24 @@ public abstract class ZoneMonster extends Monster implements MobLevel {
     public static final float CAPTAIN_CHANCE = 0.08f;
     /** How many of its kind a captain brings, unless it says otherwise. */
     public static final int ESCORTS = 3;
-    /** A captain's health and blow over a regular one's of its level. */
-    public static final double CAPTAIN_HEALTH = 2.5, CAPTAIN_DAMAGE = 1.2;
+    /** A captain's health and blow over a regular one's of its level: a trainer's 4 to 24 hits, as its kind is light or heavy. */
+    public static final double CAPTAIN_HEALTH = 2, CAPTAIN_DAMAGE = 1.2;
     /** The most a regular one's hardest single hit may be, as a share of a same-level character's health. */
     public static final double MOB_HIT_CAP = 0.12;
-    /** A miniboss's hardest single hit, as a share of a same-level character's health: over any captain's, under any boss's blow. */
-    public static final double MINIBOSS_HIT = 0.19;
+    /**
+     * A miniboss's hardest single hit, as a share of a same-level character's health: over any
+     * captain's, and under any boss's blow even from a level over its band's top (a boss's blow is
+     * at least {@link ZoneBoss#LEAST_BLOW} of a character of the band's top).
+     */
+    public static final double MINIBOSS_HIT = 0.16;
+    /** A miniboss's health, at least and at most, in a same-level character's ordinary hits: an elite trainer's, over any captain's, well under a boss's. */
+    public static final double MINIBOSS_LEAST_HITS = 25, MINIBOSS_MOST_HITS = 40;
     /** How much larger a captain is. */
     public static final float CAPTAIN_SCALE = 1.15f;
-    /** How many levels over its zone's regulars a captain is, unless it says otherwise. */
-    public static final int CAPTAIN_OVER = 7;
+    /** How many levels over the regulars round it a captain is, about (one either way), unless it says otherwise. */
+    public static final int CAPTAIN_OVER = 4;
+    /** The most levels a captain or a miniboss stands over its zone's band: its boss stands {@link ZoneBoss#LEVELS_ABOVE_BAND} over it. */
+    public static final int CAPTAIN_ABOVE_BAND = 1;
 
     /** Persistent-data keys the kill XP reads (see LevelManager). */
     public static final String KEY_TIER = "jttw_enemy_tier", KEY_ZONE = "jttw_enemy_zone";
@@ -116,14 +133,50 @@ public abstract class ZoneMonster extends Monster implements MobLevel {
         return most;
     }
 
-    /** The level a regular one is about: its zone's lowest. A constant. */
+    /** The level a regular one is at its zone's outskirts: its band's lowest. A constant. */
     public int regularLevel() {
         return zone().minLevel();
     }
 
-    /** The level a captain is about. */
+    /** The level a captain is about at its zone's outskirts. */
     public int captainLevel() {
-        return regularLevel() + CAPTAIN_OVER;
+        return Math.min(topLevel(), regularLevel() + CAPTAIN_OVER);
+    }
+
+    /** The highest level one of its kind is put at, captain or miniboss: its band's top and {@link #CAPTAIN_ABOVE_BAND}. */
+    public int topLevel() {
+        return zone().maxLevel() + CAPTAIN_ABOVE_BAND;
+    }
+
+    /**
+     * How far along its zone's road it stands, from 0 (its outskirts) to 1 (its heart): by default how
+     * far into its region, from the edge to the middle, over the share of the road its open land is
+     * ({@link #landShare()}). A zone that goes down or in says otherwise (a cave by its floors, Hell
+     * by its courts).
+     */
+    protected double routeDepth() {
+        Zones.Zone z = zone();
+        if (!(level() instanceof ServerLevel server) || !z.hasFootprint()) return 0;
+        return z.depth(server.getSeed(), getBlockX(), getBlockZ()) * landShare();
+    }
+
+    /**
+     * How much of its zone's road its open land is, from the outskirts to the region's middle: all of
+     * it (1) where the land is all there is; less where a lair goes on from there, down or in, its
+     * floors the rest of the way to the band's top (the White Bone Cave, the Fire Cloud Cave...).
+     */
+    protected double landShare() {
+        return 1;
+    }
+
+    /** The level its zone's road stands at where it is ({@link #routeDepth()}): its band's bottom at the outskirts, its top at the heart. */
+    public int routeLevel() {
+        return levelAlong(zone(), routeDepth());
+    }
+
+    /** The level of a zone's road {@code depth} along it (0 to 1): its band's bottom to its top. */
+    public static int levelAlong(Zones.Zone zone, double depth) {
+        return zone.levelAlong(depth);
     }
 
     /** The chance a naturally spawned one is a captain. */
@@ -207,19 +260,26 @@ public abstract class ZoneMonster extends Monster implements MobLevel {
 
     /**
      * Makes it a miniboss of {@code level}: a captain whose hardest hit is {@link #MINIBOSS_HIT} of a
-     * same-level character's health, with {@code overCaptain} times a captain's health.
+     * same-level character's health, with {@code overCaptain} times a captain's health, kept within a
+     * miniboss's {@link #MINIBOSS_LEAST_HITS} to {@link #MINIBOSS_MOST_HITS} hits ({@link #minibossHits}).
      */
     public void becomeMiniboss(int level, double overCaptain) {
         miniboss = true;
         set(level, true);
-        getAttribute(Attributes.MAX_HEALTH).setBaseValue(healthAt(level, true) * overCaptain);
+        getAttribute(Attributes.MAX_HEALTH).setBaseValue(minibossHits(overCaptain) * MobScaling.typicalHit(level));
         setHealth(getMaxHealth());
+    }
+
+    /** A miniboss's hits, {@code overCaptain} times a captain's of its kind, kept within a miniboss's band. */
+    public double minibossHits(double overCaptain) {
+        return Math.max(MINIBOSS_LEAST_HITS, Math.min(MINIBOSS_MOST_HITS, hitsToKill() * CAPTAIN_HEALTH * overCaptain));
     }
 
     private void set(int level, boolean captain) {
         entityData.set(CAPTAIN, captain);
         entityData.set(MOB_LEVEL, level);
-        getAttribute(Attributes.MAX_HEALTH).setBaseValue(healthAt(level, captain));
+        // one always a miniboss (a Strong General, a Spider Spirit) is a miniboss's hits whoever brings it
+        getAttribute(Attributes.MAX_HEALTH).setBaseValue(captain && isMiniboss() ? minibossHits(1) * MobScaling.typicalHit(level) : healthAt(level, captain));
         getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(hitAt(blowShare()));
         setHealth(getMaxHealth());
         getPersistentData().putString(KEY_TIER, (captain ? EnemyTier.GENERAL : EnemyTier.GRUNT).name());
@@ -228,14 +288,26 @@ public abstract class ZoneMonster extends Monster implements MobLevel {
         refreshDimensions();
     }
 
-    /** A regular one's level: within one of {@link #regularLevel()}. */
+    /**
+     * A regular one's level, where it stands now (put it there first): within one of its road's
+     * there ({@link #routeLevel()}), never under its kind's least ({@link #regularLevel()}) nor past
+     * its band's top.
+     */
     public int rollRegularLevel(RandomSource r) {
-        return regularLevel() - 1 + r.nextInt(3);
+        return Math.max(regularLevel(), Math.min(zone().maxLevel(), routeLevel() - 1 + r.nextInt(3)));
     }
 
-    /** A captain's level: within one of {@link #captainLevel()}. */
+    /**
+     * A captain's level, where it stands now: {@link #CAPTAIN_OVER} over its road's there (or its
+     * kind's least), one either way (three to five over the regulars round it), never past {@link #topLevel()}.
+     */
     public int rollCaptainLevel(RandomSource r) {
-        return captainLevel() - 1 + r.nextInt(3);
+        return captainOver(Math.max(regularLevel(), routeLevel()), r);
+    }
+
+    /** A captain's level among regulars of {@code regulars}: three to five over them, never past {@link #topLevel()}. */
+    public int captainOver(int regulars, RandomSource r) {
+        return Math.min(topLevel(), regulars + CAPTAIN_OVER - 1 + r.nextInt(3));
     }
 
     @Override

@@ -31,16 +31,35 @@ public abstract class HellMonster extends ZoneMonster {
         return true;
     }
 
-    /** Captains are never over Hell's highest level. */
+    /**
+     * Hell's road is its courts, walked from the First to the Tenth: a court's creatures are of 57 in
+     * the First to the band's top, 66, in the Tenth (the Office of Records' and the wastes' of the
+     * First's); each where it stands, of the nearest hall's ({@link #courtLevel}).
+     */
     @Override
-    public int captainLevel() {
-        return Math.min(zone().maxLevel(), super.captainLevel());
+    protected double routeDepth() {
+        com.jttw.engine.world.hell.TenCourts.Court nearest = null;
+        double best = Double.MAX_VALUE;
+        for (com.jttw.engine.world.hell.TenCourts.Court c : com.jttw.engine.world.hell.TenCourts.HALLS) {
+            double d = Math.hypot(getX() - c.x(), getZ() - c.z());
+            if (d < best) {
+                best = d;
+                nearest = c;
+            }
+        }
+        return nearest == null ? 0 : courtDepth(nearest.number());
     }
 
-    @Override
-    public int rollCaptainLevel(net.minecraft.util.RandomSource r) {
-        return Math.min(zone().maxLevel(), super.rollCaptainLevel(r));
+    /** How far along Hell's road court {@code n} is (0 the Office of Records and the First, 1 the Tenth). */
+    public static double courtDepth(int n) {
+        return Math.max(0, n - 1) / 9.0;
     }
+
+    /** The level of the regulars of court {@code n} (0 the Office of Records): 57 in the First, one or so more each court, 66 in the Tenth. */
+    public static int courtLevel(int n) {
+        return Zones.HELL.levelAlong(courtDepth(n));
+    }
+
 
     @Override
     public boolean canAttack(LivingEntity target) {

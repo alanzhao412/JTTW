@@ -50,8 +50,9 @@ import java.util.Set;
  * {@value ZonePosts#RESPAWN_MINUTES} minutes, as the zones' posts do; then, the next time its ground
  * is awake and no one is in the lair, another demon king has heard of it and taken it for his own: a
  * boss of another kind, at random, made a usurper of that lair ({@link ZoneBoss#becomeUsurper}: of its
- * zone, {@link ZoneBoss#USURPER_LEVELS_ABOVE_BAND} over its band, {@link ZoneBoss#USURPER_HITS} of his
- * kind's hits, half a boss's XP). When he falls, another follows him, and so on for ever.
+ * zone, at its band's top ({@link ZoneBoss#USURPER_LEVELS_ABOVE_BAND} over it, where its master stood
+ * three over), {@link ZoneBoss#USURPER_HITS} of his kind's hits, half a boss's XP: easier than the gym's
+ * leader he follows). When he falls, another follows him, and so on for ever.
  *
  * <p>Who may usurp ({@link #HOUSES}): every boss whose kit is his own to carry anywhere, a house at a
  * time (one house as likely as another, then one of it): Lady Earth Flow (who, a usurper, has no

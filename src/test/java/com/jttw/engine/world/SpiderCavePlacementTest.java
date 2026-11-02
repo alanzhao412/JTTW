@@ -147,12 +147,12 @@ class SpiderCavePlacementTest {
         // the sisters, youngest first, eldest last; all within the band
         for (int b = 0; b < SpiderCavePlan.BOWER_COUNT; b++) {
             int lv = SpiderCavePlan.sisterLevel(b);
-            assertTrue(lv >= 78 && lv <= 88, "sister level " + lv);
+            assertTrue(lv >= 78 && lv <= 89, "sister level, at most one over the band: " + lv);
         }
         assertEquals(6, SpiderCavePlan.sisterOf(0));
         assertEquals(0, SpiderCavePlan.sisterOf(6));
         for (SpiderCavePlan.Post p : SpiderCavePlan.POSTS) {
-            assertTrue(p.level() >= 78 && p.level() <= 88, "a keeper of the band: " + p);
+            assertTrue(p.level() >= 78 && p.level() <= (p.captain() ? 89 : 88), "a keeper of the band (a captain at most one over): " + p);
             assertTrue(SpiderCavePlan.roof(p.x(), p.z()) >= 2, "on open floor: " + p);
         }
     }

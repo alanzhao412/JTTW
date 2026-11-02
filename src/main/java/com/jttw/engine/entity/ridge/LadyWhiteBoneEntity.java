@@ -73,24 +73,29 @@ import java.util.UUID;
 public class LadyWhiteBoneEntity extends ZoneBoss implements RangedAttackMob {
 
     public static final int LEVEL = ZoneBoss.levelOver(Zones.WHITE_BONE);
+    /** The character she is built for: one of the top of her band, level 36 ({@link ZoneBoss#challengerOf}). */
+    public static final int MEASURED = ZoneBoss.challengerOf(Zones.WHITE_BONE);
     /**
-     * Ordinary hits of a level-51 character to bring down each of her four lives (her three
-     * disguises' deaths, then hers): three hundred in all, a group's fight, each life more than any
-     * miniboss's; each shard a quarter of their health, her claw 28%, before resistance.
+     * Ordinary hits of a level-36 character to bring down each of her four lives (her three
+     * disguises' deaths, then hers): 68 in all, one's hard fight, all four more than any miniboss's;
+     * each shard 15% of their health, her claw 19% (five or six kill), before resistance.
      */
-    public static final double HITS = 75, SHARD = 0.25, CLAW = 0.28;
+    public static final double HITS = 17, SHARD = 0.15, CLAW = 0.19;
+    /** The levels she passes for, as one of her court in the throne room: its regulars', and its captains'. */
+    public static final int DISGUISE_LEVEL = com.jttw.engine.world.ridge.WhiteBoneCave.floorLevel(com.jttw.engine.world.ridge.WhiteBoneCave.FLOORS - 1),
+            DISGUISE_CAPTAIN_LEVEL = com.jttw.engine.world.ridge.WhiteBoneCave.captainOver(DISGUISE_LEVEL);
     /** How many times she rises again before she dies for good: the girl, the old woman, the old man. */
     public static final int FALSE_DEATHS = 3;
     /** How far she wanders from her lair while she passes for one of her dead. */
     public static final int HIDING_GROUND = 40;
-    public static final double HEALTH = HITS * MobScaling.typicalHit(LEVEL), SHARD_DAMAGE = SHARD * MobScaling.typicalHealth(LEVEL);
+    public static final double HEALTH = HITS * MobScaling.typicalHit(MEASURED), SHARD_DAMAGE = SHARD * MobScaling.typicalHealth(MEASURED);
     /** How often the veil falls, and how long it blinds, in ticks. */
     public static final int VEIL_EVERY = 280, VEIL_BLINDS = 100;
     /** How far the veil reaches. */
     public static final double VEIL_RANGE = 24;
-    /** The bone storm: how often, how long it gathers; how far it bursts, how hard (of a level-51 character's health). */
+    /** The bone storm: how often, how long it gathers; how far it bursts, how hard (of a level-36 character's health). */
     public static final int STORM_EVERY = 220, STORM_WIND_UP = 30;
-    public static final double STORM_REACH = 8, STORM = 0.22;
+    public static final double STORM_REACH = 8, STORM = 0.14;
     /** The closest she lets anyone come before she vanishes, and how soon she can again. */
     public static final double TOO_CLOSE = 5;
     public static final int BLINK_COOLDOWN = 60;
@@ -233,7 +238,7 @@ public class LadyWhiteBoneEntity extends ZoneBoss implements RangedAttackMob {
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, HEALTH)
-                .add(Attributes.ATTACK_DAMAGE, CLAW * MobScaling.typicalHealth(LEVEL))
+                .add(Attributes.ATTACK_DAMAGE, CLAW * MobScaling.typicalHealth(MEASURED))
                 .add(Attributes.MOVEMENT_SPEED, 0.26)
                 .add(Attributes.FLYING_SPEED, 0.5) // drifting, while she passes for a Wraith
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.8)
@@ -268,7 +273,7 @@ public class LadyWhiteBoneEntity extends ZoneBoss implements RangedAttackMob {
         if (disguised()) {
             int d = disguise();
             Component kind = Component.translatable(wraith(d) ? "entity.jttw_engine.wraith" : "entity.jttw_engine.bone_servant");
-            return ZoneMonster.nameWithLevel(kind, captain(d) ? RidgeMonster.CAPTAIN_LEVEL : RidgeMonster.LEVEL, captain(d));
+            return ZoneMonster.nameWithLevel(kind, captain(d) ? DISGUISE_CAPTAIN_LEVEL : DISGUISE_LEVEL, captain(d));
         }
         String lives = falseDeaths() == 0 ? "" : " " + "I".repeat(falseDeaths() + 1).replace("IIII", "IV");
         return Component.empty().append(super.getTypeName()).append(lives + " · Lv " + mobLevel());

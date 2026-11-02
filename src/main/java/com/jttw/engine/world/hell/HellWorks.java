@@ -631,10 +631,13 @@ public final class HellWorks {
             return;
         }
         int gv = c.isYama() ? 4 : 3;
+        // of their court's level on Hell's road; King Yama's are captains, four over it
+        int lv = com.jttw.engine.entity.hell.HellMonster.courtLevel(c.number());
+        int guards = c.isYama() ? Math.min(com.jttw.engine.world.Zones.HELL.maxLevel(), lv + com.jttw.engine.entity.zone.ZoneMonster.CAPTAIN_OVER) : lv;
         s.mob(ModEntities.OX_HEAD.get(), f.x(d + 4, -gv) + 0.5, G + 1, f.z(d + 4, -gv) + 0.5, out,
-                m -> m.become(m.regularLevel(), c.isYama()));
+                m -> m.become(guards, c.isYama()));
         s.mob(ModEntities.HORSE_FACE.get(), f.x(d + 4, gv) + 0.5, G + 1, f.z(d + 4, gv) + 0.5, out,
-                m -> m.become(m.regularLevel(), c.isYama()));
+                m -> m.become(guards, c.isYama()));
         if (c.isYama()) {
             // the soul-catchers wait on him, either side of the bench
             s.mob(ModEntities.BLACK_IMPERMANENCE.get(), f.x(-d + 8, -5) + 0.5, floor + 1, f.z(-d + 8, -5) + 0.5, out, null);

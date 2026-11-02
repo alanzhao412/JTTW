@@ -333,7 +333,8 @@ public final class BlackWindCave {
         m.finalizeSpawn(level, level.getCurrentDifficultyAt(p), MobSpawnType.STRUCTURE, null);
         if (s.kind() == BlackWindPlan.WARDEN) m.becomeMiniboss(BlackWindPlan.guardLevel(floor), BlackWindChief.HEALTH_OVER);
         else if (guard) m.become(BlackWindPlan.guardLevel(floor), true);
-        else m.become(s.captain() ? BlackWindPlan.captainLevel(floor) : BlackWindPlan.regularLevel(floor) + level.random.nextInt(3) - 1, s.captain());
+        else m.become(s.captain() ? BlackWindPlan.captainLevel(floor)
+                : Math.min(com.jttw.engine.world.Zones.BLACK_WIND.maxLevel(), BlackWindPlan.regularLevel(floor) + level.random.nextInt(3) - 1), s.captain());
         m.setPersistenceRequired();
         m.restrictTo(p, guard ? GUARD_ROAM : ROAM);
         CompoundTag t = new CompoundTag();

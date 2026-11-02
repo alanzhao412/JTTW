@@ -129,7 +129,7 @@ public final class FlowerFruitGarrison {
         BlockPos at = com.jttw.engine.entity.zone.ZoneMonster.roomNear(level, type, new BlockPos(x, y, z), 2); // clear of the stools, the pots, the beds
         m.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360f, 0f);
         m.finalizeSpawn(level, level.getCurrentDifficultyAt(m.blockPosition()), MobSpawnType.STRUCTURE, null);
-        m.become(lv, captain);
+        m.become(lv > 0 ? lv : captain ? m.rollCaptainLevel(random) : m.rollRegularLevel(random), captain); // 0: the road's, where it stands
         m.setPersistenceRequired();
         m.restrictTo(post, reach);
         mark(m, c, part);
@@ -176,7 +176,7 @@ public final class FlowerFruitGarrison {
                     : roll < 6 ? FlowerFruitRegistry.SPEAR_APE.get() : FlowerFruitRegistry.GREAT_BABOON.get();
             double a = i * Math.PI * 2 / count + 0.4;
             Mob m = put(level, type, x + (int) Math.round(Math.cos(a) * 3.5), y, z + (int) Math.round(Math.sin(a) * 3.5), captain,
-                    captain ? 26 + random.nextInt(3) : 20 + random.nextInt(3), mid, camp.patrol() ? PATROL_REACH : CAMP_REACH, random, c, CAMP + n);
+                    0, mid, camp.patrol() ? PATROL_REACH : CAMP_REACH, random, c, CAMP + n);
             if (m != null) out.add(m);
         }
         return out;

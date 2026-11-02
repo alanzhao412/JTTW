@@ -7,15 +7,18 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.PathType;
 
 /**
- * A creature of the Flaming Mountains: a {@link ZoneMonster} of the fire, about level 67, its
- * captains about 74. Born of the mountains' fire, it is fire-proof (its type says so): the burning
+ * A creature of the Flaming Mountains: a {@link ZoneMonster} of the fire, of level 67 at the
+ * mountains' edge to 71 at the Fire Cloud Cave's door, and on down its floors to 77
+ * ({@link com.jttw.engine.world.fire.FortressPlan}), its captains three to five over the regulars round them. Born of the mountains' fire, it is fire-proof (its type says so): the burning
  * earth, the fire on it and lava are nothing to it, and it walks through them as through air. Red
  * Boy's own Samadhi fire spares it (see SamadhiFire).
  */
 public abstract class FireMonster extends ZoneMonster {
 
-    /** The level a regular one is about, and a captain. */
+    /** The level a regular one is at the mountains' edge, and a captain. */
     public static final int LEVEL = 67, CAPTAIN_LEVEL = LEVEL + CAPTAIN_OVER;
+    /** The share of the mountains' road their land is, to the cave's door; its floors are the rest. */
+    public static final double LAND = 0.4;
 
     protected FireMonster(EntityType<? extends FireMonster> type, Level level) {
         super(type, level);
@@ -38,6 +41,11 @@ public abstract class FireMonster extends ZoneMonster {
     @Override
     public int captainLevel() {
         return CAPTAIN_LEVEL;
+    }
+
+    @Override
+    protected double landShare() {
+        return LAND;
     }
 
     /** Where it is kept (an outpost's band, a floor of the cave's garrison), kept with it: a creature's post is not saved by itself. */

@@ -141,7 +141,7 @@ public class FlowerFruitGameTests {
         check(h, StoneGibbonEntity.HITS <= 4 && SpearApeEntity.HITS >= 4 && SpearApeEntity.HITS <= 8 && GreatBaboonEntity.HITS >= 10, "light, normal, heavy");
         check(h, StoneGibbonEntity.CLAW <= 0.07 && SpearApeEntity.BLOW >= 0.08 && GreatBaboonEntity.BLOW >= 0.11, "their blows");
         eq(h, 20, FlowerFruitMonster.LEVEL, "regulars about 20");
-        eq(h, 27, gibbon.captainLevel(), "captains about 27");
+        eq(h, 24, gibbon.captainLevel(), "captains about 24 at the shore");
         GreatBaboonEntity captain = monkey(h, FlowerFruitRegistry.GREAT_BABOON.get(), 27, true, new BlockPos(0, 2, 4));
         eq(h, ZoneMonster.PURPLE, captain.getDisplayName().getStyle().getColor().getValue(), "a captain's name is purple");
         check(h, captain.getDisplayName().getString().contains("Captain") && captain.getDisplayName().getString().contains("Lv 27"), captain.getDisplayName().getString());
@@ -268,7 +268,8 @@ public class FlowerFruitGameTests {
             eq(h, ZoneMonster.PURPLE, f.getDisplayName().getStyle().getColor().getValue(), "purple");
             check(h, f.isMiniboss(), "a miniboss");
             close(h, ZoneMonster.MINIBOSS_HIT * MobScaling.typicalHealth(29), f.getAttributeValue(Attributes.ATTACK_DAMAGE), "a miniboss's blow");
-            close(h, FakePilgrimEntity.HITS * MobScaling.typicalHit(29) * ZoneMonster.CAPTAIN_HEALTH * CavePlan.PILGRIM_HEALTH, f.getMaxHealth(), "a miniboss's health");
+            close(h, f.minibossHits(CavePlan.PILGRIM_HEALTH) * MobScaling.typicalHit(29), f.getMaxHealth(), "a miniboss's health");
+            check(h, f.minibossHits(CavePlan.PILGRIM_HEALTH) >= ZoneMonster.MINIBOSS_LEAST_HITS && f.minibossHits(CavePlan.PILGRIM_HEALTH) <= ZoneMonster.MINIBOSS_MOST_HITS, "an elite trainer's hits");
             names.add(name);
         }
         eq(h, 3, names.size(), "the three");

@@ -193,7 +193,7 @@ class LionFortressTest {
             assertEquals(captains(k), caps, "floor " + k + "'s captains");
             assertTrue(keepers >= last, "no fewer deeper");
             last = (int) keepers;
-            assertTrue(levelOf(k, REGULAR) >= 89 && levelOf(k, WARDEN) <= 100, "within the band");
+            assertTrue(levelOf(k, REGULAR) >= 89 && levelOf(k, REGULAR) <= 100 && levelOf(k, WARDEN) <= 101, "within the band (a warden at most one over)");
             if (k > 0) assertTrue(levelOf(k, REGULAR) > levelOf(k - 1, REGULAR), "stronger deeper");
             assertTrue(levelOf(k, WARDEN) >= levelOf(k, CAPTAIN) && levelOf(k, CAPTAIN) > levelOf(k, REGULAR));
             Post w = POSTS.stream().filter(p -> p.floor() == floor && p.role() == WARDEN).findFirst().orElseThrow();

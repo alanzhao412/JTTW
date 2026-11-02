@@ -21,8 +21,10 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.pathfinder.PathType;
 
 /**
- * A creature of Silk-Web Ridge (盘丝岭): a {@link ZoneMonster} of the Spider Cave's household, about
- * level 78, its captains about 85, in any light. Silk is its element: its webs and the cobwebs do
+ * A creature of Silk-Web Ridge (盘丝岭): a {@link ZoneMonster} of the Spider Cave's household, of
+ * level 78 at the ridge's edge to 84 at its heart, and on through the cave's hall and bowers to 88
+ * ({@link com.jttw.engine.world.spider.SpiderCavePlan}), its captains three to five over the regulars
+ * round them, in any light. Silk is its element: its webs and the cobwebs do
  * not hold it (it paths over them as over the ground), the ridge's venom does not touch it. One put
  * at a post when the land is made (the cave's garrison, the temple's, the cottage's) keeps near it,
  * and is put back there if it strays far with no one to fight.
@@ -32,8 +34,10 @@ import net.minecraft.world.level.pathfinder.PathType;
  */
 public abstract class SilkMonster extends ZoneMonster implements SilkKin {
 
-    /** The level a regular one is about, and a captain. */
+    /** The level a regular one is at the ridge's edge, and a captain. */
     public static final int LEVEL = 78, CAPTAIN_LEVEL = LEVEL + CAPTAIN_OVER;
+    /** The share of the ridge's road its land is, to its heart; the Spider Cave is the rest. */
+    public static final double LAND = 0.6;
     /** How far one put at a post may stray, with no one to fight, before it is put back. */
     public static final int LEASH = 32;
 
@@ -55,6 +59,11 @@ public abstract class SilkMonster extends ZoneMonster implements SilkKin {
     @Override
     public int captainLevel() {
         return CAPTAIN_LEVEL;
+    }
+
+    @Override
+    protected double landShare() {
+        return LAND;
     }
 
     /** No web holds it, and the cobwebs do not slow it. */

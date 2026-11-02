@@ -594,9 +594,23 @@ public final class WhiteBoneCave {
      */
     public record Post(int x, int y, int z, int floor, int kind, int rank, int level) {}
 
-    /** A floor's regulars' level: from 21 on the first to 33 on the last. */
+    /**
+     * A floor's regulars' level: the ridge's road goes on down the cave from the mountain's (28,
+     * {@link com.jttw.engine.entity.ridge.RidgeMonster#LAND} of the band), from 29 on the first to the
+     * band's top, 36, on the last.
+     */
     public static int floorLevel(int k) {
-        return 21 + (k * 12) / (FLOORS - 1);
+        return LAND_TOP + 1 + (k * (ZONE.maxLevel() - LAND_TOP - 1)) / (FLOORS - 1);
+    }
+
+    /** The level the ridge's land climbs to at the mountain, the cave's door: half the band. */
+    public static final int LAND_TOP = Zones.WHITE_BONE.levelAlong(com.jttw.engine.entity.ridge.RidgeMonster.LAND);
+    /** The most any post of the ridge is: a captain's or a miniboss's, one over the band's top. */
+    public static final int POST_TOP = Zones.WHITE_BONE.maxLevel() + com.jttw.engine.entity.zone.ZoneMonster.CAPTAIN_ABOVE_BAND;
+
+    /** A captain's level among regulars of {@code lv}: four over them, never past {@link #POST_TOP}. */
+    public static int captainOver(int lv) {
+        return Math.min(POST_TOP, lv + com.jttw.engine.entity.zone.ZoneMonster.CAPTAIN_OVER);
     }
 
     /** The posts of floor k (8: the throne room's, her court). */
@@ -617,14 +631,14 @@ public final class WhiteBoneCave {
                 int x = (int) Math.round(Math.cos(a) * 9), z = -6 + (int) Math.round(Math.sin(a) * 9);
                 boolean captain = i == 0 || i == 3;
                 out.add(new Post(x, THRONE_Y, z, k, i % 2 == 0 ? SERVANT : WRAITH, captain ? CAPTAIN : REGULAR,
-                        captain ? Math.min(36, lv + 3) : lv));
+                        captain ? captainOver(lv) : lv));
             }
             return List.copyOf(out);
         }
         int regulars = 8 + k, captains = 1 + k / 2, lv = floorLevel(k);
         // the guardian, before the seal
         int s = side(k);
-        out.add(new Post(-12, floorY(k), s * 43, k, SERVANT, GUARDIAN, Math.min(36, lv + 6)));
+        out.add(new Post(-12, floorY(k), s * 43, k, SERVANT, GUARDIAN, Math.min(POST_TOP, lv + 5)));
         List<int[]> spots = new ArrayList<>();
         int from = k == 3 ? FIRST : -42, pitch = k == 3 ? PITCH : 6; // in the catacombs, the cells' middles
         for (int x1 = from; x1 <= 44; x1 += pitch) for (int z1 = from; z1 <= 44; z1 += pitch) {
@@ -638,7 +652,7 @@ public final class WhiteBoneCave {
             boolean captain = i < captains;
             int kind = hash(p[0], p[1], 60 + k) < WRAITHS[k] * 10 ? WRAITH : SERVANT;
             int fy = floorY(k) + fo(plan(k, p[0], p[1]));
-            out.add(new Post(p[0], fy, p[1], k, kind, captain ? CAPTAIN : REGULAR, captain ? Math.min(36, lv + 5) : lv));
+            out.add(new Post(p[0], fy, p[1], k, kind, captain ? CAPTAIN : REGULAR, captain ? captainOver(lv) : lv));
         }
         return List.copyOf(out);
     }
@@ -662,29 +676,30 @@ public final class WhiteBoneCave {
      */
     public List<Post> outside() {
         List<Post> out = new ArrayList<>();
-        int lv = 21;
+        // the road's levels climb as it nears the door, from the outposts' to the forecourt's (the mountain's: LAND_TOP)
+        int door = LAND_TOP, lv = LAND_TOP - 2;
         for (int s = -1; s <= 1; s += 2) {
-            out.add(new Post(s * 9, 0, 67, OUTSIDE, SERVANT, WARDEN, 28));
-            out.add(new Post(s * 12, 0, 72, OUTSIDE, SERVANT, REGULAR, lv));
-            out.add(new Post(s * 5, 0, 75, OUTSIDE, WRAITH, REGULAR, lv));
+            out.add(new Post(s * 9, 0, 67, OUTSIDE, SERVANT, WARDEN, Math.min(POST_TOP, door + 6)));
+            out.add(new Post(s * 12, 0, 72, OUTSIDE, SERVANT, REGULAR, door));
+            out.add(new Post(s * 5, 0, 75, OUTSIDE, WRAITH, REGULAR, door));
         }
         for (int t : TOWERS) {
             int rx = roadX(t);
-            out.add(new Post(rx - TOWER_OUT + 1, Integer.MIN_VALUE, t + 1, OUTSIDE, WRAITH, REGULAR, lv)); // on its top
-            out.add(new Post(rx + TOWER_OUT - 3, Integer.MIN_VALUE, t + 3, OUTSIDE, SERVANT, REGULAR, lv));
+            out.add(new Post(rx - TOWER_OUT + 1, Integer.MIN_VALUE, t + 1, OUTSIDE, WRAITH, REGULAR, door - 1)); // on its top
+            out.add(new Post(rx + TOWER_OUT - 3, Integer.MIN_VALUE, t + 3, OUTSIDE, SERVANT, REGULAR, door - 1));
         }
         for (int z : new int[]{100, 135, 170, 205}) {
-            int rx = roadX(z);
-            out.add(new Post(rx, Integer.MIN_VALUE, z, OUTSIDE, z % 2 == 0 ? SERVANT : WRAITH, CAPTAIN, 27));
-            out.add(new Post(rx - 2, Integer.MIN_VALUE, z + 2, OUTSIDE, SERVANT, REGULAR, lv));
-            out.add(new Post(rx + 2, Integer.MIN_VALUE, z + 2, OUTSIDE, WRAITH, REGULAR, lv));
+            int rx = roadX(z), along = Math.max(ZONE.minLevel(), door - 1 - (z - 100) / 35); // farther down the road, lower
+            out.add(new Post(rx, Integer.MIN_VALUE, z, OUTSIDE, z % 2 == 0 ? SERVANT : WRAITH, CAPTAIN, captainOver(along)));
+            out.add(new Post(rx - 2, Integer.MIN_VALUE, z + 2, OUTSIDE, SERVANT, REGULAR, along));
+            out.add(new Post(rx + 2, Integer.MIN_VALUE, z + 2, OUTSIDE, WRAITH, REGULAR, along));
         }
         for (int[] o : outposts()) {
-            out.add(new Post(o[0] + 3, Integer.MIN_VALUE, o[1], OUTSIDE, SERVANT, CAPTAIN, 27));
+            out.add(new Post(o[0] + 3, Integer.MIN_VALUE, o[1], OUTSIDE, SERVANT, CAPTAIN, captainOver(lv)));
             for (int i = 0; i < 4; i++) {
                 double a = i * Math.PI / 2 + 0.6;
                 out.add(new Post(o[0] + (int) Math.round(Math.cos(a) * 7), Integer.MIN_VALUE, o[1] + (int) Math.round(Math.sin(a) * 7),
-                        OUTSIDE, i % 2 == 0 ? SERVANT : WRAITH, REGULAR, lv + (i % 2)));
+                        OUTSIDE, i % 2 == 0 ? SERVANT : WRAITH, REGULAR, lv - 1 + (i % 2)));
             }
         }
         // packs roaming the mountain's flanks and the ridge round it: a captain and three
@@ -698,11 +713,13 @@ public final class WhiteBoneCave {
             for (int[] o : outposts()) clear &= Math.hypot(x - o[0], z - o[1]) > OUTPOST_R + 8;
             if (!clear) continue;
             int kind = r.nextInt(2);
-            out.add(new Post(x, Integer.MIN_VALUE, z, OUTSIDE, kind, CAPTAIN, 26 + r.nextInt(3)));
+            // a pack's level is the land's where it roams: the nearer the mountain, the higher (the ridge's region some 420 across the middle)
+            int pack = Math.max(ZONE.minLevel(), Math.min(LAND_TOP, (int) Math.round(LAND_TOP - (LAND_TOP - ZONE.minLevel()) * d / 420.0)));
+            out.add(new Post(x, Integer.MIN_VALUE, z, OUTSIDE, kind, CAPTAIN, captainOver(pack) - 1 + r.nextInt(3)));
             for (int i = 0; i < 3; i++) {
                 double b = i * Math.PI * 2 / 3 + a;
                 out.add(new Post(x + (int) Math.round(Math.cos(b) * 3), Integer.MIN_VALUE, z + (int) Math.round(Math.sin(b) * 3), OUTSIDE,
-                        r.nextInt(2), REGULAR, lv - 1 + r.nextInt(3)));
+                        r.nextInt(2), REGULAR, Math.max(ZONE.minLevel(), Math.min(ZONE.maxLevel(), pack - 1 + r.nextInt(3)))));
             }
             packs++;
         }

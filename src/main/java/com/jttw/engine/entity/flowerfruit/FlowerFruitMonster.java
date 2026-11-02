@@ -25,16 +25,19 @@ import javax.annotation.Nullable;
 
 /**
  * A creature of Flower-Fruit Mountain: one of the monkey army the Six-Eared Macaque has gathered in
- * the Monkey King's old kingdom, a {@link ZoneMonster} of levels about 20, its captains about 27, in
- * any light. The monkeys know their true king: they never raise a hand against a Wukong player
+ * the Monkey King's old kingdom, a {@link ZoneMonster} of levels 20 at the island's shore to 26 at
+ * its heart, and on into the Water Curtain Cave to 30, its captains three to five over the regulars
+ * round them, in any light. The monkeys know their true king: they never raise a hand against a Wukong player
  * ({@link ZoneAllies#WUKONG}), and when he comes near with no fight on, they drop to their knees and
  * kowtow ({@link #isBowing}), now and then hailing him "Great King!" ({@link FlowerFruit#hail}).
  * One kept to a post (a camp's band, the cave's garrison) keeps its post when saved.
  */
 public abstract class FlowerFruitMonster extends ZoneMonster {
 
-    /** The level a regular one is about, and a captain. */
+    /** The level a regular one is at the island's shore, and a captain. */
     public static final int LEVEL = 20, CAPTAIN_LEVEL = LEVEL + CAPTAIN_OVER;
+    /** The share of the island's road its land is, to its heart; the Water Curtain Cave is the rest ({@link com.jttw.engine.world.flowerfruit.CavePlan}). */
+    public static final double LAND = 0.6;
     /** How near the true Monkey King must be for them to kowtow. */
     public static final double BOW_RANGE = 7;
 
@@ -57,6 +60,11 @@ public abstract class FlowerFruitMonster extends ZoneMonster {
     @Override
     public int captainLevel() {
         return CAPTAIN_LEVEL;
+    }
+
+    @Override
+    protected double landShare() {
+        return LAND;
     }
 
     /** The mountain's bands are led more often than most: one in eight of the world's own is a captain. */

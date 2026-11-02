@@ -148,7 +148,7 @@ class FlowerFruitPlacementTest {
         for (CavePlan.Post p : CavePlan.POSTS) {
             assertFalse(CavePlan.inSanctum(p.x(), p.z()), "no one in the sanctum but him");
             assertTrue(CavePlan.ceiling(p.x(), p.z()) >= 3, "a post in the open: " + p);
-            assertTrue(p.level() >= Z.minLevel() && p.level() <= Z.maxLevel(), "of the band: " + p);
+            assertTrue(p.level() >= Z.minLevel() && p.level() <= Z.maxLevel() + (p.captain() ? 1 : 0), "of the band (a captain or a miniboss at most one over): " + p);
         }
     }
 }

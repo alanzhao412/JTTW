@@ -669,7 +669,7 @@ public class LionCamelGameTests {
         check(h, captain.getDisplayName().getString().contains("Captain") && captain.getDisplayName().getString().contains("Lv 96"), captain.getDisplayName().getString());
         check(h, regular.getDisplayName().getString().contains("Lv 89"), regular.getDisplayName().getString());
         close(h, LionDemonEntity.HITS * MobScaling.typicalHit(96) * ZoneMonster.CAPTAIN_HEALTH, captain.getMaxHealth(), "a captain's health");
-        eq(h, LionCamelMonster.LEVEL + ZoneMonster.CAPTAIN_OVER, captain.captainLevel(), "captains about 96");
+        eq(h, LionCamelMonster.LEVEL + ZoneMonster.CAPTAIN_OVER, captain.captainLevel(), "captains about 93 at the ridge's edge");
         LivingEntity foe = golem(h, new BlockPos(0, 2, 4));
         captain.setTarget(foe); // its escorts are set on its foe: so this test knows its own
         captain.bringEscorts(h.getLevel());

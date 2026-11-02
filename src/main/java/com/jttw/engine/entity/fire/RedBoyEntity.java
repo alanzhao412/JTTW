@@ -71,9 +71,11 @@ import java.util.List;
 public class RedBoyEntity extends ZoneBoss {
 
     public static final int LEVEL = ZoneBoss.levelOver(Zones.FIRE_MOUNTAIN);
-    /** 320 ordinary hits of a level-92 character; a spear thrust of 30% of their health; his breath's blow a quarter. */
-    public static final double HITS = 320, SPEAR = 0.30, BREATH = 0.25;
-    public static final double HEALTH = HITS * MobScaling.typicalHit(LEVEL);
+    /** The character he is built for: one of the top of his band, level 77 ({@link ZoneBoss#challengerOf}). */
+    public static final int MEASURED = ZoneBoss.challengerOf(Zones.FIRE_MOUNTAIN);
+    /** 72 ordinary hits of a level-77 character; a spear thrust of 19.5% of their health (five or six kill); his breath's blow 16%. */
+    public static final double HITS = 72, SPEAR = 0.195, BREATH = 0.16;
+    public static final double HEALTH = HITS * MobScaling.typicalHit(MEASURED);
     /** How often he breathes the fire (and, from a third, how often then), how long he strikes his nose first. */
     public static final int BREATH_EVERY = 140, BREATH_ENRAGED = 80, WINDUP = 20;
     /** How far his breath reaches, how wide (degrees either side), how long it burns. */
@@ -107,7 +109,7 @@ public class RedBoyEntity extends ZoneBoss {
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, HEALTH)
-                .add(Attributes.ATTACK_DAMAGE, SPEAR * MobScaling.typicalHealth(LEVEL))
+                .add(Attributes.ATTACK_DAMAGE, SPEAR * MobScaling.typicalHealth(MEASURED))
                 .add(Attributes.MOVEMENT_SPEED, 0.3)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.8)
                 .add(Attributes.ARMOR, 10)
@@ -191,7 +193,7 @@ public class RedBoyEntity extends ZoneBoss {
 
     /** His breath's blow. */
     public float breathDamage() {
-        return (float) (BREATH * MobScaling.typicalHealth(LEVEL));
+        return (float) (BREATH * MobScaling.typicalHealth(MEASURED));
     }
 
     /** How fierce his fire is now: from a third of his health, fiercer. */

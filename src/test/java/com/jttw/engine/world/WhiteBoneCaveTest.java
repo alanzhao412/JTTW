@@ -196,11 +196,13 @@ class WhiteBoneCaveTest {
             assertEquals(1 + k / 2, captains, NAMES[k] + "'s captains");
             assertEquals(8 + k + 1 + k / 2 + 1, posts.size(), NAMES[k] + "'s posts all found ground");
             int level = floorLevel(k);
-            assertTrue(level >= before && level >= 20 && guardian.level() <= 36, "levels rise within the band");
+            assertTrue(level >= before && level >= 20 && level <= 36 && guardian.level() <= 37, "levels rise within the band (a guardian at most one over)");
             before = level;
             for (WhiteBoneCave.Post p : posts) assertEquals(k, p.floor());
         }
-        assertEquals(33, floorLevel(FLOORS - 1));
+        assertEquals(29, floorLevel(0), "on down from the mountain's 28");
+        assertEquals(36, floorLevel(FLOORS - 1), "the band's top at the bottom");
+        assertTrue(cave.outside().stream().allMatch(p -> p.level() >= 20 && p.level() <= 37), "the mountain's posts within the band (a captain one over)");
         assertEquals(6, cave.posts(FLOORS).size(), "her court");
         long wardens = cave.outside().stream().filter(p -> p.rank() == WARDEN).count();
         assertEquals(2, wardens, "two keepers of the door");

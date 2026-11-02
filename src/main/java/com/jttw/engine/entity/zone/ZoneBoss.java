@@ -51,17 +51,18 @@ import java.util.function.Predicate;
  *       leaves them nothing if they strike it down.</li>
  * </ul>
  *
- * <p>A boss stands {@link #LEVELS_ABOVE_BAND} levels over the top of its zone's band ({@link #levelOver}).
- * A boss is a group's fight, not one character's: all its lives together it takes at least
- * {@link #LEAST_HITS} of a same-level character's ordinary hits to kill (three or four of them,
- * some sixty to ninety hits each), and its main blow takes {@link #LEAST_BLOW} to {@link #MOST_BLOW}
- * of that character's health, so three or four of them kill; its special hits ({@link #specialShares()},
- * each struck with {@link #hitOf}) are no harder. Each
- * of its lives ({@link #lives()}) is more than any miniboss's health (see the README's pecking order).
+ * <p><b>A boss is its zone's gym leader.</b> It stands {@link #LEVELS_ABOVE_BAND} levels over the top
+ * of its zone's band ({@link #levelOver}), the highest thing of its zone, and it is built for one
+ * challenger: a character of the band's top level ({@link #challengerOf}), who can beat it alone, in a
+ * hard fight. All its lives together it takes {@link #LEAST_HITS} to {@link #MOST_HITS} of that
+ * character's ordinary hits to kill, and its main blow takes {@link #LEAST_BLOW} to {@link #MOST_BLOW}
+ * of that character's health, so five or six kill; its special hits ({@link #specialShares()}, each
+ * struck with {@link #hitOf}) are no harder. All its lives together are more than any miniboss's
+ * health (see the README's pecking order). A group finds it easy, and that is as it should be.
  *
  * <p><b>A usurper</b> ({@link #becomeUsurper}) is a boss of one kind sat in another's lair once its
- * master has fallen: of that lair's zone (its kill's XP, its allies), {@link #USURPER_LEVELS_ABOVE_BAND}
- * over its band where a master stands {@link #LEVELS_ABOVE_BAND}, {@link #USURPER_HITS} of its kind's
+ * master has fallen: of that lair's zone (its kill's XP, its allies), at its band's top
+ * ({@link #USURPER_LEVELS_ABOVE_BAND} over it) where a master stands {@link #LEVELS_ABOVE_BAND} over it, {@link #USURPER_HITS} of its kind's
  * hits (never under {@link #USURPER_LEAST_HITS}), and every blow and special of its kit, struck as its
  * kind strikes them, scaled to its new level ({@link #strikes}); half a boss's XP, half its karma, and
  * a lesser loot ({@link #USURPER_LOOT}), none of its kind's own treasures. What its kind is, its level
@@ -70,45 +71,57 @@ import java.util.function.Predicate;
 public abstract class ZoneBoss extends Monster implements MobLevel {
 
     /**
-     * How far over its zone's level band a boss stands: a zone's boss is of the band's top level and
-     * this many more ({@link #levelOver}), far beyond anything else of its zone (its minions,
-     * captains and minibosses keep within the band). Past the players' cap of 100 as need be.
+     * How far over its zone's level band a boss stands: a zone's head boss is of the band's top level
+     * and this many more ({@link #levelOver}), the highest thing of its zone, as a gym's leader stands
+     * over its trainers (its captains and minibosses are at most
+     * {@link ZoneMonster#CAPTAIN_ABOVE_BAND} over the band; a lesser boss, {@link #LESSER_ABOVE_BAND}).
+     * Past the players' cap of 100 at Lion-Camel Ridge.
      */
-    public static final int LEVELS_ABOVE_BAND = 15;
+    public static final int LEVELS_ABOVE_BAND = 3;
+    /** How far over its zone's band a lesser boss stands, under its head boss: Hell's Ten Kings under King Yama, the White Elephant under the Azure Lion. */
+    public static final int LESSER_ABOVE_BAND = 2;
 
     /** A boss's level in {@code zone}: the top of its band and {@link #LEVELS_ABOVE_BAND} more. */
     public static int levelOver(Zones.Zone zone) {
         return zone.maxLevel() + LEVELS_ABOVE_BAND;
     }
 
-    /** Up to this level a boss is measured against a character of its own level; past it, see {@link #measuredAt}. */
-    public static final int MEASURED_OWN_UP_TO = 92;
-    /** The boss level at which the measure reaches the players' cap. */
-    public static final int MEASURED_CAP_AT = 115;
+    /** A lesser boss's level in {@code zone}: the top of its band and {@link #LESSER_ABOVE_BAND} more, one under its head boss. */
+    public static int lesserLevelOver(Zones.Zone zone) {
+        return zone.maxLevel() + LESSER_ABOVE_BAND;
+    }
 
     /**
-     * The level of character a boss of {@code level} is measured against, its health and its blows: its
-     * own up to {@value #MEASURED_OWN_UP_TO} (Red Boy); past it, levels count for less, reaching the
-     * players' cap of 100 at {@value #MEASURED_CAP_AT} (the Azure Lion) and holding there (the
-     * Six-Eared Macaque). So Zhenyuan and the Hundred-Eyed Demon Lord (103) are a level-96 group's
-     * fight, the White Elephant (113) a level-99 one's, and every boss past them a capped group's:
-     * none is out of reach of players at the cap, and none one-shots them.
+     * The character a boss of {@code zone} is built for, its challenger: one of the top of its band (the
+     * players' cap, past it). A boss's health is so many of this character's ordinary hits and its blows
+     * shares of this character's health, whatever its own level: the gym's leader is a fight for one
+     * who has walked the whole road to it. (Measured at its own level, three over, it would be a third
+     * again as hard: a level is a tenth more power.)
+     */
+    public static int challengerOf(Zones.Zone zone) {
+        return measuredAt(zone.maxLevel());
+    }
+
+    /**
+     * The level of character a creature of {@code level} past the bands is measured against: its own up
+     * to the players' cap of 100, the cap past it. So no boss past the cap (the kings of Lion-Camel
+     * Ridge, at 103; the Six-Eared Macaque, at 120) is out of reach of capped players.
      */
     public static int measuredAt(int level) {
-        int cap = com.jttw.engine.progression.level.LevelConstants.MAX_LEVEL;
-        if (level <= MEASURED_OWN_UP_TO) return level;
-        double over = (level - MEASURED_OWN_UP_TO) * (cap - MEASURED_OWN_UP_TO) / (double) (MEASURED_CAP_AT - MEASURED_OWN_UP_TO);
-        return (int) Math.min(cap, Math.round(MEASURED_OWN_UP_TO + over));
+        return Math.min(level, com.jttw.engine.progression.level.LevelConstants.MAX_LEVEL);
     }
 
-    /** The level of character it is measured against now (a usurper, at its new level): see {@link #measuredAt}. */
+    /** The level of character it is measured against now: its kind's ({@link #nativeMeasured()}), or a usurper's, its own new level. */
     public int measuredLevel() {
-        return measuredAt(mobLevel());
+        return isUsurper() ? measuredAt(mobLevel()) : nativeMeasured();
     }
 
-    /** The level of character its kind is measured against, where the world first puts it: its hits ({@link #hitOf}) are of this. */
+    /**
+     * The level of character its kind is measured against, where the world first puts it: its zone's
+     * challenger ({@link #challengerOf}), unless it says otherwise. Its hits ({@link #hitOf}) are of this.
+     */
     public int nativeMeasured() {
-        return measuredAt(nativeLevel());
+        return challengerOf(zone());
     }
 
     /**
@@ -126,11 +139,11 @@ public abstract class ZoneBoss extends Monster implements MobLevel {
 
     // ── A usurper ───────────────────────────────────────────────────────
 
-    /** How far over its lair's zone's band a usurper stands (a master stands {@link #LEVELS_ABOVE_BAND} over it). */
-    public static final int USURPER_LEVELS_ABOVE_BAND = 5;
+    /** How far over its lair's zone's band a usurper stands: none, at its top (a master stands {@link #LEVELS_ABOVE_BAND} over it). */
+    public static final int USURPER_LEVELS_ABOVE_BAND = 0;
     /** A usurper's share of its kind's hits, all its lives together; never fewer than {@link #USURPER_LEAST_HITS}. */
     public static final double USURPER_HITS = 0.6;
-    public static final double USURPER_LEAST_HITS = ZoneBoss.LEAST_HITS * USURPER_HITS; // a constant: 150
+    public static final double USURPER_LEAST_HITS = ZoneBoss.LEAST_HITS * USURPER_HITS; // a constant: 36
     /** A usurper's share of a boss's kill XP, and of its kind's karma. */
     public static final double USURPER_XP = 0.5, USURPER_KARMA = 0.5;
     /** What a usurper leaves: some gold, a sigil or two, perhaps a diamond; none of its kind's own treasures. */
@@ -246,10 +259,10 @@ public abstract class ZoneBoss extends Monster implements MobLevel {
         return (float) Math.min(amount * strikeScale, MOST_BLOW * MobScaling.typicalHealth(measuredLevel()));
     }
 
-    /** The least ordinary hits of a same-level character a boss takes to kill, all its lives together. */
-    public static final double LEAST_HITS = 250;
-    /** A boss's main blow, at least and at most, as a share of a same-level character's health: three or four kill. */
-    public static final double LEAST_BLOW = 0.25, MOST_BLOW = 0.33;
+    /** The least and the most ordinary hits of its challenger ({@link #challengerOf}) a boss takes to kill, all its lives together. */
+    public static final double LEAST_HITS = 60, MOST_HITS = 80;
+    /** A boss's main blow, at least and at most, as a share of its challenger's health: five or six kill. */
+    public static final double LEAST_BLOW = 0.18, MOST_BLOW = 0.20;
 
     /** How long a player who struck it keeps seeing its bar, wherever they are, in ticks. */
     public static final int FIGHTER_MEMORY = 600;

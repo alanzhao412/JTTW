@@ -67,13 +67,15 @@ import java.util.List;
  */
 public class WhiteElephantEntity extends DemonKingEntity {
 
-    public static final int LEVEL = com.jttw.engine.entity.zone.ZoneBoss.levelOver(com.jttw.engine.world.Zones.LION_CAMEL) - 2;
-    /** The level of character he is measured against, past the cap's reach ({@link com.jttw.engine.entity.zone.ZoneBoss#measuredAt}). */
-    public static final int MEASURED = com.jttw.engine.entity.zone.ZoneBoss.measuredAt(LEVEL);
-    public static final int LANCE_PERCENT = 28, CRUSH_PERCENT = 8, STAMP_PERCENT = 16, GORE_PERCENT = 22;
-    /** What a held foe must deal his trunk, in ordinary hits of a level-113 character, to be dropped. */
+    /** A lesser boss's level, one under the Azure Lion ({@link com.jttw.engine.entity.zone.ZoneBoss#lesserLevelOver}). */
+    public static final int LEVEL = com.jttw.engine.entity.zone.ZoneBoss.lesserLevelOver(com.jttw.engine.world.Zones.LION_CAMEL);
+    /** The character he is built for: one of the top of his band, the players' cap ({@link com.jttw.engine.entity.zone.ZoneBoss#challengerOf}). */
+    public static final int MEASURED = com.jttw.engine.entity.zone.ZoneBoss.challengerOf(com.jttw.engine.world.Zones.LION_CAMEL);
+    public static final int LANCE_PERCENT = 19, CRUSH_PERCENT = 5, STAMP_PERCENT = 10, GORE_PERCENT = 14;
+    /** What a held foe must deal his trunk, in ordinary hits of a level-100 character, to be dropped. */
     public static final double ESCAPE_HITS = 3.4;
-    public static final double HITS = 330, LANCE = LANCE_PERCENT / 100.0, CRUSH = CRUSH_PERCENT / 100.0,
+    /** 74 ordinary hits of a level-100 character; his lance 19% of their health (five or six kill). */
+    public static final double HITS = 74, LANCE = LANCE_PERCENT / 100.0, CRUSH = CRUSH_PERCENT / 100.0,
             STAMP = STAMP_PERCENT / 100.0, GORE = GORE_PERCENT / 100.0;
     public static final double HEALTH = HITS * MobScaling.typicalHit(MEASURED);
     public static final int GRAB_EVERY = 200, GRAB_ENRAGED = 130, TRUNK_WINDUP = 15, SQUEEZE_EVERY = 15, MAX_HOLD = 60;

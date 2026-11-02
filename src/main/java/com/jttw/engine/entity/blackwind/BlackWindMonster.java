@@ -15,13 +15,17 @@ import java.util.List;
 
 /**
  * A creature of Black Wind Mountain (黑风山): a {@link ZoneMonster} of the Black Bear Demon's mountain,
- * about level 20, its captains about 27 (White Bone Ridge's band). It comes in any light; the black wind
- * blows round it. Where it is kept (a camp's band, the cave's garrison) is saved with it.
+ * of White Bone Ridge's band: level 20 at the mountain's foot, 28 by the cave's door at its heart, and
+ * on into the Black Wind Cave to 36 ({@link BlackWindPlan}); its captains three to five over the
+ * regulars round them. It comes in any light; the black wind blows round it. Where it is kept (a
+ * camp's band, the cave's garrison) is saved with it.
  */
 public abstract class BlackWindMonster extends ZoneMonster {
 
-    /** The level a regular one is about, and a captain. */
+    /** The level a regular one is at the mountain's foot, and a captain. */
     public static final int LEVEL = 20, CAPTAIN_LEVEL = LEVEL + CAPTAIN_OVER;
+    /** The share of the mountain's road its land is, to the cave's door; the cave is the rest. */
+    public static final double LAND = 0.5;
 
     protected BlackWindMonster(EntityType<? extends BlackWindMonster> type, Level level) {
         super(type, level);
@@ -40,6 +44,11 @@ public abstract class BlackWindMonster extends ZoneMonster {
     @Override
     public int captainLevel() {
         return CAPTAIN_LEVEL;
+    }
+
+    @Override
+    protected double landShare() {
+        return LAND;
     }
 
     /** The mountain's bands are led a little more often than most: one in ten of the world's own is a captain. */
