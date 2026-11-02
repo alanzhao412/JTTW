@@ -1,0 +1,40 @@
+{
+  "type": "jttw_engine:refining",
+  "gate": {
+    "characters": [
+      "third_lotus_prince"
+    ]
+  },
+  "armaments": [
+    "fire_tip_spear",
+    "qiankun_ring",
+    "yin_sword",
+    "yang_sword",
+    "wind_fire_wheels",
+    "huntian_cloth"
+  ],
+  "tier": 2,
+  "ingredients": [
+    {
+      "item": "jttw_engine:servant_bone"
+    },
+    {
+      "item": "jttw_engine:servant_bone"
+    },
+    {
+      "item": "jttw_engine:servant_bone"
+    },
+    {
+      "item": "jttw_engine:wraith_wisp"
+    },
+    {
+      "item": "jttw_engine:wraith_wisp"
+    },
+    {
+      "item": "jttw_engine:monkey_hair"
+    },
+    {
+      "item": "jttw_engine:captains_sigil"
+    }
+  ]
+}

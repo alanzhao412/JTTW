@@ -93,15 +93,17 @@ public class ArmoryGameTests {
         p.tickCount = 20;
         Armory.onPlayerTick(new PlayerTickEvent.Post(p));
         double bare = p.getAttributeValue(Attributes.MAX_HEALTH);
+        double none = Armory.attunement(1); // at level 1 with none: a tier (I) behind
         put(p, new ItemStack(ModItems.FIRE_TIP_SPEAR.get()));
         ItemStack ring = new ItemStack(ModItems.QIANKUN_RING.get());
         Armaments.setRefine(ring, 4);
         put(p, ring);
         Armory.onPlayerTick(new PlayerTickEvent.Post(p));
-        near(h, bare * (1 + 2 * 0.06 + 4 * 0.005), p.getAttributeValue(Attributes.MAX_HEALTH), "6% an armament, 0.5% a refinement level");
-        near(h, 0.06 * 6 + 0.005 * 6 * 10, Armory.bonus(List.of(
+        // two of six at tier I or better: on average 4/6 of a tier behind, and 6% each
+        near(h, bare / none * Armory.attunement(4 / 6.0) * (1 + 2 * 0.06), p.getAttributeValue(Attributes.MAX_HEALTH), "6% an armament, attuned");
+        near(h, 0.06 * 6, Armory.bonus(List.of(
                 full(ModItems.FIRE_TIP_SPEAR.get()), full(ModItems.QIANKUN_RING.get()), fullSword(true), fullSword(false),
-                full(ModItems.WIND_FIRE_WHEELS.get()), full(ModItems.HUNTIAN_CLOTH.get()))), "Nezha's full armory, fully refined: +66%");
+                full(ModItems.WIND_FIRE_WHEELS.get()), full(ModItems.HUNTIAN_CLOTH.get()))), "Nezha's full armory: +36%");
         h.succeed();
     }
 

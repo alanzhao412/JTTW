@@ -67,7 +67,7 @@ public class ThreePointedSpearItem extends Item implements Charged {
         // For attribute display, show the base (lower) value.
         // The Erlang Shen bonus is applied via ErlangShenAbilityHandler event.
         b.add(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK_OTHER,
-                0.20 * Armaments.refineMultiplier(stack), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL),
+                ArmamentBonuses.THREE_POINTED_SPEAR * Armaments.refineMultiplier(stack), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL),
                 EquipmentSlotGroup.MAINHAND);
 
         return b.build();

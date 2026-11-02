@@ -1,0 +1,38 @@
+{
+  "type": "jttw_engine:refining",
+  "gate": {
+    "characters": [
+      "marshal_of_the_heavenly_canopy"
+    ]
+  },
+  "armaments": [
+    "nine_tooth_rake"
+  ],
+  "tier": 2,
+  "ingredients": [
+    {
+      "item": "minecraft:iron_ingot"
+    },
+    {
+      "item": "minecraft:iron_ingot"
+    },
+    {
+      "item": "minecraft:iron_ingot"
+    },
+    {
+      "item": "minecraft:iron_ingot"
+    },
+    {
+      "item": "jttw_engine:servant_bone"
+    },
+    {
+      "item": "jttw_engine:servant_bone"
+    },
+    {
+      "item": "minecraft:porkchop"
+    },
+    {
+      "item": "jttw_engine:captains_sigil"
+    }
+  ]
+}

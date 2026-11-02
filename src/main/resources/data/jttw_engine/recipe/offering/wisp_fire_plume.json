@@ -1,0 +1,41 @@
+{
+  "type": "jttw_engine:gated_shapeless",
+  "gate": {
+    "characters": [
+      "phoenix"
+    ]
+  },
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "minecraft:feather"
+    },
+    {
+      "item": "minecraft:feather"
+    },
+    {
+      "item": "minecraft:feather"
+    },
+    {
+      "item": "minecraft:feather"
+    },
+    {
+      "item": "jttw_engine:wraith_wisp"
+    },
+    {
+      "item": "jttw_engine:wraith_wisp"
+    },
+    {
+      "item": "jttw_engine:wraith_wisp"
+    },
+    {
+      "item": "minecraft:gunpowder"
+    },
+    {
+      "item": "jttw_engine:captains_sigil"
+    }
+  ],
+  "result": {
+    "id": "jttw_engine:wisp_fire_plume"
+  }
+}

@@ -168,6 +168,7 @@ final class AbilityScenes {
         all.addAll(KunlunScenes.all());
         all.addAll(VillageScenes.all());
         all.addAll(WildScenes.all());
+        all.addAll(ClassScenes.all());
         all.addAll(CaveScenes.all());
         all.addAll(RidgeScenes.all());
         all.addAll(BuddhaScenes.all());
@@ -1257,6 +1258,7 @@ final class AbilityScenes {
         LionScenes.clear(p);
         VillageScenes.clear(p);
         WildScenes.clear(p);
+        ClassScenes.clear(p);
         CloneScenes.clear(p);
         SpiderScenes.clear(p);
         keepScreen = false;

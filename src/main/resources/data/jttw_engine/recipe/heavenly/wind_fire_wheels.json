@@ -1,0 +1,25 @@
+{
+  "type": "jttw_engine:gated_shaped",
+  "gate": {
+    "characters": [
+      "third_lotus_prince"
+    ]
+  },
+  "category": "equipment",
+  "pattern": [
+    "IFI",
+    "F F",
+    "IFI"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "F": {
+      "item": "minecraft:flint"
+    }
+  },
+  "result": {
+    "id": "jttw_engine:wind_fire_wheels"
+  }
+}

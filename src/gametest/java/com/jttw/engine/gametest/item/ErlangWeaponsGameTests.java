@@ -46,7 +46,8 @@ public class ErlangWeaponsGameTests {
 
     private static final int USE_DURATION = 72000;
     /** ErlangShenAbilityHandler.onWeaponDamageBonus multiplies Erlang Shen's hits by this. */
-    private static final double ES_BONUS = 1.667;
+    /** His spear and axe once struck x1.667 in his hand; his strength is their tiers now (the armory's attunement). */
+    private static final double ES_BONUS = 1.0;
 
     private static ItemStack spear() {
         return new ItemStack(ModItems.THREE_POINTED_SPEAR.get());
@@ -70,12 +71,12 @@ public class ErlangWeaponsGameTests {
     // ── Three-Pointed Spear: attributes and triple strike ─────────
 
     @GameTest(template = PLATFORM, batch = "anyoneCanStartAThrust")
-    public static void spearAddsTwentyPercentAttackInTheMainHandOnly(GameTestHelper h) {
+    public static void spearAddsItsOwnAttackBonusInTheMainHandOnly(GameTestHelper h) {
         ServerPlayer p = player(h);
         setBaseAtk(p, 10.0);
         ItemStack s = spear();
         applyEquipmentModifiers(p, s, EquipmentSlot.MAINHAND);
-        near(h, 12.0, p.getAttributeValue(Attributes.ATTACK_DAMAGE), "ATK");
+        near(h, 10.0 * (1 + com.jttw.engine.item.ArmamentBonuses.THREE_POINTED_SPEAR), p.getAttributeValue(Attributes.ATTACK_DAMAGE), "ATK: its own bonus at tier I");
         check(h, modifiers(s, EquipmentSlot.OFFHAND).isEmpty(), "nothing off-hand");
         eq(h, UseAnim.SPEAR, s.getUseAnimation(), "spear animation");
         h.succeed();
@@ -125,7 +126,7 @@ public class ErlangWeaponsGameTests {
             log.close();
         }
         eq(h, 2, log.playerAttacks().size(), "two bonus strikes");
-        for (var hit : log.playerAttacks()) near(h, 2.0 * ES_BONUS, hit.amount(), 0.01, "2 x 1.667");
+        for (var hit : log.playerAttacks()) near(h, 2.0 * ES_BONUS, hit.amount(), 0.01, "2 ATK");
         h.succeed();
     }
 
@@ -773,7 +774,7 @@ public class ErlangWeaponsGameTests {
         near(h, 4.0, p.getAttributeValue(Attributes.ATTACK_SPEED), "player base attack speed");
         ItemStack a = axe();
         applyEquipmentModifiers(p, a, EquipmentSlot.MAINHAND);
-        near(h, 15.0, p.getAttributeValue(Attributes.ATTACK_DAMAGE), "ATK");
+        near(h, 10.0 * (1 + com.jttw.engine.item.ArmamentBonuses.ERLANG_AXE), p.getAttributeValue(Attributes.ATTACK_DAMAGE), "ATK: its own bonus at tier I");
         near(h, 3.2, p.getAttributeValue(Attributes.ATTACK_SPEED), "attack speed");
         check(h, modifiers(a, EquipmentSlot.OFFHAND).isEmpty(), "nothing off-hand");
         eq(h, UseAnim.BOW, a.getUseAnimation(), "draw animation");
@@ -866,8 +867,8 @@ public class ErlangWeaponsGameTests {
         }
         var cleave = log.matching(src -> src.is(DamageTypes.PLAYER_ATTACK));
         eq(h, 1, cleave.size(), "cleave hit");
-        // 100% of 4 ATK, and Erlang's x1.667 with his own axe (it is his cleave now)
-        near(h, 4.0 * 1.667, cleave.get(0).amount(), "minimum charge: 100% of 4 ATK, x1.667 in Erlang's hand");
+        // 100% of 4 ATK (it is his cleave now)
+        near(h, 4.0 * ES_BONUS, cleave.get(0).amount(), "minimum charge: 100% of 4 ATK");
         check(h, p.getCooldowns().isOnCooldown(a.getItem()), "item cooldown");
         p.stopUsingItem();
         eq(h, InteractionResult.FAIL, use(h, p, a), "refused right after");
@@ -894,7 +895,7 @@ public class ErlangWeaponsGameTests {
         }
         var cleave = log.matching(src -> src.is(DamageTypes.PLAYER_ATTACK));
         eq(h, 1, cleave.size(), "cleave hit");
-        near(h, 10.0 * 1.667, cleave.get(0).amount(), "full charge: 250% of 4 ATK, x1.667 in Erlang's hand");
+        near(h, 10.0 * ES_BONUS, cleave.get(0).amount(), "full charge: 250% of 4 ATK");
         h.succeed();
     }
 
@@ -914,7 +915,7 @@ public class ErlangWeaponsGameTests {
         }
         var cleave = log.matching(src -> src.is(DamageTypes.PLAYER_ATTACK));
         eq(h, 1, cleave.size(), "cleave hit");
-        near(h, 4.0 * ES_BONUS, cleave.get(0).amount(), 0.01, "4 ATK x 1.667");
+        near(h, 4.0 * ES_BONUS, cleave.get(0).amount(), 0.01, "4 ATK");
         h.succeed();
     }
 

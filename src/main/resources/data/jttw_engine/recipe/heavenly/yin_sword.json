@@ -1,0 +1,33 @@
+{
+  "type": "jttw_engine:gated_shaped",
+  "gate": {
+    "characters": [
+      "third_lotus_prince"
+    ]
+  },
+  "category": "equipment",
+  "pattern": [
+    " I ",
+    " N ",
+    " S "
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "N": {
+      "item": "minecraft:ink_sac"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "id": "jttw_engine:yin_yang_sword",
+    "components": {
+      "minecraft:custom_data": {
+        "jttw_yy_side": "yin"
+      }
+    }
+  }
+}

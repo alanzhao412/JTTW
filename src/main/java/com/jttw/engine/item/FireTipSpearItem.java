@@ -63,7 +63,7 @@ public class FireTipSpearItem extends Item {
     @Override
     public ItemAttributeModifiers getDefaultAttributeModifiers(ItemStack stack) {
         // The attack bonus is for anyone; the sneak fireball (use) is Nezha's alone
-        double mult = isAflame(stack) ? 1.25 : 0.75; // +75% for everyone holding it, +125% lit; Nezha gets extra from handler
+        double mult = isAflame(stack) ? ArmamentBonuses.FIRE_TIP_SPEAR_LIT : ArmamentBonuses.FIRE_TIP_SPEAR; // its own bonus, lit more; raised by its tier
         ItemAttributeModifiers.Builder b = ItemAttributeModifiers.builder();
         b.add(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK,
                 mult * Armaments.refineMultiplier(stack), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL),

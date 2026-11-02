@@ -1,0 +1,38 @@
+{
+  "type": "jttw_engine:gated_shapeless",
+  "gate": {
+    "characters": [
+      "phoenix"
+    ]
+  },
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "jttw_engine:storm_feather"
+    },
+    {
+      "item": "jttw_engine:storm_feather"
+    },
+    {
+      "item": "jttw_engine:storm_feather"
+    },
+    {
+      "item": "jttw_engine:crane_plume"
+    },
+    {
+      "item": "jttw_engine:crane_plume"
+    },
+    {
+      "item": "jttw_engine:crane_plume"
+    },
+    {
+      "item": "jttw_engine:golden_eye"
+    },
+    {
+      "item": "jttw_engine:daoist_talisman"
+    }
+  ],
+  "result": {
+    "id": "jttw_engine:sovereign_sun_plume"
+  }
+}

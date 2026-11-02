@@ -1,0 +1,32 @@
+{
+  "type": "jttw_engine:refining",
+  "gate": {
+    "characters": [
+      "marshal_of_the_heavenly_canopy"
+    ]
+  },
+  "armaments": [
+    "nine_tooth_rake"
+  ],
+  "tier": 4,
+  "ingredients": [
+    {
+      "item": "minecraft:prismarine_shard"
+    },
+    {
+      "item": "minecraft:prismarine_shard"
+    },
+    {
+      "item": "minecraft:prismarine_crystals"
+    },
+    {
+      "item": "minecraft:prismarine_crystals"
+    },
+    {
+      "item": "minecraft:nautilus_shell"
+    },
+    {
+      "item": "jttw_engine:captains_sigil"
+    }
+  ]
+}

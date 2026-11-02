@@ -1,0 +1,35 @@
+{
+  "type": "jttw_engine:trigrams_refining",
+  "gate": {
+    "characters": [
+      "third_lotus_prince"
+    ]
+  },
+  "armaments": [
+    "fire_tip_spear",
+    "qiankun_ring",
+    "yin_sword",
+    "yang_sword",
+    "wind_fire_wheels",
+    "huntian_cloth"
+  ],
+  "tier": 6,
+  "materials": [
+    {
+      "item": "jttw_engine:ember_core",
+      "count": 4
+    },
+    {
+      "item": "jttw_engine:furnace_brick",
+      "count": 2
+    },
+    {
+      "item": "jttw_engine:true_samadhi_fire",
+      "count": 1
+    },
+    {
+      "item": "jttw_engine:captains_sigil",
+      "count": 1
+    }
+  ]
+}

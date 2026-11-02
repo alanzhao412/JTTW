@@ -35,6 +35,12 @@ public final class ModBlocks {
             });
 
     /** Laozi's Eight Trigrams Furnace: where armaments are forged and refined. */
+    /** The Altar of the Four Symbols, where the Divine Beasts evolve (see BeastEvolution). */
+    public static final DeferredHolder<Block, Block> FOUR_SYMBOLS_ALTAR =
+            BLOCKS.register("four_symbols_altar", () -> new com.jttw.engine.character.divinebeast.FourSymbolsAltarBlock(
+                    BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(3.5F, 9.0F)
+                            .requiresCorrectToolForDrops().sound(SoundType.DEEPSLATE_BRICKS).lightLevel(s -> 7).noOcclusion()));
+
     public static final DeferredHolder<Block, Block> EIGHT_TRIGRAMS_FURNACE =
             BLOCKS.register("eight_trigrams_furnace", () -> new com.jttw.engine.world.furnace.TrigramsFurnaceBlock(
                     BlockBehaviour.Properties.of()

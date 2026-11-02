@@ -1,0 +1,38 @@
+{
+  "type": "jttw_engine:gated_shapeless",
+  "gate": {
+    "characters": [
+      "turtle"
+    ]
+  },
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "jttw_engine:insect_carapace"
+    },
+    {
+      "item": "jttw_engine:insect_carapace"
+    },
+    {
+      "item": "jttw_engine:insect_carapace"
+    },
+    {
+      "item": "jttw_engine:insect_carapace"
+    },
+    {
+      "item": "jttw_engine:ivory_shard"
+    },
+    {
+      "item": "jttw_engine:ivory_shard"
+    },
+    {
+      "item": "jttw_engine:daoist_talisman"
+    },
+    {
+      "item": "jttw_engine:daoist_talisman"
+    }
+  ],
+  "result": {
+    "id": "jttw_engine:world_turtle_shell"
+  }
+}

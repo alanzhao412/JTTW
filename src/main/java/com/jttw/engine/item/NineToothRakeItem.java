@@ -21,7 +21,9 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 /**
- * The Nine-Tooth Rake, forged by Laozi for the Marshal of the Heavenly Canopy.
+ * The Nine-Tooth Rake, the Marshal of the Heavenly Canopy's armament: crafted plain at a crafting table
+ * (tier I) and refined tier by tier; at tier V re-forged in the Eight Trigrams Furnace with King
+ * Chujiang's Rime Shackle and jade, as Laozi forged it. +{@value #ATTACK_BONUS} attack at tier I.
  *
  * <ul>
  *   <li>Anyone: a heavy, slow weapon that tills a 3x3 patch of ground at once.</li>
@@ -34,6 +36,18 @@ public class NineToothRakeItem extends HoeItem {
     public NineToothRakeItem() {
         super(Tiers.NETHERITE, new Properties().rarity(Rarity.EPIC).fireResistant()
                 .attributes(HoeItem.createAttributes(Tiers.NETHERITE, 4, -3.0f)));
+    }
+
+    /** Its own bonus to attack at tier I, for anyone holding it (raised by its tier, as every armament's). */
+    public static final double ATTACK_BONUS = ArmamentBonuses.NINE_TOOTH_RAKE;
+    private static final net.minecraft.resources.ResourceLocation ATK = com.jttw.engine.JTTWEngine.id("nine_tooth_rake_atk");
+
+    @Override
+    public net.minecraft.world.item.component.ItemAttributeModifiers getDefaultAttributeModifiers(ItemStack stack) {
+        return super.getDefaultAttributeModifiers(stack).withModifierAdded(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE,
+                new net.minecraft.world.entity.ai.attributes.AttributeModifier(ATK, ATTACK_BONUS * Armaments.refineMultiplier(stack),
+                        net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL),
+                net.minecraft.world.entity.EquipmentSlotGroup.MAINHAND);
     }
 
     @Override

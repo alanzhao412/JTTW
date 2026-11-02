@@ -151,7 +151,7 @@ public record StatBlock(
         if (cls == null) return null;
         var who = com.jttw.engine.reincarnation.ReincarnationOutcome.byId(
                 p.getPersistentData().getString(com.jttw.engine.reincarnation.AlignmentData.KEY_REINCARNATION_OUTCOME));
-        return compute(cls, who, com.jttw.engine.progression.level.PlayerLevel.getLevel(p), com.jttw.engine.world.furnace.WukongTrial.boon(p));
+        return compute(cls, who, com.jttw.engine.character.divinebeast.BeastEvolution.poweredLevel(p, com.jttw.engine.progression.level.PlayerLevel.getLevel(p)), com.jttw.engine.world.furnace.WukongTrial.boon(p));
     }
 
     /** A class's stats at a level, before any one character's measure. */

@@ -1,0 +1,25 @@
+{
+  "type": "jttw_engine:gated_shapeless",
+  "gate": {
+    "class": "heavenly"
+  },
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "minecraft:paper"
+    },
+    {
+      "item": "minecraft:gold_nugget"
+    },
+    {
+      "item": "minecraft:gold_nugget"
+    },
+    {
+      "item": "minecraft:redstone"
+    }
+  ],
+  "result": {
+    "id": "jttw_engine:five_thunder_talisman",
+    "count": 2
+  }
+}

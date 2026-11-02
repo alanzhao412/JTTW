@@ -1,0 +1,38 @@
+{
+  "type": "jttw_engine:gated_shapeless",
+  "gate": {
+    "characters": [
+      "dragon"
+    ]
+  },
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "minecraft:heart_of_the_sea"
+    },
+    {
+      "item": "minecraft:prismarine_crystals"
+    },
+    {
+      "item": "minecraft:prismarine_crystals"
+    },
+    {
+      "item": "minecraft:prismarine_crystals"
+    },
+    {
+      "item": "minecraft:prismarine_shard"
+    },
+    {
+      "item": "minecraft:prismarine_shard"
+    },
+    {
+      "item": "jttw_engine:spirit_whisker"
+    },
+    {
+      "item": "jttw_engine:spirit_whisker"
+    }
+  ],
+  "result": {
+    "id": "jttw_engine:four_seas_pearl"
+  }
+}

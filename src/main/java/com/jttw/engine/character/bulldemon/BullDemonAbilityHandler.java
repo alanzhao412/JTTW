@@ -189,7 +189,7 @@ public final class BullDemonAbilityHandler {
             CompoundTag ed = e.getPersistentData();
             if (ed.getLong(KEY_GORED_BY) == rushId && ed.contains(KEY_GORED_BY)) continue;
             ed.putLong(KEY_GORED_BY, rushId);
-            e.hurt(p.damageSources().playerAttack(p), damage);
+            com.jttw.engine.progression.stats.AbilityDamage.hurt(p, e, p.damageSources().playerAttack(p), damage);
             e.push(dir.x * 1.5, 0.6, dir.z * 1.5);
             e.hurtMarked = true;
             level.playSound(null, e.getX(), e.getY(), e.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1f, 0.6f);
@@ -210,7 +210,7 @@ public final class BullDemonAbilityHandler {
         for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(2.5, 1.5, 2.5), e -> isFoe(e, p))) {
             com.jttw.engine.world.Stun.stun(e, ticks, p);
             e.addEffect(new MobEffectInstance(MobEffects.CONFUSION, ticks + 40, 0));
-            e.hurt(p.damageSources().playerAttack(p), 0.5f * atk(p));
+            com.jttw.engine.progression.stats.AbilityDamage.hurt(p, e, p.damageSources().playerAttack(p), 0.5f * atk(p));
             count++;
         }
         BlockState wall = level.getBlockState(BlockPos.containing(at.add(0, 1, 0)));
@@ -403,7 +403,7 @@ public final class BullDemonAbilityHandler {
         for (LivingEntity e : w.level.getEntitiesOfClass(LivingEntity.class, new AABB(next, next).inflate(1.5, 2, 1.5),
                 e -> bull == null ? e.isAlive() : isFoe(e, bull))) {
             if (!w.struck.add(e.getId())) continue;
-            e.hurt(bull != null ? bull.damageSources().mobAttack(bull) : w.level.damageSources().generic(), w.damage);
+            com.jttw.engine.progression.stats.AbilityDamage.hurt(bull instanceof net.minecraft.world.entity.player.Player bp ? bp : null, e, bull != null ? bull.damageSources().mobAttack(bull) : w.level.damageSources().generic(), w.damage);
             e.push(w.dir.x * 0.5, 0.8, w.dir.z * 0.5);
             e.hurtMarked = true;
         }

@@ -126,7 +126,7 @@ public final class PhoenixAbilityHandler {
         fireAuthor = author;
         fireTarget = target;
         try {
-            return target.hurt(source, amount);
+            return com.jttw.engine.progression.stats.AbilityDamage.hurt(author, target, source, amount);
         } finally {
             fireAuthor = wasAuthor;
             fireTarget = wasTarget;
@@ -463,7 +463,7 @@ public final class PhoenixAbilityHandler {
         // T3: fire thorns deal 2x damage (applied as direct fire damage)
         if (plumageTier >= 3) {
             float thornsDamage = event.getAmount() * 2.0f;
-            livingAttacker.hurt(player.damageSources().onFire(), thornsDamage);
+            com.jttw.engine.progression.stats.AbilityDamage.hurt(player, livingAttacker, player.damageSources().onFire(), thornsDamage);
         }
 
         // T3: burning attackers get Weakness I (10 seconds = 200 ticks)
@@ -600,7 +600,7 @@ public final class PhoenixAbilityHandler {
             if (dist > radius) continue;
 
             float falloff = Math.max(0.2f, 1.0f - (float) (dist / radius));
-            target.hurt(player.damageSources().onFire(), explosionDamage * falloff);
+            com.jttw.engine.progression.stats.AbilityDamage.hurt(player, target, player.damageSources().onFire(), explosionDamage * falloff);
             target.igniteForSeconds(5);
 
             // Knockback away

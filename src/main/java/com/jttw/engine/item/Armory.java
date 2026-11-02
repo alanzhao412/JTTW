@@ -36,10 +36,10 @@ import java.util.Map;
  * cycled into hand ({@link #cycle}). It is kept with the character, through death: their own
  * armaments, dropped as they die, go back into it.
  *
- * <p>The more of their armaments a character has forged and refined, the stronger they are: each
- * one held adds {@value #PER_ARMAMENT_PERCENT}% to their health and attack, and each level of
- * refinement across them all {@value #PER_REFINE_TENTHS}/10 of a percent more. Nezha, with the
- * most, gains the most.
+ * <p>The more of their armaments a character has crafted, the stronger they are: each one held adds
+ * {@value #PER_ARMAMENT_PERCENT}% to their health and attack (Nezha, with the most, gains the most).
+ * And a Heavenly's strength leans on them ({@link #attunement}): armaments that trail the tier of
+ * their ring of levels cost them health and attack, a step for every tier behind.
  */
 @EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class Armory {
@@ -47,7 +47,7 @@ public final class Armory {
     private Armory() {}
 
     public static final String KEY = "jttw_armory";
-    public static final int PER_ARMAMENT_PERCENT = 6, PER_REFINE_TENTHS = 5;
+    public static final int PER_ARMAMENT_PERCENT = 6;
 
     /** Worn rather than held: they work from the armory and are never cycled into hand. */
     private static final List<String> WORN = List.of("wind_fire_wheels", "huntian_cloth");
@@ -277,18 +277,61 @@ public final class Armory {
 
     // ── The collection's strength ────────────────────────────────────────
 
-    /** What having these armaments adds to health and attack, as a share: 6% each, and 0.5% a refinement level. */
+    /**
+     * What having these armaments adds to health and attack, as a share: {@value #PER_ARMAMENT_PERCENT}%
+     * each (Nezha, with six, the most). Their tiers count in {@link #attunement}.
+     */
     public static double bonus(List<ItemStack> armaments) {
-        int levels = armaments.stream().mapToInt(Armaments::refine).sum();
-        return armaments.size() * PER_ARMAMENT_PERCENT / 100.0 + levels * PER_REFINE_TENTHS / 1000.0;
+        return armaments.size() * PER_ARMAMENT_PERCENT / 100.0;
+    }
+
+    /** Each tier a character's armaments trail their ring by costs them this much of their health and attack (divided by it). */
+    public static final double ATTUNEMENT_STEP = 1.3;
+    /** The most tiers that count against them: past it, no worse (a Heavenly with no armaments at all at 100 is here). */
+    public static final double MOST_BEHIND = 3;
+
+    /**
+     * How many tiers a character's armaments trail the tier of their ring ({@link Armaments#ringTier}), on
+     * average over all of theirs (one they do not have counts as tier 0), from 0 to {@value #MOST_BEHIND}.
+     * Ahead of the ring counts as level with it.
+     */
+    public static double behind(List<Armaments.Armament> slots, List<ItemStack> held, int level) {
+        if (slots.isEmpty()) return 0;
+        int ring = Armaments.ringTier(level);
+        double sum = 0;
+        for (Armaments.Armament a : slots) {
+            int tier = 0;
+            for (ItemStack s : held) if (a.is().test(s)) tier = Math.max(tier, Armaments.tier(s));
+            sum += Math.max(0, ring - tier);
+        }
+        return Math.min(MOST_BEHIND, sum / slots.size());
+    }
+
+    /**
+     * The Heavenly class's rule: their strength leans on their armaments. Health and attack are
+     * multiplied by {@value #ATTUNEMENT_STEP} to the power of minus {@link #behind}: x1 with every armament
+     * at their ring's tier, x0.77 a tier behind, x0.46 at the worst.
+     */
+    public static double attunement(double behind) {
+        return Math.pow(ATTUNEMENT_STEP, -Math.max(0, Math.min(MOST_BEHIND, behind)));
+    }
+
+    /** What a Heavenly character's health and attack are multiplied by, from their armaments: attunement x (1 + bonus). */
+    public static double strength(Player p) {
+        List<Armaments.Armament> slots = slots(p);
+        if (slots.isEmpty()) return 1;
+        List<ItemStack> held = held(p);
+        int level = com.jttw.engine.progression.level.PlayerLevel.getLevel(p);
+        return attunement(behind(slots, held, level)) * (1 + bonus(held));
     }
 
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         if (!(event.getEntity() instanceof ServerPlayer sp) || sp.tickCount % 20 != 0) return;
-        double share = slots(sp).isEmpty() ? 0 : bonus(held(sp));
+        double share = strength(sp) - 1;
         PassiveModifiers.set(sp, Attributes.MAX_HEALTH, "jttw_armory_hp", share, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
         PassiveModifiers.set(sp, Attributes.ATTACK_DAMAGE, "jttw_armory_atk", share, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+        if (sp.getHealth() > sp.getMaxHealth()) sp.setHealth(sp.getMaxHealth());
     }
 
     // ── Kept through death ───────────────────────────────────────────────

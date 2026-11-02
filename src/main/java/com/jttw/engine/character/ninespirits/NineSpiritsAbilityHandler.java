@@ -224,7 +224,7 @@ public final class NineSpiritsAbilityHandler {
         float dmg = damage;
         for (int i = 0; i <= jumps && current != null; i++) {
             struck.add(current);
-            current.hurt(p.damageSources().indirectMagic(p, p), dmg * markBonus(current));
+            com.jttw.engine.progression.stats.AbilityDamage.hurt(p, current, p.damageSources().indirectMagic(p, p), dmg * markBonus(current));
             dmg *= 0.75f;
             final LivingEntity from = current;
             LivingEntity nextTarget = null;
@@ -269,14 +269,14 @@ public final class NineSpiritsAbilityHandler {
             // Bursts: every foe within 2.5 blocks is hit and set alight
             for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(2.5),
                     e -> isFoe(e, owner))) {
-                e.hurt(owner.damageSources().indirectMagic(shot, owner), damage * markBonus(e));
+                com.jttw.engine.progression.stats.AbilityDamage.hurt(owner instanceof Player op ? op : null, e, owner.damageSources().indirectMagic(shot, owner), damage * markBonus(e));
                 e.igniteForSeconds(4);
             }
             level.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 30, 0.8, 0.6, 0.8, 0.05);
             level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 1.0F, 1.0F);
         } else if (result instanceof EntityHitResult eh && eh.getEntity() instanceof LivingEntity target) {
             // Frost: frozen in place (pinned) 2 s, slowed a second more
-            target.hurt(owner.damageSources().indirectMagic(shot, owner), damage * markBonus(target));
+            com.jttw.engine.progression.stats.AbilityDamage.hurt(owner instanceof Player op ? op : null, target, owner.damageSources().indirectMagic(shot, owner), damage * markBonus(target));
             target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 2), owner);
             com.jttw.engine.world.Stun.pin(target, 40, owner);
             target.setTicksFrozen(Math.max(target.getTicksFrozen(), target.getTicksRequiredToFreeze() + 60));

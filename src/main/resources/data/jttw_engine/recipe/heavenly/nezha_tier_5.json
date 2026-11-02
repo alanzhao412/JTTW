@@ -1,0 +1,35 @@
+{
+  "type": "jttw_engine:trigrams_refining",
+  "gate": {
+    "characters": [
+      "third_lotus_prince"
+    ]
+  },
+  "armaments": [
+    "fire_tip_spear",
+    "qiankun_ring",
+    "yin_sword",
+    "yang_sword",
+    "wind_fire_wheels",
+    "huntian_cloth"
+  ],
+  "tier": 5,
+  "materials": [
+    {
+      "item": "jttw_engine:hell_bank_note",
+      "count": 4
+    },
+    {
+      "item": "jttw_engine:soul_chain",
+      "count": 2
+    },
+    {
+      "item": "jttw_engine:underworld_ink",
+      "count": 2
+    },
+    {
+      "item": "jttw_engine:captains_sigil",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "type": "jttw_engine:gated_shapeless",
+  "gate": {
+    "characters": [
+      "white_tiger"
+    ]
+  },
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "jttw_engine:wolf_pelt"
+    },
+    {
+      "item": "jttw_engine:wolf_pelt"
+    },
+    {
+      "item": "minecraft:bone"
+    },
+    {
+      "item": "minecraft:bone"
+    },
+    {
+      "item": "minecraft:bone"
+    },
+    {
+      "item": "minecraft:bone"
+    },
+    {
+      "item": "minecraft:iron_ingot"
+    },
+    {
+      "item": "minecraft:iron_ingot"
+    },
+    {
+      "item": "minecraft:leather"
+    }
+  ],
+  "result": {
+    "id": "jttw_engine:fang_and_pelt_totem"
+  }
+}

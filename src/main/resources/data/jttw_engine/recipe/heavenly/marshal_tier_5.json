@@ -1,5 +1,14 @@
 {
-  "type": "jttw_engine:trigrams_forging",
+  "type": "jttw_engine:trigrams_refining",
+  "gate": {
+    "characters": [
+      "marshal_of_the_heavenly_canopy"
+    ]
+  },
+  "armaments": [
+    "nine_tooth_rake"
+  ],
+  "tier": 5,
   "materials": [
     {
       "item": "minecraft:iron_ingot",
@@ -17,8 +26,5 @@
       "item": "jttw_engine:jade_block",
       "count": 1
     }
-  ],
-  "result": {
-    "id": "jttw_engine:nine_tooth_rake"
-  }
+  ]
 }

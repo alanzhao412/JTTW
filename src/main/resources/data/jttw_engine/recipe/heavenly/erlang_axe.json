@@ -1,0 +1,28 @@
+{
+  "type": "jttw_engine:gated_shaped",
+  "gate": {
+    "characters": [
+      "eye_of_heaven"
+    ]
+  },
+  "category": "equipment",
+  "pattern": [
+    "IIT",
+    "IS ",
+    " S "
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "T": {
+      "item": "jttw_engine:ogre_tusk"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "id": "jttw_engine:erlang_axe"
+  }
+}

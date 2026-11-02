@@ -29,7 +29,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /** Shared set-up for the item GameTests. */
-final class ItemTestSupport {
+public final class ItemTestSupport {
 
     private ItemTestSupport() {}
 
@@ -80,14 +80,14 @@ final class ItemTestSupport {
      * The stack's attribute modifiers that apply in {@code slot}, keyed by attribute (what
      * 1.20's {@code ItemStack.getAttributeModifiers(slot)} returned).
      */
-    static Multimap<Holder<Attribute>, AttributeModifier> modifiers(ItemStack stack, EquipmentSlot slot) {
+    public static Multimap<Holder<Attribute>, AttributeModifier> modifiers(ItemStack stack, EquipmentSlot slot) {
         Multimap<Holder<Attribute>, AttributeModifier> map = ArrayListMultimap.create();
         stack.forEachModifier(slot, map::put);
         return map;
     }
 
     /** The stack's modifiers in {@code slot} on one attribute. */
-    static java.util.Collection<AttributeModifier> modifiers(ItemStack stack, EquipmentSlot slot, Holder<Attribute> attr) {
+    public static java.util.Collection<AttributeModifier> modifiers(ItemStack stack, EquipmentSlot slot, Holder<Attribute> attr) {
         List<AttributeModifier> out = new ArrayList<>();
         stack.forEachModifier(slot, (a, m) -> { if (a.value() == attr.value()) out.add(m); });
         return out;

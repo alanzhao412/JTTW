@@ -239,7 +239,7 @@ public final class SaurianAbilityHandler {
             CompoundTag ed = e.getPersistentData();
             if (ed.contains(KEY_STRUCK_BY) && ed.getLong(KEY_STRUCK_BY) == surgeId) continue;
             ed.putLong(KEY_STRUCK_BY, surgeId);
-            e.hurt(p.damageSources().playerAttack(p), damage);
+            com.jttw.engine.progression.stats.AbilityDamage.hurt(p, e, p.damageSources().playerAttack(p), damage);
             e.push(dir.x * 1.2, 0.4, dir.z * 1.2);
             e.hurtMarked = true;
             level.sendParticles(ParticleTypes.SPLASH, e.getX(), e.getY() + e.getBbHeight() / 2, e.getZ(), 20, 0.4, 0.4, 0.4, 0.2);
@@ -289,7 +289,7 @@ public final class SaurianAbilityHandler {
             // a foe on the line: yanked to him
             caught = e;
             to = e.position().add(0, e.getBbHeight() / 2, 0);
-            e.hurt(p.damageSources().playerAttack(p), lashDamage(atk(p), tier));
+            com.jttw.engine.progression.stats.AbilityDamage.hurt(p, e, p.damageSources().playerAttack(p), lashDamage(atk(p), tier));
             Vec3 pull = p.position().subtract(e.position());
             e.setDeltaMovement(pull.normalize().scale(Math.min(2.0, 0.5 + pull.length() * 0.1)).add(0, 0.35, 0));
             e.hurtMarked = true;
@@ -387,7 +387,7 @@ public final class SaurianAbilityHandler {
             if (t % 10 == 0) {
                 boolean heart = dist < 1.6;
                 float dmg = heart ? w.drown() : w.drown() * 0.5f;
-                e.hurt(source instanceof Player pl ? level.damageSources().indirectMagic(pl, pl) : level.damageSources().drown(), dmg);
+                com.jttw.engine.progression.stats.AbilityDamage.hurt(source instanceof Player pl0 ? pl0 : null, e, source instanceof Player pl ? level.damageSources().indirectMagic(pl, pl) : level.damageSources().drown(), dmg);
                 if (heart) level.sendParticles(ParticleTypes.BUBBLE_POP, e.getX(), e.getEyeY(), e.getZ(), 6, 0.2, 0.2, 0.2, 0.05);
             }
         }
@@ -439,7 +439,7 @@ public final class SaurianAbilityHandler {
         int hit = 0;
         for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, struck.getBoundingBox().inflate(BURST_RADIUS),
                 e -> e != struck && isFoe(e, p))) {
-            e.hurt(p.damageSources().indirectMagic(p, p), blow * wrathBurst(tier));
+            com.jttw.engine.progression.stats.AbilityDamage.hurt(p, e, p.damageSources().indirectMagic(p, p), blow * wrathBurst(tier));
             Vec3 out = e.position().subtract(c);
             Vec3 flat = new Vec3(out.x, 0, out.z);
             if (flat.lengthSqr() > 1e-4) e.push(flat.normalize().x * 0.8, 0.3, flat.normalize().z * 0.8);
@@ -499,7 +499,7 @@ public final class SaurianAbilityHandler {
         Player from = v.hasUUID("From") ? e.level().getPlayerByUUID(v.getUUID("From")) : null;
         float dmg = v.getInt("Stacks") * v.getFloat("PerStack");
         e.invulnerableTime = 0; // venom burns beneath a blow's grace
-        e.hurt(from != null ? e.damageSources().indirectMagic(from, from) : e.damageSources().magic(), dmg);
+        com.jttw.engine.progression.stats.AbilityDamage.hurt(from instanceof Player fp ? fp : null, e, from != null ? e.damageSources().indirectMagic(from, from) : e.damageSources().magic(), dmg);
     }
 
     @SubscribeEvent

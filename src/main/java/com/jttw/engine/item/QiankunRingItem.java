@@ -56,7 +56,7 @@ public class QiankunRingItem extends Item {
     public ItemAttributeModifiers getDefaultAttributeModifiers(ItemStack stack) {
         ItemAttributeModifiers.Builder b = ItemAttributeModifiers.builder();
         b.add(Attributes.ATTACK_DAMAGE, new AttributeModifier(UUID_ATK,
-                0.25 * Armaments.refineMultiplier(stack), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL),
+                ArmamentBonuses.QIANKUN_RING * Armaments.refineMultiplier(stack), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL),
                 EquipmentSlotGroup.MAINHAND);
         return b.build();
     }

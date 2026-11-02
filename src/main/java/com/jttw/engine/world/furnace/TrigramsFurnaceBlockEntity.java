@@ -30,12 +30,12 @@ import java.util.function.Supplier;
 /**
  * Laozi's Eight Trigrams Furnace: where armaments are forged and refined, and nowhere else.
  *
- * <p>Eight trigram slots ring a centre. With the centre empty and the trigrams holding exactly what
- * an armament's forging takes, it forges that armament into the centre; holding exactly one of its
- * recipes' materials instead ({@link TrigramsRecipe}: the Nine-Tooth Rake's), that recipe's result.
- * With an armament in the
- * centre and the trigrams holding at least its next refinement's cost, it refines it a level. Either
- * way it takes its time: forging {@value #FORGE_TICKS} ticks, refining longer the higher the level.
+ * <p>Eight trigram slots ring a centre. With the centre empty and the trigrams holding exactly one of
+ * its recipes' materials ({@link TrigramsRecipe}), it forges that recipe's result into the centre.
+ * With a Heavenly armament in the centre and the trigrams holding at least its next tier's materials
+ * ({@link com.jttw.engine.item.craft.TrigramsRefining}: tiers V to VIII), it refines it a tier. A
+ * recipe's gate is held against its smith, the last to open it. Either way it takes its time: forging
+ * {@value #FORGE_TICKS} ticks, refining longer the higher the tier.
  *
  * <p>It burns only True Samadhi Fire: a bottled flame in its fuel slot burns {@value #SAMADHI_BURN}
  * ticks, and Nezha's Samadhi Fire or the Phoenix's flames, turned on it, light it as long as they
@@ -92,29 +92,17 @@ public class TrigramsFurnaceBlockEntity extends BlockEntity implements Container
 
     // ── What it would do now ─────────────────────────────────────────────
 
-    /** The materials in the trigram slots, counted by item. */
-    private Map<Item, Integer> materials() {
-        Map<Item, Integer> m = new HashMap<>();
-        for (int i = 0; i < TRIGRAMS; i++) {
-            ItemStack s = items.get(i);
-            if (!s.isEmpty()) m.merge(s.getItem(), s.getCount(), Integer::sum);
-        }
-        return m;
+    /** Who works it: the last to open it (their reincarnation id), whom its recipes' gates are held against. */
+    private String smith = "";
+
+    public String smith() {
+        return smith;
     }
 
-    private static Map<Item, Integer> resolve(Map<Supplier<Item>, Integer> cost) {
-        Map<Item, Integer> m = new HashMap<>();
-        cost.forEach((k, v) -> m.merge(k.get(), v, Integer::sum));
-        return m;
-    }
-
-    /** The armament the trigrams would forge (they hold exactly its cost), with the centre empty; or null. */
-    @Nullable
-    public Armaments.Armament forging() {
-        if (!items.get(CENTRE).isEmpty()) return null;
-        Map<Item, Integer> have = materials();
-        for (Armaments.Armament a : Armaments.ALL) if (resolve(a.forging()).equals(have)) return a;
-        return null;
+    /** Sets its smith (the one who opened it; a test's player). */
+    public void setSmith(Player p) {
+        smith = p.getPersistentData().getString(com.jttw.engine.reincarnation.AlignmentData.KEY_REINCARNATION_OUTCOME);
+        setChanged();
     }
 
     /** What lies in the trigram slots, as a recipe sees it. */
@@ -123,28 +111,47 @@ public class TrigramsFurnaceBlockEntity extends BlockEntity implements Container
     }
 
     /**
-     * The furnace recipe the trigrams would forge (they hold exactly its materials), with the centre
-     * empty and no armament's forging matching them; or null.
+     * The furnace recipe the trigrams would forge (they hold exactly its materials, and its gate lets
+     * the smith through), with the centre empty; or null.
      */
     @Nullable
     public net.minecraft.world.item.crafting.RecipeHolder<TrigramsRecipe> forgingRecipe() {
-        if (level == null || !items.get(CENTRE).isEmpty() || forging() != null) return null;
-        return level.getRecipeManager().getRecipeFor(com.jttw.engine.registry.ModRecipes.TRIGRAMS_FORGING.get(), trigrams(), level).orElse(null);
+        if (level == null || !items.get(CENTRE).isEmpty()) return null;
+        TrigramsRecipe.Trigrams in = trigrams();
+        for (var r : level.getRecipeManager().getAllRecipesFor(com.jttw.engine.registry.ModRecipes.TRIGRAMS_FORGING.get())) {
+            if (r.value().matches(in, level) && r.value().gate().allows(smith)) return r;
+        }
+        return null;
     }
 
-    /** The cost of refining the armament in the centre, if it is one and can go further; else null. */
+    /**
+     * The refinement the furnace would make of the armament in the centre (one of its recipes for that
+     * armament at its tier, the trigrams holding at least its materials, its gate letting the smith
+     * through); or null.
+     */
     @Nullable
-    public Map<Item, Integer> refining() {
+    public com.jttw.engine.item.craft.TrigramsRefining refining() {
         ItemStack centre = items.get(CENTRE);
-        if (Armaments.of(centre) == null || Armaments.refine(centre) >= Armaments.MAX_REFINE) return null;
-        Map<Item, Integer> cost = resolve(Armaments.refineCost(Armaments.refine(centre)));
-        Map<Item, Integer> have = materials();
-        for (var e : cost.entrySet()) if (have.getOrDefault(e.getKey(), 0) < e.getValue()) return null;
-        return cost;
+        if (level == null || Armaments.of(centre) == null || Armaments.refine(centre) >= Armaments.MAX_REFINE) return null;
+        TrigramsRecipe.Trigrams in = trigrams();
+        for (var r : level.getRecipeManager().getAllRecipesFor(com.jttw.engine.registry.ModRecipes.TRIGRAMS_REFINING.get())) {
+            var rec = r.value();
+            if (rec.refines(centre) && rec.matches(in, level) && rec.gate().allows(smith)) return rec;
+        }
+        return null;
+    }
+
+    /** The furnace's refinement for this armament from its tier, whoever the smith, or null (for the screen). */
+    @Nullable
+    public static com.jttw.engine.item.craft.TrigramsRefining refinementFor(Level level, ItemStack armament) {
+        for (var r : level.getRecipeManager().getAllRecipesFor(com.jttw.engine.registry.ModRecipes.TRIGRAMS_REFINING.get())) {
+            if (r.value().refines(armament)) return r.value();
+        }
+        return null;
     }
 
     private int jobTicks() {
-        if (forging() != null || forgingRecipe() != null) return FORGE_TICKS;
+        if (forgingRecipe() != null) return FORGE_TICKS;
         if (refining() != null) return REFINE_BASE_TICKS + REFINE_TICKS_PER_LEVEL * Armaments.refine(items.get(CENTRE));
         return 0;
     }
@@ -278,12 +285,6 @@ public class TrigramsFurnaceBlockEntity extends BlockEntity implements Container
 
     /** Forges or refines, consuming what it takes. */
     private void finish() {
-        Armaments.Armament forge = forging();
-        if (forge != null) {
-            for (int i = 0; i < TRIGRAMS; i++) items.set(i, ItemStack.EMPTY); // exactly its cost: all of it goes
-            items.set(CENTRE, forge.forged().get());
-            return;
-        }
         var recipe = forgingRecipe();
         if (recipe != null) {
             ItemStack made = recipe.value().assemble(trigrams(), level.registryAccess());
@@ -291,9 +292,9 @@ public class TrigramsFurnaceBlockEntity extends BlockEntity implements Container
             items.set(CENTRE, made);
             return;
         }
-        Map<Item, Integer> cost = refining();
-        if (cost == null) return;
-        for (var e : cost.entrySet()) {
+        var refine = refining();
+        if (refine == null) return;
+        for (var e : refine.cost().entrySet()) {
             int left = e.getValue();
             for (int i = 0; i < TRIGRAMS && left > 0; i++) {
                 ItemStack s = items.get(i);
@@ -304,7 +305,7 @@ public class TrigramsFurnaceBlockEntity extends BlockEntity implements Container
             }
         }
         ItemStack centre = items.get(CENTRE);
-        Armaments.setRefine(centre, Armaments.refine(centre) + 1);
+        Armaments.setTier(centre, refine.tier());
     }
 
     // ── Container ────────────────────────────────────────────────────────
@@ -371,6 +372,7 @@ public class TrigramsFurnaceBlockEntity extends BlockEntity implements Container
         tag.putInt("Progress", progress);
         tag.putInt("Burn", burn);
         tag.putInt("BurnMax", burnMax);
+        tag.putString("Smith", smith);
     }
 
     @Override
@@ -381,6 +383,7 @@ public class TrigramsFurnaceBlockEntity extends BlockEntity implements Container
         progress = tag.getInt("Progress");
         burn = tag.getInt("Burn");
         burnMax = tag.getInt("BurnMax");
+        smith = tag.getString("Smith");
     }
 
     // ── Menu ─────────────────────────────────────────────────────────────
@@ -393,6 +396,7 @@ public class TrigramsFurnaceBlockEntity extends BlockEntity implements Container
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int id, Inventory inventory, Player player) {
+        setSmith(player); // the one who works it now: the recipes' gates are held against them
         return new TrigramsFurnaceMenu(id, inventory, this, data);
     }
 }

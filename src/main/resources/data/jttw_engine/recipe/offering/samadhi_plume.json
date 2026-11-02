@@ -1,0 +1,38 @@
+{
+  "type": "jttw_engine:gated_shapeless",
+  "gate": {
+    "characters": [
+      "phoenix"
+    ]
+  },
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "jttw_engine:true_samadhi_fire"
+    },
+    {
+      "item": "jttw_engine:ember_core"
+    },
+    {
+      "item": "jttw_engine:ember_core"
+    },
+    {
+      "item": "jttw_engine:ember_core"
+    },
+    {
+      "item": "jttw_engine:ember_core"
+    },
+    {
+      "item": "jttw_engine:hell_bank_note"
+    },
+    {
+      "item": "jttw_engine:hell_bank_note"
+    },
+    {
+      "item": "jttw_engine:soul_chain"
+    }
+  ],
+  "result": {
+    "id": "jttw_engine:samadhi_plume"
+  }
+}

@@ -368,6 +368,28 @@ public final class ModItems {
     public static final DeferredHolder<Item, Item> ZHENYUAN_SPAWN_EGG = ITEMS.register("zhenyuan_spawn_egg",
             () -> new net.neoforged.neoforge.common.DeferredSpawnEggItem(ModEntities.ZHENYUAN, 0xE8D9A0, 0x6B4A2A, new Item.Properties()));
 
+    // ── The Divine Beasts' evolutions ─────────────────────────────
+    public static final DeferredHolder<Item, Item> FOUR_SYMBOLS_ALTAR = ITEMS.register("four_symbols_altar",
+            () -> new BlockItem(ModBlocks.FOUR_SYMBOLS_ALTAR.get(), new Item.Properties().rarity(net.minecraft.world.item.Rarity.RARE)));
+    /** Each beast's offering for each evolution (see Offering). */
+    public static final java.util.Map<com.jttw.engine.character.divinebeast.Offering, DeferredHolder<Item, Item>> OFFERINGS;
+
+    static {
+        java.util.Map<com.jttw.engine.character.divinebeast.Offering, DeferredHolder<Item, Item>> m = new java.util.EnumMap<>(com.jttw.engine.character.divinebeast.Offering.class);
+        for (var o : com.jttw.engine.character.divinebeast.Offering.values()) {
+            m.put(o, ITEMS.register(o.id(), () -> new com.jttw.engine.character.divinebeast.OfferingItem(o)));
+        }
+        OFFERINGS = java.util.Collections.unmodifiableMap(m);
+    }
+
+    // ── The Heavenly's own crafts ─────────────────────────────────
+    public static final DeferredHolder<Item, Item> FIVE_THUNDER_TALISMAN = ITEMS.register("five_thunder_talisman",
+            () -> new com.jttw.engine.item.HeavenlyCraftItem(com.jttw.engine.item.HeavenlyCraftItem.Kind.THUNDER));
+    public static final DeferredHolder<Item, Item> HEAVENS_NET_TALISMAN = ITEMS.register("heavens_net_talisman",
+            () -> new com.jttw.engine.item.HeavenlyCraftItem(com.jttw.engine.item.HeavenlyCraftItem.Kind.NET));
+    public static final DeferredHolder<Item, Item> NINE_TURN_ELIXIR = ITEMS.register("nine_turn_elixir",
+            () -> new com.jttw.engine.item.HeavenlyCraftItem(com.jttw.engine.item.HeavenlyCraftItem.Kind.ELIXIR));
+
     public static void register(IEventBus modEventBus) {
         ITEMS.register(modEventBus);
     }

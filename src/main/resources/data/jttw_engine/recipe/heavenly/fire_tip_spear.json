@@ -1,0 +1,28 @@
+{
+  "type": "jttw_engine:gated_shaped",
+  "gate": {
+    "characters": [
+      "third_lotus_prince"
+    ]
+  },
+  "category": "equipment",
+  "pattern": [
+    " IC",
+    " SI",
+    "S  "
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "C": {
+      "item": "minecraft:coal"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "id": "jttw_engine:fire_tip_spear"
+  }
+}

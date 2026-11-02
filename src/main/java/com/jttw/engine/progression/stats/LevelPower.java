@@ -205,7 +205,8 @@ public final class LevelPower {
     /** A player's power: their character's at their level (the backbone's for a player without a class). */
     public static double of(Player p) {
         ProgressionClass cls = PlayerLevel.getProgressionClass(p);
-        int level = PlayerLevel.getLevel(p);
+        // a Divine Beast owing an evolution stays at the level before it until its ritual
+        int level = com.jttw.engine.character.divinebeast.BeastEvolution.poweredLevel(p, PlayerLevel.getLevel(p));
         return (cls == null ? of(level) : of(cls, outcome(p), level)) * com.jttw.engine.world.furnace.WukongTrial.boon(p);
     }
 

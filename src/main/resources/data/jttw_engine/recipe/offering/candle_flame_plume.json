@@ -1,0 +1,38 @@
+{
+  "type": "jttw_engine:gated_shapeless",
+  "gate": {
+    "characters": [
+      "phoenix"
+    ]
+  },
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "jttw_engine:spirit_mountain_candle"
+    },
+    {
+      "item": "jttw_engine:night_petal"
+    },
+    {
+      "item": "jttw_engine:night_petal"
+    },
+    {
+      "item": "jttw_engine:night_petal"
+    },
+    {
+      "item": "minecraft:prismarine_crystals"
+    },
+    {
+      "item": "minecraft:prismarine_crystals"
+    },
+    {
+      "item": "minecraft:gold_nugget"
+    },
+    {
+      "item": "minecraft:gold_nugget"
+    }
+  ],
+  "result": {
+    "id": "jttw_engine:candle_flame_plume"
+  }
+}

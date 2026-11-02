@@ -1,0 +1,38 @@
+{
+  "type": "jttw_engine:gated_shapeless",
+  "gate": {
+    "characters": [
+      "turtle"
+    ]
+  },
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "minecraft:cobbled_deepslate"
+    },
+    {
+      "item": "minecraft:cobbled_deepslate"
+    },
+    {
+      "item": "minecraft:cobbled_deepslate"
+    },
+    {
+      "item": "minecraft:cobbled_deepslate"
+    },
+    {
+      "item": "minecraft:clay_ball"
+    },
+    {
+      "item": "minecraft:clay_ball"
+    },
+    {
+      "item": "jttw_engine:ogre_tusk"
+    },
+    {
+      "item": "minecraft:turtle_scute"
+    }
+  ],
+  "result": {
+    "id": "jttw_engine:deepstone_shell"
+  }
+}
