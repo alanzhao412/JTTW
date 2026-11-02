@@ -48,7 +48,20 @@ public class HeavenlyArcherEntity extends HeavenMonster implements RangedAttackM
 
     @Override
     protected void addAttackGoals() {
-        goalSelector.addGoal(2, new RangedAttackGoal(this, 1.0, EVERY, RANGE));
+        // as vanilla's bow goal does, it shows it is fighting (the renderer draws the bow while it is)
+        goalSelector.addGoal(2, new RangedAttackGoal(this, 1.0, EVERY, RANGE) {
+            @Override
+            public void start() {
+                super.start();
+                setAggressive(true);
+            }
+
+            @Override
+            public void stop() {
+                super.stop();
+                setAggressive(false);
+            }
+        });
     }
 
     /** An arrow at {@code target}, landing at its blow. */
