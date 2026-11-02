@@ -3006,7 +3006,9 @@ Some of the overworld's mountains, forests and jungles crawl with yaoguai (`Infe
   its edge), of every **zone** (its margin and 64 more) and of every **village**, vanilla's, the Tang
   villages' and the raided ones' (any village their sets would put within its radius and 64, judged
   by each site's own test, as the land is made). A candidate's disc covers some 16% of its cell, so at
-  most some 8% of the mountain, forest and jungle country is infested (less where villages stand).
+  most some 8% of the mountain, forest and jungle country is infested (less where villages stand). On
+  seed 12345: 19 patches within 6 km (13 forest, 6 jungle, no mountain: its peaks lie in the zones'
+  regions or by villages), some 0.1 to 0.3 a square kilometre.
 - **Who.** By its land: the **mountains'** goblins (山魈, the mountain demons) and ogres (山夜叉), an
   ogre heart; the **forests'** wolfmen and goblins, a wolfman heart; the **jungles'** kobolds (the
   lizard-folk) and goblins, a kobold heart. No new kinds yet: the roster is the four open-world kinds.
