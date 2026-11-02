@@ -71,12 +71,12 @@ public class ErlangWeaponsGameTests {
     // ── Three-Pointed Spear: attributes and triple strike ─────────
 
     @GameTest(template = PLATFORM, batch = "anyoneCanStartAThrust")
-    public static void spearAddsTwentyPercentAttackInTheMainHandOnly(GameTestHelper h) {
+    public static void spearAddsItsOwnAttackBonusInTheMainHandOnly(GameTestHelper h) {
         ServerPlayer p = player(h);
         setBaseAtk(p, 10.0);
         ItemStack s = spear();
         applyEquipmentModifiers(p, s, EquipmentSlot.MAINHAND);
-        near(h, 12.0, p.getAttributeValue(Attributes.ATTACK_DAMAGE), "ATK");
+        near(h, 10.0 * (1 + com.jttw.engine.item.ArmamentBonuses.THREE_POINTED_SPEAR), p.getAttributeValue(Attributes.ATTACK_DAMAGE), "ATK: its own bonus at tier I");
         check(h, modifiers(s, EquipmentSlot.OFFHAND).isEmpty(), "nothing off-hand");
         eq(h, UseAnim.SPEAR, s.getUseAnimation(), "spear animation");
         h.succeed();

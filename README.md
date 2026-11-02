@@ -58,12 +58,216 @@ evoker, piglin brute, breeze) 3; a boss 20. Level 20 takes about 170 common kill
 210 for a Divine Beast, 260 for a Yaoguai and 370 for a Primordial; from 20 on, only the mod's own
 enemies pay, by their zone's band.
 
+### Class identities
+
+Each class plays its own way, on top of its power curve:
+
+- **Heavenly: crafted and refined.** Their strength is their armaments, every one crafted by their
+  own hand and refined tier by tier as they climb.
+- **Divine Beast: evolution.** They grow by evolving, and each evolution is a ritual they must
+  prepare for: no XP until it is done.
+- **Yaoguai: ability spammers.** Their abilities hit far harder than their weapons; the right play
+  is always to cast.
+- **Primordial: normal gameplay.** Unchanged.
+
+What a class's way of fighting adds on top of its stats is its **kit**
+([`ClassKit`](src/main/java/com/jttw/engine/progression/stats/ClassKit.java), checked by
+`ClassKitTest`). A same-level fight takes three or four ordinary hits; a power level (the steady
+line's 1.10x) is worth about a tenth of a hit, seven of them about half the hits. Overall power
+(stats times kit), in power levels against the steady line, played as each class is meant to be (a
+Heavenly with every armament at the tier of their ring, a Yaoguai casting on every cooldown):
+
+| Character | Lv 30 | Lv 50 | Lv 70 | Lv 100 | Kit |
+|---|---|---|---|---|---|
+| Sun Wukong | -13 | -15 | -12 | +28 | none (normal gameplay) |
+| Yuan Di | -3 | -1 | 0 | +17 | none |
+| Gold-Winged Peng | +1 | -3 | -2 | +16 | none |
+| **Erlang Shen** | +4 | +4 | +4 | **+18** | +2.5 to +3 levels: three armaments, his axe |
+| **Nezha** | +7 | +8 | +8 | **+9** | +7 to +9 levels: six armaments, the Yin and Yang swords |
+| **Marshal Tianpeng** | +2 | +2 | +1 | **+1** | +3 levels: his rake |
+| Dragon, White Tiger, Black Tortoise | +3 to +8 | +3 | +3 | +3 | none (their leaps are their stats) |
+| Phoenix | +4 to +9 | +4 | +4 | +4 | +1 level: its abilities |
+| Bull Demon King, Saurian Demon King | +10 | +9 | +5 | -2 | +0.5 level: casting |
+| Nine-Headed Lion | +15 | +17 | +16 | +14 | +0.5 level: casting |
+
+So Erlang Shen lands at the lower end of the Primordials at the top (over the Peng and about Yuan
+Di, far under Wukong), Nezha's kit is the strongest of the Heavenly's though his stats are the
+plain line, the Marshal stays the least at the top, and the Yaoguai stand where they did with more
+of their strength in their abilities.
+
+#### Heavenly: crafted and refined
+
+**Every armament is crafted, never found.** Nezha's Fire-Tip Spear, Qiankun (Universe) Ring, Yin
+and Yang swords, Wind Fire Wheels and Huntian sash; Erlang Shen's Three-Pointed Spear, axe and
+Golden Bow; the Marshal's Nine-Tooth Rake. No loot table or structure hands one out (none did:
+they were forged in the Eight Trigrams Furnace from White Bone Ridge's bones, wisps and sigils, a
+Java list, and the Rake forged there whole from the Rime Shackle; both are gone, replaced by the
+recipes below). `HeavenlyCraftingGameTests` reads every loot table to keep it so.
+
+**Tiers.** An armament has a tier, I to VIII, one for each ring of levels: I below 20, II at 20-36,
+III at 37-46, IV at 47-56, V at 57-66, VI at 67-77, VII at 78-88, VIII at 89-100
+([`ArmamentTiers`](src/main/java/com/jttw/engine/item/ArmamentTiers.java)). Tier I is crafted at a
+crafting table from the first ring's things; each tier after takes the armament one tier short and
+its ring's zones' materials, at a crafting table for II to IV and in the Eight Trigrams Furnace for
+V to VIII (the furnace burns True Samadhi Fire, or Nezha's own fire). The armament keeps all else
+about it (a lit spear stays lit). Its tooltip names its tier, its ring and its next tier's recipe;
+the furnace's screen does the same for what is in its centre.
+
+**What a tier is worth.** Two things:
+
+- **Attunement, the class rule** ([`Armory`](src/main/java/com/jttw/engine/item/Armory.java)): a
+  Heavenly's health and attack lean on their armaments. Averaged over all of a character's
+  armaments (one they lack counts as tier 0), each tier they trail their ring's tier divides both by
+  1.3, up to three tiers. With every armament at their ring's tier they are their full selves; a
+  tier behind, a same-level foe takes them a hit more to kill and kills them a hit sooner; with
+  none at all (three or more behind), they need twice the hits and die in half. Being ahead of the
+  ring counts as level with it. So every ring a Heavenly crafts again, and each new tier is a real
+  jump: a step of 1.3 on health and attack both.
+- **The armament's own bonus**, raised a tenth of itself each tier (x1 at I, x1.7 at VIII), and the
+  armory's 6% health and attack for each armament held:
+
+  | Armament | Owner | Own bonus at tier I (on attack in hand, unless worn) | At VIII |
+  |---|---|---|---|
+  | Fire-Tip Spear | Nezha | x1.75 (lit, x2.25) | x2.28 (lit, x3.13) |
+  | Yin and Yang swords | Nezha | x1.4 each, the pair x1.96 | each x1.68, the pair x2.82 |
+  | Qiankun Ring | Nezha | x1.25 | x1.43 |
+  | Wind Fire Wheels | Nezha | a quarter more speed, worn | x1.7 that |
+  | Huntian sash | Nezha | 25 magic resistance, worn | 42.5 |
+  | Three-Pointed Spear | Erlang Shen | x1.1 | x1.17 |
+  | Erlang's axe | Erlang Shen | x1.15 (grown large, x3) | x1.26 (large, x4.4) |
+  | Golden Bow | Erlang Shen | its arrows, as they were | |
+  | Nine-Tooth Rake | the Marshal | x1.6 | x2.02 |
+
+  Erlang Shen's old hidden x1.667 on every blow with his spear or axe in hand is gone (his stats
+  already grow as a Primordial's); in its place his armaments' tiers. In hits: Nezha with his
+  swords at his ring's tier kills a same-level plain Heavenly in one or two blows and takes about
+  five of theirs; Erlang Shen at tier VIII kills one in two or three and takes about four.
+
+**Recipes.** Data, in `data/jttw_engine/recipe/heavenly/`, written by
+[`assets_source/class_recipes.py`](assets_source/class_recipes.py). Tier I, at a crafting table:
+
+| Armament | Pattern | Key |
+|---|---|---|
+| Fire-Tip Spear | ` IC` / ` SI` / `S  ` | iron, coal, stick |
+| Qiankun Ring | ` G ` / `GCG` / ` G ` | gold ingot, copper cash (goblins) |
+| Yin sword | ` I ` / ` N ` / ` S ` | iron, ink sac, stick |
+| Yang sword | ` I ` / ` G ` / ` S ` | iron, gold ingot, stick |
+| Wind Fire Wheels | `IFI` / `F F` / `IFI` | iron, flint |
+| Huntian sash | `RWR` / `WGW` / `RWR` | red dye, white wool, gold nugget |
+| Three-Pointed Spear | `IGI` / ` S ` / ` S ` | iron, gold ingot, stick |
+| Erlang's axe | `IIT` / `IS ` / ` S ` | iron, ogre tusk, stick |
+| Golden Bow | ` GS` / `G S` / ` GS` | gold ingot, string |
+| Nine-Tooth Rake | `III` / `NSN` / ` S ` | iron, iron nugget, stick |
+
+Refinements, one recipe per character and tier, taking any of that character's armaments one tier
+short (the materials besides the armament; a sigil is any captain's):
+
+| Tier | Where | Nezha (fire and the lotus) | Erlang Shen (the hunt and war) | the Marshal (iron, water and the field) |
+|---|---|---|---|---|
+| II (20-36) | table | 3 servant bone, 2 wraith wisp, 1 monkey hair, 1 sigil | 3 servant bone, 2 leather, 1 wraith wisp, 1 sigil | 4 iron, 2 servant bone, 1 porkchop, 1 sigil |
+| III (37-46) | table | 3 night petal, 2 spirit whisker, 1 sigil | 3 spirit whisker, 1 night petal, 2 iron, 1 sigil | 2 spirit whisker, 2 night petal, 2 iron, 1 sigil |
+| IV (47-56) | table | 2 prismarine crystals, 2 prismarine shard, 1 nautilus shell, 1 sigil | 2 turtle scute, 2 prismarine shard, 1 sigil | 2 prismarine shard, 2 prismarine crystals, 1 nautilus shell, 1 sigil |
+| V (57-66) | furnace | 4 hell bank note, 2 soul chain, 2 underworld ink, 1 sigil | 2 ox horn, 2 horse mane, 2 hell bank note, 1 sigil | 9 iron, 3 gold, 1 Rime Shackle, 1 jade block (Laozi's forging) |
+| VI (67-77) | furnace | 4 ember core, 2 furnace brick, 1 True Samadhi Fire, 1 sigil | 3 furnace brick, 2 ember core, 1 True Samadhi Fire, 1 sigil | 3 furnace brick, 2 ember core, 1 True Samadhi Fire |
+| VII (78-88) | furnace | 3 spider silk, 2 crane plume, 2 Daoist talisman, 1 golden eye | 3 insect carapace, 2 crane plume, 1 golden eye, 1 sigil | 3 Daoist talisman, 2 crane plume, 2 spider silk |
+| VIII (89-100) | furnace | 3 storm feather, 2 mane tuft, 1 ivory shard, 2 sigils | 3 ivory shard, 2 mane tuft, 2 storm feather, 1 sigil | 3 ivory shard, 2 mane tuft, 2 storm feather, 1 sigil |
+
+**Heavenly crafts**, any Heavenly's alone to make and to use
+([`HeavenlyCraftItem`](src/main/java/com/jttw/engine/item/HeavenlyCraftItem.java)):
+
+| Craft | Made | What it does |
+|---|---|---|
+| Five-Thunder Talisman (五雷符) | crafting table: paper, 2 gold nuggets, redstone (makes 2) | Burned, calls heavenly thunder down on the creature you look at within 24 blocks: three kill a foe of your level. |
+| Heaven's Net Talisman (天罗符) | crafting table: paper, 2 string, gold nugget, ink sac (makes 2) | Burned, pins the creature you look at within 16 blocks for 5 seconds (a boss shakes it off in half). |
+| Nine-Turn Golden Elixir (九转金丹) | the furnace: 3 gold ingots, 2 wraith wisps, an immortal peach, a servant bone (makes 2) | Eaten, heals you fully, fills your Qi, and gives Regeneration II for 30 s and Resistance I for a minute. |
+
+**The class gate** ([`ClassGate`](src/main/java/com/jttw/engine/item/craft/ClassGate.java)). A
+recipe names who may make it: `"gate": {"class": "heavenly"}`, `{"characters": ["third_lotus_prince"]}`,
+or both. The types: `jttw_engine:gated_shaped` and `gated_shapeless` (vanilla's shaped and
+shapeless with a gate), `jttw_engine:refining` (a tier at a crafting table), and the furnace's
+`jttw_engine:trigrams_refining` and `trigrams_forging` (whose gate is optional). At a crafting table
+the grid tells the recipe who is crafting (`CraftingMenuMixin`, and NeoForge's crafting player as the
+result is taken); a recipe matches only for someone its gate lets through, and with no one known (a
+Crafter block) never. The furnace answers to its **smith**, the last to open it. A character's gated
+recipes are put in their recipe book as they awaken and at login (refinements stay out of it:
+the armament's tooltip names them).
+
+#### Divine Beast: evolution by ritual
+
+At each evolution (levels 20, 40, 60, 80, and the last at 100) a beast that has levelled up to it
+stops: it holds the level, but the evolution is owed. Until it is performed it gains **no XP**
+(as Wukong at his checkpoints), its power and stats stay the level before's (the leap waits), and its
+form and look stay the one before. To evolve, it crafts its **offering** for that evolution and
+burns it at an **Altar of the Four Symbols**
+([`BeastEvolution`](src/main/java/com/jttw/engine/character/divinebeast/BeastEvolution.java)). Then
+the leap, the new form, its health refilled, and XP flowing again, at once. A level an operator sets
+owes nothing; evolutions performed are kept through death; a new reincarnation starts over.
+
+- **The altar** (四象坛, a craftable block: no existing place fitted every beast, and a beast should
+  carry its altar with it): a stepped altar of dark stone banded with carved clouds, a jade table
+  inlaid with the trigrams round a taiji, the Four Symbols' pillars at its corners crowned azure,
+  vermilion, white and black, and a two-eared bronze ding on three legs with incense burning in it.
+  Crafted by a Divine Beast alone: `ILI` / `CGC` / `SSS` (iron, lapis, candles, a gold block,
+  polished deepslate). Used empty-handed, it says what the next ritual wants.
+- **Feedback.** Reaching an evolution, the beast is told in chat that its XP has stopped, which
+  offering the ritual wants, its recipe, and where its materials come from. Each offering's tooltip
+  says whose it is, for which evolution, and where it is burned. The offerings are in the beast's
+  recipe book.
+- **The ritual.** Three seconds: the beast's element spirals up off the altar in four arms, the Four
+  Symbols (flame and lava for the Phoenix, water and glow for the Dragon, white dust and sparks for
+  the Tiger, deepslate and moss for the Tortoise), rising to the beast, a bell and a resonance each
+  second, louder; then a flash, a burst of light and the beast's own cry (a blaze's roar, thunder, a
+  ravager's roar, an anvil falling), a challenge chime, and the new form's name as a title.
+
+The offerings, each crafted by its beast alone from the part of the world that leads to it
+(`data/jttw_engine/recipe/offering/`; a sigil is any captain's):
+
+| Evolution | Materials from | Phoenix (feathers and fire) | Dragon (pearls and water) | White Tiger (fang, pelt and mane) | Black Tortoise (shell and earth) |
+|---|---|---|---|---|---|
+| 20 | the open world: beasts, wild yaoguai, ores | **Kindled Plume**: 4 feather, 2 gold, 2 coal, 1 flint | **Rain Pearl**: 1 ender pearl, 4 lapis, 2 silver tael, 1 water bucket | **Fang-and-Pelt Totem**: 2 wolf pelt, 4 bone, 2 iron, 1 leather | **Deepstone Shell**: 4 cobbled deepslate, 2 clay, 1 ogre tusk, 1 turtle scute |
+| 40 | White Bone, Black Wind, Flower-Fruit | **Wisp-Fire Plume**: 4 feather, 3 wraith wisp, 1 gunpowder, 1 sigil | **Water-Curtain Pearl**: 3 monkey hair, 3 wraith wisp, 1 immortal peach, 1 sigil | **Bone-Fang Totem**: 4 servant bone, 2 leather, 2 monkey hair, 1 sigil | **Ridge-Bone Shell**: 4 servant bone, 2 wraith wisp, 2 coal, 1 sigil |
+| 60 | the Bottomless Cave, the Mystical Waters | **Candle-Flame Plume**: 1 Spirit Mountain candle, 3 night petal, 2 prismarine crystals, 2 gold nugget | **Pearl of the Four Seas**: 1 heart of the sea, 3 prismarine crystals, 2 prismarine shard, 2 spirit whisker | **Moonlit Whisker Totem**: 4 spirit whisker, 2 night petal, 2 prismarine shard, 1 sigil | **Tide-Worn Shell**: 2 turtle scute, 2 nautilus shell, 2 spirit whisker, 2 night petal |
+| 80 | Hell, the Flaming Mountains | **Samadhi Plume**: 1 True Samadhi Fire, 4 ember core, 2 hell bank note, 1 soul chain | **Naihe Pearl**: 3 underworld ink, 2 soul chain, 2 ember core, 1 sigil | **Ox-and-Horse Totem**: 2 ox horn, 2 horse mane, 2 furnace brick, 1 sigil | **Furnace-Brick Shell**: 4 furnace brick, 2 soul chain, 2 hell bank note |
+| 100 | Wuzhuang, the Spider Cave, Lion-Camel | **Sovereign Sun Plume**: 3 storm feather, 3 crane plume, 1 golden eye, 1 Daoist talisman | **Dragon King's Pearl**: 1 golden eye, 3 spider silk, 2 crane plume, 2 storm feather | **Western Mane Totem**: 3 mane tuft, 2 ivory shard, 2 insect carapace, 1 Daoist talisman | **World-Turtle Shell**: 4 insect carapace, 2 ivory shard, 2 Daoist talisman |
+
+Every material is already dropped in its stage (turtle scutes and prismarine by the sea's soldiers,
+hearts of the sea by yakshas, feathers and gunpowder by Black Wind's imps, leather by its bear
+soldiers and wolfmen); no new drop was needed. `BeastEvolutionGameTests` reads each stage's
+creatures' loot tables to keep every offering's materials in its stage. The forms the rituals bring:
+the Phoenix Flame Guardian, Phoenix, Celestial Phoenix, Vermilion Bird, Solar Sovereign; the Dragon
+River Guardian, Azure Dragon, Dragon Prince, Dragon King, Azure Dragon of the East; the Tiger Western
+Guardian, White Tiger, Celestial White Tiger, Lord of the West, Byakko; the Tortoise Stone Sentinel,
+Mountain Guardian, Earth Titan, Black Tortoise, World Turtle.
+
+#### Yaoguai: ability damage over weapons
+
+A class-wide rule ([`AbilityDamage`](src/main/java/com/jttw/engine/progression/stats/AbilityDamage.java)):
+every blow a Yaoguai's ability deals lands x1.5, and every plain weapon hit (from the hand, or an
+arrow they loosed) x0.6. A same-level foe that takes three or four ordinary hits takes **six** of a
+Yaoguai's weapon hits and **two or three** of their ability hits. A blow struck in an ability's own
+body (the Great White Bull, the Nine-Headed Lion's True Form) is the ability's. The **Phoenix**'s
+abilities land x1.3 too (its weapon hits as they were).
+
+How a hit is told apart: the damage types do not (an ability's blow is often a plain player attack),
+so every ability deals its blows through `AbilityDamage.hurt`, which marks them, on the thread, as
+its caster's (the Bull's Rush, wall slam and shockwaves; the Saurian's blows, lash, floods and wrath;
+the Lion's heads and roaring shots; the Phoenix's flamethrower, Solar Flare, rebirth burst and
+burning thorns). An unmarked hit from the player's hand or projectile is a weapon hit; anything else
+(fire ticks, falling, reflections) is neither and is untouched. Casting on every cooldown (a little over half their damage from
+abilities), the Yaoguai's kit comes to about x1.1 overall, half a
+power level: where they stood, with the strength moved into their abilities.
+
+#### Primordial
+
+Normal gameplay: no change.
+
 ### Class passives
 
 Besides each character's own skill tree there is one shared class layer
 ([`AbilityUnlock`](src/main/java/com/jttw/engine/progression/skilltree/AbilityUnlock.java)), shown on
 the character screen's Skills tab (H) and announced in chat as each level is reached. It belongs to
-the **Divine Beasts**: their forms come by level alone and stand on it as free milestones, and
+the **Divine Beasts**: their forms come by evolution, each by its ritual at the Altar of the Four
+Symbols (see "Divine Beast: evolution by ritual" above), and stand on the list as free milestones, and
 between them come passives bought with skill points from the same pool as the tree (1 point below
 level 50, 2 from 50, 3 at 100), kept running by
 [`BeastPassives`](src/main/java/com/jttw/engine/character/divinebeast/BeastPassives.java):
@@ -409,14 +613,14 @@ Abilities and items are drawn from the source material rather than invented:
 - **Immortal Peach · Yin Yang Sword**
 - **The signature weapons and treasures, and where they are come by** (none of them in any other
   loot, vanilla's or ours):
-  - **Nine-Tooth Rake** (九齿钉耙, the Marshal of the Heavenly Canopy's): forged only in the Eight
-    Trigrams Furnace, as Laozi forged it, from exactly **9 iron ingots, 3 gold ingots, a Rime
-    Shackle** (King Chujiang's ice-iron, from the Second Court's cold hell) **and a jade block**,
-    with the centre empty and True Samadhi Fire burning (400 ticks, as an armament). No crafting
-    table makes it. The furnace's recipes besides the armaments are data
-    (`data/jttw_engine/recipe/`, type `jttw_engine:trigrams_forging`:
+  - **Nine-Tooth Rake** (九齿钉耙, the Marshal of the Heavenly Canopy's): crafted plain at a crafting
+    table (tier I) and refined tier by tier like every Heavenly armament (see "Heavenly: crafted and
+    refined"); at **tier V** it is re-forged in the Eight Trigrams Furnace as Laozi forged it, from
+    **9 iron ingots, 3 gold ingots, a Rime Shackle** (King Chujiang's ice-iron, from the Second
+    Court's cold hell) **and a jade block**, True Samadhi Fire burning. The furnace's recipes are data
+    (`data/jttw_engine/recipe/`, types `jttw_engine:trigrams_forging` and `trigrams_refining`:
     [`TrigramsRecipe`](src/main/java/com/jttw/engine/world/furnace/TrigramsRecipe.java)), and its
-    screen lists them with the armaments.
+    screen lists them.
   - **Mixed-Iron Cudgel** (混铁棍, the Bull Demon King's): crafted cheaply at a crafting table, two
     iron ingots and two iron nuggets on a diagonal over a stick (` NI` / ` IN` / `S  `). A plain
     iron club: 7 attack at 1 swing a second, 250 durability, uncommon (it was netherite-tier, 11
