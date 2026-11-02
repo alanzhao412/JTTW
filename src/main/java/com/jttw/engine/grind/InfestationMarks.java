@@ -63,7 +63,7 @@ public class InfestationMarks extends Feature<NoneFeatureConfiguration> {
                 BlockPos sign = at.relative(net.minecraft.core.Direction.fromYRot(out + 90));
                 if (level.getBlockState(sign).isAir() && level.getBlockState(sign.below()).blocksMotion()) {
                     level.setBlock(sign, Blocks.DARK_OAK_SIGN.defaultBlockState().setValue(StandingSignBlock.ROTATION, rot), Block.UPDATE_CLIENTS);
-                    TangVillagePiece.writeSign(level, sign, DyeColor.RED, signLines(patch));
+                    TangVillagePiece.writeSign(level, sign, DyeColor.ORANGE, signLines(patch));
                 }
             }
             return true;

@@ -159,7 +159,7 @@ public final class RaidedVillages {
         String[] lines = {name[0], "Freed from", "the yaoguai", by == null ? "" : "by " + by};
         for (BlockPos p : BlockPos.betweenClosed(box.minX(), centre.getY() + 1, box.minZ(), box.maxX(), centre.getY() + 6, box.maxZ())) {
             var s = level.getBlockState(p);
-            if (s.is(Blocks.BLACK_BANNER) || s.is(Blocks.SKELETON_SKULL) || s.is(Blocks.NETHER_BRICK_FENCE)
+            if (s.is(Blocks.BLACK_BANNER) || s.is(Blocks.SKELETON_SKULL) || s.is(Blocks.NETHER_BRICK_FENCE) || s.is(Blocks.SOUL_LANTERN)
                     || s.getBlock() instanceof CampfireBlock) {
                 level.setBlock(p, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
             } else if (s.getBlock() instanceof StandingSignBlock) {

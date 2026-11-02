@@ -648,10 +648,10 @@ def paint_ogre(p, style, f, dims):
 # blued and chased with gold (his club, bracers, fetters and shoulder plate), gold rings and a gilded
 # necklace of skulls, and eyes burning red-gold.
 CHIEF = dict(
-    RED=(54, 66, 104), RED_SHADE=(22, 26, 52), RED_LIGHT=(106, 126, 176),
+    RED=(62, 98, 156), RED_SHADE=(26, 40, 82), RED_LIGHT=(132, 172, 222),
     HAIR=(132, 22, 20), HAIR_GREY=(214, 120, 64),
     TIGER=(150, 30, 26), TIGER_DEEP=(92, 16, 16), STRIPE=(18, 12, 12), TIGER_WHITE=(222, 206, 170),
-    IRON=(58, 62, 82), IRON_DARK=(26, 28, 40), RUST=(196, 148, 52),
+    IRON=(86, 82, 98), IRON_DARK=(34, 30, 42), RUST=(206, 156, 56),
     GOLD=(250, 204, 80), GOLD_DEEP=(178, 124, 40),
     BONE=(236, 210, 150), BONE_SHADE=(160, 120, 70),
     EYE=(255, 120, 40), GUM=(40, 10, 24), ROPE=(150, 40, 30), LEATHER=(58, 26, 22), NAIL=(16, 12, 20),

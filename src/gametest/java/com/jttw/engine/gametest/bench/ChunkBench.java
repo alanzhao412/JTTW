@@ -81,6 +81,8 @@ public final class ChunkBench {
     private static final boolean VOID = "void".equals(System.getProperty("jttw.chunkBench.mode", ""));
     /** "village" runs {@link VillageBench}: the nearest Tang village of each kind, and the nearest as built. */
     private static final boolean VILLAGE = "village".equals(System.getProperty("jttw.chunkBench.mode", ""));
+    /** "raided" runs {@link RaidBench}: the raided villages and infested wilds by ring, the nearest of each pictured. */
+    private static final boolean RAIDED = "raided".equals(System.getProperty("jttw.chunkBench.mode", ""));
     /** "ridge" runs {@link RidgeBench}: White Bone Ridge, what its heart costs to make, and pictures of it. */
     private static final boolean RIDGE = "ridge".equals(System.getProperty("jttw.chunkBench.mode", ""));
     /** "blackwind" runs {@link BlackWindBench}: Black Wind Mountain, its range, temple, cave and king, and pictures of it. */
@@ -205,6 +207,15 @@ public final class ChunkBench {
             if (p.tickCount < 100) return;
             if (CaveBench.tick(p)) {
                 report.addAll(CaveBench.report());
+                write();
+                next(Step.DONE);
+            }
+            return;
+        }
+        if (RAIDED) {
+            if (p.tickCount < 100) return;
+            if (RaidBench.tick(p)) {
+                report.addAll(RaidBench.report());
                 write();
                 next(Step.DONE);
             }
