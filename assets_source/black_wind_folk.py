@@ -731,9 +731,18 @@ SCHOLAR = mirrored([
                                                           (-0.6, 5.6, -0.4, 1.2, 3.4, 0.8, 'stassel')]),
     part('right_arm', 'body', (-5.4, -13.8, 0), SARM, [(-1.4, -1, -1.4, 2.8, 7, 2.8, 'swarm')]),
     part('right_forearm', 'right_arm', (0, 6.4, 0), SFORE, [(-1.3, 0, -1.3, 2.6, 6, 2.6, 'swarm')]),
+    # the great scholar's sleeve (袖), hanging from the forearm whatever it does: not a block but a long
+    # bag of white silk, narrow across and deep from front to back as a hanfu sleeve is, its cuff bordered
+    # black where the hand comes out; below the arm the cloth swells and swoops down toward the back into the
+    # sleeve's hanging pocket (袂), its lower edge a curve hemmed in black, deepest behind; an outer fold
+    # lying over it, the lining pale blue-grey within
     part('right_sleeve', 'right_forearm', (0, 0.4, 0.8), aim([SARM, SFORE], (0.1, 0, 0.1)), [
-        (-2.9, -1, -7.4, 5.8, 12.8, 8.4, 'sbigsleeve'),
-        (-1.8, 11.4, -3.4, 3.6, 2.2, 3.8, 'scuff')]),
+        (-2.2, -1.3, -6.9, 4.4, 5.4, 9.2, 'ssleeve_wall'),
+        (-2.55, -1.6, -7.25, 5.1, 4.3, 0.6, 'ssleeve_cuff'),
+    ]),
+    part('right_sleeve_fall', 'right_sleeve', (0, 1.0, 4.75), (-0.45, 0, 0), [(-2.6, 0, -8.0, 5.2, 10.0, 8.0, 'ssleeve_pocket')]),
+    part('right_sleeve_swell', 'right_sleeve', (0, 0.6, 3.2), (-0.2, 0, 0), [(-2.4, 0, -5.5, 4.8, 9.0, 5.5, 'ssleeve_swell')]),
+    part('right_sleeve_drape', 'right_sleeve_fall', (-2.75, 0.6, -0.8), (0.03, 0, 0.06), [(-0.4, 0, -6.8, 0.45, 8.6, 6.4, 'ssleeve_drape')]),
     part('right_hand', 'right_forearm', (0, 6, 0), (0, 0, 0), [(-1.1, 0, -1.2, 2.2, 2.8, 2.4, 'shand')]),
     part('head', 'body', (0, -17.2, -0.6), (0, 0, 0), [
         (-2.6, -7.6, -3.0, 5.2, 4.8, 5.8, 'sface'),
@@ -795,6 +804,44 @@ def paint_scholar(p, style, f, dims):
                     w.hline(p, f[s], j, k(BLACK_EDGE, w.LIGHT[s]))
         if style == 'sbigsleeve':
             w.flat(p, f, BLACK_EDGE, faces=('bottom',))
+    if style.startswith('ssleeve'):
+        # the great sleeve: white silk in soft folds, a faint cloud pattern; its swoop hemmed in black; its
+        # cuff a black border round the dark of the sleeve's mouth, the lining showing at its rim
+        LINING = (196, 210, 222)
+        w.cloth(p, f, WHITE, WHITE_DEEP, fold=4, coarse=False)
+        for s_ in S:
+            fx, fy, fw, fh = f[s_]
+            for i, j, xy in w.each(p, f[s_]):
+                if w.vnoise(fx + i, fy + j, 3.0, 17) > 0.74:
+                    p.px(xy, k(p.get(xy), 0.9))
+                if style in ('ssleeve_pocket', 'ssleeve_drape'):   # the cloth's folds, falling
+                    p.px(xy, k(p.get(xy), 0.93 + 0.1 * math.cos((i % 6) / 6.0 * 2 * math.pi)))
+        if style in ('ssleeve_pocket', 'ssleeve_drape'):
+            w.flat(p, f, BLACK_EDGE, faces=('bottom',))
+            for s_ in ('front', 'right', 'left'):
+                fx, fy, fw, fh = f[s_]
+                for j in range(max(0, fh - 2), fh):
+                    w.hline(p, f[s_], j, k(BLACK_EDGE, w.LIGHT[s_]))
+            fx, fy, fw, fh = f['back']
+            for j in range(fh):                                   # the hem running up the back of the swoop
+                for i in range(fw):
+                    if j >= fh - 2:
+                        p.px((fx + i, fy + j), k(BLACK_EDGE, w.LIGHT['back']))
+        if style == 'ssleeve_drape':
+            for s_ in ('right', 'left'):
+                fx, fy, fw, fh = f[s_]
+                for j in range(fh):
+                    p.px((fx, fy + j), BLACK_EDGE)
+        if style == 'ssleeve_cuff':
+            w.flat(p, f, k(LINING, 0.95))
+            fx, fy, fw, fh = f['front']
+            for i, j, xy in w.each(p, f['front']):
+                edge = i == 0 or i == fw - 1 or j == 0 or j == fh - 1
+                inner = 3 <= i < fw - 3 and 2 <= j < fh - 3
+                p.px(xy, BLACK_EDGE if edge else (70, 76, 88) if inner else k(LINING, 0.9))
+            for s_ in S:
+                w.hline(p, f[s_], 0, (120, 120, 126))
+        return
     if style in ('scollar', 'ssash', 'ssash_knot', 'ssash_tail'):
         w.cloth(p, f, BLACK_EDGE, (6, 6, 8), fold=2, coarse=False)
         if style == 'ssash':

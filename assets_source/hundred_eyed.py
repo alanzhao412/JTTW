@@ -2,9 +2,10 @@
 silk_court.py: his model and skins come from one list of parts, written into SpiderCaveRenderers.
 
 A centipede spirit in a Daoist master's shape, towering near four blocks. A tall, gaunt figure in a
-voluminous Daoist robe of temple yellow falling to the ground in three flaring tiers: damask
-lozenges woven through the silk, auspicious clouds worked in ochre round each tier, the eight
-trigrams round the hem between black and gold bands, the taiji on his back; a black cross collar
+voluminous Daoist robe of temple yellow, its skirt falling to the ground in long gores that hang in
+deep folds and flare toward the hem, open up the front: damask lozenges woven through the silk,
+auspicious clouds worked in ochre and the eight trigrams round the hem over a black hem piped gold,
+the opening's edges bordered in black and gold (gold as trim, not banding), the taiji on his back; a black cross collar
 edged in gold and a stiff high collar standing behind his head; a crimson sash knotted at his
 waist, its ends and a jade pendant hanging to his knees; great sleeves lined in black. Over his
 shoulders three tiers of a centipede's armoured segments, umber-black and gold-rimmed.
@@ -92,6 +93,30 @@ def tier_dims(t):
     return 0.6 + t * 2.25, 10.2 + 12.0 * q ** 1.5, 7.2 + 8.4 * q ** 1.5, 1.2 * q * q
 
 
+GORE_UP, GORE_LOW = 8.2, 12.6
+
+
+def gores():
+    """The skirt's gores down his right side, from the front opening round to his back: for each, the angle
+    round him (0 before him), its breadth at the top and at the hem, how far its upper and lower lengths lean
+    out (so the bell curves out toward the hem), the lower length's style (the one beside the opening edged in
+    gold), and whether an eye is set in it."""
+    out = []
+    n = 8
+    for k_ in range(n):
+        th = 0.4 + (math.pi - 0.62) * k_ / (n - 1)
+        r0 = math.hypot(5.0 * math.sin(th), 3.55 * math.cos(th))
+        r1 = math.hypot(11.0 * math.sin(th), 7.9 * math.cos(th))
+        drop = r1 - r0                                         # how far out the hem lies beyond the waist
+        x0 = math.atan2(drop * 0.32, GORE_UP)
+        x1 = math.atan2(drop - GORE_UP * math.sin(x0), GORE_LOW) - x0
+        w0 = 2 * math.pi * r0 / (2 * n) * 1.5 + 0.6
+        w1 = 2 * math.pi * r1 / (2 * n) * 1.25 + 0.4
+        low = 'gore_front' if k_ == 0 else 'gore_low' if k_ % 2 == 0 else 'gore_low_dark'
+        out.append((th, w0, w1, x0, x1, low, k_ in (2, 5)))
+    return out
+
+
 def lord_parts():
     ps = []
     # ── his body from the waist up: lean, his own hide, glossy segments ringed with eyes; a long neck ──
@@ -153,24 +178,25 @@ def lord_parts():
         part('pendant', 'sash', (-3.8, 0.6, -4.1), (-0.12, 0, 0.03), [
             (-0.25, 0, -0.25, 0.5, 4, 0.5, 'cord'), (-1.5, 4, -0.5, 3, 3, 1, 'jade_disc'), (-0.5, 7, -0.4, 1, 4.5, 0.8, 'tassel')]),
     ]
-    # ── the robe's skirt: a bell flaring from his waist to the ground in thin stepped tiers, each a little
-    # wider and further back than the last, trimmed gold; split up the front over the centipede's belly ──
+    # ── the robe's skirt: a bell of silk falling from his waist to the ground in long gores, gathered under
+    # the sash and flaring as they fall, curving out toward the hem, each lying a little over the next so that
+    # the cloth hangs in deep folds, light on their ridges and dark in their troughs; open up the front over
+    # the centipede's belly. Gold only where silk would carry it: the hem's border, the edges of the opening,
+    # and a little embroidery. Inside, a dark lining (seen between the folds) ──
     skirt = []
-    for t in range(TIERS):
-        y0, w, d, zc = tier_dims(t)
-        skirt.append((-w / 2, y0, zc - d / 2, w, 2.4, d, 'tier_%d' % t))
-    for t, xs in ((3, (-6.0, 2.4)), (5, (-8.2, -3.3, 4.6)), (7, (-6.6, 3.0))):  # eyes in the skirt's silk
-        y0, w, d, zc = tier_dims(t)
-        for x in xs:
-            skirt.append((x, y0 + 0.4, zc - d / 2 - 0.3, 3.6, 1.6, 0.3, 'robe_eye'))
+    for t, (y0, h, w, d) in enumerate(((0.6, 7.2, 10.0, 7.0), (7.6, 7.0, 13.6, 9.6), (14.4, 6.8, 17.2, 12.0))):
+        skirt.append((-w / 2, y0, -d / 2 + 0.4 * t, w, h, d, 'lining_core'))
     ps.append(part('skirt', 'body', (0, 0, 0), (0, 0, 0), skirt))
-    # draped folds: thin panels hanging round the bell at angles, flaring with it
-    for k_, th in enumerate((0.42, 0.95, 1.6, 2.3, 2.8)):
-        rx, rz = 5.2, 4.3
-        ps.append(part('right_fold_%d' % k_, 'skirt', (-math.sin(th) * rx, 0.9, -math.cos(th) * rz + 0.3), (-0.25 - 0.04 * k_, -th, 0),
-                       [(-1.7, 0, -0.45, 3.4, 20.2 - 0.3 * abs(k_ - 2), 0.4, 'fold' if k_ % 2 == 0 else 'fold_dark')]))
+    for k_, (th, w0, w1, x0, x1, low, eye) in enumerate(gores()):
+        rx0, rz0 = 5.0, 3.55
+        ps.append(part('right_fold_%d' % k_, 'skirt', (-math.sin(th) * rx0, 0.9, -math.cos(th) * rz0 + 0.3), (-x0, -th, 0),
+                       [(-w0 / 2, 0, -0.5, w0, GORE_UP + 0.4, 0.5, 'gore_up_front' if k_ == 0 else 'gore_up' if k_ % 2 == 0 else 'gore_up_dark')]))
+        boxes = [(-w1 / 2, 0, -0.5, w1, GORE_LOW, 0.5, low)]
+        if eye:
+            boxes.append((-1.8, GORE_LOW * 0.42, -0.8, 3.6, 1.6, 0.3, 'robe_eye'))
+        ps.append(part('right_fold_low_%d' % k_, 'right_fold_%d' % k_, (0, GORE_UP, 0), (-x1, 0, 0), boxes))
     ps += [
-        part('right_back_panel', 'skirt', (-2.1, 1.0, 4.4), (0.3, 0, 0.05), [(-3.2, 0, 0, 3.4, 20.0, 0.5, 'back_panel')]),
+        part('right_back_panel', 'skirt', (-2.1, 1.0, 4.6), (0.3, 0, 0.05), [(-3.2, 0, 0, 3.4, 20.0, 0.5, 'back_panel')]),
     ]
     # the centipede's belly in the robe's front slit, and its little legs reaching out of it
     belly = []
@@ -647,51 +673,60 @@ def lord_painter():
                     band(p, f[s], fh - 4 * S, 4 * S, BLACK, GOLD)
                     eye_motif(p, fx + fw // 2 - 3 * S, fy + 6 * S, w=6 * S)
                     eye_motif(p, fx + fw // 2 - 3 * S, fy + 18 * S, w=6 * S)
-        elif style.startswith('tier_'):
-            # one of the bell's tiers: silk deepening toward the hem from yellow into ochre, deep folds, a
-            # gold-trimmed hem over a line of shadow; the slit up its front over the centipede's belly
-            t = int(style[5:])
-            q = t / (TIERS - 1)
-            base = mixc(YELLOW, OCHRE, 0.12 + 0.4 * q)
-            for s, r in f.items():
-                silk_robe(p, r, s, base=base, light=1.0 - 0.15 * q, folds=7, deep=0.6)
-            for s in SIDES:
-                fx, fy, fw, fh = f[s]
-                for i in range(fw):
-                    p.px((fx + i, fy), noisy(p, k(YELLOW_DEEP, 0.55 * LIGHTS[s]), 2))
-                    for j in range(fh - S, fh):
-                        p.px((fx + i, fy + j), noisy(p, k(GOLD if j >= fh - S // 2 else GOLD_DEEP, LIGHTS[s]), 3))
-                if t == TIERS - 1:
-                    band(p, f[s], 0, fh, BLACK, GOLD)
-                    for i in range(2 * S, fw - 2 * S, 3 * S):
-                        for di in range(S + S // 2):
-                            p.px((fx + i + di, fy + fh // 2 - 1), GOLD_DEEP if (i // (3 * S)) % 3 else GOLD)
-                elif t in (2, 5):
-                    clouds(p, f[s], S // 2, fh - 2 * S, light=LIGHTS[s])
-                if s == 'front' and 0 < t < TIERS - 1:              # the slit, dark, its edges piped gold
-                    half = int((1.4 - 0.05 * t) * S)
-                    for i in range(fw // 2 - half - S // 2, fw // 2 + half + S // 2):
-                        for j in range(fh):
-                            edge = abs(i + 0.5 - fw / 2) > half
-                            p.px((fx + i, fy + j), GOLD if edge else noisy(p, (26, 12, 10), 2))
-        elif style in ('fold', 'fold_dark'):
-            base = mixc(YELLOW, OCHRE, 0.35) if style == 'fold' else mixc(OCHRE, (96, 52, 16), 0.35)
-            for s, r in f.items():
+        elif style.startswith('gore_'):
+            # one of the skirt's gores: temple-yellow silk hanging in a single deep fold, its ridge catching the
+            # light and its edges falling into shadow where it passes under the next; deepening toward ochre as
+            # it falls; the darker gores lying further in. The lower lengths carry the hem's embroidery: a band
+            # of ochre clouds, the trigrams, and the black hem piped gold. The gores beside the opening are edged
+            # in black and gold down their length.
+            dark = style.endswith('_dark')
+            low = style.startswith('gore_low') or style == 'gore_front'
+            front = style in ('gore_front', 'gore_up_front')
+            for s_, r in f.items():
                 fx, fy, fw, fh = r
+                L = LIGHTS[s_] * (0.86 if dark else 1.0)
                 for i, j, xy in each(r):
-                    v = j / max(1, fh)
-                    c = k(base, LIGHTS[s] * (1.06 - 0.3 * v))
-                    if s in SIDES:
-                        c = mixc(c, k((90, 50, 14), 1), 0.35 * (0.5 + 0.5 * math.cos((i / max(1, fw)) * math.pi * 2)) ** 2)
-                    p.px(xy, noisy(p, c, 2))
-            for s in ('front', 'back'):
-                fx, fy, fw, fh = f[s]
-                vedges(p, f[s], GOLD, S // 2)
-                band(p, f[s], fh - 2 * S, 2 * S, BLACK, GOLD)
-                if style == 'fold':
-                    eye_motif(p, fx + fw // 2 - 3 * S, fy + int(fh * 0.4), w=6 * S)
-                else:
-                    clouds(p, f[s], int(fh * 0.25), 5 * S, light=0.9)
+                    v = j / max(1, fh - 1)
+                    q = (0.25 + 0.45 * v) if low else 0.08 + 0.2 * v
+                    c = mixc(YELLOW, OCHRE, q)
+                    if s_ in ('front', 'back'):
+                        u = (i + 0.5) / fw
+                        ridge = math.cos((u - 0.5) * math.pi)          # 1 on the fold's crest, 0 at its edges
+                        c = mixc(c, YELLOW_LIGHT, 0.4 * ridge ** 6)
+                        c = mixc(c, (96, 54, 14), 0.55 * (1 - ridge) ** 1.5)
+                        a_, b_ = (i + 2 * S) % (6 * S), (j + 3 * S) % (6 * S)   # the damask lozenge woven through
+                        if abs(a_ - 3 * S) + abs(b_ - 3 * S) == 2 * S:
+                            c = mixc(c, OCHRE, 0.25)
+                    else:
+                        c = mixc(c, (96, 54, 14), 0.5)
+                    if s_ == 'back':
+                        c = mixc((70, 40, 14), (40, 22, 10), v)          # its inside: the dark lining
+                    if not low and v < 0.12:
+                        c = k(c, 0.75 + 2.0 * v)                        # gathered in shadow under the sash
+                    p.px(xy, noisy(p, k(c, L), 2))
+            if low:
+                for s_ in ('front',):
+                    fx, fy, fw, fh = f[s_]
+                    clouds(p, f[s_], fh - 15 * S, 5 * S, light=LIGHTS[s_] * (0.9 if dark else 1.0))
+                    trigrams(p, f[s_], fh - 9 * S - S // 2, 6 * S, start=fx // 7)
+                    band(p, f[s_], fh - 3 * S, 3 * S, BLACK, GOLD)
+                    if not dark and s_ == 'front':
+                        eye_motif(p, fx + fw // 2 - 2 * S, fy + int(fh * 0.22), w=4 * S)
+                for s_ in ('right', 'left'):
+                    fx, fy, fw, fh = f[s_]
+                    for j in range(fh - 3 * S, fh):
+                        for i in range(fw):
+                            p.px((fx + i, fy + j), noisy(p, GOLD if j in (fh - 3 * S, fh - 1) else BLACK, 3))
+            if front:
+                for s_ in ('front',):
+                    fx, fy, fw, fh = f[s_]
+                    vedges(p, f[s_], BLACK, S)
+                    vedges(p, (fx + S, fy, fw - 2 * S, fh), GOLD, S // 2)
+        elif style == 'lining_core':
+            # inside the robe, between and behind its folds: the dark lining
+            for s_, r in f.items():
+                for i, j, xy in each(r):
+                    p.px(xy, noisy(p, k((44, 26, 10), LIGHTS[s_] * (0.85 - 0.25 * j / max(1, r[3]))), 3))
         elif style in ('belly_plate', 'belly_plate_red'):
             chitin(p, f, CHITIN if style == 'belly_plate' else (96, 20, 18), (230, 170, 120))
             for s in SIDES:
@@ -709,11 +744,6 @@ def lord_painter():
             elif style.endswith('b'):
                 for s in SIDES:
                     clouds(p, f[s], S, 4 * S)
-            else:
-                for s in SIDES:
-                    band(p, f[s], 0, S, GOLD_DEEP, GOLD_DEEP)
-            for s in SIDES:
-                vedges(p, f[s], GOLD_DEEP, S // 2)
         elif style == 'lining':
             cloth(p, f, (28, 20, 20), folds=True)
         elif style == 'sleeve_cuff':

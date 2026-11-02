@@ -146,8 +146,12 @@ final class FlowerFruitScenes {
         all.addAll(views("baboon", 1.9, (p, yaw) -> monkey(p, FlowerFruitRegistry.GREAT_BABOON.get(), 0.5, 9.5, yaw, false)));
         all.addAll(views("tang", 2.1, (p, yaw) -> pilgrim(p, FakePilgrimEntity.TANG, 0.5, ground(p), 9.5, yaw)));
         all.addAll(views("bajie", 2.0, (p, yaw) -> pilgrim(p, FakePilgrimEntity.BAJIE, 0.5, ground(p), 9.5, yaw)));
+        all.add(scene("ff_bajie_quarter", p -> pilgrim(p, FakePilgrimEntity.BAJIE, 0.5, ground(p), 9.5, 150f), new double[]{-0.5, 1.75, 7.6, 0.5, 1.65, 9.5}));
         all.addAll(views("sha", 2.2, (p, yaw) -> pilgrim(p, FakePilgrimEntity.SHA, 0.5, ground(p), 9.5, yaw)));
         all.addAll(views("macaque", 3.2, (p, yaw) -> macaque(p, 0.5, ground(p), 9.5, yaw)));
+        // his cap seated on his head, from the side and three-quarters
+        all.add(scene("ff_macaque_cap", p -> macaque(p, 0.5, ground(p), 9.5, 145f), new double[]{-1.1, 3.1, 7.5, 0.5, 2.9, 9.5}));
+        all.add(scene("ff_macaque_quarter", p -> macaque(p, 0.5, ground(p), 9.5, 150f), new double[]{-1.9, 3.0, 5.4, 0.5, 2.4, 9.5}));
         all.addAll(List.of(
                 scene("ff_monkeys", p -> {
                     monkey(p, FlowerFruitRegistry.STONE_GIBBON.get(), -2.5, 9.5, 200f, false);
