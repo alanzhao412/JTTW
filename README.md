@@ -718,7 +718,8 @@ Abilities and items are drawn from the source material rather than invented:
 
 Custom **Heaven** and **Hell** dimensions ship with their own worldgen, biomes, and noise settings.
 Heaven is a sky of cloud islands with the Immortals' pavilions, the Queen Mother's peach gardens
-and the Jade Palace. Hell (Diyu) is a dark underworld of ash plains, black stone hills and rivers,
+and the Jade Palace, held by Heaven's host: wild grass of every level from 1 on the outer clouds to
+100 at the palace, reached by anyone with a Heaven Pass (see "Heaven" under Zones). Hell (Diyu) is a dark underworld of ash plains, black stone hills and rivers,
 crossed by the Naihe, with the arrival plaza where the Book of Life and Death is kept and, far to
 the north, the fortress of the Ten Courts: the levels 57–66 zone (see "Hell" under Zones). Sun
 Wukong is sent there at level 30 to strike his name from the Book; the Dragon's and Wukong's
@@ -1141,11 +1142,11 @@ under its boss, in hits to kill and in blow:
 | Rank | Blow (before resistance) | Hits to kill | Who |
 |---|---|---|---|
 | Light mobs | 6–7% (15–17 kill you) | 2–4 | wraiths, mouse spirits, ember imps, fish soldiers, yin soldiers, wandering ghosts, judge-clerks, cloud cranes, Wind-Drillers, goblins, black-wind imps, spider demons, stinging sons, stone-throwing gibbons, the Macaque's hair clones |
-| Normal mobs | 8–10% (10–13 kill you) | 4–8 | flower maids, shrimp soldiers, yaksha, Horse-Face, the Impermanence, peng-demons, Daoist disciples, kobolds, wolfmen, heavenly soldiers, boar demons, Mantis Sons, spear apes |
+| Normal mobs | 8–10% (10–13 kill you) | 4–8 | flower maids, shrimp soldiers, yaksha, Horse-Face, the Impermanence, peng-demons, Daoist disciples, kobolds, wolfmen, heavenly soldiers and archers, cloud cavalry, thunder drummers, boar demons, Mantis Sons, spear apes |
 | Heavy mobs | 11–12% (9 kill you), no single hit (slam, gore, pounce, swoop) harder | 10–12 | Bone Servants, Furnace-Brick Brutes, ogres, elephant-demons, lion-demons, turtle soldiers, Crab Generals, Ox-Head, Black Bear Soldiers, Cockroach Sons, great baboons |
-| Captains (trainers) | a regular's ×1.2: at most 14.4% (7 kill you) | a regular's ×2: 4–24 | any of the above, purple-named, 3–5 levels over the regulars round them |
-| Minibosses (elite trainers) | their hardest hit 16% whatever their kind (7 kill you), their blow 14–16% | 25–40, over any captain's | the floor wardens and gate keepers of every lair (White Bone's Wardens and Keepers of the Bone Gate, the Bottomless Cave's guardians, the Fire Cloud Cave's door wardens and floor guardians, Lion-Camel's floor wardens), the Six Strong Generals, the Seven Spider Spirits, Clear Wind and Bright Moon, Heavenly Generals, Lingxuzi and the White-Robed Scholar (Black Wind's door keepers) and its stair's warden, the Six-Eared Macaque's three fake pilgrims |
-| Bosses (gym leaders) | 18–20% of a character of their band's top (5–6 blows kill them); no special or area hit harder | 60–80 of that character's, all their lives together, over any miniboss's | every `ZoneBoss` but the Macaque, three levels over its zone's band (a lesser boss two) |
+| Captains (trainers) | a regular's ×1.2: at most 14.4% (7 kill you) | a regular's ×2: 4–24 | any of the above, purple-named, 3–5 levels over the regulars round them; Heaven's Twenty-Eight Lunar Mansions |
+| Minibosses (elite trainers) | their hardest hit 16% whatever their kind (7 kill you), their blow 14–16% | 25–40, over any captain's | the floor wardens and gate keepers of every lair (White Bone's Wardens and Keepers of the Bone Gate, the Bottomless Cave's guardians, the Fire Cloud Cave's door wardens and floor guardians, Lion-Camel's floor wardens), the Six Strong Generals, the Seven Spider Spirits, Clear Wind and Bright Moon, Heavenly Generals, the Nine Luminaries, the Great Spirit Giant, the Thunder Lord and the Lightning Mother, Thousand-Mile Eye and Wind-Following Ear, Lingxuzi and the White-Robed Scholar (Black Wind's door keepers) and its stair's warden, the Six-Eared Macaque's three fake pilgrims |
+| Bosses (gym leaders) | 18–20% of a character of their band's top (5–6 blows kill them); no special or area hit harder | 60–80 of that character's, all their lives together, over any miniboss's | every `ZoneBoss` but the Macaque, three levels over its zone's band (a lesser boss two); Heaven's Four Kings, Li Jing, Nezha and Erlang Shen, each over his region's |
 | Usurpers | as their kind's, at their own level (5–6 blows kill you) | 36–47: 60% of their kind's | a boss sat in a fallen master's lair, at its zone's band's top (above) |
 | The superboss | a third of a capped character's health (4 kill one) | 430 of a capped character's | the Six-Eared Macaque, level 120 |
 
@@ -2540,8 +2541,8 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   from the Flaming Mountains' 130 and Mount Wuzhuang's 145). Striking down the Azure Lion or the White
   Elephant, who ate a kingdom, is a good deed: **karma +150** each, as Lady White Bone; captains +5,
   the rest +1. With this band and Mount Wuzhuang's (78–88) every level from 21 to 100 has one; the
-  kill XP's flat fallback for a tiered enemy outside every band stays, for Heaven's soldiers (they
-  carry a tier but no zone, being levelled to whoever they hunt).
+  kill XP's flat fallback for a tiered enemy outside every band stays, for any mob tagged by hand
+  (Heaven's host pays by its own level instead: see "Heaven", below).
 - **Art**: `LionDemonRenderer`, `ElephantDemonRenderer`, `PengDemonRenderer`,
   `LittleWindDrillerRenderer`, `AzureLionRenderer`, `WhiteElephantRenderer` (box models and skins with
   glowing eyes and gold from `assets_source/lion_camel.py`; the little demons bow; each king has two
@@ -2960,6 +2961,147 @@ luggage and made himself a false pilgrimage to fetch the scriptures in his place
   `PeckingOrderGameTests` (the superboss exception, and that he is the strongest boss);
   gallery scenes `-Pgallery.only=scene__ff_`; the island, its falls and its cave in a real world with
   `./gradlew runWorldgenBench -Pbench.mode=flowerfruit`.
+
+#### Heaven: wild grass of every level (levels 1–100; Li Jing, level 103)
+
+Heaven (天庭, the `jttw_engine:heaven` dimension, a sky of cloud islands) is not one zone of a band but
+the game's wild grass: an optional place to grind between the zones, with foes of every level, and a
+brawl if Heaven turns on you. Its host keeps its islands, and its levels are read off the way to the
+Jade Palace ([`HeavenRegions`](src/main/java/com/jttw/engine/world/heaven/HeavenRegions.java)): level
+100 at the palace, one level lower every 36 blocks out, down to level 1 on the outermost clouds
+(3,564 blocks out and beyond). The road falls into five regions of twenty levels, each ending at a gate
+or a court whose head is its gym's leader (its band's top and three, as every zone's):
+
+| Region | Levels | From the Jade Palace | Its head (boss) | Its gods and star lords (minibosses) |
+|---|---|---|---|---|
+| The Outer Clouds | 1–20 | 2,880 blocks and out | Chiguo, Heavenly King of the East (23), at the Eastern Gate | Rahu, Ketu |
+| The Cloud Road | 21–40 | 2,160–2,880 | Zengzhang, Heavenly King of the South (43), at the Southern Gate | Thousand-Mile Eye and Wind-Following Ear (by the Southern Gate), the Moon, Mercury |
+| The Star Palaces | 41–60 | 1,440–2,160 | Guangmu, Heavenly King of the West (63), at the Western Gate | Jupiter, Mars, Venus |
+| The Thunder Court | 61–80 | 720–1,440 | Duowen, Heavenly King of the North (83), at the Northern Gate | the Thunder Lord and the Lightning Mother, Saturn |
+| The Jade Palace | 81–100 | 0–720 | Li Jing, the Pagoda-Bearing Heavenly King (103), before the palace's gate; Nezha and Erlang Shen (102) | the Great Spirit Giant, the Sun |
+
+- **Regulars** are the road's wild creatures: each of a level either way of the road's where it comes
+  down, never out of its region's band. **Captains** (a Lunar Mansion, or a captain of the band's own
+  kind) stand three to five levels over the regulars round them, never more than one over the region's
+  top; **minibosses** five over the road at their post, never more than one over.
+- **They keep coming back** ([`HeavenSpawner`](src/main/java/com/jttw/engine/world/heaven/HeavenSpawner.java)):
+  every five seconds, round each player in Heaven (not on Peaceful), if fewer than ten of the wild host
+  are within 48 blocks, a band of two to four comes down on a cloud onto island ground 10 to 40 blocks
+  off (never within 8 of a player): soldiers (two bands in five), archers, thunder drummers or cloud
+  cavalry; one band in eight led by a Lunar Mansion, one in twelve by a captain of its own kind. They
+  drift over the island they came down on and go when no one is near, as any monster does.
+- **The court keeps its posts** ([`HeavenCourt`](src/main/java/com/jttw/engine/world/heaven/HeavenCourt.java)):
+  each god, star lord and great name holds an island of his region, toward his quarter (the Kings at
+  their gates: east, south, west, north of the palace). He is put there the first time his ground is
+  awake; once he falls his post stays empty 20 minutes, then, the next time its ground is awake and no
+  one is within 32 blocks, Heaven sends him back. No usurper takes a post of Heaven's. Where no island
+  lies near a post, a cloud is laid for him.
+
+**Who the host fights** ([`HeavenHostility`](src/main/java/com/jttw/engine/world/heaven/HeavenHostility.java)).
+It depends on who you are:
+
+- **A demon**: a Yaoguai is attacked on sight by everything in Heaven, whatever their karma. That is what
+  Havoc in Heaven is for a demon.
+- **Bad karma**: at karma −100 and under (Heaven's "Suspect", the standing under Neutral) anyone is
+  attacked on sight too.
+- **An outlaw** (karma −250 and under) besides has the host sent down round them, wave after wave, as
+  long as they stay in Heaven ([`HeavenlyHost`](src/main/java/com/jttw/engine/world/morality/HeavenlyHost.java)),
+  at the higher of their own level and the road's, and more levels the more wanted:
+
+  | Degree (karma) | A wave every | Regulars | Lunar Mansions | Heavenly Generals | Star lords | Most out at once | Levels over |
+  |---|---|---|---|---|---|---|---|
+  | Outlaw (−250) | 30 s | 3 | 0 | 0 | 0 | 10 | 0 |
+  | Enemy of Heaven (−1,000) | 20 s | 5 | 1 | 1 | 0 | 18 | 3 |
+  | Great Rebel (−3,000) | 12 s | 7 | 2 | 1 | 1 | 30 | 6 |
+
+  (The hunt is Heaven's alone: the host does not come down into the world below.)
+- **Everyone else** is left alone. Strike one of the host and it fights back, and every one of its allies
+  within 16 blocks that has no foe yet comes to its aid.
+
+**Who struck first.** Heaven judges a kill by who began it (`Grudge`, `HeavenHostility.killDeed`). Killing
+one of the host that came at you (on sight, rallying to an ally, hunting you) is self-defence: no deed at
+all. Killing one you struck first is a crime against Heaven: a soldier **−2**, a star general (any captain)
+**−5**, a god or star lord (a miniboss) **−15**, a Heavenly King **−30**, Nezha or Erlang Shen **−40**, Li
+Jing **−60** (as against King Yama's −70 and a Dragon King's −80). So a good player who grinds the host
+pays two karma a band (the one they struck; the rest rally and are self-defence), takes some fifty bands
+to sink to Suspect, and from then on is attacked on sight and no longer pays at all: grinding alone never
+makes an outlaw. Striking first at all four Kings (−120) leaves a player of 0 karma Suspect, not
+outlawed; every great name of Heaven, struck first, makes one (−260), as the four Dragon Kings do.
+
+**XP: the road pays as the zones do.** A kill of Heaven's host pays what a zone's kill of the same level
+and rank pays (`LevelManager.heavenKillXp`): the band holding its level (White Bone Ridge's for 20–36,
+the Bottomless Cave's for 37–46, and so on, Lion-Camel Ridge's for 89 and up), its tier's XP (a captain
+or a miniboss a General's, five times a regular's; a great name a Boss's, twenty times), to anyone no
+more than five levels over it. Below level 20 it pays as any monster does, weighed by rank: a regular
+twice a zombie's, a captain six times, a miniboss ten, a great name twenty.
+
+| The kill's level | A regular pays | A captain or miniboss | A great name |
+|---|---|---|---|
+| 20–36 | 72 | 360 | 1,440 |
+| 37–46 | 260 | 1,300 | 5,200 |
+| 47–56 | 396 | 1,980 | 7,920 |
+| 57–66 | 575 | 2,875 | 11,500 |
+| 67–77 | 728 | 3,640 | 14,560 |
+| 78–88 | 972 | 4,858 | 19,430 |
+| 89–103 | 1,248 | 6,240 | 24,960 |
+
+**The way up** ([`HeavenGate`](src/main/java/com/jttw/engine/world/heaven/HeavenGate.java)). Before this
+only Sun Wukong (Somersault Cloud III) and the Dragon (Dimension Travel) could reach Heaven, both late.
+Now anyone may craft a **Heaven Pass** (天门通牒, `HeavenPassItem`: paper, a gold nugget, a feather and
+white wool) at level 1. Used below, it carries its holder up on a cloud to an island of Heaven whose road
+is of their own level (within two; where islands are few, near the palace, within six, or else a cloud is
+laid on their level's ring); used in Heaven, it carries them home. It is kept, 30 seconds between uses.
+Falling off the clouds still sets one down in the world below, and the realm leaps still come down at
+Heaven's arrival.
+
+**The host** (each kind's strength as a character of its level finds it):
+
+| Creature | Rank | Levels | Hits to kill | Its blow kills you in | Its blow on all (telegraph; area; kills you in) |
+|---|---|---|---|---|---|
+| Heavenly Soldier (天兵), halberd | regular (captain; a Heavenly General a miniboss) | the road's | 4 (captain 8, General 25) | 12 (captain 10, General 7) | — |
+| Heavenly Archer, bow | regular | the road's | 3 (captain 6) | 13 (captain 11), from 14 blocks | — |
+| Cloud Cavalry (云骑), lance | regular | the road's | 8 (captain 16) | 10 (captain 9) | the charge: lance lowered, its line marked (14 ticks); a line 7 long; 10 |
+| Thunder Drummer (雷鼓手) | regular | the road's | 5 (captain 10) | 15 (captain 12) | the roll: sticks raised, the ring marked (18); 4 round it, quickening the host near; 13 |
+| The Twenty-Eight Lunar Mansions (二十八宿) | captain | 3–5 over the road | 14 | 8 | — |
+| The Nine Luminaries (九曜星君) | miniboss | 5 over the road at their posts | 28 | 7 | **starfall**: emblem raised, a ring of starlight under each foe within 12 (30); 2.5 round each mark, by his star burning, blinding, slowing, weakening or flinging; 7 |
+| The Great Spirit Giant (巨灵神), two great axes | miniboss | ~94–101 | 36 | 7 | **axe-quake**: both axes heaved overhead (30); 6 round him, thrown up; 7 |
+| The Thunder Lord (雷公), beak, wings, drums, mallet and chisel | miniboss | ~76–81 | 30 | 7 | **thunderbolt**: wings spread, mallet and chisel raised, crackling rings under each foe within 14 (30); 3 round each, lightning, Slowness II; 7 |
+| The Lightning Mother (电母), two mirrors | miniboss | ~76–81 | 26 | 7 | **mirror-flash**: mirrors held up (25); a 90° cone 11 before her, Blindness; 7 |
+| Thousand-Mile Eye (千里眼) | miniboss | ~36–41 | 25 | 7 | **piercing gaze**: eyes fixed, a line marked toward his foe (28); 16 long, Slowness II, Glowing; 7 |
+| Wind-Following Ear (顺风耳) | miniboss | ~36–41 | 26 | 7 | **echo**: hands cupped to his ears (25); 6 round him, Nausea, thrown back; 7 |
+| Chiguo, King of the East (持国天王), pipa | boss of the Outer Clouds | 23 | 70 of a level-20 character's | 6 | **discord**: the pipa swept (30); 7 round him, Nausea, Slowness; 7 |
+| Zengzhang, King of the South (增长天王), sword | boss of the Cloud Road | 43 | 70 of a level-40's | 6 | **the blade's circle**: sword raised (25); 5.5 round him, flung back; 6 |
+| Guangmu, King of the West (广目天王), serpent | boss of the Star Palaces | 63 | 70 of a level-60's | 6 | **the serpent's lash**: the serpent rears (28); a 70° cone 9 before him, Poison; 6 |
+| Duowen, King of the North (多闻天王), umbrella | boss of the Thunder Court | 83 | 70 of a level-80's | 6 | **the umbrella opened**: darkness gathers (30); 8 round him, Blindness; 7 |
+| Li Jing, the Pagoda-Bearing Heavenly King (托塔天王) | head of the Jade Palace | 103 | 70 of a level-100's | 6 | **the pagoda descends**: the pagoda raised, its golden shadow under each foe within 14 (30); 3.5 round each, pinned 1.5 s; 6 |
+| Nezha, the Third Lotus Prince (哪吒) | boss of the Jade Palace (lesser) | 102 | 70 of a level-100's | 6 | **the wheels' blaze**: the wheels spin up (25); 6 round him, set alight; 6 |
+| Erlang Shen (二郎神) and his hound Xiaotian | boss of the Jade Palace (lesser) | 102 | 70 of a level-100's | 6 | **the third eye's light**: the eye opens and burns (30); a 50° cone 14 before him, Glowing; 6 |
+
+Every regular, captain and miniboss rides a small cloud: they fly, never fall (thrown off their island,
+they ride back to their post), and with no foe drift low over the island they keep. The great names walk
+their islands, and are back on their post at once if thrown off it.
+
+**When a player is Erlang Shen or Nezha.** Heaven's champion will not fight himself: the NPC Erlang Shen
+never takes a player who is Erlang Shen for his foe nor joins a fight against them, his blows pass over
+them, and theirs pass through him ("I do not cross blades with myself"); so Nezha with a player who is
+Nezha. Each fights every other player as all Heaven's host does (an outlawed Erlang Shen is hunted by all
+Heaven but its Erlang Shen).
+
+- **Loot** (nothing that breaks the game): soldiers a little gold, archers arrows, cavalry and drummers
+  leather; the Lunar Mansions **Star Shards** (a new forging material) and gold, and a captain's sigil as
+  every captain; the star lords and gods star shards, gold ingots and their own touch (glowstone, iron,
+  copper, amethyst, now and then an Eye of Ender or an Echo Shard); the Kings gold, star shards, sigils,
+  perhaps a diamond or a golden apple; Nezha and Erlang the same, and now and then Heavenly Wine; Li Jing
+  a block of gold, diamonds, star shards, sigils, perhaps wine, and one time in four an Immortal Pill.
+- **Tests and pictures**: `HeavenHostGameTests` (the road's levels from 1 to 100 and its five regions;
+  regulars, captains and minibosses rolled by the road; the XP at every level and below 20; whom the host
+  attacks on sight by class and karma, a neutral player left alone until they strike and the rally, who
+  struck first and the karma, the outlaw's waves; every kind's rank, hits and blow; each great name at
+  its region's top; every area blow striking the one who stayed in it and sparing the one who stepped
+  out; the champions who will not fight themselves; the court's posts, each in its region and seated in
+  Heaven; the wild bands; the pass), `MoralityGameTests` (the waves by degree), `PeckingOrderGameTests`
+  (every kind in its rank band, the bosses built for their regions' tops); gallery scenes
+  `-Pgallery.only=heaven_` (`HeavenScenes`, `HeavenHostScenes`, `HeavenGodScenes`, `HeavenGreatScenes`).
 
 ## The open world's yaoguai
 

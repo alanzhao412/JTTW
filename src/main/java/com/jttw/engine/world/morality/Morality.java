@@ -1,7 +1,6 @@
 package com.jttw.engine.world.morality;
 
 import com.jttw.engine.JTTWEngine;
-import com.jttw.engine.entity.heaven.HeavenlySoldierEntity;
 import com.jttw.engine.entity.ridge.LadyWhiteBoneEntity;
 import com.jttw.engine.entity.zone.ZoneMonster;
 import com.jttw.engine.entity.cave.LadyEarthFlowEntity;
@@ -49,7 +48,12 @@ public final class Morality {
 
     // ── deeds ──────────────────────────────────────────────────────────
     public static final int STEAL_PEACH = -40, STEAL_WINE = -40, LOOT_HEAVEN = -30, STRIKE_THE_BOOK = -200;
-    public static final int KILL_VILLAGER = -50, KILL_PET = -30, KILL_GOLEM = -10, KILL_PLAYER = -60, KILL_SOLDIER = -15;
+    public static final int KILL_VILLAGER = -50, KILL_PET = -30, KILL_GOLEM = -10, KILL_PLAYER = -60;
+    /**
+     * Heaven's host: a kill one started (struck it first) is a crime against Heaven by its rank, a soldier
+     * {@value #KILL_SOLDIER} (see HeavenHostility); a kill in self-defence (it came at you) is nothing.
+     */
+    public static final int KILL_SOLDIER = com.jttw.engine.world.heaven.HeavenHostility.SOLDIER;
     public static final int SLAY_MONSTER = 1, SLAY_CAPTAIN = 5, SLAY_LADY = 150, TRADE = 1;
     /** Lady Earth Flow, who ate the Buddha's candles and preyed on monks: as much as Lady White Bone. */
     public static final int SLAY_EARTH_FLOW = SLAY_LADY;
@@ -176,7 +180,7 @@ public final class Morality {
     private static int deedOf(ServerPlayer killer, LivingEntity victim) {
         // a zone's creature its ally struck down never fought him: no deed either way
         if ((victim instanceof ZoneMonster || victim instanceof com.jttw.engine.entity.zone.ZoneBoss) && victim.isAlliedTo(killer)) return 0;
-        if (victim instanceof HeavenlySoldierEntity) return KILL_SOLDIER;
+        if (victim instanceof com.jttw.engine.entity.heaven.HeavenFolk folk) return com.jttw.engine.world.heaven.HeavenHostility.killDeed(killer, folk);
         if (victim instanceof LadyWhiteBoneEntity) return SLAY_LADY;
         if (victim instanceof LadyEarthFlowEntity) return SLAY_EARTH_FLOW;
         if (victim instanceof com.jttw.engine.entity.fire.RedBoyEntity) return SLAY_RED_BOY;
@@ -207,6 +211,7 @@ public final class Morality {
     }
 
     private static String killWhat(int deed, LivingEntity victim) {
+        if (victim instanceof com.jttw.engine.entity.heaven.HeavenFolk folk) return folk.crimeWhat();
         if (deed == SLAY_CAPTAIN && victim instanceof com.jttw.engine.entity.waters.SeaMonster) return "you slew a captain of the sea";
         if (deed == SLAY_CAPTAIN && victim instanceof com.jttw.engine.entity.hell.HellMonster) return "you slew a captain of the underworld";
         if (deed == SLAY_MONSTER && victim instanceof com.jttw.engine.entity.hell.WanderingGhostEntity) return "you laid a wandering ghost to rest";
@@ -226,7 +231,6 @@ public final class Morality {
             case KILL_DISCIPLE -> "you killed a disciple of the Temple of the Five Villages";
             case SLAY_TEMPLE_YOUTH -> "you killed one of Zhenyuan's youths";
             case SLAY_ZHENYUAN -> "you killed the Great Immortal Zhenyuan, Master of the Earth Immortals";
-            case KILL_SOLDIER -> "you struck down a soldier of Heaven";
             case KILL_VILLAGER -> "you killed a villager";
             case KILL_GOLEM -> "you killed a village's guardian";
             case KILL_PET -> "you killed someone's companion";

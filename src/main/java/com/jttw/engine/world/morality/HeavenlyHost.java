@@ -2,25 +2,30 @@ package com.jttw.engine.world.morality;
 
 import com.jttw.engine.JTTWEngine;
 import com.jttw.engine.dimension.JTTWDimensions;
+import com.jttw.engine.entity.heaven.HeavenMonster;
 import com.jttw.engine.entity.heaven.HeavenlySoldierEntity;
+import com.jttw.engine.entity.heaven.StarLordEntity;
 import com.jttw.engine.progression.level.PlayerLevel;
+import com.jttw.engine.registry.HeavenRegistry;
 import com.jttw.engine.registry.ModEntities;
+import com.jttw.engine.world.heaven.HeavenRegions;
+import com.jttw.engine.world.heaven.HeavenSpawner;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
+import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,25 +34,41 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Heaven's host. While a player Heaven has outlawed ({@link Morality#wanted}) is in Heaven, its
- * soldiers come down on their clouds in waves, round about them and above: the more wanted, the
- * larger and more often, and from the second degree with Heavenly Generals at their head.
+ * Heaven's host against its outlaws. While a player Heaven has outlawed ({@link Morality#wanted}) is in
+ * Heaven, its host comes down round them and above, wave after wave, as long as they stay: the more wanted,
+ * the larger, the oftener and the stronger. A wave is regulars of every kind (soldiers, archers, drummers,
+ * cavalry), from the second degree with Lunar Mansions (captains) and a Heavenly General (a miniboss) at
+ * their head, at the third with a star lord too (another miniboss). They come at the higher of the
+ * outlaw's own level and the road's where they stand, and {@link #ABOVE} more by degree.
+ *
+ * <pre>
+ *   degree (karma)              every   regulars  Lunar Mansions  Heavenly Generals  star lords  most out
+ *   1 outlaw    (-250)          30 s       3            0                0               0          10
+ *   2 enemy     (-1,000)        20 s       5            1                1               0          18
+ *   3 rebel     (-3,000)        12 s       7            2                1               1          30
+ * </pre>
  */
 @EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class HeavenlyHost {
 
     private HeavenlyHost() {}
 
-    /** By degree of wrath (1 to 3): ticks between waves, soldiers a wave, generals a wave, and the most out at once. */
-    public static final int[] INTERVAL = {0, 900, 500, 300};
-    public static final int[] WAVE = {0, 3, 5, 8};
-    public static final int[] GENERALS = {0, 0, 1, 2};
-    public static final int[] MOST = {0, 8, 16, 30};
-    /** How many levels above their quarry they come, by degree; a general a further {@value #GENERAL_ABOVE}. */
+    /** By degree of wrath (1 to 3): ticks between waves; regulars, Lunar Mansions, Heavenly Generals and star lords a wave; the most out at once. */
+    public static final int[] INTERVAL = {0, 600, 400, 240};
+    public static final int[] WAVE = {0, 3, 5, 7};
+    public static final int[] MANSIONS = {0, 0, 1, 2};
+    public static final int[] GENERALS = {0, 0, 1, 1};
+    public static final int[] STAR_LORDS = {0, 0, 0, 1};
+    public static final int[] MOST = {0, 10, 18, 30};
+    /** How many levels above their quarry (or the road) they come, by degree; a captain a further {@value #CAPTAIN_ABOVE}, a miniboss {@value #GENERAL_ABOVE}. */
     public static final int[] ABOVE = {0, 0, 3, 6};
-    public static final int GENERAL_ABOVE = 7;
+    public static final int CAPTAIN_ABOVE = 4, GENERAL_ABOVE = 5;
     /** Ticks after arriving in Heaven before the first wave: 5 s. */
     public static final int FIRST_WAVE = 100;
+    /** On each one sent: whom it was sent after. */
+    public static final String KEY_QUARRY = JTTWEngine.MOD_ID + ":quarry";
+    /** The highest any of a wave comes at: the players' cap and one, as any captain or miniboss of a band's top. */
+    public static final int TOP = com.jttw.engine.progression.level.LevelConstants.MAX_LEVEL + 1;
 
     private static final Map<UUID, Long> NEXT_WAVE = new ConcurrentHashMap<>();
 
@@ -77,31 +98,66 @@ public final class HeavenlyHost {
         p.level().playSound(null, p.blockPosition(), SoundEvents.RAID_HORN.value(), SoundSource.HOSTILE, 4f, degree >= 3 ? 0.8f : 1f);
     }
 
-    /** The soldiers already out after {@code quarry}. */
-    public static List<HeavenlySoldierEntity> hunting(ServerLevel level, ServerPlayer quarry) {
-        return level.getEntitiesOfClass(HeavenlySoldierEntity.class, new AABB(quarry.blockPosition()).inflate(128),
-                s -> quarry.getUUID().equals(s.quarry()));
+    /** Those of the host already out after {@code quarry}. */
+    public static List<HeavenMonster> hunting(ServerLevel level, ServerPlayer quarry) {
+        String id = quarry.getUUID().toString();
+        return level.getEntitiesOfClass(HeavenMonster.class, new AABB(quarry.blockPosition()).inflate(128),
+                m -> m.isAlive() && id.equals(m.getPersistentData().getString(KEY_QUARRY)));
+    }
+
+    /** The level the host comes at after {@code quarry}: the higher of theirs and the road's, and the degree's more. */
+    public static int baseLevel(ServerLevel level, ServerPlayer quarry, int degree) {
+        int road = HeavenRegions.roadLevel(level.getSeed(), quarry.getX(), quarry.getZ());
+        return Math.max(Math.max(1, PlayerLevel.getLevel(quarry)), road) + ABOVE[Math.max(0, Math.min(3, degree))];
     }
 
     /** Sends a wave after {@code quarry}: as many as the degree sends, short of the most it lets out at once. */
-    public static List<HeavenlySoldierEntity> wave(ServerLevel level, ServerPlayer quarry, int degree) {
-        List<HeavenlySoldierEntity> sent = new ArrayList<>();
+    public static List<HeavenMonster> wave(ServerLevel level, ServerPlayer quarry, int degree) {
+        List<HeavenMonster> sent = new ArrayList<>();
         if (degree <= 0) return sent;
         int room = MOST[degree] - hunting(level, quarry).size();
-        int soldiers = Math.min(WAVE[degree], room), generals = Math.min(GENERALS[degree], room - soldiers);
-        int base = Math.max(20, PlayerLevel.getLevel(quarry)) + ABOVE[degree];
-        for (int i = 0; i < soldiers + Math.max(0, generals); i++) {
-            boolean general = i >= soldiers;
-            Vec3 at = descent(level, quarry, i, soldiers + generals);
-            HeavenlySoldierEntity s = ModEntities.HEAVENLY_SOLDIER.get().create(level);
-            if (s == null) continue;
-            s.moveTo(at.x, at.y, at.z, level.random.nextFloat() * 360f, 0f);
-            s.finalizeSpawn(level, level.getCurrentDifficultyAt(s.blockPosition()), MobSpawnType.EVENT, null);
-            s.become(base + (general ? GENERAL_ABOVE : 0) + level.random.nextInt(3) - 1, general, quarry.getUUID());
-            s.setTarget(quarry);
-            level.addFreshEntity(s);
-            level.sendParticles(ParticleTypes.CLOUD, at.x, at.y, at.z, 12, 0.6, 0.3, 0.6, 0.01);
-            sent.add(s);
+        int base = baseLevel(level, quarry, degree);
+        List<EntityType<? extends HeavenMonster>> kinds = HeavenSpawner.kinds();
+        int[] counts = {Math.min(WAVE[degree], room), 0, 0, 0};
+        counts[1] = Math.min(MANSIONS[degree], room - counts[0]);
+        counts[2] = Math.min(GENERALS[degree], room - counts[0] - counts[1]);
+        counts[3] = Math.min(STAR_LORDS[degree], room - counts[0] - counts[1] - counts[2]);
+        int of = Math.max(1, counts[0] + Math.max(0, counts[1]) + Math.max(0, counts[2]) + Math.max(0, counts[3])), i = 0;
+        for (int role = 0; role < 4; role++) {
+            for (int k = 0; k < counts[role]; k++, i++) {
+                EntityType<? extends HeavenMonster> type = switch (role) {
+                    case 0 -> kinds.get((i + level.random.nextInt(kinds.size())) % kinds.size());
+                    case 1 -> HeavenRegistry.LUNAR_MANSION.get();
+                    case 2 -> ModEntities.HEAVENLY_SOLDIER.get();
+                    default -> HeavenRegistry.STAR_LORD.get();
+                };
+                HeavenMonster m = type.create(level);
+                if (m == null) continue;
+                Vec3 at = descent(level, quarry, i, of);
+                m.moveTo(at.x, at.y, at.z, level.random.nextFloat() * 360f, 0f);
+                m.finalizeSpawn(level, level.getCurrentDifficultyAt(m.blockPosition()), MobSpawnType.EVENT, null);
+                int lv = Math.min(TOP, base + level.random.nextInt(3) - 1);
+                switch (role) {
+                    case 0 -> {
+                        if (m instanceof HeavenlySoldierEntity s) s.become(lv, false, quarry.getUUID());
+                        else m.become(lv, false);
+                    }
+                    case 1 -> {
+                        m.become(Math.min(TOP, lv + CAPTAIN_ABOVE), true);
+                        m.setVariant(level.random.nextInt(m.variants()));
+                    }
+                    case 2 -> ((HeavenlySoldierEntity) m).become(Math.min(TOP, lv + GENERAL_ABOVE), true, quarry.getUUID());
+                    default -> {
+                        m.becomeMiniboss(Math.min(TOP, lv + GENERAL_ABOVE), 1);
+                        m.setVariant(level.random.nextInt(StarLordEntity.LUMINARIES.length));
+                    }
+                }
+                m.getPersistentData().putString(KEY_QUARRY, quarry.getUUID().toString());
+                m.setTarget(quarry);
+                level.addFreshEntity(m);
+                level.sendParticles(ParticleTypes.CLOUD, at.x, at.y, at.z, 12, 0.6, 0.3, 0.6, 0.01);
+                sent.add(m);
+            }
         }
         return sent;
     }
@@ -112,7 +168,7 @@ public final class HeavenlyHost {
             double a = (i + level.random.nextDouble() * 0.6) * Math.PI * 2 / Math.max(1, of) + tries;
             double d = 18 + level.random.nextDouble() * 8;
             Vec3 at = quarry.position().add(Math.cos(a) * d, 4 + level.random.nextDouble() * 6, Math.sin(a) * d);
-            var box = ModEntities.HEAVENLY_SOLDIER.get().getDimensions().makeBoundingBox(at.x, at.y, at.z);
+            var box = ModEntities.HEAVENLY_SOLDIER.get().getDimensions().makeBoundingBox(at.x, at.y, at.z).inflate(0.4, 1, 0.4);
             if (level.noCollision(box)) return at;
         }
         return quarry.position().add(0, 6, 0);

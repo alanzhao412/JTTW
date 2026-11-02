@@ -366,6 +366,31 @@ public final class Zones {
             TagKey.create(Registries.BIOME, id("black_wind_mountain_hosts")), ZoneLayout.BLACK_WIND, Vertical.WHOLE_COLUMN,
             20, 36, 80).hostSampledAt(256);
 
+    public static final ResourceKey<Biome> HEAVEN_BIOME = ResourceKey.create(Registries.BIOME, id("heaven_biome"));
+
+    /**
+     * Heaven (天庭), a dimension of its own ({@code jttw_engine:heaven}): not one band but every level, as
+     * a Pokemon game's wild grass is between its towns. Its host's road climbs from level 1 on the
+     * outermost clouds to 100 at the Jade Palace ({@link com.jttw.engine.world.heaven.HeavenRegions});
+     * its creatures are of this zone (their kills pay by their own level, not a band: see LevelManager).
+     * Not in {@link #ALL}: it has no region in the overworld and no band of its own to register.
+     */
+    public static final Zone HEAVEN = Zone.dimension(HEAVEN_BIOME, 1, 100, 0);
+
+    /**
+     * Heaven's five regions, outermost first (see {@link com.jttw.engine.world.heaven.HeavenRegions}):
+     * each a band of twenty levels whose head stands at its top and three (a gym's leader). Zones by
+     * name only (no biome of their own is placed: the ids name them), not in {@link #ALL}.
+     */
+    public static final Zone HEAVEN_OUTER_CLOUDS = Zone.dimension(ResourceKey.create(Registries.BIOME, id("heaven_outer_clouds")), 1, 20, 0);
+    public static final Zone HEAVEN_CLOUD_ROAD = Zone.dimension(ResourceKey.create(Registries.BIOME, id("heaven_cloud_road")), 21, 40, 0);
+    public static final Zone HEAVEN_STAR_PALACES = Zone.dimension(ResourceKey.create(Registries.BIOME, id("heaven_star_palaces")), 41, 60, 0);
+    public static final Zone HEAVEN_THUNDER_COURT = Zone.dimension(ResourceKey.create(Registries.BIOME, id("heaven_thunder_court")), 61, 80, 0);
+    public static final Zone HEAVEN_JADE_PALACE = Zone.dimension(ResourceKey.create(Registries.BIOME, id("heaven_jade_palace")), 81, 100, 0);
+    /** Heaven's regions, outermost (lowest) first. */
+    public static final List<Zone> HEAVEN_REGIONS = List.of(HEAVEN_OUTER_CLOUDS, HEAVEN_CLOUD_ROAD, HEAVEN_STAR_PALACES,
+            HEAVEN_THUNDER_COURT, HEAVEN_JADE_PALACE);
+
     /**
      * Every zone, in order: a later one keeps clear of an earlier one sharing its heights. A new zone of a
      * band goes before Lion-Camel Ridge (the last band's), so the places of no band (Fengdu, Mount
@@ -390,6 +415,8 @@ public final class Zones {
     @Nullable
     public static Zone byId(String id) {
         for (Zone zone : ALL) if (zone.id().equals(id)) return zone;
+        if (HEAVEN.id().equals(id)) return HEAVEN;
+        for (Zone zone : HEAVEN_REGIONS) if (zone.id().equals(id)) return zone;
         return null;
     }
 

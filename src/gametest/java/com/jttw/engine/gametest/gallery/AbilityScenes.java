@@ -177,6 +177,7 @@ final class AbilityScenes {
         all.addAll(CloneScenes.all());
         all.addAll(EyeLaserScenes.all());
         all.addAll(SpiderScenes.all());
+        all.addAll(HeavenScenes.all());
         return all;
     }
 

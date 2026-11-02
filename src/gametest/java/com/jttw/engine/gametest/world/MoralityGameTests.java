@@ -1,6 +1,7 @@
 package com.jttw.engine.gametest.world;
 
 import com.jttw.engine.JTTWEngine;
+import com.jttw.engine.entity.heaven.HeavenMonster;
 import com.jttw.engine.entity.heaven.HeavenlySoldierEntity;
 import com.jttw.engine.registry.ModBlocks;
 import com.jttw.engine.reincarnation.ReincarnationOutcome;
@@ -96,21 +97,30 @@ public class MoralityGameTests {
     @GameTest(template = PLATFORM, batch = "heavenly_host")
     public static void heavenSendsItsHostAfterItsEnemies(GameTestHelper h) {
         ServerPlayer p = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
-        List<HeavenlySoldierEntity> sent = new java.util.ArrayList<>();
-        onEnd(h, () -> sent.forEach(HeavenlySoldierEntity::discard));
+        List<HeavenMonster> sent = new java.util.ArrayList<>();
+        onEnd(h, () -> sent.forEach(HeavenMonster::discard));
         Morality.set(p, Morality.ENEMY);
         sent.addAll(HeavenlyHost.wave(h.getLevel(), p, Morality.wanted(p)));
-        eq(h, HeavenlyHost.WAVE[2] + HeavenlyHost.GENERALS[2], sent.size(), "a wave of soldiers with a general at their head");
-        eq(h, 1, (int) sent.stream().filter(HeavenlySoldierEntity::isGeneral).count(), "one general");
-        check(h, sent.stream().allMatch(s -> p.getUUID().equals(s.quarry()) && s.getTarget() == p), "every one sent after them");
+        eq(h, HeavenlyHost.WAVE[2] + HeavenlyHost.MANSIONS[2] + HeavenlyHost.GENERALS[2], sent.size(),
+                "a wave of the host with a Lunar Mansion and a Heavenly General at its head");
+        eq(h, 1, (int) sent.stream().filter(m -> m instanceof HeavenlySoldierEntity s && s.isMiniboss()).count(), "one Heavenly General");
+        eq(h, 1, (int) sent.stream().filter(m -> m instanceof com.jttw.engine.entity.heaven.LunarMansionEntity && m.isCaptain()).count(), "one Lunar Mansion");
+        check(h, sent.stream().allMatch(s -> s.getTarget() == p
+                && p.getUUID().toString().equals(s.getPersistentData().getString(HeavenlyHost.KEY_QUARRY))), "every one sent after them");
         check(h, sent.stream().allMatch(s -> s.distanceTo(p) >= 15), "coming down from round about, not on top of them");
-        HeavenlySoldierEntity soldier = sent.stream().filter(s -> !s.isGeneral()).findFirst().orElseThrow();
-        HeavenlySoldierEntity general = sent.stream().filter(HeavenlySoldierEntity::isGeneral).findFirst().orElseThrow();
-        check(h, general.getMaxHealth() > soldier.getMaxHealth() * 2, "a general far stronger than a soldier");
-        check(h, soldier.mobLevel() >= 20 + HeavenlyHost.ABOVE[2] - 1, "levelled above the one they hunt");
+        HeavenMonster regular = sent.stream().filter(s -> !s.isCaptain()).findFirst().orElseThrow();
+        HeavenMonster general = sent.stream().filter(m -> m instanceof HeavenlySoldierEntity s && s.isMiniboss()).findFirst().orElseThrow();
+        check(h, general.getMaxHealth() > regular.getMaxHealth() * 2, "a general far stronger than a soldier");
+        check(h, regular.mobLevel() >= HeavenlyHost.baseLevel(h.getLevel(), p, 2) - 1, "levelled above the one they hunt");
+        check(h, HeavenlyHost.baseLevel(h.getLevel(), p, 2) >= 1 + HeavenlyHost.ABOVE[2], "the degree's levels over them");
+        // at the third degree a star lord comes too
+        Morality.set(p, Morality.GREAT_REBEL);
+        List<HeavenMonster> third = HeavenlyHost.wave(h.getLevel(), p, 3);
+        sent.addAll(third);
+        check(h, third.stream().anyMatch(m -> m instanceof com.jttw.engine.entity.heaven.StarLordEntity && m.isMiniboss()), "a star lord at the third degree");
         // waves keep coming, never more out at once than Heaven lets loose
-        for (int i = 0; i < 10; i++) sent.addAll(HeavenlyHost.wave(h.getLevel(), p, 2));
-        eq(h, HeavenlyHost.MOST[2], HeavenlyHost.hunting(h.getLevel(), p).size(), "no more than the most at once");
+        for (int i = 0; i < 10; i++) sent.addAll(HeavenlyHost.wave(h.getLevel(), p, 3));
+        eq(h, HeavenlyHost.MOST[3], HeavenlyHost.hunting(h.getLevel(), p).size(), "no more than the most at once");
         check(h, HeavenlyHost.wave(h.getLevel(), p, 0).isEmpty(), "and none for the unhunted");
         h.succeed();
     }
