@@ -37,9 +37,9 @@ final class HeavenGreatScenes {
 
     /** A creature winding up, seen from the front a little to one side (its height {@code tall}). */
     private static AbilityScenes.Scene windUp(String name, double tall, EntityType<? extends Mob> type) {
-        double d = 1.8 + tall * 1.3, eye = tall * 0.62;
+        double d = 1.2 + tall * 1.05, eye = tall * 0.66;
         return scene("heaven_" + name + "_windup", p -> winding(p, type, 0.5, 9.5, 180f, 10),
-                new double[]{0.5 - d * 0.35, eye + 0.4, 9.5 - d, 0.5, eye, 9.5});
+                new double[]{0.5 - d * 0.25, eye + 0.3, 9.5 - d, 0.5, eye, 9.5});
     }
 
     static List<AbilityScenes.Scene> all() {

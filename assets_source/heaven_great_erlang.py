@@ -88,6 +88,7 @@ ERLANG = mirrored([
         (-3.9, -8.7, -0.6, 7.8, 8.6, 4.8, 'hair_back'),
         (-0.75, -8.0, -3.85, 1.5, 3.2, 0.45, 'third_eye'),
     ]),
+    part('third_flare', 'head', (0, -6.4, -4.3), (0, 0, 0), [(-4.5, -6.5, 0, 9, 13, 0.01, 'third_flare')]),
     part('third_lid', 'head', (0, -8.1, -4.0), (0, 0, 0), [(-0.9, 0, -0.25, 1.8, 1.3, 0.3, 'third_lid')]),
     part('third_lid_low', 'head', (0, -4.7, -4.0), (0, 0, 0), [(-0.9, -1.0, -0.25, 1.8, 1.0, 0.3, 'third_lid_low')]),
     part('right_brow', 'head', (-0.6, -6.1, -3.7), (0, 0.1, 0.22), [(-2.8, -0.45, -0.3, 2.8, 0.7, 0.6, 'brow')]),
@@ -339,6 +340,22 @@ def skin():
                 p.lit(xy, c, 0.75, blaze=1.0, hot=FIRE_WHITE)
             for j in range(1, fh - 1):
                 p.px((fx + (fw - 1) // 2, fy + j), (30, 10, 10)) if fw > 2 else None
+        if style == 'third_flare':                             # the eye's light, in the wind-up alone: a tall blaze
+            for s in f:
+                for i, j, xy in each(p, f[s]):
+                    p.clear(xy)
+            for s in ('front', 'back'):
+                fx, fy, fw, fh = f[s]
+                for i, j, (x, y) in each(p, f[s]):
+                    u, v = ((i + 0.5) / fw - 0.5) * 2, ((j + 0.5) / fh - 0.5) * 2
+                    a = math.atan2(v, u)
+                    d = math.hypot(u * 1.0, v * 0.55)
+                    ray = (0.5 + 0.5 * math.cos(a * 8)) ** 6
+                    strength = max(0, 1 - d) * (0.35 + ray) + max(0, 1 - abs(u) * 6) * max(0, 1 - abs(v)) * 0.9
+                    if strength < 0.06:
+                        continue
+                    p.img.putpixel((x, y), (0, 0, 0, 0))
+                    p.flare((x, y), mix((255, 170, 40), FIRE_WHITE, clamp(strength)), clamp(strength * 1.4))
         if style in ('third_lid', 'third_lid_low'):
             kit.flesh(p, f, FACE, round_=0.3)
             for s in ('front',):

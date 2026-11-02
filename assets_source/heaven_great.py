@@ -105,8 +105,8 @@ def umbrella():
     for i in range(n):
         th = 2 * math.pi * i / n
         ox, oz = -0.9 * math.sin(th), -0.9 * math.cos(th)
-        out.append(part('umb_panel_%d' % i, 'umb', (ox, -40, oz), (-0.12, th, 0), [(-3.3, 0, -0.3, 6.6, 13, 0.6, 'umb_panel')]))
-        out.append(part('umb_tassel_%d' % i, 'umb_panel_%d' % i, (0, 12.6, -0.4), (0.12, 0, 0), [
+        out.append(part('umb_panel_%d' % i, 'umb', (ox, -40, oz), (-0.12, th, 0), [(-4.2, 0, -0.3, 8.4, 16, 0.6, 'umb_panel')]))
+        out.append(part('umb_tassel_%d' % i, 'umb_panel_%d' % i, (0, 15.6, -0.4), (0.12, 0, 0), [
             (-0.3, 0, -0.3, 0.6, 3.4, 0.6, 'umb_cord'), (-0.8, 3.2, -0.8, 1.6, 1.6, 1.6, 'umb_bead'),
             (-0.6, 4.6, -0.6, 1.2, 2.6, 1.2, 'umb_tuft')]))
     for i in range(6):                                  # the canopy's crown: a little fixed tier over it

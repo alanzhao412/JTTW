@@ -190,7 +190,7 @@ public final class HeavenGreatRenderers {
         PartDefinition root = mesh.getRoot();
         PartDefinition waist = root.addOrReplaceChild("waist", CubeListBuilder.create()
                 .texOffs(90, 69).mirror(false).addBox(-7, -2, -4.6f, 14, 4, 9.2f)
-                .texOffs(67, 50).mirror(false).addBox(-8, -4.6f, -5.8f, 16, 3.8f, 11.6f)
+                .texOffs(88, 50).mirror(false).addBox(-8, -4.6f, -5.8f, 16, 3.8f, 11.6f)
                 .texOffs(146, 113).mirror(false).addBox(-3.6f, -6.8f, -7.8f, 7.2f, 6.2f, 2)
                 .texOffs(167, 113).mirror(false).addBox(-4.6f, -7.6f, -6.8f, 9.2f, 7.6f, 1), PartPose.offsetAndRotation(0, 4, 0, 0, 0, 0));
         PartDefinition apron = waist.addOrReplaceChild("apron", CubeListBuilder.create()
@@ -222,21 +222,21 @@ public final class HeavenGreatRenderers {
         PartDefinition leftLeg = root.addOrReplaceChild("left_leg", CubeListBuilder.create()
                 .texOffs(38, 50).mirror(true).addBox(-3.1f, 0, -3.1f, 6.2f, 9.4f, 6.2f), PartPose.offsetAndRotation(3.8f, 6, 0.4f, 0, 0, 0));
         PartDefinition rightRobe = rightLeg.addOrReplaceChild("right_robe", CubeListBuilder.create()
-                .texOffs(176, 50).mirror(false).addBox(-3.5f, 0, -0.5f, 7, 13.6f, 0.6f), PartPose.offsetAndRotation(0, -0.6f, -3.3f, -0.05f, 0, 0.04f));
+                .texOffs(197, 50).mirror(false).addBox(-3.5f, 0, -0.5f, 7, 13.6f, 0.6f), PartPose.offsetAndRotation(0, -0.6f, -3.3f, -0.05f, 0, 0.04f));
         PartDefinition leftRobe = leftLeg.addOrReplaceChild("left_robe", CubeListBuilder.create()
-                .texOffs(176, 50).mirror(true).addBox(-3.5f, 0, -0.5f, 7, 13.6f, 0.6f), PartPose.offsetAndRotation(0, -0.6f, -3.3f, -0.05f, 0, -0.04f));
+                .texOffs(197, 50).mirror(true).addBox(-3.5f, 0, -0.5f, 7, 13.6f, 0.6f), PartPose.offsetAndRotation(0, -0.6f, -3.3f, -0.05f, 0, -0.04f));
         PartDefinition rightRobeBack = rightLeg.addOrReplaceChild("right_robe_back", CubeListBuilder.create()
-                .texOffs(176, 50).mirror(false).addBox(-3.5f, 0, -0.1f, 7, 13.6f, 0.6f), PartPose.offsetAndRotation(0, -0.6f, 3.3f, 0.06f, 0, 0.04f));
+                .texOffs(197, 50).mirror(false).addBox(-3.5f, 0, -0.1f, 7, 13.6f, 0.6f), PartPose.offsetAndRotation(0, -0.6f, 3.3f, 0.06f, 0, 0.04f));
         PartDefinition leftRobeBack = leftLeg.addOrReplaceChild("left_robe_back", CubeListBuilder.create()
-                .texOffs(176, 50).mirror(true).addBox(-3.5f, 0, -0.1f, 7, 13.6f, 0.6f), PartPose.offsetAndRotation(0, -0.6f, 3.3f, 0.06f, 0, -0.04f));
+                .texOffs(197, 50).mirror(true).addBox(-3.5f, 0, -0.1f, 7, 13.6f, 0.6f), PartPose.offsetAndRotation(0, -0.6f, 3.3f, 0.06f, 0, -0.04f));
         PartDefinition rightShin = rightLeg.addOrReplaceChild("right_shin", CubeListBuilder.create()
-                .texOffs(172, 85).mirror(false).addBox(-2.7f, 0, -2.7f, 5.4f, 6, 5.4f)
+                .texOffs(155, 85).mirror(false).addBox(-2.7f, 0, -2.7f, 5.4f, 6, 5.4f)
                 .texOffs(58, 113).mirror(false).addBox(-3.1f, 0.6f, -3.4f, 6.2f, 5.2f, 3.4f)
                 .texOffs(133, 100).mirror(false).addBox(-3.2f, 5.6f, -3.6f, 6.4f, 3.4f, 6.8f)
                 .texOffs(13, 143).mirror(false).addBox(-2.4f, 7, -5.6f, 4.8f, 2, 2.2f)
                 .texOffs(16, 150).mirror(false).addBox(-1.4f, 5.8f, -6.3f, 2.8f, 2, 1), PartPose.offsetAndRotation(0, 9, 0, 0, 0, 0));
         PartDefinition leftShin = leftLeg.addOrReplaceChild("left_shin", CubeListBuilder.create()
-                .texOffs(172, 85).mirror(true).addBox(-2.7f, 0, -2.7f, 5.4f, 6, 5.4f)
+                .texOffs(155, 85).mirror(true).addBox(-2.7f, 0, -2.7f, 5.4f, 6, 5.4f)
                 .texOffs(58, 113).mirror(true).addBox(-3.1f, 0.6f, -3.4f, 6.2f, 5.2f, 3.4f)
                 .texOffs(133, 100).mirror(true).addBox(-3.2f, 5.6f, -3.6f, 6.4f, 3.4f, 6.8f)
                 .texOffs(13, 143).mirror(true).addBox(-2.4f, 7, -5.6f, 4.8f, 2, 2.2f)
@@ -249,7 +249,7 @@ public final class HeavenGreatRenderers {
                 .texOffs(235, 125).mirror(false).addBox(-6.4f, -15.2f, -6.5f, 5.2f, 5.2f, 0.7f)
                 .texOffs(235, 125).mirror(false).addBox(1.2f, -15.2f, -6.5f, 5.2f, 5.2f, 0.7f)
                 .texOffs(89, 135).mirror(false).addBox(-1.4f, -14.4f, -6.4f, 2.8f, 4.2f, 0.6f)
-                .texOffs(197, 85).mirror(false).addBox(-5, -18.2f, -4.2f, 10, 2.6f, 8.4f)
+                .texOffs(180, 85).mirror(false).addBox(-5, -18.2f, -4.2f, 10, 2.6f, 8.4f)
                 .texOffs(0, 69).mirror(false).addBox(-9.2f, -17, -6.4f, 18.4f, 1.4f, 12.8f)
                 .texOffs(98, 135).mirror(false).addBox(-8.8f, -16.4f, -6.5f, 17.6f, 4.6f, 0.5f)
                 .texOffs(98, 135).mirror(false).addBox(-8.8f, -16.4f, 6, 17.6f, 4.6f, 0.5f), PartPose.offsetAndRotation(0, -3, 0, 0, 0, 0));
@@ -309,7 +309,7 @@ public final class HeavenGreatRenderers {
                 .texOffs(81, 113).mirror(false).addBox(-5, -5.8f, -3.4f, 10, 3, 6.2f)
                 .texOffs(148, 135).mirror(false).addBox(-1.3f, -7, -5.5f, 2.6f, 3.4f, 1.2f)
                 .texOffs(25, 150).mirror(false).addBox(-2.1f, -4.4f, -5.1f, 4.2f, 1.2f, 0.8f)
-                .texOffs(124, 50).mirror(false).addBox(-4.9f, -10.8f, -0.8f, 9.8f, 9.6f, 5.8f), PartPose.offsetAndRotation(0, -18, -0.4f, 0, 0, 0));
+                .texOffs(145, 50).mirror(false).addBox(-4.9f, -10.8f, -0.8f, 9.8f, 9.6f, 5.8f), PartPose.offsetAndRotation(0, -18, -0.4f, 0, 0, 0));
         PartDefinition rightEye = head.addOrReplaceChild("right_eye", CubeListBuilder.create()
                 .texOffs(38, 150).mirror(false).addBox(-1.5f, -0.95f, -0.6f, 3, 1.9f, 0.8f), PartPose.offsetAndRotation(-2.3f, -7, -4.45f, 0, 0.12f, 0));
         PartDefinition leftEye = head.addOrReplaceChild("left_eye", CubeListBuilder.create()
@@ -340,7 +340,7 @@ public final class HeavenGreatRenderers {
         PartDefinition leftBeard = beard.addOrReplaceChild("left_beard", CubeListBuilder.create()
                 .texOffs(199, 113).mirror(true).addBox(-1.2f, 0, -0.9f, 2.4f, 6.8f, 1.8f), PartPose.offsetAndRotation(2.7f, -0.6f, 0.6f, 0.12f, -0.2f, -0.28f));
         PartDefinition crown = head.addOrReplaceChild("crown", CubeListBuilder.create()
-                .texOffs(129, 85).mirror(false).addBox(-5.1f, -1.8f, -4.9f, 10.2f, 2.2f, 9.8f)
+                .texOffs(112, 85).mirror(false).addBox(-5.1f, -1.8f, -4.9f, 10.2f, 2.2f, 9.8f)
                 .texOffs(0, 85).mirror(false).addBox(-4.2f, -6, -4.2f, 8.4f, 4.4f, 8.4f)
                 .texOffs(129, 113).mirror(false).addBox(-3.3f, -10.4f, -5.6f, 6.6f, 9, 0.8f)
                 .texOffs(28, 125).mirror(false).addBox(-1.6f, -9.2f, -1.6f, 3.2f, 3.4f, 3.2f)
@@ -435,7 +435,7 @@ public final class HeavenGreatRenderers {
                 .texOffs(101, 125).mirror(false).addBox(-2, -5.2f, -2, 4, 4, 4), PartPose.offsetAndRotation(0, -0.2f, -0.2f, 1.0612f, 0.3237f, 0.2191f));
         PartDefinition pearlFlame = pearl.addOrReplaceChild("pearl_flame", CubeListBuilder.create()
                 .texOffs(0, 125).mirror(false).addBox(-3.6f, -5.4f, -0.25f, 7.2f, 7.2f, 0.5f)
-                .texOffs(157, 50).mirror(false).addBox(-0.25f, -5.4f, -3.6f, 0.5f, 7.2f, 7.2f), PartPose.offsetAndRotation(0, -3.2f, 0, 0, 0.6f, 0));
+                .texOffs(178, 50).mirror(false).addBox(-0.25f, -5.4f, -3.6f, 0.5f, 7.2f, 7.2f), PartPose.offsetAndRotation(0, -3.2f, 0, 0, 0.6f, 0));
         PartDefinition umb = rightHand.addOrReplaceChild("umb", CubeListBuilder.create()
                 .texOffs(0, 0).mirror(false).addBox(-0.6f, -40, -0.6f, 1.2f, 47, 1.2f)
                 .texOffs(102, 143).mirror(false).addBox(-1, -41, -1, 2, 2.2f, 2)
@@ -443,77 +443,77 @@ public final class HeavenGreatRenderers {
                 .texOffs(111, 143).mirror(false).addBox(-0.9f, -47.2f, -0.9f, 1.8f, 2.6f, 1.8f)
                 .texOffs(235, 143).mirror(false).addBox(-0.9f, 6.2f, -0.9f, 1.8f, 1.4f, 1.8f), PartPose.offsetAndRotation(0, 2, 0, 1.0612f, 0.3237f, 0.2191f));
         PartDefinition umbPanel0 = umb.addOrReplaceChild("umb_panel_0", CubeListBuilder.create()
-                .texOffs(112, 85).mirror(false).addBox(-3.3f, 0, -0.3f, 6.6f, 13, 0.6f), PartPose.offsetAndRotation(-0, -40, -0.9f, -0.12f, 0, 0));
+                .texOffs(67, 50).mirror(false).addBox(-4.2f, 0, -0.3f, 8.4f, 16, 0.6f), PartPose.offsetAndRotation(-0, -40, -0.9f, -0.12f, 0, 0));
         PartDefinition umbTassel0 = umbPanel0.addOrReplaceChild("umb_tassel_0", CubeListBuilder.create()
                 .texOffs(120, 143).mirror(false).addBox(-0.3f, 0, -0.3f, 0.6f, 3.4f, 0.6f)
                 .texOffs(244, 143).mirror(false).addBox(-0.8f, 3.2f, -0.8f, 1.6f, 1.6f, 1.6f)
-                .texOffs(125, 143).mirror(false).addBox(-0.6f, 4.6f, -0.6f, 1.2f, 2.6f, 1.2f), PartPose.offsetAndRotation(0, 12.6f, -0.4f, 0.12f, 0, 0));
+                .texOffs(125, 143).mirror(false).addBox(-0.6f, 4.6f, -0.6f, 1.2f, 2.6f, 1.2f), PartPose.offsetAndRotation(0, 15.6f, -0.4f, 0.12f, 0, 0));
         PartDefinition umbPanel1 = umb.addOrReplaceChild("umb_panel_1", CubeListBuilder.create()
-                .texOffs(112, 85).mirror(false).addBox(-3.3f, 0, -0.3f, 6.6f, 13, 0.6f), PartPose.offsetAndRotation(-0.45f, -40, -0.7794f, -0.12f, 0.5236f, 0));
+                .texOffs(67, 50).mirror(false).addBox(-4.2f, 0, -0.3f, 8.4f, 16, 0.6f), PartPose.offsetAndRotation(-0.45f, -40, -0.7794f, -0.12f, 0.5236f, 0));
         PartDefinition umbTassel1 = umbPanel1.addOrReplaceChild("umb_tassel_1", CubeListBuilder.create()
                 .texOffs(120, 143).mirror(false).addBox(-0.3f, 0, -0.3f, 0.6f, 3.4f, 0.6f)
                 .texOffs(244, 143).mirror(false).addBox(-0.8f, 3.2f, -0.8f, 1.6f, 1.6f, 1.6f)
-                .texOffs(125, 143).mirror(false).addBox(-0.6f, 4.6f, -0.6f, 1.2f, 2.6f, 1.2f), PartPose.offsetAndRotation(0, 12.6f, -0.4f, 0.12f, 0, 0));
+                .texOffs(125, 143).mirror(false).addBox(-0.6f, 4.6f, -0.6f, 1.2f, 2.6f, 1.2f), PartPose.offsetAndRotation(0, 15.6f, -0.4f, 0.12f, 0, 0));
         PartDefinition umbPanel2 = umb.addOrReplaceChild("umb_panel_2", CubeListBuilder.create()
-                .texOffs(112, 85).mirror(false).addBox(-3.3f, 0, -0.3f, 6.6f, 13, 0.6f), PartPose.offsetAndRotation(-0.7794f, -40, -0.45f, -0.12f, 1.0472f, 0));
+                .texOffs(67, 50).mirror(false).addBox(-4.2f, 0, -0.3f, 8.4f, 16, 0.6f), PartPose.offsetAndRotation(-0.7794f, -40, -0.45f, -0.12f, 1.0472f, 0));
         PartDefinition umbTassel2 = umbPanel2.addOrReplaceChild("umb_tassel_2", CubeListBuilder.create()
                 .texOffs(120, 143).mirror(false).addBox(-0.3f, 0, -0.3f, 0.6f, 3.4f, 0.6f)
                 .texOffs(244, 143).mirror(false).addBox(-0.8f, 3.2f, -0.8f, 1.6f, 1.6f, 1.6f)
-                .texOffs(125, 143).mirror(false).addBox(-0.6f, 4.6f, -0.6f, 1.2f, 2.6f, 1.2f), PartPose.offsetAndRotation(0, 12.6f, -0.4f, 0.12f, 0, 0));
+                .texOffs(125, 143).mirror(false).addBox(-0.6f, 4.6f, -0.6f, 1.2f, 2.6f, 1.2f), PartPose.offsetAndRotation(0, 15.6f, -0.4f, 0.12f, 0, 0));
         PartDefinition umbPanel3 = umb.addOrReplaceChild("umb_panel_3", CubeListBuilder.create()
-                .texOffs(112, 85).mirror(false).addBox(-3.3f, 0, -0.3f, 6.6f, 13, 0.6f), PartPose.offsetAndRotation(-0.9f, -40, -0, -0.12f, 1.5708f, 0));
+                .texOffs(67, 50).mirror(false).addBox(-4.2f, 0, -0.3f, 8.4f, 16, 0.6f), PartPose.offsetAndRotation(-0.9f, -40, -0, -0.12f, 1.5708f, 0));
         PartDefinition umbTassel3 = umbPanel3.addOrReplaceChild("umb_tassel_3", CubeListBuilder.create()
                 .texOffs(120, 143).mirror(false).addBox(-0.3f, 0, -0.3f, 0.6f, 3.4f, 0.6f)
                 .texOffs(244, 143).mirror(false).addBox(-0.8f, 3.2f, -0.8f, 1.6f, 1.6f, 1.6f)
-                .texOffs(125, 143).mirror(false).addBox(-0.6f, 4.6f, -0.6f, 1.2f, 2.6f, 1.2f), PartPose.offsetAndRotation(0, 12.6f, -0.4f, 0.12f, 0, 0));
+                .texOffs(125, 143).mirror(false).addBox(-0.6f, 4.6f, -0.6f, 1.2f, 2.6f, 1.2f), PartPose.offsetAndRotation(0, 15.6f, -0.4f, 0.12f, 0, 0));
         PartDefinition umbPanel4 = umb.addOrReplaceChild("umb_panel_4", CubeListBuilder.create()
-                .texOffs(112, 85).mirror(false).addBox(-3.3f, 0, -0.3f, 6.6f, 13, 0.6f), PartPose.offsetAndRotation(-0.7794f, -40, 0.45f, -0.12f, 2.0944f, 0));
+                .texOffs(67, 50).mirror(false).addBox(-4.2f, 0, -0.3f, 8.4f, 16, 0.6f), PartPose.offsetAndRotation(-0.7794f, -40, 0.45f, -0.12f, 2.0944f, 0));
         PartDefinition umbTassel4 = umbPanel4.addOrReplaceChild("umb_tassel_4", CubeListBuilder.create()
                 .texOffs(120, 143).mirror(false).addBox(-0.3f, 0, -0.3f, 0.6f, 3.4f, 0.6f)
                 .texOffs(244, 143).mirror(false).addBox(-0.8f, 3.2f, -0.8f, 1.6f, 1.6f, 1.6f)
-                .texOffs(125, 143).mirror(false).addBox(-0.6f, 4.6f, -0.6f, 1.2f, 2.6f, 1.2f), PartPose.offsetAndRotation(0, 12.6f, -0.4f, 0.12f, 0, 0));
+                .texOffs(125, 143).mirror(false).addBox(-0.6f, 4.6f, -0.6f, 1.2f, 2.6f, 1.2f), PartPose.offsetAndRotation(0, 15.6f, -0.4f, 0.12f, 0, 0));
         PartDefinition umbPanel5 = umb.addOrReplaceChild("umb_panel_5", CubeListBuilder.create()
-                .texOffs(112, 85).mirror(false).addBox(-3.3f, 0, -0.3f, 6.6f, 13, 0.6f), PartPose.offsetAndRotation(-0.45f, -40, 0.7794f, -0.12f, 2.618f, 0));
+                .texOffs(67, 50).mirror(false).addBox(-4.2f, 0, -0.3f, 8.4f, 16, 0.6f), PartPose.offsetAndRotation(-0.45f, -40, 0.7794f, -0.12f, 2.618f, 0));
         PartDefinition umbTassel5 = umbPanel5.addOrReplaceChild("umb_tassel_5", CubeListBuilder.create()
                 .texOffs(120, 143).mirror(false).addBox(-0.3f, 0, -0.3f, 0.6f, 3.4f, 0.6f)
                 .texOffs(244, 143).mirror(false).addBox(-0.8f, 3.2f, -0.8f, 1.6f, 1.6f, 1.6f)
-                .texOffs(125, 143).mirror(false).addBox(-0.6f, 4.6f, -0.6f, 1.2f, 2.6f, 1.2f), PartPose.offsetAndRotation(0, 12.6f, -0.4f, 0.12f, 0, 0));
+                .texOffs(125, 143).mirror(false).addBox(-0.6f, 4.6f, -0.6f, 1.2f, 2.6f, 1.2f), PartPose.offsetAndRotation(0, 15.6f, -0.4f, 0.12f, 0, 0));
         PartDefinition umbPanel6 = umb.addOrReplaceChild("umb_panel_6", CubeListBuilder.create()
-                .texOffs(112, 85).mirror(false).addBox(-3.3f, 0, -0.3f, 6.6f, 13, 0.6f), PartPose.offsetAndRotation(-0, -40, 0.9f, -0.12f, 3.1416f, 0));
+                .texOffs(67, 50).mirror(false).addBox(-4.2f, 0, -0.3f, 8.4f, 16, 0.6f), PartPose.offsetAndRotation(-0, -40, 0.9f, -0.12f, 3.1416f, 0));
         PartDefinition umbTassel6 = umbPanel6.addOrReplaceChild("umb_tassel_6", CubeListBuilder.create()
                 .texOffs(120, 143).mirror(false).addBox(-0.3f, 0, -0.3f, 0.6f, 3.4f, 0.6f)
                 .texOffs(244, 143).mirror(false).addBox(-0.8f, 3.2f, -0.8f, 1.6f, 1.6f, 1.6f)
-                .texOffs(125, 143).mirror(false).addBox(-0.6f, 4.6f, -0.6f, 1.2f, 2.6f, 1.2f), PartPose.offsetAndRotation(0, 12.6f, -0.4f, 0.12f, 0, 0));
+                .texOffs(125, 143).mirror(false).addBox(-0.6f, 4.6f, -0.6f, 1.2f, 2.6f, 1.2f), PartPose.offsetAndRotation(0, 15.6f, -0.4f, 0.12f, 0, 0));
         PartDefinition umbPanel7 = umb.addOrReplaceChild("umb_panel_7", CubeListBuilder.create()
-                .texOffs(112, 85).mirror(false).addBox(-3.3f, 0, -0.3f, 6.6f, 13, 0.6f), PartPose.offsetAndRotation(0.45f, -40, 0.7794f, -0.12f, 3.6652f, 0));
+                .texOffs(67, 50).mirror(false).addBox(-4.2f, 0, -0.3f, 8.4f, 16, 0.6f), PartPose.offsetAndRotation(0.45f, -40, 0.7794f, -0.12f, 3.6652f, 0));
         PartDefinition umbTassel7 = umbPanel7.addOrReplaceChild("umb_tassel_7", CubeListBuilder.create()
                 .texOffs(120, 143).mirror(false).addBox(-0.3f, 0, -0.3f, 0.6f, 3.4f, 0.6f)
                 .texOffs(244, 143).mirror(false).addBox(-0.8f, 3.2f, -0.8f, 1.6f, 1.6f, 1.6f)
-                .texOffs(125, 143).mirror(false).addBox(-0.6f, 4.6f, -0.6f, 1.2f, 2.6f, 1.2f), PartPose.offsetAndRotation(0, 12.6f, -0.4f, 0.12f, 0, 0));
+                .texOffs(125, 143).mirror(false).addBox(-0.6f, 4.6f, -0.6f, 1.2f, 2.6f, 1.2f), PartPose.offsetAndRotation(0, 15.6f, -0.4f, 0.12f, 0, 0));
         PartDefinition umbPanel8 = umb.addOrReplaceChild("umb_panel_8", CubeListBuilder.create()
-                .texOffs(112, 85).mirror(false).addBox(-3.3f, 0, -0.3f, 6.6f, 13, 0.6f), PartPose.offsetAndRotation(0.7794f, -40, 0.45f, -0.12f, 4.1888f, 0));
+                .texOffs(67, 50).mirror(false).addBox(-4.2f, 0, -0.3f, 8.4f, 16, 0.6f), PartPose.offsetAndRotation(0.7794f, -40, 0.45f, -0.12f, 4.1888f, 0));
         PartDefinition umbTassel8 = umbPanel8.addOrReplaceChild("umb_tassel_8", CubeListBuilder.create()
                 .texOffs(120, 143).mirror(false).addBox(-0.3f, 0, -0.3f, 0.6f, 3.4f, 0.6f)
                 .texOffs(244, 143).mirror(false).addBox(-0.8f, 3.2f, -0.8f, 1.6f, 1.6f, 1.6f)
-                .texOffs(125, 143).mirror(false).addBox(-0.6f, 4.6f, -0.6f, 1.2f, 2.6f, 1.2f), PartPose.offsetAndRotation(0, 12.6f, -0.4f, 0.12f, 0, 0));
+                .texOffs(125, 143).mirror(false).addBox(-0.6f, 4.6f, -0.6f, 1.2f, 2.6f, 1.2f), PartPose.offsetAndRotation(0, 15.6f, -0.4f, 0.12f, 0, 0));
         PartDefinition umbPanel9 = umb.addOrReplaceChild("umb_panel_9", CubeListBuilder.create()
-                .texOffs(112, 85).mirror(false).addBox(-3.3f, 0, -0.3f, 6.6f, 13, 0.6f), PartPose.offsetAndRotation(0.9f, -40, 0, -0.12f, 4.7124f, 0));
+                .texOffs(67, 50).mirror(false).addBox(-4.2f, 0, -0.3f, 8.4f, 16, 0.6f), PartPose.offsetAndRotation(0.9f, -40, 0, -0.12f, 4.7124f, 0));
         PartDefinition umbTassel9 = umbPanel9.addOrReplaceChild("umb_tassel_9", CubeListBuilder.create()
                 .texOffs(120, 143).mirror(false).addBox(-0.3f, 0, -0.3f, 0.6f, 3.4f, 0.6f)
                 .texOffs(244, 143).mirror(false).addBox(-0.8f, 3.2f, -0.8f, 1.6f, 1.6f, 1.6f)
-                .texOffs(125, 143).mirror(false).addBox(-0.6f, 4.6f, -0.6f, 1.2f, 2.6f, 1.2f), PartPose.offsetAndRotation(0, 12.6f, -0.4f, 0.12f, 0, 0));
+                .texOffs(125, 143).mirror(false).addBox(-0.6f, 4.6f, -0.6f, 1.2f, 2.6f, 1.2f), PartPose.offsetAndRotation(0, 15.6f, -0.4f, 0.12f, 0, 0));
         PartDefinition umbPanel10 = umb.addOrReplaceChild("umb_panel_10", CubeListBuilder.create()
-                .texOffs(112, 85).mirror(false).addBox(-3.3f, 0, -0.3f, 6.6f, 13, 0.6f), PartPose.offsetAndRotation(0.7794f, -40, -0.45f, -0.12f, 5.236f, 0));
+                .texOffs(67, 50).mirror(false).addBox(-4.2f, 0, -0.3f, 8.4f, 16, 0.6f), PartPose.offsetAndRotation(0.7794f, -40, -0.45f, -0.12f, 5.236f, 0));
         PartDefinition umbTassel10 = umbPanel10.addOrReplaceChild("umb_tassel_10", CubeListBuilder.create()
                 .texOffs(120, 143).mirror(false).addBox(-0.3f, 0, -0.3f, 0.6f, 3.4f, 0.6f)
                 .texOffs(244, 143).mirror(false).addBox(-0.8f, 3.2f, -0.8f, 1.6f, 1.6f, 1.6f)
-                .texOffs(125, 143).mirror(false).addBox(-0.6f, 4.6f, -0.6f, 1.2f, 2.6f, 1.2f), PartPose.offsetAndRotation(0, 12.6f, -0.4f, 0.12f, 0, 0));
+                .texOffs(125, 143).mirror(false).addBox(-0.6f, 4.6f, -0.6f, 1.2f, 2.6f, 1.2f), PartPose.offsetAndRotation(0, 15.6f, -0.4f, 0.12f, 0, 0));
         PartDefinition umbPanel11 = umb.addOrReplaceChild("umb_panel_11", CubeListBuilder.create()
-                .texOffs(112, 85).mirror(false).addBox(-3.3f, 0, -0.3f, 6.6f, 13, 0.6f), PartPose.offsetAndRotation(0.45f, -40, -0.7794f, -0.12f, 5.7596f, 0));
+                .texOffs(67, 50).mirror(false).addBox(-4.2f, 0, -0.3f, 8.4f, 16, 0.6f), PartPose.offsetAndRotation(0.45f, -40, -0.7794f, -0.12f, 5.7596f, 0));
         PartDefinition umbTassel11 = umbPanel11.addOrReplaceChild("umb_tassel_11", CubeListBuilder.create()
                 .texOffs(120, 143).mirror(false).addBox(-0.3f, 0, -0.3f, 0.6f, 3.4f, 0.6f)
                 .texOffs(244, 143).mirror(false).addBox(-0.8f, 3.2f, -0.8f, 1.6f, 1.6f, 1.6f)
-                .texOffs(125, 143).mirror(false).addBox(-0.6f, 4.6f, -0.6f, 1.2f, 2.6f, 1.2f), PartPose.offsetAndRotation(0, 12.6f, -0.4f, 0.12f, 0, 0));
+                .texOffs(125, 143).mirror(false).addBox(-0.6f, 4.6f, -0.6f, 1.2f, 2.6f, 1.2f), PartPose.offsetAndRotation(0, 15.6f, -0.4f, 0.12f, 0, 0));
         PartDefinition umbCap0 = umb.addOrReplaceChild("umb_cap_0", CubeListBuilder.create()
                 .texOffs(222, 135).mirror(false).addBox(-1.6f, 0, -0.3f, 3.2f, 4.2f, 0.6f), PartPose.offsetAndRotation(-0.3f, -42.6f, -0.5196f, -1, 0.5236f, 0));
         PartDefinition umbCap1 = umb.addOrReplaceChild("umb_cap_1", CubeListBuilder.create()
@@ -733,14 +733,17 @@ public final class HeavenGreatRenderers {
             turn(rightForearm, rfx, 0, rfz + strum);
             turn(leftForearm, lfx, 0, 0);
             // the East's pipa rises to his chest as he winds up
-            move(pipa, 0, -5f * up, -1.5f * up);
+            move(pipa, 0, -3.5f * up, -1.5f * up);
             turn(pipa, -0.25f * up, 0, -0.35f * up);
-            turn(sword, up * 0.9f, 0, 0);
+            // the sword laid level over his head, its point to his left, for the circling cut
+            turn(sword, up * 1.55f, 0, -up * 1.35f);
+            turn(umb, up * 0.45f, 0, -up * 0.12f);
             // the pearl's flames turning
             turn(pearlFlame, 0, age * 0.05f, 0);
             pearl.xScale = pearl.yScale = pearl.zScale = 1 + up * 0.15f;
             // the serpent sways, rears back and gapes in the wind-up
             turn(serpent, Mth.sin(age * 0.07f) * 0.08f - up * 0.55f, Mth.sin(age * 0.05f) * 0.15f, 0);
+            serpent.xScale = serpent.yScale = serpent.zScale = 1.35f + up * 0.2f;
             turn(serpentHead, up * 0.6f, 0, 0);
             turn(serpentJaw, 0.1f + Math.max(0, Mth.sin(age * 0.1f)) * 0.15f + up * 0.75f, 0, 0);
             // the umbrella furled, opening in the wind-up: its gores spread and broaden, its tassels hanging
@@ -748,7 +751,7 @@ public final class HeavenGreatRenderers {
                 ModelPart p = panels.get(k);
                 float open = up;
                 turn(p, -1.18f * open, 0, 0);
-                float w = 0.22f + 0.78f * open;
+                float w = 0.18f + 0.82f * open;
                 p.xScale = w;
                 ModelPart t = tassels.get(k);
                 t.xRot = -p.xRot + Mth.sin(age * 0.1f + k) * 0.05f;
@@ -1058,7 +1061,7 @@ public final class HeavenGreatRenderers {
             turn(rightForearm, strike * -0.4f, 0, 0);
             turn(leftArm, -up * 0.35f, 0, -up * 0.75f);
             turn(leftForearm, up * 0.35f, 0, 0);
-            turn(pagoda, -up * 0.3f, 0, up * 0.75f);
+            turn(pagoda, -up * 0.3f, 0, -up * 0.75f);
             float grow = 1 + up * 0.3f;
             pagoda.xScale = pagoda.yScale = pagoda.zScale = grow;
             float r = up * (1.1f + Mth.sin(age * 0.4f) * 0.08f);
@@ -1424,7 +1427,7 @@ public final class HeavenGreatRenderers {
      */
     public static final class NezhaModel extends EntityModel<NezhaEntity> {
         private final ModelPart root, waist, body, head, rightArm, leftArm, rightForearm, leftForearm, rightLeg, leftLeg,
-                rightSpin, leftSpin, ring, spearFire, sash;
+                rightSpin, leftSpin, ring, spear, spearFire, sash;
         private final List<ModelPart> flames = new ArrayList<>(), petals, arc;
         private final List<List<ModelPart>> streamers = new ArrayList<>();
         private float up;
@@ -1446,7 +1449,8 @@ public final class HeavenGreatRenderers {
             flames.addAll(numbered(rightWheel, "right_wheel_flame"));
             flames.addAll(numbered(leftWheel, "left_wheel_flame"));
             ring = leftArm.getChild("qiankun");
-            spearFire = rightForearm.getChild("right_hand").getChild("spear").getChild("spear_fire");
+            spear = rightForearm.getChild("right_hand").getChild("spear");
+            spearFire = spear.getChild("spear_fire");
             sash = body.getChild("sash");
             arc = numbered(sash, "sash_arc");
             petals = numbered(waist, "petal");
@@ -1491,6 +1495,7 @@ public final class HeavenGreatRenderers {
             turn(rightForearm, strike * 0.6f + up * 0.6f, 0, 0);
             turn(leftArm, -up * 0.5f + Mth.sin(age * 0.06f) * 0.03f, 0, -up * 0.2f);
             turn(leftForearm, 0, 0, 0);
+            turn(spear, up * 1.5f, 0, 0);
             spearFire.yScale = 1 + up * 0.5f + Mth.sin(age * 0.5f) * 0.1f;
             spearFire.yRot = age * 0.08f;
             // the Universe Ring turning about his arm
@@ -1527,25 +1532,25 @@ public final class HeavenGreatRenderers {
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
         PartDefinition waist = root.addOrReplaceChild("waist", CubeListBuilder.create()
-                .texOffs(33, 41).mirror(false).addBox(-5.2f, -2, -3.6f, 10.4f, 4, 7.2f)
-                .texOffs(72, 41).mirror(false).addBox(-6, -3.6f, -4.2f, 12, 3, 8.4f)
+                .texOffs(54, 41).mirror(false).addBox(-5.2f, -2, -3.6f, 10.4f, 4, 7.2f)
+                .texOffs(93, 41).mirror(false).addBox(-6, -3.6f, -4.2f, 12, 3, 8.4f)
                 .texOffs(63, 78).mirror(false).addBox(-2, -4.2f, -4.9f, 4, 3.6f, 1), PartPose.offsetAndRotation(0, 6, 0, 0, 0, 0));
         PartDefinition apron = waist.addOrReplaceChild("apron", CubeListBuilder.create()
                 .texOffs(80, 0).mirror(false).addBox(-2.6f, 0, -0.5f, 5.2f, 15, 0.7f), PartPose.offsetAndRotation(0, 0.2f, -4.4f, -0.05f, 0, 0));
         PartDefinition rightTasset = waist.addOrReplaceChild("right_tasset", CubeListBuilder.create()
-                .texOffs(194, 41).mirror(false).addBox(-3, 0, -0.5f, 6, 9.5f, 1), PartPose.offsetAndRotation(-3.2f, -0.4f, -3.8f, -0.12f, 0.15f, 0.1f));
+                .texOffs(215, 41).mirror(false).addBox(-3, 0, -0.5f, 6, 9.5f, 1), PartPose.offsetAndRotation(-3.2f, -0.4f, -3.8f, -0.12f, 0.15f, 0.1f));
         PartDefinition leftTasset = waist.addOrReplaceChild("left_tasset", CubeListBuilder.create()
-                .texOffs(194, 41).mirror(true).addBox(-3, 0, -0.5f, 6, 9.5f, 1), PartPose.offsetAndRotation(3.2f, -0.4f, -3.8f, -0.12f, -0.15f, -0.1f));
+                .texOffs(215, 41).mirror(true).addBox(-3, 0, -0.5f, 6, 9.5f, 1), PartPose.offsetAndRotation(3.2f, -0.4f, -3.8f, -0.12f, -0.15f, -0.1f));
         PartDefinition rightSideTasset = waist.addOrReplaceChild("right_side_tasset", CubeListBuilder.create()
                 .texOffs(46, 0).mirror(false).addBox(-1, 0, -3.6f, 1, 9, 7.2f), PartPose.offsetAndRotation(-5.7f, -0.4f, 0, 0, 0, 0.2f));
         PartDefinition leftSideTasset = waist.addOrReplaceChild("left_side_tasset", CubeListBuilder.create()
                 .texOffs(46, 0).mirror(true).addBox(0, 0, -3.6f, 1, 9, 7.2f), PartPose.offsetAndRotation(5.7f, -0.4f, 0, 0, 0, -0.2f));
         PartDefinition backTasset = waist.addOrReplaceChild("back_tasset", CubeListBuilder.create()
-                .texOffs(209, 41).mirror(false).addBox(-5.4f, 0, -0.5f, 10.8f, 9.5f, 1), PartPose.offsetAndRotation(0, -0.4f, 4, 0.12f, 0, 0));
+                .texOffs(230, 41).mirror(false).addBox(-5.4f, 0, -0.5f, 10.8f, 9.5f, 1), PartPose.offsetAndRotation(0, -0.4f, 4, 0.12f, 0, 0));
         PartDefinition rightLeg = root.addOrReplaceChild("right_leg", CubeListBuilder.create()
-                .texOffs(230, 0).mirror(false).addBox(-2.4f, 0, -2.4f, 4.8f, 8, 4.8f), PartPose.offsetAndRotation(-2.8f, 8, 0.2f, 0, 0, 0));
+                .texOffs(0, 41).mirror(false).addBox(-2.4f, 0, -2.4f, 4.8f, 8, 4.8f), PartPose.offsetAndRotation(-2.8f, 8, 0.2f, 0, 0, 0));
         PartDefinition leftLeg = root.addOrReplaceChild("left_leg", CubeListBuilder.create()
-                .texOffs(230, 0).mirror(true).addBox(-2.4f, 0, -2.4f, 4.8f, 8, 4.8f), PartPose.offsetAndRotation(2.8f, 8, 0.2f, 0, 0, 0));
+                .texOffs(0, 41).mirror(true).addBox(-2.4f, 0, -2.4f, 4.8f, 8, 4.8f), PartPose.offsetAndRotation(2.8f, 8, 0.2f, 0, 0, 0));
         PartDefinition rightRobe = rightLeg.addOrReplaceChild("right_robe", CubeListBuilder.create()
                 .texOffs(171, 0).mirror(false).addBox(-2.7f, 0, -0.5f, 5.4f, 12.5f, 0.6f), PartPose.offsetAndRotation(0, -0.6f, -2.6f, -0.05f, 0, 0.04f));
         PartDefinition leftRobe = leftLeg.addOrReplaceChild("left_robe", CubeListBuilder.create()
@@ -1565,11 +1570,11 @@ public final class HeavenGreatRenderers {
                 .texOffs(95, 0).mirror(false).addBox(-6.1f, -13.4f, -4.3f, 12.2f, 6.8f, 8.6f)
                 .texOffs(183, 67).mirror(false).addBox(-2.6f, -12.4f, -4.9f, 5.2f, 5.2f, 0.7f)
                 .texOffs(107, 67).mirror(false).addBox(-3.6f, -14.6f, -3, 7.2f, 2, 6)
-                .texOffs(115, 41).mirror(false).addBox(-6.8f, -13.8f, -4.6f, 13.6f, 1.1f, 9.2f)
+                .texOffs(136, 41).mirror(false).addBox(-6.8f, -13.8f, -4.6f, 13.6f, 1.1f, 9.2f)
                 .texOffs(101, 78).mirror(false).addBox(-6.4f, -13.6f, -4.8f, 2.2f, 2.2f, 0.7f)
                 .texOffs(101, 78).mirror(false).addBox(4.2f, -13.6f, -4.8f, 2.2f, 2.2f, 0.7f), PartPose.offsetAndRotation(0, -3, 0, 0, 0, 0));
         PartDefinition cape = body.addOrReplaceChild("cape", CubeListBuilder.create()
-                .texOffs(0, 41).mirror(false).addBox(-7.4f, 0, -0.4f, 14.8f, 12, 0.8f), PartPose.offsetAndRotation(0, -13.6f, 4.2f, 0.1f, 0, 0));
+                .texOffs(21, 41).mirror(false).addBox(-7.4f, 0, -0.4f, 14.8f, 12, 0.8f), PartPose.offsetAndRotation(0, -13.6f, 4.2f, 0.1f, 0, 0));
         PartDefinition capeLower = cape.addOrReplaceChild("cape_lower", CubeListBuilder.create()
                 .texOffs(0, 55).mirror(false).addBox(-8, 0, -0.4f, 16, 10, 0.8f), PartPose.offsetAndRotation(0, 11.8f, 0, 0.06f, 0, 0));
         PartDefinition capeHem = capeLower.addOrReplaceChild("cape_hem", CubeListBuilder.create()
@@ -1584,6 +1589,8 @@ public final class HeavenGreatRenderers {
                 .texOffs(110, 78).mirror(false).addBox(-0.8f, -5.4f, -4.2f, 1.6f, 2.6f, 0.8f)
                 .texOffs(186, 0).mirror(false).addBox(-3.9f, -8.7f, -0.6f, 7.8f, 8.6f, 4.8f)
                 .texOffs(74, 78).mirror(false).addBox(-0.75f, -8, -3.85f, 1.5f, 3.2f, 0.45f), PartPose.offsetAndRotation(0, -14.4f, -0.2f, 0, 0, 0));
+        PartDefinition thirdFlare = head.addOrReplaceChild("third_flare", CubeListBuilder.create()
+                .texOffs(213, 0).mirror(false).addBox(-4.5f, -6.5f, 0, 9, 13, 0.01f), PartPose.offsetAndRotation(0, -6.4f, -4.3f, 0, 0, 0));
         PartDefinition thirdLid = head.addOrReplaceChild("third_lid", CubeListBuilder.create()
                 .texOffs(144, 78).mirror(false).addBox(-0.9f, 0, -0.25f, 1.8f, 1.3f, 0.3f), PartPose.offsetAndRotation(0, -8.1f, -4, 0, 0, 0));
         PartDefinition thirdLidLow = head.addOrReplaceChild("third_lid_low", CubeListBuilder.create()
@@ -1622,22 +1629,22 @@ public final class HeavenGreatRenderers {
         PartDefinition leftCrownTie3 = leftCrownTie2.addOrReplaceChild("left_crown_tie_3", CubeListBuilder.create()
                 .texOffs(81, 78).mirror(true).addBox(-0.75f, 0, -0.15f, 1.5f, 4, 0.3f), PartPose.offsetAndRotation(0, 4.2f, 0, 0.14f, 0, 0));
         PartDefinition rightArm = body.addOrReplaceChild("right_arm", CubeListBuilder.create()
-                .texOffs(164, 41).mirror(false).addBox(-2.1f, -1, -2.1f, 4.2f, 7, 4.2f)
+                .texOffs(185, 41).mirror(false).addBox(-2.1f, -1, -2.1f, 4.2f, 7, 4.2f)
                 .texOffs(0, 78).mirror(false).addBox(-2.5f, 3.6f, -2.5f, 5, 1.1f, 5), PartPose.offsetAndRotation(-7.4f, -11.8f, 0.2f, -0.08f, 0, 0.12f));
         PartDefinition leftArm = body.addOrReplaceChild("left_arm", CubeListBuilder.create()
-                .texOffs(164, 41).mirror(true).addBox(-2.1f, -1, -2.1f, 4.2f, 7, 4.2f)
+                .texOffs(185, 41).mirror(true).addBox(-2.1f, -1, -2.1f, 4.2f, 7, 4.2f)
                 .texOffs(0, 78).mirror(true).addBox(-2.5f, 3.6f, -2.5f, 5, 1.1f, 5), PartPose.offsetAndRotation(7.4f, -11.8f, 0.2f, 0.05f, 0, -0.1f));
         PartDefinition rightPauldron = rightArm.addOrReplaceChild("right_pauldron", CubeListBuilder.create()
                 .texOffs(63, 67).mirror(false).addBox(-3.8f, -1.3f, -3.4f, 5.8f, 1.5f, 6.8f)
                 .texOffs(187, 55).mirror(false).addBox(-4.4f, 0, -3.8f, 6.4f, 1.7f, 7.6f)
                 .texOffs(77, 55).mirror(false).addBox(-5, 1.5f, -4.2f, 6.9f, 2, 8.4f)
-                .texOffs(213, 0).mirror(false).addBox(-5.8f, -1.4f, -3.4f, 0.8f, 6.8f, 6.8f)
+                .texOffs(234, 0).mirror(false).addBox(-5.8f, -1.4f, -3.4f, 0.8f, 6.8f, 6.8f)
                 .texOffs(218, 55).mirror(false).addBox(-6.5f, -0.3f, -2.4f, 1.3f, 4.8f, 4.8f), PartPose.offsetAndRotation(-0.3f, -0.7f, 0, 0, 0, 0.4f));
         PartDefinition leftPauldron = leftArm.addOrReplaceChild("left_pauldron", CubeListBuilder.create()
                 .texOffs(63, 67).mirror(true).addBox(-2, -1.3f, -3.4f, 5.8f, 1.5f, 6.8f)
                 .texOffs(187, 55).mirror(true).addBox(-2, 0, -3.8f, 6.4f, 1.7f, 7.6f)
                 .texOffs(77, 55).mirror(true).addBox(-1.9f, 1.5f, -4.2f, 6.9f, 2, 8.4f)
-                .texOffs(213, 0).mirror(true).addBox(5, -1.4f, -3.4f, 0.8f, 6.8f, 6.8f)
+                .texOffs(234, 0).mirror(true).addBox(5, -1.4f, -3.4f, 0.8f, 6.8f, 6.8f)
                 .texOffs(218, 55).mirror(true).addBox(5.2f, -0.3f, -2.4f, 1.3f, 4.8f, 4.8f), PartPose.offsetAndRotation(0.3f, -0.7f, 0, 0, 0, -0.4f));
         PartDefinition rightForearm = rightArm.addOrReplaceChild("right_forearm", CubeListBuilder.create()
                 .texOffs(233, 55).mirror(false).addBox(-1.9f, 0, -1.9f, 3.8f, 5.6f, 3.8f)
@@ -1655,7 +1662,7 @@ public final class HeavenGreatRenderers {
                 .texOffs(0, 0).mirror(false).addBox(-0.5f, -24, -0.5f, 1, 39, 1)
                 .texOffs(126, 78).mirror(false).addBox(-0.8f, -25.2f, -0.8f, 1.6f, 1.4f, 1.6f)
                 .texOffs(48, 78).mirror(false).addBox(-1.6f, -27.4f, -1.2f, 3.2f, 2.4f, 2.4f)
-                .texOffs(185, 41).mirror(false).addBox(-1.4f, -37.4f, -0.3f, 2.8f, 10.4f, 0.6f)
+                .texOffs(206, 41).mirror(false).addBox(-1.4f, -37.4f, -0.3f, 2.8f, 10.4f, 0.6f)
                 .texOffs(135, 78).mirror(false).addBox(-0.7f, 14.6f, -0.7f, 1.4f, 1.6f, 1.4f), PartPose.offsetAndRotation(0, 1.6f, 0, 0.8383f, 0.2199f, 0.1428f));
         PartDefinition rightBlProng = blade.addOrReplaceChild("right_bl_prong", CubeListBuilder.create()
                 .texOffs(178, 67).mirror(false).addBox(-0.5f, -6.4f, -0.3f, 1, 6.6f, 0.6f), PartPose.offsetAndRotation(-1.3f, -26.6f, 0, 0, 0, 0.38f));
@@ -1675,7 +1682,7 @@ public final class HeavenGreatRenderers {
      */
     public static final class ErlangModel extends EntityModel<ErlangShenEntity> {
         private final ModelPart root, waist, body, head, rightArm, leftArm, rightForearm, leftForearm, rightLeg, leftLeg,
-                rightShin, leftShin, apron, rightTasset, leftTasset, backTasset, cape, capeLower, capeHem, lid, lidLow;
+                rightShin, leftShin, apron, rightTasset, leftTasset, backTasset, cape, capeLower, capeHem, lid, lidLow, flare;
         private final List<List<ModelPart>> streamers = new ArrayList<>();
         private float up;
 
@@ -1701,6 +1708,7 @@ public final class HeavenGreatRenderers {
             capeHem = capeLower.getChild("cape_hem");
             lid = head.getChild("third_lid");
             lidLow = head.getChild("third_lid_low");
+            flare = head.getChild("third_flare");
             ModelPart crown = head.getChild("crown");
             streamers.add(chain(crown, "right_crown_tie"));
             streamers.add(chain(crown, "left_crown_tie"));
@@ -1710,6 +1718,7 @@ public final class HeavenGreatRenderers {
         @Override
         public void prepareMobModel(ErlangShenEntity e, float swing, float amount, float partial) {
             up = windUp(e, ErlangShenEntity.WIND_UP, partial);
+            flare.visible = up > 0;
         }
 
         @Override
@@ -1735,10 +1744,12 @@ public final class HeavenGreatRenderers {
             // the blade swings down in a blow; in his wind-up two fingers of his left hand go to his brow
             turn(rightArm, -step * 0.2f - strike * 1.5f, 0, 0);
             turn(rightForearm, strike * 0.5f, 0, 0);
-            turn(leftArm, step * 0.25f - up * 1.25f, -up * 0.3f, -up * 0.15f);
-            turn(leftForearm, -up * 1.45f, up * 0.5f, 0);
+            turn(leftArm, step * 0.25f - up * 1.75f, -up * 0.55f, up * 0.2f);
+            turn(leftForearm, -up * 1.3f, up * 0.6f, 0);
+            float f = up * (1 + Mth.sin(age * 0.5f) * 0.12f);
+            flare.xScale = flare.yScale = Math.max(0.01f, f);
             // the third eye, half shut at rest, opening wide
-            float open = Math.max(0.15f, 1 - up * 0.9f);
+            float open = Math.max(0.1f, 0.7f - up * 0.6f);
             lid.yScale = open;
             lidLow.yScale = open;
             for (int k = 0; k < streamers.size(); k++) flutter(streamers.get(k), age, amount, k * 1.3f, k % 2 == 0 ? 1 : -1, 1 + up);
