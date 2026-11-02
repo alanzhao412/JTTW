@@ -464,5 +464,8 @@
   "effect.jttw_engine.venom": "Venom",
   "message.jttw_engine.spider_cave.seal_loosens": "Her silk loosens: the way on lies open",
   "message.jttw_engine.spider_cave.sister_falls": "A Spider Spirit falls",
-  "message.jttw_engine.spider_cave.canopy_falls": "The last of the Seven Spider Spirits has fallen. Over the Yellow Flower Temple, their canopy of silk sags, tears, and falls away."
+  "message.jttw_engine.spider_cave.canopy_falls": "The last of the Seven Spider Spirits has fallen. Over the Yellow Flower Temple, their canopy of silk sags, tears, and falls away.",
+  "entity.jttw_engine.raid_chief": "Yaksha King",
+  "entity.jttw_engine.wild_miniboss": "%s Warlord",
+  "item.jttw_engine.raid_chief_spawn_egg": "Yaksha King Spawn Egg"
 }

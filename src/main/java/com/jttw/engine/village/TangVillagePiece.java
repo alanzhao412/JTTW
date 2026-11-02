@@ -142,7 +142,12 @@ public class TangVillagePiece extends StructurePiece implements PieceBeardifierM
                 c.setLootTable(chest.smithy() ? SMITHY_CHEST : HOUSE_CHEST, level.getSeed() ^ at.asLong());
             }
         }
-        if (!folk) return;
+        if (folk) settle(level, plan, centre, area);
+    }
+
+    /** Puts the village's folk in place within {@code area} (as it is made; a raided village's, once freed), each with its calling and bed; the oasis's camels too. */
+    public static void settle(WorldGenLevel level, TangVillage.Plan plan, BlockPos centre, BoundingBox area) {
+        int cx = centre.getX(), floor = centre.getY(), cz = centre.getZ();
         for (TangVillage.Resident r : plan.residents) {
             BlockPos at = new BlockPos(cx + plan.planX(r.x()), floor + 1, cz + r.z());
             if (!area.isInside(at)) continue;
@@ -166,12 +171,17 @@ public class TangVillagePiece extends StructurePiece implements PieceBeardifierM
     }
 
     /** Puts up a sign at {@code pos}, its text glowing (written as saved data: while the land is made a sign has no level to tell). */
-    static void sign(WorldGenLevel level, BlockPos pos, Direction facing, String... lines) {
+    public static void sign(WorldGenLevel level, BlockPos pos, Direction facing, String... lines) {
         level.setBlock(pos, Blocks.DARK_OAK_WALL_SIGN.defaultBlockState().setValue(WallSignBlock.FACING, facing), Block.UPDATE_CLIENTS);
+        writeSign(level, pos, net.minecraft.world.item.DyeColor.YELLOW, lines);
+    }
+
+    /** Writes {@code lines} on both faces of the sign at {@code pos}, glowing in {@code color}, waxed. */
+    public static void writeSign(WorldGenLevel level, BlockPos pos, net.minecraft.world.item.DyeColor color, String... lines) {
         if (!(level.getBlockEntity(pos) instanceof SignBlockEntity be)) return;
         SignText text = new SignText();
         for (int i = 0; i < Math.min(4, lines.length); i++) text = text.setMessage(i, Component.literal(lines[i]));
-        text = text.setColor(net.minecraft.world.item.DyeColor.YELLOW).setHasGlowingText(true);
+        text = text.setColor(color).setHasGlowingText(true);
         var registries = level.registryAccess();
         var tag = be.saveWithoutMetadata(registries);
         SignText.DIRECT_CODEC.encodeStart(registries.createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE), text).result().ifPresent(saved -> {

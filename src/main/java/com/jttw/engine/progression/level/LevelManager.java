@@ -201,6 +201,13 @@ public final class LevelManager {
 
         int killerLevel = PlayerLevel.getLevel(killer);
 
+        // ── The open world's grinding grounds (raided villages, infested wilds): paid by their own rules
+        long grind = com.jttw.engine.grind.GrindXp.forKill(event.getEntity(), killerLevel);
+        if (grind >= 0) {
+            if (grind > 0) grantXp(killer, grind, "grinding_ground");
+            return;
+        }
+
         // ── Phase 1: Vanilla mobs (levels 1–19) ─────────────────────────────
         net.minecraft.nbt.CompoundTag tags = event.getEntity().getPersistentData();
         double share = tags.contains(XP_SHARE_TAG) ? tags.getDouble(XP_SHARE_TAG) : 1;
