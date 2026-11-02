@@ -42,7 +42,7 @@ final class ClassScenes {
         }
         level.setBlock(new BlockPos(0, g, 10), ModBlocks.FOUR_SYMBOLS_ALTAR.get().defaultBlockState()
                 .setValue(HorizontalDirectionalBlock.FACING, Direction.SOUTH), Block.UPDATE_CLIENTS);
-        p.setInvisible(true);
+        p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.INVISIBILITY, 2000, 0, false, false));
         set = true;
     }
 
@@ -76,7 +76,7 @@ final class ClassScenes {
             for (int y = 0; y <= 7; y++) level.setBlock(new BlockPos(x, g + y, z), Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
         }
         level.getEntities((Entity) null, new AABB(-6, g - 2, 4, 6, g + 9, 15), e -> e instanceof ItemFrame).forEach(Entity::discard);
-        p.setInvisible(false);
+        p.removeEffect(net.minecraft.world.effect.MobEffects.INVISIBILITY);
         set = false;
     }
 
@@ -89,8 +89,8 @@ final class ClassScenes {
 
     static List<AbilityScenes.Scene> all() {
         return List.of(
-                scene("class_altar", ClassScenes::altar, new double[]{1.9, 1.35, 12.0, 0.5, 0.45, 10.5}),
-                scene("class_altar_above", ClassScenes::altar, new double[]{2.2, 2.4, 12.4, 0.5, 0.3, 10.5}),
+                scene("class_altar", ClassScenes::altar, new double[]{1.6, 1.15, 11.6, 0.5, 0.5, 10.5}),
+                scene("class_altar_above", ClassScenes::altar, new double[]{1.9, 1.9, 11.9, 0.5, 0.45, 10.5}),
                 scene("class_offerings", ClassScenes::wall, new double[]{0.5, 3.6, 2.6, 0.5, 3.5, 8.0}));
     }
 }

@@ -6,6 +6,7 @@
     "stone": "jttw_engine:block/altar_stone",
     "stone_top": "jttw_engine:block/altar_stone_top",
     "jade": "jttw_engine:block/altar_jade",
+    "jade_side": "jttw_engine:block/altar_jade_side",
     "bronze": "jttw_engine:block/altar_bronze",
     "symbols": "jttw_engine:block/altar_symbols",
     "incense": "jttw_engine:block/altar_incense"
@@ -120,22 +121,58 @@
       ],
       "faces": {
         "north": {
-          "texture": "#jade"
+          "texture": "#jade_side",
+          "uv": [
+            0,
+            0,
+            16,
+            4
+          ]
         },
         "south": {
-          "texture": "#jade"
+          "texture": "#jade_side",
+          "uv": [
+            0,
+            0,
+            16,
+            4
+          ]
         },
         "east": {
-          "texture": "#jade"
+          "texture": "#jade_side",
+          "uv": [
+            0,
+            0,
+            16,
+            4
+          ]
         },
         "west": {
-          "texture": "#jade"
+          "texture": "#jade_side",
+          "uv": [
+            0,
+            0,
+            16,
+            4
+          ]
         },
         "up": {
-          "texture": "#jade"
+          "texture": "#jade",
+          "uv": [
+            0,
+            0,
+            16,
+            4
+          ]
         },
         "down": {
-          "texture": "#jade"
+          "texture": "#jade_side",
+          "uv": [
+            0,
+            0,
+            16,
+            4
+          ]
         }
       }
     },

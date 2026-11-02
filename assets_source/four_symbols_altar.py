@@ -86,14 +86,24 @@ for y in range(16):
         img.putpixel((x, y), rgba(c, noise(0.05)))
 img.save(T + 'altar_jade.png')
 
+# ── the jade table's edge: jade, banded gold at top and foot ──
+img = Image.new('RGBA', (16, 16))
+for y in range(16):
+    for x in range(16):
+        c = (225, 190, 80) if y in (0, 15) else (JADE_L if y == 1 else (JADE_D if y == 14 else JADE))
+        if 5 <= y <= 10 and x % 4 == 1:
+            c = mix_jade = (int(JADE[0] * 0.8), int(JADE[1] * 0.85), int(JADE[2] * 0.8))
+        img.putpixel((x, y), rgba(c, noise(0.05)))
+img.save(T + 'altar_jade_side.png')
+
 # ── the bronze: the ding's body, old bronze gone green in its hollows, a taotie band ──
-BRONZE, BRONZE_D, VERD = (150, 105, 50), (90, 60, 30), (80, 140, 115)
+BRONZE, BRONZE_D, VERD = (118, 82, 44), (66, 44, 24), (72, 128, 104)
 img = Image.new('RGBA', (16, 16))
 for y in range(16):
     for x in range(16):
         c = BRONZE
         if y < 2:
-            c = (190, 145, 70)                                     # the lip, worn bright
+            c = (172, 128, 62)                                     # the lip, worn bright
         elif 5 <= y <= 9:                                          # the taotie band: eyes and curls
             pat = [".#..##..##..#...", "##.#..#.#..#.##.", ".#.#.##.##.#.#..", "##.#..#.#..#.##.", ".#..##..##..#..."][y - 5]
             c = BRONZE_D if pat[x] == '#' else BRONZE
@@ -101,7 +111,7 @@ for y in range(16):
                 c = (220, 60, 40)                                  # the eyes, inlaid
         elif y >= 14:
             c = BRONZE_D
-        if c == BRONZE_D and rnd.random() < 0.35:
+        if (c == BRONZE_D and rnd.random() < 0.45) or (c == BRONZE and rnd.random() < 0.08):
             c = VERD                                               # verdigris in the hollows
         img.putpixel((x, y), rgba(c, noise(0.07)))
 img.save(T + 'altar_bronze.png')
@@ -157,7 +167,7 @@ elements = [
     box([1.5, 3, 1.5], [14.5, 5, 14.5], 'stone', top='stone_top'),
     # the jade table, on a waisted neck
     box([4, 5, 4], [12, 6.5, 12], 'stone', top='stone_top'),
-    box([3, 6.5, 3], [13, 8, 13], 'jade', top='jade'),
+    box([3, 6.5, 3], [13, 8, 13], 'jade_side', top='jade', uv=[0, 0, 16, 4]),
     # the ding: three legs, its belly, its lip and its two upright ears
     box([5.25, 8, 5.25], [6.25, 9, 6.25], 'bronze', uv=[0, 14, 2, 16]),
     box([9.75, 8, 5.25], [10.75, 9, 6.25], 'bronze', uv=[0, 14, 2, 16]),
@@ -186,7 +196,7 @@ model = {
     'parent': 'minecraft:block/block',
     'ambientocclusion': False,
     'textures': {'particle': 'jttw_engine:block/altar_stone', 'stone': 'jttw_engine:block/altar_stone',
-                 'stone_top': 'jttw_engine:block/altar_stone_top', 'jade': 'jttw_engine:block/altar_jade',
+                 'stone_top': 'jttw_engine:block/altar_stone_top', 'jade': 'jttw_engine:block/altar_jade', 'jade_side': 'jttw_engine:block/altar_jade_side',
                  'bronze': 'jttw_engine:block/altar_bronze', 'symbols': 'jttw_engine:block/altar_symbols',
                  'incense': 'jttw_engine:block/altar_incense'},
     'elements': elements,
