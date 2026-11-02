@@ -63,6 +63,7 @@ public class JTTWEngine {
         ModAttributes.register(modEventBus);
         com.jttw.engine.registry.ModEffects.register(modEventBus);
         com.jttw.engine.registry.ModVillages.register(modEventBus);
+        com.jttw.engine.registry.ModGrinds.register(modEventBus);
         com.jttw.engine.world.lion.LionTreasury.register(modEventBus);
         com.jttw.engine.registry.SpiderCaveRegistry.register(modEventBus);
         com.jttw.engine.registry.HeavenRegistry.register(modEventBus);

@@ -45,6 +45,19 @@ public class TangVillageStructure extends Structure {
 
     @Override
     protected Optional<GenerationStub> findGenerationPoint(GenerationContext ctx) {
+        Optional<BlockPos> site = site(ctx);
+        if (site.isEmpty()) return Optional.empty();
+        BlockPos centre = site.get();
+        long layout = ctx.random().nextLong();
+        return Optional.of(new GenerationStub(centre, b -> b.addPiece(new TangVillagePiece(variant, centre.getX(), centre.getY(), centre.getZ(), layout))));
+    }
+
+    /**
+     * Where a village of the chunk being looked at would stand (its centre, on its ground), or none:
+     * out of every zone and its margin, on ground near enough level and dry, over the sea. The raided
+     * villages stand by the same rules.
+     */
+    public static Optional<BlockPos> site(GenerationContext ctx) {
         ChunkPos chunk = ctx.chunkPos();
         int cx = chunk.getMiddleBlockX(), cz = chunk.getMiddleBlockZ();
         if (!VillageSites.clearOfZones(ctx.seed(), cx, cz)) return Optional.empty();
@@ -65,9 +78,7 @@ public class TangVillageStructure extends Structure {
         if (sorted[sorted.length - 1] - sorted[0] > STEEPEST) return Optional.empty();
         int floor = Math.max(sorted[sorted.length / 2], heights[0] - 2);
         if (floor < ctx.chunkGenerator().getSeaLevel()) return Optional.empty();
-        long layout = ctx.random().nextLong();
-        BlockPos centre = new BlockPos(cx, floor, cz);
-        return Optional.of(new GenerationStub(centre, b -> b.addPiece(new TangVillagePiece(variant, cx, floor, cz, layout))));
+        return Optional.of(new BlockPos(cx, floor, cz));
     }
 
     @Override

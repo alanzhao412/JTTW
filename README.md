@@ -3121,7 +3121,8 @@ are set against a typical character of that level (`MobScaling`), as a zone crea
 carry no enemy tier and no zone, so their kills pay as vanilla monsters' do: below level 20 by the
 killer's level and their weight (`WildYaoguai.vanillaXpShare`, as `LevelManager.vanillaMobWeight` is
 a vanilla mob's: a goblin a zombie's 1, an ogre 5), from 20 nothing; the zones are where a character
-grows from then on. They keep the zones' pecking order (see Zones): a goblin takes 4 hits and its
+grows from then on (the raided villages and infested wilds, below, field the same kinds at the levels
+of their ring, and pay as a zone does). They keep the zones' pecking order (see Zones): a goblin takes 4 hits and its
 blow is 6% of a same-level character's health, a kobold 5 and 8%, a wolfman 8 and 10%, an ogre 12
 and 12% (its slam three quarters of that).
 
@@ -3257,6 +3258,160 @@ village's market, shrine, square, courtyard, inn, smithy and fields; every look 
 ghost market; the merchant-immortal's stall); in a real world `./gradlew runWorldgenBench
 -Pbench.mode=village` (`VillageBench`: the nearest village of each kind, its folk and their beds,
 and pictures).
+
+---
+
+## The open world's grinding grounds
+
+The zones are roads with a fixed band each; a character too high or too low for the one at hand has
+two more places to grow, all over the overworld (`com.jttw.engine.grind`, `com.jttw.engine.village.raid`,
+registered by `registry/ModGrinds`): **raided villages** and **infested wilds**.
+
+**The rings.** Both take their levels from how far from spawn (the origin, round which the zones' rings
+lie) they stand, along the zones' own rings, smoothly within each (`RingLevels.levelAt`):
+
+| From spawn | Levels there | The zone of that ring |
+|---|---|---|
+| 0–1 km | 1 → 20 | (the early road) |
+| 1–2 km | 20 → 37 | White Bone Ridge, Black Wind Mountain, Flower-Fruit Mountain (20–36) |
+| 2–3 km | 37 → 47 | the Bottomless Cave (37–46) |
+| 3–3.75 km | 47 → 57 | the Mystical Waters (47–56) |
+| 3.75–4.5 km | 57 → 67 | Hell's band (57–66; Hell has no ring, so it takes the Waters' farther half) |
+| 4.5–6 km | 67 → 78 | the Flaming Mountains (67–77) |
+| 6–7.5 km | 78 → 89 | Mount Wuzhuang, Silk-Web Ridge (78–88) |
+| 7.5–9 km | 89 → 100 | Lion-Camel Ridge (89–100) |
+| past 9 km | 100 | |
+
+A place's band (`RingLevels.bandAt`) is seven levels round its ring's level, its middle jittered up to
+two levels either way by where it stands, kept within 1–100; fixed: the same place always has the same
+band (it is computed from the world seed and the place, never stored). A band's captains stand three to
+five over the regular they lead, never more than one over its top; its minibosses one over its top; a
+raid's chief its top and three, as a zone's boss.
+
+**What they pay** (`GrindXp`, one hook in `LevelManager`). A kill pays as a zone's creature of the same
+level does: a Grunt's, a General's or a Boss's of the zone whose band holds its level (a level-50 raider
+pays as a Mystical Waters soldier). By level: a regular pays 72 XP at 25, 396 at 50, 728 at 75, 1,248
+at 95; a captain or miniboss five times that; a chief twenty times. Nothing is paid to a character more
+than five levels over its ground's band (as a zone stops paying past its band's top and five); a
+character under the band is paid in full. A creature under 20 pays a character of 20 or more nothing
+(as the open world's yaoguai do); a character under 20 is paid as for a vanilla monster, by their own
+level, times its rank (a regular 1, a captain 2, a miniboss 4, a chief 20, over its kind's weight).
+
+**Karma.** Every one of them killed is slaying a monster (+1), whoever kills it: they are rabble and
+bandits, and a demon player gains by putting them down as anyone does. They attack a Yaoguai player
+too: they serve no demon king, and the Yaoguai class's kings are not theirs (the zones' monsters spare
+only their own masters' allies). Freeing a village pays **+100** (two thirds of a demon queen's: Lady
+White Bone's 150 is the most any deed pays).
+
+### Raided villages (劫掠之村)
+
+A Tang village a band of yaoguai has sacked and holds (`RaidedVillage`, laid by `RaidedVillagePiece` as a
+Tang village is, its folk left out).
+
+- **Where.** A structure set of its own (`structure_set/raided_villages`): **spacing 16 chunks,
+  separation 6** (a village's width, so two never overlap), in the Tang villages' three kinds and
+  biomes (plains, mountain, oasis), by their rules (`TangVillageStructure.site`: near-level dry ground
+  over the sea, never within a zone's region nor 108 blocks of one, `VillageSites`), **6 chunks clear
+  of every Tang village** (the set's exclusion zone) **and of vanilla's** (`RaidedVillageStructure`,
+  from vanilla's placement). Its grid is finer than vanilla's (34) because so few sites pass those
+  rules: on seed 12345 (`./gradlew runWorldgenBench -Pbench.mode=raided`, `RaidBench`, each site by its
+  own test) 3 stand within 1 km, 4 at 1–2 km (the first zones' ring, much of it the zones' own), 20 at
+  2–3 km, 37 at 3–4.5 km, 45 at 4.5–6 km: some 0.4 to 1.3 a square kilometre, about as common as
+  vanilla's villages. That is enough because the rings put the right levels near the player: each
+  band of seven levels is held by several villages of its ring, so one freed (only once) leaves the
+  next not far.
+- **How it looks.** Every door smashed; lanterns, awnings and pots torn down; where the fire took (a
+  little under half the village, in patches) timbers burnt to basalt or gone, roofs fallen in, walls
+  sooted and broken, the ground scorched to coarse dirt and basalt, embers still smouldering
+  (campfires); cobwebs in the empty rooms; crops trampled, farmland gone to dirt; the folk's chests
+  emptied. The raiders' marks: black banners with a red skull, skull totems (a heap of bone, a pole of
+  nether brick, a skull, a soul lantern hung off it), the chief's hoard before the shrine (copper and
+  silver, iron and gold; diamonds and golden apples in the richer bands).
+- **Telling it before going in.** A sign at its gate and at each of its other edges: 妖怪占据, "Held by
+  yaoguai", its band ("Lv 34–40") and its chief's level ("Chief Lv 43"); every raider's name carries its
+  level.
+- **Its raiders.** Five posts (the gate, the square, the cross street either side, the north-east
+  fields), three to each, of the open world's yaoguai of its land: the plains' goblins, wolfmen and
+  kobolds; the mountains' wolfmen, goblins and ogres; the oasis's kobolds, goblins and ogres (never two
+  ogres to a post). Regulars of the band; a **captain** at the head of the gate's and the square's. Each
+  post is kept by `ZonePosts`: when its last falls it stays empty **20 minutes**, then is held again by
+  the same, the next time its ground is awake and no one is near.
+- **Its chief, the Yaksha King** (夜叉王, `RaidChiefEntity`): an ogre made a gym's leader, a fifth again
+  as big, blue-faced where his kind are red (the 青面獠牙 of the temple yakshas), a blood-red mane, a
+  black-and-crimson tiger skin, gilded iron (a skin of his own from `assets_source/ogre.py`, on the
+  ogre's frame). He stands at his band's top and three and is built for one character of its top, who
+  can beat him alone in a hard fight: **68 of their ordinary hits**; his club **kills them in six**. His
+  **war-stomp**: he heaves the club over his head while a ring of fire marks the ground round him (a
+  second and a half to get out), then brings it down: everything within **6 blocks** is struck (**kills
+  in seven**) and flung; every nine to eleven seconds while a foe is near. At half his health he roars
+  and every raider of his village within 48 blocks comes for his foe. A boss bar shows him to those
+  within 32 blocks. He never despawns, and he does not come back.
+- **Freed for good** (`RaidedVillages`). When the chief falls the village is freed, remembered for the
+  world (saved data): its raiders flee (gone), their posts are forgotten and none is ever put back (a
+  raider of a freed village that would come back, or is loaded from a chunk unloaded at the time, is
+  turned away); its banners, totems, lanterns and embers come down; its signs say whom it was freed by;
+  its eleven folk come home, each to the bed the raid left, a Tang village again, trading as any does;
+  whoever struck the chief down gains +100 karma.
+
+| Its yaoguai | Kills you in | Hits to kill | As a captain: kills you in, hits |
+|---|---|---|---|
+| Goblin | 17 | 4 | 14, 8 |
+| Kobold | 13 | 5 | 11, 10 |
+| Wolfman | 10 | 8 | 9, 16 |
+| Ogre | 9 (its slam 12) | 12 | 7, 24 |
+| Yaksha King (chief) | 6 (the stomp 7), of a character of his band's top | 68 of theirs | — |
+
+### Infested wilds (妖窟之野)
+
+Some of the overworld's mountains, forests and jungles crawl with yaoguai (`Infestation`).
+
+- **Where.** The world is cut into cells 640 blocks square; by the seed, one cell in two has a
+  candidate: a disc 100–180 blocks in radius (200–360 across) round a point kept within its cell (no two
+  overlap). It is infested if the land at its middle is mountain (peaks, slopes, groves, windswept
+  hills: `#jttw_engine:infested_mountains`), forest (forests, birch, dark forest, taiga:
+  `infested_forests`) or jungle (`infested_jungles`), and it keeps clear of **spawn** (500 blocks past
+  its edge), of every **zone** (its margin and 64 more) and of every **village**, vanilla's, the Tang
+  villages' and the raided ones' (any village their sets would put within its radius and 64, judged
+  by each site's own test, as the land is made). A candidate's disc covers some 16% of its cell, so at
+  most some 8% of the mountain, forest and jungle country is infested (less where villages stand). On
+  seed 12345: 19 patches within 6 km (13 forest, 6 jungle, no mountain: its peaks lie in the zones'
+  regions or by villages), some 0.1 to 0.3 a square kilometre.
+- **Who.** By its land: the **mountains'** goblins (山魈, the mountain demons) and ogres (山夜叉), an
+  ogre heart; the **forests'** wolfmen and goblins, a wolfman heart; the **jungles'** kobolds (the
+  lizard-folk) and goblins, a kobold heart. No new kinds yet: the roster is the four open-world kinds.
+- **Coming back** (`InfestationSpawner`). Round anyone in a patch, every two seconds, while fewer than
+  nine of its creatures are within 48 blocks, one time in two a **pack** of two to four comes, 22–40
+  blocks off on open ground of the patch, by day or night: regulars of its band, one pack in four led by
+  a **captain**. They come and go as monsters do. At its **heart** (its middle) one or two
+  **minibosses** ("Ogre Warlord", the theme's heaviest kind, one over the band's top) and two regulars
+  hold the ground and never despawn; when the last of them falls the heart stays empty 20 minutes, then
+  is held again the next time someone is within 72 blocks but none within 32 (as a zone's post).
+- **Telling it before going in** (`InfestationMarks`, a feature of every overworld chunk). Along its
+  edge, in most of the chunks it crosses, a skull totem with a soul lantern hung off it, burning blue,
+  every third with a sign beside it: 山魈出没 / 狼妖出没 / 蜥妖出没, "Infested:", "Mountain demons"
+  (forest, jungle), and its band ("Lv 44–50"); within, the bones of what they ate, a skull on a heap of
+  bone. Every creature's name carries its level.
+- **Ranks.** Regulars and captains as the raided villages' (above); a miniboss takes **32 hits and kills
+  you in seven** (an ogre warlord's slam in nine), whatever its kind.
+
+A fault in a raided village's piece or the infestation marks is logged and the chunk goes on
+(`RaidedVillagePiece`, `InfestationMarks`): an exception there would leave its chunk unfinished, never
+saved, and the server spinning at "Saving worlds" when it stops. (One did: a Tang plan picked its
+herbalist's pots with `(u + salt) % 5`, and half of all layouts give a negative salt; it is
+`Math.floorMod` now, for the Tang villages as well.)
+
+**Tests and pictures**: `GrindRulesTest` (the rings' levels, a band seven wide round its ring and fixed
+by place, the patches' size, share and clearance of spawn and zones); `GrindGameTests` (a raided
+village's band, its sack, signs, banners, totems, emptied chests and hoard; its fifteen raiders kept at
+their posts, its captains and chief; a post held again 20 minutes after it falls, until the chief falls;
+then freed for good: karma, raiders gone, posts forgotten, none put back, its folk home in their beds and
+trading, its marks down; a kill's XP at its level, the cap past the band, under 20; no raided village in
+or beside a zone; the infested themes by land, the patches clear of villages, zones and spawn; a heart
+held, fallen, not back at once nor under someone's nose, back after 20 minutes; the chief's stomp;
+every village plan laid from negative seeds);
+`PeckingOrderGameTests.theGrindingGroundsKeepThePeckingOrder` (every kind as regular, captain and
+miniboss at levels 3 to 101, every chief of every band). Gallery scenes `-Pgallery.only=raid_,infested_`;
+in a real world `./gradlew runWorldgenBench -Pbench.mode=raided`.
 
 ---
 

@@ -1,0 +1,26 @@
+{
+  "structures": [
+    {
+      "structure": "jttw_engine:raided_village_plains",
+      "weight": 1
+    },
+    {
+      "structure": "jttw_engine:raided_village_mountain",
+      "weight": 1
+    },
+    {
+      "structure": "jttw_engine:raided_village_oasis",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 16,
+    "separation": 6,
+    "salt": 503117942,
+    "exclusion_zone": {
+      "other_set": "jttw_engine:tang_villages",
+      "chunk_count": 6
+    }
+  }
+}

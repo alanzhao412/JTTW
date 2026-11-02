@@ -561,5 +561,8 @@
   "item.jttw_engine.king_duowen_spawn_egg": "Duowen Spawn Egg",
   "item.jttw_engine.li_jing_spawn_egg": "Li Jing Spawn Egg",
   "item.jttw_engine.nezha_spawn_egg": "Nezha Spawn Egg",
-  "item.jttw_engine.erlang_shen_spawn_egg": "Erlang Shen Spawn Egg"
+  "item.jttw_engine.erlang_shen_spawn_egg": "Erlang Shen Spawn Egg",
+  "entity.jttw_engine.raid_chief": "Yaksha King",
+  "entity.jttw_engine.wild_miniboss": "%s Warlord",
+  "item.jttw_engine.raid_chief_spawn_egg": "Yaksha King Spawn Egg"
 }

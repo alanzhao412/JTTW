@@ -1124,7 +1124,7 @@ public final class WildRenderers {
             int w = e.slamWindup();
             float raise = 0, down = 0;
             if (w > 0) {
-                raise = w > 3 ? Math.min(1, (OgreEntity.SLAM_WINDUP - w) / 8f) : w / 3f;
+                raise = w > 3 ? Math.min(1, (e.slamWindupTicks() - w) / 8f) : w / 3f;
                 down = w <= 3 ? 1 - w / 3f : 0;
             }
             // a blow: the club swung down off its shoulder
@@ -1159,19 +1159,27 @@ public final class WildRenderers {
         }
     }
 
-    public static final class OgreRenderer extends MobRenderer<OgreEntity, OgreModel> {
+    public static class OgreRenderer extends MobRenderer<OgreEntity, OgreModel> {
         /** How much larger than its pixels it is drawn: some 3.2 blocks to its horns' tips (ogre.py prints it). */
         public static final float SIZE = 0.95f;
-        private static final ResourceLocation SKIN = tex("ogre");
+        private final ResourceLocation skin;
+        private final float size;
 
         public OgreRenderer(EntityRendererProvider.Context ctx) {
-            super(ctx, new OgreModel(ctx.bakeLayer(OGRE_LAYER)), 1.2f);
-            addLayer(LionCourt.glow(this, "ogre"));
+            this(ctx, "ogre", SIZE);
+        }
+
+        /** The ogre's frame in another skin ({@code textures/entity/<skin>.png}, its glow {@code <skin>_glow.png}), drawn {@code size} large: the raid chief's. */
+        public OgreRenderer(EntityRendererProvider.Context ctx, String skin, float size) {
+            super(ctx, new OgreModel(ctx.bakeLayer(OGRE_LAYER)), 1.2f * size / SIZE);
+            this.skin = tex(skin);
+            this.size = size;
+            addLayer(LionCourt.glow(this, skin));
         }
 
         @Override
         protected void scale(OgreEntity e, PoseStack pose, float partial) {
-            pose.scale(SIZE, SIZE, SIZE);
+            pose.scale(size, size, size);
         }
 
         @Override
@@ -1181,7 +1189,7 @@ public final class WildRenderers {
 
         @Override
         public ResourceLocation getTextureLocation(OgreEntity e) {
-            return SKIN;
+            return skin;
         }
     }
 }

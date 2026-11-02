@@ -100,6 +100,24 @@ public class OgreEntity extends WildYaoguai {
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
     }
 
+    /** How far round it its slam reaches. */
+    public double slamReach() {
+        return SLAM_REACH;
+    }
+
+    /** How long it heaves its club up before a slam comes down, in ticks: the time to get clear. */
+    public int slamWindupTicks() {
+        return SLAM_WINDUP;
+    }
+
+    /** About how long between slams, in ticks. */
+    public int slamEvery() {
+        return SLAM_EVERY;
+    }
+
+    /** Each tick of a slam's wind-up, {@code left} ticks before it falls (a chief marks the ground it will strike). */
+    protected void slamWindingUp(int left) {}
+
     /** How far through heaving its club up for a slam it is (0 when not): the model raises the club. */
     public int slamWindup() {
         return entityData.get(SLAM);
@@ -107,18 +125,19 @@ public class OgreEntity extends WildYaoguai {
 
     /** For the gallery: shown with the club heaved up. */
     public void showSlam() {
-        entityData.set(SLAM, SLAM_WINDUP / 2);
+        entityData.set(SLAM, slamWindupTicks() / 2);
     }
 
-    /** The slam's hurt. */
+    /** The slam's hurt: {@value #SLAM_PERCENT}% of its blow now (at its level and rank). */
     public float slamDamage() {
-        return (float) (blowAt(mobLevel()) * SLAM_PERCENT / 100.0);
+        return (float) (currentBlow() * SLAM_PERCENT / 100.0);
     }
 
     /** Brings the club down: everything round within {@value #SLAM_REACH} blocks, but its own kind, hurt and flung. Returns them. */
     public List<LivingEntity> slam() {
-        List<LivingEntity> struck = level().getEntitiesOfClass(LivingEntity.class, new AABB(blockPosition()).inflate(SLAM_REACH, 2, SLAM_REACH),
-                e -> e != this && e.isAlive() && !(e instanceof OgreEntity) && !isAlliedTo(e) && distanceToSqr(e) <= SLAM_REACH * SLAM_REACH * 1.5
+        double reach = slamReach();
+        List<LivingEntity> struck = level().getEntitiesOfClass(LivingEntity.class, new AABB(blockPosition()).inflate(reach, 2, reach),
+                e -> e != this && e.isAlive() && !(e instanceof OgreEntity) && !isAlliedTo(e) && distanceToSqr(e) <= reach * reach * 1.5
                         && !(e instanceof Player p && (p.isCreative() || p.isSpectator())));
         for (LivingEntity e : struck) {
             if (e.hurt(damageSources().mobAttack(this), slamDamage())) {
@@ -132,7 +151,7 @@ public class OgreEntity extends WildYaoguai {
         playSound(SoundEvents.ANVIL_LAND, 0.8f, 0.5f);
         if (level() instanceof ServerLevel server) {
             BlockState ground = level().getBlockState(blockPosition().below());
-            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, ground), getX(), getY() + 0.1, getZ(), 80, SLAM_REACH * 0.5, 0.1, SLAM_REACH * 0.5, 0.2);
+            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, ground), getX(), getY() + 0.1, getZ(), 80, reach * 0.5, 0.1, reach * 0.5, 0.2);
             server.sendParticles(ParticleTypes.EXPLOSION, getX(), getY() + 0.3, getZ(), 2, 0.6, 0, 0.6, 0);
         }
         return struck;
@@ -151,7 +170,7 @@ public class OgreEntity extends WildYaoguai {
         public boolean canUse() {
             LivingEntity t = ogre.getTarget();
             return ogre.slamCooldown <= 0 && t != null && t.isAlive() && ogre.onGround()
-                    && ogre.distanceToSqr(t) <= SLAM_REACH * SLAM_REACH;
+                    && ogre.distanceToSqr(t) <= ogre.slamReach() * ogre.slamReach();
         }
 
         @Override
@@ -161,7 +180,7 @@ public class OgreEntity extends WildYaoguai {
 
         @Override
         public void start() {
-            ogre.entityData.set(SLAM, SLAM_WINDUP);
+            ogre.entityData.set(SLAM, ogre.slamWindupTicks());
             ogre.getNavigation().stop();
             ogre.playSound(SoundEvents.RAVAGER_ROAR, 1.5f, 0.6f);
         }
@@ -178,9 +197,10 @@ public class OgreEntity extends WildYaoguai {
             if (t != null) ogre.getLookControl().setLookAt(t, 30f, 30f);
             int w = ogre.slamWindup() - 1;
             ogre.entityData.set(SLAM, w);
+            ogre.slamWindingUp(w);
             if (w == 0) {
                 ogre.slam();
-                ogre.slamCooldown = SLAM_EVERY + ogre.random.nextInt(40);
+                ogre.slamCooldown = ogre.slamEvery() + ogre.random.nextInt(40);
             }
         }
     }

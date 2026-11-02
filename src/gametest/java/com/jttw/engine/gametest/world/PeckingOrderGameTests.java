@@ -471,7 +471,7 @@ public class PeckingOrderGameTests {
                         double hits = hits(m, m.mobLevel());
                         check(h, hits >= ZoneMonster.MINIBOSS_LEAST_HITS - HITS_EPS && hits <= ZoneMonster.MINIBOSS_MOST_HITS + HITS_EPS, n + " a miniboss's hits: " + hits);
                     }
-                } else if (e instanceof WildYaoguai y) {
+                } else if (e instanceof WildYaoguai y && !(y instanceof com.jttw.engine.entity.wild.RaidChiefEntity)) { // a raid's chief: see below
                     wild++;
                     y.become(y.maxLevel());
                     check(h, share(y, y.maxLevel()) <= ZoneMonster.MOB_HIT_CAP + EPS, name(y) + "'s blow");
@@ -500,6 +500,70 @@ public class PeckingOrderGameTests {
             }
         }
         check(h, zone >= 20 && wild == 4 && bosses >= 10, "every kind measured: " + zone + " zone, " + wild + " wild, " + bosses + " bosses");
+        h.succeed();
+    }
+
+    /**
+     * The open world's grinding grounds (the raided villages, the infested wilds) keep the pecking
+     * order: their yaoguai, of any level the rings give, as regulars (2-12 hits, at most 12%), captains
+     * (twice a regular's hits, under any miniboss's; at most 14.4%) and minibosses (25-40 hits, a blow of
+     * 14-16%, the hardest at most 16% and over any captain's); a raid's chief a gym's leader of his
+     * band (60-80 hits of a character of its top, a club that kills them in five or six, his stomp no
+     * harder), three over the band's top.
+     */
+    @GameTest(template = PLATFORM)
+    public static void theGrindingGroundsKeepThePeckingOrder(GameTestHelper h) {
+        List<EntityType<? extends WildYaoguai>> kinds = List.of(ModEntities.GOBLIN.get(), ModEntities.KOBOLD.get(), ModEntities.WOLFMAN.get(), ModEntities.OGRE.get());
+        double toughestMiniboss = 0;
+        for (EntityType<? extends WildYaoguai> kind : kinds) {
+            for (int lv : new int[]{3, 20, 45, 70, 100, 101}) {
+                WildYaoguai m = kind.create(h.getLevel());
+                try {
+                    String n = name(m) + " at " + lv;
+                    m.become(lv, WildYaoguai.Rank.REGULAR);
+                    double regular = hits(m, lv);
+                    check(h, regular >= MOB_HITS_LEAST - EPS && regular <= MOB_HITS_MOST + EPS, n + ", a regular's hits: " + regular);
+                    check(h, share(m, lv) <= ZoneMonster.MOB_HIT_CAP + EPS && m.hardestShare() <= ZoneMonster.MOB_HIT_CAP + EPS, n + ", a regular's blow");
+                    m.become(lv, WildYaoguai.Rank.CAPTAIN);
+                    double captain = hits(m, lv);
+                    check(h, captain > regular && captain >= 4 - EPS && captain <= 24 + EPS && captain < ZoneMonster.MINIBOSS_LEAST_HITS, n + ", a captain's hits: " + captain);
+                    check(h, share(m, lv) <= CAPTAIN_CAP + EPS, n + ", a captain's blow: " + share(m, lv));
+                    check(h, m.hardestShare() * m.blowScale(WildYaoguai.Rank.CAPTAIN) <= CAPTAIN_CAP + EPS, n + ", a captain's hardest hit");
+                    m.become(lv, WildYaoguai.Rank.MINIBOSS);
+                    double mini = hits(m, lv);
+                    toughestMiniboss = Math.max(toughestMiniboss, mini);
+                    check(h, mini >= ZoneMonster.MINIBOSS_LEAST_HITS - HITS_EPS && mini <= ZoneMonster.MINIBOSS_MOST_HITS + HITS_EPS, n + ", a miniboss's hits: " + mini);
+                    double blow = share(m, lv), hardest = m.hardestShare() * m.blowScale(WildYaoguai.Rank.MINIBOSS);
+                    check(h, blow >= MINIBOSS_LEAST - EPS && blow <= MINIBOSS_MOST + EPS, n + ", a miniboss's blow: " + blow);
+                    check(h, hardest <= MINIBOSS_MOST + EPS && hardest > CAPTAIN_CAP, n + ", a miniboss's hardest hit: " + hardest);
+                } finally {
+                    m.discard();
+                }
+            }
+        }
+        int chiefs = 0;
+        for (int lo = 1; lo <= 94; lo += 3) {
+            com.jttw.engine.grind.RingLevels.Band band = new com.jttw.engine.grind.RingLevels.Band(lo, lo + com.jttw.engine.grind.RingLevels.WIDTH - 1);
+            var chief = com.jttw.engine.registry.ModGrinds.RAID_CHIEF.get().create(h.getLevel());
+            try {
+                chief.become(band.leader());
+                chiefs++;
+                int top = band.challenger();
+                eq(h, band.hi() + ZoneBoss.LEVELS_ABOVE_BAND, chief.mobLevel(), "a chief stands three over his band's top");
+                eq(h, top, chief.challenger(), "a chief is built for his band's top");
+                double all = chief.getMaxHealth() / MobScaling.typicalHit(top), blow = share(chief, top);
+                check(h, all >= ZoneBoss.LEAST_HITS - EPS && all <= ZoneBoss.MOST_HITS + EPS, "band " + band + ": a chief takes 60-80 hits: " + all);
+                check(h, all > toughestMiniboss, "a chief outlasts any miniboss");
+                check(h, blow >= BOSS_LEAST - EPS && blow <= BOSS_MOST + EPS, "band " + band + ": a chief's blow: " + blow);
+                int kills = (int) Math.ceil(1 / blow - EPS);
+                check(h, kills >= 5 && kills <= 6, "a chief kills his challenger in five or six: " + kills);
+                double stomp = chief.slamDamage() / MobScaling.typicalHealth(top);
+                check(h, stomp > 0 && stomp <= BOSS_MOST + EPS, "his stomp no harder than a boss's blow: " + stomp);
+            } finally {
+                chief.discard();
+            }
+        }
+        check(h, chiefs >= 30, "chiefs measured across the bands: " + chiefs);
         h.succeed();
     }
 }
