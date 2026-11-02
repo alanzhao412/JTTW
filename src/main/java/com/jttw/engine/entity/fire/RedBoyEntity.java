@@ -93,9 +93,9 @@ public class RedBoyEntity extends ZoneBoss {
     /** How far round him his fight spreads: his carts' ring, his ring of fire, his breath's reach (see {@link #confine}). */
     private double arena = CART_RADIUS;
 
-    /** Its level, as its name shows it. */
+    /** Its kind's level (as a usurper, its name shows another: ZoneBoss#mobLevel). */
     @Override
-    public int mobLevel() {
+    public int nativeLevel() {
         return LEVEL;
     }
 
@@ -179,7 +179,7 @@ public class RedBoyEntity extends ZoneBoss {
 
     @Override
     protected Component getTypeName() {
-        return Component.empty().append(super.getTypeName()).append(" · Lv " + LEVEL);
+        return Component.empty().append(super.getTypeName()).append(" · Lv " + mobLevel());
     }
 
     @Override

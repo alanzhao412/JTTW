@@ -232,7 +232,7 @@ public final class HellKings {
                 e.setTicksFrozen(e.getTicksRequiredToFreeze() + FROZEN);
                 e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, FROZEN, 2), this);
                 e.invulnerableTime = 0;
-                e.hurt(damageSources().freeze(), (float) (blow() * FROST));
+                e.hurt(damageSources().freeze(), strikes((float) (blow() * FROST))); // frost names no striker: scaled here
                 n++;
             }
             playSound(SoundEvents.POWDER_SNOW_BREAK, 2f, 0.6f);
@@ -520,7 +520,7 @@ public final class HellKings {
                 if (e.distanceTo(this) > REACH) continue;
                 e.igniteForTicks(BURNS);
                 e.invulnerableTime = 0;
-                e.hurt(damageSources().inFire(), (float) (blow() * SCALD));
+                e.hurt(damageSources().inFire(), strikes((float) (blow() * SCALD))); // the oil names no striker: scaled here
                 n++;
             }
             playSound(SoundEvents.LAVA_POP, 2f, 0.6f);

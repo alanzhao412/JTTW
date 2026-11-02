@@ -96,6 +96,12 @@ public abstract class TempleYouthEntity extends TempleImmortal {
         return GARDEN;
     }
 
+    /** A youth is the garden's warden, a miniboss, no lair's master: fallen, he comes back to his post as the zones' posts do (ZonePosts). */
+    @Override
+    public boolean headsLair() {
+        return false;
+    }
+
     @Override
     protected double hitCap() {
         return 0.06;

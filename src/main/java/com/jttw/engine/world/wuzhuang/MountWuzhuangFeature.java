@@ -291,6 +291,7 @@ public class MountWuzhuangFeature extends Feature<NoneFeatureConfiguration> {
             if (m instanceof ZoneMonster zm) zm.become(zm.rollRegularLevel(level.getRandom()), false);
             m.setPersistenceRequired();
             TempleRecord.belongs(m, is.cx, is.cz);
+            // no post of ZonePosts': the household is finite (TempleRecord counts it down to Zhenyuan's coming), and never comes back
             level.addFreshEntityWithPassengers(m);
         }
     }

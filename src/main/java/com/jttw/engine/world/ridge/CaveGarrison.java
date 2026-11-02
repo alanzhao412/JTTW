@@ -88,6 +88,8 @@ public final class CaveGarrison {
         }
         mob.setPersistenceRequired();
         mob.restrictTo(stand, post.rank() == WhiteBoneCave.GUARDIAN ? GUARDIAN_KEEP : post.floor() == WhiteBoneCave.OUTSIDE ? OUTSIDE_KEEP : KEEP);
+        // the fortress's floors are manned anew by its keeper (CaveKeeper); its outside posts come back as every zone's do
+        if (post.floor() == WhiteBoneCave.OUTSIDE && reason == MobSpawnType.STRUCTURE) com.jttw.engine.world.ZonePosts.keep(mob);
         level.addFreshEntityWithPassengers(mob);
         return mob;
     }

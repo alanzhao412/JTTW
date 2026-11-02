@@ -115,9 +115,9 @@ public class LadyWhiteBoneEntity extends ZoneBoss implements RangedAttackMob {
     /** How many of the three health marks (3/4, 1/2, 1/4) have called her servants. */
     private int marks;
 
-    /** Its level, as its name shows it. */
+    /** Its kind's level (as a usurper, its name shows another: ZoneBoss#mobLevel). */
     @Override
-    public int mobLevel() {
+    public int nativeLevel() {
         return LEVEL;
     }
 
@@ -271,7 +271,7 @@ public class LadyWhiteBoneEntity extends ZoneBoss implements RangedAttackMob {
             return ZoneMonster.nameWithLevel(kind, captain(d) ? RidgeMonster.CAPTAIN_LEVEL : RidgeMonster.LEVEL, captain(d));
         }
         String lives = falseDeaths() == 0 ? "" : " " + "I".repeat(falseDeaths() + 1).replace("IIII", "IV");
-        return Component.empty().append(super.getTypeName()).append(lives + " · Lv " + LEVEL);
+        return Component.empty().append(super.getTypeName()).append(lives + " · Lv " + mobLevel());
     }
 
     @Override

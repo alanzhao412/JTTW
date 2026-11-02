@@ -377,6 +377,13 @@ public final class Zones {
         for (Zone zone : ALL) if (zone.hasLevelBand()) BiomeLevelBand.register(zone.levelBand());
     }
 
+    /** The zone of this id (its biome's, {@link Zone#id()}), or null. */
+    @Nullable
+    public static Zone byId(String id) {
+        for (Zone zone : ALL) if (zone.id().equals(id)) return zone;
+        return null;
+    }
+
     /** The zone whose biome this is, or null. */
     @Nullable
     public static Zone byBiome(ResourceKey<Biome> biome) {

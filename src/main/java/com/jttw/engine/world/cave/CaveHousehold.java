@@ -4,6 +4,7 @@ import com.jttw.engine.entity.cave.CaveMonster;
 import com.jttw.engine.entity.zone.ZoneMonster;
 import com.jttw.engine.registry.ModEntities;
 import com.jttw.engine.world.feature.Labyrinth;
+import com.jttw.engine.world.ZonePosts;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
@@ -18,9 +19,9 @@ import java.util.List;
 
 /**
  * Lady Earth Flow's household put in its places: a group of mice or maids (or both) at a post, a
- * floor's guardian, the gate's guard; as the land is made (kept, never despawned) or as the cave
- * breeds more near someone walking it (not kept). Each is of its floor's strength
- * ({@link CaveMonster#regularOn}) and keeps to its floor.
+ * floor's guardian, the gate's guard; as the land is made (kept, never despawned, and back 20 minutes
+ * after a post's last falls: {@link ZonePosts}) or as the cave breeds more near someone walking it
+ * (not kept). Each is of its floor's strength ({@link CaveMonster#regularOn}) and keeps to its floor.
  */
 public final class CaveHousehold {
 
@@ -47,6 +48,7 @@ public final class CaveHousehold {
             CaveMonster m = put(level, type, spot, at, n == 0 && captain, k, kept ? POST_RANGE : -1, random);
             if (m != null) out.add(m);
         }
+        if (kept) out.forEach(ZonePosts::keep);
         for (CaveMonster m : out) level.addFreshEntityWithPassengers(m);
         return out;
     }
@@ -63,6 +65,7 @@ public final class CaveHousehold {
         m.setCustomName(Component.literal("Warden of " + Labyrinth.FLOOR_NAMES[k] + " · Lv " + lv)
                 .withStyle(s -> s.withColor(TextColor.fromRgb(ZoneMonster.PURPLE))));
         m.setCustomNameVisible(true);
+        ZonePosts.keep(m);
         level.addFreshEntityWithPassengers(m);
         return m;
     }
@@ -79,6 +82,7 @@ public final class CaveHousehold {
             m.getPersistentData().putBoolean(BottomlessCave.KEY_GATE, true);
             out.add(m);
         }
+        out.forEach(ZonePosts::keep);
         for (CaveMonster m : out) level.addFreshEntityWithPassengers(m);
         return out;
     }

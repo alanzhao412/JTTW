@@ -744,6 +744,78 @@ So no boss one-shots a capped player (its blows at most a third of one's health)
 measured past a group's level is still far beyond it (the Macaque's blow is near enough a level-90
 character's whole health). Its kill pays a Boss's XP of its zone, as before.
 
+**The posts come back** (`world/ZonePosts`). Everything the land puts at a post as it is made (a
+camp's band, an outpost's, a household's group, a court's door guards, a palace's hall guard, a
+floor's warden; its regulars, captains and minibosses) comes back once it has fallen: a post whose
+holders are all dead stays empty for **20 minutes**, then, the next time its ground is awake and no
+one is in it or within 16 blocks of its holders' reach, it is held again by the same as held it, each
+as it was first put there (its kind, rank and level, its health, its name, its post and its reach:
+each carries its own likeness from the day it was put there). Those put round one middle (a band
+round its fire) are one post: it is not empty until the last of them falls, and they come back
+together. Flower-Fruit's garrison, the Black Wind Cave's and the Fire Cloud Cave's are mustered from
+their plans by their own keepers, the White Bone Cave's floors by its (`CaveKeeper`), all on the same
+20 minutes; every other post comes back through `ZonePosts`. What respawns, zone by zone:
+
+| Zone | What comes back | How |
+|---|---|---|
+| White Bone Ridge | the cave's eight floors and the throne room's court; its forecourt and towers (the Keepers of the Bone Gate, the sentries, the road's bands) | a floor no player has been on for 20 minutes is manned again when one comes back (`CaveKeeper`; a seal once broken stays broken); the outside posts through `ZonePosts` |
+| Black Wind Mountain | the cave's forecourt and court (the door's keepers, the grate's warden); the watch-camps' and the burnt temple's bands | the cave's garrisons mustered again (`BlackWindCave`); the bands through `ZonePosts` |
+| Flower-Fruit Mountain | the Water Curtain Cave's garrison and its three fake pilgrims; every camp's band | `FlowerFruitGarrison` |
+| The Bottomless Cave | every floor's posted groups and guardians, the gate's guard, the mountain's outposts, her palace's maids | `ZonePosts` (and the cave still breeds, unkept, round whoever walks it) |
+| The Mystical Waters | each palace's guard of eight | `ZonePosts`, each held 12 blocks about his place |
+| Hell | each court's door guards (Ox-Head and Horse-Face), the clerks, Yama's Impermanence | `ZonePosts`, each held 12 blocks about his place |
+| The Flaming Mountains | the Fire Cloud Cave's floors; every outpost's band (patrols too) | the cave's floors mustered again (`FireFortress`); the bands through `ZonePosts` |
+| Silk-Web Ridge | the hall's keepers, the Seven Spider Spirits and their sons in the bowers, the yard's, the spring's and the gate's bands | `ZonePosts` (a sister's death still loosens her seal for good, and the canopy, once fallen, stays down) |
+| Lion-Camel Ridge | the city's garrison, the ways up's outposts and patrols, the cave's door wardens, every floor's keepers and wardens | `ZonePosts` (a gate once opened never closes) |
+| Mount Wuzhuang | nothing: the temple's household is finite by design (`TempleRecord` counts it down to Zhenyuan's coming); its cranes are the island's own spawns | — |
+| Fengdu, Mount Kunlun | no posts | — |
+
+**A fallen boss's seat is usurped** (`world/Usurpers`, `ZoneBoss.becomeUsurper`). A lair's master
+the world put there (or a usurper before him) leaves his seat empty when he dies; 20 minutes after,
+the next time its ground is awake and no one is within 16 blocks of the lair's ground, another demon
+king has heard of it and taken it: a boss of **another kind**, at random (one house as likely as
+another: Lady Earth Flow, the Black Bear Demon, Red Boy, a King of Hell, the Hundred-Eyed Demon Lord,
+a king of Lion-Camel; then one of the house), a **usurper**, named as his kind with his new level
+("· Lv N"). When he falls another follows, and so on. A usurper is the lair's: of its zone (the XP
+his kill pays, the allies he spares, his boss bar), kept to the fallen master's ground (drawn 16
+blocks past it, he is back on his seat at once). And he is **easier**:
+
+- **Level**: his lair's band's top **and 5** (a master stands 15 over it), measured as every boss
+  is (`ZoneBoss.measuredAt`).
+- **Hits**: **60%** of his kind's hits, all his lives together (never under 150), of a character
+  of the level he is now measured at.
+- **Blows**: every blow and special of his kit is struck as his kind strikes it and lands scaled to
+  his new level (`ZoneBoss.strikes`, hooked on all the damage he deals), so it kills a character of
+  his level in as many hits as his kind's kills one of theirs (3–4 for his main blow), and never
+  harder than a boss's hardest (a third of that character's health), not even a hit weighed by its
+  target's own health.
+- **XP**: half a boss's XP of the lair's zone (`jttw_enemy_xp_share`). **Karma**: half what his
+  kind's death says of his slayer. **Loot**: a usurper's (`entities/usurper`: a sigil or two, gold,
+  perhaps a diamond and a golden apple), none of his kind's own treasures (no staff, spear, sabre,
+  swords, kasaya or shard).
+
+| Lair | Its usurper's level (measured at) | Hits, all lives together |
+|---|---|---|
+| White Bone Cave, Black Wind Cave | 41 | by kind: Lady Earth Flow 162, the Black Bear 180, Red Boy 192, a King of Hell 168 (Zhuanlun 180 over his two lives, Yama 210), the Demon Lord 180, the White Elephant 198, the Azure Lion 210 |
+| The Water Curtain Cave (the Macaque's sanctum) | 35 | as above |
+| The Bottomless Cave's palace | 51 | as above |
+| A Dragon King's palace | 61 | a king of another sea, 162 |
+| A court of Hell (each of the Ten) | 71 | as above |
+| The Fire Cloud Cave | 82 | as above |
+| The Spider Cave's temple court | 93 (92) | as above |
+| The Lion-Camel throne room (each king's place) | 105 (97) | as above |
+
+Who never usurps: **the Six-Eared Macaque** (the one superboss, met once: he never comes back, and
+his sanctum is a seat like any other once he has fallen, taken by a usurper of Flower-Fruit's band);
+**the temple's youths** (minibosses, no lair's masters); **Zhenyuan** (righteous, he fights no one but
+the temple's enemies, and keeps no lair: Mount Wuzhuang has no seat); **Lady White Bone** (her kit is
+her ridge's: she passes for its dead, calls them up, lays its curse); and, but in a drowned palace,
+**the Dragon Kings**, whose wrath is their sea's and who are made to swim; a palace's seat, under the
+sea, is a sea king's only, of another sea. Lady Earth Flow, a usurper, has no shrine of hers to flee
+to: she fights it out. **Two to a lair**: the White Elephant and the Azure Lion each have their own
+place before their thrones, a seat each, taken each by its own usurper, never of a kind already sat
+in the room; each of the Ten Courts is a seat of its own.
+
 Where in its ring follows from the world seed and its biomes: earliest zone first, the places its
 layout offers (spread evenly over the ring by the seed) are tried in turn, and it takes the first on
 host ground (the vanilla biome at its host height, from the overworld's own biome source and
@@ -808,6 +880,7 @@ each, where one alone cannot realistically outlast it:
 | Captains | a regular's ×1.2: at most 14.4% | a regular's ×2.5 | any of the above, purple-named |
 | Minibosses | 17–19%: a miniboss's hardest hit is 19% whatever its kind | a captain's, or more | the floor wardens and gate keepers of every lair (White Bone's Wardens and Keepers of the Bone Gate, the Bottomless Cave's guardians, the Fire Cloud Cave's door wardens and floor guardians, Lion-Camel's floor wardens), the Six Strong Generals, the Seven Spider Spirits, Clear Wind and Bright Moon, Heavenly Generals, Lingxuzi and the White-Robed Scholar (Black Wind's door keepers) and its stair's warden, the Six-Eared Macaque's three fake pilgrims |
 | Bosses | 25–33% (3–4 blows kill you); no special or area hit harder | 250–350, all its lives together; each life more than any miniboss's | every `ZoneBoss`, 15 levels over its zone's band |
+| Usurpers | as their kind's, at their own level (3–4 blows kill you) | 150–210: 60% of their kind's | a boss sat in a fallen master's lair, 5 levels over its zone's band (above) |
 
 **Every boss strikes all near it.** A boss is fought by a group, so each has at least one blow
 that falls on everyone in an area, each telegraphed (a wind-up to step out of) and declared, as
@@ -857,6 +930,14 @@ the Macaque, up to 460, whom it checks is the strongest boss there is), or any b
 any boss's special hit is harder than a boss's blow may be; or any boss is not above everything else
 of its zone (fortress and garrison posts counted: White Bone Cave's, the Bottomless Cave's
 households, the Fire Cloud Cave's, Lion-Camel's floors), its head boss at its band's top and 15.
+The bosses it measures are their own lairs' (no usurper among them), so its numbers are theirs.
+`UsurperGameTests` sits usurpers on the tests' own seats and checks each: his kind never the fallen
+one's nor the Macaque (nor any who may not usurp), his level, zone, XP share, loot and name, 60% of
+his kind's hits, his blow and every special of his kit landing at his kind's share of a character of
+his level, kept as he was saved and loaded, and his own fall seating another; `ZonePostsGameTests` a
+post of each zone (White Bone's gate wardens and the Bottomless Cave's gate guard through the land's
+own putting): written down as it falls, cleared, kept empty with a player in it or near it, then held
+again, by the same, when its time comes round.
 
 To add a zone:
 
@@ -876,7 +957,9 @@ To add a zone:
 5. **Worldgen**: features read `zone.depth(...)`, `zone.centre(...)` (its nearest region's),
    `zone.centres(seed)`, `zone.isAt(level, pos)` and `ZoneTerrain.landAt(...)`; the lair extends
    `world/feature/ZoneLairFeature` (`zone()`, `boss()`, `build(...)`, `floorAt(...)`), which builds
-   it at its region's centre and puts the boss there once.
+   it at its region's centre and puts the boss there once (his seat: fallen, a usurper takes it).
+   A post's holders are kept with `ZonePosts.keep(mob)`, last, just before they join the world: they
+   come back 20 minutes after the post's last falls.
 6. **Tests**: `ZonesTest` checks every zone of `Zones.ALL` (one region, in its ring, on its hosts,
    clear of the others); GameTests for its monsters and boss as `RidgeGameTests` does; a line for it
    in the Earth Gods' words (`EarthGod`). See where it lands with `./gradlew runWorldgenBench
@@ -928,9 +1011,11 @@ mountain and the road by `BoneMassifFeature`), so it comes out whole whichever c
   60% more health). A Warden's death breaks its seal for good. Every one of them is kept (never
   despawned) and held near its post. One found off its floor with no one to fight is put back at its
   post, and none is ever let into the throne room.
-- **Restocking.** A floor no player has been on for 15 minutes is manned again when someone comes
+- **Restocking.** A floor no player has been on for 20 minutes is manned again when someone comes
   back to it: each empty post is filled (the Warden too, though the seal stays broken), never within
-  12 blocks of a player.
+  12 blocks of a player. The posts outside (the Keepers of the Bone Gate, the towers' sentries, the
+  road's bands) come back as every zone's do (`ZonePosts`): 20 minutes after a post's last falls, no
+  one near it.
 - **Checkpoints: the well of the dead.** A ladder shaft runs in the rock from the first floor to the
   last, a short corridor to it from each. A grate bars it over each floor's landing until that floor
   is won (the seal above it broken), so after a death one climbs straight down to the deepest floor
@@ -946,7 +1031,8 @@ mountain and the road by `BoneMassifFeature`), so it comes out whole whichever c
   burst outward: everyone within 8 blocks struck for 22% (five kill), cut and slowed),
   but she never leaves the room: a blink that would take her out of it is not taken, and if she is
   ever outside it (thrown, pulled) she is back in its middle at once. She persists and, once killed,
-  does not come back.
+  does not come back: 20 minutes after, with no one in the room, a **usurper** takes her throne
+  (level 41, 60% of his kind's hits, half a boss's XP: see Zones), and another after him.
 - **Natural spawns** keep to the open ridge (`RidgeRules`): none inside the cave, whose floors hold
   only their garrison.
 - **The Earth God's Luopan** points the ridge's band to the great door when the ridge is the nearest zone of the band (or is named among them, its way told), and in the ridge's country
@@ -996,12 +1082,13 @@ Cave. In [`world/blackwind/`](src/main/java/com/jttw/engine/world/blackwind/) an
   halls' stubs, the main hall's platform with its columns burnt to stumps, its back wall standing black,
   one corner of its roof still on its beams, the statue of Guanyin thrown down before her empty
   pedestal, a broken relic pagoda, ash and cinders, three fires still smouldering under the rubble, dead
-  trees burnt black. A boar-demon captain and four scavengers pick over it (put once, kept).
+  trees burnt black. A boar-demon captain and four scavengers pick over it (put once, kept, back 20
+  minutes after the last falls).
 - **The watch-camps** (`BlackWindShape.camps`, laid by `BlackWindWorksFeature`): one tried every 84
   blocks over the range, on level ground clear of the peak and the valley: a stockade of sharpened spruce
   stakes round a smoking fire, a black banner on its pole, lean-tos of black cloth, a rack of spears;
   each with its band put there once and kept, a captain and three or four (one band in three roams 40
-  blocks round, a patrol).
+  blocks round, a patrol); a band all fallen is back 20 minutes after, no one near (`ZonePosts`).
 - **Creatures** (`BlackWindMonster`: level 20, captains 27, any light; never born inside the cave; one in
   ten of the world's own a captain, who comes with his escort). In hits of a same-level character
   ("you kill it in") and blows to kill that character ("it kills you in"):
@@ -1042,7 +1129,8 @@ Cave. In [`world/blackwind/`](src/main/java/com/jttw/engine/world/blackwind/) an
     gold; on the rock behind it the stolen kasaya's likeness worked in red and gold, its jade ring; his
     treasury chest beside the throne (`chests/black_wind_treasury`: gold, emeralds, diamonds, golden
     apples, bottles of experience, sigils). The Black Bear is put there once, when the land is made, on
-    the open floor before the dais (`BlackWindCaveFeature`), and kept to the cavern.
+    the open floor before the dais (`BlackWindCaveFeature`), and kept to the cavern; fallen, his throne
+    is a usurper's 20 minutes after (level 41).
   - **The garrisons are kept** to their part of the cave: one found off it is taken back to its post.
     A part whose garrison is all dead stays empty 20 minutes, then is mustered again the next time
     someone comes near while no one is in it. The door and the grate, once opened, stay open.
@@ -1195,8 +1283,9 @@ of the world.
     regulars level 38 on the first floor to 44 on the eighth, captains 43 to 46, guardians 39 to 46 (never past the band's top, so their lady stands 15 over all of them)
     (the mountain's 37 and 44). The posted are kept (never despawned, even on Peaceful) and keep to
     their floor: idle and off it (having chased someone up or down a stair, or fallen), they go back
-    to their post. **Respawn**: the posted, the guardians and the gate's guard do not come back once
-    killed; but **the cave breeds**: while someone walks a floor, now and then (every 15 s on the first,
+    to their post. **Respawn**: the posted, the guardians, the gate's guard, the outposts' watch and
+    her palace's maids come back as every zone's posts do (`ZonePosts`: 20 minutes after a post's last
+    falls, no one near; a door once opened stays open); and **the cave breeds**: while someone walks a floor, now and then (every 15 s on the first,
     11 s on the eighth) a group of that floor's strength comes up out of the tunnels 14–32 blocks off,
     while fewer than 5–8 are near. The bred are not kept, and one found off its floor with no one to
     fight slinks away (is gone), so none wanders down into her throne room.
@@ -1224,7 +1313,8 @@ of the world.
   end. Karma +150, captains +5. **She never leaves her throne room**: bound to her cave, she keeps to
   her palace (18 blocks round her dais), and fled, to her shrine (8); drawn or carried six blocks
   past it, or as high or low, she is back where she belongs within a second (`keepToLair`). She is
-  never despawned and, killed, does not come back.
+  never despawned and, killed, does not come back: her palace is a usurper's 20 minutes after (level
+  51; see Zones).
 - **Drops**: her twin swords (`EarthFlowSwordItem`, male and female: +35% damage, a quick sword;
   held as a pair, drawn into both hands like Nezha's Yin-Yang Swords through `PairedBlade`, every cut
   is followed by a second for 40%), the Stolen Candle of Spirit Mountain, sigils, gold; Spirit
@@ -1298,7 +1388,9 @@ The Four Seas and the Dragon Kings' crystal palaces (水晶宫, novel chapter 3)
   and crystal under a stepped, gilded roof, quartz columns, sea lanterns, the king's gold throne on a
   dais at the region's centre, a runner in his colour; behind it his treasury, four chests
   (`chests/dragon_treasury`) and heaps of gold; coral gardens, lantern towers at the gate, a road of
-  lanterns out across the floor. Its king and a guard of eight are put there once
+  lanterns out across the floor. Its king and a guard of eight are put there once (the guard back 20
+  minutes after each falls, no one near; a fallen king's throne taken by a king of another sea, a
+  usurper at level 61)
   (`DragonPalaceFeature`, the framework's `ZoneLairFeature`, which now lets a zone choose the boss by
   region).
 - **Creatures** (`SeaMonster`: level 47, captains 54; they breathe water, are not pushed by the
@@ -1384,6 +1476,9 @@ XP 125, stepped up from the Mystical Waters' 110 (575 a grunt kill at the band's
   iron cage of soul fire (9), Meng Po's soup (10). Two guards (Ox-Head and Horse-Face) stand at
   each door (captains at Yama's), three clerks keep the Office of Records, the Impermanence pair
   and a clerk wait on Yama, and each king sits on his dais, all put there once as the land is made.
+  The guards and clerks come back 20 minutes after they fall, no one near (`ZonePosts`); a fallen
+  king's court is a usurper's 20 minutes after (level 71, a boss of another house or another of the
+  Ten: see Zones), each court its own seat.
 - **The way in and out**: everyone comes down through Fengdu's Gate of Ghosts, once they have come to
   it by an Ancient City's frame and fought it open (and Wukong at level 30, and the Dragon's and
   Wukong's dimension travel, as before), all to the arrival plaza (`JTTWDimensions.teleportTo`: its
@@ -1527,7 +1622,8 @@ Boy's Fire Cloud Cave on Mount Haohao (火云洞, chapters 40–42), in
   the ground wherever the ground falls away, the ground over it cut away and the ground round it
   cut back 8 blocks out, rising a block for each block out (`FlameSeamsFeature.seat`,
   `layOutpost`). Each has its band, put there once and kept, on its paving: a captain and three or
-  four imps and brutes; about one band in three is a patrol that roams 40 blocks round its tower. The mountains'
+  four imps and brutes; about one band in three is a patrol that roams 40 blocks round its tower. A
+  band all fallen is back 20 minutes after, no one near (`ZonePosts`). The mountains'
   own creatures come in bigger packs than before (imps 3–5, brutes 1–2) and one in eight is a captain.
 - **The heat** (`FireMountain`, `BurningEarthBlock`): lit burning earth scorches whatever stands on
   it once a second, **4% of its health** (magma's hot-floor damage, so armour softens it) and sets it
@@ -1619,7 +1715,7 @@ Boy's Fire Cloud Cave on Mount Haohao (火云洞, chapters 40–42), in
     chest beside it (True Samadhi Fire, gold, ember cores, furnace bricks). Red Boy is put on his
     dais once, when the land is made (`FireCloudCaveFeature`), and is kept to the throne room:
     should anything bring him off it he is taken back to his dais. His fight (phases, bar, carts,
-    breath) is as it was.
+    breath) is as it was. Fallen, his dais is a usurper's 20 minutes after (level 82; see Zones).
   - **Old worlds**: chunks already made keep what they have. Where the region's centre was made
     before (the old cave, its hall at the gorge's level, Red Boy in it), the old cave is left as it
     is and none of this applies there. Where the centre is new but some of the fortress's chunks
@@ -1840,7 +1936,8 @@ Mount Wuzhuang's band, on the ground (Wuzhuang is in the sky).
   each bower is shut by a wall of **sealing silk** (`silk_seal`: no hand, blast or art breaks it, no
   phasing passes it, see-through between its threads) that only that bower's sister's death loosens.
 - **Who keeps it** (put at their posts when the land is made, kept, held near their posts; one found
-  far off its post with no one to fight is put back): the hall's ten (spiders, mantises, a cockroach,
+  far off its post with no one to fight is put back; each back 20 minutes after it falls, no one near,
+  `ZonePosts`: a sister come back does not shut her seal again, nor raise the fallen canopy): the hall's ten (spiders, mantises, a cockroach,
   stinging sons; two captains), in each bower its sister and two to five of her sons (captains in the
   later bowers); outside, a band in the cottage's yard, one by the spring, one at the temple's gate;
   and the ridge's own creatures come in any light (spider demons in threes and fours, stinging sons in
@@ -1893,7 +1990,7 @@ Mount Wuzhuang's band, on the ground (Wuzhuang is in the sky).
   demons come (once). Her death loosens her bower's seal, and is remembered.
 - **The Hundred-Eyed Demon Lord** (百眼魔君, `HundredEyedDemonEntity`, a `ZoneBoss`, level **103**: his
   band's top and fifteen, towering over the ridge he keeps; 300 hits of a level-96 character, the level he is measured at, a
-  yellow bar), a centipede spirit in a Daoist's yellow robe, sworn brother of the seven, who poisoned
+  yellow bar; fallen, his court is a usurper's 20 minutes after, level 93), a centipede spirit in a Daoist's yellow robe, sworn brother of the seven, who poisoned
   the Tang Monk's tea. His blow, a cut of his Daoist sword: 28% (four kill). Every art is shown first:
   - **the golden light of his thousand eyes** (金光): every 16 s (11 s once his robe is off) he flings
     his arms up, his eyes blazing brighter for 1.5 s (gold motes gathering, a rising chime); then the
@@ -2036,15 +2133,16 @@ and [`entity/lion/`](src/main/java/com/jttw/engine/entity/lion/).
   (1 to 3), stronger the deeper (regulars level 89 in the gate hall up to 97 on the eighth floor,
   captains 93–100, wardens 94–100), and the warden before the gate. Each keeps to its floor: it is
   back at its post if it strays 40 blocks or off its floor's heights, so none follows a foe down the
-  stairs, and none comes into the throne room. **Respawn**: what is put there is put once (a fallen
-  keeper is not replaced, a fallen warden's gate stays open), but the ridge's demons rise of
-  themselves in the halls as anywhere in the zone (any light, as their mob cap allows) and keep to the
+  stairs, and none comes into the throne room. **Respawn**: a fallen keeper or warden comes back 20
+  minutes after, no one near (`ZonePosts`; the city's and the ways up's too), but a fallen warden's
+  gate stays open; and the ridge's demons rise of themselves in the halls as anywhere in the zone (any light, as their mob cap allows) and keep to the
   hall they rose in; none rises in the throne room. **Checkpoints**: as a floor's way down opens,
   every player in its hall will rise again, should he fall, on its landing at the head of the stair
   down (whatever bed he had); and the gates once opened never close, so he walks back down through
   the floors he won. The Earth God's Luopan points to the great door.
 - **The kings in their throne room**: they are put there once, as the land is made, their lairs
-  before their thrones, and keep to them: drawn more than 16 blocks past their lairs (up the grand
+  before their thrones (a seat each: a fallen king's place is a usurper's 20 minutes after, level 105,
+  never of the kind still sat there), and keep to them: drawn more than 16 blocks past their lairs (up the grand
   stair after a foe) they let go whatever they hold and are back before their thrones. Their fight is
   as before, phases, bars, true forms and all; the room is high and wide enough for the true forms.
 - **Old worlds**: ground already made keeps what it had (no migration); new ground gets the new
@@ -2469,7 +2567,9 @@ luggage and made himself a false pilgrimage to fetch the scriptures in his place
   minutes**, then is mustered again whole the next time someone comes near (80 blocks of the falls;
   56 of a camp) while no one is in it (under the cave's roof; within 24 of the camp's fire). The
   Macaque is no part of it. (In a world made before this, the first garrison is unmarked, so once
-  its 20 minutes pass a second may join whoever of it still lives.)
+  its 20 minutes pass a second may join whoever of it still lives.) The Macaque's sanctum, once he
+  has fallen, is a seat like any other: a usurper takes it 20 minutes after (level 35, Flower-Fruit's
+  band's top and 5), and another after him; the Macaque himself never comes back.
 - **The monkey truce** (`ZoneAllies.WUKONG`): the monkeys know the true Monkey King. Nothing of the
   monkey army targets a Wukong player or fights him back, even struck (and what he strikes down of
   theirs leaves him nothing); when he comes near with no fight on they drop to their knees and

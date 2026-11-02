@@ -262,7 +262,7 @@ public class KingYamaEntity extends KingOfHellEntity {
                 e -> e.isAlive() && e != this && !(e instanceof HellMonster) && canAttack(e))) {
             if (e.distanceTo(this) > AURA + getBbWidth() / 2) continue;
             e.invulnerableTime = 0;
-            e.hurt(damageSources().inFire(), (float) (blow() * AURA_SHARE));
+            e.hurt(damageSources().inFire(), strikes((float) (blow() * AURA_SHARE))); // the fire names no striker: scaled here
             n++;
         }
         return n;

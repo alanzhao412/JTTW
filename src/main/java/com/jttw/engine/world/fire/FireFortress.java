@@ -80,7 +80,7 @@ public final class FireFortress {
     private FireFortress() {}
 
     /** How long a floor cleared of its garrison stays empty. */
-    public static final int RESPAWN_MINUTES = 20;
+    public static final int RESPAWN_MINUTES = com.jttw.engine.world.ZonePosts.RESPAWN_MINUTES; // every zone's posts alike
     public static final long RESPAWN = RESPAWN_MINUTES * 60 * 20L;
     /** How often the fortress is looked after, in ticks. */
     public static final int EVERY = 20;

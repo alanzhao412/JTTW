@@ -68,7 +68,7 @@ public final class BlackWindCave {
 
     private BlackWindCave() {}
 
-    public static final int RESPAWN_MINUTES = 20;
+    public static final int RESPAWN_MINUTES = com.jttw.engine.world.ZonePosts.RESPAWN_MINUTES; // every zone's posts alike
     public static final long RESPAWN = RESPAWN_MINUTES * 60 * 20L;
     public static final int EVERY = 20;
     /** How near the region's centre someone must be for its cave to be looked after. */

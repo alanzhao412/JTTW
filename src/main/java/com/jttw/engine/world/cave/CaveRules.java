@@ -49,7 +49,8 @@ import java.util.UUID;
  *       road), and <b>breeds in the dark of each floor</b>: while someone walks a floor, a group of
  *       its strength now and then comes up out of the tunnels beyond sight, up to a few at a time.
  *       What is posted at the outposts, the gate, the halls and the ways down was put there when
- *       the land was made, and does not come back once killed;</li>
+ *       the land was made, and comes back as every zone's posts do ({@link com.jttw.engine.world.ZonePosts}:
+ *       20 minutes after a post's last falls, no one near);</li>
  *   <li><b>the great door</b> is barred from within while its guard stands: use it with any of the
  *       gate's guard alive near it and it will not move; when the last of them has fallen, it grinds
  *       open at a touch (its leaves are gone) and stays open;</li>

@@ -36,7 +36,7 @@ public abstract class TempleImmortal extends ZoneBoss implements TempleFolk {
     public abstract int immortalLevel();
 
     @Override
-    public int mobLevel() {
+    public int nativeLevel() {
         return immortalLevel();
     }
 
@@ -54,7 +54,7 @@ public abstract class TempleImmortal extends ZoneBoss implements TempleFolk {
 
     @Override
     protected Component getTypeName() {
-        return Component.empty().append(super.getTypeName()).append(" · Lv " + immortalLevel())
+        return Component.empty().append(super.getTypeName()).append(" · Lv " + mobLevel())
                 .withStyle(s -> s.withColor(TextColor.fromRgb(0xF0D060)));
     }
 

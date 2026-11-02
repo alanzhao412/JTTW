@@ -131,6 +131,7 @@ public class LionCamelCityFeature extends ZoneLairFeature {
             if (m == null) continue;
             m.become(post.captain() ? m.rollCaptainLevel(random) : m.rollRegularLevel(random), post.captain());
             m.keepTo(at, CITY_WANDER, LionCamelMonster.LEASH, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            com.jttw.engine.world.ZonePosts.keep(m); // back 20 minutes after it falls, no one near
             level.addFreshEntityWithPassengers(m);
             any = true;
         }
@@ -145,6 +146,7 @@ public class LionCamelCityFeature extends ZoneLairFeature {
             if (m == null) continue;
             m.become(post.captain() ? m.rollCaptainLevel(random) : m.rollRegularLevel(random), post.captain());
             m.keepTo(at, RIDGE_WANDER, RIDGE_LEASH, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            com.jttw.engine.world.ZonePosts.keep(m); // back 20 minutes after it falls, no one near
             level.addFreshEntityWithPassengers(m);
             any = true;
         }
@@ -173,6 +175,7 @@ public class LionCamelCityFeature extends ZoneLairFeature {
                 int base = floor + LionFortress.floorY(post.floor());
                 m.keepTo(at, LionCamelMonster.WANDER, LionCamelMonster.LEASH, base, base + LionFortress.airOf(post.floor()));
             }
+            com.jttw.engine.world.ZonePosts.keep(m); // back 20 minutes after it falls, no one near
             level.addFreshEntityWithPassengers(m);
             any = true;
         }

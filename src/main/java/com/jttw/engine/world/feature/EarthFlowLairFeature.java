@@ -64,6 +64,7 @@ public class EarthFlowLairFeature extends ZoneLairFeature {
             maid.getPersistentData().putInt(BottomlessCave.KEY_FLOOR, Labyrinth.FLOORS + 1);
             maid.restrictTo(centre, LadyEarthFlowEntity.PALACE_GROUND);
             maid.getPersistentData().putBoolean(BottomlessCave.KEY_POST, true);
+            com.jttw.engine.world.ZonePosts.keep(maid); // her maids come back, 20 minutes after the last falls
             level.addFreshEntityWithPassengers(maid);
         }
     }
