@@ -1,0 +1,38 @@
+{
+  "type": "jttw_engine:gated_shapeless",
+  "gate": {
+    "characters": [
+      "turtle"
+    ]
+  },
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "jttw_engine:furnace_brick"
+    },
+    {
+      "item": "jttw_engine:furnace_brick"
+    },
+    {
+      "item": "jttw_engine:furnace_brick"
+    },
+    {
+      "item": "jttw_engine:furnace_brick"
+    },
+    {
+      "item": "jttw_engine:soul_chain"
+    },
+    {
+      "item": "jttw_engine:soul_chain"
+    },
+    {
+      "item": "jttw_engine:hell_bank_note"
+    },
+    {
+      "item": "jttw_engine:hell_bank_note"
+    }
+  ],
+  "result": {
+    "id": "jttw_engine:furnace_brick_shell"
+  }
+}

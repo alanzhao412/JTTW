@@ -1,0 +1,37 @@
+{
+  "type": "jttw_engine:refining",
+  "gate": {
+    "characters": [
+      "third_lotus_prince"
+    ]
+  },
+  "armaments": [
+    "fire_tip_spear",
+    "qiankun_ring",
+    "yin_sword",
+    "yang_sword",
+    "wind_fire_wheels",
+    "huntian_cloth"
+  ],
+  "tier": 3,
+  "ingredients": [
+    {
+      "item": "jttw_engine:night_petal"
+    },
+    {
+      "item": "jttw_engine:night_petal"
+    },
+    {
+      "item": "jttw_engine:night_petal"
+    },
+    {
+      "item": "jttw_engine:spirit_whisker"
+    },
+    {
+      "item": "jttw_engine:spirit_whisker"
+    },
+    {
+      "item": "jttw_engine:captains_sigil"
+    }
+  ]
+}

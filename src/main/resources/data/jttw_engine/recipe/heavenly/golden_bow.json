@@ -1,0 +1,25 @@
+{
+  "type": "jttw_engine:gated_shaped",
+  "gate": {
+    "characters": [
+      "eye_of_heaven"
+    ]
+  },
+  "category": "equipment",
+  "pattern": [
+    " GS",
+    "G S",
+    " GS"
+  ],
+  "key": {
+    "G": {
+      "item": "minecraft:gold_ingot"
+    },
+    "S": {
+      "item": "minecraft:string"
+    }
+  },
+  "result": {
+    "id": "jttw_engine:golden_bow"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "type": "jttw_engine:gated_shapeless",
+  "gate": {
+    "characters": [
+      "white_tiger"
+    ]
+  },
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "jttw_engine:servant_bone"
+    },
+    {
+      "item": "jttw_engine:servant_bone"
+    },
+    {
+      "item": "jttw_engine:servant_bone"
+    },
+    {
+      "item": "jttw_engine:servant_bone"
+    },
+    {
+      "item": "minecraft:leather"
+    },
+    {
+      "item": "minecraft:leather"
+    },
+    {
+      "item": "jttw_engine:monkey_hair"
+    },
+    {
+      "item": "jttw_engine:monkey_hair"
+    },
+    {
+      "item": "jttw_engine:captains_sigil"
+    }
+  ],
+  "result": {
+    "id": "jttw_engine:bone_fang_totem"
+  }
+}

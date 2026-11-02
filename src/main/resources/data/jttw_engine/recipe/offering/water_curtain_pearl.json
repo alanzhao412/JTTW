@@ -1,0 +1,38 @@
+{
+  "type": "jttw_engine:gated_shapeless",
+  "gate": {
+    "characters": [
+      "dragon"
+    ]
+  },
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "jttw_engine:monkey_hair"
+    },
+    {
+      "item": "jttw_engine:monkey_hair"
+    },
+    {
+      "item": "jttw_engine:monkey_hair"
+    },
+    {
+      "item": "jttw_engine:wraith_wisp"
+    },
+    {
+      "item": "jttw_engine:wraith_wisp"
+    },
+    {
+      "item": "jttw_engine:wraith_wisp"
+    },
+    {
+      "item": "jttw_engine:immortal_peach"
+    },
+    {
+      "item": "jttw_engine:captains_sigil"
+    }
+  ],
+  "result": {
+    "id": "jttw_engine:water_curtain_pearl"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "type": "jttw_engine:trigrams_refining",
+  "gate": {
+    "characters": [
+      "eye_of_heaven"
+    ]
+  },
+  "armaments": [
+    "three_pointed_spear",
+    "erlang_axe",
+    "golden_bow"
+  ],
+  "tier": 8,
+  "materials": [
+    {
+      "item": "jttw_engine:ivory_shard",
+      "count": 3
+    },
+    {
+      "item": "jttw_engine:mane_tuft",
+      "count": 2
+    },
+    {
+      "item": "jttw_engine:storm_feather",
+      "count": 2
+    },
+    {
+      "item": "jttw_engine:captains_sigil",
+      "count": 1
+    }
+  ]
+}

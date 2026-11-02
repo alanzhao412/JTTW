@@ -219,8 +219,9 @@ public class NezhaWeaponsGameTests {
 
     @GameTest(template = PLATFORM)
     public static void eitherSwordAddsFiftyPercentAttackInEitherHand(GameTestHelper h) {
-        near(h, 15.0, atkWith(h, YinYangSwordItem.createYin(), EquipmentSlot.MAINHAND), "yin main hand");
-        near(h, 15.0, atkWith(h, YinYangSwordItem.createYang(), EquipmentSlot.OFFHAND), "yang off hand");
+        double each = 10.0 * (1 + com.jttw.engine.item.ArmamentBonuses.YIN_YANG_SWORD);
+        near(h, each, atkWith(h, YinYangSwordItem.createYin(), EquipmentSlot.MAINHAND), "yin main hand");
+        near(h, each, atkWith(h, YinYangSwordItem.createYang(), EquipmentSlot.OFFHAND), "yang off hand");
         near(h, 10.0, atkWith(h, YinYangSwordItem.createYin(), EquipmentSlot.HEAD), "not as a helmet");
         h.succeed();
     }
@@ -333,12 +334,12 @@ public class NezhaWeaponsGameTests {
         double base = zombie.getAttributeValue(Attributes.ATTACK_DAMAGE);
         zombie.setItemSlot(EquipmentSlot.MAINHAND, YinYangSwordItem.createYin());
         h.runAfterDelay(3, () -> {
-            near(h, base * 1.5, zombie.getAttributeValue(Attributes.ATTACK_DAMAGE), "yin in main hand");
+            near(h, base * (1 + com.jttw.engine.item.ArmamentBonuses.YIN_YANG_SWORD), zombie.getAttributeValue(Attributes.ATTACK_DAMAGE), "yin in main hand");
             zombie.setItemSlot(EquipmentSlot.OFFHAND, YinYangSwordItem.createYang());
         });
         h.runAfterDelay(6, () -> zombie.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY));
         h.runAfterDelay(9, () -> {
-            near(h, base * 1.5, zombie.getAttributeValue(Attributes.ATTACK_DAMAGE), "yin still in main hand");
+            near(h, base * (1 + com.jttw.engine.item.ArmamentBonuses.YIN_YANG_SWORD), zombie.getAttributeValue(Attributes.ATTACK_DAMAGE), "yin still in main hand");
             h.succeed();
         });
     }

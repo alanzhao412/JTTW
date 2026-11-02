@@ -1,0 +1,35 @@
+{
+  "type": "jttw_engine:refining",
+  "gate": {
+    "characters": [
+      "marshal_of_the_heavenly_canopy"
+    ]
+  },
+  "armaments": [
+    "nine_tooth_rake"
+  ],
+  "tier": 3,
+  "ingredients": [
+    {
+      "item": "jttw_engine:spirit_whisker"
+    },
+    {
+      "item": "jttw_engine:spirit_whisker"
+    },
+    {
+      "item": "jttw_engine:night_petal"
+    },
+    {
+      "item": "jttw_engine:night_petal"
+    },
+    {
+      "item": "minecraft:iron_ingot"
+    },
+    {
+      "item": "minecraft:iron_ingot"
+    },
+    {
+      "item": "jttw_engine:captains_sigil"
+    }
+  ]
+}

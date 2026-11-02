@@ -456,32 +456,21 @@ public class ErlangShenGameTests {
 
     // ── Weapon bonus ────────────────────────────────────────────────
 
-    @GameTest(template = PLATFORM, batch = "erlangShenHitsHarderWithTheSpearAndAxe")
-    public static void erlangShenHitsHarderWithTheSpearAndAxe(GameTestHelper h) {
-        ServerPlayer p = erlang(h);
-        Pig pig = mob(h, EntityType.PIG, 0, 0);
-        var ds = h.getLevel().damageSources();
-
-        LivingIncomingDamageEvent bare = incoming(pig, ds.playerAttack(p), 10f);
-        ErlangShenAbilityHandler.onWeaponDamageBonus(bare);
-        near(h, 10f, bare.getAmount(), "bare hand");
-
-        p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.THREE_POINTED_SPEAR.get()));
-        LivingIncomingDamageEvent spear = incoming(pig, ds.playerAttack(p), 10f);
-        ErlangShenAbilityHandler.onWeaponDamageBonus(spear);
-        near(h, 16.67f, spear.getAmount(), "spear x1.667");
-
-        p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.ERLANG_AXE.get()));
-        LivingIncomingDamageEvent axe = incoming(pig, ds.playerAttack(p), 10f);
-        ErlangShenAbilityHandler.onWeaponDamageBonus(axe);
-        near(h, 16.67f, axe.getAmount(), "axe x1.667");
-
-        ServerPlayer wukong = as(h, ReincarnationOutcome.CELESTIAL_PRIMATE);
-        wukong.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.THREE_POINTED_SPEAR.get()));
-        LivingIncomingDamageEvent other = incoming(pig, ds.playerAttack(wukong), 10f);
-        ErlangShenAbilityHandler.onWeaponDamageBonus(other);
-        near(h, 10f, other.getAmount(), "no bonus for other characters");
+    @GameTest(template = PLATFORM, batch = "erlangsWeaponsGiveTheirOwnBonusRaisedByTier")
+    public static void erlangsWeaponsGiveTheirOwnBonusRaisedByTier(GameTestHelper h) {
+        // his strength is the tier of his armaments now (the armory's attunement), not a hidden x1.667 in hand
+        ItemStack spear = new ItemStack(ModItems.THREE_POINTED_SPEAR.get()), axe = new ItemStack(ModItems.ERLANG_AXE.get());
+        near(h, com.jttw.engine.item.ArmamentBonuses.THREE_POINTED_SPEAR, bonus(spear), "the spear's own bonus at tier I");
+        near(h, com.jttw.engine.item.ArmamentBonuses.ERLANG_AXE, bonus(axe), "the axe's at tier I");
+        com.jttw.engine.item.Armaments.setTier(axe, 8);
+        near(h, com.jttw.engine.item.ArmamentBonuses.ERLANG_AXE * 1.7, bonus(axe), "x1.7 at tier VIII");
         h.succeed();
+    }
+
+    private static double bonus(ItemStack stack) {
+        return com.jttw.engine.gametest.item.ItemTestSupport.modifiers(stack, net.minecraft.world.entity.EquipmentSlot.MAINHAND,
+                net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE).stream()
+                .mapToDouble(net.minecraft.world.entity.ai.attributes.AttributeModifier::amount).sum();
     }
 
     // ── Key routing ─────────────────────────────────────────────────

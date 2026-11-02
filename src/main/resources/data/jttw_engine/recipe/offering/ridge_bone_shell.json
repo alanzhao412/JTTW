@@ -1,0 +1,41 @@
+{
+  "type": "jttw_engine:gated_shapeless",
+  "gate": {
+    "characters": [
+      "turtle"
+    ]
+  },
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "jttw_engine:servant_bone"
+    },
+    {
+      "item": "jttw_engine:servant_bone"
+    },
+    {
+      "item": "jttw_engine:servant_bone"
+    },
+    {
+      "item": "jttw_engine:servant_bone"
+    },
+    {
+      "item": "jttw_engine:wraith_wisp"
+    },
+    {
+      "item": "jttw_engine:wraith_wisp"
+    },
+    {
+      "item": "minecraft:coal"
+    },
+    {
+      "item": "minecraft:coal"
+    },
+    {
+      "item": "jttw_engine:captains_sigil"
+    }
+  ],
+  "result": {
+    "id": "jttw_engine:ridge_bone_shell"
+  }
+}

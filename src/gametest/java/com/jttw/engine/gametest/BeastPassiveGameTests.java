@@ -47,15 +47,13 @@ public class BeastPassiveGameTests {
     /** {@code who}, reincarnated and levelled to {@code level} through XP, as a player gets there. */
     private static ServerPlayer at(GameTestHelper h, ReincarnationOutcome who, int level) {
         ServerPlayer p = as(h, who);
-        ProgressionClass cls = PlayerLevel.getProgressionClass(p);
-        if (level > 1) LevelManager.grantXp(p, cls.growthRate.totalXpForLevel(level), "test");
+        if (level > 1) com.jttw.engine.gametest.character.CharTest.levelTo(p, level); // its evolutions performed on the way
         return p;
     }
 
     /** Further XP, to just reach {@code level}. */
     private static void levelTo(ServerPlayer p, int level) {
-        long total = PlayerLevel.getProgressionClass(p).growthRate.totalXpForLevel(level);
-        LevelManager.grantXp(p, total - PlayerLevel.getXp(p), "test");
+        com.jttw.engine.gametest.character.CharTest.levelTo(p, level);
     }
 
     /** A Divine Beast at {@code level}, with these passives bought (points enough given first). */

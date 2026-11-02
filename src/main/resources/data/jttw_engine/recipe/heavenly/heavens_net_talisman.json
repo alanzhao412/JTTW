@@ -1,0 +1,28 @@
+{
+  "type": "jttw_engine:gated_shapeless",
+  "gate": {
+    "class": "heavenly"
+  },
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "minecraft:paper"
+    },
+    {
+      "item": "minecraft:string"
+    },
+    {
+      "item": "minecraft:string"
+    },
+    {
+      "item": "minecraft:gold_nugget"
+    },
+    {
+      "item": "minecraft:ink_sac"
+    }
+  ],
+  "result": {
+    "id": "jttw_engine:heavens_net_talisman",
+    "count": 2
+  }
+}

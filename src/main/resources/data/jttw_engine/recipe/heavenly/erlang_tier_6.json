@@ -1,0 +1,32 @@
+{
+  "type": "jttw_engine:trigrams_refining",
+  "gate": {
+    "characters": [
+      "eye_of_heaven"
+    ]
+  },
+  "armaments": [
+    "three_pointed_spear",
+    "erlang_axe",
+    "golden_bow"
+  ],
+  "tier": 6,
+  "materials": [
+    {
+      "item": "jttw_engine:furnace_brick",
+      "count": 3
+    },
+    {
+      "item": "jttw_engine:ember_core",
+      "count": 2
+    },
+    {
+      "item": "jttw_engine:true_samadhi_fire",
+      "count": 1
+    },
+    {
+      "item": "jttw_engine:captains_sigil",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "type": "jttw_engine:gated_shapeless",
+  "gate": {
+    "characters": [
+      "white_tiger"
+    ]
+  },
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "jttw_engine:spirit_whisker"
+    },
+    {
+      "item": "jttw_engine:spirit_whisker"
+    },
+    {
+      "item": "jttw_engine:spirit_whisker"
+    },
+    {
+      "item": "jttw_engine:spirit_whisker"
+    },
+    {
+      "item": "jttw_engine:night_petal"
+    },
+    {
+      "item": "jttw_engine:night_petal"
+    },
+    {
+      "item": "minecraft:prismarine_shard"
+    },
+    {
+      "item": "minecraft:prismarine_shard"
+    },
+    {
+      "item": "jttw_engine:captains_sigil"
+    }
+  ],
+  "result": {
+    "id": "jttw_engine:moonlit_whisker_totem"
+  }
+}

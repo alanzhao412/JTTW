@@ -1,0 +1,38 @@
+{
+  "type": "jttw_engine:gated_shapeless",
+  "gate": {
+    "characters": [
+      "dragon"
+    ]
+  },
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "jttw_engine:underworld_ink"
+    },
+    {
+      "item": "jttw_engine:underworld_ink"
+    },
+    {
+      "item": "jttw_engine:underworld_ink"
+    },
+    {
+      "item": "jttw_engine:soul_chain"
+    },
+    {
+      "item": "jttw_engine:soul_chain"
+    },
+    {
+      "item": "jttw_engine:ember_core"
+    },
+    {
+      "item": "jttw_engine:ember_core"
+    },
+    {
+      "item": "jttw_engine:captains_sigil"
+    }
+  ],
+  "result": {
+    "id": "jttw_engine:naihe_pearl"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "type": "jttw_engine:refining",
+  "gate": {
+    "characters": [
+      "eye_of_heaven"
+    ]
+  },
+  "armaments": [
+    "three_pointed_spear",
+    "erlang_axe",
+    "golden_bow"
+  ],
+  "tier": 4,
+  "ingredients": [
+    {
+      "item": "minecraft:turtle_scute"
+    },
+    {
+      "item": "minecraft:turtle_scute"
+    },
+    {
+      "item": "minecraft:prismarine_shard"
+    },
+    {
+      "item": "minecraft:prismarine_shard"
+    },
+    {
+      "item": "jttw_engine:captains_sigil"
+    }
+  ]
+}

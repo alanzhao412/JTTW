@@ -116,7 +116,10 @@ public class LevelingGameTests {
         LevelManager.initClass(p, ReincarnationOutcome.WHITE_TIGER);
         LevelManager.grantXp(p, xpToReach(ProgressionClass.DIVINE_BEAST, 20), "test");
         eq(h, 20, PlayerLevel.getLevel(p), "level");
-        eq(h, FormStage.GUARDIAN.stageIndex, PlayerLevel.getFormStage(p), "form stage");
+        eq(h, FormStage.SPIRIT.stageIndex, PlayerLevel.getFormStage(p), "the form waits for its ritual");
+        eq(h, 20, com.jttw.engine.character.divinebeast.BeastEvolution.owed(p), "the evolution owed");
+        com.jttw.engine.character.divinebeast.BeastEvolution.evolve(p, null);
+        eq(h, FormStage.GUARDIAN.stageIndex, PlayerLevel.getFormStage(p), "form stage, by the ritual");
         check(h, !PlayerLevel.hasAbility(p, "domain_sense"), "level-20 passive is to be bought, not given");
         h.succeed();
     }
@@ -125,6 +128,7 @@ public class LevelingGameTests {
     public static void levelCapsAtHundred(GameTestHelper h) {
         ServerPlayer p = player(h);
         LevelManager.initClass(p, ReincarnationOutcome.DRAGON);
+        com.jttw.engine.gametest.character.CharTest.levelTo(p, 100); // its evolutions performed on the way
         LevelManager.grantXp(p, Long.MAX_VALUE / 4, "test");
         eq(h, 100, PlayerLevel.getLevel(p), "level");
         long xp = PlayerLevel.getXp(p);

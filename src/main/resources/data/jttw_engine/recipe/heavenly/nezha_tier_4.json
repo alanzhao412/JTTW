@@ -1,0 +1,37 @@
+{
+  "type": "jttw_engine:refining",
+  "gate": {
+    "characters": [
+      "third_lotus_prince"
+    ]
+  },
+  "armaments": [
+    "fire_tip_spear",
+    "qiankun_ring",
+    "yin_sword",
+    "yang_sword",
+    "wind_fire_wheels",
+    "huntian_cloth"
+  ],
+  "tier": 4,
+  "ingredients": [
+    {
+      "item": "minecraft:prismarine_crystals"
+    },
+    {
+      "item": "minecraft:prismarine_crystals"
+    },
+    {
+      "item": "minecraft:prismarine_shard"
+    },
+    {
+      "item": "minecraft:prismarine_shard"
+    },
+    {
+      "item": "minecraft:nautilus_shell"
+    },
+    {
+      "item": "jttw_engine:captains_sigil"
+    }
+  ]
+}

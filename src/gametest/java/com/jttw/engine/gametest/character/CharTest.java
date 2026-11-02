@@ -62,6 +62,20 @@ public final class CharTest {
         return p;
     }
 
+    /**
+     * XP until {@code p} reaches {@code level}, as play gets there: a Divine Beast's evolutions owed on
+     * the way are performed as they come (their rituals, at once).
+     */
+    public static void levelTo(ServerPlayer p, int level) {
+        var cls = com.jttw.engine.progression.level.PlayerLevel.getProgressionClass(p);
+        for (int guard = 0; guard < 20 && com.jttw.engine.progression.level.PlayerLevel.getLevel(p) < level; guard++) {
+            if (com.jttw.engine.character.divinebeast.BeastEvolution.owed(p) > 0) com.jttw.engine.character.divinebeast.BeastEvolution.evolve(p, null);
+            long need = cls.growthRate.totalXpForLevel(level) - com.jttw.engine.progression.level.PlayerLevel.getXp(p);
+            LevelManager.grantXp(p, Math.max(1, need), "test");
+        }
+        if (com.jttw.engine.character.divinebeast.BeastEvolution.owed(p) > 0) com.jttw.engine.character.divinebeast.BeastEvolution.evolve(p, null);
+    }
+
     public static void qi(ServerPlayer p, float current, float max) {
         QiData.setMax(p, max);
         QiData.setCurrent(p, current);

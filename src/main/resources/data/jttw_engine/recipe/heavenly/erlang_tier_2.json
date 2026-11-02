@@ -1,0 +1,37 @@
+{
+  "type": "jttw_engine:refining",
+  "gate": {
+    "characters": [
+      "eye_of_heaven"
+    ]
+  },
+  "armaments": [
+    "three_pointed_spear",
+    "erlang_axe",
+    "golden_bow"
+  ],
+  "tier": 2,
+  "ingredients": [
+    {
+      "item": "jttw_engine:servant_bone"
+    },
+    {
+      "item": "jttw_engine:servant_bone"
+    },
+    {
+      "item": "jttw_engine:servant_bone"
+    },
+    {
+      "item": "minecraft:leather"
+    },
+    {
+      "item": "minecraft:leather"
+    },
+    {
+      "item": "jttw_engine:wraith_wisp"
+    },
+    {
+      "item": "jttw_engine:captains_sigil"
+    }
+  ]
+}

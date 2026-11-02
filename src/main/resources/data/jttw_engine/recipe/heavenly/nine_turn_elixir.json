@@ -1,0 +1,28 @@
+{
+  "type": "jttw_engine:trigrams_forging",
+  "gate": {
+    "class": "heavenly"
+  },
+  "materials": [
+    {
+      "item": "minecraft:gold_ingot",
+      "count": 3
+    },
+    {
+      "item": "jttw_engine:wraith_wisp",
+      "count": 2
+    },
+    {
+      "item": "jttw_engine:immortal_peach",
+      "count": 1
+    },
+    {
+      "item": "jttw_engine:servant_bone",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "jttw_engine:nine_turn_elixir",
+    "count": 2
+  }
+}

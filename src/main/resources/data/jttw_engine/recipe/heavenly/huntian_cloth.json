@@ -1,0 +1,28 @@
+{
+  "type": "jttw_engine:gated_shaped",
+  "gate": {
+    "characters": [
+      "third_lotus_prince"
+    ]
+  },
+  "category": "equipment",
+  "pattern": [
+    "RWR",
+    "WGW",
+    "RWR"
+  ],
+  "key": {
+    "R": {
+      "item": "minecraft:red_dye"
+    },
+    "W": {
+      "item": "minecraft:white_wool"
+    },
+    "G": {
+      "item": "minecraft:gold_nugget"
+    }
+  },
+  "result": {
+    "id": "jttw_engine:huntian_cloth"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "type": "jttw_engine:gated_shapeless",
+  "gate": {
+    "characters": [
+      "white_tiger"
+    ]
+  },
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "jttw_engine:ox_horn"
+    },
+    {
+      "item": "jttw_engine:ox_horn"
+    },
+    {
+      "item": "jttw_engine:horse_mane"
+    },
+    {
+      "item": "jttw_engine:horse_mane"
+    },
+    {
+      "item": "jttw_engine:furnace_brick"
+    },
+    {
+      "item": "jttw_engine:furnace_brick"
+    },
+    {
+      "item": "jttw_engine:captains_sigil"
+    }
+  ],
+  "result": {
+    "id": "jttw_engine:ox_and_horse_totem"
+  }
+}

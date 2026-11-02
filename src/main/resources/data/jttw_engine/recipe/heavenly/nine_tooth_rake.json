@@ -1,0 +1,28 @@
+{
+  "type": "jttw_engine:gated_shaped",
+  "gate": {
+    "characters": [
+      "marshal_of_the_heavenly_canopy"
+    ]
+  },
+  "category": "equipment",
+  "pattern": [
+    "III",
+    "NSN",
+    " S "
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "N": {
+      "item": "minecraft:iron_nugget"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "id": "jttw_engine:nine_tooth_rake"
+  }
+}

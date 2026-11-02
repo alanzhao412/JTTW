@@ -1,0 +1,38 @@
+{
+  "type": "jttw_engine:gated_shapeless",
+  "gate": {
+    "characters": [
+      "dragon"
+    ]
+  },
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "jttw_engine:golden_eye"
+    },
+    {
+      "item": "jttw_engine:spider_silk"
+    },
+    {
+      "item": "jttw_engine:spider_silk"
+    },
+    {
+      "item": "jttw_engine:spider_silk"
+    },
+    {
+      "item": "jttw_engine:crane_plume"
+    },
+    {
+      "item": "jttw_engine:crane_plume"
+    },
+    {
+      "item": "jttw_engine:storm_feather"
+    },
+    {
+      "item": "jttw_engine:storm_feather"
+    }
+  ],
+  "result": {
+    "id": "jttw_engine:dragon_kings_pearl"
+  }
+}
