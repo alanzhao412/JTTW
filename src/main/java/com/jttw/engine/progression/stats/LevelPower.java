@@ -129,7 +129,55 @@ public final class LevelPower {
 
     /** A character's power at a level: its class's, in its own measure. */
     public static double of(ProgressionClass cls, @Nullable ReincarnationOutcome who, int level) {
-        return of(cls, level) * Math.pow(characterFactor(who), (clamp(level) - 1) / (double) (MAX - 1));
+        return of(cls, level) * measure(who, clamp(level));
+    }
+
+    /**
+     * A character's own measure over its class at a level, as a multiplier. Most build up evenly to
+     * their {@link #characterFactor} at 100. The three heads of the Primordials take turns instead,
+     * each by so many backbone levels over their class:
+     * <ul>
+     *   <li><b>Peng</b> leads the early climb: some {@value #PENG_LEAD} levels ahead about level
+     *       {@value #PENG_PEAK}, gone by the top;</li>
+     *   <li><b>Yuan Di</b> the middle: some {@value #YUAN_DI_LEAD} levels ahead about level
+     *       {@value #YUAN_DI_PEAK} (passing Peng near 44), settling to his measure at the top;</li>
+     *   <li><b>Wukong</b> trails both, {@value #WUKONG_LAG} levels behind his class, until his late
+     *       surge from level {@value #WUKONG_SURGE}: past Peng near 87 and Yuan Di near 89, and the
+     *       strongest of them at 100.</li>
+     * </ul>
+     */
+    public static double measure(@Nullable ReincarnationOutcome who, int level) {
+        int lv = clamp(level);
+        double t = (lv - 1) / (double) (MAX - 1);
+        if (who == null) return 1;
+        double levels = switch (who) {
+            case GOLD_WINGED_PENG -> lead(lv, PENG_LEAD, PENG_PEAK, PENG_WIDTH);
+            case YUAN_DI -> lead(lv, YUAN_DI_LEAD, YUAN_DI_PEAK, YUAN_DI_WIDTH) + inLevels(characterFactor(who)) * Math.pow(t, 6);
+            case CELESTIAL_PRIMATE -> {
+                double x = Math.max(0, Math.min(1, (lv - WUKONG_SURGE) / (double) WUKONG_SURGE_LENGTH));
+                yield -WUKONG_LAG * Math.min(1, (lv - 1) / 10.0) + (WUKONG_LAG + inLevels(characterFactor(who))) * x * x * (3 - 2 * x);
+            }
+            default -> inLevels(characterFactor(who)) * t;
+        };
+        return Math.pow(GROWTH, levels);
+    }
+
+    /** Peng's lead over his class, in levels, and where and how broadly it peaks. */
+    public static final double PENG_LEAD = 4, PENG_PEAK = 30, PENG_WIDTH = 22;
+    /** Yuan Di's. */
+    public static final double YUAN_DI_LEAD = 4, YUAN_DI_PEAK = 55, YUAN_DI_WIDTH = 18;
+    /** How many levels Wukong trails his class until his surge, from what level it rises, and over how many. */
+    public static final double WUKONG_LAG = 2;
+    public static final int WUKONG_SURGE = 78, WUKONG_SURGE_LENGTH = 18;
+
+    private static double inLevels(double factor) {
+        return Math.log(factor) / Math.log(GROWTH);
+    }
+
+    /** A lead of {@code levels} peaking at {@code peak}: none at level 1 nor at the top. */
+    private static double lead(int lv, double levels, double peak, double width) {
+        double ends = Math.min(1, Math.min((lv - 1) / 10.0, (MAX - lv) / 10.0));
+        return levels * Math.exp(-Math.pow((lv - peak) / width, 2)) * ends;
     }
 
     /** A player's power: their character's at their level (the backbone's for a player without a class). */
@@ -145,9 +193,9 @@ public final class LevelPower {
     }
 
     /**
-     * A character's own measure over its class, reached at level 100: Wukong, Yuan Di and Peng
-     * at the head of the Primordials, the Nine-Headed Lion far above the other Yaoguai, Marshal
-     * below the rest of the Heavenly.
+     * A character's own measure over its class at level 100 ({@link #measure} on the way there):
+     * Wukong, Yuan Di and Peng at the head of the Primordials, the Nine-Headed Lion far above the
+     * other Yaoguai, Marshal below the rest of the Heavenly.
      */
     public static double characterFactor(@Nullable ReincarnationOutcome who) {
         if (who == null) return 1;

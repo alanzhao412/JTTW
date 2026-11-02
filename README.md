@@ -36,9 +36,13 @@ read against a steady character that grows 1.10x a level (its "power level": the
 | **Primordial** | exponential | weak for long: seven to nine levels behind from 30 to 60, level near 84, then a steep climb (growth 1.07x a level rising to 1.20x) | first: some twelve levels ahead |
 | **Divine Beast** | staggered | a leap of 3.45x (some thirteen levels) at each evolution (20, 40, 60, 80), landing five levels ahead, then falling eight behind by the next | second: the last leap, at 100, lands level with the steady line |
 
-The characters with a measure of their own stand off their class's curve by it, built up to
-level 100: Wukong 1.25x, Yuan Di 1.12x, the Nine-Headed Lion 4.7x (his class ends behind; he does not),
-Marshal Tianpeng 0.7x (the least of anyone at the top).
+The characters with a measure of their own stand off their class's curve by it, reached at
+level 100 (`LevelPower.measure`): Wukong 1.25x, Yuan Di 1.12x, the Nine-Headed Lion 4.7x (his class
+ends behind; he does not), Marshal Tianpeng 0.7x (the least of anyone at the top). The three heads of
+the Primordials take turns on the way: Peng leads the early climb (some four levels over his class
+about level 30), Yuan Di the middle (four over about 55, passing Peng near 44), and Wukong trails both
+(two under his class) until his surge from 78: past Peng near 87, Yuan Di near 89, the strongest of
+them at 100.
 
 Up to level 20, XP comes from ordinary Minecraft mobs, paid as in Pokémon by the level the kill
 is won at ([`LevelManager.vanillaMobXp`](src/main/java/com/jttw/engine/progression/level/LevelManager.java)):

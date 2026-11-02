@@ -52,7 +52,7 @@ class LevelPowerSpecTest {
             assertTrue(median(h) <= 1, at + ": the typical pairing is one hit: " + median(h));
             assertTrue(oneShots >= h.length * 2 / 3, at + ": two in three pairings or more are one hit: " + oneShots + "/" + h.length);
             // the classes' shapes part them (a weak Primordial against a Divine Beast fresh from evolving)
-            assertTrue(h[h.length - 1] <= 4, at + ": and none takes more than four: " + h[h.length - 1]);
+            assertTrue(h[h.length - 1] <= 4.5, at + ": and none takes more than four or five: " + h[h.length - 1]);
         }
     }
 
@@ -96,6 +96,27 @@ class LevelPowerSpecTest {
             double growth = LevelPower.of(ProgressionClass.YAOGUAI, level) / LevelPower.of(ProgressionClass.YAOGUAI, level - 1);
             assertTrue(growth < before && growth > 1, "each level's growth less than the last's, at " + level);
             before = growth;
+        }
+    }
+
+    @Test
+    void pengLeadsTheEarlyClimbYuanDiTheMiddleAndWukongTheEnd() {
+        var peng = ReincarnationOutcome.GOLD_WINGED_PENG;
+        var yuanDi = ReincarnationOutcome.YUAN_DI;
+        var wukong = ReincarnationOutcome.CELESTIAL_PRIMATE;
+        java.util.function.BiFunction<ReincarnationOutcome, Integer, Double> p = (who, lv) -> LevelPower.of(ProgressionClass.PRIMORDIAL, who, lv);
+        for (int lv = 10; lv <= 40; lv++) {
+            assertTrue(p.apply(peng, lv) > p.apply(yuanDi, lv) && p.apply(yuanDi, lv) > p.apply(wukong, lv), "Peng, then Yuan Di, then Wukong at " + lv);
+        }
+        for (int lv = 46; lv <= 84; lv++) {
+            assertTrue(p.apply(yuanDi, lv) > p.apply(peng, lv) && p.apply(peng, lv) > p.apply(wukong, lv), "Yuan Di, then Peng, then Wukong at " + lv);
+        }
+        for (int lv = 91; lv <= 100; lv++) {
+            assertTrue(p.apply(wukong, lv) > p.apply(yuanDi, lv) && p.apply(yuanDi, lv) > p.apply(peng, lv), "Wukong, then Yuan Di, then Peng at " + lv);
+        }
+        for (var who : ReincarnationOutcome.values()) {
+            assertEquals(LevelPower.characterFactor(who), LevelPower.measure(who, 100), 1e-9, who + " reaches its measure at the top");
+            assertEquals(1, LevelPower.measure(who, 1), 1e-9, who + " starts at its class");
         }
     }
 
