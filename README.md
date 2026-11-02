@@ -183,9 +183,12 @@ From the start, a Wukong player is drawn as the Monkey King himself, not in the 
 `MonkeyKingLayer`). He has no armour or outfit of his own:
 - **Head:** the sculpted head the Fighting Buddha also wears
   ([`assets_source/fighting_buddha_head.py`](assets_source/fighting_buddha_head.py)), without the crown.
-- **Body:** a lean, muscular monkey's build in golden-brown fur, broad at the shoulders and narrow at
-  the waist, the flanks and upper back rounded ([`assets_source/monkey_king.py`](assets_source/monkey_king.py)). The chest and belly are
-  bare tan skin.
+- **Body:** a lean, muscular monkey's build in golden-brown fur ([`assets_source/monkey_king.py`](assets_source/monkey_king.py)),
+  sculpted rather than boxed: shoulders sloping from the neck, a deep chest narrowing through the ribcage to
+  a hard waist and flaring a little at the hips, lats and obliques slanting in, shoulder blades and a
+  furrow down the spine. The chest and belly are bare tan skin: two pectorals standing out over the ribs,
+  the abdomen in six blocks. Tufts of longer fur break his outline: a ruff round the neck, at the
+  shoulders, flanks, hips, forearms and down the back.
 - **Limbs:** long arms ending in monkey hands, and bowed legs ending in long monkey feet.
 - **Tail:** curling up behind him and swaying.
 - **Golden fillet (紧箍):** worn on his head. It is part of him, not armour.
@@ -197,10 +200,12 @@ first person his arms are the Monkey King's. His shadow clones are drawn as he i
 place.
 
 Carrying the staff at ease across his right shoulder (`StaffStance`), the Monkey King and the Buddha both
-hold it: the right arm raised, bent at the elbow, the hand closed round the shaft in front of the shoulder
-([`StaffGrip`](src/main/java/com/jttw/engine/client/StaffGrip.java)). The player model's arm takes the
-upper arm's pose, so armour sleeves follow it, and the drawn forearm folds at the elbow. The pose was
-solved so the hand lies on the staff. While he strikes, uses the staff, or holds anything else, his arm
+hold it ([`StaffGrip`](src/main/java/com/jttw/engine/client/StaffGrip.java)). The Monkey King's elbow is
+back at his side and his fist is before his breast; his hand turns at the wrist and closes round the
+shaft, which runs through the fist from thumb to little finger, the fingers curled over it and the thumb
+wrapped over them. The Buddha's arm is raised, his hand in its wide sleeve hooked over the shaft. The
+player model's arm takes the upper arm's pose, so armour sleeves follow it, and the drawn forearm folds at
+the elbow. The pose was solved so the fist lies on the staff. While he strikes, uses the staff, or holds anything else, his arm
 is his own again. In first person his monkey arm is drawn a little smaller, so the long hand doesn't
 fill the view.
 
@@ -1221,7 +1226,9 @@ Cave. In [`world/blackwind/`](src/main/java/com/jttw/engine/world/blackwind/) an
     someone comes near while no one is in it. The door and the grate, once opened, stay open.
 - **The Black Bear Demon** (黑熊精, the Great King of the Black Wind 黑风大王; `BlackBearDemonEntity`, a
   `ZoneBoss`): a towering black bear near four blocks to his ears, in black lamellae edged in gold, a gold
-  diadem, a black war cloak, **the stolen kasaya** thrown across his breast; his black-tasselled spear (黑缨
+  diadem, a black war cloak, **the stolen kasaya** thrown across his breast (red patchwork in five folds
+  fanning from his left shoulder, sagging in swags below, gold only at its border and fringe; its skirt
+  in three pleats at his hip, its corner and its long fall layered); his black-tasselled spear (黑缨
   枪). **Level 39**, his band's top and three, his mountain's gym leader; **68 hits** of a level-36
   character (the one he is built for), one life; his spear kills one in **six** thrusts (19.5%), a purple
   bar. One of the band's top can beat him alone, in a hard fight:
@@ -2078,7 +2085,8 @@ Mount Wuzhuang's band, on the ground (Wuzhuang is in the sky).
   - **Stinging sons** (蜜蜂, 马蜂, 牛蜢: the Honeybee, Hornet and Gadfly Sons, light, flying): 3 hits / 15
     stings (7%, venom 3 s); now and then it **hangs buzzing** (0.7 s), then darts straight at you: 9%
     and 5 s of venom.
-  - **Mantis Sons** (螳螂精, normal): 6 hits / 12 cuts (9%); close, it **raises both scythes** (0.7 s)
+  - **Mantis Sons** (螳螂精, normal; heavy-bodied: a plated thorax, a ringed abdomen under broad leaf-wings,
+    a triangular head of two great eyes, massive spined scythes, stout spined legs): 6 hits / 12 cuts (9%); close, it **raises both scythes** (0.7 s)
     and sweeps them through all before it, 3.4 blocks and 60° either side: 10%. Step aside or back.
   - **Cockroach Sons** (蜚蠊精, heavy, armoured): 11 hits / 9 blows (11.5%); 3–12 blocks off it **scrapes
     the ground** (0.8 s), then charges straight where you were: 12% and thrown back. It cannot turn.
@@ -2097,7 +2105,8 @@ Mount Wuzhuang's band, on the ground (Wuzhuang is in the sky).
   demons come (once). Her death loosens her bower's seal, and is remembered.
 - **The Hundred-Eyed Demon Lord** (百眼魔君, `HundredEyedDemonEntity`, a `ZoneBoss`, level **91**: his
   band's top and three, the ridge's gym leader; 68 hits of a level-88 character, the one he is built for, a
-  yellow bar; fallen, his court is a usurper's 20 minutes after, level 88), a centipede spirit in a Daoist's yellow robe, sworn brother of the seven, who poisoned
+  yellow bar; fallen, his court is a usurper's 20 minutes after, level 88), a centipede spirit in a Daoist's yellow robe (its skirt long gores of silk
+  hanging in deep folds and flaring to the ground, gold kept to the hem, the opening's edges and embroidery), sworn brother of the seven, who poisoned
   the Tang Monk's tea. His blow, a cut of his Daoist sword: 19% (six kill). Every art is shown first:
   - **the golden light of his thousand eyes** (金光): every 16 s (11 s once his robe is off) he flings
     his arms up, his eyes blazing brighter for 1.5 s (gold motes gathering, a rising chime); then the
@@ -2706,7 +2715,7 @@ luggage and made himself a false pilgrimage to fetch the scriptures in his place
   before the old throne with **the stolen luggage**, two chests): the **false Tang Sanzang**
   (kasaya, Vairocana crown, ringed staff) chants the **Tightening-Fillet Spell** (1.5 s, golden rings
   rising): all within 8 blocks struck, slowed and dizzied, and a Wukong player, whose head the fillet
-  binds, held fast; the **false Zhu Bajie** heaves his nine-tooth rake over his shoulder (0.9 s) and
+  binds, held fast; the **false Zhu Bajie** (boar's tusks curling up from his jaw in four tapering lengths) heaves his nine-tooth rake over his shoulder (0.9 s) and
   sweeps it round before him, all in its arc thrown back; the **false Sha Wujing** (necklace of
   skulls, crescent-moon spade) levels his spade (0.7 s) and charges 8 blocks. Each a monkey in the
   likeness, a monkey's tail under his robe; struck down, the likeness falls away. You kill one in
@@ -2718,7 +2727,8 @@ luggage and made himself a false pilgrimage to fetch the scriptures in his place
   Sage", Lv 120); no one has to face him to have the rest of the mountain, its army, its pilgrims and
   its cave. The sanctum: a round hall under a 30-high vault, six gold-banded black pillars (one for
   each ear) with soul fire at their feet, his throne of black stone and gold on its steps under torn
-  yellow banners. He is the Monkey King's mirror: the phoenix-plumed cap, the gold fillet, golden chain
+  yellow banners. He is the Monkey King's mirror: the phoenix-plumed cap seated on the crown of his head, the gold fillet
+round it above his brow, golden chain
   mail, a tiger-skin kilt, a red cloak, an iron staff banded in gold, and three ears a side. **430
   hits of a level-100 character**, his staff a third of a level-100 character's health (measured at
   the cap, `ZoneBoss.measuredAt`: a capped group's fight, and four of his blows kill; the one boss that

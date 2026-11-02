@@ -200,6 +200,8 @@ final class BlackWindScenes {
                 scene("bw_scholar_side", p -> put(p, BlackWindRegistry.WHITE_ROBED_SCHOLAR.get(), 0.5, 0, 9.5, 90f), new double[]{0.5, 1.6, 6.0, 0.5, 1.1, 9.5}),
                 scene("bw_scholar_back", p -> put(p, BlackWindRegistry.WHITE_ROBED_SCHOLAR.get(), 0.5, 0, 8.5, 20f), new double[]{0.5, 1.8, 4.5, 0.5, 0.9, 8.5}),
                 scene("bw_scholar_face", p -> put(p, BlackWindRegistry.WHITE_ROBED_SCHOLAR.get(), 0.5, 0, 8.5, 190f), new double[]{0.8, 2.3, 6.9, 0.5, 2.2, 8.5}),
+                scene("bw_scholar_quarter", p -> put(p, BlackWindRegistry.WHITE_ROBED_SCHOLAR.get(), 0.5, 0, 9.5, 150f), new double[]{-1.9, 1.8, 6.6, 0.5, 1.3, 9.5}),
+                scene("bw_scholar_sleeve", p -> put(p, BlackWindRegistry.WHITE_ROBED_SCHOLAR.get(), 0.5, 0, 9.5, 120f), new double[]{-1.2, 1.4, 7.4, 0.5, 1.15, 9.5}),
                 scene("bw_scholar_spit", p -> {
                     WhiteRobedScholarEntity s = put(p, BlackWindRegistry.WHITE_ROBED_SCHOLAR.get(), 0.5, 0, 9.0, 160f);
                     if (s != null) s.pose(WhiteRobedScholarEntity.REARING);

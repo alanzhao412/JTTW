@@ -5,11 +5,15 @@ His head is the Fighting Buddha's sculpted one (fighting_buddha_head.py: brow, s
 Eyes, fur frame, tiered muzzle, cupped ears), drawn without the Buddha's crown; this is the rest of him,
 and the golden fillet (紧箍) the Bodhisattva set on his head, which is part of him, not armour:
 
-- a lean, muscular monkey's build in golden-brown fur, about a man's size so that real armour fits him:
-  a ruff at the neck, broad shoulders, the fur darker down the spine;
-- bare tan skin on the chest and belly, shaped into pectorals and a lean belly by shading;
+- a lean, muscular monkey's build in golden-brown fur, about a man's size so that real armour fits him,
+  sculpted rather than boxed: shoulders sloping from the neck, a deep chest narrowing through the ribs
+  to a hard waist, the hips flaring a little, the lats and obliques slanting in, shoulder blades, a
+  furrow down the spine; tufts of longer fur breaking his outline (a ruff round the neck, at the
+  shoulders, flanks, hips and forearms, down the back);
+- bare tan skin on the chest and belly: two pectorals standing out over the ribs, the abdomen in six blocks;
 - long arms, furred, the forearms tapering to monkey hands of bare skin: a long palm, fingers curled
-  with knuckles and dark nails, a thumb set low;
+  with knuckles and dark nails, a thumb set low; carrying the staff at ease, a fist closed round the
+  shaft (the shaft through it, the fingers curled over it, the thumb wrapped over them);
 - bowed, furred legs to monkey feet of bare skin, long, with long toes and a big toe set apart;
 - a tail, long and furred, curling up behind him in four lengths, a tuft at its tip, swaying;
 - on his head the golden fillet: a plain band of gold over his brow, its two ends curled at the front.
@@ -49,6 +53,25 @@ def tail():
     ]
 
 
+# The staff carried at ease (StaffGrip): the wrist turned so that the fist closes round the shaft, which runs
+# across it; solved (with StaffGrip's arm and elbow) so that the fist's middle lies on the staff's line
+# (StaffRestLayer) and the shaft crosses the fist from its thumb to its little finger.
+GRIP_WRIST = (-0.352, -1.081, -0.355)
+GRIP_FIST = (3.06, 0.14, -0.534)
+
+
+def ruff():
+    """The ruff of longer fur round his neck: tufts lying out and down over his collarbones and shoulders
+    and up his nape, each its own angle, overlapping, breaking the line of the shoulders."""
+    out = []
+    for n, (x, y, z, rx, rz, w, h) in enumerate((
+            (-1.2, -0.4, -2.1, -0.55, 0.15, 2.0, 2.6), (-2.9, -0.2, -1.6, -0.45, 0.55, 2.0, 2.8),
+            (-3.6, 0.1, 0.3, 0.05, 0.85, 1.8, 2.8), (-2.8, -0.3, 1.9, 0.5, 0.45, 2.0, 2.8),
+            (-1.0, -0.6, 2.3, 0.6, 0.12, 2.0, 3.0))):
+        out.append(part('right_ruff_%d' % n, 'body', (x, y, z), (rx, 0, rz), [(-w / 2, 0, -0.55, w, h, 1.1, 'fur_tuft')]))
+    return out
+
+
 MONKEY = mirrored([
     # the player's own parts, at their pivots (the model copies the player's pose onto them each frame)
     part('head', 'root', (0, 0, 0), (0, 0, 0), []),
@@ -56,40 +79,80 @@ MONKEY = mirrored([
     part('right_arm', 'root', (-5, 2, 0), (0, 0, 0), []),
     part('right_leg', 'root', (-1.9, 12, 0), (0, 0, 0), []),
 
-    # ── the golden fillet ──
+    # -- the golden fillet --
     part('fillet', 'head', (0, 0, 0), (0, 0, 0), [(-4.45, -9.0, -4.15, 8.9, 1.0, 9.0, 'fillet')]),
     part('right_fillet_curl', 'head', (-0.9, -8.45, -4.35), (0, 0, 0.785), [(-0.75, -0.75, -0.25, 1.5, 1.5, 0.5, 'fillet_curl')]),
 
-    # ── the body: lean, muscular, furred, broad at the shoulders and narrow at the waist; the chest and belly bare ──
+    # -- the body: a fighter's, not a block: a deep chest under sloping shoulders, the ribcage narrowing to a
+    # hard waist, the hips flaring a little; worked over with muscle (pectorals, the abdomen in its six
+    # blocks, the obliques and lats slanting in), and fur standing off it in tufts --
     part('torso', 'body', (0, 0, 0), (0, 0, 0), [
-        (-4.2, -0.1, -2.25, 8.4, 5.6, 4.5, 'fur_torso'),
-        (-3.5, 5.3, -1.95, 7.0, 5.0, 3.9, 'fur_waist'),
-        (-3.8, 9.9, -2.05, 7.6, 2.2, 4.1, 'fur_hips'),
-        (-2.7, -1.1, -2.6, 5.4, 1.5, 5.2, 'ruff'),
-        (-1.95, 4.5, -2.3, 3.9, 5.2, 0.45, 'belly'),
-        (-3.7, 0.4, 2.05, 7.4, 5.2, 0.5, 'fur_back'),
+        (-4.25, 0.0, -2.25, 8.5, 3.4, 4.5, 'fur_torso'),          # the chest under the shoulders
+        (-3.85, 3.2, -2.05, 7.7, 2.6, 4.2, 'fur_ribs'),           # the ribcage, narrowing
+        (-3.2, 5.6, -1.85, 6.4, 3.8, 3.8, 'fur_waist'),           # the waist, narrowest
+        (-3.55, 9.3, -1.95, 7.1, 1.4, 4.0, 'fur_hips'),
+        (-3.85, 10.6, -2.05, 7.7, 1.5, 4.1, 'fur_hips'),
+        (-1.85, 5.5, -2.2, 3.7, 4.4, 0.4, 'belly'),               # the bare belly under the chest
+        (-3.4, 0.5, 2.05, 6.8, 4.6, 0.5, 'fur_back'),
+        (-0.45, 0.6, 2.4, 0.9, 9.6, 0.35, 'spine'),               # the furrow down his spine
     ]),
-    part('right_pec', 'body', (0, 0, 0), (0, 0, 0), [(-3.35, 0.55, -2.75, 3.25, 3.7, 0.55, 'pec')]),
-    # the flanks and back rounded: the lats swelling at the sides, the upper back over the shoulder blades
-    part('right_flank', 'body', (0, 0, 0), (0, 0, 0), [(-4.6, 0.7, -1.7, 0.45, 4.4, 3.5, 'fur_flank')]),
-    part('upper_back', 'body', (0, 0, 0), (0, 0, 0), [(-3.2, 0.3, 2.5, 6.4, 4.0, 0.4, 'fur_back')]),
-
-    # ── the arms: long, furred, a round shoulder and a bulge of muscle, to bare monkey hands ──
+    # the abdomen: three pairs of blocks either side of the line down its middle, the lowest smallest
+    part('right_abs', 'body', (0, 0, 0), (0, 0, 0), [
+        (-1.75, 5.65, -2.5, 1.55, 1.25, 0.35, 'abs'),
+        (-1.7, 7.0, -2.45, 1.5, 1.25, 0.35, 'abs'),
+        (-1.55, 8.35, -2.4, 1.35, 1.15, 0.35, 'abs')]),
+    # the pectorals: two broad plates, their lower edges standing out over the ribs, turned out a little
+    part('right_pec', 'body', (-1.95, 0.55, -2.25), (-0.16, 0.14, 0), [(-1.75, 0, -0.65, 3.55, 3.15, 0.75, 'pec')]),
+    # the shoulders sloping from the neck (the trapezius), so that the top of him is not a flat line
+    part('right_trap', 'body', (-1.2, 0.35, 0.3), (0, 0, -0.42), [(-3.4, -1.0, -1.7, 3.4, 1.3, 3.6, 'fur_trap')]),
+    # the lats, slanting in from under the arm to the waist, and the obliques below them: the V of his back
+    part('right_lat', 'body', (-4.05, 1.0, 0.5), (0, 0, -0.26), [(-0.25, 0, -1.65, 0.75, 5.6, 3.3, 'fur_flank')]),
+    part('right_oblique', 'body', (-3.45, 6.0, -0.2), (0, 0, 0.2), [(-0.3, 0, -1.6, 0.6, 3.6, 3.4, 'fur_flank')]),
+    # the shoulder blades, and the fur on his back standing in tufts down his spine
+    part('right_blade', 'body', (-1.9, 1.0, 2.35), (0.12, -0.12, 0.1), [(-1.6, 0, -0.2, 3.2, 3.4, 0.45, 'fur_back')]),
+    part('back_tuft_0', 'body', (0, 0.4, 2.35), (0.55, 0, 0), [(-1.3, 0, -0.35, 2.6, 2.8, 0.7, 'fur_tuft')]),
+    part('back_tuft_1', 'body', (0, 3.6, 2.45), (0.4, 0, 0), [(-1.1, 0, -0.35, 2.2, 2.6, 0.6, 'fur_tuft')]),
+    part('back_tuft_2', 'body', (0, 6.6, 2.15), (0.35, 0, 0), [(-1.0, 0, -0.35, 2.0, 2.4, 0.6, 'fur_tuft')]),
+    # fur standing off his flanks and hips, breaking the line of his sides
+    part('right_flank_tuft_0', 'body', (-4.15, 1.8, 0.6), (0.25, 0, 0.45), [(-0.5, 0, -0.9, 1.0, 2.6, 1.8, 'fur_tuft')]),
+    part('right_flank_tuft_1', 'body', (-3.55, 5.0, 0.9), (0.3, 0, 0.35), [(-0.45, 0, -0.85, 0.9, 2.4, 1.7, 'fur_tuft')]),
+    part('right_hip_tuft', 'body', (-3.75, 9.6, 0.7), (0.2, 0, 0.3), [(-0.45, 0, -1.0, 0.9, 2.4, 2.0, 'fur_tuft')]),
+] + ruff() + [
+    # -- the arms: long, furred, a round shoulder capped in two tiers and a bulge of muscle, to bare monkey hands --
     part('right_upper_arm', 'right_arm', (0, 0, 0), (0, 0, 0), [
-        (-3.65, -2.6, -2.4, 4.6, 3.1, 4.8, 'fur_shoulder'),
+        (-3.6, -2.4, -2.35, 4.4, 2.9, 4.7, 'fur_shoulder'),
+        (-3.95, -1.5, -2.0, 0.6, 3.4, 4.0, 'fur_shoulder'),
         (-3.05, -0.2, -1.95, 3.8, 4.6, 3.9, 'fur_arm'),
         (-2.65, 0.4, -2.35, 2.9, 3.1, 0.5, 'fur_arm'),
     ]),
-    # the forearm and hand, from the elbow: it bends there (MonkeyKingModel folds it to grip the staff at rest)
+    part('right_delt_tuft', 'right_upper_arm', (-3.7, -0.4, 0.2), (0.15, 0, 0.55), [(-0.5, 0, -1.3, 1.0, 2.8, 2.6, 'fur_tuft')]),
+    part('right_delt_tuft_back', 'right_upper_arm', (-2.6, -0.6, 2.2), (0.6, 0, 0.3), [(-1.0, 0, -0.45, 2.0, 2.6, 0.9, 'fur_tuft')]),
+    # the forearm, from the elbow: it bends there (MonkeyKingModel folds it to grip the staff at rest)
     part('right_forearm', 'right_upper_arm', (-1, 4.2, 0), (0, 0, 0), [
         (-2.0, 0, -2.0, 3.8, 3.0, 4.0, 'fur_forearm'),
         (-1.8, 2.8, -1.8, 3.4, 3.4, 3.6, 'fur_forearm'),
-        (-1.85, 6.0, -1.85, 3.5, 2.3, 3.7, 'hand'),
-        (-1.8, 8.1, -1.95, 3.4, 1.0, 2.9, 'fingers'),
-        (0.85, 6.3, -2.4, 0.9, 1.7, 0.9, 'thumb'),
     ]),
+    part('right_forearm_tuft', 'right_forearm', (-2.0, 0.6, 0.4), (0.2, 0, 0.5), [(-0.45, 0, -1.0, 0.9, 2.6, 2.0, 'fur_tuft')]),
+    # the hand, from the wrist: a long palm, fingers curled, a thumb set low
+    part('right_hand', 'right_forearm', (0, 6.0, 0), (0, 0, 0), [
+        (-1.85, 0, -1.85, 3.5, 2.3, 3.7, 'hand'),
+        (-1.8, 2.1, -1.95, 3.4, 1.0, 2.9, 'fingers'),
+        (0.85, 0.3, -2.4, 0.9, 1.7, 0.9, 'thumb'),
+    ]),
+    # the fist closed round the staff carried at ease (shown in place of the hand only then): turned at the
+    # wrist, the shaft running through it from the thumb to the little finger; the back of the hand and its
+    # knuckles outward, the four fingers curled over the shaft and round under it, the thumb wrapped over them
+    part('grip_wrist', 'right_forearm', (0, 6.0, 0), GRIP_WRIST, []),
+    part('grip_fist', 'grip_wrist', (0, 1.5, 0), GRIP_FIST, [
+        (-1.7, -1.25, -1.25, 3.4, 2.5, 2.5, 'fist_palm'),
+        (-1.75, -1.2, 1.15, 3.5, 2.9, 0.7, 'fist_back'),
+        (-1.8, -2.05, 0.15, 3.6, 1.0, 1.7, 'knuckles'),
+        (-1.55, 0.9, -1.45, 3.1, 1.2, 2.7, 'fist_heel'),
+    ] + [(-1.72 + 0.86 * i, -2.0, -1.55, 0.8, 0.85, 1.9, 'finger_top') for i in range(4)]
+      + [(-1.72 + 0.86 * i, -1.6, -1.95, 0.8, 1.9 - 0.15 * abs(i - 1.5), 0.7, 'finger_tip') for i in range(4)]
+      + [(1.0, -2.3, -1.4, 1.05, 0.9, 2.5, 'thumb_wrap')]),
 
-    # ── the legs: bowed a little, furred, a heavy thigh and calf, to long monkey feet ──
+    # -- the legs: bowed a little, furred, a heavy thigh and calf, to long monkey feet --
     part('right_thigh', 'right_leg', (0, 0, 0), (0, 0, 0.04), [
         (-2.2, -0.1, -2.2, 4.4, 6.0, 4.4, 'fur_thigh'),
         (-1.95, 5.8, -1.95, 3.9, 4.8, 3.9, 'fur_shin'),
@@ -99,6 +162,13 @@ MONKEY = mirrored([
         (1.05, 10.85, -3.75, 0.9, 1.15, 1.3, 'big_toe'),
     ]),
 ] + tail())
+
+
+def each(rect):
+    fx, fy, fw, fh = rect
+    for j in range(fh):
+        for i in range(fw):
+            yield i, j, (fx + i, fy + j)
 
 
 def furred(p, f, light=1.0, base=FUR, slant=0.0):
@@ -112,7 +182,91 @@ def skin_box(p, f, base=SKIN):
 
 
 def paint_box(p, style, f, dims):
-    if style in ('fur_torso', 'fur_flank', 'fur_waist', 'fur_hips', 'fur_arm', 'fur_shoulder', 'fur_forearm', 'fur_thigh', 'fur_shin'):
+    if style in ('fur_torso', 'fur_ribs', 'fur_flank', 'fur_waist', 'fur_hips', 'fur_arm', 'fur_shoulder', 'fur_forearm', 'fur_thigh', 'fur_shin',
+                 'fur_trap'):
+        furred(p, f, 1.0 if style != 'fur_trap' else 1.06, base=FUR, slant=0.15)
+        if style in ('fur_ribs', 'fur_waist', 'fur_flank'):           # darker toward the sides, where the body turns away
+            for s in ('right', 'left'):
+                fx, fy, fw, fh = f[s]
+                for i, j, xy in each(f[s]):
+                    p.px(xy, k(p.img.getpixel(xy)[:3], 0.88))
+        if style == 'fur_torso':                                       # the chest's fur parting down the middle, toward the bare skin
+            fx, fy, fw, fh = f['front']
+            for j in range(fh):
+                for i in range(fw // 2 - 1, fw // 2 + 1):
+                    p.px((fx + i, fy + j), k(p.img.getpixel((fx + i, fy + j))[:3], 0.8))
+    elif style == 'fur_tuft':
+        # a tuft of longer fur standing off him: lit at the root's crest, tapering to a ragged point
+        furred(p, f, 1.08, base=mixc(FUR, FUR_LIGHT, 0.2), slant=0.25)
+        for s in ('front', 'back', 'right', 'left'):
+            taper(p, f[s], sharp=1.0)
+    elif style == 'spine':
+        furred(p, f, 0.7, base=FUR_DARK)
+    elif style == 'abs':
+        # a block of the abdomen: lit along its top, its lower edge in shadow, rounded at its corners
+        skin_box(p, f, SKIN)
+        fx, fy, fw, fh = f['front']
+        for i, j, xy in each(f['front']):
+            y = j / max(1, fh - 1)
+            x = abs(i + 0.5 - fw / 2) / (fw / 2)
+            c = mixc(SKIN_HIGH, SKIN, min(1.0, y * 1.5))
+            if y > 0.7:
+                c = mixc(c, SKIN_DARK, (y - 0.7) / 0.3 * 0.7)
+            if x > 0.75:
+                c = mixc(c, SKIN_DARK, (x - 0.75) * 1.6)
+            p.px(xy, [v + p.rnd.randint(-2, 2) for v in c])
+        for s in ('right', 'left', 'bottom'):
+            fx, fy, fw, fh = f[s]
+            for i, j, xy in each(f[s]):
+                p.px(xy, k(SKIN_DARK, 0.9))
+    elif style in ('fist_palm', 'fist_heel'):
+        skin_box(p, f, SKIN if style == 'fist_palm' else SKIN_LIGHT)
+    elif style == 'fist_back':
+        # the back of the hand, outward: furred, the tendons faint under it toward the knuckles
+        skin_box(p, f, SKIN)
+        fx, fy, fw, fh = f['back']
+        fur(p, (fx, fy, fw, fh), 0.95, base=FUR, slant=0.1)
+    elif style == 'knuckles':
+        # the knuckles in a row, each lit along its crest, the clefts between them dark
+        skin_box(p, f, SKIN_LIGHT)
+        for s in ('top', 'back', 'front', 'bottom'):
+            fx, fy, fw, fh = f[s]
+            for i, j, xy in each(f[s]):
+                cleft = (i * 4 // max(1, fw)) != ((i + 1) * 4 // max(1, fw)) and i < fw - 1
+                if cleft:
+                    p.px(xy, SKIN_DEEP)
+                elif s == 'top':
+                    p.px(xy, mixc(SKIN_HIGH, SKIN_LIGHT, j / max(1, fh - 1)))
+    elif style in ('finger_top', 'finger_tip'):
+        # a finger curled over the shaft: lit across its back, dark at its sides where it meets the next;
+        # its tip under the shaft with a dark nail
+        skin_box(p, f, SKIN_LIGHT if style == 'finger_top' else SKIN)
+        for s in ('top', 'front', 'back', 'bottom'):
+            fx, fy, fw, fh = f[s]
+            for j in range(fh):
+                p.px((fx, fy + j), SKIN_DEEP)
+                p.px((fx + fw - 1, fy + j), SKIN_DARK)
+        if style == 'finger_tip':
+            for s in ('front', 'back', 'right', 'left'):
+                fx, fy, fw, fh = f[s]
+                for i in range(fw):
+                    p.px((fx + i, fy + fh - 1), NAIL)
+                    p.px((fx + i, fy + fh - 2), mixc(NAIL, SKIN_DARK, 0.5))
+        else:
+            for s in ('right', 'left'):                                  # the joint's crease
+                fx, fy, fw, fh = f[s]
+                for j in range(fh):
+                    p.px((fx + fw // 2, fy + j), SKIN_DARK)
+    elif style == 'thumb_wrap':
+        skin_box(p, f, SKIN_LIGHT)
+        for s in ('front', 'back', 'top', 'bottom'):
+            fx, fy, fw, fh = f[s]
+            for i in range(fw):
+                p.px((fx + i, fy + fh - 1), SKIN_DARK)
+        fx, fy, fw, fh = f['front']
+        for i in range(fw):
+            p.px((fx + i, fy + fh - 1), NAIL)
+    elif style in ('fur_torso', 'fur_flank', 'fur_waist', 'fur_hips', 'fur_arm', 'fur_shoulder', 'fur_forearm', 'fur_thigh', 'fur_shin'):
         furred(p, f, 1.0, base=FUR, slant=0.15)
     elif style == 'fur_back':
         furred(p, f, 0.92, base=FUR_DARK)

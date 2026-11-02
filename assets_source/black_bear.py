@@ -71,18 +71,29 @@ ARM, FOREARM, HAND = (-0.2, 0, 0.2), (-0.7, -0.1, 0), (0, 0, 0)
 
 def kasaya_strips(side, W, D):
     """The kasaya over his breast (side -1) or back (+1): thrown over the left shoulder and down across him to the
-    right hip, its breadth laid as four long folds side by side along the slant, each lying out a little from the
-    next, so the cloth falls in folds; the folds lower on his left side, shorter, covering the left of his belly."""
+    right hip, its breadth gathered in five folds fanning out from the shoulder, each lying a little out from the
+    one above it and at its own angle, so the cloth falls in rolls; the uppermost carrying its gold border along
+    the neck, the lowest its border and fringe; below it the cloth sagging in swags between the folds' ends."""
     out = []
     z = -D - 2.2 if side < 0 else D + 1.8
-    ang = -0.62
-    ux, uy = 0.58, 0.81                                  # across the slant, toward his left hip
-    for k in range(4):
-        cx, cy = 1.2 + ux * 4.0 * k, -18.5 + uy * 4.0 * k
-        length = 36 - 7 * k
-        fold = (0.5 if k % 2 else 0.0) + 0.15 * k
-        out.append(part('kasaya_%s_%d' % ('front' if side < 0 else 'back', k), 'body', (cx, cy, z + side * fold), (side * -0.05, 0, ang + 0.03 * (k % 2)),
-                        [(-length / 2, -2.3, -0.7, length, 4.6, 1.4, 'kasaya_band' if k % 2 == 0 else 'kasaya_band_seam')]))
+    name = 'front' if side < 0 else 'back'
+    for k in range(5):
+        ang = -0.74 + 0.065 * k                              # the folds fanning out from the shoulder
+        ux, uy = -math.sin(ang), math.cos(ang)               # across the fold, toward his left hip
+        cx, cy = 1.4 + ux * 3.3 * k, -18.8 + uy * 3.3 * k
+        length = 37 - 6.4 * k
+        out_ = (0.55 if k % 2 else 0.0) + 0.18 * k          # each a little proud of the last
+        style = 'kasaya_edge' if k == 0 else 'kasaya_edge_low' if k == 4 else 'kasaya_fold'
+        out.append(part('kasaya_%s_%d' % (name, k), 'body', (cx, cy, z + side * out_), (side * (-0.05 - 0.02 * k), 0, ang),
+                        [(-length / 2, -2.2, -0.75, length, 4.4 if k < 4 else 4.8, 1.5, style)]))
+    # the swags: the cloth's lower edge sagging below the last fold, in three hanging curves
+    ang = -0.74 + 0.065 * 4
+    ux, uy = -math.sin(ang), math.cos(ang)
+    bx, by = 1.4 + ux * 3.3 * 4 + ux * 2.6, -18.8 + uy * 3.3 * 4 + uy * 2.6
+    for n, (along, wd, ht) in enumerate(((-8.5, 6.0, 2.6), (-1.5, 6.6, 3.2), (5.0, 5.4, 2.4))):
+        x, y = bx + math.cos(ang) * along, by + math.sin(ang) * along
+        out.append(part('kasaya_%s_swag_%d' % (name, n), 'body', (x, y, z + side * 1.0), (side * -0.12, 0, ang * 0.35),
+                        [(-wd / 2, -0.4, -0.6, wd, ht, 1.2, 'kasaya_swag')]))
     return out
 
 
@@ -178,13 +189,25 @@ def bear(king):
             # the kasaya: over the left shoulder, across breast and back to the right hip in folding bands; its
             # skirt hanging from the belt over his left side and before him in folds; its corner falling from the
             # shoulder down his front; its long fall down his back from the shoulder, lifting as he moves
+            # over the shoulder the cloth rounds in three layers, its gold border at its edge
             part('kasaya_shoulder', 'body', (W + 1.8, -30.5, 0), (0, 0, -0.38), [(-5.5, -1.6, -D - 3.0, 10, 3.2, 2 * D + 6.0, 'kasaya_drape'),
+                                                                                (-4.3, -2.7, -D - 2.2, 7.6, 1.3, 2 * D + 4.4, 'kasaya_drape_top'),
                                                                                 (-5.5, 1.4, -D - 3.0, 2.0, 5, 2 * D + 6.0, 'kasaya_drape')]),
-            part('kasaya_skirt', 'body', (W * 0.35, -4.4, -D - 2.4), (-0.12, 0, -0.04), [(-W * 0.75, 0, -0.7, W * 1.5, 9, 1.4, 'kasaya_panel')]),
-            part('kasaya_skirt_hem', 'kasaya_skirt', (0, 8.6, 0), (-0.14, 0, 0), [(-W * 0.8, 0, -0.7, W * 1.6, 8, 1.4, 'kasaya_hem')]),
+            part('kasaya_shoulder_fall', 'kasaya_shoulder', (-5.3, 1.2, 0), (0, 0, 0.32), [(-0.7, 0, -D - 2.6, 1.4, 6.5, 2 * D + 5.2, 'kasaya_side')]),
+            # its skirt from the belt over his left side in three pleated panels, each at its own angle and
+            # length, hemmed in gold over a fringe; the side panel wrapping round his hip
+            part('kasaya_skirt', 'body', (W * 0.35, -4.4, -D - 2.4), (-0.12, 0, -0.04), [(-W * 0.3, 0, -0.7, W * 0.6, 9, 1.4, 'kasaya_pleat')]),
+            part('kasaya_skirt_hem', 'kasaya_skirt', (0, 8.6, 0), (-0.14, 0, 0), [(-W * 0.32, 0, -0.7, W * 0.64, 8.6, 1.4, 'kasaya_hem')]),
+            part('kasaya_pleat_in', 'kasaya_skirt', (-W * 0.5, 0.3, 0.5), (-0.03, 0.2, 0.06), [(-W * 0.26, 0, -0.6, W * 0.52, 8.6, 1.2, 'kasaya_pleat_dark')]),
+            part('kasaya_pleat_in_hem', 'kasaya_pleat_in', (0, 8.3, 0), (-0.1, 0, 0), [(-W * 0.27, 0, -0.6, W * 0.54, 7.4, 1.2, 'kasaya_hem')]),
+            part('kasaya_pleat_out', 'kasaya_skirt', (W * 0.52, 0.2, 0.6), (0.0, -0.22, -0.06), [(-W * 0.26, 0, -0.6, W * 0.52, 8.8, 1.2, 'kasaya_pleat_dark')]),
+            part('kasaya_pleat_out_hem', 'kasaya_pleat_out', (0, 8.5, 0), (-0.1, 0, 0), [(-W * 0.27, 0, -0.6, W * 0.54, 8.2, 1.2, 'kasaya_hem')]),
             part('kasaya_side', 'body', (W + 0.8, -4.4, 0), (0, 0, -0.1), [(-0.7, 0, -D - 1.6, 1.4, 15, 2 * D + 2.8, 'kasaya_side')]),
+            # its corner falling from the shoulder down his front, in two layers, the under one longer
             part('kasaya_tail', 'body', (W - 2.0, -24.5, -D - 2.6), (-0.08, 0, 0.04), [(-3.2, 0, -0.6, 6.4, 22, 1.2, 'kasaya_end')]),
-            part('kasaya_cape', 'body', (W - 3, -31, D + 2.6), (0.16, 0, -0.06), [(-6.5, 0, -0.6, 13, 16, 1.2, 'kasaya_panel')]),
+            part('kasaya_tail_over', 'kasaya_tail', (1.2, -0.4, -0.9), (-0.04, 0, -0.06), [(-2.4, 0, -0.5, 4.8, 13, 1.0, 'kasaya_end_short')]),
+            # its long fall down his back from the shoulder, in two lengths
+            part('kasaya_cape', 'body', (W - 3, -31, D + 2.6), (0.16, 0, -0.06), [(-6.5, 0, -0.6, 13, 16, 1.2, 'kasaya_cape')]),
             part('kasaya_cape_lower', 'kasaya_cape', (0, 15.6, 0), (0.08, 0, 0), [(-7, 0, -0.6, 14, 14, 1.2, 'kasaya_hem')]),
             part('jade_ring', 'body', (W - 3.0, -27.0, -D - 3.4), (0, 0, 0), [(-2.2, -2.2, -0.6, 4.4, 4.4, 1.2, 'jade')]),
         ] + kasaya_strips(-1, W, D) + kasaya_strips(1, W, D) + [
@@ -304,6 +327,42 @@ def brocade(p, rect, light=1.0, cell=6):
         p.px(xy, [x * light + p.rnd.randint(-3, 3) for x in c])
 
 
+def patchwork(p, rect, light=1.0, cell=10):
+    """The kasaya's patchwork as it is sewn (the rice-field pattern, 田相): broad panels of red silk, each its
+    own shade and with a faint damask of its own, divided by narrow strips of deep wine-red (not gold: from a
+    step away it must read as one cloth, its gold kept for its border); a small gold flower worked in every
+    other panel."""
+    fx, fy, fw, fh = rect
+    for i, j, xy in w.each(p, rect):
+        ci, cj = (i + fx) // cell, (j + fy) // (cell + 2)
+        u, v = (i + fx) % cell, (j + fy) % (cell + 2)
+        tone = 0.84 + 0.26 * w._hash(ci, cj, 77)
+        if u == 0 or v == 0:
+            c = mix(SILK_DEEP, (70, 10, 14), 0.4)
+        elif u == 1 or v == 1:
+            c = mix(SILK_DEEP, SILK, 0.35)                        # the seam's shadow
+        else:
+            c = mix(SILK_DEEP, SILK, 0.55 + 0.45 * w.vnoise(fx + i, fy + j, 3.0, 5))
+            if (u + v) % 4 == 0:
+                c = k(c, 1.06)                                    # the damask's glint
+            c = k(c, tone)
+            if (ci + cj) % 2 == 0:
+                du, dv = u - cell // 2, v - (cell + 2) // 2
+                if abs(du) + abs(dv) == 0:
+                    c = GOLD_LIGHT
+                elif abs(du) + abs(dv) == 1:
+                    c = mix(GOLD, SILK, 0.25)
+        p.px(xy, [x * light + p.rnd.randint(-3, 3) for x in c])
+
+
+def gold_scroll(p, rect):
+    """A running scroll of dark gold worked along a gold border."""
+    fx, fy, fw, fh = rect
+    for i in range(fw):
+        j = int((fh - 1) * (0.5 + 0.5 * math.sin(i * 0.9)))
+        p.px((fx + i, fy + j), GOLD_DEEP)
+
+
 def paint_bear(king, lace):
     lace_c, lace_d = lace
 
@@ -325,10 +384,50 @@ def paint_bear(king, lace):
                 fx, fy, fw, fh = f[s]
                 p.clear((fx, fy))
                 p.clear((fx + fw - 1, fy))
+        if style in ('kasaya_edge', 'kasaya_edge_low', 'kasaya_fold', 'kasaya_swag', 'kasaya_pleat', 'kasaya_pleat_dark',
+                     'kasaya_end_short', 'kasaya_cape', 'kasaya_drape_top'):
+            # the cloth rolled into a fold: lit along its crest, falling into shadow toward its lower edge and
+            # dark in the crease beneath; its sides (the cloth's thickness) shadowed
+            dark = style == 'kasaya_pleat_dark'
+            for s_ in f:
+                fx, fy, fw, fh = f[s_]
+                patchwork(p, f[s_], light=w.LIGHT[s_] * (0.86 if dark else 1.0))
+                for i, j, xy in w.each(p, f[s_]):
+                    t = j / max(1, fh - 1)
+                    if style in ('kasaya_pleat', 'kasaya_pleat_dark', 'kasaya_end_short', 'kasaya_cape'):
+                        u = (i + 0.5) / fw                         # a pleat falling: its crest down its middle
+                        p.px(xy, k(p.get(xy), 0.78 + 0.32 * math.sin(u * math.pi)))
+                    elif style == 'kasaya_swag':                   # a swag: hanging in a curve, its belly lit
+                        u = (i + 0.5) / fw
+                        p.px(xy, k(p.get(xy), 0.75 + 0.35 * math.sin(u * math.pi) * (1 - 0.5 * t)))
+                    else:
+                        p.px(xy, k(p.get(xy), 1.16 - 0.5 * t * t))
+                if s_ in ('right', 'left', 'top', 'bottom'):
+                    w.flat(p, {s_: f[s_]}, k(SILK_DEEP, w.LIGHT[s_] * 0.8))
+            for s_ in ('front', 'back'):
+                fx, fy, fw, fh = f[s_]
+                if style == 'kasaya_edge':                         # its border along the neck: a broad gold band, a dark rule
+                    for j in range(2):
+                        w.hline(p, f[s_], j, GOLD_LIGHT if j == 0 else GOLD)
+                    w.hline(p, f[s_], 2, GOLD_DEEP)
+                    gold_scroll(p, (fx, fy, fw, 3))
+                if style in ('kasaya_edge_low', 'kasaya_swag', 'kasaya_cape', 'kasaya_end_short', 'kasaya_pleat',
+                             'kasaya_pleat_dark'):
+                    edge = fh - 3 if style != 'kasaya_swag' else fh - 2
+                    w.hline(p, f[s_], edge - 1, GOLD_DEEP)
+                    for j in range(edge, fh):
+                        w.hline(p, f[s_], j, GOLD if j < fh - 1 else GOLD_DEEP)
+                    if style == 'kasaya_edge_low':
+                        gold_scroll(p, (fx, fy + edge, fw, 2))
+                if style in ('kasaya_end_short', 'kasaya_cape', 'kasaya_pleat', 'kasaya_pleat_dark'):
+                    w.vline(p, f[s_], 0, GOLD)
+                    w.vline(p, f[s_], fw - 1, GOLD_DEEP)
+            if style == 'kasaya_drape_top':
+                w.border(p, f, GOLD, width=1)
         if style in ('kasaya_band', 'kasaya_band_seam', 'kasaya_hem', 'kasaya_side'):
             for s in f:
                 fx, fy, fw, fh = f[s]
-                brocade(p, f[s], light=w.LIGHT[s], cell=7)
+                patchwork(p, f[s], light=w.LIGHT[s])
                 for i, j, xy in w.each(p, f[s]):              # the fold: the cloth rounding over, shadowed beneath
                     t = j / max(1, fh - 1)
                     p.px(xy, k(p.get(xy), 1.12 - 0.42 * t * t))
@@ -593,8 +692,12 @@ def paint_bear(king, lace):
             w.flat(p, f, (10, 8, 10), faces=('right', 'left', 'top', 'bottom'))
         if style in ('kasaya', 'kasaya_drape', 'kasaya_end', 'kasaya_panel'):
             for s in f:
-                brocade(p, f[s], light=w.LIGHT[s], cell=7 if style != 'kasaya_drape' else 5)
-            w.border(p, f, GOLD_LIGHT, width=1)
+                patchwork(p, f[s], light=w.LIGHT[s], cell=10 if style != 'kasaya_drape' else 8)
+                if style == 'kasaya_end':                          # hanging: a fold down its middle
+                    fx, fy, fw, fh = f[s]
+                    for i, j, xy in w.each(p, f[s]):
+                        p.px(xy, k(p.get(xy), 0.8 + 0.3 * math.sin((i + 0.5) / fw * math.pi)))
+            w.border(p, f, GOLD, width=1)
             if style in ('kasaya_end', 'kasaya_panel'):
                 for s in ('front', 'back'):
                     fx, fy, fw, fh = f[s]

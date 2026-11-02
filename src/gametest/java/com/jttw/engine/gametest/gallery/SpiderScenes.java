@@ -156,6 +156,8 @@ final class SpiderScenes {
             MantisSonEntity m = creature(p, SpiderCaveRegistry.MANTIS_SON.get(), 0.5, 10.5, 200f, false);
             if (m != null) m.showRaised(true);
         }, new double[]{2.6, 2.4, 5.5, 0.5, 2.0, 10.5}));
+        all.add(scene("spider_mantis_close", p -> creature(p, SpiderCaveRegistry.MANTIS_SON.get(), 0.5, 10.5, 205f, false),
+                new double[]{-1.3, 2.3, 6.9, 0.5, 1.8, 10.5}));
         all.add(scene("spider_mantis_face", p -> creature(p, SpiderCaveRegistry.MANTIS_SON.get(), 0.5, 9.5, 180f, false),
                 new double[]{1.0, 2.7, 7.3, 0.5, 2.6, 9.5}));
         // the Cockroach Son
@@ -180,6 +182,8 @@ final class SpiderScenes {
         }, new double[]{-1.8, 2.0, 5.5, 0.5, 1.4, 10.0}));
         // the Hundred-Eyed Demon Lord
         all.addAll(turns("spider_lord", (p, yaw) -> lord(p, 0.5, 10.5, yaw), 10.5, 2.1, 7.0));
+        // at a distance, as he is first seen: his robe must read as cloth, its gold as trim
+        all.add(scene("spider_lord_far", p -> lord(p, 0.5, 10.5, 215f), new double[]{-8.5, 3.6, -1.5, 0.5, 2.0, 10.5}));
         all.add(scene("spider_lord_face", p -> lord(p, 0.5, 10.0, 180f), new double[]{0.9, 3.15, 7.6, 0.5, 3.0, 10.0}));
         for (String[] art : new String[][]{{"glaring", "1"}, {"pouring", "2"}, {"rearing", "3"}}) {
             all.add(scene("spider_lord_" + art[0], p -> {

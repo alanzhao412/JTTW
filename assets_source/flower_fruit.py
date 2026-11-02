@@ -809,8 +809,12 @@ BAJIE = mirrored(BAJIE + [
     part('right_cheek', 'head', (-3.0, -3.0, -3.1), (0, 0.3, 0), [(-1.2, -0.7, -0.8, 2.4, 1.6, 1.4, 'j_jowl')]),
     part('jaw', 'head', (0, 0.2, -3.0), (0.08, 0, 0), [(-2.3, 0, -4.4, 4.6, 1.5, 4.8, 'j_jaw'),
                                                        (-1.8, 1.4, -3.6, 3.6, 0.9, 3.6, 'j_jaw')]),
-    part('right_tusk', 'jaw', (-2.0, 0.2, -4.0), (-0.25, 0, 0.35), [(-0.4, -1.8, -0.4, 0.8, 2.0, 0.8, 'j_tusk')]),
-    part('right_tusk_tip', 'right_tusk', (0, -1.7, 0), (-0.5, 0, 0.3), [(-0.3, -1.5, -0.3, 0.6, 1.6, 0.6, 'j_tusk')]),
+    # the tusks: from the corners of the jaw outside the lip, a boar's: thick and stained at the root,
+    # sweeping out and forward, then curling up and back over the snout in four tapering lengths to a point
+    part('right_tusk', 'jaw', (-2.35, 0.55, -3.3), (0.55, 0.1, -0.55), [(-0.55, -1.5, -0.55, 1.1, 1.8, 1.1, 'j_tusk_root')]),
+    part('right_tusk_1', 'right_tusk', (0, -1.4, 0), (-0.3, 0, 0.05), [(-0.45, -1.4, -0.45, 0.9, 1.5, 0.9, 'j_tusk')]),
+    part('right_tusk_2', 'right_tusk_1', (0, -1.3, 0), (-0.45, 0, 0.18), [(-0.35, -1.25, -0.35, 0.7, 1.35, 0.7, 'j_tusk')]),
+    part('right_tusk_tip', 'right_tusk_2', (0, -1.15, 0), (-0.55, 0, 0.25), [(-0.25, -1.2, -0.25, 0.5, 1.25, 0.5, 'j_tusk_tip')]),
     part('right_ear', 'head', (-3.6, -5.8, -0.2), (-0.35, 0.55, 0.95), [(-0.45, 0, -2.4, 0.9, 4.2, 4.8, 'j_ear')]),
     part('right_ear_flap', 'right_ear', (0, 4.0, 0), (-0.55, 0, 0), [(-0.4, 0, -2.2, 0.8, 4.4, 4.4, 'j_ear')]),
     part('monkcap', 'head', (0, -6.4, 0.2), (-0.1, 0, 0), [(-3.7, -1.6, -3.5, 7.4, 1.8, 7.0, 'j_cap'), (-3.1, -2.5, -2.9, 6.2, 1.0, 5.8, 'j_cap')]),
@@ -889,8 +893,28 @@ def paint_bajie(p, style, f, dims):
             p.px((fx + fw // 2, fy + j), (14, 10, 8))
             p.glow.putpixel((fx + fw // 2, fy + j), (0, 0, 0, 0))
         p.lit((fx + 1, fy), (255, 250, 230), 1.0)
-    if style == 'j_tusk':
-        w.flat(p, f, IVORY)
+    if style in ('j_tusk_root', 'j_tusk', 'j_tusk_tip'):
+        # old ivory: stained brown-yellow at the root where it leaves the gum, paling up its length, ringed
+        # with fine growth lines, shadowed on its underside; the tip polished and sharp
+        root, mid, tip = (150, 122, 74), (214, 198, 160), (246, 240, 222)
+        lo, hi = {'j_tusk_root': (0.0, 0.35), 'j_tusk': (0.3, 0.75), 'j_tusk_tip': (0.7, 1.0)}[style]
+        for s_ in f:
+            fx, fy, fw, fh = f[s_]
+            for i, j, xy in w.each(p, f[s_]):
+                v = 1 - j / max(1, fh - 1)                  # 0 at the root end (below), 1 toward the tip (above)
+                q = lo + (hi - lo) * v
+                c = mix(root, mid, q / 0.6) if q < 0.6 else mix(mid, tip, (q - 0.6) / 0.4)
+                if s_ in ('right', 'left', 'front', 'back') and (j + (2 if style == 'j_tusk' else 0)) % 3 == 0 and q < 0.85:
+                    c = k(c, 0.86)                          # a growth ring
+                if s_ == 'back' or (s_ == 'right' and i < fw // 2):
+                    c = k(c, 0.85)
+                p.px(xy, [x * w.LIGHT[s_] + p.rnd.randint(-3, 3) for x in c])
+        if style == 'j_tusk_root':
+            for s_ in S:
+                w.hline(p, f[s_], f[s_][3] - 1, (110, 60, 56))        # the gum about its root
+        if style == 'j_tusk_tip':
+            for s_ in S:
+                w.point(p, f[s_], down=False, keep=0.25, sharp=0.55)
     if style == 'j_ear':
         skin(p, f, BAJIE_SKIN, BAJIE_SHADE)
         for s in ('right', 'left'):
@@ -1024,15 +1048,19 @@ MACAQUE = [q for q in MACAQUE if q[0] != 'right_toes']
 MACAQUE = mirrored(MACAQUE + [
     # the head: an empty part at the neck, which the Monkey King's head (its own model) rides; his cap on it
     part('head', 'chest', (0, -10.5, -0.4), (0, 0, 0), []),
-    # the phoenix-feather cap (凤翅紫金冠): a purple-gold dome banded in gold, a jewel at its brow, phoenix
-    # wings rising at its sides, and the two long pheasant plumes arcing up and back
-    part('cap', 'head', (0, -8.4, 0.2), (0, 0, 0), [(-4.0, -2.4, -3.6, 8.0, 2.6, 7.4, 'k_cap'),
-                                                    (-3.0, -3.4, -2.6, 6.0, 1.2, 5.4, 'k_cap'),
-                                                    (-4.7, -0.4, -4.3, 9.4, 1.3, 8.8, 'k_capband'),
-                                                    (-1.0, -2.0, -4.6, 2.0, 2.2, 0.7, 'k_jewel')]),
-    part('right_phoenix', 'cap', (-4.6, -1.0, 0.4), (0.15, 0.2, -0.75), [(-0.3, -5.2, -2.0, 0.6, 5.4, 4.0, 'k_wing'),
+    # the phoenix-feather cap (凤翅紫金冠), seated on the crown of his head above the brow, tipped back a
+    # little as a cap sits: the gold fillet (紧箍) round his head at the top of the forehead, its two ends
+    # curled in scrolls over the middle of the brow; the purple-gold dome on it in two tiers and a knob, a
+    # jewel at its brow over the fillet; phoenix wings rising at its sides, the two long pheasant plumes
+    part('cap', 'head', (0, -8.75, 0.3), (-0.12, 0, 0), [(-4.15, -2.35, -3.45, 8.3, 2.45, 7.7, 'k_cap'),
+                                                       (-3.35, -3.35, -2.75, 6.7, 1.1, 6.3, 'k_cap'),
+                                                       (-1.6, -4.05, -1.4, 3.2, 0.8, 3.0, 'k_capknob'),
+                                                       (-4.6, -0.55, -3.95, 9.2, 1.05, 8.6, 'k_capband'),
+                                                       (-0.95, -2.3, -3.85, 1.9, 1.75, 0.55, 'k_jewel')]),
+    part('right_fillet_curl', 'cap', (-0.85, 0.05, -4.05), (0, 0, 0.785), [(-0.65, -0.65, -0.25, 1.3, 1.3, 0.5, 'k_fillet_curl')]),
+    part('right_phoenix', 'cap', (-4.4, -1.4, 0.4), (0.15, 0.2, -0.75), [(-0.3, -5.2, -2.0, 0.6, 5.4, 4.0, 'k_wing'),
                                                                         (-0.3, -7.2, -0.6, 0.6, 2.2, 2.0, 'k_wing')]),
-    part('right_plume', 'cap', (-1.2, -3.2, 1.2), (-0.62, 0.08, -0.12), [(-0.45, -16.0, -0.45, 0.9, 16.0, 0.9, 'k_plume')]),
+    part('right_plume', 'cap', (-1.2, -3.6, 1.2), (-0.62, 0.08, -0.12), [(-0.45, -16.0, -0.45, 0.9, 16.0, 0.9, 'k_plume')]),
     part('right_plume_mid', 'right_plume', (0, -15.6, 0), (-0.6, 0, -0.08), [(-0.4, -12.0, -0.4, 0.8, 12.0, 0.8, 'k_plume')]),
     part('right_plume_tip', 'right_plume_mid', (0, -11.8, 0), (-0.6, 0, -0.06), [(-0.3, -9.0, -0.3, 0.6, 9.0, 0.6, 'k_plume')]),
     # the golden chain mail (锁子黄金甲): a gorget, the breast in two plates and its mirror, a plate over the belly
@@ -1223,6 +1251,18 @@ def paint_macaque(p, style, f, dims):
             fx, fy, fw, fh = f[s_]
             for i in range(2, fw - 2, 4):
                 p.px((fx + i, fy + fh // 2), (60, 140, 200))
+    if style == 'k_capknob':
+        plate(p, f, GOLD_MAIL, GOLD_MAIL_DEEP, GOLD_LIGHT)
+    if style == 'k_fillet_curl':                                   # the fillet's scrolled end: a gold ring cut within
+        plate(p, f, GOLD_MAIL, GOLD_MAIL_DEEP, GOLD_LIGHT)
+        for s_ in ('front', 'back'):
+            fx, fy, fw, fh = f[s_]
+            for i, j, xy in w.each(p, f[s_]):
+                r = math.hypot((i + 0.5 - fw / 2) / (fw / 2), (j + 0.5 - fh / 2) / (fh / 2))
+                if r > 1.05:
+                    p.clear(xy)
+                elif r < 0.45:
+                    p.px(xy, GOLD_MAIL_DEEP)
     if style == 'k_jewel':
         w.flat(p, f, (200, 30, 40))
         fx, fy, fw, fh = f['front']

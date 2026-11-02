@@ -11,11 +11,13 @@ from one list of parts; the model is written into SpiderCaveRenderers between it
   that hold a barbed lance; four legs drawn up under them; a banded abdomen hanging in a curve to its
   sting. Three skins: the Honeybee Son (amber and black, golden fur), the Hornet Son (a rust-red head,
   chestnut and orange-yellow bands), the Gadfly Son (dun and grey, huge eyes of iridescent green).
-- The Mantis Son (螳螂精): a lean, upright mantis demon some two and a half blocks tall on four long
-  legs, its long neck-like prothorax rising from its body, a triangular head with great bulging eyes
-  and long feelers, two raptorial forelegs folded like scythes (spined femur, hooked blade), leaf-green
-  wings tented over its abdomen and veined like leaves, thorns down its neck, a flared shield at its
-  shoulders; a crimson sash knotted at its waist and a bronze collar plate.
+- The Mantis Son (螳螂精): an upright mantis demon with weight to it, on four stout legs: a thick plated
+  thorax, a heavy abdomen in ringed segments under broad leaf-green wings tented over it (the violet
+  hind wings showing at their edges), its long prothorax in three segments with a keel and thorns,
+  flaring into a shield at its shoulders; a triangular head, wide between two great bulging eyes and
+  narrowing in tiers to mandibles and palps, three simple eyes on its crest, long feelers; two massive
+  raptorial forelegs folded like scythes (a thick femur with a double row of spines, a spined blade to a
+  hooked tip); a crimson sash knotted at its waist and a bronze collar plate.
 - The Cockroach Son (蜚蠊精): a squat, broad beetle-demon on six spined legs, glossy chestnut wing
   covers domed and lacquer-bright, a pale-rimmed shield blotched dark over its head, long
   sweeping feelers, mandibles, cerci at its tail.
@@ -310,62 +312,173 @@ CRIMSON = (150, 26, 34)
 
 
 def mantis_parts():
+    """A mantis with weight to it: a thick, plated thorax under a crimson sash; a heavy abdomen in six
+    ringed segments under broad leaf-wings tented over it, the hind wings' violet showing at their edges; the
+    long prothorax in three segments with a keel down its back and thorns down its edges, flaring at the
+    top into the shield the forelegs hang from; the head a broad triangle, wide across the crown between two
+    great bulging eyes and narrowing in tiers to the jaws (mandibles, palps), three simple eyes on a crest
+    between the feelers; the raptorial forelegs massive: a long coxa, a thick femur with a double row of
+    spines and its claw-groove, the tibia's blade spined along its edge to a hooked tip; four walking legs,
+    each a stout femur to a spined knee, a long shin and a foot of segments flat on the ground."""
     ps = [
-        part('waist', 'root', (0, 6.5, 0), (0, 0, 0), [(-3.4, -2.6, -3.2, 6.8, 5.2, 6.4, 'meso'),
-                                                       (-3.8, -1.4, -3.6, 7.6, 1.6, 7.2, 'sash')]),
-        part('sash_tail', 'waist', (1.6, 0, -3), (-0.1, 0, -0.1), [(-0.9, 0, -0.3, 1.8, 7, 0.4, 'sash_tail')]),
-        part('abdomen', 'waist', (0, -0.6, 2.2), (-0.32, 0, 0), [
-            (-3.6, -2.4, 0, 7.2, 5.2, 7.5, 'abdomen_a'),
-            (-3.0, -2, 7, 6, 4.6, 6.5, 'abdomen_b'),
-            (-1.8, -1, 12, 3.6, 2.8, 3, 'abdomen_c'),
+        part('waist', 'root', (0, 6.5, 0), (0, 0, 0), [(-4.0, -3.0, -3.6, 8.0, 6.0, 7.2, 'meso'),
+                                                       (-4.3, -3.5, -3.1, 8.6, 1.3, 6.4, 'thorax_plate'),
+                                                       (-4.5, -1.3, -3.9, 9.0, 1.8, 7.8, 'sash'),
+                                                       (-1.4, -1.6, -4.4, 2.8, 2.6, 0.8, 'sash_knot')]),
+        part('sash_tail', 'waist', (1.6, 0.4, -4.1), (-0.1, 0, -0.1), [(-0.9, 0, -0.3, 1.8, 7.5, 0.5, 'sash_tail')]),
+        part('abdomen', 'waist', (0, -0.6, 2.8), (-0.32, 0, 0), [
+            (-4.2, -2.8, 0, 8.4, 5.8, 4.0, 'abd_seg'),
+            (-4.5, -3.0, 3.6, 9.0, 6.2, 4.0, 'abd_seg'),
+            (-4.2, -2.8, 7.2, 8.4, 5.7, 3.8, 'abd_seg'),
+            (-3.5, -2.3, 10.6, 7.0, 4.7, 3.4, 'abd_seg'),
+            (-2.6, -1.7, 13.6, 5.2, 3.5, 2.9, 'abd_seg'),
+            (-1.7, -1.1, 16.1, 3.4, 2.3, 2.2, 'abd_tip'),
+            (-1.0, -0.4, 17.9, 0.7, 0.7, 2.8, 'cercus'), (0.3, -0.4, 17.9, 0.7, 0.7, 2.8, 'cercus'),
         ]),
-        part('wings', 'abdomen', (0, -2.7, -0.5), (0.06, 0, 0), []),
-        part('right_tegmen', 'wings', (-0.1, -0.2, 0), (0, 0, 0.42), [(-4.6, -0.3, 0, 4.6, 0.6, 17.5, 'tegmen')]),
-        part('right_hindwing', 'wings', (-0.3, 0.5, 0.6), (0, 0, 0.62), [(-4.4, -0.2, 0, 4.4, 0.4, 15.5, 'hindwing')]),
-        part('prothorax', 'waist', (0, -2, -0.5), (0.14, 0, 0), [
-            (-1.9, -17, -1.9, 3.8, 17, 3.8, 'prothorax'),
-            (-2.8, -8.0, -2.7, 5.6, 8.2, 5.4, 'prothorax_low'),
-            (-3.4, -15.0, -2.9, 6.8, 4.8, 5.6, 'pronotum_lobe'),
-            (-2.6, -17.6, -2.6, 5.2, 2.6, 5.2, 'collar'),
-            (-2.2, -15, -2.3, 4.4, 1.2, 0.8, 'collar_plate'),
-            (-2.25, -9.5, -0.4, 0.5, 0.5, 0.9, 'thorn'), (1.75, -9.5, -0.4, 0.5, 0.5, 0.9, 'thorn'),
-            (-2.25, -6.0, -0.4, 0.5, 0.5, 0.9, 'thorn'), (1.75, -6.0, -0.4, 0.5, 0.5, 0.9, 'thorn'),
-            (-2.25, -2.5, -0.4, 0.5, 0.5, 0.9, 'thorn'), (1.75, -2.5, -0.4, 0.5, 0.5, 0.9, 'thorn'),
+        part('wings', 'abdomen', (0, -3.3, -0.4), (0.07, 0, 0), []),
+        part('right_hindwing', 'wings', (-0.3, 0.6, 0.6), (0, 0, 0.66), [(-5.6, -0.25, 0, 5.6, 0.5, 18.2, 'hindwing')]),
+        part('right_tegmen', 'wings', (-0.1, -0.1, 0), (0, 0, 0.4), [(-6.0, -0.35, 0, 6.0, 0.7, 19.6, 'tegmen'),
+                                                                   (-6.3, -0.2, 0.6, 0.6, 0.9, 18.2, 'costa')]),
+        # the prothorax, long and segmented, flaring at the top into the shield the forelegs hang from
+        part('prothorax', 'waist', (0, -2.6, -0.6), (0.14, 0, 0), [
+            (-2.8, -7.6, -2.7, 5.6, 7.8, 5.4, 'pro_low'),
+            (-2.2, -13.0, -2.2, 4.4, 5.8, 4.4, 'pro_mid'),
+            (-2.5, -17.4, -2.4, 5.0, 4.6, 4.8, 'pro_top'),
+            (-3.8, -15.6, -3.0, 7.6, 3.4, 6.0, 'pronotum_lobe'),
+            (-0.6, -17.2, 2.0, 1.2, 16.0, 0.8, 'pro_keel'),
+            (-2.7, -18.0, -2.7, 5.4, 1.6, 5.4, 'collar'),
+            (-2.3, -15.2, -3.4, 4.6, 1.4, 0.8, 'collar_plate'),
+        ] + [(x, y, -0.5, 0.6, 0.6, 1.3, 'thorn') for y in (-11.5, -9.0, -6.2, -3.4) for hw in ((2.2 if y < -8 else 2.8),) for x in (-hw - 0.45, hw - 0.15)]),
+        # the head: a broad triangle, wide across the crown between the eyes, narrowing in tiers to the jaws
+        part('head', 'prothorax', (0, -18.0, -0.4), (-0.1, 0, 0), [
+            (-5.8, -4.6, -3.0, 11.6, 2.4, 5.0, 'head_top'),
+            (-4.8, -2.4, -3.0, 9.6, 2.6, 4.8, 'head_top2'),
+            (-3.6, 0, -2.9, 7.2, 2.4, 4.2, 'head_mid'),
+            (-2.4, 2.2, -2.8, 4.8, 1.9, 3.4, 'head_low'),
+            (-1.4, 3.9, -2.7, 2.8, 1.8, 2.6, 'mouthparts'),
+            (-2.0, -5.6, -1.4, 4.0, 1.2, 2.8, 'vertex'),
+            (-1.9, -2.2, -3.35, 3.8, 3.2, 0.5, 'frons'),
         ]),
-        part('head', 'prothorax', (0, -17.6, -0.4), (-0.1, 0, 0), [
-            (-5.4, -4.4, -2.9, 10.8, 4.4, 4.8, 'head_top'),
-            (-3.6, 0, -2.9, 7.2, 2.6, 3.8, 'head_mid'),
-            (-2.2, 2.4, -2.8, 4.4, 1.8, 3.0, 'head_low'),
-            (-1.2, 4.0, -2.7, 2.4, 2.0, 2.4, 'mouthparts'),
-        ]),
-        part('right_eye', 'head', (-4.9, -2.8, -0.5), (0, 0.15, 0.15), [(-3.0, -2.8, -2.8, 4.0, 5.6, 5.6, 'compound')]),
-        part('right_antenna', 'head', (-0.8, -3.2, -2), (0.85, 0.25, -0.2), [(-0.25, -12, -0.25, 0.5, 12, 0.5, 'antenna')]),
-        part('right_coxa', 'prothorax', (-2.6, -14.0, -1.6), (-0.85, 0.15, 0.3), [(-1, 0, -1, 2, 7, 2, 'coxa'),
-                                                                           (-1.4, 0.5, -1.4, 2.8, 1.6, 2.8, 'armlet')]),
-        part('right_femur', 'right_coxa', (0, 7, 0), (-2.55, 0, 0), [
-            (-1.4, -0.2, -1.4, 2.8, 11, 2.8, 'femur'),
-            (-0.5, 1, -2.2, 1, 9, 0.9, 'femur_spines'),
-            (-0.3, 2.0, -3.4, 0.6, 0.6, 1.6, 'spine'), (-0.3, 4.4, -3.6, 0.6, 0.6, 1.8, 'spine'),
-            (-0.3, 6.8, -3.4, 0.6, 0.6, 1.6, 'spine'), (-0.3, 9.0, -3.0, 0.6, 0.6, 1.2, 'spine'),
-        ]),
-        part('right_tibia', 'right_femur', (0, 10.8, 0), (2.7, 0, 0), [
-            (-0.9, 0, -0.9, 1.8, 9, 1.8, 'blade'),
-            (-0.4, 0.8, -1.6, 0.8, 7.5, 0.8, 'blade_edge'),
-            (-0.55, 8.6, -1.9, 1.1, 1.8, 1.9, 'hook'),
-        ]),
+        part('right_eye', 'head', (-5.0, -3.2, -0.4), (0, 0.15, 0.15), [(-3.0, -3.0, -3.0, 4.2, 6.0, 6.0, 'compound')]),
+        part('right_mandible', 'head', (-1.1, 5.0, -2.2), (0.15, 0.3, 0.35), [(-1.0, 0, -0.7, 1.5, 1.8, 1.4, 'mandible')]),
+        part('right_palp', 'head', (-1.7, 4.4, -2.5), (0.35, 0.2, 0.3), [(-0.3, 0, -0.3, 0.6, 2.6, 0.6, 'palp')]),
+        part('right_antenna', 'head', (-0.9, -3.6, -2.2), (0.85, 0.25, -0.2), [(-0.3, -13, -0.3, 0.6, 13, 0.6, 'antenna')]),
+        part('right_antenna_tip', 'right_antenna', (0, -12.8, 0), (-0.35, 0, -0.1), [(-0.2, -9, -0.2, 0.4, 9, 0.4, 'antenna')]),
+        # the raptorial forelegs, folded before it like scythes
+        part('right_coxa', 'prothorax', (-2.9, -14.2, -1.6), (-0.85, 0.15, 0.3), [(-1.45, 0, -1.45, 2.9, 7.6, 2.9, 'coxa'),
+                                                                           (-1.8, 0.4, -1.8, 3.6, 1.6, 3.6, 'armlet')]),
+        part('right_femur', 'right_coxa', (0, 7.4, 0), (-2.55, 0, 0), [
+            (-1.75, -0.2, -2.0, 3.5, 12.2, 3.9, 'femur'),
+            (-0.6, 0.8, -2.8, 1.2, 10.4, 0.9, 'femur_spines'),
+        ] + [(-1.2, 1.4 + 1.7 * n, -3.2 - (1.2 if n % 2 == 0 else 0.4), 0.6, 0.6, 1.4 + (1.2 if n % 2 == 0 else 0.4), 'spine') for n in range(6)]
+          + [(0.6, 2.2 + 1.9 * n, -3.0 - (0.8 if n % 2 else 0.2), 0.6, 0.6, 1.2 + (0.8 if n % 2 else 0.2), 'spine') for n in range(5)]),
+        part('right_tibia', 'right_femur', (0, 11.8, 0), (2.7, 0, 0), [
+            (-1.15, 0, -1.25, 2.3, 9.8, 2.5, 'blade'),
+            (-0.5, 0.8, -2.15, 1.0, 8.2, 1.0, 'blade_edge'),
+            (-0.75, 9.3, -2.6, 1.5, 2.2, 2.6, 'hook'),
+            (-0.4, 9.2, 0.8, 0.8, 3.2, 0.8, 'tarsus'),
+        ] + [(-0.3, 1.6 + 1.6 * n, -2.9, 0.6, 0.6, 0.9, 'spine') for n in range(5)]),
     ]
-    for i, (z, yaw) in enumerate(((-1.2, -0.55), (1.4, 0.6))):
+    for i, (z, yaw) in enumerate(((-1.2, -0.55), (1.6, 0.6))):
         ps += [
-            part('right_hip_%d' % i, 'waist', (-2.4, 1, z), (0, yaw, 0), []),
-            part('right_leg_%d' % i, 'right_hip_%d' % i, (0, 0, 0), (0, 0, 0.5), [(-8, -0.7, -0.7, 8, 1.4, 1.4, 'leg')]),
-            part('right_shin_%d' % i, 'right_leg_%d' % i, (-8, 0, 0), (0, 0, -1.75), [(-21, -0.55, -0.55, 21, 1.1, 1.1, 'leg_shin'),
-                                                                                       (-1.2, -1, -1, 1.4, 2, 2, 'knee')]),
+            part('right_hip_%d' % i, 'waist', (-3.2, 1, z), (0, yaw, 0), []),
+            part('right_leg_%d' % i, 'right_hip_%d' % i, (0, 0, 0), (0, 0, 0.5), [(-8.2, -1.05, -1.05, 8.6, 2.1, 2.1, 'leg'),
+                                                                               (-5.6, -1.3, -1.25, 3.6, 2.5, 2.5, 'leg_bulge')]),
+            part('right_shin_%d' % i, 'right_leg_%d' % i, (-8, 0, 0), (0, 0, -1.75), [(-21, -0.7, -0.7, 21, 1.4, 1.4, 'leg_shin'),
+                                                                                       (-1.5, -1.25, -1.25, 2.2, 2.5, 2.5, 'knee'),
+                                                                                       (-7.5, -1.4, -0.3, 0.6, 0.9, 0.6, 'spine'),
+                                                                                       (-12.5, -1.3, -0.3, 0.6, 0.8, 0.6, 'spine'),
+                                                                                       (-17.0, -1.2, -0.3, 0.6, 0.7, 0.6, 'spine')]),
+            part('right_foot_%d' % i, 'right_shin_%d' % i, (-20.8, 0, 0), (0, 0, 1.25), [(-3.4, -0.45, -0.5, 3.4, 0.9, 1.0, 'tarsus'),
+                                                                                         (-4.0, -0.3, -0.35, 0.8, 0.6, 0.7, 'claw')]),
         ]
-    return mirrored(ps)
+    # its bulk: the body, the scythes and the legs thickened across their length (a heavy insect, not a stick)
+    bulk = {'waist': (1.2, 1.15, 1.2), 'abdomen': (1.22, 1.2, 1.0), 'prothorax': (1.22, 1.0, 1.2), 'head': (1.12, 1.1, 1.1),
+            'right_coxa': (1.2, 1.0, 1.2), 'right_femur': (1.25, 1.0, 1.15), 'right_tibia': (1.2, 1.0, 1.1),
+            'right_eye': (1.15, 1.15, 1.15)}
+    for i in range(2):
+        bulk['right_leg_%d' % i] = (1.0, 1.3, 1.3)
+        bulk['right_shin_%d' % i] = (1.0, 1.35, 1.35)
+    out = []
+    for name, parent, pivot, rot, boxes, mirror in ps:
+        sx, sy, sz = bulk.get(name, (1, 1, 1))
+        out.append((name, parent, pivot, rot, [(x * sx, y * sy, z * sz, w_ * sx, h * sy, d * sz, st) for x, y, z, w_, h, d, st in boxes], mirror))
+    return mirrored(out)
 
 
 def mantis_painter():
     def paint_box(p, style, f, dims):
+        if style in ('abd_seg', 'abd_tip'):
+            # a ring of the abdomen: pale-green plate, its lower edge overlapping the next in a dark seam, a
+            # paler band along its belly, a faint dark dorsal line
+            chitin(p, f, mixc(MANTIS_GREEN, MANTIS_PALE, 0.15), MANTIS_PALE, gloss=True)
+            for s2 in SIDES:
+                fx, fy, fw, fh = f[s2]
+                for i in range(fw):
+                    p.px((fx + i, fy), k(MANTIS_DARK, 0.8))
+                    p.px((fx + i, fy + 1), k(MANTIS_DARK, 1.05))
+            for s2 in ('top', 'bottom'):
+                fx, fy, fw, fh = f[s2]
+                for i, j, xy in each(f[s2]):
+                    if j >= fh - 2:
+                        p.px(xy, k(MANTIS_DARK, 0.85))
+                    elif s2 == 'bottom' and abs(i - fw / 2) < fw * 0.3:
+                        p.px(xy, noisy(p, mixc(MANTIS_PALE, (230, 226, 160), 0.4), 3))
+                    elif s2 == 'top' and abs(i + 0.5 - fw / 2) < 1:
+                        p.px(xy, k(MANTIS_DARK, 0.9))
+            return
+        if style in ('pro_low', 'pro_mid', 'pro_top', 'thorax_plate'):
+            # the prothorax: glossy green, a pale seam down its front, ridged in rings, its edges darker
+            chitin(p, f, MANTIS_GREEN, MANTIS_PALE, gloss=True)
+            for s2 in SIDES:
+                fx, fy, fw, fh = f[s2]
+                for j in range(fh):
+                    if j % 6 == 5:
+                        for i in range(fw):
+                            p.px((fx + i, fy + j), k(MANTIS_DARK, 0.95))
+                    if s2 == 'front':
+                        p.px((fx + fw // 2, fy + j), MANTIS_PALE)
+                for i in range(fw):
+                    p.px((fx + i, fy), k(MANTIS_PALE, 0.95))
+            return
+        if style in ('pro_keel', 'vertex', 'frons', 'costa'):
+            chitin(p, f, mixc(MANTIS_GREEN, MANTIS_PALE, 0.4), (250, 255, 220))
+            if style == 'vertex':                                    # its three simple eyes
+                fx, fy, fw, fh = f['front']
+                for ex in (fw // 2 - 3, fw // 2, fw // 2 + 3):
+                    p.px((fx + ex, fy + 1), (250, 230, 150), glow=True)
+            if style == 'frons':
+                fx, fy, fw, fh = f['front']
+                for j in range(fh):
+                    p.px((fx + fw // 2, fy + j), k(MANTIS_DARK, 1.0))
+            return
+        if style == 'mandible':
+            chitin(p, f, (150, 120, 60), (230, 210, 150))
+            for s2 in ('front', 'right', 'left'):
+                cut_point(p, f[s2], keep=0.3, down=True, sharp=0.6)
+            return
+        if style == 'palp':
+            chitin(p, f, mixc(MANTIS_GREEN, MANTIS_PALE, 0.5))
+            return
+        if style == 'leg_bulge':
+            chitin(p, f, MANTIS_GREEN, MANTIS_PALE, gloss=True)
+            return
+        if style in ('tarsus', 'claw'):
+            chitin(p, f, MANTIS_DARK if style == 'tarsus' else (40, 34, 24))
+            if style == 'tarsus':
+                for s2 in SIDES:
+                    fx, fy, fw, fh = f[s2]
+                    for i in range(0, fw, 3):
+                        for j in range(fh):
+                            p.px((fx + i, fy + j), (30, 46, 22))
+            return
+        if style == 'sash_knot':
+            cloth(p, f, CRIMSON)
+            edges(p, f, (230, 180, 70))
+            return
+        if style == 'cercus':
+            chitin(p, f, MANTIS_DARK)
+            return
         if style in ('meso', 'prothorax', 'prothorax_low', 'head_top', 'head_mid', 'head_low', 'coxa', 'femur', 'leg', 'leg_shin', 'knee'):
             chitin(p, f, MANTIS_GREEN, MANTIS_PALE, gloss=style in ('head_top', 'femur', 'prothorax'))
             if style == 'prothorax':                                  # a pale seam down its front, and ridges
@@ -390,7 +503,7 @@ def mantis_painter():
         elif style == 'mouthparts':
             chitin(p, f, (140, 120, 60))
         elif style == 'compound':
-            compound_eye(p, f, (186, 214, 90), glow=0.45)
+            compound_eye(p, f, (130, 180, 64), glow=0.12)
             for s in ('front', 'right'):                              # the false pupil a mantis's eye shows
                 fx, fy, fw, fh = f[s]
                 for i, j, xy in each(f[s]):
@@ -634,7 +747,9 @@ if __name__ == '__main__':
     emit(st, slots, JAVA, 'stinger')
     print('stinging son', len(st), 'parts', {a: round(b, 2) for a, b in extent(st, 1.0).items()})
     mt = mantis_parts()
+    bg.UNITS, bg.TEX = 256, 256 * bg.S                       # the mantis, heavier and more detailed, on a larger skin
     save('mantis_son', mt, mantis_painter(), 'mantis', 31)
+    bg.UNITS, bg.TEX = 128, 128 * bg.S
     print('mantis son', len(mt), 'parts', {a: round(b, 2) for a, b in extent(mt, 1.0).items()})
     rc = roach_parts()
     save('cockroach_son', rc, roach_painter(), 'roach', 41)
