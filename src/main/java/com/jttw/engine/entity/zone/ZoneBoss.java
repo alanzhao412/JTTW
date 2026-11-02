@@ -36,8 +36,10 @@ import java.util.function.Predicate;
 
 /**
  * A zone's boss: one to each region, put in its lair when the land is made
- * ({@link com.jttw.engine.world.feature.ZoneLairFeature}), and once killed it does not come back.
- * So that is never by accident, it is never despawned, not even when the world is set to Peaceful.
+ * ({@link com.jttw.engine.world.feature.ZoneLairFeature}), and once killed it does not come back:
+ * its seat is taken instead, a while after, by a <b>usurper</b>, a boss of another kind, weaker
+ * ({@link #becomeUsurper}, {@link com.jttw.engine.world.Usurpers}). So that is never by accident, it
+ * is never despawned, not even when the world is set to Peaceful.
  * <ul>
  *   <li>its kill pays as a {@link EnemyTier#BOSS} of its {@link #zone()};</li>
  *   <li>a <b>boss bar</b> shows its health to the players near it ({@link #bossBarRange()}) and to
@@ -56,6 +58,14 @@ import java.util.function.Predicate;
  * of that character's health, so three or four of them kill; its special hits ({@link #specialShares()},
  * each struck with {@link #hitOf}) are no harder. Each
  * of its lives ({@link #lives()}) is more than any miniboss's health (see the README's pecking order).
+ *
+ * <p><b>A usurper</b> ({@link #becomeUsurper}) is a boss of one kind sat in another's lair once its
+ * master has fallen: of that lair's zone (its kill's XP, its allies), {@link #USURPER_LEVELS_ABOVE_BAND}
+ * over its band where a master stands {@link #LEVELS_ABOVE_BAND}, {@link #USURPER_HITS} of its kind's
+ * hits (never under {@link #USURPER_LEAST_HITS}), and every blow and special of its kit, struck as its
+ * kind strikes them, scaled to its new level ({@link #strikes}); half a boss's XP, half its karma, and
+ * a lesser loot ({@link #USURPER_LOOT}), none of its kind's own treasures. What its kind is, its level
+ * ({@link #nativeLevel()}), its zone ({@link #zone()}) and its hits ({@link #hitOf}), stays its kind's.
  */
 public abstract class ZoneBoss extends Monster implements MobLevel {
 
@@ -91,9 +101,149 @@ public abstract class ZoneBoss extends Monster implements MobLevel {
         return (int) Math.min(cap, Math.round(MEASURED_OWN_UP_TO + over));
     }
 
-    /** The level of character it is measured against: see {@link #measuredAt}. */
+    /** The level of character it is measured against now (a usurper, at its new level): see {@link #measuredAt}. */
     public int measuredLevel() {
         return measuredAt(mobLevel());
+    }
+
+    /** The level of character its kind is measured against, where the world first puts it: its hits ({@link #hitOf}) are of this. */
+    public int nativeMeasured() {
+        return measuredAt(nativeLevel());
+    }
+
+    /**
+     * Its level: its kind's ({@link #nativeLevel()}), or a usurper's, its lair's ({@link #usurperLevel}).
+     * The one its name shows, and what weighs it against a player.
+     */
+    @Override
+    public final int mobLevel() {
+        int usurping = entityData.get(USURPING);
+        return usurping > 0 ? usurping : nativeLevel();
+    }
+
+    /** Its kind's level: where the world first puts it, its stats are of. A constant (or its court's, its rank's). */
+    public abstract int nativeLevel();
+
+    // ── A usurper ───────────────────────────────────────────────────────
+
+    /** How far over its lair's zone's band a usurper stands (a master stands {@link #LEVELS_ABOVE_BAND} over it). */
+    public static final int USURPER_LEVELS_ABOVE_BAND = 5;
+    /** A usurper's share of its kind's hits, all its lives together; never fewer than {@link #USURPER_LEAST_HITS}. */
+    public static final double USURPER_HITS = 0.6;
+    public static final double USURPER_LEAST_HITS = ZoneBoss.LEAST_HITS * USURPER_HITS; // a constant: 150
+    /** A usurper's share of a boss's kill XP, and of its kind's karma. */
+    public static final double USURPER_XP = 0.5, USURPER_KARMA = 0.5;
+    /** What a usurper leaves: some gold, a sigil or two, perhaps a diamond; none of its kind's own treasures. */
+    public static final net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable> USURPER_LOOT =
+            net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE,
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("jttw_engine", "entities/usurper"));
+    /** How far past its lair a usurper may be drawn before it is back in it. */
+    public static final int USURPER_LEASH = 16;
+
+    /** A usurper's level in a lair of {@code zone}: the top of its band and {@link #USURPER_LEVELS_ABOVE_BAND} more. */
+    public static int usurperLevel(Zones.Zone zone) {
+        return zone.maxLevel() + USURPER_LEVELS_ABOVE_BAND;
+    }
+
+    /** A usurper's level (synced: its name shows it), or 0 for a boss of its own lair. */
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> USURPING = net.minecraft.network.syncher.SynchedEntityData
+            .defineId(ZoneBoss.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
+
+    /** Its seat: the lair the world put it in (or, a usurper, the one it took), whose master it is; null for one put anywhere else. */
+    @Nullable
+    private BlockPos seat;
+    /** A usurper's: its lair's zone, how far from its seat it keeps, how much harder (or lighter) than its kind's its blows land. */
+    @Nullable
+    private Zones.Zone lairZone;
+    private int lairReach;
+    private double strikeScale = 1;
+
+    /** Whether it is the master of a lair, whose fall a usurper follows: every boss but a lair's lesser immortals (the temple youths). */
+    public boolean headsLair() {
+        return true;
+    }
+
+    /** Whether it is a usurper, sat in a fallen boss's seat. */
+    public boolean isUsurper() {
+        return entityData.get(USURPING) > 0;
+    }
+
+    /** Its seat (see {@link #seat}), or null. */
+    @Nullable
+    public BlockPos seat() {
+        return seat;
+    }
+
+    /** Takes the lair at {@code at} for its seat, as the world does putting it there: its fall leaves the seat to a usurper. */
+    public void takeSeat(BlockPos at) {
+        seat = at.immutable();
+    }
+
+    /** The zone of the lair it holds: a usurper's, the lair's; else its own ({@link #zone()}). Its kill pays by it, its allies are its. */
+    public Zones.Zone lairZone() {
+        return lairZone != null ? lairZone : zone();
+    }
+
+    /** How far from its lair it keeps: a usurper, the fallen master's ground; else its own ({@link #lairRadius()}). */
+    public int homeReach() {
+        return lairZone != null ? lairReach : lairRadius();
+    }
+
+    /** Its hits to kill, all its lives together, of a character of the level it is measured at now. */
+    public double hitsToKill() {
+        return getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).getBaseValue() * livesTogether()
+                / MobScaling.typicalHit(measuredLevel());
+    }
+
+    private double livesTogether() {
+        double all = 0;
+        for (double life : lives()) all += life;
+        return all;
+    }
+
+    /**
+     * Makes it a usurper of the lair at {@code seat}, of {@code zone}, keeping within {@code reach} of
+     * it: its level the lair's {@link #usurperLevel}, its health {@link #USURPER_HITS} of its kind's hits
+     * (never under {@link #USURPER_LEAST_HITS}) of a character of the level it is now measured at, its
+     * blows scaled to match ({@link #strikes}), half a boss's XP, its kill paid by the lair's zone.
+     */
+    public void becomeUsurper(Zones.Zone zone, BlockPos seat, int reach) {
+        double kindHits = hitsToKill(); // its kind's, before it is anything else
+        entityData.set(USURPING, usurperLevel(zone));
+        this.lairZone = zone;
+        this.lairReach = reach;
+        this.seat = seat.immutable();
+        double hits = Math.max(USURPER_HITS * kindHits, USURPER_LEAST_HITS);
+        getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH)
+                .setBaseValue(hits * MobScaling.typicalHit(measuredLevel()) / livesTogether());
+        setHealth(getMaxHealth());
+        usurp();
+        restrictTo(seat, reach);
+    }
+
+    /** What follows from being a usurper, made one or loaded as one: its blows' scale, its XP, its zone's name on it. */
+    private void usurp() {
+        strikeScale = MobScaling.typicalHealth(measuredLevel()) / MobScaling.typicalHealth(nativeMeasured());
+        xpReward = Math.max(1, (int) Math.round(xpReward * USURPER_XP));
+        getPersistentData().putString(ZoneMonster.KEY_ZONE, lairZone().id());
+        getPersistentData().putDouble(ZoneMonster.KEY_XP_SHARE, USURPER_XP);
+    }
+
+    /** How much harder (over 1) or lighter its blows land than its kind's: 1 but for a usurper. */
+    public double strikeScale() {
+        return isUsurper() ? strikeScale : 1;
+    }
+
+    /**
+     * A blow of its kit, {@code amount} as its kind strikes it, as it lands from it now: a usurper's
+     * scaled to its level ({@link #strikeScale()}) and never past a boss's hardest blow at it
+     * ({@link #MOST_BLOW}, so a hit weighed by its target's own health, scaled up, cannot one-shot);
+     * else as it is. {@link com.jttw.engine.world.Usurpers} scales every hit a usurper deals by this;
+     * a hit that names no striker (frost, scalding oil, its fire round it) is scaled where it is dealt.
+     */
+    public float strikes(float amount) {
+        if (!isUsurper()) return amount;
+        return (float) Math.min(amount * strikeScale, MOST_BLOW * MobScaling.typicalHealth(measuredLevel()));
     }
 
     /** The least ordinary hits of a same-level character a boss takes to kill, all its lives together. */
@@ -151,9 +301,9 @@ public abstract class ZoneBoss extends Monster implements MobLevel {
     /** Called once as each phase begins: 1 when its health first falls past the first threshold, and on. */
     protected void onPhase(int phase) {}
 
-    /** The players it is allied to: its zone's, unless it says otherwise. */
+    /** The players it is allied to: its lair's zone's, unless it says otherwise. */
     public Predicate<Player> allies() {
-        return zone().allies();
+        return lairZone().allies();
     }
 
     /**
@@ -173,9 +323,12 @@ public abstract class ZoneBoss extends Monster implements MobLevel {
         return new double[0];
     }
 
-    /** A hit of {@code share} of a same-level character's health, as it lands from it, at its measured level. */
+    /**
+     * A hit of {@code share} of a same-level character's health, as its kind strikes it, at the level
+     * its kind is measured at (a usurper's lands scaled after, as all its blows: {@link #strikes}).
+     */
     public float hitOf(double share) {
-        return (float) (share * MobScaling.typicalHealth(measuredLevel()));
+        return (float) (share * MobScaling.typicalHealth(nativeMeasured()));
     }
 
     /**
@@ -250,12 +403,37 @@ public abstract class ZoneBoss extends Monster implements MobLevel {
     }
 
     @Override
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(USURPING, 0);
+    }
+
+    @Override
     public void tick() {
         super.tick();
         if (level().isClientSide) return;
         if (tickCount % BAR_EVERY == 0) updateBossBar();
         else if (!bossBar.getPlayers().isEmpty()) bossBar.setProgress(getHealth() / getMaxHealth());
         checkPhase();
+        if (tickCount % 20 == 7) keepToSeat();
+    }
+
+    /**
+     * A usurper keeps to the lair it took: drawn more than {@value #USURPER_LEASH} blocks past its
+     * ground (thrown, carried, chasing), it is back on its seat at once. Returns whether it was.
+     * (A lair's own master is kept to it by its lair, as ever.)
+     */
+    public boolean keepToSeat() {
+        if (!isUsurper() || seat == null || isDeadOrDying()) return false;
+        double reach = homeReach() + USURPER_LEASH;
+        if (distanceToSqr(net.minecraft.world.phys.Vec3.atBottomCenterOf(seat)) <= reach * reach) return false;
+        if (isPassenger()) stopRiding();
+        getNavigation().stop();
+        setTarget(null);
+        teleportTo(seat.getX() + 0.5, seat.getY(), seat.getZ() + 0.5);
+        setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+        fallDistance = 0;
+        return true;
     }
 
     /** Moves it on to the phase its health has fallen to, calling {@link #onPhase} for each one begun. */
@@ -285,10 +463,15 @@ public abstract class ZoneBoss extends Monster implements MobLevel {
         return hurt;
     }
 
+    /** Dead (truly: not a life lost), it leaves its seat empty, for a usurper to take in time ({@link com.jttw.engine.world.Usurpers}). */
     @Override
     public void die(DamageSource source) {
+        boolean was = !dead;
         super.die(source);
         if (dead) bossBar.removeAllPlayers();
+        if (was && dead && seat != null && headsLair() && level() instanceof ServerLevel server) {
+            com.jttw.engine.world.Usurpers.fallen(server, this);
+        }
     }
 
     /** Struck down by one it is allied to, who never had to fight it, it leaves nothing (as a ZoneMonster). */
@@ -296,6 +479,12 @@ public abstract class ZoneBoss extends Monster implements MobLevel {
     protected void dropAllDeathLoot(ServerLevel level, DamageSource source) {
         if (ZoneAllies.allied(allies(), source.getEntity())) return;
         super.dropAllDeathLoot(level, source);
+    }
+
+    /** A usurper leaves a usurper's loot ({@link #USURPER_LOOT}), not its kind's treasures. */
+    @Override
+    protected net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable> getDefaultLootTable() {
+        return isUsurper() ? USURPER_LOOT : super.getDefaultLootTable();
     }
 
     @Override
@@ -322,11 +511,12 @@ public abstract class ZoneBoss extends Monster implements MobLevel {
         return false;
     }
 
-    /** Its lair: where it is first put, and keeps to. */
+    /** Its lair: where it is first put, and keeps to; put there by the world as the land is made, its seat. */
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason,
                                         @Nullable SpawnGroupData data) {
         restrictTo(blockPosition(), lairRadius());
+        if (reason == MobSpawnType.STRUCTURE && headsLair()) takeSeat(blockPosition());
         return super.finalizeSpawn(level, difficulty, reason, data);
     }
 
@@ -351,16 +541,33 @@ public abstract class ZoneBoss extends Monster implements MobLevel {
         super.addAdditionalSaveData(tag);
         tag.putInt("BossPhase", phase);
         if (hasRestriction()) tag.put("Lair", NbtUtils.writeBlockPos(getRestrictCenter()));
+        if (seat != null) tag.put("Seat", NbtUtils.writeBlockPos(seat));
+        if (isUsurper() && lairZone != null) {
+            CompoundTag u = new CompoundTag();
+            u.putString("Zone", lairZone.id());
+            u.putInt("Level", entityData.get(USURPING));
+            u.putInt("Reach", lairReach);
+            tag.put("Usurper", u);
+        }
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         phase = tag.getInt("BossPhase");
-        NbtUtils.readBlockPos(tag, "Lair").ifPresent(lair -> restrictTo(lair, lairRadius()));
+        seat = NbtUtils.readBlockPos(tag, "Seat").orElse(null);
+        CompoundTag u = tag.getCompound("Usurper");
+        Zones.Zone zone = u.contains("Zone") ? Zones.byId(u.getString("Zone")) : null;
+        if (zone != null) {
+            lairZone = zone;
+            lairReach = u.getInt("Reach");
+            entityData.set(USURPING, u.getInt("Level"));
+            usurp();
+        }
+        NbtUtils.readBlockPos(tag, "Lair").ifPresent(lair -> restrictTo(lair, homeReach()));
         if (tag.contains("Lair", Tag.TAG_COMPOUND)) { // as saved before 1.21: {X, Y, Z}
             CompoundTag lair = tag.getCompound("Lair");
-            restrictTo(new BlockPos(lair.getInt("X"), lair.getInt("Y"), lair.getInt("Z")), lairRadius());
+            restrictTo(new BlockPos(lair.getInt("X"), lair.getInt("Y"), lair.getInt("Z")), homeReach());
         }
     }
 }

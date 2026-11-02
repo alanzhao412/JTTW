@@ -117,9 +117,9 @@ public class LadyEarthFlowEntity extends ZoneBoss {
     @Nullable
     private int[] cave;
 
-    /** Its level, as its name shows it. */
+    /** Its kind's level (as a usurper, its name shows another: ZoneBoss#mobLevel). */
     @Override
-    public int mobLevel() {
+    public int nativeLevel() {
         return LEVEL;
     }
 
@@ -163,7 +163,7 @@ public class LadyEarthFlowEntity extends ZoneBoss {
     @Override
     protected void onPhase(int phase) {
         if (phase == 1) callHousehold();
-        if (phase == 2 && !fled()) escape();
+        if (phase == 2 && !fled() && !isUsurper()) escape(); // a usurper has no shrine of hers to flee to: she fights it out
     }
 
     @Override
@@ -204,7 +204,7 @@ public class LadyEarthFlowEntity extends ZoneBoss {
 
     @Override
     protected Component getTypeName() {
-        return Component.empty().append(super.getTypeName()).append(" · Lv " + LEVEL);
+        return Component.empty().append(super.getTypeName()).append(" · Lv " + mobLevel());
     }
 
     @Override
@@ -488,7 +488,7 @@ public class LadyEarthFlowEntity extends ZoneBoss {
      */
     @Override
     public void die(DamageSource source) {
-        if (!fled() && !level().isClientSide && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+        if (!fled() && !isUsurper() && !level().isClientSide && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             setHealth(1);
             escape();
             return;

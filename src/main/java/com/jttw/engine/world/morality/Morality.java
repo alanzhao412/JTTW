@@ -161,8 +161,19 @@ public final class Morality {
 
     // ── what counts ────────────────────────────────────────────────────
 
-    /** What a kill says of the killer, or 0 for a kill that says nothing (livestock, game). */
+    /**
+     * What a kill says of the killer, or 0 for a kill that says nothing (livestock, game). A usurper
+     * (ZoneBoss#isUsurper) says half what its kind would: no lair's own master, it is half the deed.
+     */
     public static int killDeed(ServerPlayer killer, LivingEntity victim) {
+        int deed = deedOf(killer, victim);
+        if (victim instanceof com.jttw.engine.entity.zone.ZoneBoss b && b.isUsurper()) {
+            deed = (int) (deed * com.jttw.engine.entity.zone.ZoneBoss.USURPER_KARMA);
+        }
+        return deed;
+    }
+
+    private static int deedOf(ServerPlayer killer, LivingEntity victim) {
         // a zone's creature its ally struck down never fought him: no deed either way
         if ((victim instanceof ZoneMonster || victim instanceof com.jttw.engine.entity.zone.ZoneBoss) && victim.isAlliedTo(killer)) return 0;
         if (victim instanceof HeavenlySoldierEntity) return KILL_SOLDIER;

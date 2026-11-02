@@ -72,6 +72,7 @@ public class DragonPalaceFeature extends ZoneLairFeature {
         m.finalizeSpawn(level, level.getCurrentDifficultyAt(at), MobSpawnType.STRUCTURE, null);
         m.become(m.rollRegularLevel(random), false);
         m.setPersistenceRequired();
+        com.jttw.engine.world.ZonePosts.keep(m); // held to his place in the hall, and back 20 minutes after he falls
         level.addFreshEntityWithPassengers(m);
     }
 }

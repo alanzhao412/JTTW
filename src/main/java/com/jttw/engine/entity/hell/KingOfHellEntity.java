@@ -89,7 +89,7 @@ public abstract class KingOfHellEntity extends ZoneBoss {
     }
 
     @Override
-    public int mobLevel() {
+    public int nativeLevel() {
         return kingLevel();
     }
 
@@ -304,7 +304,7 @@ public abstract class KingOfHellEntity extends ZoneBoss {
 
     @Override
     protected Component getTypeName() {
-        return Component.empty().append(super.getTypeName()).append(" · Lv " + kingLevel());
+        return Component.empty().append(super.getTypeName()).append(" · Lv " + mobLevel());
     }
 
     @Override

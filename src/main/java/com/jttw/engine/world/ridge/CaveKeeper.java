@@ -52,7 +52,8 @@ public final class CaveKeeper {
 
     private CaveKeeper() {}
 
-    public static final int EVERY = 20, DOOR_NEAR = 12, RESTOCK_MINUTES = 15, RESTOCK_AFTER = 20 * 60 * RESTOCK_MINUTES, NOT_IN_SIGHT = 12;
+    public static final int EVERY = 20, DOOR_NEAR = 12, RESTOCK_MINUTES = com.jttw.engine.world.ZonePosts.RESPAWN_MINUTES,
+            RESTOCK_AFTER = 20 * 60 * RESTOCK_MINUTES, NOT_IN_SIGHT = 12;
     /** How near the fortress a player must be for the keeper to keep it (local, each way; to the south, the forecourt and beyond). */
     public static final int NEAR = 90;
 

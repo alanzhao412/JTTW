@@ -297,6 +297,7 @@ public class SilkRidgeFeature extends Feature<NoneFeatureConfiguration> {
             if (m instanceof StingerSonEntity s) s.setKind(Math.floorMod(post.x() * 7 + post.z(), StingerSonEntity.KINDS.length));
             m.keepTo(at, post.bower() >= 0 ? 12 : 18);
         }
+        com.jttw.engine.world.ZonePosts.keep(m); // back 20 minutes after it falls, no one near
         level.addFreshEntityWithPassengers(m);
     }
 

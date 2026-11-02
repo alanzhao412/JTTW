@@ -513,7 +513,7 @@ public final class EarthGod {
     /** A Dragon King's death is remembered: the Earth Gods send no one to an empty palace while another king lives. */
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {
-        if (event.getEntity() instanceof DragonKingEntity king && king.level() instanceof ServerLevel level) {
+        if (event.getEntity() instanceof DragonKingEntity king && !king.isUsurper() && king.level() instanceof ServerLevel level) {
             FallenKings.of(level.getServer().overworld()).fall(king.sea());
         }
     }

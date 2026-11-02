@@ -120,7 +120,7 @@ public class SixEaredMacaqueEntity extends ZoneBoss {
     }
 
     @Override
-    public int mobLevel() {
+    public int nativeLevel() {
         return LEVEL;
     }
 
@@ -199,7 +199,7 @@ public class SixEaredMacaqueEntity extends ZoneBoss {
 
     @Override
     protected Component getTypeName() {
-        return Component.empty().append(super.getTypeName()).append(" · Lv " + LEVEL);
+        return Component.empty().append(super.getTypeName()).append(" · Lv " + mobLevel());
     }
 
     @Override

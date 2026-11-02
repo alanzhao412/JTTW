@@ -33,14 +33,15 @@ import java.util.List;
  * (0 the cave, 1 + n the n-th camp). As Black Wind's and the Fire Cloud Cave's garrisons do, a part
  * whose holders are all dead stays empty for {@value #RESPAWN_MINUTES} minutes, then is mustered again
  * the next time someone comes near while no one is in it ({@link #look}). The Six-Eared Macaque is no
- * part of it: he is the lair's, once.
+ * part of it: he is the lair's, once; fallen, his seat is a usurper's ({@link com.jttw.engine.world.Usurpers}).
+ * (Every other zone's posts come back through {@link com.jttw.engine.world.ZonePosts}, on the same 20 minutes.)
  */
 @EventBusSubscriber(modid = JTTWEngine.MOD_ID)
 public final class FlowerFruitGarrison {
 
     private FlowerFruitGarrison() {}
 
-    public static final int RESPAWN_MINUTES = 20;
+    public static final int RESPAWN_MINUTES = com.jttw.engine.world.ZonePosts.RESPAWN_MINUTES; // every zone's posts alike
     public static final long RESPAWN = RESPAWN_MINUTES * 60 * 20L;
     public static final int EVERY = 20;
     /** The part of the cave's garrison, and the first camp's (the n-th camp's is {@code CAMP + n}). */

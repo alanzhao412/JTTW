@@ -72,6 +72,8 @@ public abstract class ZoneMonster extends Monster implements MobLevel {
 
     /** Persistent-data keys the kill XP reads (see LevelManager). */
     public static final String KEY_TIER = "jttw_enemy_tier", KEY_ZONE = "jttw_enemy_zone";
+    /** The share of its tier's kill XP it pays, where it pays less (a usurper's half: see ZoneBoss#becomeUsurper); 1 if absent. */
+    public static final String KEY_XP_SHARE = "jttw_enemy_xp_share";
 
     public static final int WHITE = 0xFFFFFF, PURPLE = 0xB04DFF;
 

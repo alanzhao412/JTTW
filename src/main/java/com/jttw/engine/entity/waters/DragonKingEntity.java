@@ -91,9 +91,9 @@ public abstract class DragonKingEntity extends ZoneBoss implements RangedAttackM
     private Vec3 whirl;
     private int whirlLeft;
 
-    /** Its level, as its name shows it. */
+    /** Its kind's level (as a usurper, its name shows another: ZoneBoss#mobLevel). */
     @Override
-    public int mobLevel() {
+    public int nativeLevel() {
         return LEVEL;
     }
 
@@ -215,7 +215,7 @@ public abstract class DragonKingEntity extends ZoneBoss implements RangedAttackM
 
     @Override
     protected Component getTypeName() {
-        return Component.empty().append(super.getTypeName()).append(" · Lv " + LEVEL);
+        return Component.empty().append(super.getTypeName()).append(" · Lv " + mobLevel());
     }
 
     @Override

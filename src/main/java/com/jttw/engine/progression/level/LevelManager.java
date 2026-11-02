@@ -57,7 +57,8 @@ import java.util.List;
  * <p><b>Biome XP:</b> from level 20 a kill pays only if the creature carries an enemy tier
  * ({@code jttw_enemy_tier}, an {@link EnemyTier}) and, as every zone's creature and boss does, its
  * zone ({@code jttw_enemy_zone}); {@link #onEntityKilled} pays it by that zone's
- * {@link BiomeLevelBand}. Any other mob can be tagged by hand:
+ * {@link BiomeLevelBand}, times its share ({@code jttw_enemy_xp_share}, where it carries one: a
+ * usurper boss pays half a boss's). Any other mob can be tagged by hand:
  * <pre>{@code entity.getPersistentData().putString("jttw_enemy_tier", "GENERAL");}</pre>
  */
 @EventBusSubscriber(modid = JTTWEngine.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
@@ -68,6 +69,8 @@ public final class LevelManager {
     private static final String TIER_TAG = "jttw_enemy_tier";
     /** The zone (biome id) a tiered enemy belongs to; its kill pays by that zone's band wherever it dies. */
     private static final String ZONE_TAG = "jttw_enemy_zone";
+    /** The share of its XP a tiered enemy pays, where it pays less (a usurper boss, half); 1 if absent. */
+    private static final String XP_SHARE_TAG = "jttw_enemy_xp_share";
 
     // -----------------------------------------------------------------------
     // Base XP values for vanilla phase (levels 1–20)
@@ -199,8 +202,10 @@ public final class LevelManager {
         int killerLevel = PlayerLevel.getLevel(killer);
 
         // ── Phase 1: Vanilla mobs (levels 1–19) ─────────────────────────────
+        net.minecraft.nbt.CompoundTag tags = event.getEntity().getPersistentData();
+        double share = tags.contains(XP_SHARE_TAG) ? tags.getDouble(XP_SHARE_TAG) : 1;
         if (killerLevel < LevelConstants.VANILLA_CAP_LEVEL) {
-            long xp = vanillaMobXp(event.getEntity(), killerLevel);
+            long xp = Math.round(vanillaMobXp(event.getEntity(), killerLevel) * share);
             if (xp > 0) grantXp(killer, xp, "vanilla_mob");
             return;
         }
@@ -224,14 +229,14 @@ public final class LevelManager {
             // tier but no zone (they are levelled to whoever they hunt, wherever that is), and any
             // mob tagged by hand. Every zone's creature carries its zone, and every level from 21 to
             // 100 now has a band, but these still need paying: a flat sum, so no kill is wasted.
-            long fallbackXp = (long) (VANILLA_BASE_XP * tier.xpMultiplier * 3);
+            long fallbackXp = Math.round(VANILLA_BASE_XP * tier.xpMultiplier * 3 * share);
             grantXp(killer, fallbackXp, "biome_fallback:" + tierStr);
             return;
         }
 
         if (!band.isRewardingForLevel(killerLevel)) return; // too low or too high for this zone
 
-        long xp = band.xpForTier(tier);
+        long xp = Math.round(band.xpForTier(tier) * share);
         grantXp(killer, xp, band.biome() + ":" + tier.displayName);
     }
 

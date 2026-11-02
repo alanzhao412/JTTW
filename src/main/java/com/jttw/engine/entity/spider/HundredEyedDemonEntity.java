@@ -120,7 +120,7 @@ public class HundredEyedDemonEntity extends ZoneBoss implements SilkKin {
     }
 
     @Override
-    public int mobLevel() {
+    public int nativeLevel() {
         return LEVEL;
     }
 
@@ -186,7 +186,7 @@ public class HundredEyedDemonEntity extends ZoneBoss implements SilkKin {
 
     @Override
     protected Component getTypeName() {
-        return Component.empty().append(super.getTypeName()).append(" · Lv " + LEVEL);
+        return Component.empty().append(super.getTypeName()).append(" · Lv " + mobLevel());
     }
 
     @Override

@@ -18,7 +18,8 @@ import javax.annotation.Nullable;
 /**
  * A zone's boss lair, at the heart of each of its regions, and the boss put there once, when the
  * land is made: the feature runs in the one chunk that holds the region's centre, and a chunk is
- * made once, so there is one boss to each region; killed, it does not come back.
+ * made once, so there is one boss to each region; killed, it does not come back, but its seat is
+ * taken in time by a usurper ({@link com.jttw.engine.world.Usurpers}).
  *
  * <p>A subclass names its {@link #zone()} and {@link #boss()}, and {@link #build}s the lair; it may
  * move the lair's floor ({@link #floorAt}: the surface, unless it says otherwise; a cave's or a

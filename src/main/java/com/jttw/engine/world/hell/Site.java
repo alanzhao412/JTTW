@@ -109,6 +109,7 @@ public final class Site {
         mob.finalizeSpawn(level, level.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.STRUCTURE, null);
         mob.setPersistenceRequired();
         if (then != null) then.accept(mob);
+        com.jttw.engine.world.ZonePosts.keep(mob); // a court's guards and clerks come back; its king's seat is a usurper's (ZonePosts skips him)
         level.addFreshEntityWithPassengers(mob);
         return mob;
     }

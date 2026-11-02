@@ -223,6 +223,7 @@ public class BlackWindWorksFeature extends Feature<NoneFeatureConfiguration> {
             m.become(captain ? m.rollCaptainLevel(random) : m.rollRegularLevel(random), captain);
             m.setPersistenceRequired();
             m.restrictTo(new BlockPos(x, y, z), roam);
+            com.jttw.engine.world.ZonePosts.keep(m); // the band comes back, 20 minutes after its last falls
             level.addFreshEntityWithPassengers(m);
         }
     }
