@@ -41,9 +41,9 @@ class StatBlockTest {
 
     @Test
     void yaoguaiAtLevelHundredMatchesTheFormulaByHand() {
-        // Yaoguai rides the backbone, 1.1 a level
+        // Yaoguai end the climb some levels behind the backbone, 1.1 a level
         StatBlock s = StatBlock.compute(ProgressionClass.YAOGUAI, 100);
-        double power = Math.pow(1.10, 99);
+        double power = Math.pow(1.10, 99 - LevelPower.YAOGUAI_BEHIND);
         assertEquals(hpShape(230) * HP_NORM * power, s.maxHealth(), s.maxHealth() * EPS);
         assertEquals(atkShape(220) * 0.13 * power, s.attackDamage(), s.attackDamage() * EPS);
         // STR keeps the formula: base 220, raw = 440 + 5

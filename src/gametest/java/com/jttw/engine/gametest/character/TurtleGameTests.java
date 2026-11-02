@@ -207,7 +207,7 @@ public class TurtleGameTests {
         List<Hit> blows = of(hits, DamageTypes.PLAYER_ATTACK);
         eq(h, 1, blows.size(), "impact hits the golem");
         // tier 1: (6 + resistance 25 x 0.04 = 7) x power, falloff 1 - 2/8
-        near(h, 7.0 * LevelPower.of(20) * 0.75, blows.get(0).amount(), "impact damage");
+        near(h, 7.0 * LevelPower.of(com.jttw.engine.progression.stats.ProgressionClass.DIVINE_BEAST, 20) * 0.75, blows.get(0).amount(), "impact damage");
         check(h, golem.getDeltaMovement().z > 0, "knocked away");
         eq(h, -1, amp(golem, ModEffects.STUNNED), "no stun below tier 3");
         h.succeed();
@@ -269,7 +269,7 @@ public class TurtleGameTests {
         character().use(p, "tu_tectonic", AbilityAction.USE);
         near(h, 90f, QiData.getCurrent(p), "10 Qi");
         // (4 + resistance 25 x 0.04) x power, no falloff
-        near(h, 5.0 * LevelPower.of(20), of(hits, DamageTypes.PLAYER_ATTACK).get(0).amount(), "slam damage");
+        near(h, 5.0 * LevelPower.of(com.jttw.engine.progression.stats.ProgressionClass.DIVINE_BEAST, 20), of(hits, DamageTypes.PLAYER_ATTACK).get(0).amount(), "slam damage");
         TurtleAbilityHandler.castTectonicSlam(p);
         near(h, 90f, QiData.getCurrent(p), "on cooldown");
         h.runAfterDelay(201, () -> {
@@ -294,7 +294,7 @@ public class TurtleGameTests {
         h.runAfterDelay(45, () -> {
             List<Hit> zone = of(hits, DamageTypes.PLAYER_ATTACK).subList(slamHits, of(hits, DamageTypes.PLAYER_ATTACK).size());
             check(h, zone.size() >= 2, "zone pulses once a second, " + zone.size() + " pulses");
-            near(h, LevelPower.of(20), zone.get(0).amount(), "1 x power per pulse");
+            near(h, LevelPower.of(com.jttw.engine.progression.stats.ProgressionClass.DIVINE_BEAST, 20), zone.get(0).amount(), "1 x power per pulse");
             h.succeed();
         });
     }

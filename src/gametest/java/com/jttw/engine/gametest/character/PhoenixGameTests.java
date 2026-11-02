@@ -111,7 +111,7 @@ public class PhoenixGameTests {
         ticks(p, 10);
         near(h, 98.25f, QiData.getCurrent(p), "0.175 Qi per tick from tier 2");
         // 0.5 x 1.5 x 1.5 = 1.125 at level 1, half physical and half magic, scaled to level 20
-        near(h, 0.5625 * LevelPower.of(20), firstHit(h, hits, DamageTypes.MAGIC, golem).amount(), "magic half at level 20");
+        near(h, 0.5625 * LevelPower.of(com.jttw.engine.progression.stats.ProgressionClass.DIVINE_BEAST, 20), firstHit(h, hits, DamageTypes.MAGIC, golem).amount(), "magic half at level 20");
         eq(h, 60, golem.getRemainingFireTicks(), "burning for 3 s from tier 2");
         PhoenixAbilityHandler.stopFlame(p);
         h.succeed();
@@ -382,7 +382,7 @@ public class PhoenixGameTests {
         ServerPlayer p = phoenix(h);
         PlayerLevel.setLevel(p, 20); // the heals are set at level 1, scaled by the player's power
         LevelManager.reapplyStats(p);
-        float power = (float) LevelPower.of(20);
+        float power = (float) LevelPower.of(com.jttw.engine.progression.stats.ProgressionClass.DIVINE_BEAST, 20);
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 0, 0); // a deep well of health: no kill, no experience
         var ds = h.getLevel().damageSources();
         p.setHealth(10f);

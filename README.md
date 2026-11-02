@@ -26,6 +26,20 @@ different numbers:
 | **Yaoguai** | 1030 | Fluctuating | Lower stat floor, strong transformation mechanics. Power comes from abilities, not raw stats. |
 | **Heavenly** | 1000 | Medium | Widest utility toolkit. Ability-expansion focused: power comes from each character's own skill tree. |
 
+Each class also grows in power in its own shape ([`LevelPower`](src/main/java/com/jttw/engine/progression/stats/LevelPower.java)),
+read against a steady character that grows 1.10x a level (its "power level": the steady level as strong):
+
+| Class | Shape | Through the climb | At 100, by stats |
+|---|---|---|---|
+| **Heavenly** | linear | the steady 1.10x a level itself | third |
+| **Yaoguai** | logarithmic | quick early: some eight levels ahead from 20 to 40, flattening after | last: four levels behind the steady line |
+| **Primordial** | exponential | weak for long: seven to nine levels behind from 30 to 60, level near 84, then a steep climb (growth 1.07x a level rising to 1.20x) | first: some twelve levels ahead |
+| **Divine Beast** | staggered | a leap of 3.45x (some thirteen levels) at each evolution (20, 40, 60, 80), landing five levels ahead, then falling eight behind by the next | second: the last leap, at 100, lands level with the steady line |
+
+The characters with a measure of their own stand off their class's curve by it, built up to
+level 100: Wukong 1.25x, Yuan Di 1.12x, the Nine-Headed Lion 4.7x (his class ends behind; he does not),
+Marshal Tianpeng 0.7x (the least of anyone at the top).
+
 Up to level 20, XP comes from ordinary Minecraft mobs, paid as in Pokémon by the level the kill
 is won at ([`LevelManager.vanillaMobXp`](src/main/java/com/jttw/engine/progression/level/LevelManager.java)):
 weight × 3 × level / 5, at least 1. Animals, villagers and anything else that is no monster pay

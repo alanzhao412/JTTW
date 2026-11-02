@@ -123,7 +123,7 @@ public class ByakkoGameTests {
         List<Hit> blows = of(hits, DamageTypes.PLAYER_ATTACK);
         eq(h, 1, blows.size(), "landing impact");
         // tier 1: 5 x power + attack 4 x 0.5, falloff 1 - 1/3
-        near(h, (5.0 * LevelPower.of(20) + 2.0) * (2.0 / 3.0), blows.get(0).amount(), "impact damage");
+        near(h, (5.0 * LevelPower.of(com.jttw.engine.progression.stats.ProgressionClass.DIVINE_BEAST, 20) + 2.0) * (2.0 / 3.0), blows.get(0).amount(), "impact damage");
         land(p);
         eq(h, 1, of(hits, DamageTypes.PLAYER_ATTACK).size(), "only one impact per leap");
         h.succeed();
@@ -266,7 +266,7 @@ public class ByakkoGameTests {
         ticks(p, 20);
         eq(h, 1, hits.size(), "first bleed tick after a second");
         // tier 1: 1 x power + attack 4 x 0.10
-        near(h, LevelPower.of(20) + 0.4, hits.get(0).amount(), "bleed damage");
+        near(h, LevelPower.of(com.jttw.engine.progression.stats.ProgressionClass.DIVINE_BEAST, 20) + 0.4, hits.get(0).amount(), "bleed damage");
         ticks(p, 100);
         int total = hits.size();
         ticks(p, 40);

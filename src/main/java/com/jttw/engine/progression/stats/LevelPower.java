@@ -17,16 +17,22 @@ import javax.annotation.Nullable;
  * character: level 20 one-shots level 5, 40 one-shots 20, and on to 100 over 80; characters of a
  * level take three or four such hits to kill each other. The zones' mobs are set against it.
  *
- * <p><b>Each class rides it in its own shape</b> (every class is 1 at level 1):
+ * <p><b>Each class rides it in its own shape</b> (every class is 1 at level 1), so that at 100, by
+ * stats (with each class's base stats), Primordial &gt; Divine Beast &gt; Heavenly &gt; Yaoguai. Measured in
+ * "power levels" (the backbone level as strong), the four shapes read as their names:
  * <ul>
- *   <li><b>Yaoguai and Heavenly</b>: the backbone itself, steady. Yaoguai make up for it with
- *       damaging abilities, Heavenly with utility and their own items.</li>
- *   <li><b>Primordial</b>: a slow start and an ever faster climb. Its growth per level rises from
- *       {@value #PRIMORDIAL_START}x to {@value #PRIMORDIAL_END}x: about three quarters of the
- *       backbone through the 20s to 40s, level with it by 60, far past it at 100.</li>
- *   <li><b>Divine Beast</b>: growth that slows within each stage of its evolution, and a leap at
- *       each evolution (20, 40, 60, 80, 100) of about {@value #DIVINE_LEAP}x; across a stage it
- *       keeps pace with the backbone.</li>
+ *   <li><b>Heavenly</b>: linear, the backbone itself, steady. Its edge is utility and its own items.</li>
+ *   <li><b>Yaoguai</b>: logarithmic. Quick early and flattening late: part steady, part a log curve
+ *       over the whole climb ({@value #YAOGUAI_LOG_WEIGHT} of it, bent by {@value #YAOGUAI_LOG_BEND}),
+ *       some eight levels ahead from 20 to 40, and {@value #YAOGUAI_BEHIND} behind the backbone at 100.</li>
+ *   <li><b>Primordial</b>: exponential. Weak for long, then an ever faster climb: its growth per
+ *       level rises from {@value #PRIMORDIAL_START}x to {@value #PRIMORDIAL_END}x along a square,
+ *       so seven to nine levels behind from 30 to 60, level with the backbone near 84, and some
+ *       twelve levels past it at 100.</li>
+ *   <li><b>Divine Beast</b>: staggered. Each evolution (20, 40, 60, 80, 100) is a leap of
+ *       {@value #DIVINE_LEAP}x (some thirteen levels), landing {@value #DIVINE_AHEAD} levels ahead of
+ *       the backbone; the stage's growth then slows, so it falls eight behind by the next. The last,
+ *       at 100, lands level with the backbone, from thirteen behind.</li>
  * </ul>
  *
  * <p><b>And each character in its own measure</b>, building over the campaign to its full
@@ -48,12 +54,19 @@ public final class LevelPower {
     /** Resistance grows with level only this far: past it, power alone separates levels. */
     public static final int RESISTANCE_LEVELS = 40;
 
-    /** Primordial's growth per level at level 1 and at level 99. */
-    public static final double PRIMORDIAL_START = 1.08, PRIMORDIAL_END = 1.145;
+    /** Primordial's growth per level at level 2 and at level 100, and how late it rises between (a square). */
+    public static final double PRIMORDIAL_START = 1.07, PRIMORDIAL_END = 1.20, PRIMORDIAL_RISE = 2;
+
+    /** Yaoguai: how much of its climb is a log curve rather than steady, and how sharply that curve bends. */
+    public static final double YAOGUAI_LOG_WEIGHT = 0.35, YAOGUAI_LOG_BEND = 0.1;
+    /** How many backbone levels behind Yaoguai end at the cap: the frailest class by stats there. */
+    public static final double YAOGUAI_BEHIND = 4;
 
     /** Divine Beast: the levels it evolves at, and how much each evolution multiplies its power. */
     private static final int[] EVOLUTIONS = {20, 40, 60, 80, 100};
-    public static final double DIVINE_LEAP = 2.12;
+    public static final double DIVINE_LEAP = 3.45;
+    /** How many backbone levels ahead each evolution lands it. */
+    public static final double DIVINE_AHEAD = 5;
     /** How sharply Divine Beast growth slows within a stage: higher, flatter toward its end. */
     private static final double DIVINE_BEND = 0.4;
 
@@ -68,29 +81,36 @@ public final class LevelPower {
             for (int lv = 1; lv <= MAX; lv++) {
                 ln[lv] = switch (cls) {
                     case PRIMORDIAL -> lv == 1 ? 0 : ln[lv - 1]
-                            + Math.log(PRIMORDIAL_START + (PRIMORDIAL_END - PRIMORDIAL_START) * (lv - 2) / (MAX - 2));
+                            + Math.log(PRIMORDIAL_START + (PRIMORDIAL_END - PRIMORDIAL_START) * Math.pow((lv - 2) / (double) (MAX - 2), PRIMORDIAL_RISE));
                     case DIVINE_BEAST -> divine(lv, step);
+                    case YAOGUAI -> step * ((1 - YAOGUAI_LOG_WEIGHT) * (lv - 1)
+                            + YAOGUAI_LOG_WEIGHT * (MAX - 1) * Math.log(1 + YAOGUAI_LOG_BEND * (lv - 1)) / Math.log(1 + YAOGUAI_LOG_BEND * (MAX - 1))
+                            - YAOGUAI_BEHIND * (lv - 1) / (MAX - 1));
                     default -> (lv - 1) * step;
                 };
             }
         }
     }
 
-    /** Divine Beast's ln(power): log-shaped growth within each stage, a leap at each evolution. */
+    /**
+     * Divine Beast's ln(power): each evolution lands it {@link #DIVINE_AHEAD} backbone levels ahead (the
+     * last, at the cap, level with it); within a stage, log-shaped growth to the leap's size short of
+     * where the next evolution lands.
+     */
     private static double divine(int lv, double step) {
-        double total = 0, leap = Math.log(DIVINE_LEAP);
+        double leap = Math.log(DIVINE_LEAP), ahead = DIVINE_AHEAD * step;
         int stageStart = 1;
         for (int evolution : EVOLUTIONS) {
-            int length = evolution - stageStart;
-            double within = length * step - leap; // across the stage, it keeps pace with the backbone
+            double start = stageStart == 1 ? 0 : (stageStart - 1) * step + ahead;
+            double lands = evolution == MAX ? 0 : ahead; // the last lands level with the backbone, at the cap
+            double end = (evolution - 1) * step + lands - leap; // the level before it: the leap's size short
             if (lv < evolution) {
-                int t = lv - stageStart;
-                return total + within * Math.log(1 + DIVINE_BEND * t) / Math.log(1 + DIVINE_BEND * length);
+                int length = evolution - 1 - stageStart, t = lv - stageStart;
+                return start + (end - start) * Math.log(1 + DIVINE_BEND * t) / Math.log(1 + DIVINE_BEND * length);
             }
-            total += within + leap;
             stageStart = evolution;
         }
-        return total;
+        return (MAX - 1) * step;
     }
 
     private static int clamp(int level) {
@@ -134,8 +154,8 @@ public final class LevelPower {
         return switch (who) {
             case CELESTIAL_PRIMATE -> 1.25;
             case YUAN_DI -> 1.12;
-            case GRAND_SAINT_NINE_SPIRITS -> 3.2;
-            case MARSHAL_HEAVENLY_CANOPY -> 0.8;
+            case GRAND_SAINT_NINE_SPIRITS -> 4.7; // his class ends behind the backbone; he does not
+            case MARSHAL_HEAVENLY_CANOPY -> 0.7;
             default -> 1;
         };
     }
