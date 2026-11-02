@@ -148,6 +148,20 @@ class LevelPowerSpecTest {
     }
 
     @Test
+    void erlangGrowsAtTheLowerEndOfThePrimordialsAndOverNezhaByStats() {
+        var erlang = ReincarnationOutcome.EYE_OF_HEAVEN;
+        for (int lv = 2; lv <= 100; lv++) {
+            assertTrue(statIndex(erlang, lv) > statIndex(ReincarnationOutcome.THIRD_LOTUS_PRINCE, lv), "over Nezha at " + lv);
+        }
+        for (int lv = 80; lv <= 100; lv += 5) { // where the Primordials have pulled ahead of a Heavenly
+            double e = statIndex(erlang, lv);
+            assertTrue(e < statIndex(ReincarnationOutcome.GOLD_WINGED_PENG, lv) && e < statIndex(ReincarnationOutcome.YUAN_DI, lv), "under Peng and Yuan Di at " + lv);
+        }
+        double gap = Math.log(statIndex(ReincarnationOutcome.GOLD_WINGED_PENG, 100) / statIndex(erlang, 100)) / Math.log(LevelPower.GROWTH);
+        assertTrue(gap < 3, "close under the Primordials at the top: " + gap + " levels");
+    }
+
+    @Test
     void atTheTopTheClassesStandPrimordialDivineBeastHeavenlyYaoguai() {
         var order = List.of(ProgressionClass.PRIMORDIAL, ProgressionClass.DIVINE_BEAST, ProgressionClass.HEAVENLY, ProgressionClass.YAOGUAI);
         for (int i = 1; i < order.size(); i++) {
@@ -203,12 +217,12 @@ class LevelPowerSpecTest {
     @Test
     void atTheTopWukongYuanDiPengAndTheLionStandFarAboveEveryoneByStats() {
         var top = List.of(ReincarnationOutcome.CELESTIAL_PRIMATE, ReincarnationOutcome.YUAN_DI,
-                ReincarnationOutcome.GOLD_WINGED_PENG, ReincarnationOutcome.GRAND_SAINT_NINE_SPIRITS);
+                ReincarnationOutcome.GOLD_WINGED_PENG, ReincarnationOutcome.EYE_OF_HEAVEN, ReincarnationOutcome.GRAND_SAINT_NINE_SPIRITS);
         for (int i = 1; i < top.size(); i++) {
             assertTrue(statIndex(top.get(i - 1)) >= statIndex(top.get(i)), top.get(i - 1) + " >= " + top.get(i));
         }
         double rest = Arrays.stream(ALL).filter(o -> !top.contains(o)).mapToDouble(LevelPowerSpecTest::statIndex).max().orElseThrow();
-        assertTrue(statIndex(top.get(3)) >= 2 * rest, "the lion is far above everyone else: " + statIndex(top.get(3)) / rest + "x");
+        assertTrue(statIndex(top.get(4)) >= 2 * rest, "the lion is far above everyone else: " + statIndex(top.get(4)) / rest + "x");
     }
 
     @Test

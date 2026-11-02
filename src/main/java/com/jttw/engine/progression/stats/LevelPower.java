@@ -158,9 +158,30 @@ public final class LevelPower {
                 double x = Math.max(0, Math.min(1, (lv - WUKONG_SURGE) / (double) WUKONG_SURGE_LENGTH));
                 yield -WUKONG_LAG * Math.min(1, (lv - 1) / 10.0) + (WUKONG_LAG + inLevels(characterFactor(who))) * x * x * (3 - 2 * x);
             }
+            case EYE_OF_HEAVEN -> erlang(lv);
             default -> inLevels(characterFactor(who)) * t;
         };
         return Math.pow(GROWTH, levels);
+    }
+
+    /**
+     * How many levels Erlang Shen's stats stand over a plain Primordial's growth (a Primordial's base
+     * stats outweigh a Heavenly's by some four levels, so three keeps him just under Peng and Yuan Di).
+     */
+    public static final double ERLANG_OVER_PRIMORDIAL = 3;
+    /** The least he stands over Nezha's (his class's) line, in levels, where the Primordials are slower. */
+    public static final double ERLANG_LEAST_OVER_NEZHA = 1;
+
+    /**
+     * Erlang Shen's measure, in levels over his class: the Heavenly the strongest by stats, he grows as a
+     * Primordial does, at the lower end of them (under Peng and Yuan Di all the climb). Nezha keeps the
+     * Heavenly line; his strength is his kit.
+     */
+    private static double erlang(int lv) {
+        double primordial = LN[ProgressionClass.PRIMORDIAL.ordinal()][lv] / Math.log(GROWTH) + 1 - lv;
+        double ramp = Math.min(1, (lv - 1) / 10.0);
+        // never under Nezha's line, though the Primordials start slower than a Heavenly
+        return Math.max(primordial + ERLANG_OVER_PRIMORDIAL * ramp, ERLANG_LEAST_OVER_NEZHA * ramp);
     }
 
     /** Peng's lead over his class, in levels, and where and how broadly it peaks. */
@@ -205,6 +226,7 @@ public final class LevelPower {
             case YUAN_DI -> 1.12;
             case GRAND_SAINT_NINE_SPIRITS -> 4.7; // his class ends behind the backbone; he does not
             case MARSHAL_HEAVENLY_CANOPY -> 0.7;
+            case EYE_OF_HEAVEN -> Math.pow(GROWTH, erlang(MAX));
             default -> 1;
         };
     }

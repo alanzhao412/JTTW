@@ -43,7 +43,11 @@ the Primordials take turns on the way: Peng leads the early climb (some four lev
 about level 30), Yuan Di the middle (four over about 55, passing Peng near 44). Wukong is the steepest
 of anyone: ten levels under his class, the weakest character there is until the 80s, then a surge
 from 75 over 25 levels that carries him past everyone by the 90s and, at 100, to some 2.8x the next
-strongest by stats (and his furnace boon besides).
+strongest by stats (and his furnace boon besides). Erlang Shen, the Heavenly strongest by stats,
+grows as a Primordial does (`LevelPower.erlang`): at the lower end of them, just under Peng and Yuan
+Di once they pull ahead (from about 80; some 115 at 100), and never under Nezha's line before that.
+Nezha keeps the plain Heavenly line by stats; his kit (the Samadhi fire and the Fire-Tip Spear) is
+the stronger of the two.
 
 Up to level 20, XP comes from ordinary Minecraft mobs, paid as in Pokémon by the level the kill
 is won at ([`LevelManager.vanillaMobXp`](src/main/java/com/jttw/engine/progression/level/LevelManager.java)):
