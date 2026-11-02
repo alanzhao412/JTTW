@@ -128,7 +128,7 @@ def emblems():
         (-0.8, -8.4, -0.3, 1.6, 4.2, 1.2, 'v_head'),
         (-4.2, 1.2, -1.0, 8.4, 11, 2.0, 'v_body'),
         (-3.2, 0.2, -0.8, 6.4, 1.4, 1.6, 'v_shoulder'),
-    ], grand=1.15, children=[
+    ], grand=1.5, children=[
         part('emblem_venus_pegs', 'emblem_venus', (0, -7, 0), (0, 0, 0), [(-1.8, -0.3, 0, 3.6, 0.6, 0.6, 'v_peg'),
                                                                        (-1.8, 1.4, 0, 3.6, 0.6, 0.6, 'v_peg')]),
     ])
@@ -144,18 +144,20 @@ def emblems():
         (-2.6, -4.8, -1, 5.2, 1.6, 2, 'ra_bracket'),
         (-7, -18.4, -0.6, 14, 14, 1.2, 'ra_disc'),
     ])
-    # 8 Ketu: a comet on his palm, its tail streaming back over his shoulder
+    # 8 Ketu: a comet on his palm, its tail streaming up and back over his shoulder
     out += held('ketu', [
-        (-1.6, -4.8, -1.6, 3.2, 3.2, 3.2, 'ke_head'),
-        (-3.6, -6.8, -0.1, 7.2, 7.2, 0.2, 'ke_star'),
-        (-0.1, -6.8, -3.6, 0.2, 7.2, 7.2, 'ke_star_x'),
+        (-2.2, -6.2, -2.2, 4.4, 4.4, 4.4, 'ke_head'),
+        (-4.6, -8.6, -0.1, 9.2, 9.2, 0.2, 'ke_star'),
+        (-0.1, -8.6, -4.6, 0.2, 9.2, 9.2, 'ke_star_x'),
     ], pivot=(0.4, 0.4, -1.2), children=[
-        part('emblem_ketu_tail', 'emblem_ketu', (0, -3.2, 1.2), (-0.35, 0, 0), [
-            (-1.6, -0.1, 0, 3.2, 0.2, 7, 'ke_tail'), (-0.1, -1.6, 0, 0.2, 3.2, 7, 'ke_tail_x')]),
-        part('emblem_ketu_tail_2', 'emblem_ketu_tail', (0, 0, 6.6), (-0.25, 0, 0), [
-            (-2.4, -0.1, 0, 4.8, 0.2, 8, 'ke_tail2'), (-0.1, -2.4, 0, 0.2, 4.8, 8, 'ke_tail2_x')]),
-        part('emblem_ketu_tail_3', 'emblem_ketu_tail_2', (0, 0, 7.6), (-0.2, 0, 0), [
-            (-3.2, -0.1, 0, 6.4, 0.2, 8, 'ke_tail3'), (-0.1, -3.2, 0, 0.2, 6.4, 8, 'ke_tail3_x')]),
+        part('emblem_ketu_tail', 'emblem_ketu', (0, -4.2, 1.6), (-0.8, 0, 0), [
+            (-2.4, -0.1, 0, 4.8, 0.2, 8, 'ke_tail'), (-0.1, -2.4, 0, 0.2, 4.8, 8, 'ke_tail_x'),
+            (-1.2, -1.2, 0, 2.4, 2.4, 8, 'ke_trail')]),
+        part('emblem_ketu_tail_2', 'emblem_ketu_tail', (0, 0, 7.6), (0.25, 0, 0), [
+            (-3.4, -0.1, 0, 6.8, 0.2, 9, 'ke_tail2'), (-0.1, -3.4, 0, 0.2, 6.8, 9, 'ke_tail2_x'),
+            (-0.8, -0.8, 0, 1.6, 1.6, 9, 'ke_trail2')]),
+        part('emblem_ketu_tail_3', 'emblem_ketu_tail_2', (0, 0, 8.6), (0.25, 0, 0), [
+            (-4.4, -0.1, 0, 8.8, 0.2, 9, 'ke_tail3'), (-0.1, -4.4, 0, 0.2, 8.8, 9, 'ke_tail3_x')]),
     ])
     return out
 
@@ -1243,15 +1245,20 @@ def paint_emblem(p, style, f, name, light):
         for s, r in f.items():
             for i, j, xy in each(r):
                 d = math.hypot(i + 0.5 - r[2] / 2, j + 0.5 - r[3] / 2) / (r[2] / 2)
-                p.lit(xy, mixc((255, 255, 255), (200, 150, 255), min(1, d)), glow=1.0)
+                p.lit(xy, mixc((255, 255, 255), (150, 70, 250), min(1, d) ** 0.7), glow=1.0)
     if style in ('ke_star', 'ke_star_x'):                          # its rays, a four-pointed star
         flat = ('right', 'left') if style == 'ke_star_x' else ('front', 'back')
         for s in flat:
             def m(s_, t):
                 dx, dy = abs(s_ - 0.5) * 2, abs(t - 0.5) * 2
                 return dx * dy < 0.012 or dx + dy < 0.5 or (dx ** 0.5 + dy ** 0.5) < 0.9
-            cutout(p, f[s], m, lambda s_, t: mixc((255, 255, 255), (190, 140, 255), min(1, (abs(s_ - 0.5) + abs(t - 0.5)) * 1.6)), glow=0.9)
+            cutout(p, f[s], m, lambda s_, t: mixc((240, 220, 255), (140, 60, 240), min(1, (abs(s_ - 0.5) + abs(t - 0.5)) * 2.2)), glow=0.9)
         bare(p, f, [s for s in ('front', 'back', 'right', 'left', 'top', 'bottom') if s not in flat])
+    if style in ('ke_trail', 'ke_trail2'):                         # the tail's bright core, streaming
+        for s, r in f.items():
+            for i, j, xy in each(r):
+                a = (along_z(s, i, j, r[2], r[3]) + (0 if style == 'ke_trail' else 1)) / 2
+                p.lit(xy, mixc((250, 236, 255), (130, 50, 230), a), glow=1.0 - 0.4 * a)
     if style.startswith('ke_tail'):                                # the tail, streaming, fading from white to violet to nothing
         x_plane = style.endswith('_x')
         stage = 0 if style.startswith('ke_tail_') or style == 'ke_tail' else (1 if 'tail2' in style else 2)
@@ -1267,6 +1274,6 @@ def paint_emblem(p, style, f, name, light):
                 if across > 0.35 + 0.65 * a or (a > 0.5 and p.rnd.random() < (a - 0.5) * 1.2):
                     p.clear(xy)
                     continue
-                c = mixc((255, 250, 255), (150, 90, 230), min(1, a * 1.3 + across * 0.3))
+                c = mixc((236, 210, 255), (110, 40, 210), min(1, a * 1.6 + across * 0.5))
                 p.lit(xy, c, glow=0.9 - 0.5 * a)
         bare(p, f, [s for s in ('front', 'back', 'right', 'left', 'top', 'bottom') if s not in flat])

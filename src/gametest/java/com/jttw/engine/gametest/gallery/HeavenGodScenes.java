@@ -60,7 +60,7 @@ final class HeavenGodScenes {
         }
         all.add(scene("heaven_luminaries_lineup", p -> {
             for (int i = 0; i < 9; i++) god(p, lord, -7.5 + i * 2.0, 11.5 - 0.6 * Math.abs(i - 4) * 0.5, 180f, i);
-        }, new double[]{0.5, 2.6, -1.2, 0.5, 1.5, 11}));
+        }, new double[]{0.5, 2.3, 1.8, 0.5, 1.4, 11}));
         all.add(scene("heaven_luminaries_close_a", p -> {
             for (int i = 0; i < 5; i++) god(p, lord, -3.5 + i * 2.0, 11, 180f, i);
         }, new double[]{0.5, 2.0, 3.6, 0.5, 1.4, 11}));

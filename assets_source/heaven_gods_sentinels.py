@@ -115,6 +115,8 @@ def frame(eye):
             (-5.4, -11.4, -3.4, 10.8, 7.4, 6.8, 'sn_torso'),
             (-4.6, -4.4, -3.0, 9.2, 4.6, 6, 'sn_belly'),
             (-5.9, -11.8, -3.9, 11.8, 7.6, 7.8, 'sn_breastplate'),
+            (-5.0, -10.9, -4.5, 4.4, 4.4, 0.7, 'sn_boss'),
+            (0.6, -10.9, -4.5, 4.4, 4.4, 0.7, 'sn_boss'),
             (-4.8, -4.6, -3.4, 9.6, 4.4, 6.8, 'sn_scales'),
             (-2.4, -5.4, -4.3, 4.8, 4.8, 0.8, 'sn_mirror'),
             (-6.2, -12.2, -3.6, 12.4, 1.2, 7.2, 'sn_mantle'),
@@ -122,9 +124,10 @@ def frame(eye):
             (-1.8, -14.4, -1.8, 3.6, 2.2, 3.6, 'sn_neck'),
         ]),
         part('right_pauldron', 'body', (-6.6, -11.4, 0), (0, 0, 0.45), [
-            (-3.6, -1.0, -3.2, 5.8, 1.8, 6.4, 'sn_pauldron'),
-            (-4.2, 0.6, -3.6, 6.2, 2, 7.2, 'sn_pauldron2'),
-            (-4.9, 0.4, -1.8, 0.9, 3.4, 3.6, 'sn_lionface'),
+            (-4.0, -1.2, -3.6, 6.6, 2, 7.2, 'sn_pauldron'),
+            (-4.8, 0.6, -4.0, 7.2, 2.2, 8.0, 'sn_pauldron2'),
+            (-5.6, 2.6, -4.4, 7.8, 2.2, 8.8, 'sn_pauldron3'),
+            (-6.5, 0.6, -2.0, 1.0, 4.0, 4.0, 'sn_lionface'),
         ]),
         part('arch', 'body', (0, -11.6, 4.6), (0.15, 0, 0), []),
     ] + arc('arch_seg', 'arch', 0, 0, 0, 11.4, 180, 360, 9, 2, 0.4, 'sn_ribbon') + [
@@ -282,11 +285,33 @@ def painter(eye):
                     hline(p, r, 1, PLATE_DEEP)
                     hline(p, r, fh - 1, lace)
                     hline(p, r, fh - 2, GOLD_LIGHT)
+                if s in ('front', 'back') and fh > 8:
+                    scale_mail(p, (fx + 2, fy + fh - 6, fw - 4, 4), PLATE, PLATE_DEEP, LIGHTS[s])
                 if s == 'front':
                     for j in range(3, fh - 2):
                         p.px((fx + fw // 2, fy + j), PLATE_DEEP)
                     for i in range(3, fw - 3):
                         p.px((fx + i, fy + 3 - (i // 3) % 2), GOLD_LIGHT if (i // 3) % 2 == 0 else GOLD)
+        if style == 'sn_boss':                                    # a round boss on the breast: a lion's face cast in gold
+            for s, (fx, fy, fw, fh) in f.items():
+                if s in ('front', 'back'):
+                    def col(r, a, d):
+                        if r > 0.82:
+                            return GOLD_DEEP if int((a + math.pi) * 8 / math.pi) % 2 else GOLD_LIGHT
+                        if r > 0.7:
+                            return lace
+                        return GOLD
+                    disc(p, (fx, fy, fw, fh), col)
+                    if s == 'front':                              # 9x9: brows, eyes, the muzzle
+                        for i in range(2, 7):
+                            p.px((fx + i, fy + 2 + (i == 4)), GOLD_DEEP)
+                        p.lit((fx + 3, fy + 3), c['eye'], glow=0.5)
+                        p.lit((fx + 5, fy + 3), c['eye'], glow=0.5)
+                        p.px((fx + 4, fy + 4), GOLD_LIGHT)
+                        for i in range(3, 6):
+                            p.px((fx + i, fy + 6), PLATE_DEEP)
+                else:
+                    p.face((fx, fy, fw, fh), GOLD_DEEP, 1.0, noise=3)
         if style == 'sn_scales':
             for s, r in f.items():
                 if s in ('top', 'bottom'):
@@ -317,7 +342,7 @@ def painter(eye):
             plate(p, f, PLATE)
         if style == 'sn_neck':
             skin_box(p, f, k(face, 0.82))
-        if style in ('sn_pauldron', 'sn_pauldron2'):
+        if style in ('sn_pauldron', 'sn_pauldron2', 'sn_pauldron3'):
             for s, r in f.items():
                 fx, fy, fw, fh = r
                 for i, j, xy in each(r):

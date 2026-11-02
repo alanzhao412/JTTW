@@ -24,6 +24,7 @@ SIZE = 0.96
 
 PLATE = (184, 132, 56)          # gilt bronze
 PLATE_DEEP = (104, 66, 28)
+LAM = (64, 56, 74)               # black-lacquered lamellae
 LACE = (184, 34, 30)
 ROBE = (176, 30, 32)
 ROBE_DEEP = (92, 10, 16)
@@ -110,8 +111,8 @@ PARTS = mirrored([
         (-1.1, 8.6, -1.1, 2.2, 2, 2.2, 'axe_butt'),
         (-1.6, -14.8, -1.6, 3.2, 4, 3.2, 'axe_tassel'),
     ]),
-    part('right_blade', 'right_axe', (-1, -21, 0), (0, 0, 0), [
-        (-12, -8, -0.5, 12, 16, 1.0, 'axe_blade'),
+    part('right_blade', 'right_axe', (-1, -19.5, 0), (0, 0, 0), [
+        (-15.5, -11, -0.5, 15.5, 22, 1.0, 'axe_blade'),
         (-1.4, -3.4, -0.9, 1.4, 6.8, 1.8, 'axe_socket'),
     ]),
     part('right_spike', 'right_axe', (0.8, -21, 0), (0, 0, 0), [(0, -0.8, -0.5, 4.2, 1.6, 1, 'axe_spike')]),
@@ -165,7 +166,7 @@ def roar(p, rect):
 
 def paint_giant(p, style, f, dims):
     trim = GOLD_LIGHT
-    lam = lambda s, r, **kw: lamellar(p, r, PLATE, LACE, trim, light=LIGHTS[s], **kw)
+    lam = lambda s, r, **kw: lamellar(p, r, LAM, LACE, trim, light=LIGHTS[s], sheen=(120, 110, 130), **kw)
 
     if style == 'hips':
         silk(p, f, ROBE, ROBE_DEEP)
@@ -325,7 +326,7 @@ def paint_giant(p, style, f, dims):
             if s in ('top', 'bottom'):
                 p.face(r, PLATE_DEEP, LIGHTS[s], noise=3)
                 continue
-            scale_mail(p, r, PLATE, PLATE_DEEP, LIGHTS[s])
+            scale_mail(p, r, LAM, GOLD, LIGHTS[s])
             hline(p, r, 0, GOLD_LIGHT)
             hline(p, r, r[3] - 1, PLATE_DEEP)
     if style == 'gorget':
@@ -647,7 +648,7 @@ def paint_giant(p, style, f, dims):
             if s in ('top', 'bottom'):
                 plate(p, {s: r}, PLATE)
             else:
-                lamellar(p, r, PLATE, LACE, GOLD_LIGHT, light=LIGHTS[s], pw=3, ph=4)
+                lamellar(p, r, LAM, LACE, GOLD_LIGHT, light=LIGHTS[s], pw=3, ph=4, sheen=(120, 110, 130))
     if style == 'helm_crest':                                     # the flame crest on his brow: gold, a burning jewel in it
         for s in ('front', 'back'):
             fx, fy, fw, fh = f[s]

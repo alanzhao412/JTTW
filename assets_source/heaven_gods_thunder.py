@@ -44,15 +44,15 @@ TLARM, TLFOREARM = (-0.55, 0, -0.18), (-0.85, -0.2, 0)          # his left: the 
 MALLET = aim([TARM, TFOREARM], (0.1, 0, -0.15))
 CHISEL = aim([TLARM, TLFOREARM], (0.9, 0, 0))
 
-WING_REST = (0.1, 1.0, 0.55)
-WING_TIP_REST = (0, 0.7, -0.35)
+WING_REST = (0.1, 0.55, 0.42)
+WING_TIP_REST = (0, 0.45, -0.2)
 
 drums = []
-for i, a in enumerate(range(165, 376, 30)):
+for i, a in enumerate(range(160, 381, 31)):
     t = math.radians(a)
-    drums.append(part('drum_%d' % i, 'drums', (17 * math.cos(t), 17 * math.sin(t), 0), (0, 0, t + math.pi / 2), [
-        (-2.6, -2.6, -1.5, 5.2, 5.2, 3.0, 'tl_drum'),
-        (-2.9, -2.9, -0.4, 5.8, 5.8, 0.8, 'tl_drum_band'),
+    drums.append(part('drum_%d' % i, 'drums', (20 * math.cos(t), 20 * math.sin(t), 0), (0, 0, t + math.pi / 2), [
+        (-3.6, -3.6, -1.8, 7.2, 7.2, 3.6, 'tl_drum'),
+        (-4.0, -4.0, -0.5, 8.0, 8.0, 1.0, 'tl_drum_band'),
     ]))
 
 THUNDER = mirrored([
@@ -90,7 +90,7 @@ THUNDER = mirrored([
     part('right_mantle_back', 'body', (-3.6, -12.4, 4.4), (0.15, 0, 0.05), [(-3.6, 0, -0.5, 7.2, 8, 1, 'tl_mantle_back')]),
     # the ring of drums on his back: a gold hoop arching over his head, eight drums on it
     part('drums', 'body', (0, -11, 8.2), (-0.08, 0, 0), []),
-] + arc('hoop', 'drums', 0, 0, 0, 17, 165, 375, 16, 1.2, 1.2, 'tl_hoop') + drums + [
+] + arc('hoop', 'drums', 0, 0, 0, 20, 160, 380, 18, 1.4, 1.4, 'tl_hoop') + drums + [
     part('drum_strut', 'body', (0, -11, 3.6), (-0.08, 0, 0), [(-0.7, -0.7, 0, 1.4, 1.4, 4.8, 'tl_hoop'),
                                                               (-4.4, -0.6, 3.6, 8.8, 1.2, 1.2, 'tl_hoop')]),
     # the wings: from his shoulder blades, half-folded behind him
@@ -122,16 +122,16 @@ THUNDER = mirrored([
     # the head: blue, round-eyed, beaked, his red mane standing up from a gold band
     part('head', 'body', (0, -15.2, -0.8), (0, 0, 0), [
         (-4, -8.4, -3.8, 8, 8, 7.6, 'tl_face'),
-        (-4.3, -7.4, -4.0, 8.6, 1.4, 8.2, 'tl_band'),
-        (-1.3, -8.2, -4.6, 2.6, 2.4, 0.8, 'tl_jewel'),
+        (-4.3, -8.9, -4.0, 8.6, 1.4, 8.2, 'tl_band'),
+        (-1.3, -9.6, -4.6, 2.6, 2.4, 0.8, 'tl_jewel'),
     ]),
-    part('right_eye', 'head', (-2.0, -4.8, -3.9), (0, 0.2, 0), [(-1.4, -1.4, -0.6, 2.8, 2.8, 0.8, 'tl_eye')]),
-    part('right_brow', 'head', (-0.3, -6.1, -4.1), (0, 0.15, 0.5), [(-3.8, -0.8, -0.6, 3.8, 1.4, 1.2, 'tl_brow')]),
-    part('beak', 'head', (0, -3.6, -3.8), (0.08, 0, 0), [
-        (-1.7, -1.2, -4.2, 3.4, 2.6, 4.4, 'tl_beak'),
-        (-1.2, 0.8, -4.9, 2.4, 2.4, 1.6, 'tl_hook'),
+    part('right_eye', 'head', (-2.1, -5.7, -3.9), (0, 0.2, 0), [(-1.4, -1.4, -0.6, 2.8, 2.8, 0.8, 'tl_eye')]),
+    part('right_brow', 'head', (-0.3, -7.3, -4.1), (0, 0.15, 0.5), [(-3.8, -0.8, -0.6, 3.8, 1.4, 1.2, 'tl_brow')]),
+    part('beak', 'head', (0, -2.5, -3.8), (0.08, 0, 0), [
+        (-1.9, -1.6, -5.6, 3.8, 3.2, 5.8, 'tl_beak'),
+        (-1.4, 1.0, -6.6, 2.8, 3.4, 2.0, 'tl_hook'),
     ]),
-    part('lower_beak', 'head', (0, -1.8, -3.6), (0.1, 0, 0), [(-1.3, 0, -3.3, 2.6, 1.3, 3.4, 'tl_lowbeak')]),
+    part('lower_beak', 'head', (0, -0.8, -3.6), (0.1, 0, 0), [(-1.4, 0, -4.4, 2.8, 1.5, 4.4, 'tl_lowbeak')]),
     part('right_ear', 'head', (-4, -5.4, 0.6), (0, -0.4, -0.3), [(-2.6, -1.8, -0.4, 2.6, 3.6, 0.8, 'tl_ear')]),
 ] + [
     part('mane_%d' % i, 'head', (x, -7.4, z), (rx, 0, rz), [(-1.4, -ln, -1.2, 2.8, ln, 2.4, 'tl_mane')])
@@ -207,10 +207,10 @@ def drum_face(p, rect, back=False):
             return (210, 190, 150)
         spiral = (r * 3.2 - a / (2 * math.pi)) % 1.0
         if 0.2 < r < 0.78 and spiral < 0.22:
-            return ('glow', mixc(SPARK_HOT, (90, 160, 255), r), 0.9)
+            return ('glow', mixc((150, 210, 255), (60, 120, 255), r), 0.9)
         if r < 0.14:
             return ('glow', SPARK_HOT, 1.0)
-        return mixc((236, 220, 180), (190, 160, 120), r)
+        return mixc((214, 186, 136), (150, 116, 76), r)
     disc(p, rect, c)
 
 
@@ -432,7 +432,7 @@ def paint_thunder(p, style, f, dims):
         fx, fy, fw, fh = f['front']                               # 16x16
         for side in (0, 1):                                       # dark sockets round the eyes
             ex = 1 if side == 0 else fw - 1 - 7
-            for i, j, xy in each((fx + ex, fy + 4, 7, 6)):
+            for i, j, xy in each((fx + ex, fy + 2, 7, 6)):
                 d = math.hypot((i + 0.5) / 7 - 0.5, (j + 0.5) / 6 - 0.5)
                 if d < 0.55:
                     p.px(xy, k(SKIN_DEEP, 0.9))
@@ -575,7 +575,7 @@ LIGHTNING = mirrored([
         (-4, -8, -3.6, 8, 7.2, 7.2, 'lm_face'),
         (-0.8, -5, -4.3, 1.6, 2, 0.8, 'lm_nose'),
         (-4.2, -8.3, -0.6, 8.4, 7.6, 4.6, 'lm_hair_back'),
-        (-4.3, -8.6, -3.8, 8.6, 2.0, 7.8, 'lm_hair_top'),
+        (-4.3, -9.2, -3.3, 8.6, 1.8, 7.4, 'lm_hair_top'),
         (-3.6, -0.9, -3.0, 7.2, 1.6, 6.2, 'lm_chin'),
     ]),
     part('right_lock', 'head', (-3.9, -7.0, -2.0), (-0.04, 0, 0.05), [(-0.7, 0, -0.9, 1.4, 10, 1.8, 'lm_lock')]),
@@ -808,7 +808,7 @@ def paint_lightning(p, style, f, dims):
                 for i in range(5):
                     x = fx + (fw - 1 - i if s == 'right' else i)
                     p.px((x, fy + j), k(LADY, 0.92 - 0.03 * i))
-        face_front(p, f['front'], dict(kind='lady', skin=LADY, hair=HAIR, eye=(40, 60, 110), hairline=2, widow=True,
+        face_front(p, f['front'], dict(kind='lady', skin=LADY, hair=HAIR, eye=(40, 60, 110), hairline=2, widow=False,
                                        mark=(80, 160, 255), lid=(140, 170, 240), eye_row=7))
         p.face(f['bottom'], k(LADY, 0.75), 1.0)
     if style == 'lm_nose':

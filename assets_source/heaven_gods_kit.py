@@ -470,22 +470,19 @@ def face_front(p, rect, o):
     if kind == 'lady':
         for side in (0, 1):
             ex = 3 if side == 0 else fw - 3 - 5
-            sgn = 1 if side == 0 else -1
-            for i in range(5):                                     # brows: fine, arched, long
-                bx = ex + i - (1 if side == 0 else -1) * 0
-                by = ey - 3 + (0 if 1 <= i <= 3 else 1)
-                p.px((fx + bx, fy + by), shade_of(hair, 0.8))
-            for i in range(5):                                     # the eye: almond, a dark lash line, a dark iris
-                p.px((fx + ex + i, fy + ey - 1), (40, 26, 30))
-                p.px((fx + ex + i, fy + ey), (244, 238, 232))
-                p.px((fx + ex + i, fy + ey + 1), k(skin, 0.86))
-            ix = ex + (2 if side == 0 else 2)
+            outer = 0 if side == 0 else 4                          # the eye's outer corner (side 0 is her right, on the left)
+            inner = 4 - outer
+            for i in range(5):                                     # brows: fine willow-leaf strokes, high, the outer end drooping
+                if i == inner:
+                    continue
+                p.px((fx + ex + i, fy + ey - 3 + (1 if i == outer else 0)), shade_of(hair, 0.9))
+            for i in range(5):                                     # the eye: a dark lash line, the white, the iris; the lid's crease above
+                p.px((fx + ex + i, fy + ey - 1), (34, 22, 28) if i != inner else k(skin, 0.8))
+                p.px((fx + ex + i, fy + ey), (246, 242, 238))
+            ix = ex + (1 if side == 0 else 2)
             p.px((fx + ix, fy + ey), o.get('eye', (40, 30, 34)))
-            p.px((fx + ix + 1, fy + ey), (20, 14, 16))
-            p.px((fx + ex + (4 if side == 0 else 0), fy + ey - 1), (20, 12, 16))   # a flick at the outer corner
-            p.px((fx + ex + (5 if side == 0 else -1), fy + ey - 2), (20, 12, 16))
-            for i in range(5):                                     # a touch of colour on the lid
-                p.px((fx + ex + i, fy + ey - 2), mixc(k(skin, 0.95), o.get('lid', (200, 110, 140)), 0.35))
+            p.px((fx + ix + 1, fy + ey), k(o.get('eye', (40, 30, 34)), 0.5))
+            p.px((fx + ex + outer + (-1 if side == 0 else 1), fy + ey - 1), (20, 12, 16))   # liner flicked out at the corner
         for i in range(int(cx) - 2, int(cx) + 2):                  # small red lips
             p.px((fx + i, fy + fh - 1), RED_LIPS if abs(i + 0.5 - cx) < 1.6 else k(RED_LIPS, 0.75))
         p.px((fx + int(cx) - 1, fy + fh - 2), k(skin, 0.82))
