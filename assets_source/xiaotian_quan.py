@@ -299,14 +299,10 @@ def painter(berserk):
             return
         if style == 'skull':
             fur(p, f, sheen=1.1)
-            fx, fy, fw, fh = f['front']                  # the eyes, wide-set either side of the stop, under the brow
-            ew = max(4, fw // 4)
-            eye(p, fx + 1, fy + 3, iris, eye_glow, w=ew, toward=1)
-            eye(p, fx + fw - 1 - ew, fy + 3, iris, eye_glow, w=ew, toward=-1)
-            for s, toward in (('right', -1), ('left', 1)):  # the eye seen from the side, toward its front
-                fx, fy, fw, fh = f[s]
-                x = fx + fw - 6 if s == 'right' else fx + 1
-                eye(p, x, fy + 3, iris, eye_glow, w=5, toward=toward)
+            fx, fy, fw, fh = f['front']                  # one eye each side, wrapped round the skull's front corner (the
+            ew = max(6, fw // 3)                         # side faces sit flush either side of the front in the UV), so it
+            eye(p, fx - ew // 2, fy + 3, iris, eye_glow, w=ew, toward=1)        # reads as the same eye from any angle
+            eye(p, fx + fw - ew + ew // 2, fy + 3, iris, eye_glow, w=ew, toward=-1)
             fx, fy, fw, fh = f['top']                    # a flame on the brow
             flame(p, (fx + fw // 2 - 3, fy + fh - 9, 6, 8), mark, mark_glow)
             return
