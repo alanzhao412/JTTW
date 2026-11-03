@@ -255,22 +255,16 @@ def flame(p, rect, colour, glow):
             p.lit((fx + i, fy + j), colour, glow=glow, skin=noisy(p, mixc(colour, (255, 250, 220), 0.3 * (1 - t)), 5))
 
 
-def eye(p, x, y, iris, glow, w=5, h=4, toward=1):
-    """An almond eye `w` wide at (x, y) (its inner corner toward `toward`): a dark lid line, the iris lit
-    with a dark pupil and a catch-light, shining on the glowing skin."""
-    rows = [(1, w - 1), (0, w), (0, w), (1, w - 1)][:h]
-    for j in range(-1, h + 1):
-        for i in range(-1, w + 1):
-            p.px((x + i, y + j), (8, 8, 10))
-    for j, (a, b) in enumerate(rows):
-        for i in range(a, b):
-            col = mixc(iris, (120, 60, 10), j / max(1, h - 1) * 0.6)
-            p.lit((x + i, y + j), col, glow=glow)
-    pc = x + w // 2 - (1 if toward > 0 else 0)
-    for j in range(1, h - 1):
-        p.px((pc, y + j), (6, 4, 4))
-        p.glow.putpixel((int(pc), int(y + j)), (0, 0, 0, 0))
-    p.lit((pc + toward, y + 1), (255, 250, 230), glow=glow * 0.8)
+def flat_eye(p, rect, iris, glow):
+    """One flat block of eye: the iris, lit (a shade darker along its bottom), or with no iris a dark pupil."""
+    x, y, w, h = rect
+    for j in range(h):
+        for i in range(w):
+            if iris is None:
+                p.px((x + i, y + j), (6, 4, 4))
+                p.glow.putpixel((x + i, y + j), (0, 0, 0, 0))
+            else:
+                p.lit((x + i, y + j), iris if j < h - 1 else k(iris, 0.8), glow=glow)
 
 
 def painter(berserk):
@@ -299,10 +293,19 @@ def painter(berserk):
             return
         if style == 'skull':
             fur(p, f, sheen=1.1)
-            fx, fy, fw, fh = f['front']                  # one eye each side, wrapped round the skull's front corner (the
-            ew = max(6, fw // 3)                         # side faces sit flush either side of the front in the UV), so it
-            eye(p, fx - ew // 2, fy + 3, iris, eye_glow, w=ew, toward=1)        # reads as the same eye from any angle
-            eye(p, fx + fw - ew + ew // 2, fy + 3, iris, eye_glow, w=ew, toward=-1)
+            # one eye each side, flat and blocky like vanilla's, wrapped round the skull's front corner (the side faces
+            # sit flush either side of the front in the UV): from the side an iris block behind a pupil block at the
+            # front edge, looking ahead; from the front just the iris, beside the muzzle
+            b, y = bg.S, f['front'][1] + bg.S
+            fx, fy, fw, fh = f['front']
+            flat_eye(p, (fx, y, b, b), iris, eye_glow)
+            flat_eye(p, (fx + fw - b, y, b, b), iris, eye_glow)
+            fx, fy, fw, fh = f['right']
+            flat_eye(p, (fx + fw - 2 * b, y, b, b), iris, eye_glow)
+            flat_eye(p, (fx + fw - b, y, b, b), None, 0)
+            fx, fy, fw, fh = f['left']
+            flat_eye(p, (fx + b, y, b, b), iris, eye_glow)
+            flat_eye(p, (fx, y, b, b), None, 0)
             fx, fy, fw, fh = f['top']                    # a flame on the brow
             flame(p, (fx + fw // 2 - 3, fy + fh - 9, 6, 8), mark, mark_glow)
             return
