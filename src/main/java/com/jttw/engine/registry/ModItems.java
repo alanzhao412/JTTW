@@ -390,6 +390,12 @@ public final class ModItems {
     public static final DeferredHolder<Item, Item> NINE_TURN_ELIXIR = ITEMS.register("nine_turn_elixir",
             () -> new com.jttw.engine.item.HeavenlyCraftItem(com.jttw.engine.item.HeavenlyCraftItem.Kind.ELIXIR));
 
+    // ── Star Shards' crafts: the Eight Trigrams Furnace forges them for anyone ──
+    public static final DeferredHolder<Item, Item> STARFALL_TALISMAN = ITEMS.register("starfall_talisman",
+            () -> new com.jttw.engine.item.StarCraftItem(com.jttw.engine.item.StarCraftItem.Kind.STARFALL));
+    public static final DeferredHolder<Item, Item> STAR_ESSENCE_ELIXIR = ITEMS.register("star_essence_elixir",
+            () -> new com.jttw.engine.item.StarCraftItem(com.jttw.engine.item.StarCraftItem.Kind.ELIXIR));
+
     public static void register(IEventBus modEventBus) {
         ITEMS.register(modEventBus);
     }

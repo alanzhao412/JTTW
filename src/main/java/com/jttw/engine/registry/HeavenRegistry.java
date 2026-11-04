@@ -107,8 +107,18 @@ public final class HeavenRegistry {
 
     /** A pass through Heaven's gates: up to the clouds of one's own level, and home again. */
     public static final DeferredHolder<Item, Item> HEAVEN_PASS = ITEMS.register("heaven_pass", com.jttw.engine.item.HeavenPassItem::new);
-    /** A shard of starlight, from Heaven's star generals and star lords: a forging material. */
-    public static final DeferredHolder<Item, Item> STAR_SHARD = ITEMS.register("star_shard", () -> new Item(new Item.Properties()));
+    /**
+     * A shard of starlight, from Heaven's star generals and star lords: a forging material for any
+     * class, which the Eight Trigrams Furnace makes into Starfall Talismans and Star-Essence Elixirs.
+     */
+    public static final DeferredHolder<Item, Item> STAR_SHARD = ITEMS.register("star_shard", () -> new Item(new Item.Properties()) {
+        @Override
+        public void appendHoverText(net.minecraft.world.item.ItemStack stack, Item.TooltipContext context,
+                                    List<net.minecraft.network.chat.Component> tooltip, net.minecraft.world.item.TooltipFlag flag) {
+            tooltip.add(net.minecraft.network.chat.Component.translatable("item.jttw_engine.star_shard.desc")
+                    .withStyle(net.minecraft.ChatFormatting.GRAY));
+        }
+    });
 
     private static DeferredHolder<Item, Item> egg(String name, Supplier<? extends EntityType<? extends net.minecraft.world.entity.Mob>> type, int a, int b) {
         return ITEMS.register(name + "_spawn_egg", () -> new DeferredSpawnEggItem(type, a, b, new Item.Properties()));

@@ -1,7 +1,8 @@
 """The class identities' icons: the Divine Beasts' twenty evolution offerings (the Vermilion Bird's
 plumes, the Azure Dragon's pearls, the White Tiger's fang totems, the Black Tortoise's shells, each
-richer by its evolution), and the Heavenly's own crafts (the Five-Thunder and Heaven's Net
-talismans, the Nine-Turn Golden Elixir).
+richer by its evolution), the Heavenly's own crafts (the Five-Thunder and Heaven's Net
+talismans, the Nine-Turn Golden Elixir), and the Star Shards' crafts (the Starfall Talisman, the
+Star-Essence Elixir).
 
 Run from the repository root: python assets_source/class_items.py"""
 import math
@@ -304,3 +305,69 @@ put(img, 6, 6, (255, 250, 210, 255))
 put(img, 5, 6, (255, 246, 200, 255))
 outline(img)
 img.save(T + 'nine_turn_elixir.png')
+
+
+# ── The Star Shards' crafts: the night's colours, and a star's light ──
+def sparkle(img, x, y, core, arm, long=False):
+    """A four-pointed star: a white core, its arms a softer light (longer when it is the great one)."""
+    put(img, x, y, rgba(core))
+    for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+        put(img, x + dx, y + dy, rgba(arm))
+        if long:
+            put(img, x + 2 * dx, y + 2 * dy, rgba(arm, 0.8))
+
+
+# the Starfall Talisman: night-blue paper, a gold seal, and a star falling down it, its tail behind it
+NIGHT, NIGHT_D = (52, 58, 128), (40, 44, 104)
+GOLD_S, GOLD_SD = (236, 196, 84), (180, 138, 44)
+TAIL = [(255, 250, 220), (200, 230, 255), (140, 190, 250), (100, 140, 225), (80, 110, 200)]
+img = icon()
+for y in range(1, 16):
+    for x in range(4, 12):
+        k = 1.12 if x < 6 else (0.86 if x > 9 else 1.0)
+        put(img, x, y, rgba(NIGHT if y % 5 else NIGHT_D, k))
+for x in range(4, 12):  # the torn foot
+    if x % 2:
+        put(img, x, 15, CLEAR)
+for (x, y), c in [((7, 2), GOLD_S), ((8, 2), GOLD_S), ((6, 3), GOLD_S), ((9, 3), GOLD_S), ((7, 3), GOLD_SD), ((8, 3), GOLD_SD)]:
+    put(img, x, y, rgba(c))  # the seal's crown, in gold
+for (x, y) in ((5, 6), (10, 9), (5, 13)):  # far stars in the paper
+    put(img, x, y, rgba((170, 180, 235)))
+# the tail: from the upper right down to the star, brightening as it comes
+for i, (x, y) in enumerate(((10, 5), (10, 6), (9, 7), (9, 8), (8, 9))):
+    put(img, x, y, rgba(TAIL[4 - i] if i < 4 else TAIL[1]))
+for (x, y), c in (((9, 6), TAIL[4]), ((8, 8), TAIL[2]), ((8, 10), TAIL[1]), ((7, 9), TAIL[2])):
+    put(img, x, y, rgba(c))
+sparkle(img, 7, 11, (255, 255, 255), (255, 236, 150))
+put(img, 6, 10, rgba((255, 250, 210)))  # the glow round its head
+put(img, 8, 12, rgba((230, 200, 110)))
+put(img, 10, 13, rgba(RED))  # the seal's stamp
+put(img, 10, 14, rgba(RED_D))
+outline(img)
+img.save(T + 'starfall_talisman.png')
+
+# the Star-Essence Elixir: a pale star-silver pill on a night-blue dish, sparks of starlight round it
+img = icon()
+for y in range(10, 14):  # the dish
+    for x in range(1, 15):
+        if abs(x - 7.5) <= 6.5 - (y - 10) * 1.5:
+            put(img, x, y, rgba((52, 62, 140), 1.2 - (y - 10) * 0.15 - (0.1 if x > 9 else 0)))
+for x in range(2, 14):
+    put(img, x, 10, rgba((190, 200, 240)))
+for y in range(16):  # the pill
+    for x in range(16):
+        dx, dy = x - 7.5, y - 7.0
+        d = math.hypot(dx, dy)
+        if d < 3.7:
+            t = max(0.0, 1 - math.hypot(dx + 1.3, dy + 1.3) / 4.6)
+            put(img, x, y, rgba(ramp([(84, 82, 170), (150, 160, 230), (214, 226, 255), (250, 252, 255)], t)))
+put(img, 6, 5, (255, 255, 255, 255))
+put(img, 5, 6, (240, 246, 255, 255))
+put(img, 9, 8, rgba((255, 236, 150)))  # a gold fleck of star in it
+put(img, 8, 9, rgba((236, 200, 110)))
+outline(img)
+sparkle(img, 2, 3, (255, 255, 255), (255, 232, 140), long=True)
+sparkle(img, 13, 2, (255, 255, 255), (150, 186, 250))
+put(img, 14, 7, rgba((255, 240, 180)))
+put(img, 1, 8, rgba((150, 186, 250)))
+img.save(T + 'star_essence_elixir.png')

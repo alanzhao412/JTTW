@@ -203,6 +203,46 @@ Crafter block) never. The furnace answers to its **smith**, the last to open it.
 recipes are put in their recipe book as they awaken and at login (refinements stay out of it:
 the armament's tooltip names them).
 
+#### Any class: Star Shards in the furnace
+
+**Star Shards** (Heaven's loot, below) are a forging material for every class. The Eight Trigrams
+Furnace forges two things from them, with no class gate (`trigrams_forging` with no `"gate"`, in
+`data/jttw_engine/recipe/star/`, written by
+[`assets_source/class_recipes.py`](assets_source/class_recipes.py)), for any smith, and they work in
+anyone's hands ([`StarCraftItem`](src/main/java/com/jttw/engine/item/StarCraftItem.java)). They are
+not a Heavenly armament's refining material, and no refining tier takes them.
+
+| Craft | The furnace's materials | What it does |
+|---|---|---|
+| Starfall Talisman (星陨符) | 4 star shards, 2 paper, 2 glowstone dust, a gold ingot (makes 2) | Burned, calls a falling star down on the creature you look at within 32 blocks. It strikes every foe within 4 blocks of where it lands: **two kill a foe of your level**. 2 s before the next. |
+| Star-Essence Elixir (星华丹) | 6 star shards, 3 glowstone dust, a glistering melon slice (makes 2) | Eaten, gives back half your health and half your Qi, washes off vanilla's harmful effects (the blindness, poison, slowness and nausea Heaven's host lays on), and gives Night Vision for a minute. 30 s before another takes. |
+
+- **The star's strength** is half the health of a typical character of the burner's level
+  (`MobScaling.typicalHealth`): two kill a same-level foe, before its magic resistance takes its
+  share. The burner's level sets it, not their class's power curve, so it reads the same for every
+  class at every level (a Divine Beast owing an evolution strikes at the level before it, as all its
+  power does). For comparison, the Heavenly's Five-Thunder bolt takes three or more to kill and
+  strikes one creature alone. The star spares its burner, their allies and pets, and every player
+  but the one aimed at. It breaks no block and sets nothing alight.
+- **The elixir** is the Nine-Turn Golden Elixir's lesser cousin: half your health back is about one
+  of a same-level foe's ordinary blows undone, with a little to spare. It is meant for the middle of a
+  fight with Heaven's host. The mod's own effects (the Fiery Gaze, the True Samadhi Fire) keep
+  their own rules and are not washed off.
+- **The cost.** A pair of talismans (4 shards) is about three Lunar Mansions, or a star lord and a
+  Lunar Mansion; a pair of elixirs (6) is about a Heavenly King and a god. Lunar Mansions drop 1 or 2
+  shards (one more at most with Looting), and lead one band in eight. The gods drop 1 to 3, the star
+  lords 2 to 4, and the Kings 3 to 5; each holds a post that stays empty 20 minutes once he falls. Nezha and Erlang
+  Shen drop 4 to 6, and Li Jing 5 to 8. Every Heaven region has its shards, from the Outer Clouds
+  (levels 1-20) up, so they are there to grind at every level. The furnace burns True Samadhi Fire,
+  as it does for everything it forges.
+- **Tests**: `StarCraftGameTests` (a Divine Beast, a Yaoguai, a Primordial and a Heavenly each forge
+  both; a shard short forges nothing; every star-shard recipe has no gate and no refining tier takes
+  them; the star strikes the creature looked at and the one beside it, but not one out of reach nor
+  the burner's pet; two strikes kill a same-level foe from level 1 to 100 for every class; the elixir
+  heals, restores and washes off, and waits its half minute). Their icons (a night-blue talisman
+  with a star falling down it, a star-silver pill on a night-blue dish) come from
+  [`assets_source/class_items.py`](assets_source/class_items.py).
+
 #### Divine Beast: evolution by ritual
 
 At each evolution (levels 20, 40, 60, 80, and the last at 100) a beast that has levelled up to it
@@ -3108,7 +3148,9 @@ Nezha. Each fights every other player as all Heaven's host does (an outlawed Erl
 Heaven but its Erlang Shen).
 
 - **Loot** (nothing that breaks the game): soldiers a little gold, archers arrows, cavalry and drummers
-  leather; the Lunar Mansions **Star Shards** (a new forging material) and gold, and a captain's sigil as
+  leather; the Lunar Mansions **Star Shards** (any class's forging material: the Eight Trigrams
+  Furnace makes Starfall Talismans and Star-Essence Elixirs of them, see "Any class: Star Shards in
+  the furnace") and gold, and a captain's sigil as
   every captain; the star lords and gods star shards, gold ingots and their own touch (glowstone, iron,
   copper, amethyst, now and then an Eye of Ender or an Echo Shard); the Kings gold, star shards, sigils,
   perhaps a diamond or a golden apple; Nezha and Erlang the same, and now and then Heavenly Wine; Li Jing
