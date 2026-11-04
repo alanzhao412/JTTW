@@ -91,6 +91,82 @@ def tail():
 EAR_W, EAR_D, EAR_H = 2.9, 0.6, 4.3
 EAR_SD = 1.9            # the crossed cup's depth front to back at its root
 
+# The ear's two triangles are not cut from boxes in the texture (a diagonal cut in texture pixels is a
+# staircase, jagged up close) but built so that every slanting edge is the true edge of a box turned to lie
+# along it: a narrow band along each slant (EAR_BAND wide, turned about the point), and the middle filled
+# with boxes stepped down inside them (their corners tucked under the bands). Each piece is painted from the
+# ear's own coordinates, so the fur and the dusky hollow run on across them unbroken; any texture pixel of a
+# band reaching past the other slant near the point is cleared.
+EAR_BAND = 0.42
+EAR_GEOM = {}           # style: how its box lies in the ear (see ear_point)
+
+
+def _halfwidth(y):
+    return EAR_W / 2 * (y + EAR_H) / (EAR_H + 0.2)
+
+
+def _cupdepth(y):
+    return EAR_SD * (y + EAR_H) / (EAR_H + 0.2)
+
+
+def ear_parts():
+    """The right ear's pieces under its part: (name, parent, pivot, rot, boxes) and its own boxes."""
+    th = math.atan2(EAR_W / 2, EAR_H + 0.2)                  # each slant's lean from upright
+    length = math.hypot(EAR_W / 2, EAR_H + 0.2) + EAR_BAND * math.tan(th) + 0.15
+    D = EAR_D
+    out, own = [], []
+    for name, sign, x0, z0, d in (('right_ear_a', 1, 0.0, -D / 2, D), ('right_ear_b', -1, -EAR_BAND, -D / 2 + 0.015, D - 0.03)):
+        style = 'ear_band_' + name[-1]
+        EAR_GEOM[style] = ('xy', x0, 0.0, EAR_BAND, length, sign * th, (0.0, -EAR_H))
+        out.append((name, (0, -EAR_H, 0), (0, 0, sign * th), [(x0, 0, z0, EAR_BAND, length, d, style)]))
+    # the middle, stepped: each box's top corners just inside the bands
+    y, n, d = -EAR_H + EAR_BAND / math.sin(th) * 0.9, 0, D - 0.06
+    while y < 0.2:
+        c = _halfwidth(y) - 0.05
+        style = 'ear_core_%d' % n
+        EAR_GEOM[style] = ('xy', -c, y, 2 * c, 0.2 - y, 0.0, (0.0, 0.0))
+        own.append((-c, y, -d / 2, 2 * c, 0.2 - y, d, style))
+        y, n, d = y + 0.55, n + 1, d - 0.03
+    # the cup, crossed through it front to back: upright at its front edge, its back edge slanting
+    tc = math.atan2(EAR_SD, EAR_H + 0.2)
+    clen = math.hypot(EAR_SD, EAR_H + 0.2) + EAR_BAND * math.tan(tc) + 0.15
+    EAR_GEOM['ear_cup_band'] = ('zy', -EAR_BAND, 0.0, EAR_BAND, clen, tc, (-EAR_H, -D / 2))
+    out.append(('right_ear_c', (0, -EAR_H, -D / 2), (tc, 0, 0), [(-D / 2 + 0.01, 0, -EAR_BAND, D - 0.02, clen, EAR_BAND, 'ear_cup_band')]))
+    y, n, w = -EAR_H + EAR_BAND / math.sin(tc) * 0.9, 0, D - 0.04
+    while y < 0.2:
+        c = _cupdepth(y) - 0.05
+        style = 'ear_cup_%d' % n
+        EAR_GEOM[style] = ('zy', -D / 2, y, c, 0.2 - y, 0.0, (0.0, 0.0))
+        own.append((-w / 2, y, -D / 2, w, 0.2 - y, c, style))
+        y, n, w = y + 0.55, n + 1, w - 0.03
+    return out, own
+
+
+def ear_point(style, s, u, v):
+    """The point (across, up) in the ear's own plane of the texture point (u, v) (0..1 across and down) on
+    the face s of the box of this style: x and y for the ear's broad triangle, z and y for its cup."""
+    plane, a0, b0, wa, hb, th, (pa, pb) = EAR_GEOM[style]
+    if plane == 'xy':                                     # u runs with x on the front, against it behind
+        a = a0 + (u if s == 'front' else 1 - u) * wa
+    else:                                                 # u runs toward the front on the right, back on the left
+        a = a0 + (1 - u if s == 'right' else u) * wa
+    b = b0 + v * hb
+    if plane == 'xy':                                     # turned about z: x' = x cos - y sin, y' = x sin + y cos
+        return pa + a * math.cos(th) - b * math.sin(th), pb + a * math.sin(th) + b * math.cos(th)
+    # turned about x: y' = y cos - z sin, z' = y sin + z cos (here pa is y, pb is z)
+    return pb + b * math.sin(th) + a * math.cos(th), pa + b * math.cos(th) - a * math.sin(th)
+
+
+def ear_inside(style, a, y, slack=0.0):
+    if y > 0.25:
+        return False
+    if EAR_GEOM[style][0] == 'xy':
+        return abs(a) <= _halfwidth(y) + slack
+    return -EAR_D / 2 - slack <= a <= -EAR_D / 2 + _cupdepth(y) + slack
+
+
+EAR_PIECES, EAR_OWN = ear_parts()
+
 
 def hound():
     parts = [
@@ -139,10 +215,8 @@ def hound():
         # a pricked ear: a broad triangle, its root across the back of the skull, rising to a sharp point,
         # swept a little back and turned a little out; a narrower triangle crossed through it front to back
         # (the cup of the ear), so from the front, the side and between it is a triangle, never a post
-        part('right_ear', 'head', (-1.45, -2.3, -1.1), (-0.3, 0.25, -0.26), [
-            (-EAR_W / 2, -EAR_H, -EAR_D / 2, EAR_W, EAR_H + 0.2, EAR_D, 'ear'),
-            (-EAR_D / 2, -EAR_H, -EAR_D / 2, EAR_D, EAR_H + 0.2, EAR_SD, 'ear_x'),
-        ]),
+        part('right_ear', 'head', (-1.45, -2.3, -1.1), (-0.3, 0.25, -0.26), EAR_OWN),
+    ] + [part(n, 'right_ear', piv, rot, boxes) for n, piv, rot, boxes in EAR_PIECES] + [
         part('front_right', 'root', (-2.25, 13.0, -5.9), (0, 0, 0), []),
         part('rear_right', 'root', (-2.25, 13.6, 8.6), (0, 0, 0), []),
         part('tail', 'root', (0, 11.4, 10.4), (0, 0, 0), []),
@@ -359,43 +433,68 @@ def painter(berserk):
                 for i in range(fw):
                     p.px((fx + i, fy + (fh - 1 if style == 'flews' else 0)), (2, 2, 4))
             return
-        if style == 'ear_x':                              # the ear's cup, seen from the side: a triangle, its front edge upright
-            fur(p, f, sheen=1.1)
-            for s in ('right', 'left'):
-                fx, fy, fw, fh = f[s]
-                for i, j, xy in each(f[s]):
-                    y = -EAR_H + (j + 0.5) / fh * (EAR_H + 0.2)
-                    share = max(0.0, (y + EAR_H) / (EAR_H + 0.2))
-                    back = 1 - (i + 0.5) / fw if s == 'right' else (i + 0.5) / fw   # 0 at its front edge .. 1 behind
-                    if back > share + 0.03:
-                        p.clear(xy)
-                    elif back > share - 0.18:
-                        p.px(xy, mixc(p.img.getpixel(xy)[:3], SHEEN, 0.4))
-            for s in ('front', 'back', 'top', 'bottom'):
-                fx, fy, fw, fh = f[s]
-                for i, j, xy in each(f[s]):
-                    if s in ('top', 'bottom', 'back') or j < fh - 2:
-                        p.clear(xy)
-            return
-        if style == 'ear':                                # pricked: a triangle cut from its front and back, the inner ear dusky
-            fur(p, f, sheen=1.2)
-            for s in ('front', 'back'):
-                fx, fy, fw, fh = f[s]
-                for i, j, xy in each(f[s]):
-                    y = -EAR_H + (j + 0.5) / fh * (EAR_H + 0.2)
-                    share = max(0.0, (y + EAR_H) / (EAR_H + 0.2))      # 0 at its point .. 1 at its root
-                    across = abs((i + 0.5) / fw - 0.5) * 2             # 0 down its middle .. 1 at its edge
-                    if across > share + 0.03:
-                        p.clear(xy)
-                    elif s == 'front' and across < share * 0.6 and 0.12 < share < 0.95:
-                        p.px(xy, noisy(p, mixc((64, 42, 52), (26, 20, 26), share), 2))   # the hollow within
-                    elif across > share - 0.14:
-                        p.px(xy, mixc(p.img.getpixel(xy)[:3], SHEEN, 0.4))                 # its rim catching the light
-            for s in ('right', 'left', 'top', 'bottom'):         # the edges: only a sliver at the root
-                fx, fy, fw, fh = f[s]
-                for i, j, xy in each(f[s]):
-                    if s in ('top', 'bottom') or j < fh - 2:
-                        p.clear(xy)
+        if style in EAR_GEOM:
+            # the ear, painted from its own coordinates (the same on every piece of it): its coat lit toward
+            # the point; the hollow within dusky on the front of the broad triangle; the rims catching the
+            # light; anything outside the ear's true outline cleared. The broad faces of each piece only:
+            # the bands' outer edges are the ear's edges (kept), every other edge lies inside the ear
+            plane = EAR_GEOM[style][0]
+            broad = ('front', 'back') if plane == 'xy' else ('right', 'left')
+            band = 'band' in style
+            outer = {'ear_band_a': 'right', 'ear_band_b': 'left', 'ear_cup_band': 'back'}.get(style)
+            for s_, (fx, fy, fw, fh) in f.items():
+                for i in range(fw):
+                    for j in range(fh):
+                        xy = (fx + i, fy + j)
+                        if s_ not in broad and s_ != outer:
+                            p.clear(xy)
+                            continue
+                        if s_ == outer:                   # the slanting edge itself: the coat, lit along it
+                            v = (j + 0.5) / fh
+                            a, y = ear_point(style, 'front' if plane == 'xy' else 'right', 0.0 if s_ == 'right' else 1.0, v) \
+                                if plane == 'xy' else ear_point(style, 'right', 0.0, v)
+                            if not ear_inside(style, a, y, 0.05):
+                                p.clear(xy)
+                                continue
+                            share = max(0.0, (y + EAR_H) / (EAR_H + 0.2))
+                            p.px(xy, noisy(p, mixc(SHEEN, SHINE, 0.5 * (1 - share)), 2))
+                            continue
+                        u, v = (i + 0.5) / fw, (j + 0.5) / fh
+                        a, y = ear_point(style, s_, u, v)
+                        if band:                          # a band: cleared wherever any of the pixel is outside
+                            out = False
+                            for du in (-0.5, 0.5):
+                                for dv in (-0.5, 0.5):
+                                    a2, y2 = ear_point(style, s_, (i + 0.5 + du) / fw, (j + 0.5 + dv) / fh)
+                                    out = out or not ear_inside(style, a2, y2, 0.02)
+                            # but near the point, where the bands both reach past, keep what the pixel's
+                            # middle covers, so the point stays sharp
+                            if out and not (ear_inside(style, a, y) and y < -EAR_H + 0.9):
+                                p.clear(xy)
+                                continue
+                        elif not ear_inside(style, a, y):
+                            p.clear(xy)
+                            continue
+                        share = max(0.0, (y + EAR_H) / (EAR_H + 0.2))     # 0 at its point .. 1 at its root
+                        if plane == 'xy':
+                            across = abs(a) / max(0.05, _halfwidth(y))    # 0 down its middle .. 1 at its edge
+                        else:
+                            across = 1 - (a + EAR_D / 2) / max(0.05, _cupdepth(y))  # 1 at its front edge
+                        # the coat: a strand's tone from where it lies in the ear, so the pieces agree
+                        h = math.sin(round(a * 3.4) * 12.9898 + round(y * 3.4 / 5) * 78.233) * 43758.5453
+                        seed = h - math.floor(h)
+                        lift = max(0.0, 0.9 - share * 1.4) * (1 - 0.55 * across ** 2) * 1.2 * LIGHTS[s_]
+                        col = mixc(FUR, SHEEN, min(1, lift)) if lift < 1 else mixc(SHEEN, SHINE, min(1, lift - 1))
+                        if share > 0.75:
+                            col = mixc(col, SHADOW, (share - 0.75) * 1.6)
+                        col = k(col, 0.86 + 0.28 * seed)
+                        if plane == 'xy' and s_ == 'front' and across < 0.6 and 0.12 < share < 0.95:
+                            col = mixc((64, 42, 52), (26, 20, 26), share)            # the hollow within
+                        elif plane == 'xy' and across > 1 - 0.14 / max(0.2, share):
+                            col = mixc(col, SHEEN, 0.4)                               # its rim catching the light
+                        elif plane == 'zy' and across < 0.25:
+                            col = mixc(col, SHEEN, 0.4)
+                        p.px(xy, noisy(p, col, 2))
             return
         if style == 'paw':
             fur(p, f, light=0.8, sheen=0.5)
