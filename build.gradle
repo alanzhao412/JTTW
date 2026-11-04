@@ -100,6 +100,7 @@ neoForge {
             client()
             gameDirectory = project.file('run-mp')
             systemProperty 'jttw.mpPass', 'true'
+            systemProperty 'jttw.mpPass.role', (project.findProperty('mp.role') ?: 'driver').toString()   // 'stress': StressPass
             systemProperty 'jttw.backgroundWindow', 'true'
             programArguments.addAll '--quickPlayMultiplayer', (project.findProperty('mp.server') ?: 'localhost:25599').toString(),
                     '--username', (project.findProperty('mp.user') ?: 'Tester1').toString()
@@ -110,7 +111,7 @@ neoForge {
             client()
             gameDirectory = project.file('run-mp2')
             systemProperty 'jttw.mpPass', 'true'
-            systemProperty 'jttw.mpPass.role', 'observer'
+            systemProperty 'jttw.mpPass.role', (project.findProperty('mp.role2') ?: 'observer').toString()   // 'roamer': StressPass
             systemProperty 'jttw.backgroundWindow', 'true'
             programArguments.addAll '--quickPlayMultiplayer', (project.findProperty('mp.server') ?: 'localhost:25599').toString(),
                     '--username', 'Tester2'
