@@ -731,18 +731,20 @@ SCHOLAR = mirrored([
                                                           (-0.6, 5.6, -0.4, 1.2, 3.4, 0.8, 'stassel')]),
     part('right_arm', 'body', (-5.4, -13.8, 0), SARM, [(-1.4, -1, -1.4, 2.8, 7, 2.8, 'swarm')]),
     part('right_forearm', 'right_arm', (0, 6.4, 0), SFORE, [(-1.3, 0, -1.3, 2.6, 6, 2.6, 'swarm')]),
-    # the great scholar's sleeve (袖), hanging from the forearm whatever it does: not a block but a long
-    # bag of white silk, narrow across and deep from front to back as a hanfu sleeve is, its cuff bordered
-    # black where the hand comes out; below the arm the cloth swells and swoops down toward the back into the
-    # sleeve's hanging pocket (袂), its lower edge a curve hemmed in black, deepest behind; an outer fold
-    # lying over it, the lining pale blue-grey within
+    # the great scholar's sleeve (袖), hanging from the forearm whatever it does: its mouth about the wrist,
+    # bordered black where the hand comes out; from under the arm the silk falls in long soft folds (each
+    # fold a panel of its own, the middle ones billowing wider), swinging a little further back the further
+    # back they hang, short at the cuff and longest behind, so the hem (袂) sweeps down in a curve to its
+    # deepest point behind the arm and rises again at the back
     part('right_sleeve', 'right_forearm', (0, 0.4, 0.8), aim([SARM, SFORE], (0.1, 0, 0.1)), [
-        (-2.2, -1.3, -6.9, 4.4, 5.4, 9.2, 'ssleeve_wall'),
+        (-2.2, -1.3, -6.9, 4.4, 4.2, 9.2, 'ssleeve_wall'),
         (-2.55, -1.6, -7.25, 5.1, 4.3, 0.6, 'ssleeve_cuff'),
     ]),
-    part('right_sleeve_fall', 'right_sleeve', (0, 1.0, 4.75), (-0.45, 0, 0), [(-2.6, 0, -8.0, 5.2, 10.0, 8.0, 'ssleeve_pocket')]),
-    part('right_sleeve_swell', 'right_sleeve', (0, 0.6, 3.2), (-0.2, 0, 0), [(-2.4, 0, -5.5, 4.8, 9.0, 5.5, 'ssleeve_swell')]),
-    part('right_sleeve_drape', 'right_sleeve_fall', (-2.75, 0.6, -0.8), (0.03, 0, 0.06), [(-0.4, 0, -6.8, 0.45, 8.6, 6.4, 'ssleeve_drape')]),
+] + [
+    part('right_sleeve_fold%d' % n, 'right_sleeve', (dx, 2.2, z), (-0.04 - 0.035 * n, 0, tilt), [(-wd / 2, 0, -1.0, wd, ln, 2.0, 'ssleeve_fold')])
+    for n, (z, ln, wd, dx, tilt) in enumerate([(-5.9, 5.0, 4.5, 0.0, 0.0), (-4.1, 8.0, 4.9, -0.15, 0.03), (-2.3, 10.4, 5.3, 0.0, -0.02),
+                                              (-0.5, 11.8, 5.1, -0.1, 0.04), (1.2, 11.2, 4.7, 0.05, -0.02), (2.6, 8.6, 4.2, 0.0, 0.02)])
+] + [
     part('right_hand', 'right_forearm', (0, 6, 0), (0, 0, 0), [(-1.1, 0, -1.2, 2.2, 2.8, 2.4, 'shand')]),
     part('head', 'body', (0, -17.2, -0.6), (0, 0, 0), [
         (-2.6, -7.6, -3.0, 5.2, 4.8, 5.8, 'sface'),
@@ -761,9 +763,9 @@ SCHOLAR = mirrored([
 ] + tail_parts())
 SCHOLAR += [
     # the fan, open in his right hand, held up before him
-    part('fan', 'right_hand', (0, 2.4, -0.4), aim([SARM, SFORE], (0.2, 0.5, 0)), [
+    part('fan', 'right_hand', (0, 2.4, -0.4), aim([SARM, SFORE], (0.2, 0.3, 0)), [
         (-0.4, -1, -0.4, 0.8, 2, 0.8, 'fan_rivet'),
-        (-6.5, -9.0, -0.15, 13, 8.6, 0.3, 'fan_leaf')]),
+        (-5.5, -7.6, -0.1, 11, 7.6, 0.2, 'fan_leaf')]),
 ]
 SCHOLAR = [(n, par, pv, (SLARM if n == 'left_arm' else SLFORE if n == 'left_forearm' else aim([SLARM, SLFORE], (0.1, 0, -0.1)) if n == 'left_sleeve' else r), b, m)
            for n, par, pv, r, b, m in SCHOLAR]
@@ -805,59 +807,42 @@ def paint_scholar(p, style, f, dims):
         if style == 'sbigsleeve':
             w.flat(p, f, BLACK_EDGE, faces=('bottom',))
     if style.startswith('ssleeve'):
-        # the great sleeve: white silk in soft folds, a faint cloud pattern; its swoop hemmed in black; its
-        # cuff a black border round the dark of the sleeve's mouth, the lining showing at its rim
-        LINING = (196, 210, 222)
+        # the great sleeve: white silk, a faint cloud pattern, lit down each fold's middle and shadowed in the
+        # creases between; each fold's foot hemmed in black; the cuff a black border round the sleeve's mouth
         w.cloth(p, f, WHITE, WHITE_DEEP, fold=4, coarse=False)
         for s_ in S:
             fx, fy, fw, fh = f[s_]
             for i, j, xy in w.each(p, f[s_]):
-                if w.vnoise(fx + i, fy + j, 3.0, 17) > 0.74:
-                    p.px(xy, k(p.get(xy), 0.9))
-                if style in ('ssleeve_pocket', 'ssleeve_drape'):   # the cloth's folds, falling
-                    p.px(xy, k(p.get(xy), 0.93 + 0.1 * math.cos((i % 6) / 6.0 * 2 * math.pi)))
-        if style in ('ssleeve_pocket', 'ssleeve_drape'):
+                if w.vnoise(fx + i, fy + j, 3.0, 17) > 0.78:
+                    p.px(xy, k(p.get(xy), 0.94))
+                u = (i + 0.5) / fw
+                if style == 'ssleeve_fold':
+                    # rounded across: bright down the middle, darkening into the creases at either edge, and a
+                    # little greyer toward the hem as the cloth turns under
+                    t = 1.04 - 0.22 * (2 * u - 1) ** 2 - 0.08 * (j / max(1, fh - 1))
+                    p.px(xy, k(p.get(xy), t))
+        if style == 'ssleeve_fold':
+            # the black hem along each fold's foot on the sleeve's outer and inner faces (where the curve of
+            # its hem shows); before and behind, where the folds lie one over another, only the cloth darkening
+            # as it turns under, so from the front they read as one fall of silk, not a stack of slabs
             w.flat(p, f, BLACK_EDGE, faces=('bottom',))
-            for s_ in ('front', 'right', 'left'):
+            for s_ in S:
                 fx, fy, fw, fh = f[s_]
-                for j in range(max(0, fh - 2), fh):
-                    w.hline(p, f[s_], j, k(BLACK_EDGE, w.LIGHT[s_]))
-            fx, fy, fw, fh = f['back']
-            for j in range(fh):                                   # the hem running up the back of the swoop
-                for i in range(fw):
-                    if j >= fh - 2:
-                        p.px((fx + i, fy + j), k(BLACK_EDGE, w.LIGHT['back']))
-        if style == 'ssleeve_drape':
-            for s_ in ('right', 'left'):
-                fx, fy, fw, fh = f[s_]
-                for j in range(fh):
-                    p.px((fx, fy + j), BLACK_EDGE)
-        if style in ('ssleeve_pocket', 'ssleeve_swell', 'ssleeve_wall'):
-            # from the front: the silk falling in soft folds, lit down the middle and shadowed at either edge
-            for s_ in ('front', 'back'):
-                fx, fy, fw, fh = f[s_]
-                for i, j, xy in w.each(p, f[s_]):
-                    u = (i + 0.5) / fw
-                    fold = 1.02 + 0.06 * math.cos(u * 2 * math.pi * 1.5) - 0.1 * abs(u - 0.5) ** 2 * 4
-                    p.px(xy, k(p.get(xy), fold))
-        if style == 'ssleeve_pocket':
-            # its foot not a straight cut but the swoop of a hanging sleeve: rising to either side in a curve,
-            # the black hem following it
-            for s_ in ('front', 'back'):
-                fx, fy, fw, fh = f[s_]
-                for i in range(fw):
-                    u = (i + 0.5) / fw
-                    rise = int(round(4.0 * (2 * u - 1) ** 2))
-                    for j in range(fh):
-                        xy = (fx + i, fy + j)
-                        if j >= fh - rise:
-                            p.clear(xy)
-                        elif j >= fh - rise - 2:
-                            p.px(xy, k(BLACK_EDGE, w.LIGHT[s_]))
+                for j in range(max(0, fh - 3), fh):
+                    if s_ in ('right', 'left'):
+                        if j >= fh - 2:
+                            w.hline(p, f[s_], j, k(BLACK_EDGE if j == fh - 1 else (60, 58, 64), w.LIGHT[s_]))
+                    else:
+                        for i in range(fw):
+                            p.px((fx + i, fy + j), k(p.get((fx + i, fy + j)), 0.9 - 0.08 * (j - fh + 3)))
+                for j in range(fh - 2):                           # a fine crease down each side's edge
+                    p.px((fx, fy + j), k(p.get((fx, fy + j)), 0.86))
+                    p.px((fx + fw - 1, fy + j), k(p.get((fx + fw - 1, fy + j)), 0.86))
+        if style == 'ssleeve_wall':
+            w.flat(p, f, (196, 210, 222), faces=('bottom',))       # the lining, glimpsed from under the arm
         if style == 'ssleeve_cuff':
-            # the sleeve's mouth, from before him: not a hole but white silk falling over it, a thin black border
-            # along its foot, his fingertips just showing in the shadow above it
-            w.cloth(p, f, WHITE, WHITE_DEEP, fold=4, coarse=False)
+            # the sleeve's mouth, from before him: white silk falling over it, a thin black border along its
+            # foot, his fingertips just showing in the shadow above it
             fx, fy, fw, fh = f['front']
             for i, j, xy in w.each(p, f['front']):
                 u = (i + 0.5) / fw
@@ -942,31 +927,53 @@ def paint_scholar(p, style, f, dims):
                 w.point(p, f[s], down=False, keep=0.3, sharp=0.35)
     if style == 'fan_rivet':
         jade(p, f)
-    if style == 'fan_leaf':                                      # an open folding fan: white paper on dark ribs, ink mountains and a red seal
-        for s in ('front', 'back'):
-            fx, fy, fw, fh = f[s]
-            cx, cy = fw / 2 - 0.5, fh + 0.5
-            for i, j, xy in w.each(p, f[s]):
-                dx, dy = i - cx, cy - j
+    if style == 'fan_leaf':
+        # an open folding fan, cut out to its shape (no box about it): a half-round of white paper on its
+        # band of pleats, each pleat lit or shaded in turn so the folds read; bare bamboo ribs fanning up from
+        # the rivet to the paper with nothing between them; a dark guard stick at either end; along the paper
+        # one clean line of ink hills, a red seal at its corner. No noise: it reads at a glance
+        BAMBOO, BAMBOO_DEEP, INK, PAPER = (176, 132, 76), (104, 70, 36), (46, 46, 54), (240, 238, 230)
+        SPREAD, N = 1.25, 11                                     # its half-angle (radians), its pleats
+        for s_ in ('front', 'back'):
+            fx, fy, fw, fh = f[s_]
+            cx, cy = fw / 2, fh                                  # the rivet at the bottom middle
+            R = fh - 0.1
+            for i, j, xy in w.each(p, f[s_]):
+                dx, dy = i + 0.5 - cx, cy - (j + 0.5)
                 r, a = math.hypot(dx, dy), math.atan2(dx, dy)
-                if r > fh + 0.3 or r < 2.5 or abs(a) > 1.15:
+                if abs(a) > SPREAD + 0.04 or r > R:
                     p.clear(xy)
                     continue
-                rib = int((a + 1.15) / 2.3 * 12) % 1 == 0 and abs(((a + 1.15) / 2.3 * 12) % 1 - 0.5) > 0.42
-                c = (60, 42, 30) if r < 3.5 or rib else WHITE
-                if r > 3.5 and not rib:                          # ink mountains along it
-                    m = fh * (0.55 + 0.18 * math.sin(a * 6) + 0.08 * math.sin(a * 13))
-                    if abs(r - m) < 0.9:
-                        c = (40, 40, 46)
-                    elif r < m and r > m - 2:
-                        c = (130, 130, 136)
-                if r > fh - 0.7:
-                    c = (40, 36, 34)
-                p.px(xy, [v * w.LIGHT[s] + p.rnd.randint(-3, 3) for v in c])
-            p.px((fx + int(fw * 0.7), fy + 2), (190, 30, 30))
-            p.px((fx + int(fw * 0.7) + 1, fy + 2), (190, 30, 30))
-        w.flat(p, f, (60, 42, 30), faces=('right', 'left', 'top', 'bottom'))
-
+                q = (a + SPREAD) / (2 * SPREAD) * N              # 0..N across the pleats
+                pleat, within = int(min(N - 1, q)), q % 1
+                guard = q < 0.5 or q > N - 0.5
+                if r < R * 0.45:                                 # the bare ribs below the paper
+                    if guard or within < 0.34:
+                        p.px(xy, k(BAMBOO_DEEP if guard else BAMBOO, w.LIGHT[s_]))
+                    else:
+                        p.clear(xy)
+                    continue
+                if guard:
+                    c = BAMBOO_DEEP
+                else:
+                    c = k(PAPER, 1.0 if pleat % 2 == 0 else 0.8)  # the pleats lit and shaded in turn
+                    if within < 0.14:
+                        c = (150, 140, 128)                      # the crease between two pleats
+                    hill = R * (0.72 + 0.1 * math.sin(a * 4.2 + 0.6) + 0.05 * math.sin(a * 9.1))
+                    if s_ == 'front' and abs(r - hill) < 0.55:
+                        c = INK
+                    elif s_ == 'front' and R * 0.5 < r < hill:
+                        c = mix(c, (150, 150, 158), 0.45)        # the hills' wash below their line
+                    if r > R - 0.8:
+                        c = BAMBOO_DEEP                          # the top edge
+                p.px(xy, k(c, w.LIGHT[s_]))
+            if s_ == 'front':                                    # the red seal, high on the right
+                sx, sy = fx + int(fw * 0.72), fy + int(fh * 0.28)
+                for d in ((0, 0), (1, 0), (0, 1), (1, 1)):
+                    p.px((sx + d[0], sy + d[1]), (190, 30, 30))
+        for s_ in ('right', 'left', 'top', 'bottom'):
+            for i, j, xy in w.each(p, f[s_]):
+                p.clear(xy)
 
 if __name__ == '__main__':
     for captain in (False, True):
