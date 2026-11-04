@@ -48,15 +48,15 @@ public class XiaotianQuanModel extends HierarchicalModel<XiaotianQuanEntity> {
                 .texOffs(101, 0).mirror(false).addBox(-1.763f, -3.956f, -1.935f, 3.526f, 4.816f, 3.87f)
                 .texOffs(13, 15).mirror(false).addBox(-1.505f, -7.396f, -1.677f, 3.01f, 3.784f, 3.354f)
                 .texOffs(106, 15).mirror(false).addBox(-1.032f, -7.052f, 1.333f, 2.064f, 5.332f, 0.774f)
-                .texOffs(120, 25).mirror(false).addBox(-1.29f, -4.644f, -2.365f, 2.58f, 3.956f, 0.688f), PartPose.offsetAndRotation(0, -9.804f, -5.676f, 0.62f, 0, 0));
+                .texOffs(107, 25).mirror(false).addBox(-1.29f, -4.644f, -2.365f, 2.58f, 3.956f, 0.688f), PartPose.offsetAndRotation(0, -9.804f, -5.676f, 0.62f, 0, 0));
         PartDefinition collar = neck.addOrReplaceChild("collar", CubeListBuilder.create()
                 .texOffs(0, 25).mirror(false).addBox(-2.064f, -0.645f, -2.236f, 4.128f, 1.29f, 4.472f), PartPose.offsetAndRotation(0, -2.236f, 0, 0, 0, 0));
         PartDefinition bell = collar.addOrReplaceChild("bell", CubeListBuilder.create()
                 .texOffs(88, 33).mirror(false).addBox(-0.688f, 0, -0.688f, 1.376f, 1.29f, 1.376f)
-                .texOffs(18, 39).mirror(false).addBox(-0.86f, 1.075f, -0.86f, 1.72f, 0.43f, 1.72f)
-                .texOffs(27, 39).mirror(false).addBox(-0.301f, -0.43f, -0.301f, 0.602f, 0.516f, 0.602f), PartPose.offsetAndRotation(0, 0.473f, -2.365f, -0.62f, 0, 0));
+                .texOffs(0, 39).mirror(false).addBox(-0.86f, 1.075f, -0.86f, 1.72f, 0.43f, 1.72f)
+                .texOffs(22, 39).mirror(false).addBox(-0.301f, -0.43f, -0.301f, 0.602f, 0.516f, 0.602f), PartPose.offsetAndRotation(0, 0.473f, -2.365f, -0.62f, 0, 0));
         PartDefinition tassel = bell.addOrReplaceChild("tassel", CubeListBuilder.create()
-                .texOffs(32, 39).mirror(false).addBox(-0.43f, 0, -0.43f, 0.86f, 0.516f, 0.86f)
+                .texOffs(27, 39).mirror(false).addBox(-0.43f, 0, -0.43f, 0.86f, 0.516f, 0.86f)
                 .texOffs(97, 33).mirror(false).addBox(-0.387f, 0.43f, -0.387f, 0.774f, 2.064f, 0.774f), PartPose.offsetAndRotation(0, 1.505f, 0, 0, 0, 0));
         PartDefinition lowerBody = root.addOrReplaceChild("lower_body", CubeListBuilder.create()
                 .texOffs(29, 0).mirror(false).addBox(-2.236f, -2.408f, -3.784f, 4.472f, 3.44f, 5.504f)
@@ -65,12 +65,12 @@ public class XiaotianQuanModel extends HierarchicalModel<XiaotianQuanEntity> {
         PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create()
                 .texOffs(53, 15).mirror(false).addBox(-1.978f, -2.236f, -3.354f, 3.956f, 3.268f, 3.956f)
                 .texOffs(62, 25).mirror(false).addBox(-2.15f, -0.516f, -3.01f, 4.3f, 2.064f, 2.408f)
-                .texOffs(102, 33).mirror(false).addBox(-1.677f, -2.537f, -3.741f, 3.354f, 1.032f, 1.032f)
-                .texOffs(79, 25).mirror(false).addBox(-1.161f, -1.677f, -5.504f, 2.322f, 2.15f, 2.322f)
-                .texOffs(0, 33).mirror(false).addBox(-0.86f, -1.333f, -7.654f, 1.72f, 1.72f, 2.236f)
-                .texOffs(37, 39).mirror(false).addBox(-0.645f, -1.548f, -8.041f, 1.29f, 0.86f, 0.688f)
-                .texOffs(92, 25).mirror(false).addBox(-0.989f, 0.172f, -7.224f, 1.978f, 0.559f, 4.042f)
-                .texOffs(115, 33).mirror(false).addBox(-1.376f, -1.118f, 0.172f, 2.752f, 2.236f, 0.86f), PartPose.offsetAndRotation(0, 9.036f, -9.288f, 0, 0, 0));
+                .texOffs(9, 39).mirror(false).addBox(-1.677f, -2.537f, -3.741f, 3.354f, 0.645f, 1.032f)
+                .texOffs(116, 25).mirror(false).addBox(-1.161f, -1.118f, -5.504f, 2.322f, 1.591f, 2.322f)
+                .texOffs(0, 33).mirror(false).addBox(-0.86f, -0.989f, -7.654f, 1.72f, 1.376f, 2.236f)
+                .texOffs(32, 39).mirror(false).addBox(-0.645f, -1.204f, -8.041f, 1.29f, 0.86f, 0.688f)
+                .texOffs(79, 25).mirror(false).addBox(-0.989f, 0.172f, -7.224f, 1.978f, 0.559f, 4.042f)
+                .texOffs(102, 33).mirror(false).addBox(-1.376f, -1.118f, 0.172f, 2.752f, 2.236f, 0.86f), PartPose.offsetAndRotation(0, 9.036f, -9.288f, 0, 0, 0));
         PartDefinition jaw = head.addOrReplaceChild("jaw", CubeListBuilder.create()
                 .texOffs(11, 33).mirror(false).addBox(-0.946f, 0, -3.87f, 1.892f, 0.86f, 3.87f), PartPose.offsetAndRotation(0, 0.516f, -3.01f, 0.07f, 0, 0));
         PartDefinition rightEar = head.addOrReplaceChild("right_ear", CubeListBuilder.create()
@@ -87,11 +87,11 @@ public class XiaotianQuanModel extends HierarchicalModel<XiaotianQuanEntity> {
         PartDefinition rightForearm = rightUpperarm.addOrReplaceChild("right_forearm", CubeListBuilder.create()
                 .texOffs(21, 25).mirror(false).addBox(-0.774f, -0.344f, -0.817f, 1.548f, 4.3f, 1.634f), PartPose.offsetAndRotation(0, 3.784f, 0, -0.18f, 0, 0));
         PartDefinition rightPastern = rightForearm.addOrReplaceChild("right_pastern", CubeListBuilder.create()
-                .texOffs(0, 39).mirror(false).addBox(-0.688f, -0.258f, -0.731f, 1.376f, 1.376f, 1.462f), PartPose.offsetAndRotation(0, 3.87f, 0, -0.22f, 0, 0));
+                .texOffs(111, 33).mirror(false).addBox(-0.688f, -0.258f, -0.731f, 1.376f, 1.376f, 1.462f), PartPose.offsetAndRotation(0, 3.87f, 0, -0.22f, 0, 0));
         PartDefinition rightForepaw = rightPastern.addOrReplaceChild("right_forepaw", CubeListBuilder.create()
                 .texOffs(31, 33).mirror(false).addBox(-1.032f, 0, -1.72f, 2.064f, 1.032f, 2.408f)
-                .texOffs(44, 39).mirror(false).addBox(-0.903f, 0.215f, -2.365f, 1.806f, 0.817f, 0.688f)
-                .texOffs(51, 39).mirror(false).addBox(-0.774f, 0.731f, -2.623f, 1.548f, 0.301f, 0.344f), PartPose.offsetAndRotation(0, 1.075f, 0, 0.22f, 0, 0));
+                .texOffs(39, 39).mirror(false).addBox(-0.903f, 0.215f, -2.365f, 1.806f, 0.817f, 0.688f)
+                .texOffs(46, 39).mirror(false).addBox(-0.774f, 0.731f, -2.623f, 1.548f, 0.301f, 0.344f), PartPose.offsetAndRotation(0, 1.075f, 0, 0.22f, 0, 0));
         PartDefinition rightThigh = rearRight.addOrReplaceChild("right_thigh", CubeListBuilder.create()
                 .texOffs(75, 0).mirror(false).addBox(-1.333f, -1.72f, -1.978f, 2.666f, 5.504f, 3.784f), PartPose.offsetAndRotation(0, 0, 0, -0.32f, 0, 0));
         PartDefinition rightGaskin = rightThigh.addOrReplaceChild("right_gaskin", CubeListBuilder.create()
@@ -100,18 +100,18 @@ public class XiaotianQuanModel extends HierarchicalModel<XiaotianQuanEntity> {
                 .texOffs(44, 33).mirror(false).addBox(-0.688f, -0.344f, -0.731f, 1.376f, 2.58f, 1.462f), PartPose.offsetAndRotation(0, 3.268f, 0, -0.7f, 0, 0));
         PartDefinition rightHindpaw = rightHock.addOrReplaceChild("right_hindpaw", CubeListBuilder.create()
                 .texOffs(31, 33).mirror(false).addBox(-1.032f, 0, -1.72f, 2.064f, 1.032f, 2.408f)
-                .texOffs(44, 39).mirror(false).addBox(-0.903f, 0.215f, -2.365f, 1.806f, 0.817f, 0.688f)
-                .texOffs(51, 39).mirror(false).addBox(-0.774f, 0.731f, -2.623f, 1.548f, 0.301f, 0.344f), PartPose.offsetAndRotation(0, 2.107f, 0, 0.07f, 0, 0));
+                .texOffs(39, 39).mirror(false).addBox(-0.903f, 0.215f, -2.365f, 1.806f, 0.817f, 0.688f)
+                .texOffs(46, 39).mirror(false).addBox(-0.774f, 0.731f, -2.623f, 1.548f, 0.301f, 0.344f), PartPose.offsetAndRotation(0, 2.107f, 0, 0.07f, 0, 0));
         PartDefinition leftUpperarm = frontLeft.addOrReplaceChild("left_upperarm", CubeListBuilder.create()
                 .texOffs(0, 15).mirror(true).addBox(-1.161f, -1.204f, -1.376f, 2.322f, 5.074f, 2.752f), PartPose.offsetAndRotation(0, 0, 0, 0.18f, 0, 0));
         PartDefinition leftForearm = leftUpperarm.addOrReplaceChild("left_forearm", CubeListBuilder.create()
                 .texOffs(21, 25).mirror(true).addBox(-0.774f, -0.344f, -0.817f, 1.548f, 4.3f, 1.634f), PartPose.offsetAndRotation(0, 3.784f, 0, -0.18f, 0, 0));
         PartDefinition leftPastern = leftForearm.addOrReplaceChild("left_pastern", CubeListBuilder.create()
-                .texOffs(0, 39).mirror(true).addBox(-0.688f, -0.258f, -0.731f, 1.376f, 1.376f, 1.462f), PartPose.offsetAndRotation(0, 3.87f, 0, -0.22f, 0, 0));
+                .texOffs(111, 33).mirror(true).addBox(-0.688f, -0.258f, -0.731f, 1.376f, 1.376f, 1.462f), PartPose.offsetAndRotation(0, 3.87f, 0, -0.22f, 0, 0));
         PartDefinition leftForepaw = leftPastern.addOrReplaceChild("left_forepaw", CubeListBuilder.create()
                 .texOffs(31, 33).mirror(true).addBox(-1.032f, 0, -1.72f, 2.064f, 1.032f, 2.408f)
-                .texOffs(44, 39).mirror(true).addBox(-0.903f, 0.215f, -2.365f, 1.806f, 0.817f, 0.688f)
-                .texOffs(51, 39).mirror(true).addBox(-0.774f, 0.731f, -2.623f, 1.548f, 0.301f, 0.344f), PartPose.offsetAndRotation(0, 1.075f, 0, 0.22f, 0, 0));
+                .texOffs(39, 39).mirror(true).addBox(-0.903f, 0.215f, -2.365f, 1.806f, 0.817f, 0.688f)
+                .texOffs(46, 39).mirror(true).addBox(-0.774f, 0.731f, -2.623f, 1.548f, 0.301f, 0.344f), PartPose.offsetAndRotation(0, 1.075f, 0, 0.22f, 0, 0));
         PartDefinition leftThigh = rearLeft.addOrReplaceChild("left_thigh", CubeListBuilder.create()
                 .texOffs(75, 0).mirror(true).addBox(-1.333f, -1.72f, -1.978f, 2.666f, 5.504f, 3.784f), PartPose.offsetAndRotation(0, 0, 0, -0.32f, 0, 0));
         PartDefinition leftGaskin = leftThigh.addOrReplaceChild("left_gaskin", CubeListBuilder.create()
@@ -120,10 +120,10 @@ public class XiaotianQuanModel extends HierarchicalModel<XiaotianQuanEntity> {
                 .texOffs(44, 33).mirror(true).addBox(-0.688f, -0.344f, -0.731f, 1.376f, 2.58f, 1.462f), PartPose.offsetAndRotation(0, 3.268f, 0, -0.7f, 0, 0));
         PartDefinition leftHindpaw = leftHock.addOrReplaceChild("left_hindpaw", CubeListBuilder.create()
                 .texOffs(31, 33).mirror(true).addBox(-1.032f, 0, -1.72f, 2.064f, 1.032f, 2.408f)
-                .texOffs(44, 39).mirror(true).addBox(-0.903f, 0.215f, -2.365f, 1.806f, 0.817f, 0.688f)
-                .texOffs(51, 39).mirror(true).addBox(-0.774f, 0.731f, -2.623f, 1.548f, 0.301f, 0.344f), PartPose.offsetAndRotation(0, 2.107f, 0, 0.07f, 0, 0));
+                .texOffs(39, 39).mirror(true).addBox(-0.903f, 0.215f, -2.365f, 1.806f, 0.817f, 0.688f)
+                .texOffs(46, 39).mirror(true).addBox(-0.774f, 0.731f, -2.623f, 1.548f, 0.301f, 0.344f), PartPose.offsetAndRotation(0, 2.107f, 0, 0.07f, 0, 0));
         PartDefinition tail0 = tail.addOrReplaceChild("tail_0", CubeListBuilder.create()
-                .texOffs(107, 25).mirror(false).addBox(-0.688f, -0.688f, -0.172f, 1.376f, 1.376f, 3.096f)
+                .texOffs(94, 25).mirror(false).addBox(-0.688f, -0.688f, -0.172f, 1.376f, 1.376f, 3.096f)
                 .texOffs(53, 33).mirror(false).addBox(-0.258f, 0.602f, 0.086f, 0.516f, 1.118f, 2.752f), PartPose.offsetAndRotation(0, 0, 0, 0.55f, 0, 0));
         PartDefinition tail1 = tail0.addOrReplaceChild("tail_1", CubeListBuilder.create()
                 .texOffs(62, 33).mirror(false).addBox(-0.6235f, -0.6235f, -0.172f, 1.247f, 1.247f, 2.924f)
@@ -132,7 +132,7 @@ public class XiaotianQuanModel extends HierarchicalModel<XiaotianQuanEntity> {
                 .texOffs(62, 33).mirror(false).addBox(-0.559f, -0.559f, -0.172f, 1.118f, 1.118f, 2.666f)
                 .texOffs(53, 33).mirror(false).addBox(-0.258f, 0.473f, 0.086f, 0.516f, 1.634f, 2.322f), PartPose.offsetAndRotation(0, 0, 2.623f, 0.55f, 0, 0));
         PartDefinition tail3 = tail2.addOrReplaceChild("tail_3", CubeListBuilder.create()
-                .texOffs(9, 39).mirror(false).addBox(-0.4515f, -0.4515f, -0.172f, 0.903f, 0.903f, 2.408f)
+                .texOffs(120, 33).mirror(false).addBox(-0.4515f, -0.4515f, -0.172f, 0.903f, 0.903f, 2.408f)
                 .texOffs(53, 33).mirror(false).addBox(-0.258f, 0.3655f, 0.086f, 0.516f, 1.892f, 2.064f), PartPose.offsetAndRotation(0, 0, 2.365f, 0.65f, 0, 0));
         return LayerDefinition.create(mesh, 128, 128);
         // GENERATED: end

@@ -123,10 +123,10 @@ def hound():
         part('head', 'root', (0, 6.6, -10.8), (0, 0, 0), [
             (-2.3, -2.6, -3.9, 4.6, 3.8, 4.6, 'skull'),
             (-2.5, -0.6, -3.5, 5.0, 2.4, 2.8, 'jowl'),
-            (-1.95, -2.95, -4.35, 3.9, 1.2, 1.2, 'brow'),
-            (-1.35, -1.95, -6.4, 2.7, 2.5, 2.7, 'muzzle'),          # the muzzle, deep at the stop, tapering
-            (-1.0, -1.55, -8.9, 2.0, 2.0, 2.6, 'snout'),
-            (-0.75, -1.8, -9.35, 1.5, 1.0, 0.8, 'nose'),
+            (-1.95, -2.95, -4.35, 3.9, 0.75, 1.2, 'brow'),
+            (-1.35, -1.3, -6.4, 2.7, 1.85, 2.7, 'muzzle'),          # the muzzle, dropped below the eyes at the stop
+            (-1.0, -1.15, -8.9, 2.0, 1.6, 2.6, 'snout'),
+            (-0.75, -1.4, -9.35, 1.5, 1.0, 0.8, 'nose'),
             (-1.15, 0.2, -8.4, 2.3, 0.65, 4.7, 'flews'),          # the upper lip hanging over the jaw
             (-1.6, -1.3, 0.2, 3.2, 2.6, 1.0, 'nape'),
         ]),
@@ -293,19 +293,21 @@ def painter(berserk):
             return
         if style == 'skull':
             fur(p, f, sheen=1.1)
-            # one eye each side, flat and blocky like vanilla's, wrapped round the skull's front corner (the side faces
-            # sit flush either side of the front in the UV): from the side an iris block behind a pupil block at the
-            # front edge, looking ahead; from the front just the iris, beside the muzzle
-            b, y = bg.S, f['front'][1] + bg.S
+            # one eye each side, flat and blocky like vanilla's, in the band between the brow and the dropped muzzle:
+            # from the front an iris block at the skull's edge with the pupil inside it, like the wolf's; the iris
+            # wraps round the corner onto the side face (flush either side of the front in the UV), so from the side
+            # and three-quarters it is the same eye
+            b, h = bg.S, 3
             fx, fy, fw, fh = f['front']
-            flat_eye(p, (fx, y, b, b), iris, eye_glow)
-            flat_eye(p, (fx + fw - b, y, b, b), iris, eye_glow)
+            y = fy + 2
+            flat_eye(p, (fx, y, b, h), iris, eye_glow)
+            flat_eye(p, (fx + b, y, b - 1, h), None, 0)
+            flat_eye(p, (fx + fw - b, y, b, h), iris, eye_glow)
+            flat_eye(p, (fx + fw - 2 * b + 1, y, b - 1, h), None, 0)
             fx, fy, fw, fh = f['right']
-            flat_eye(p, (fx + fw - 2 * b, y, b, b), iris, eye_glow)
-            flat_eye(p, (fx + fw - b, y, b, b), None, 0)
+            flat_eye(p, (fx + fw - b, y, b, h), iris, eye_glow)
             fx, fy, fw, fh = f['left']
-            flat_eye(p, (fx + b, y, b, b), iris, eye_glow)
-            flat_eye(p, (fx, y, b, b), None, 0)
+            flat_eye(p, (fx, y, b, h), iris, eye_glow)
             fx, fy, fw, fh = f['top']                    # a flame on the brow
             flame(p, (fx + fw // 2 - 3, fy + fh - 9, 6, 8), mark, mark_glow)
             return
