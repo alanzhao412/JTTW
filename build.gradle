@@ -95,6 +95,27 @@ neoForge {
             systemProperty 'jttw.backgroundWindow', 'true'
         }
 
+        // A real client joining a real dedicated server, started apart on localhost:25599 (see MultiplayerPass)
+        multiplayerPass {
+            client()
+            gameDirectory = project.file('run-mp')
+            systemProperty 'jttw.mpPass', 'true'
+            systemProperty 'jttw.backgroundWindow', 'true'
+            programArguments.addAll '--quickPlayMultiplayer', (project.findProperty('mp.server') ?: 'localhost:25599').toString(),
+                    '--username', (project.findProperty('mp.user') ?: 'Tester1').toString()
+        }
+
+        // The second player of the multiplayer pass: joins first and watches Tester1 (see MultiplayerPass)
+        multiplayerObserver {
+            client()
+            gameDirectory = project.file('run-mp2')
+            systemProperty 'jttw.mpPass', 'true'
+            systemProperty 'jttw.mpPass.role', 'observer'
+            systemProperty 'jttw.backgroundWindow', 'true'
+            programArguments.addAll '--quickPlayMultiplayer', (project.findProperty('mp.server') ?: 'localhost:25599').toString(),
+                    '--username', 'Tester2'
+        }
+
         data {
             data()
             gameDirectory = project.file('run-data')
@@ -117,7 +138,7 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 // The dev clients that run on their own open in the background (see WindowMixin): NeoForge's early
 // loading window would be made, and take focus, before the mod could say otherwise, so it is off in
 // their run directories. They are muted there too.
-['runFormGallery': 'run-gallery', 'runWorldgenBench': 'run-bench', 'runPlaytestPass': 'run-playtest'].each { task, dir ->
+['runFormGallery': 'run-gallery', 'runWorldgenBench': 'run-bench', 'runPlaytestPass': 'run-playtest', 'runMultiplayerPass': 'run-mp', 'runMultiplayerObserver': 'run-mp2'].each { task, dir ->
     tasks.matching { it.name == task }.configureEach {
         doFirst {
             def toml = project.file("${dir}/config/fml.toml")

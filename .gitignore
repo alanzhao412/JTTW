@@ -26,6 +26,8 @@ run-data/
 run-gallery/
 run-bench/
 run-playtest/
+run-mp/
+run-mp2/
 
 # ---------------------------------------------------------------
 # Decompiled Minecraft source.
