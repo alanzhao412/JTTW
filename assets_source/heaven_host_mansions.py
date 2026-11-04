@@ -57,11 +57,12 @@ def mansion_parts():
 MANSION = mansion_parts()
 
 GLOW_EYES = (220, 236, 255)
+FACE_EYES = (34, 96, 228)        # the star-blue of their eyes' iris (a white one would read as eyeballs)
 
 
 def quarter_colours(q):
     """The quarter's armour, silk and cloak: 0 east (jade green), 1 north (blue-black), 2 west (silver-white), 3 south (vermilion)."""
-    common = dict(plate_trim=GOLD, moustache=True, captain=True, glow_eyes=GLOW_EYES, beard=(40, 30, 28))
+    common = dict(plate_trim=GOLD, moustache=True, captain=True, glow_eyes=FACE_EYES, beard=(40, 30, 28))
     if q == 0:
         return colours(silk=(214, 232, 214), silk_deep=(112, 150, 126), trim=(40, 128, 108), plume=(212, 38, 34), plume_deep=(110, 14, 16),
                        lace=(214, 180, 70), cloak=(30, 112, 98), cloak_deep=(10, 52, 46), plate=(58, 158, 128), plate_deep=(18, 72, 60),
