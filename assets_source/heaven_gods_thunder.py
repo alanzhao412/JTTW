@@ -645,13 +645,9 @@ def lm_face_front(p, rect):
             p.px((fx + m(x), fy + 5), (30, 18, 36))
         p.px((fx + m(0), fy + 4), (30, 18, 36))
         # the eye: a flat block of glowing blue iris, its lower row a shade deeper; a thin pupil inside
-        for x in (3, 4, 5):
+        for x in (2, 3, 4, 5, 6):
             p.lit((fx + m(x), fy + 6), IRIS, glow=0.9)
             p.lit((fx + m(x), fy + 7), IRIS_DEEP, glow=0.8)
-        p.px((fx + m(2), fy + 6), (246, 242, 248))                  # the white at each corner of the eye
-        p.px((fx + m(6), fy + 6), (246, 242, 248))
-        p.px((fx + m(2), fy + 7), k(LADY, 0.86))
-        p.px((fx + m(6), fy + 7), k(LADY, 0.86))
         for y in (6, 7):
             p.px((fx + m(4), fy + y), PUPIL)
             p.glow.putpixel((fx + m(4), fy + y), (0, 0, 0, 0))
