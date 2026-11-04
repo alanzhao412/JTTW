@@ -11,7 +11,16 @@ from heaven_host_kit import *
 from heaven_host import cape, plume_big, paint_arms
 from heaven_host_ranks import strip, restyle
 
-RIDER_SIZE = 0.86                                           # HeavenHostRenderers.RIDER_SIZE: a trooper's
+# HeavenHostRenderers.RIDER_SIZE: larger than a foot trooper (0.86), so that against vanilla's horse (drawn
+# at HORSE_SIZE 1.1) he stands as a vanilla player does to a vanilla horse
+RIDER_SIZE = 1.0
+
+# his legs astride, found by artpass-style forward kinematics (the turns MC applies, Z then Y then X): the
+# thigh from the hip forward, down and a little out, hugging the barrel's top edge (from behind it slopes
+# down over the horse's shoulder rather than spreading flat across its back), the knee just outside the
+# flank; the shin's turn undoes the thigh's so it hangs plumb down the flank, the heel a little back
+THIGH = (-0.589, 0.128, 0.416)
+SHIN = (0.693, 0.098, -0.376)
 
 R_ARM, R_FOREARM = (-0.15, 0, 0.12), (-0.75, -0.25, 0)       # the spear arm
 L_ARM, L_FOREARM = (-0.35, 0, -0.08), (-0.9, 0.2, 0)        # the rein hand before him
@@ -25,17 +34,15 @@ def rider():
     for n, par, piv, rot, boxes, m in parts:
         if n == 'waist':
             par, piv = 'rider', (0, -1.6, 0)
-        # astride the horse's broad back as a rider sits it: from the hip's edge the thigh forward, down and
-        # out over the top of the barrel, as vanilla's rider's legs reach forward; the knee just outside the
-        # flank; the shin hanging plumb down the flank, the heel a little back (its turn undoes the thigh's,
-        # so it hangs straight whatever the thigh does). The horse is vanilla's, drawn HORSE_SIZE / RIDER_SIZE
-        # larger than him: its barrel's flank lies 6.5 of his pixels out from his middle, its back 0.5 below
-        # his seat. His legs a little slimmer than a foot soldier's, so the shins clear the flank
+        # astride the horse's broad back as a rider sits it (THIGH, SHIN): the horse is vanilla's, drawn
+        # HORSE_SIZE / RIDER_SIZE larger than him, so its barrel's flank lies 5.5 of his pixels out from his
+        # middle, its back 0.4 below his seat, its belly 11.4 below: his boots hang three-quarters of the way
+        # down it. His legs a little slimmer than a foot soldier's, so the shins clear the flank
         if n == 'right_leg':
-            par, piv, rot = 'waist', (-4.4, -0.3, 0), (-1.121, 0.732, 0)
+            par, piv, rot = 'waist', (-4.4, -0.3, 0), THIGH
             boxes = [(x * 0.85, y, z, w * 0.85, h, d, st) for (x, y, z, w, h, d, st) in boxes]
         if n == 'right_shin':
-            rot = (1.346, -0.295, -0.68)
+            rot = SHIN
             boxes = [(x * 0.8, y, z, w * 0.8, h, d, st) for (x, y, z, w, h, d, st) in boxes]
         out.append((n, par, piv, rot, boxes, m))
     out.append(part('right_moustache', 'head', (-0.3, -2.25, -3.45), (0, 0.15, -0.35), [(-2.2, -0.35, -0.3, 2.2, 0.6, 0.6, 'moustache')]))

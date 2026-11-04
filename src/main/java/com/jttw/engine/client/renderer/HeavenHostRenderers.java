@@ -73,8 +73,9 @@ public final class HeavenHostRenderers {
 
     public static final ModelLayerLocation SOLDIER_LAYER = layer("heavenly_soldier"), ARCHER_LAYER = layer("heavenly_archer"),
             DRUMMER_LAYER = layer("thunder_drummer"), MANSION_LAYER = layer("lunar_mansion"), CAVALRY_LAYER = layer("cloud_cavalry");
-    /** The cloud cavalry's horse is drawn as vanilla draws a horse; its rider a trooper's size (heaven_host_cavalry.py prints his reach). */
-    public static final float HORSE_SIZE = 1.1f, RIDER_SIZE = 0.86f;
+    /** The cloud cavalry's horse is drawn as vanilla draws a horse; its rider larger than a foot trooper, sized to it as a
+     *  vanilla player is to a vanilla horse (heaven_host_cavalry.py prints his reach). */
+    public static final float HORSE_SIZE = 1.1f, RIDER_SIZE = 1.0f;
 
     /** How much larger than its pixels a trooper is drawn (heaven_host.py prints its reach). */
     public static final float TROOPER_SIZE = 0.86f;
@@ -1129,23 +1130,23 @@ public final class HeavenHostRenderers {
         PartDefinition leftSash = waist.addOrReplaceChild("left_sash", CubeListBuilder.create()
                 .texOffs(13, 66).mirror(true).addBox(-0.6f, 0, -0.3f, 1.2f, 5.9f, 0.6f), PartPose.offsetAndRotation(3.5f, -2, -2.5f, -0.04f, -0.2f, -0.12f));
         PartDefinition rightLeg = waist.addOrReplaceChild("right_leg", CubeListBuilder.create()
-                .texOffs(147, 0).mirror(false).addBox(-1.7f, -0.5f, -2.1f, 3.4f, 6.8f, 4.2f), PartPose.offsetAndRotation(-4.4f, -0.3f, 0, -1.121f, 0.732f, 0));
+                .texOffs(147, 0).mirror(false).addBox(-1.7f, -0.5f, -2.1f, 3.4f, 6.8f, 4.2f), PartPose.offsetAndRotation(-4.4f, -0.3f, 0, -0.589f, 0.128f, 0.416f));
         PartDefinition leftLeg = waist.addOrReplaceChild("left_leg", CubeListBuilder.create()
-                .texOffs(147, 0).mirror(true).addBox(-1.7f, -0.5f, -2.1f, 3.4f, 6.8f, 4.2f), PartPose.offsetAndRotation(4.4f, -0.3f, 0, -1.121f, -0.732f, 0));
+                .texOffs(147, 0).mirror(true).addBox(-1.7f, -0.5f, -2.1f, 3.4f, 6.8f, 4.2f), PartPose.offsetAndRotation(4.4f, -0.3f, 0, -0.589f, -0.128f, -0.416f));
         PartDefinition rightShin = rightLeg.addOrReplaceChild("right_shin", CubeListBuilder.create()
                 .texOffs(97, 46).mirror(false).addBox(-1.4f, 0, -1.75f, 2.8f, 4.6f, 3.5f)
                 .texOffs(20, 66).mirror(false).addBox(-1.64f, 0.7f, -2.3f, 3.28f, 3.7f, 2.2f)
                 .texOffs(69, 74).mirror(false).addBox(-1.56f, -0.8f, -2.65f, 3.12f, 2, 1)
                 .texOffs(35, 66).mirror(false).addBox(-1.56f, 4.4f, -2.2f, 3.12f, 1.6f, 4.3f)
                 .texOffs(9, 74).mirror(false).addBox(-1.16f, 4.9f, -3.3f, 2.32f, 1.1f, 1.3f)
-                .texOffs(124, 74).mirror(false).addBox(-0.64f, 4.3f, -3.85f, 1.28f, 0.9f, 0.7f), PartPose.offsetAndRotation(0, 6, 0, 1.346f, -0.295f, -0.68f));
+                .texOffs(124, 74).mirror(false).addBox(-0.64f, 4.3f, -3.85f, 1.28f, 0.9f, 0.7f), PartPose.offsetAndRotation(0, 6, 0, 0.693f, 0.098f, -0.376f));
         PartDefinition leftShin = leftLeg.addOrReplaceChild("left_shin", CubeListBuilder.create()
                 .texOffs(97, 46).mirror(true).addBox(-1.4f, 0, -1.75f, 2.8f, 4.6f, 3.5f)
                 .texOffs(20, 66).mirror(true).addBox(-1.64f, 0.7f, -2.3f, 3.28f, 3.7f, 2.2f)
                 .texOffs(69, 74).mirror(true).addBox(-1.56f, -0.8f, -2.65f, 3.12f, 2, 1)
                 .texOffs(35, 66).mirror(true).addBox(-1.56f, 4.4f, -2.2f, 3.12f, 1.6f, 4.3f)
                 .texOffs(9, 74).mirror(true).addBox(-1.16f, 4.9f, -3.3f, 2.32f, 1.1f, 1.3f)
-                .texOffs(124, 74).mirror(true).addBox(-0.64f, 4.3f, -3.85f, 1.28f, 0.9f, 0.7f), PartPose.offsetAndRotation(0, 6, 0, 1.346f, 0.295f, 0.68f));
+                .texOffs(124, 74).mirror(true).addBox(-0.64f, 4.3f, -3.85f, 1.28f, 0.9f, 0.7f), PartPose.offsetAndRotation(0, 6, 0, 0.693f, -0.098f, 0.376f));
         PartDefinition body = waist.addOrReplaceChild("body", CubeListBuilder.create()
                 .texOffs(5, 0).mirror(false).addBox(-4, -9.6f, -2.6f, 8, 9.8f, 5.2f)
                 .texOffs(84, 0).mirror(false).addBox(-4.6f, -10, -3.1f, 9.2f, 5.8f, 6.2f)
