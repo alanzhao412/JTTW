@@ -316,7 +316,7 @@ public final class HeavenGodRenderers {
                 .texOffs(38, 228).mirror(false).addBox(-0.7f, 2.6f, -0.7f, 1.4f, 1, 1.4f), PartPose.offsetAndRotation(0, 1.6f, -0.2f, 1.2955f, 0.48f, 0.3331f));
         PartDefinition head = body.addOrReplaceChild("head", CubeListBuilder.create()
                 .texOffs(190, 90).mirror(false).addBox(-4.4f, -9, -4, 8.8f, 7.4f, 8)
-                .texOffs(184, 221).mirror(false).addBox(-1, -5.8f, -4.8f, 2, 2.4f, 0.9f)
+                .texOffs(184, 221).mirror(false).addBox(-0.7f, -5.6f, -4.65f, 1.4f, 2.2f, 0.75f)
                 .texOffs(171, 127).mirror(false).addBox(-4.6f, -9.3f, -0.6f, 9.2f, 8, 5), PartPose.offsetAndRotation(0, -18.4f, -0.8f, 0, 0, 0));
         PartDefinition rightEar = head.addOrReplaceChild("right_ear", CubeListBuilder.create()
                 .texOffs(147, 213).mirror(false).addBox(-0.7f, -1.4f, -0.9f, 0.8f, 3.2f, 1.8f), PartPose.offsetAndRotation(-4.4f, -5.6f, -0.8f, 0, -0.2f, 0));

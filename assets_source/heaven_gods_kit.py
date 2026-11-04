@@ -488,21 +488,21 @@ def face_front(p, rect, o):
     ey = o.get('eye_row', 7)                                       # the eyes' row
     if kind == 'lady':
         for side in (0, 1):
-            ex = 3 if side == 0 else fw - 3 - 5
+            ex = 2 if side == 0 else fw - 7                        # the eye's five columns, clear of the nose
             outer = 0 if side == 0 else 4                          # the eye's outer corner (side 0 is her right, on the left)
             inner = 4 - outer
+            out = -1 if side == 0 else 1                           # outward, across the texture
             for i in range(5):                                     # brows: fine willow-leaf strokes, high, the outer end drooping
                 if i == inner:
                     continue
                 p.px((fx + ex + i, fy + ey - 3 + (1 if i == outer else 0)), shade_of(hair, 0.9))
             for i in range(5):                                     # the eye: a dark lash line over a block of iris, a thin pupil
-                p.px((fx + ex + i, fy + ey - 1), (34, 22, 28) if i != inner else k(skin, 0.8))
+                p.px((fx + ex + i, fy + ey - 1), (34, 22, 28) if i != inner else mixc((34, 22, 28), skin, 0.4))
                 p.px((fx + ex + i, fy + ey + 2), k(skin, 0.9))     # the lower lid, soft
-            p.px((fx + ex + outer, fy + ey), (34, 22, 28))         # the liner drawn along the outer corner
-            p.px((fx + ex + inner, fy + ey), k(skin, 0.86))
-            block_eye(p, fx, fy, ex + 1, ey, side, 3, o.get('eye', (120, 90, 60)))
-            p.px((fx + ex + outer + (-1 if side == 0 else 1), fy + ey - 1), (20, 12, 16))   # liner flicked out at the corner
-            p.px((fx + ex + outer + (-1 if side == 0 else 1), fy + ey - 2), (20, 12, 16))
+            block_eye(p, fx, fy, ex, ey, side, 5, o.get('eye', (120, 90, 60)))
+            p.px((fx + ex + outer + out, fy + ey - 1), (20, 12, 16))   # liner flicked out at the corner
+            p.px((fx + ex + outer + out, fy + ey - 2), (20, 12, 16))
+            p.px((fx + ex + outer + out, fy + ey), k(skin, 0.82))
         for i in range(int(cx) - 2, int(cx) + 2):                  # small red lips
             p.px((fx + i, fy + fh - 1), RED_LIPS if abs(i + 0.5 - cx) < 1.6 else k(RED_LIPS, 0.75))
         p.px((fx + int(cx) - 1, fy + fh - 2), k(skin, 0.82))
@@ -536,14 +536,15 @@ def face_front(p, rect, o):
         for j in range(2, 5):                                      # a furrow between the brows
             p.px((fx + int(cx) - 1, fy + j), shade)
         for side in (0, 1):                                        # eyes: calm, level, under a heavy lid
-            ex = 3 if side == 0 else fw - 3 - 5
+            ex = 2 if side == 0 else fw - 7                        # the eye's five columns, clear of the nose
+            out = -1 if side == 0 else 1                           # outward, across the texture
             outer = 0 if side == 0 else 4
             for i in range(5):
-                p.px((fx + ex + i, fy + ey - 1), k(shade, 0.62))
-                p.px((fx + ex + i, fy + ey + 2), k(skin, 0.86))
-            p.px((fx + ex + outer, fy + ey), k(shade, 0.8))
-            p.px((fx + ex + 4 - outer, fy + ey), k(shade, 0.9))
-            block_eye(p, fx, fy, ex + 1, ey, side, 3, o.get('eye', (120, 80, 40)))
+                p.px((fx + ex + i, fy + ey - 1), k(shade, 0.55))   # the upper lid, dark and level
+                p.px((fx + ex + i, fy + ey + 2), k(skin, 0.86))    # the lower lid
+            p.px((fx + ex + outer + out, fy + ey - 1), k(shade, 0.7))   # the lid run out past the outer corner
+            p.px((fx + ex + outer + out, fy + ey), k(shade, 0.85))
+            block_eye(p, fx, fy, ex, ey, side, 5, o.get('eye', (120, 80, 40)))
         for j in range(9, 12):                                     # lines from the nose
             p.px((fx + 5 - (j - 9) // 2, fy + j), shade)
             p.px((fx + fw - 6 + (j - 9) // 2, fy + j), shade)
