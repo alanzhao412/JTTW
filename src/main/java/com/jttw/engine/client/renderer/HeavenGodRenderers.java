@@ -313,7 +313,7 @@ public final class HeavenGodRenderers {
         PartDefinition brush = rightHand.addOrReplaceChild("brush", CubeListBuilder.create()
                 .texOffs(166, 127).mirror(false).addBox(-0.45f, -9, -0.45f, 0.9f, 12, 0.9f)
                 .texOffs(138, 213).mirror(false).addBox(-0.8f, -12.4f, -0.8f, 1.6f, 3.6f, 1.6f)
-                .texOffs(38, 228).mirror(false).addBox(-0.7f, 2.6f, -0.7f, 1.4f, 1, 1.4f), PartPose.offsetAndRotation(0, 1.6f, -0.2f, 1.2955f, 0.48f, 0.3331f));
+                .texOffs(43, 228).mirror(false).addBox(-0.7f, 2.6f, -0.7f, 1.4f, 1, 1.4f), PartPose.offsetAndRotation(0, 1.6f, -0.2f, 1.2955f, 0.48f, 0.3331f));
         PartDefinition head = body.addOrReplaceChild("head", CubeListBuilder.create()
                 .texOffs(190, 90).mirror(false).addBox(-4.4f, -9, -4, 8.8f, 7.4f, 8)
                 .texOffs(184, 221).mirror(false).addBox(-0.7f, -5.6f, -4.65f, 1.4f, 2.2f, 0.75f)
@@ -323,13 +323,13 @@ public final class HeavenGodRenderers {
         PartDefinition leftEar = head.addOrReplaceChild("left_ear", CubeListBuilder.create()
                 .texOffs(147, 213).mirror(true).addBox(-0.1f, -1.4f, -0.9f, 0.8f, 3.2f, 1.8f), PartPose.offsetAndRotation(4.4f, -5.6f, -0.8f, 0, 0.2f, 0));
         PartDefinition rightBrow = head.addOrReplaceChild("right_brow", CubeListBuilder.create()
-                .texOffs(47, 228).mirror(false).addBox(-3.8f, -0.9f, -0.5f, 3.8f, 1.1f, 1), PartPose.offsetAndRotation(-0.4f, -6.5f, -4.3f, 0, 0.1f, 0.24f));
+                .texOffs(52, 228).mirror(false).addBox(-3.8f, -0.9f, -0.5f, 3.8f, 1.1f, 1), PartPose.offsetAndRotation(-0.4f, -6.5f, -4.3f, 0, 0.1f, 0.24f));
         PartDefinition leftBrow = head.addOrReplaceChild("left_brow", CubeListBuilder.create()
-                .texOffs(47, 228).mirror(true).addBox(0, -0.9f, -0.5f, 3.8f, 1.1f, 1), PartPose.offsetAndRotation(0.4f, -6.5f, -4.3f, 0, -0.1f, -0.24f));
+                .texOffs(52, 228).mirror(true).addBox(0, -0.9f, -0.5f, 3.8f, 1.1f, 1), PartPose.offsetAndRotation(0.4f, -6.5f, -4.3f, 0, -0.1f, -0.24f));
         PartDefinition rightMoustache = head.addOrReplaceChild("right_moustache", CubeListBuilder.create()
-                .texOffs(99, 228).mirror(false).addBox(-3.2f, -0.5f, -0.5f, 3.2f, 1, 1), PartPose.offsetAndRotation(-0.5f, -3.3f, -4.5f, 0, 0.2f, -0.55f));
+                .texOffs(104, 228).mirror(false).addBox(-3.2f, -0.5f, -0.5f, 3.2f, 1, 1), PartPose.offsetAndRotation(-0.5f, -3.3f, -4.5f, 0, 0.2f, -0.55f));
         PartDefinition leftMoustache = head.addOrReplaceChild("left_moustache", CubeListBuilder.create()
-                .texOffs(99, 228).mirror(true).addBox(0, -0.5f, -0.5f, 3.2f, 1, 1), PartPose.offsetAndRotation(0.5f, -3.3f, -4.5f, 0, -0.2f, 0.55f));
+                .texOffs(104, 228).mirror(true).addBox(0, -0.5f, -0.5f, 3.2f, 1, 1), PartPose.offsetAndRotation(0.5f, -3.3f, -4.5f, 0, -0.2f, 0.55f));
         PartDefinition rightSidelock = head.addOrReplaceChild("right_sidelock", CubeListBuilder.create()
                 .texOffs(21, 156).mirror(false).addBox(-0.8f, 0, -1, 1.6f, 9.5f, 2), PartPose.offsetAndRotation(-4.3f, -7.6f, -2.4f, -0.05f, 0, 0.06f));
         PartDefinition leftSidelock = head.addOrReplaceChild("left_sidelock", CubeListBuilder.create()
@@ -348,7 +348,7 @@ public final class HeavenGodRenderers {
                 .texOffs(138, 156).mirror(false).addBox(-3.4f, -3.6f, -3.2f, 6.8f, 3.8f, 6.4f)
                 .texOffs(167, 156).mirror(false).addBox(-4.7f, -0.9f, -4.3f, 9.4f, 1.4f, 8.6f)
                 .texOffs(154, 213).mirror(false).addBox(-2.4f, -6.8f, -4.6f, 4.8f, 4.8f, 0.8f)
-                .texOffs(110, 228).mirror(false).addBox(-6, -3.2f, -0.35f, 12, 0.7f, 0.7f), PartPose.offsetAndRotation(0, -9, 0, 0, 0, 0));
+                .texOffs(115, 228).mirror(false).addBox(-6, -3.2f, -0.35f, 12, 0.7f, 0.7f), PartPose.offsetAndRotation(0, -9, 0, 0, 0, 0));
         PartDefinition hdSunRay0 = hdSun.addOrReplaceChild("hd_sun_ray_0", CubeListBuilder.create()
                 .texOffs(167, 213).mirror(false).addBox(-0.7f, -7.725f, -0.3f, 1.4f, 4.325f, 0.6f), PartPose.offsetAndRotation(0, -3.6f, -3.4f, 0, 0, -1.309f));
         PartDefinition hdSunRay1 = hdSun.addOrReplaceChild("hd_sun_ray_1", CubeListBuilder.create()
@@ -372,30 +372,30 @@ public final class HeavenGodRenderers {
         PartDefinition leftMoonLoop = hdMoon.addOrReplaceChild("left_moon_loop", CubeListBuilder.create()
                 .texOffs(68, 213).mirror(true).addBox(0, -3.6f, -1.2f, 2.4f, 3.6f, 2.4f), PartPose.offsetAndRotation(2.8f, -2.4f, 0.2f, 0, 0, 0.35f));
         PartDefinition rightMoonPin = hdMoon.addOrReplaceChild("right_moon_pin", CubeListBuilder.create()
-                .texOffs(137, 228).mirror(false).addBox(-4.6f, -0.3f, -0.3f, 4.6f, 0.6f, 0.6f)
+                .texOffs(142, 228).mirror(false).addBox(-4.6f, -0.3f, -0.3f, 4.6f, 0.6f, 0.6f)
                 .texOffs(200, 221).mirror(false).addBox(-4.4f, 0.3f, -0.3f, 0.6f, 2.8f, 0.6f)
-                .texOffs(58, 228).mirror(false).addBox(-3, 0.3f, -0.3f, 0.6f, 1.8f, 0.6f), PartPose.offsetAndRotation(-1.8f, -3.6f, -0.6f, 0, 0.2f, 0.35f));
+                .texOffs(63, 228).mirror(false).addBox(-3, 0.3f, -0.3f, 0.6f, 1.8f, 0.6f), PartPose.offsetAndRotation(-1.8f, -3.6f, -0.6f, 0, 0.2f, 0.35f));
         PartDefinition leftMoonPin = hdMoon.addOrReplaceChild("left_moon_pin", CubeListBuilder.create()
-                .texOffs(137, 228).mirror(true).addBox(0, -0.3f, -0.3f, 4.6f, 0.6f, 0.6f)
+                .texOffs(142, 228).mirror(true).addBox(0, -0.3f, -0.3f, 4.6f, 0.6f, 0.6f)
                 .texOffs(200, 221).mirror(true).addBox(3.8f, 0.3f, -0.3f, 0.6f, 2.8f, 0.6f)
-                .texOffs(58, 228).mirror(true).addBox(2.4f, 0.3f, -0.3f, 0.6f, 1.8f, 0.6f), PartPose.offsetAndRotation(1.8f, -3.6f, -0.6f, 0, -0.2f, -0.35f));
+                .texOffs(63, 228).mirror(true).addBox(2.4f, 0.3f, -0.3f, 0.6f, 1.8f, 0.6f), PartPose.offsetAndRotation(1.8f, -3.6f, -0.6f, 0, -0.2f, -0.35f));
         PartDefinition hdMoonCrescent0 = hdMoon.addOrReplaceChild("hd_moon_crescent_0", CubeListBuilder.create()
-                .texOffs(63, 228).mirror(false).addBox(-1.0359f, -0.7f, -0.5f, 2.0718f, 1.4f, 1), PartPose.offsetAndRotation(3.0158f, -6.8301f, -1.4f, 0, 0, 2.0508f));
+                .texOffs(68, 228).mirror(false).addBox(-1.0359f, -0.7f, -0.5f, 2.0718f, 1.4f, 1), PartPose.offsetAndRotation(3.0158f, -6.8301f, -1.4f, 0, 0, 2.0508f));
         PartDefinition hdMoonCrescent1 = hdMoon.addOrReplaceChild("hd_moon_crescent_1", CubeListBuilder.create()
-                .texOffs(63, 228).mirror(false).addBox(-1.0359f, -0.7f, -0.5f, 2.0718f, 1.4f, 1), PartPose.offsetAndRotation(2.0698f, -5.7026f, -1.4f, 0, 0, 2.4871f));
+                .texOffs(68, 228).mirror(false).addBox(-1.0359f, -0.7f, -0.5f, 2.0718f, 1.4f, 1), PartPose.offsetAndRotation(2.0698f, -5.7026f, -1.4f, 0, 0, 2.4871f));
         PartDefinition hdMoonCrescent2 = hdMoon.addOrReplaceChild("hd_moon_crescent_2", CubeListBuilder.create()
-                .texOffs(63, 228).mirror(false).addBox(-1.0359f, -0.7f, -0.5f, 2.0718f, 1.4f, 1), PartPose.offsetAndRotation(0.7359f, -5.0806f, -1.4f, 0, 0, 2.9234f));
+                .texOffs(68, 228).mirror(false).addBox(-1.0359f, -0.7f, -0.5f, 2.0718f, 1.4f, 1), PartPose.offsetAndRotation(0.7359f, -5.0806f, -1.4f, 0, 0, 2.9234f));
         PartDefinition hdMoonCrescent3 = hdMoon.addOrReplaceChild("hd_moon_crescent_3", CubeListBuilder.create()
-                .texOffs(63, 228).mirror(false).addBox(-1.0359f, -0.7f, -0.5f, 2.0718f, 1.4f, 1), PartPose.offsetAndRotation(-0.7359f, -5.0806f, -1.4f, 0, 0, 3.3598f));
+                .texOffs(68, 228).mirror(false).addBox(-1.0359f, -0.7f, -0.5f, 2.0718f, 1.4f, 1), PartPose.offsetAndRotation(-0.7359f, -5.0806f, -1.4f, 0, 0, 3.3598f));
         PartDefinition hdMoonCrescent4 = hdMoon.addOrReplaceChild("hd_moon_crescent_4", CubeListBuilder.create()
-                .texOffs(63, 228).mirror(false).addBox(-1.0359f, -0.7f, -0.5f, 2.0718f, 1.4f, 1), PartPose.offsetAndRotation(-2.0698f, -5.7026f, -1.4f, 0, 0, 3.7961f));
+                .texOffs(68, 228).mirror(false).addBox(-1.0359f, -0.7f, -0.5f, 2.0718f, 1.4f, 1), PartPose.offsetAndRotation(-2.0698f, -5.7026f, -1.4f, 0, 0, 3.7961f));
         PartDefinition hdMoonCrescent5 = hdMoon.addOrReplaceChild("hd_moon_crescent_5", CubeListBuilder.create()
-                .texOffs(63, 228).mirror(false).addBox(-1.0359f, -0.7f, -0.5f, 2.0718f, 1.4f, 1), PartPose.offsetAndRotation(-3.0158f, -6.8301f, -1.4f, 0, 0, 4.2324f));
+                .texOffs(68, 228).mirror(false).addBox(-1.0359f, -0.7f, -0.5f, 2.0718f, 1.4f, 1), PartPose.offsetAndRotation(-3.0158f, -6.8301f, -1.4f, 0, 0, 4.2324f));
         PartDefinition hdJupiter = head.addOrReplaceChild("hd_jupiter", CubeListBuilder.create()
                 .texOffs(7, 204).mirror(false).addBox(-1.8f, -3.6f, -1.8f, 3.6f, 3.8f, 3.6f)
                 .texOffs(24, 204).mirror(false).addBox(-2.6f, -1.8f, -2.6f, 5.2f, 1.6f, 5.2f)
                 .texOffs(39, 169).mirror(false).addBox(-4.6f, -0.9f, -4.3f, 9.2f, 1.4f, 8.6f)
-                .texOffs(150, 228).mirror(false).addBox(-5, -2.8f, -0.3f, 10, 0.6f, 0.6f), PartPose.offsetAndRotation(0, -9, 0, 0, 0, 0));
+                .texOffs(155, 228).mirror(false).addBox(-5, -2.8f, -0.3f, 10, 0.6f, 0.6f), PartPose.offsetAndRotation(0, -9, 0, 0, 0, 0));
         PartDefinition hdJupiterPetal0 = hdJupiter.addOrReplaceChild("hd_jupiter_petal_0", CubeListBuilder.create()
                 .texOffs(60, 221).mirror(false).addBox(-1.2f, -3.4f, -0.15f, 2.4f, 3.4f, 0.3f), PartPose.offsetAndRotation(1, -1.6f, -1.7321f, 0.4f, -0.5236f, 0));
         PartDefinition hdJupiterPetal1 = hdJupiter.addOrReplaceChild("hd_jupiter_petal_1", CubeListBuilder.create()
@@ -411,7 +411,12 @@ public final class HeavenGodRenderers {
         PartDefinition hdMars = head.addOrReplaceChild("hd_mars", CubeListBuilder.create()
                 .texOffs(78, 169).mirror(false).addBox(-4.7f, -0.9f, -4.3f, 9.4f, 1.4f, 8.6f)
                 .texOffs(205, 221).mirror(false).addBox(-1.2f, -1.6f, -4.7f, 2.4f, 2.2f, 0.6f)
-                .texOffs(145, 193).mirror(false).addBox(-3.6f, -2.6f, -2.4f, 7.2f, 2.4f, 6), PartPose.offsetAndRotation(0, -9, 0, 0, 0, 0));
+                .texOffs(145, 193).mirror(false).addBox(-3.6f, -2.6f, -2.4f, 7.2f, 2.4f, 6)
+                .texOffs(214, 221).mirror(false).addBox(-0.75f, 0.6f, -4.12f, 1.5f, 2.5f, 0.12f), PartPose.offsetAndRotation(0, -9, 0, 0, 0, 0));
+        PartDefinition rightMarsBrow = hdMars.addOrReplaceChild("right_mars_brow", CubeListBuilder.create()
+                .texOffs(52, 228).mirror(false).addBox(-3.3f, -0.9f, -0.5f, 3.3f, 1.1f, 1), PartPose.offsetAndRotation(-1.05f, 2.6f, -4.3f, 0, 0.1f, 0.42f));
+        PartDefinition leftMarsBrow = hdMars.addOrReplaceChild("left_mars_brow", CubeListBuilder.create()
+                .texOffs(52, 228).mirror(true).addBox(0, -0.9f, -0.5f, 3.3f, 1.1f, 1), PartPose.offsetAndRotation(1.05f, 2.6f, -4.3f, 0, -0.1f, -0.42f));
         PartDefinition hdMarsFlame = hdMars.addOrReplaceChild("hd_mars_flame", CubeListBuilder.create()
                 .texOffs(174, 193).mirror(false).addBox(-3.4f, -7.4f, -0.1f, 6.8f, 7.4f, 0.2f)
                 .texOffs(179, 110).mirror(false).addBox(-0.1f, -7.4f, -3.4f, 0.2f, 7.4f, 6.8f), PartPose.offsetAndRotation(0, -1, -2.6f, -0.1f, 0, 0));
@@ -430,31 +435,31 @@ public final class HeavenGodRenderers {
         PartDefinition hdVenus = head.addOrReplaceChild("hd_venus", CubeListBuilder.create()
                 .texOffs(160, 181).mirror(false).addBox(-2.8f, -4.4f, -1.6f, 5.6f, 4.8f, 4.6f)
                 .texOffs(117, 169).mirror(false).addBox(-4.6f, -1.6f, -4.3f, 9.2f, 2, 8.6f)
-                .texOffs(214, 221).mirror(false).addBox(-2.2f, -3.4f, -4.6f, 4.4f, 2.6f, 0.6f), PartPose.offsetAndRotation(0, -9, 0, 0, 0, 0));
+                .texOffs(221, 221).mirror(false).addBox(-2.2f, -3.4f, -4.6f, 4.4f, 2.6f, 0.6f), PartPose.offsetAndRotation(0, -9, 0, 0, 0, 0));
         PartDefinition hdVenusBird = hdVenus.addOrReplaceChild("hd_venus_bird", CubeListBuilder.create()
                 .texOffs(101, 213).mirror(false).addBox(-1.1f, -2.6f, -2, 2.2f, 2.6f, 3.6f)
                 .texOffs(78, 221).mirror(false).addBox(-0.75f, -4.8f, -2.8f, 1.5f, 2.6f, 1.5f)
-                .texOffs(227, 221).mirror(false).addBox(-0.3f, -5.8f, -2.6f, 0.6f, 1.2f, 1.2f)
-                .texOffs(173, 228).mirror(false).addBox(-0.3f, -4.2f, -3.6f, 0.6f, 0.6f, 0.9f), PartPose.offsetAndRotation(0, -4.4f, -0.2f, 0, 0, 0));
+                .texOffs(234, 221).mirror(false).addBox(-0.3f, -5.8f, -2.6f, 0.6f, 1.2f, 1.2f)
+                .texOffs(178, 228).mirror(false).addBox(-0.3f, -4.2f, -3.6f, 0.6f, 0.6f, 0.9f), PartPose.offsetAndRotation(0, -4.4f, -0.2f, 0, 0, 0));
         PartDefinition hdVenusTail = hdVenusBird.addOrReplaceChild("hd_venus_tail", CubeListBuilder.create()
                 .texOffs(74, 204).mirror(false).addBox(-2.2f, -6.4f, -0.1f, 4.4f, 6.4f, 0.2f)
                 .texOffs(156, 169).mirror(false).addBox(-0.1f, -6.4f, -1.6f, 0.2f, 6.4f, 3.2f), PartPose.offsetAndRotation(0, -1.6f, 1.2f, -0.55f, 0, 0));
         PartDefinition rightVenusPin = hdVenus.addOrReplaceChild("right_venus_pin", CubeListBuilder.create()
-                .texOffs(178, 228).mirror(false).addBox(-3.6f, -0.3f, -0.3f, 3.6f, 0.6f, 0.6f)
+                .texOffs(183, 228).mirror(false).addBox(-3.6f, -0.3f, -0.3f, 3.6f, 0.6f, 0.6f)
                 .texOffs(87, 221).mirror(false).addBox(-3.4f, 0.3f, -0.3f, 0.6f, 3.2f, 0.6f)
-                .texOffs(234, 221).mirror(false).addBox(-2.2f, 0.3f, -0.3f, 0.6f, 2.2f, 0.6f), PartPose.offsetAndRotation(-3.2f, -1.2f, -1.2f, 0, 0.15f, 0.25f));
+                .texOffs(241, 221).mirror(false).addBox(-2.2f, 0.3f, -0.3f, 0.6f, 2.2f, 0.6f), PartPose.offsetAndRotation(-3.2f, -1.2f, -1.2f, 0, 0.15f, 0.25f));
         PartDefinition leftVenusPin = hdVenus.addOrReplaceChild("left_venus_pin", CubeListBuilder.create()
-                .texOffs(178, 228).mirror(true).addBox(0, -0.3f, -0.3f, 3.6f, 0.6f, 0.6f)
+                .texOffs(183, 228).mirror(true).addBox(0, -0.3f, -0.3f, 3.6f, 0.6f, 0.6f)
                 .texOffs(87, 221).mirror(true).addBox(2.8f, 0.3f, -0.3f, 0.6f, 3.2f, 0.6f)
-                .texOffs(234, 221).mirror(true).addBox(1.6f, 0.3f, -0.3f, 0.6f, 2.2f, 0.6f), PartPose.offsetAndRotation(3.2f, -1.2f, -1.2f, 0, -0.15f, -0.25f));
+                .texOffs(241, 221).mirror(true).addBox(1.6f, 0.3f, -0.3f, 0.6f, 2.2f, 0.6f), PartPose.offsetAndRotation(3.2f, -1.2f, -1.2f, 0, -0.15f, -0.25f));
         PartDefinition hdMercury = head.addOrReplaceChild("hd_mercury", CubeListBuilder.create()
                 .texOffs(202, 127).mirror(false).addBox(-4, -3.6f, -3.8f, 8, 4.4f, 7.6f)
                 .texOffs(87, 204).mirror(false).addBox(-3, -6.2f, -0.4f, 6, 3, 4.2f)
                 .texOffs(183, 181).mirror(false).addBox(-4.2f, -0.5f, -4.1f, 8.4f, 0.9f, 8.2f), PartPose.offsetAndRotation(0, -9, 0, 0, 0, 0));
         PartDefinition rightFutouWing = hdMercury.addOrReplaceChild("right_futou_wing", CubeListBuilder.create()
-                .texOffs(72, 228).mirror(false).addBox(-12, -0.75f, -0.2f, 12, 1.5f, 0.4f), PartPose.offsetAndRotation(-3.6f, -2.6f, 2.6f, 0, 0, -0.03f));
+                .texOffs(77, 228).mirror(false).addBox(-12, -0.75f, -0.2f, 12, 1.5f, 0.4f), PartPose.offsetAndRotation(-3.6f, -2.6f, 2.6f, 0, 0, -0.03f));
         PartDefinition leftFutouWing = hdMercury.addOrReplaceChild("left_futou_wing", CubeListBuilder.create()
-                .texOffs(72, 228).mirror(true).addBox(0, -0.75f, -0.2f, 12, 1.5f, 0.4f), PartPose.offsetAndRotation(3.6f, -2.6f, 2.6f, 0, 0, 0.03f));
+                .texOffs(77, 228).mirror(true).addBox(0, -0.75f, -0.2f, 12, 1.5f, 0.4f), PartPose.offsetAndRotation(3.6f, -2.6f, 2.6f, 0, 0, 0.03f));
         PartDefinition hdRahu = head.addOrReplaceChild("hd_rahu", CubeListBuilder.create()
                 .texOffs(167, 169).mirror(false).addBox(-4.7f, -0.9f, -4.3f, 9.4f, 1.6f, 8.6f)
                 .texOffs(220, 181).mirror(false).addBox(-3.8f, -2.6f, -3, 7.6f, 2.4f, 6.6f), PartPose.offsetAndRotation(0, -9, 0, 0, 0, 0));
@@ -478,7 +483,7 @@ public final class HeavenGodRenderers {
                 .texOffs(206, 169).mirror(false).addBox(-1.3f, -8, -1.1f, 2.6f, 8, 2.2f), PartPose.offsetAndRotation(1.4f, -1.6f, 2.6f, -0.9f, 0, 0.25f));
         PartDefinition hdKetu = head.addOrReplaceChild("hd_ketu", CubeListBuilder.create()
                 .texOffs(0, 181).mirror(false).addBox(-4.7f, -0.9f, -4.3f, 9.4f, 1.4f, 8.6f)
-                .texOffs(239, 221).mirror(false).addBox(-1.3f, -2.8f, -4.7f, 2.6f, 2.6f, 0.6f)
+                .texOffs(246, 221).mirror(false).addBox(-1.3f, -2.8f, -4.7f, 2.6f, 2.6f, 0.6f)
                 .texOffs(13, 193).mirror(false).addBox(-3.6f, -2.2f, -3.4f, 7.2f, 1.8f, 7.4f), PartPose.offsetAndRotation(0, -9, 0, 0, 0, 0));
         PartDefinition hdKetuLock0 = hdKetu.addOrReplaceChild("hd_ketu_lock_0", CubeListBuilder.create()
                 .texOffs(196, 110).mirror(false).addBox(-1.3f, -1.1f, 0, 2.6f, 2.2f, 12), PartPose.offsetAndRotation(-2.6f, -1.4f, 2.4f, 0.25f, -0.25f, 0));
@@ -524,8 +529,8 @@ public final class HeavenGodRenderers {
                 .texOffs(229, 213).mirror(false).addBox(-1.1f, -26.4f, -4.6f, 2.2f, 2.2f, 2.2f)
                 .texOffs(126, 221).mirror(false).addBox(-1, -30, 0.6f, 2, 2.6f, 1.4f), PartPose.offsetAndRotation(0.4f, 1.6f, -1.2f, 2.4327f, -0.3499f, -0.1503f));
         PartDefinition emblemSaturnGourd = emblemSaturn.addOrReplaceChild("emblem_saturn_gourd", CubeListBuilder.create()
-                .texOffs(248, 221).mirror(false).addBox(-0.25f, 0, -0.25f, 0.5f, 2.2f, 0.5f)
-                .texOffs(0, 228).mirror(false).addBox(-1, 2, -1, 2, 2, 2)
+                .texOffs(0, 228).mirror(false).addBox(-0.25f, 0, -0.25f, 0.5f, 2.2f, 0.5f)
+                .texOffs(5, 228).mirror(false).addBox(-1, 2, -1, 2, 2, 2)
                 .texOffs(171, 204).mirror(false).addBox(-1.6f, 3.8f, -1.6f, 3.2f, 3.4f, 3.2f), PartPose.offsetAndRotation(1.2f, -23.5f, 0, 0, 0, -0.1f));
         PartDefinition emblemVenus = leftHand.addOrReplaceChild("emblem_venus", CubeListBuilder.create()
                 .texOffs(39, 181).mirror(false).addBox(-1.05f, -6.75f, -0.9f, 2.1f, 9, 1.8f)
@@ -533,12 +538,12 @@ public final class HeavenGodRenderers {
                 .texOffs(111, 68).mirror(false).addBox(-6.3f, 1.8f, -1.5f, 12.6f, 16.5f, 3)
                 .texOffs(0, 221).mirror(false).addBox(-4.8f, 0.3f, -1.2f, 9.6f, 2.1f, 2.4f), PartPose.offsetAndRotation(0.4f, 1.6f, -1.2f, 2.4327f, -0.3499f, -0.1503f));
         PartDefinition emblemVenusPegs = emblemVenus.addOrReplaceChild("emblem_venus_pegs", CubeListBuilder.create()
-                .texOffs(189, 228).mirror(false).addBox(-2.7f, -0.45f, 0, 5.4f, 0.9f, 0.9f)
-                .texOffs(189, 228).mirror(false).addBox(-2.7f, 2.1f, 0, 5.4f, 0.9f, 0.9f), PartPose.offsetAndRotation(0, -10.5f, 0, 0, 0, 0));
+                .texOffs(194, 228).mirror(false).addBox(-2.7f, -0.45f, 0, 5.4f, 0.9f, 0.9f)
+                .texOffs(194, 228).mirror(false).addBox(-2.7f, 2.1f, 0, 5.4f, 0.9f, 0.9f), PartPose.offsetAndRotation(0, -10.5f, 0, 0, 0, 0));
         PartDefinition emblemMercury = leftHand.addOrReplaceChild("emblem_mercury", CubeListBuilder.create()
-                .texOffs(9, 228).mirror(false).addBox(-5.98f, -0.92f, -0.92f, 11.96f, 1.84f, 1.84f)
+                .texOffs(14, 228).mirror(false).addBox(-5.98f, -0.92f, -0.92f, 11.96f, 1.84f, 1.84f)
                 .texOffs(227, 110).mirror(false).addBox(-5.175f, 0.92f, -0.1725f, 10.35f, 13.8f, 0.345f)
-                .texOffs(9, 228).mirror(false).addBox(-5.98f, 14.49f, -0.92f, 11.96f, 1.84f, 1.84f), PartPose.offsetAndRotation(0.4f, 2.2f, -1.2f, 2.4327f, -0.3499f, -0.1503f));
+                .texOffs(14, 228).mirror(false).addBox(-5.98f, 14.49f, -0.92f, 11.96f, 1.84f, 1.84f), PartPose.offsetAndRotation(0.4f, 2.2f, -1.2f, 2.4327f, -0.3499f, -0.1503f));
         PartDefinition emblemRahu = leftHand.addOrReplaceChild("emblem_rahu", CubeListBuilder.create()
                 .texOffs(188, 204).mirror(false).addBox(-0.91f, -4.42f, -0.91f, 1.82f, 5.72f, 1.82f)
                 .texOffs(27, 221).mirror(false).addBox(-3.38f, -6.24f, -1.3f, 6.76f, 2.08f, 2.6f)
@@ -587,9 +592,10 @@ public final class HeavenGodRenderers {
         /** How much larger than his pixels he is drawn: some 2.3 blocks to his crown (heaven_gods.py prints his reach). */
         public static final float SIZE = 0.7f;
         private static final String[] NAMES = StarLordEntity.LUMINARIES;
-        // who wears a beard, who frowns under drawn brows, whose hair hangs at her cheeks, who holds the tablet
+        // who wears a beard, who frowns under drawn brows (Mars has his own, set wide of his third eye, on his
+        // headdress), whose hair hangs at her cheeks, who holds the tablet
         private static final boolean[] BEARD = {true, false, true, true, true, false, true, true, false};
-        private static final boolean[] BROWS = {true, false, true, true, false, false, true, true, true};
+        private static final boolean[] BROWS = {true, false, true, false, false, false, true, true, true};
         private static final boolean[] LOCKS = {false, true, false, false, false, true, false, false, false};
         private static final boolean[] TABLET = {true, true, true, false, true, true, false, false, false};
         private static final boolean[] FIERCE = {false, false, false, true, false, false, false, true, true};

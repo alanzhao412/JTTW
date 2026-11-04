@@ -583,11 +583,12 @@ def face_front(p, rect, o):
         p.px((fx + ex + out_n + step, fy + ey - 1), kohl)          # swept up past the outer corner
         p.px((fx + ex + out_n + step, fy + ey - 2), kohl)
         p.px((fx + ex + out_n, fy + ey - 2), kohl)
-    if o.get('third'):                                             # a third eye, upright, on the brow
-        tx = int(cx) - 1
-        for jj in range(4):
-            for ii in range(2):
-                p.lit((fx + tx + ii, fy + 1 + hairline + jj), iris if 0 < jj < 3 else (24, 12, 12), glow=0.9 if 0 < jj < 3 else 0)
+    if o.get('third'):
+        # the third eye is a box of its own on the brow (the face is an even 18 across: a pupil can't sit
+        # in the middle of it); here only its socket, a dark crease round where it stands
+        for jj in range(1 + hairline - 1, ey - 1):
+            for ii in range(int(cx) - 2, int(cx) + 2):
+                p.px((fx + ii, fy + jj), mixc(kohl, skin, 0.45))
     for j in range(ey + 3, fh - 1):                                # flared nostril shadow and snarl lines
         p.px((fx + 3 - (j - ey - 3) // 2, fy + j), shade)
         p.px((fx + fw - 4 + (j - ey - 3) // 2, fy + j), shade)

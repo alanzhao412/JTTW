@@ -224,7 +224,12 @@ def headdresses():
         (-4.7, -0.9, -4.3, 9.4, 1.4, 8.6, 'mars_band'),
         (-1.2, -1.6, -4.7, 2.4, 2.2, 0.6, 'mars_jewel'),
         (-3.6, -2.6, -2.4, 7.2, 2.4, 6.0, 'mars_hair'),
+        # his third eye, upright on the brow: a box of its own just proud of the face, three texture pixels
+        # across (the face's eighteen can't hold a pupil in its middle), a thin pupil down its centre
+        (-0.75, 0.6, -4.12, 1.5, 2.5, 0.12, 'mars_eye'),
     ]))
+    # his brows (the others' hidden for him): set wider apart, either side of the third eye, swept up hard
+    out.append(part('right_mars_brow', 'hd_mars', (-1.05, 2.6, -4.3), (0, 0.1, 0.42), [(-3.3, -0.9, -0.5, 3.3, 1.1, 1, 'brow')]))
     out.append(part('hd_mars_flame', 'hd_mars', (0, -1, -2.6), (-0.1, 0, 0), [
         (-3.4, -7.4, -0.1, 6.8, 7.4, 0.2, 'mars_flame'), (-0.1, -7.4, -3.4, 0.2, 7.4, 6.8, 'mars_flame_x')]))
     out.append(part('right_mars_flame', 'hd_mars', (-3.4, -0.8, -1.4), (0, 0.3, -0.35), [
@@ -902,6 +907,17 @@ def paint_headdress(p, style, f, name, robe, deep, under, face, hair, light, tri
         fx, fy, fw, fh = f['front']
         for i, j, xy in each((fx + 1, fy + 1, fw - 2, fh - 2)):
             p.lit(xy, (255, 120, 40), glow=0.9)
+    if style == 'mars_eye':                                        # the third eye: glowing iris, a thin black pupil, lids
+        fx, fy, fw, fh = f['front']
+        for i, j, xy in each(f['front']):
+            if j == 0 or j == fh - 1:
+                p.px(xy, (18, 8, 10))
+            elif i == fw // 2:
+                p.px(xy, (10, 4, 4))
+            else:
+                p.lit(xy, (255, 220, 80) if j > 1 else (230, 170, 60), glow=0.9)
+        for s_ in ('top', 'bottom', 'right', 'left', 'back'):
+            p.face(f[s_], (18, 8, 10), 1.0, noise=1)
     if style == 'mars_hair':
         hair_box(p, f, RED_HAIR, lean=1)
     if style in ('mars_flame', 'mars_flame_x', 'mars_flame_s'):
