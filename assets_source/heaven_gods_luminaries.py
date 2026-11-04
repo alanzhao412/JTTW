@@ -21,6 +21,7 @@ holding up the star's emblem, which shines.
 
 Run from the repository root: python assets_source/heaven_gods.py"""
 import math
+import random
 
 from fire_court import part, mirrored
 from sea_court import aim
@@ -144,21 +145,42 @@ def emblems():
         (-2.6, -4.8, -1, 5.2, 1.6, 2, 'ra_bracket'),
         (-7, -18.4, -0.6, 14, 14, 1.2, 'ra_disc'),
     ])
-    # 8 Ketu: a comet on his palm, its tail streaming up and back over his shoulder
+    # 8 Ketu: a comet over his palm, a white-hot head in a great violet coma, a four-pointed flare about it;
+    # its tail streaming up and back over his shoulder in a long curve, a broad violet dust tail widening
+    # and fraying into sparks, and a straighter blue-white ion tail splitting from it
     out += held('ketu', [
-        (-2.2, -6.2, -2.2, 4.4, 4.4, 4.4, 'ke_head'),
-        (-4.6, -8.6, -0.1, 9.2, 9.2, 0.2, 'ke_star'),
-        (-0.1, -8.6, -4.6, 0.2, 9.2, 9.2, 'ke_star_x'),
-    ], pivot=(0.4, 0.4, -1.2), children=[
-        part('emblem_ketu_tail', 'emblem_ketu', (0, -4.2, 1.6), (-0.8, 0, 0), [
-            (-2.4, -0.1, 0, 4.8, 0.2, 8, 'ke_tail'), (-0.1, -2.4, 0, 0.2, 4.8, 8, 'ke_tail_x'),
-            (-1.2, -1.2, 0, 2.4, 2.4, 8, 'ke_trail')]),
-        part('emblem_ketu_tail_2', 'emblem_ketu_tail', (0, 0, 7.6), (0.25, 0, 0), [
-            (-3.4, -0.1, 0, 6.8, 0.2, 9, 'ke_tail2'), (-0.1, -3.4, 0, 0.2, 6.8, 9, 'ke_tail2_x'),
-            (-0.8, -0.8, 0, 1.6, 1.6, 9, 'ke_trail2')]),
-        part('emblem_ketu_tail_3', 'emblem_ketu_tail_2', (0, 0, 8.6), (0.25, 0, 0), [
-            (-4.4, -0.1, 0, 8.8, 0.2, 9, 'ke_tail3'), (-0.1, -4.4, 0, 0.2, 8.8, 9, 'ke_tail3_x')]),
-    ])
+        (-1.9, -10.4, -1.9, 3.8, 3.8, 3.8, 'ke_head'),
+        (-7.5, -15.8, -0.1, 15, 15, 0.2, 'ke_star'),               # the coma and its flare, from the front
+        (-0.1, -15.8, -7.5, 0.2, 15, 15, 'ke_star_x'),             # .. from the side
+        (-5.5, -8.6, -5.5, 11, 0.2, 11, 'ke_star_y'),              # .. from above
+    ], pivot=(0.4, 0.4, -1.2), children=comet_tail())
+    return out
+
+
+def comet_tail():
+    """The comet's tails, rooted in its head (at the emblem's (0, -8.5, 0)): each a chain of segments laid
+    along +z, crossed planes widening as they go, curving up and back."""
+    out = []
+    # the dust tail: broad, violet, curving, fraying into sparks at its end
+    # (a turn about x of +a lifts a segment laid along +z: the first rises steeply, the rest bend back)
+    segs = [(5.5, 7.0, 0.8), (7.5, 8.0, -0.22), (9.5, 8.5, -0.22), (11.0, 9.0, -0.2), (12.5, 9.0, -0.16)]
+    parent, at = 'emblem_ketu', (0, -8.5, 1.0)
+    for n, (w, ln, turn) in enumerate(segs):
+        name = 'emblem_ketu_tail_%d' % n
+        tag = 'ke_tail%d' % n
+        boxes = [(-w / 2, -0.1, 0, w, 0.2, ln, tag), (-0.1, -w / 2, 0, 0.2, w, ln, tag + '_x')]
+        if n < 2:
+            boxes.append((-1.3 + 0.4 * n, -1.3 + 0.4 * n, 0, 2.6 - 0.8 * n, 2.6 - 0.8 * n, ln, 'ke_trail%d' % n))
+        out.append(part(name, parent, at, (turn, 0.08 if n == 0 else 0.03, 0), boxes))
+        parent, at = name, (0, 0, ln - 0.4)
+    # the ion tail: narrow, straight, blue-white, splitting off the head steeper and outward
+    parent, at = 'emblem_ketu', (0, -9.0, 1.0)
+    for n, (w, ln, turn) in enumerate([(3.4, 9.0, 0.95), (5.0, 9.0, -0.12), (6.4, 8.0, -0.12)]):
+        name = 'emblem_ketu_ion_%d' % n
+        tag = 'ke_ion%d' % n
+        out.append(part(name, parent, at, (turn, 0.5 if n == 0 else 0.06, 0), [
+            (-w / 2, -0.1, 0, w, 0.2, ln, tag), (-0.1, -w / 2, 0, 0.2, w, ln, tag + '_x')]))
+        parent, at = name, (0, 0, ln - 0.4)
     return out
 
 
@@ -1240,40 +1262,78 @@ def paint_emblem(p, style, f, name, light):
              else ('glow', (220, 70, 30), 0.6) if r > 0.68 else (40, 30, 40))
         bare(p, f)
 
-    # 8 the comet: a white-violet star, its tail streaming
+    # 8 the comet: a white-hot head in a great violet coma, a four-pointed flare; its tails streaming
     if style == 'ke_head':
         for s, r in f.items():
             for i, j, xy in each(r):
                 d = math.hypot(i + 0.5 - r[2] / 2, j + 0.5 - r[3] / 2) / (r[2] / 2)
-                p.lit(xy, mixc((255, 255, 255), (150, 70, 250), min(1, d) ** 0.7), glow=1.0)
-    if style in ('ke_star', 'ke_star_x'):                          # its rays, a four-pointed star
-        flat = ('right', 'left') if style == 'ke_star_x' else ('front', 'back')
+                p.lit(xy, mixc((255, 255, 255), (226, 196, 255), min(1, d) ** 1.5), glow=1.0)
+    if style in ('ke_star', 'ke_star_x', 'ke_star_y'):
+        flat = {'ke_star': ('front', 'back'), 'ke_star_x': ('right', 'left'), 'ke_star_y': ('top', 'bottom')}[style]
+        spikes = style != 'ke_star_y'
         for s in flat:
-            def m(s_, t):
-                dx, dy = abs(s_ - 0.5) * 2, abs(t - 0.5) * 2
-                return dx * dy < 0.012 or dx + dy < 0.5 or (dx ** 0.5 + dy ** 0.5) < 0.9
-            cutout(p, f[s], m, lambda s_, t: mixc((240, 220, 255), (140, 60, 240), min(1, (abs(s_ - 0.5) + abs(t - 0.5)) * 2.2)), glow=0.9)
+            for i, j, xy in each(f[s]):
+                dx, dy = ((i + 0.5) / f[s][2] - 0.5) * 2, ((j + 0.5) / f[s][3] - 0.5) * 2
+                r = math.hypot(dx, dy)
+                lo, hi = min(abs(dx), abs(dy)), max(abs(dx), abs(dy))
+                spike = spikes and lo < 0.075 * (1 - hi) + 0.02 and hi < 0.98
+                ray = spikes and abs(abs(dx) - abs(dy)) < 0.06 * (1 - r) and r < 0.62
+                edge = 0.5 + 0.06 * math.sin(math.atan2(dy, dx) * 7)
+                if r < 0.2:
+                    c, g = mixc((255, 255, 255), (240, 222, 255), r / 0.2), 1.0
+                elif r < edge:
+                    t = (r - 0.2) / (edge - 0.2)
+                    c, g = mixc((226, 190, 255), (124, 56, 220), t ** 0.8), 0.95 - 0.35 * t
+                    if t > 0.7 and p.rnd.random() < (t - 0.7) * 1.6:
+                        c, g = None, 0
+                elif spike or ray:
+                    c, g = mixc((250, 240, 255), (170, 110, 255), hi), 1.0 - 0.4 * hi
+                elif r < 0.9 and p.rnd.random() < 0.035:                # sparks thrown off about it
+                    c, g = (246, 226, 255), 1.0
+                else:
+                    c, g = None, 0
+                if c is None:
+                    p.clear(xy)
+                else:
+                    p.lit(xy, c, glow=g)
         bare(p, f, [s for s in ('front', 'back', 'right', 'left', 'top', 'bottom') if s not in flat])
-    if style in ('ke_trail', 'ke_trail2'):                         # the tail's bright core, streaming
+    if style in ('ke_trail0', 'ke_trail1'):                        # the tail's bright core, streaming out of the head
         for s, r in f.items():
             for i, j, xy in each(r):
-                a = (along_z(s, i, j, r[2], r[3]) + (0 if style == 'ke_trail' else 1)) / 2
-                p.lit(xy, mixc((250, 236, 255), (130, 50, 230), a), glow=1.0 - 0.4 * a)
-    if style.startswith('ke_tail'):                                # the tail, streaming, fading from white to violet to nothing
-        x_plane = style.endswith('_x')
-        stage = 0 if style.startswith('ke_tail_') or style == 'ke_tail' else (1 if 'tail2' in style else 2)
-        if style.startswith('ke_tail3'):
-            stage = 2
-        flat = ('right', 'left') if x_plane else ('top', 'bottom')
+                a = (along_z(s, i, j, r[2], r[3]) + (0 if style == 'ke_trail0' else 1)) / 2
+                p.lit(xy, mixc((255, 250, 255), (176, 120, 250), a), glow=1.0 - 0.3 * a)
+    if style.startswith(('ke_tail', 'ke_ion')):
+        # a tail: streaks running along it, bright at its heart, widening and fading from white through
+        # violet (the dust tail) or ice-blue (the ion tail) to nothing, fraying into sparks at its end
+        ion = style.startswith('ke_ion')
+        stage = int(style[7 if not ion else 6])
+        stages = 3 if ion else 5
+        flat = ('right', 'left') if style.endswith('_x') else ('top', 'bottom')
+        hot, mid, deep = (((236, 248, 255), (120, 180, 255), (70, 90, 220)) if ion
+                          else ((250, 236, 255), (176, 110, 250), (96, 30, 180)))
+        rnd = random.Random(sum(ord(ch) * (n + 1) for n, ch in enumerate(style)))
         for s in flat:
             fx, fy, fw, fh = f[s]
+            phase = [rnd.random() * 6.3 for _ in range(3)]
             for i, j, xy in each(f[s]):
                 along = along_z(s, i, j, fw, fh)
-                across = abs((i + 0.5) / fw - 0.5) * 2 if s in ('top', 'bottom') else abs((j + 0.5) / fh - 0.5) * 2
-                a = (stage + along) / 3                            # 0 at the head .. 1 at the tail's end
-                if across > 0.35 + 0.65 * a or (a > 0.5 and p.rnd.random() < (a - 0.5) * 1.2):
+                u = (i + 0.5) / fw if s in ('top', 'bottom') else (j + 0.5) / fh
+                across = abs(u - 0.5) * 2
+                a = (stage + along) / stages                       # 0 at the head .. 1 at the tail's end
+                streak = 0.5 + 0.5 * math.sin(u * (9 if ion else 13) + phase[0]) * math.sin(u * 5 + phase[1])
+                reach = (0.55 + 0.4 * a) * (0.85 + 0.15 * streak)
+                if across > reach:
                     p.clear(xy)
                     continue
-                c = mixc((236, 210, 255), (110, 40, 210), min(1, a * 1.6 + across * 0.5))
-                p.lit(xy, c, glow=0.9 - 0.5 * a)
+                start = 0.35 if ion else 0.55
+                if a > start and rnd.random() < (a - start) * (1.6 if ion else 1.9) * (0.6 + 0.6 * (1 - streak)):
+                    if rnd.random() < 0.06:                         # a spark left where the tail frays
+                        p.lit(xy, hot, glow=0.9)
+                    else:
+                        p.clear(xy)
+                    continue
+                heart = max(0.0, 1 - across / max(0.2, reach)) ** 1.3
+                c = mixc(mid, deep, min(1, a * 1.1 + across * 0.4))
+                c = mixc(c, hot, heart * (1 - a) * 0.9 + 0.25 * streak * heart)
+                p.lit(xy, c, glow=(0.75 if ion else 0.95) - 0.45 * a)
         bare(p, f, [s for s in ('front', 'back', 'right', 'left', 'top', 'bottom') if s not in flat])

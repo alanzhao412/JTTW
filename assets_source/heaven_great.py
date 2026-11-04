@@ -117,27 +117,57 @@ def umbrella():
 
 
 def serpent():
-    """The serpent-dragon coiled about his left forearm, rising from his fist, its head reared over it."""
+    """The serpent-dragon (the West's naga, as the temple kings hold it): its tail coiled thick about his left
+    forearm, its body rising from his fist in an S, a crest of red fins down its back; its head a dragon's,
+    long-snouted, the jaws agape on ivory fangs, gold antlers swept back, a flaming red mane behind its
+    cheeks, a beard under its chin and long gold whiskers trailing from its lip."""
     parts = [part('coil', 'left_forearm', (0, 0, 0), (0, 0, 0), [])]
-    c, end = coil('coil', 3.5, 0.2, 6.4, 1.75, 14, 1.2, 2.3, 'coil', start=0.4)
+    c, end = coil('coil', 4.3, -0.4, 6.6, 1.75, 16, 1.6, 2.9, 'coil', start=0.4)
     parts += c
-    # the neck rises from the coil's end at the wrist; its frame the model's own (aim), so it rears by turning
+    # the body rises from the coil's end at the wrist; its frame the model's own (aim), so it rears by turning
     parts.append(part('serpent', 'left_forearm', (end[0], end[1], end[2]), aim([LARM, LFOREARM], (0, 0, 0)), []))
-    neck = [(0, 0, 0), (0.6, -3.2, 0.4), (1.0, -6.4, -0.6), (0.9, -9.2, -2.6), (0.6, -10.6, -5.0)]
-    parts += path('serpent', 'serpent_neck', neck, [2.4, 2.3, 2.2, 2.1], 'serpent_neck')
+    # out and back from his fist in an S, so the head rears beside his shoulder, never before his face
+    neck = [(0, 0, 0), (1.8, -3.0, 1.6), (3.8, -5.6, 3.6), (5.4, -8.4, 5.0), (6.2, -10.8, 4.8), (6.2, -12.4, 3.2)]
+    thick = [3.4, 3.2, 3.0, 2.8, 2.6]
+    for i in range(len(neck) - 1):
+        xr, yr, length = bg.segment(neck[i], neck[i + 1])
+        t = thick[i]
+        parts.append(part('serpent_neck_%d' % i, 'serpent', neck[i], (xr, yr, 0), [
+            (-t / 2, -t / 2, -0.3, t, t, length + 0.6, 'serpent_neck'),
+            (-0.15, t / 2 - 0.3, 0.1, 0.3, 1.9, length + 0.2, 'serpent_fin')]))      # its back's crest
     hx, hy, hz = neck[-1]
-    parts.append(part('serpent_head', 'serpent', (hx, hy, hz), (0.15, 0, 0), [
-        (-1.7, -1.4, -4.4, 3.4, 2.6, 4.6, 'serpent_skull'),
-        (-1.3, -0.8, -7.2, 2.6, 1.6, 3.0, 'serpent_snout'),
-        (-1.9, -2.0, -3.6, 0.8, 1.2, 1.6, 'serpent_brow'),
-        (1.1, -2.0, -3.6, 0.8, 1.2, 1.6, 'serpent_brow'),
+    parts.append(part('serpent_head', 'serpent', (hx, hy, hz), (0.12, 0.1, 0), [
+        (-2.3, -2.0, -5.2, 4.6, 3.6, 5.6, 'serpent_skull'),
+        (-1.8, -1.0, -9.8, 3.6, 2.2, 4.8, 'serpent_snout'),
+        (-2.0, -1.5, -10.4, 4.0, 1.4, 1.6, 'serpent_nose'),
+        (-2.7, -2.9, -5.0, 1.5, 1.3, 3.0, 'serpent_brow'),
+        (1.2, -2.9, -5.0, 1.5, 1.3, 3.0, 'serpent_brow'),
+        (-1.4, -2.7, -3.0, 2.8, 0.8, 3.4, 'serpent_crest'),           # a ridge down the crown
+        (-1.5, 1.1, -9.4, 0.6, 1.2, 0.6, 'serpent_fang'),             # the upper fangs
+        (0.9, 1.1, -9.4, 0.6, 1.2, 0.6, 'serpent_fang'),
     ]))
-    parts.append(part('right_serpent_horn', 'serpent_head', (-1.0, -1.6, -1.0), (-0.9, 0, -0.35), [(-0.4, -0.4, 0, 0.8, 0.8, 3.6, 'serpent_horn')]))
-    parts.append(part('right_serpent_whisker', 'serpent_head', (-1.2, 0.2, -6.4), (0.2, 0.9, 0.3), [(-0.2, -0.2, 0, 0.4, 0.4, 4.0, 'serpent_whisker')]))
-    parts.append(part('serpent_jaw', 'serpent_head', (0, 1.1, -0.8), (0.12, 0, 0), [
-        (-1.4, 0, -6.2, 2.8, 0.9, 6.2, 'serpent_jaw')]))
-    parts.append(part('serpent_tongue', 'serpent_jaw', (0, 0, -6.0), (0.25, 0, 0), [(-0.4, -0.2, -2.6, 0.8, 0.3, 2.6, 'serpent_tongue')]))
-    return parts
+    # gold antlers swept back from the brow, each with a tine; the mane flaring behind the cheeks
+    parts.append(part('right_serpent_horn', 'serpent_head', (-1.3, -2.6, -2.2), (0.55, -0.35, -0.15), [
+        (-0.55, -0.55, 0, 1.1, 1.1, 6.4, 'serpent_horn')]))
+    parts.append(part('right_serpent_tine', 'right_serpent_horn', (0, 0, 3.0), (0.9, -0.2, 0), [
+        (-0.4, -0.4, 0, 0.8, 0.8, 2.6, 'serpent_horn')]))
+    parts.append(part('right_serpent_mane', 'serpent_head', (-2.2, -0.4, -1.2), (0.1, -0.5, 0), [
+        (-0.1, -3.6, 0, 0.2, 6.6, 6.0, 'serpent_mane')]))
+    parts.append(part('serpent_mane_back', 'serpent_head', (0, -1.6, 0.2), (0.35, 0, 0), [
+        (-2.8, -3.2, -0.1, 5.6, 6.0, 0.2, 'serpent_mane_b')]))
+    # long whiskers from its upper lip, trailing back in two lengths
+    parts.append(part('right_serpent_whisker', 'serpent_head', (-1.8, 0.4, -9.4), (0.1, 0.55, 0.2), [
+        (-0.2, -0.2, 0, 0.4, 0.4, 4.4, 'serpent_whisker')]))
+    parts.append(part('right_serpent_whisker_2', 'right_serpent_whisker', (0, 0, 4.2), (-0.5, 0.25, 0), [
+        (-0.18, -0.18, 0, 0.36, 0.36, 4.0, 'serpent_whisker')]))
+    parts.append(part('serpent_jaw', 'serpent_head', (0, 1.2, -4.2), (0.18, 0, 0), [
+        (-1.6, 0, -5.4, 3.2, 1.2, 5.8, 'serpent_jaw'),
+        (-1.2, -0.9, -5.0, 0.5, 0.9, 0.5, 'serpent_fang'),           # the lower fangs
+        (0.7, -0.9, -5.0, 0.5, 0.9, 0.5, 'serpent_fang'),
+        (-1.0, 1.0, -2.6, 2.0, 2.2, 2.4, 'serpent_beard'),
+    ]))
+    parts.append(part('serpent_tongue', 'serpent_jaw', (0, -0.1, -4.6), (-0.15, 0, 0), [(-0.5, -0.2, -3.0, 1.0, 0.3, 3.0, 'serpent_tongue')]))
+    return mirrored(parts)
 
 
 def pipa():
@@ -929,61 +959,138 @@ def king_skin(q):
             bare(p, f, [s for s in f if s not in flat])
 
         # ── the serpent ──
-        if style in ('coil', 'coil_tail', 'serpent_neck'):    # green scales, gold belly plates down one side
-            SC, SC_D = (54, 150, 90), (20, 70, 44)
+        SC, SC_D, SC_HI = (52, 150, 88), (16, 64, 40), (120, 210, 130)
+        BELLY, BELLY_D = (232, 200, 104), (146, 108, 44)
+        MANE, MANE_D = (226, 58, 34), (120, 18, 16)
+        if style in ('coil', 'coil_tail', 'serpent_neck'):    # jade-green scales, gold belly plates down its front
             for s, r in f.items():
-                if s in ('top', 'bottom'):
+                if s in ('front', 'back'):
                     p.face(r, SC_D, 1.0, noise=3)
-                    continue
-                if s == 'bottom' or s == 'right':
-                    kit.wp.plates(p, r, (226, 196, 104), (140, 110, 50), rows=4)
+                elif s == 'top':
+                    kit.wp.plates(p, r, BELLY, BELLY_D, rows=3)
                 else:
                     kit.fish_scales(p, r, SC, SC_D, light=LIGHT[s], cw=4, ch=3)
-            if style in ('coil', 'serpent_neck'):
-                fx, fy, fw, fh = f['left']                  # a gold ridge of fins along its back
-                for j in range(0, fh, 3):
-                    p.px((fx + fw // 2, fy + j), GOLD)
-            if style == 'coil_tail':
-                for s in ('front', 'back', 'right', 'left'):
-                    pass
-        if style in ('serpent_skull', 'serpent_snout', 'serpent_jaw', 'serpent_brow'):
-            SC, SC_D = (60, 160, 96), (22, 76, 48)
+                    fx, fy, fw, fh = r                       # a pale glint along the scales' crowns
+                    for i in range(0, fw - 1, 4):
+                        for j in range(1, fh, 3):
+                            p.px((fx + i + 1, fy + j), mix(SC, SC_HI, 0.6))
+            fx, fy, fw, fh = f['bottom']                    # a dark seam down its spine
+            for j in range(fh):
+                p.px((fx + fw // 2, fy + j), SC_D)
+        if style == 'serpent_fin':                          # a crest of red fins down its back, saw-toothed, gold at the tips
+            for s in ('right', 'left'):
+                fx, fy, fw, fh = f[s]
+                for i, j, xy in each(p, f[s]):
+                    u, v = (i + 0.5) / fw, (j + 0.5) / fh       # v: 0 at its root on the back .. 1 at its tips
+                    tooth = (u * 3.0) % 1.0
+                    if v > 0.25 + 0.75 * (1 - tooth):
+                        p.clear(xy)
+                        continue
+                    p.px(xy, noisy(p, mix(MANE, GOLD, clamp(v * 1.3 - 0.2)), 4))
+            bare(p, f, ('front', 'back', 'top', 'bottom'))
+        if style in ('serpent_skull', 'serpent_snout', 'serpent_jaw', 'serpent_nose', 'serpent_crest', 'serpent_beard'):
             for s, r in f.items():
-                if s == 'bottom' and style != 'serpent_brow':
-                    kit.wp.plates(p, r, (226, 196, 104), (140, 110, 50), rows=3)
-                else:
-                    kit.fish_scales(p, r, SC, SC_D, light=LIGHT[s], cw=3, ch=2)
-            if style == 'serpent_skull':                    # its eyes, glowing gold
+                kit.fish_scales(p, r, SC, SC_D, light=LIGHT[s], cw=3, ch=2)
+            if style == 'serpent_skull':
+                # its eyes on its cheeks, as the ender dragon's: a flat block of burning gold, cut at a slant
+                # by the brow over it, no pupil (none on the front of the head: the eyes look out to the sides)
                 for s in ('right', 'left'):
                     fx, fy, fw, fh = f[s]
-                    ex = fx + (2 if s == 'right' else fw - 4)
-                    for a in range(2):
-                        for b in range(2):
-                            p.lit((ex + a, fy + 1 + b), (255, 220, 60), 0.9, blaze=1.0, hot=(255, 255, 160))
-                    p.px((ex + 1, fy + 1), (20, 10, 6))
+                    for a in range(5):
+                        x = fx + (fw - 2 - a if s == 'right' else 1 + a)    # from the front of the cheek back
+                        top = 1 + (1 if a >= 3 else 0)                       # the brow cuts the back of it lower
+                        for y in range(top, 4):
+                            p.lit((x, fy + y), (255, 214, 60) if y < 3 else (230, 150, 30), 0.95, blaze=1.0, hot=(255, 255, 170))
+                    for a in range(6):                                       # a dark lid-line under it
+                        x = fx + (fw - 2 - a if s == 'right' else 1 + a)
+                        p.px((x, fy + 4), SC_D)
+                fx, fy, fw, fh = f['front']                 # the brow over the snout: a flame-jewel
+                for (a, b_) in ((0, 0), (-1, 1), (0, 1), (1, 1), (0, 2)):
+                    p.lit((fx + fw // 2 + a, fy + 1 + b_), (255, 120, 60), 0.6, blaze=1.0)
+            if style == 'serpent_crest':
+                kit.gold(p, f, faces=('top', 'right', 'left', 'front'))
             if style == 'serpent_snout':
-                fx, fy, fw, fh = f['front']
-                p.px((fx + 1, fy + 1), (10, 10, 10))
-                p.px((fx + fw - 2, fy + 1), (10, 10, 10))
-                for s in ('right', 'left', 'bottom'):       # the mouth's line, fangs
+                fx, fy, fw, fh = f['bottom']                # its palate, red, an ivory row of teeth at the rim
+                for i, j, xy in each(p, f['bottom']):
+                    edge = i == 0 or i == fw - 1 or j == fh - 1
+                    p.px(xy, (IVORY if (i + j) % 2 == 0 else (90, 16, 22)) if edge else (150, 30, 40))
+                for s in ('right', 'left'):                 # the lip line
                     fx, fy, fw, fh = f[s]
-                    if s != 'bottom':
-                        for i in range(fw):
-                            p.px((fx + i, fy + fh - 1), IVORY if i % 2 else (70, 20, 20))
-            if style == 'serpent_jaw':
-                fx, fy, fw, fh = f['top']                   # its mouth within, red; fangs at its edge
-                for i, j, xy in each(p, f['top']):
-                    p.px(xy, (150, 30, 40) if 0 < i < fw - 1 else IVORY)
-            if style == 'serpent_brow':
+                    for i in range(fw):
+                        p.px((fx + i, fy + fh - 1), (80, 14, 18))
+            if style == 'serpent_nose':                     # a gold nose pad, two dark nostrils on its front
                 kit.gold(p, f)
-        if style == 'serpent_horn':
+                fx, fy, fw, fh = f['front']
+                for x in (fx + 2, fx + fw - 3):
+                    p.px((x, fy + 1), (40, 20, 6))
+                    p.px((x, fy + 2), (40, 20, 6))
+            if style == 'serpent_jaw':
+                kit.wp.plates(p, f['bottom'], BELLY, BELLY_D, rows=3)
+                fx, fy, fw, fh = f['top']                   # its mouth within, red; teeth along the rim
+                for i, j, xy in each(p, f['top']):
+                    edge = i == 0 or i == fw - 1
+                    p.px(xy, (IVORY if j % 2 == 0 else (90, 16, 22)) if edge else (160, 34, 44))
+            if style == 'serpent_beard':                    # a red beard under its chin
+                for s, r in f.items():
+                    p.face(r, MANE, LIGHT[s], noise=8)
+                for s in SIDES:
+                    fx, fy, fw, fh = f[s]
+                    for i in range(0, fw, 2):
+                        for j in range(fh):
+                            p.px((fx + i, fy + j), k(MANE_D, 1.0 + 0.3 * (j / max(1, fh))))
+        if style == 'serpent_brow':
             kit.gold(p, f)
-            for s in SIDES:
-                point(p, f[s], keep=0.2, down=True, sharp=0.5) if False else None
+        if style == 'serpent_fang':
+            for s, r in f.items():
+                p.face(r, IVORY, LIGHT[s], noise=4)
+        if style in ('serpent_mane', 'serpent_mane_b'):     # its mane: red flames flaring back, gold at the root
+            flat = ('right', 'left') if style == 'serpent_mane' else ('front', 'back')
+            for s in flat:
+                fx, fy, fw, fh = f[s]
+                for i, j, xy in each(p, f[s]):
+                    u, v = (i + 0.5) / fw, (j + 0.5) / fh
+                    if style == 'serpent_mane':
+                        back = u if s == 'left' else 1 - u      # 0 at its root by the cheek .. 1 at its flaring tips
+                        across = abs(v - 0.45) * 2
+                        tongue = 0.55 + 0.45 * abs(math.sin(v * 7.5))
+                        if back > tongue or across > 1 - back * 0.25:
+                            p.clear(xy)
+                            continue
+                        t = back
+                    else:
+                        r_ = math.hypot((u - 0.5) * 2, (1 - v) * 1.2)
+                        tongue = 0.75 + 0.3 * abs(math.sin(math.atan2(1 - v, u - 0.5) * 6))
+                        if r_ > tongue or v > 0.92:
+                            p.clear(xy)
+                            continue
+                        t = r_
+                    c = mix(GOLD, MANE, clamp(t * 1.5)) if t < 0.6 else mix(MANE, MANE_D, clamp((t - 0.6) * 2))
+                    p.px(xy, noisy(p, c, 5))
+            bare(p, f, [s for s in f if s not in flat])
+        if style == 'serpent_horn':                         # gold antlers, paling to ivory at the tips, ringed
+            for s, r in f.items():
+                fx, fy, fw, fh = r
+                for i, j, xy in each(p, r):
+                    if s in ('right', 'left'):
+                        t = (i / max(1, fw - 1)) if s == 'left' else 1 - i / max(1, fw - 1)
+                    elif s in ('top', 'bottom'):
+                        t = 1 - j / max(1, fh - 1) if s == 'top' else j / max(1, fh - 1)
+                    else:
+                        t = 0.0 if s == 'front' else 1.0
+                    c = k(mix(GOLD, (244, 232, 200), clamp(t)), LIGHT[s])
+                    if s in ('right', 'left', 'top', 'bottom') and int(t * 9) % 3 == 2 and t < 0.7:
+                        c = k(GOLD_DEEP, LIGHT[s])
+                    p.px(xy, noisy(p, c, 3))
         if style == 'serpent_whisker':
             p.shaded(f, GOLD)
-        if style == 'serpent_tongue':
+        if style == 'serpent_tongue':                      # forked
             p.shaded(f, (200, 40, 60))
+            for s in ('top', 'bottom'):
+                fx, fy, fw, fh = f[s]
+                for j in range(min(3, fh)):
+                    p.clear((fx + fw // 2, fy + j))
+                    if fw > 2:
+                        p.clear((fx + fw // 2 - 1, fy + j))
 
         # ── the umbrella ──
         if style == 'umb_shaft':

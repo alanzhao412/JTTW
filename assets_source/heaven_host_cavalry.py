@@ -25,10 +25,18 @@ def rider():
     for n, par, piv, rot, boxes, m in parts:
         if n == 'waist':
             par, piv = 'rider', (0, -1.6, 0)
-        if n == 'right_leg':                               # astride the horse's broad back: the thigh out and down over it, the shin down its flank
-            par, piv, rot = 'waist', (-2.6, 0.2, 0), (-0.6, 0.1, 1.0)
+        # astride the horse's broad back as a rider sits it: from the hip's edge the thigh forward, down and
+        # out over the top of the barrel, as vanilla's rider's legs reach forward; the knee just outside the
+        # flank; the shin hanging plumb down the flank, the heel a little back (its turn undoes the thigh's,
+        # so it hangs straight whatever the thigh does). The horse is vanilla's, drawn HORSE_SIZE / RIDER_SIZE
+        # larger than him: its barrel's flank lies 6.5 of his pixels out from his middle, its back 0.5 below
+        # his seat. His legs a little slimmer than a foot soldier's, so the shins clear the flank
+        if n == 'right_leg':
+            par, piv, rot = 'waist', (-4.4, -0.3, 0), (-1.121, 0.732, 0)
+            boxes = [(x * 0.85, y, z, w * 0.85, h, d, st) for (x, y, z, w, h, d, st) in boxes]
         if n == 'right_shin':
-            rot = (0.75, 0, -0.95)
+            rot = (1.346, -0.295, -0.68)
+            boxes = [(x * 0.8, y, z, w * 0.8, h, d, st) for (x, y, z, w, h, d, st) in boxes]
         out.append((n, par, piv, rot, boxes, m))
     out.append(part('right_moustache', 'head', (-0.3, -2.25, -3.45), (0, 0.15, -0.35), [(-2.2, -0.35, -0.3, 2.2, 0.6, 0.6, 'moustache')]))
     # the spear: a long red shaft, a steel head over a red tassel, a pennant below it

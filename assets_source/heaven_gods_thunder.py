@@ -573,14 +573,14 @@ LIGHTNING = mirrored([
     # the head: a lady's, her hair high in two upright loops, a gold crown, pins with pearls
     part('head', 'body', (0, -16.8, -0.6), (0, 0, 0), [
         (-4, -8, -3.6, 8, 7.2, 7.2, 'lm_face'),
-        (-0.8, -5, -4.3, 1.6, 2, 0.8, 'lm_nose'),
+        (-0.6, -4.0, -4.1, 1.2, 1.4, 0.5, 'lm_nose'),              # below the eyes' band, not over it
         (-4.2, -8.3, -0.6, 8.4, 7.6, 4.6, 'lm_hair_back'),
         (-4.3, -9.2, -3.3, 8.6, 1.8, 7.4, 'lm_hair_top'),
-        (-3.6, -0.9, -3.0, 7.2, 1.6, 6.2, 'lm_chin'),
+        (-2.8, -0.9, -3.3, 5.6, 1.4, 5.6, 'lm_chin'),              # a narrow chin, the face tapering to it
     ]),
     part('right_lock', 'head', (-3.9, -7.0, -2.0), (-0.04, 0, 0.05), [(-0.7, 0, -0.9, 1.4, 10, 1.8, 'lm_lock')]),
     part('right_ear', 'head', (-4.0, -4.6, -0.6), (0, -0.2, 0), [(-0.6, -1.2, -0.8, 0.7, 2.8, 1.6, 'lm_ear')]),
-    part('crown', 'head', (0, -8.2, 0), (0, 0, 0), [
+    part('crown', 'head', (0, -8.8, 0), (0, 0, 0), [                  # set high: its band clear of her brows
         (-2.6, -3.2, -1.8, 5.2, 3.6, 4.4, 'lm_bun'),
         (-4.4, -0.6, -4.1, 8.8, 1.6, 8.2, 'lm_crown'),
         (-2.0, -4.2, -4.4, 4.0, 4.0, 0.6, 'lm_crown_front'),
@@ -605,6 +605,72 @@ def zigzag(p, rect, colour, glow=0.8, x0=None):
         x += (1 if (j // 2) % 3 == 0 else -1 if (j // 2) % 3 == 1 else 0)
         x = max(fx, min(fx + fw - 1, x))
         p.lit((x, fy + j), colour, glow=glow)
+
+
+def lm_face_front(p, rect):
+    """Her face, as a heavenly lady of the opera stage is painted: pale, a peach-red flush (桃花妆) washed
+    round the eyes and up to the temples, fading into the cheeks; black brows winging up to the temples;
+    the lash line drawn out into a flick at each outer corner; eyes of lightning, flat blocks of glowing
+    blue iris as vanilla's, a thin dark pupil in each; a zigzag of lightning glowing on her brow; small red
+    lips. On the front only (her cheeks are bare, so from three-quarters there are two eyes, not four)."""
+    fx, fy, fw, fh = rect
+    cx = fw / 2
+    BLUSH, BLUSH_DEEP = (236, 96, 120), (196, 52, 84)
+    BROW = (58, 46, 78)
+    IRIS, IRIS_DEEP, PUPIL = (110, 196, 255), (60, 130, 240), (16, 22, 60)
+    for i, j, xy in each(rect):                                    # the skin, lit across the brow, rounded
+        across = abs((i + 0.5) / fw - 0.5) * 2
+        c = k(LADY, 1.06 - 0.16 * across ** 2 - 0.06 * j / fh)
+        side = min(i, fw - 1 - i)                                   # 0 at her temple .. 7 at the middle
+        # the peach flush: strongest about the eyes (rows 3..7) and out to the temples, fading downward
+        if 3 <= j <= 10 and side <= 6:
+            near = 1 - abs(j - 5.5) / 5.0
+            out = 1 - max(0, side - 1) / 6.0
+            t = max(0.0, near) * (0.35 + 0.5 * out)
+            if j >= 8:
+                t *= 0.75
+            c = mixc(c, BLUSH, min(0.62, t))
+        p.px(xy, noisy(p, c, 2))
+    for i in range(fw):                                            # the hairline, a widow's peak at its middle
+        p.px((fx + i, fy), shade_of(HAIR, 1.1))
+        if i < 3 or i > fw - 4 or abs(i + 0.5 - cx) < 1:
+            p.px((fx + i, fy + 1), shade_of(HAIR, 0.9))
+    for side in (0, 1):
+        m = (lambda x: x) if side == 0 else (lambda x: fw - 1 - x)  # side 0 her right (on the left as we look)
+        # brows: fine and black, rising from the inner end in a wing to the temple
+        for x, y in ((6, 3), (5, 3), (4, 3), (3, 2), (2, 2), (1, 1)):
+            p.px((fx + m(x), fy + y), BROW)
+        # the lash line over the eye, drawn out at the outer corner and flicked up
+        for x in range(1, 6):
+            p.px((fx + m(x), fy + 5), (30, 18, 36))
+        p.px((fx + m(0), fy + 4), (30, 18, 36))
+        # the eye: a flat block of glowing blue iris, its lower row a shade deeper; a thin pupil inside
+        for x in (3, 4, 5):
+            p.lit((fx + m(x), fy + 6), IRIS, glow=0.9)
+            p.lit((fx + m(x), fy + 7), IRIS_DEEP, glow=0.8)
+        p.px((fx + m(2), fy + 6), (246, 242, 248))                  # the white at each corner of the eye
+        p.px((fx + m(6), fy + 6), (246, 242, 248))
+        p.px((fx + m(2), fy + 7), k(LADY, 0.86))
+        p.px((fx + m(6), fy + 7), k(LADY, 0.86))
+        for y in (6, 7):
+            p.px((fx + m(4), fy + y), PUPIL)
+            p.glow.putpixel((fx + m(4), fy + y), (0, 0, 0, 0))
+        for x in range(2, 7):                                      # the flush deepening under the eye
+            p.px((fx + m(x), fy + 8), mixc(p.img.getpixel((fx + m(x), fy + 8))[:3], BLUSH_DEEP, 0.35))
+    # the lightning mark on her brow (花钿), glowing
+    for x, y in ((8, 2), (7, 3), (8, 3), (7, 4)):
+        p.lit((fx + x, fy + y), (70, 150, 255), glow=1.0)
+    # the shadow under her nose, her lips: small and red, the upper a deeper bow
+    mid = int(cx)
+    p.px((fx + mid - 1, fy + 11), k(LADY, 0.84))
+    p.px((fx + mid, fy + 11), k(LADY, 0.84))
+    for x in (mid - 2, mid + 1):
+        p.px((fx + x, fy + 12), k(RED_LIPS, 0.8))
+    for x in (mid - 1, mid):
+        p.px((fx + x, fy + 12), k(RED_LIPS, 0.7))
+        p.px((fx + x, fy + 13), RED_LIPS)
+    p.px((fx + mid - 2, fy + 13), k(RED_LIPS, 0.9))
+    p.px((fx + mid + 1, fy + 13), k(RED_LIPS, 0.9))
 
 
 def paint_lightning(p, style, f, dims):
@@ -808,8 +874,7 @@ def paint_lightning(p, style, f, dims):
                 for i in range(5):
                     x = fx + (fw - 1 - i if s == 'right' else i)
                     p.px((x, fy + j), k(LADY, 0.92 - 0.03 * i))
-        face_front(p, f['front'], dict(kind='lady', skin=LADY, hair=HAIR, eye=(40, 60, 110), hairline=2, widow=False,
-                                       mark=(80, 160, 255), lid=(140, 170, 240), eye_row=7))
+        lm_face_front(p, f['front'])
         p.face(f['bottom'], k(LADY, 0.75), 1.0)
     if style == 'lm_nose':
         skin_box(p, f, LADY)

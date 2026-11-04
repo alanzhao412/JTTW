@@ -832,15 +832,46 @@ def paint_scholar(p, style, f, dims):
                 fx, fy, fw, fh = f[s_]
                 for j in range(fh):
                     p.px((fx, fy + j), BLACK_EDGE)
+        if style in ('ssleeve_pocket', 'ssleeve_swell', 'ssleeve_wall'):
+            # from the front: the silk falling in soft folds, lit down the middle and shadowed at either edge
+            for s_ in ('front', 'back'):
+                fx, fy, fw, fh = f[s_]
+                for i, j, xy in w.each(p, f[s_]):
+                    u = (i + 0.5) / fw
+                    fold = 1.02 + 0.06 * math.cos(u * 2 * math.pi * 1.5) - 0.1 * abs(u - 0.5) ** 2 * 4
+                    p.px(xy, k(p.get(xy), fold))
+        if style == 'ssleeve_pocket':
+            # its foot not a straight cut but the swoop of a hanging sleeve: rising to either side in a curve,
+            # the black hem following it
+            for s_ in ('front', 'back'):
+                fx, fy, fw, fh = f[s_]
+                for i in range(fw):
+                    u = (i + 0.5) / fw
+                    rise = int(round(4.0 * (2 * u - 1) ** 2))
+                    for j in range(fh):
+                        xy = (fx + i, fy + j)
+                        if j >= fh - rise:
+                            p.clear(xy)
+                        elif j >= fh - rise - 2:
+                            p.px(xy, k(BLACK_EDGE, w.LIGHT[s_]))
         if style == 'ssleeve_cuff':
-            w.flat(p, f, k(LINING, 0.95))
+            # the sleeve's mouth, from before him: not a hole but white silk falling over it, a thin black border
+            # along its foot, his fingertips just showing in the shadow above it
+            w.cloth(p, f, WHITE, WHITE_DEEP, fold=4, coarse=False)
             fx, fy, fw, fh = f['front']
             for i, j, xy in w.each(p, f['front']):
-                edge = i == 0 or i == fw - 1 or j == 0 or j == fh - 1
-                inner = 3 <= i < fw - 3 and 2 <= j < fh - 3
-                p.px(xy, BLACK_EDGE if edge else (70, 76, 88) if inner else k(LINING, 0.9))
-            for s_ in S:
-                w.hline(p, f[s_], 0, (120, 120, 126))
+                u = (i + 0.5) / fw
+                fold = 0.95 + 0.07 * math.cos(u * 2 * math.pi * 1.5) - 0.1 * (2 * u - 1) ** 2
+                p.px(xy, k(p.get(xy), fold))
+                if (i in (0, fw - 1)) and j == 0:
+                    p.clear(xy)                                  # its top corners rounded
+                if j == fh - 1:
+                    p.px(xy, BLACK_EDGE)                         # the black border at the cuff's edge
+                elif j == fh - 2 and abs(u - 0.5) < 0.3:
+                    p.px(xy, SKIN if abs(u - 0.5) < 0.18 else (96, 100, 112))   # his fingertips in the sleeve's shadow
+            for s_ in ('right', 'left'):
+                fx, fy, fw, fh = f[s_]
+                w.hline(p, f[s_], fh - 1, BLACK_EDGE)
         return
     if style in ('scollar', 'ssash', 'ssash_knot', 'ssash_tail'):
         w.cloth(p, f, BLACK_EDGE, (6, 6, 8), fold=2, coarse=False)

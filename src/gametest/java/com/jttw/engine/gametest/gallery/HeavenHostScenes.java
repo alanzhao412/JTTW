@@ -36,6 +36,8 @@ final class HeavenHostScenes {
             if (m != null) m.setAggressive(true);
         }));
         all.addAll(views("cavalry", 2.6, (p, yaw) -> one(p, HeavenRegistry.CLOUD_CAVALRY.get(), 0.5, 9.5, yaw, false, 0)));
+        all.add(HeavenGodScenes.quarter("cavalry_quarter", 2.6, p -> one(p, HeavenRegistry.CLOUD_CAVALRY.get(), 0.5, 9.5, 180f, false, 0)));
+        all.add(HeavenGodScenes.quarter("cavalry_back_quarter", 2.6, p -> one(p, HeavenRegistry.CLOUD_CAVALRY.get(), 0.5, 9.5, 30f, false, 0)));
         all.addAll(views("cavalry_captain", 2.6, (p, yaw) -> one(p, HeavenRegistry.CLOUD_CAVALRY.get(), 0.5, 9.5, yaw, true, 0)));
         all.addAll(views("cavalry_windup", 2.6, (p, yaw) -> {
             var m = one(p, HeavenRegistry.CLOUD_CAVALRY.get(), 0.5, 9.5, yaw, false, 0);
