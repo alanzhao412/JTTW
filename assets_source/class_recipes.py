@@ -1,7 +1,8 @@
 """The class identities' recipes: every Heavenly armament's tier I and its refinements to VIII, the
 Heavenly's own crafts, the Divine Beasts' evolution offerings and their altar. All gated
 (jttw_engine:gated_shaped / gated_shapeless / refining / trigrams_refining / trigrams_forging with a
-"gate"), so only the class or character named can make them.
+"gate"), so only the class or character named can make them; but for the Star Shards' crafts, which
+the Eight Trigrams Furnace forges for anyone (trigrams_forging with no gate).
 
 Run from the repository root: python assets_source/class_recipes.py
 The README's tables are written from the same lists (python assets_source/class_recipes.py --readme)."""
@@ -102,6 +103,13 @@ CRAFTS_SHAPELESS = {
 }
 ELIXIR = [('minecraft:gold_ingot', 3), ('wraith_wisp', 2), ('immortal_peach', 1), ('servant_bone', 1)]
 
+# ── The Star Shards' crafts (anyone: Heaven's wild grass is every class's grinding ground) ──
+STAR_CRAFTS = {
+    # result: (materials, how many it makes)
+    'starfall_talisman': ([('star_shard', 4), ('minecraft:paper', 2), ('minecraft:glowstone_dust', 2), ('minecraft:gold_ingot', 1)], 2),
+    'star_essence_elixir': ([('star_shard', 6), ('minecraft:glowstone_dust', 3), ('minecraft:glistering_melon_slice', 1)], 2),
+}
+
 # ── The Divine Beasts' offerings, by beast and evolution ──
 OFFERINGS = {
     'phoenix': {
@@ -164,6 +172,10 @@ def build():
     write('heavenly/nine_turn_elixir.json', {'type': 'jttw_engine:trigrams_forging', 'gate': HEAVENLY,
                                              'materials': [{'item': item(n), 'count': c} for n, c in ELIXIR],
                                              'result': {'id': 'jttw_engine:nine_turn_elixir', 'count': 2}})
+    for name, (mats, count) in STAR_CRAFTS.items():
+        write('star/' + name + '.json', {'type': 'jttw_engine:trigrams_forging',
+                                         'materials': [{'item': item(n), 'count': c} for n, c in mats],
+                                         'result': {'id': item(name), 'count': count}})
     for beast, stages in OFFERINGS.items():
         for level, (name, ings) in stages.items():
             assert sum(n for _, n in ings) <= 9, name
@@ -180,6 +192,9 @@ def readme():
         print('\n' + owner)
         for t, m in tiers.items():
             print('| %d | %s | %s |' % (t, 'furnace' if t >= FURNACE_FROM else 'table', mats(m)))
+    print('\nstar crafts')
+    for name, (m, count) in STAR_CRAFTS.items():
+        print('| %s | %s (makes %d) |' % (nice(name), mats(m), count))
     for beast, stages in OFFERINGS.items():
         print('\n' + beast)
         for lv, (name, m) in stages.items():

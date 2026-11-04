@@ -1,0 +1,21 @@
+{
+  "type": "jttw_engine:trigrams_forging",
+  "materials": [
+    {
+      "item": "jttw_engine:star_shard",
+      "count": 6
+    },
+    {
+      "item": "minecraft:glowstone_dust",
+      "count": 3
+    },
+    {
+      "item": "minecraft:glistering_melon_slice",
+      "count": 1
+    }
+  ],
+  "result": {
+    "id": "jttw_engine:star_essence_elixir",
+    "count": 2
+  }
+}

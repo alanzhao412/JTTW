@@ -71,6 +71,8 @@ public class ModItemsGameTests {
             Map.entry("five_thunder_talisman", com.jttw.engine.item.HeavenlyCraftItem.class),
             Map.entry("heavens_net_talisman", com.jttw.engine.item.HeavenlyCraftItem.class),
             Map.entry("nine_turn_elixir", com.jttw.engine.item.HeavenlyCraftItem.class),
+            Map.entry("starfall_talisman", com.jttw.engine.item.StarCraftItem.class),
+            Map.entry("star_essence_elixir", com.jttw.engine.item.StarCraftItem.class),
             Map.entry("kindled_plume", com.jttw.engine.character.divinebeast.OfferingItem.class),
             Map.entry("wisp_fire_plume", com.jttw.engine.character.divinebeast.OfferingItem.class),
             Map.entry("candle_flame_plume", com.jttw.engine.character.divinebeast.OfferingItem.class),
