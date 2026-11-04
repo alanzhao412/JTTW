@@ -269,59 +269,75 @@ def beast_mask(p, rect, base=GOLD, eyes=(200, 40, 30), ring=False):
 
 
 def face_front(p, rect, c, beard=None, stern=True, glow_eyes=None, moustache=False):
-    """A man's face on the front of a head box (some 14 x 14): the forehead under the helmet band, level
-    brows (the brows are parts of their own), eyes of flat amber iris with a thin pupil under a dark lid, cheekbones in
-    light, a mouth set firm, the chin, a shadow at the jaw."""
+    """A soldier's face on the front of a head box (some 13 x 14): the forehead under the helmet band, the
+    brows (parts of their own) drawn down in a V, and under them, with skin between, the eyes: fierce and
+    disciplined, as the Great White Bull's are angled. Each is a flat block of iris (the game's own kind of
+    eye, no whites) with a thin pupil inside it, iris either side; its top slopes down to the nose, cut by a
+    hard black lid that sweeps up past the outer corner; a dark socket line beneath. Cheekbones lit, the
+    hollows under them shadowed; lines from the nose; a mouth set in one hard level line, the jaw clenched."""
     fx, fy, fw, fh = rect
     sk, sh = c['skin'], c['skin_shade']
+    cx = fw // 2
+    ey = int(fh * 0.42) + 1                               # the iris's top row: a clear band of skin above it
     for i, j, xy in each(rect):
         a = abs((i + 0.5) / fw - 0.5) * 2
-        col = mixc(sk, SKIN_LIGHT, 0.3) if (j < 5 and a < 0.5) or (5 <= j <= 8 and 0.3 < a < 0.7) else sk
+        lit = (j < ey - 2 and a < 0.5) or (ey + 2 <= j <= ey + 3 and 0.3 < a < 0.75)    # brow and cheekbones
+        col = mixc(sk, SKIN_LIGHT, 0.3) if lit else sk
+        if ey + 4 <= j <= ey + 5 and 0.45 < a < 0.85:
+            col = mixc(col, sh, 0.35)                      # the hollow under the cheekbone
         col = mixc(col, sh, max(0, a - 0.72) * 1.2 + max(0, j - fh + 3) * 0.15)
         p.px(xy, noisy(p, col, 1))
-    cx = fw // 2
-    ey = int(fh * 0.42)
     iris = glow_eyes or c.get('iris', (156, 96, 36))
-    pupil = (20, 12, 10)
-    lash = (52, 30, 24)
+    pupil = (18, 10, 8)
+    kohl = (34, 20, 18)
     for side in (0, 1):
-        # the eyes, as the game's own: a flat block of iris four wide and two high, a thin pupil inside it
-        # (iris either side of it), set a little toward the nose: a level, hard stare. The upper lid's dark
-        # line is drawn down over the inner corner, so the eye slants down to the nose; the outer end of
-        # the lid flicks up. No whites.
-        out_x, in_x = (fx + 1, fx + 4) if side == 0 else (fx + fw - 2, fx + fw - 5)
+        # the eye: a block of iris four across and two high, the pupil one texel wide in its third column
+        # (iris either side of it, both rows). The hard black lid along its top runs on down past the inner
+        # corner toward the nose and sweeps up past the outer corner to the temple, and the iris is
+        # shadowed under the lid's inner end: the eye's set slopes down to the nose, glaring
         step = 1 if side == 0 else -1
+        out_x = fx + 1 if side == 0 else fx + fw - 2
         for n in range(4):
             x = out_x + step * n
             for j in (ey, ey + 1):
-                if j == ey and n == 3:
-                    p.px((x, fy + j), lash)               # the lid down over the inner corner
-                elif n == 2:
-                    p.px((x, fy + j), pupil)
+                if n == 2:
+                    p.px((x, fy + j), pupil)              # the pupil: one texel wide, iris either side
                 elif glow_eyes:
-                    p.lit((x, fy + j), iris, glow=0.9)
+                    p.lit((x, fy + j), iris if (j > ey or n < 2) else k(iris, 0.72), glow=0.9 if (j > ey or n < 2) else 0.55)
                 else:
-                    p.px((x, fy + j), iris if j == ey + 1 or n else k(iris, 0.8))
-            p.px((x, fy + ey - 1), lash if n < 3 else k(sh, 0.8))    # the upper lid
-            p.px((x, fy + ey + 2), mixc(sk, sh, 0.45))                  # the lower lid's shadow
-        p.px((out_x - step, fy + ey - 1), k(sh, 0.7))                  # the outer corner raised: a fierce eye
-        p.px((out_x - step, fy + ey - 2), lash)
+                    p.px((x, fy + j), iris if j == ey + 1 else k(iris, 0.86 if n < 2 else 0.66))
+            p.px((x, fy + ey - 1), kohl)                  # the hard upper lid
+            p.px((x, fy + ey + 2), mixc(sk, sh, 0.55 if 0 < n < 3 else 0.35))  # the socket's shadow beneath
+        p.px((out_x + step * 4, fy + ey), kohl)           # the lid run on down past the inner corner
+        p.px((out_x + step * 4, fy + ey + 1), k(sh, 0.85))  # the inner corner's shadow by the nose
+        p.px((out_x - step, fy + ey - 1), kohl)           # the lid swept up and out past the outer corner
+        p.px((out_x - step, fy + ey - 2), kohl)
         p.px((out_x - step, fy + ey), k(sh, 0.85))
-    for j in range(ey - 2, ey + 1):                       # a furrow between the brows
-        if stern:
-            p.px((fx + cx, fy + j), k(sh, 0.92))
-    my = fy + min(fh - 3, ey + 5)
-    for i in range(cx - 2, cx + 3):                       # the mouth: a hard, level line, the lower lip only shaded
-        p.px((fx + i, my), (100, 40, 36))
-        p.px((fx + i, my + 1), mixc(LIPS, sk, 0.6))
-    p.px((fx + cx - 3, my + 1), k(sh, 0.85))              # its corners pulled down: stern
-    p.px((fx + cx + 3, my + 1), k(sh, 0.85))
-    if moustache:
-        for i in range(cx - 4, cx + 4):
-            d = abs(i - cx + 0.5)
-            p.px((fx + i, my - 1 + int(d > 2.5)), HAIR if d < 3.5 else (60, 46, 44))
-    if beard:
-        for i in range(cx - 2, cx + 2):
+        for n in range(4):                                 # the skin between brow and lid, shaded a little: deep-set
+            p.px((out_x + step * n, fy + ey - 2), mixc(p.get((out_x + step * n, fy + ey - 2))[:3], sh, 0.25))
+    if stern:
+        for j in range(ey - 3, ey):                       # a furrow between the brows
+            p.px((fx + cx, fy + j), k(sh, 0.9))
+    for j in range(ey + 3, ey + 5):                       # hard lines from the nose toward the mouth's corners
+        p.px((fx + cx - 3, fy + j), mixc(sk, sh, 0.7))
+        p.px((fx + cx + 3, fy + j), mixc(sk, sh, 0.7))
+    my = fy + fh - 3
+    for i in range(cx - 2, cx + 3):                       # the mouth: one hard level line, pressed shut
+        p.px((fx + i, my), (70, 30, 28))
+    p.px((fx + cx - 3, my), k(sh, 0.8))                   # its corners set in, not drooping
+    p.px((fx + cx + 3, my), k(sh, 0.8))
+    p.px((fx + cx, my + 2), mixc(sk, SKIN_LIGHT, 0.35))  # the point of the chin, lit (not under the lip: no pout)
+    if moustache:                                         # the moustache over the lip, its ends drawn down beside it
+        for i in range(cx - 4, cx + 5):
+            d = abs(i - cx)
+            p.px((fx + i, my - 1), HAIR if d < 4 else (60, 46, 44))
+        for i in range(cx - 2, cx + 3):                   # the shut mouth only a shadow under it
+            p.px((fx + i, my), mixc(sk, sh, 0.6))
+        for d in (3, 4):                                  # its ends drooping past the corners
+            p.px((fx + cx - d, my), HAIR if d == 3 else (60, 46, 44))
+            p.px((fx + cx + d, my), HAIR if d == 3 else (60, 46, 44))
+    if beard:                                             # a tuft on the chin, skin between it and the shut mouth
+        for i in range(cx - 1, cx + 2):
             for j in range(my + 2, fy + fh):
                 p.px((fx + i, j), noisy(p, beard, 4))
 

@@ -671,6 +671,27 @@ def lm_face_front(p, rect):
         p.px((fx + x, fy + 13), RED_LIPS)
     p.px((fx + mid - 2, fy + 13), k(RED_LIPS, 0.9))
     p.px((fx + mid + 1, fy + 13), k(RED_LIPS, 0.9))
+    # polish (none of it on the eyes, the flush about them or the brow mark): a scalloped hairline, the
+    # small flat curls of an opera lady's hair pieces (片子) along her forehead; the cheekbones catching the
+    # light under the flush; the face's sides turning away into shadow down to a narrow jaw; the lips
+    # glossed, their corners tucked in shadow; the dip under the lower lip
+    for x in (4, 5, fw - 5, fw - 6):
+        p.px((fx + x, fy + 1), shade_of(HAIR, 0.7 if x in (4, fw - 5) else 1.0))
+    for side in (0, 1):
+        m = (lambda x: x) if side == 0 else (lambda x: fw - 1 - x)
+        for x, y in ((3, 9), (4, 9), (3, 10), (4, 10), (5, 10)):
+            p.px((fx + m(x), fy + y), mixc(p.img.getpixel((fx + m(x), fy + y))[:3], (255, 246, 240), 0.35))
+        for y in range(10, fh):
+            t = (y - 9) / (fh - 9)
+            p.px((fx + m(0), fy + y), mixc(p.img.getpixel((fx + m(0), fy + y))[:3], k(LADY, 0.7), 0.5 * t + 0.2))
+            if y >= 12:
+                p.px((fx + m(1), fy + y), mixc(p.img.getpixel((fx + m(1), fy + y))[:3], k(LADY, 0.74), 0.35 * t))
+    p.px((fx + mid - 3, fy + 12), k(LADY, 0.84))                 # the mouth's corners
+    p.px((fx + mid + 2, fy + 12), k(LADY, 0.84))
+    p.px((fx + mid - 1, fy + 13), mixc(RED_LIPS, (255, 236, 236), 0.4))   # the gloss on the lower lip
+    if fh > 14:
+        p.px((fx + mid - 1, fy + 14), k(LADY, 0.86))             # the dip beneath it
+        p.px((fx + mid, fy + 14), k(LADY, 0.86))
 
 
 def paint_lightning(p, style, f, dims):
@@ -874,6 +895,16 @@ def paint_lightning(p, style, f, dims):
                 for i in range(5):
                     x = fx + (fw - 1 - i if s == 'right' else i)
                     p.px((x, fy + j), k(LADY, 0.92 - 0.03 * i))
+            # her hair pieces (片子) down before the ear: a long flat black curl lying on the cheek, its tip
+            # turned forward (not an eye: nothing is painted on her face's sides but skin and hair)
+            for j in range(3, fh - 2):
+                for i in (2, 3):
+                    if j > fh - 5 and i == 3:
+                        continue
+                    x = fx + (fw - 1 - i if s == 'right' else i)
+                    p.px((x, fy + j), shade_of(HAIR, 0.6 + 0.3 * ((j + i) % 3)))
+            x = fx + (fw - 1 - 1 if s == 'right' else 1)
+            p.px((x, fy + fh - 3), shade_of(HAIR, 0.8))
         lm_face_front(p, f['front'])
         p.face(f['bottom'], k(LADY, 0.75), 1.0)
     if style == 'lm_nose':
@@ -881,6 +912,9 @@ def paint_lightning(p, style, f, dims):
         p.face(f['bottom'], k(LADY, 0.75), 1.0)
     if style == 'lm_chin':
         skin_box(p, f, LADY)
+        fx, fy, fw, fh = f['front']                               # the chin's point, lit
+        p.px((fx + fw // 2, fy + fh // 2), mixc(LADY, (255, 248, 244), 0.35))
+        p.px((fx + fw // 2 - 1, fy + fh // 2), mixc(LADY, (255, 248, 244), 0.2))
     if style in ('lm_hair_back', 'lm_hair_top', 'lm_bun', 'lm_loop', 'lm_loop_top'):
         hair_box(p, f, HAIR)
         if style == 'lm_hair_top':

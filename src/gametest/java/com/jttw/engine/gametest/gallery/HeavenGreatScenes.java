@@ -84,6 +84,13 @@ final class HeavenGreatScenes {
         all.addAll(views("hound", 1.2, (p, yaw) -> great(p, ModEntities.XIAOTIAN_QUAN.get(), 0.5, 9.5, yaw)));
         all.add(scene("heaven_hound_quarter", p -> great(p, ModEntities.XIAOTIAN_QUAN.get(), 0.5, 9.5, 100f),
                 new double[]{-1.2, 1.15, 7.4, 0.5, 0.55, 9.5}));
+        // close at its head and ears (it faces the camera, its head some 0.6 before its middle): front,
+        // three-quarters, side
+        for (String[] v : new String[][]{{"", "0.5", "7.9"}, {"_quarter", "1.15", "8.1"}, {"_side", "1.4", "8.75"}}) {
+            double cx = Double.parseDouble(v[1]), cz = Double.parseDouble(v[2]);
+            all.add(scene("heaven_hound_ears" + v[0], p -> great(p, ModEntities.XIAOTIAN_QUAN.get(), 0.5, 9.5, 180f),
+                    new double[]{cx, 0.97, cz, 0.5, 0.88, 8.75}));
+        }
         all.add(scene("heaven_hound_berserk", p -> {
             var h = great(p, ModEntities.XIAOTIAN_QUAN.get(), 0.5, 9.5, 100f);
             if (h != null) h.setBerserk(true);
