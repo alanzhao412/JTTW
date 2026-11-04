@@ -87,6 +87,11 @@ def tail():
     return out
 
 
+# the ear (unscaled): its width at its root (y 0.2), its depth, its height to the point (y -EAR_H)
+EAR_W, EAR_D, EAR_H = 2.9, 0.6, 4.3
+EAR_SD = 1.9            # the crossed cup's depth front to back at its root
+
+
 def hound():
     parts = [
         # the forequarters: the deep ribcage, the keel between the elbows, the forechest, the withers
@@ -131,7 +136,13 @@ def hound():
             (-1.6, -1.3, 0.2, 3.2, 2.6, 1.0, 'nape'),
         ]),
         part('jaw', 'head', (0, 0.6, -3.5), (0.07, 0, 0), [(-1.1, 0.0, -4.5, 2.2, 1.0, 4.5, 'jaw')]),
-        part('right_ear', 'head', (-1.45, -2.3, -1.1), (-0.42, 0.1, -0.2), [(-0.95, -3.3, -0.35, 1.9, 3.5, 0.7, 'ear')]),
+        # a pricked ear: a broad triangle, its root across the back of the skull, rising to a sharp point,
+        # swept a little back and turned a little out; a narrower triangle crossed through it front to back
+        # (the cup of the ear), so from the front, the side and between it is a triangle, never a post
+        part('right_ear', 'head', (-1.45, -2.3, -1.1), (-0.3, 0.25, -0.26), [
+            (-EAR_W / 2, -EAR_H, -EAR_D / 2, EAR_W, EAR_H + 0.2, EAR_D, 'ear'),
+            (-EAR_D / 2, -EAR_H, -EAR_D / 2, EAR_D, EAR_H + 0.2, EAR_SD, 'ear_x'),
+        ]),
         part('front_right', 'root', (-2.25, 13.0, -5.9), (0, 0, 0), []),
         part('rear_right', 'root', (-2.25, 13.6, 8.6), (0, 0, 0), []),
         part('tail', 'root', (0, 11.4, 10.4), (0, 0, 0), []),
@@ -348,14 +359,43 @@ def painter(berserk):
                 for i in range(fw):
                     p.px((fx + i, fy + (fh - 1 if style == 'flews' else 0)), (2, 2, 4))
             return
-        if style == 'ear':                                 # pricked: pointed, the inner ear dusky
+        if style == 'ear_x':                              # the ear's cup, seen from the side: a triangle, its front edge upright
+            fur(p, f, sheen=1.1)
+            for s in ('right', 'left'):
+                fx, fy, fw, fh = f[s]
+                for i, j, xy in each(f[s]):
+                    y = -EAR_H + (j + 0.5) / fh * (EAR_H + 0.2)
+                    share = max(0.0, (y + EAR_H) / (EAR_H + 0.2))
+                    back = 1 - (i + 0.5) / fw if s == 'right' else (i + 0.5) / fw   # 0 at its front edge .. 1 behind
+                    if back > share + 0.03:
+                        p.clear(xy)
+                    elif back > share - 0.18:
+                        p.px(xy, mixc(p.img.getpixel(xy)[:3], SHEEN, 0.4))
+            for s in ('front', 'back', 'top', 'bottom'):
+                fx, fy, fw, fh = f[s]
+                for i, j, xy in each(f[s]):
+                    if s in ('top', 'bottom', 'back') or j < fh - 2:
+                        p.clear(xy)
+            return
+        if style == 'ear':                                # pricked: a triangle cut from its front and back, the inner ear dusky
             fur(p, f, sheen=1.2)
-            fx, fy, fw, fh = f['front']
-            for i, j, xy in each(f['front']):
-                if abs(i - fw / 2 + 0.5) < fw * 0.28 and j > 2:
-                    p.px(xy, noisy(p, mixc((54, 38, 46), (26, 20, 26), j / fh), 2))
-            for s in SIDES:
-                point(p, f[s], keep=0.5, sharp=0.55, down=False)
+            for s in ('front', 'back'):
+                fx, fy, fw, fh = f[s]
+                for i, j, xy in each(f[s]):
+                    y = -EAR_H + (j + 0.5) / fh * (EAR_H + 0.2)
+                    share = max(0.0, (y + EAR_H) / (EAR_H + 0.2))      # 0 at its point .. 1 at its root
+                    across = abs((i + 0.5) / fw - 0.5) * 2             # 0 down its middle .. 1 at its edge
+                    if across > share + 0.03:
+                        p.clear(xy)
+                    elif s == 'front' and across < share * 0.6 and 0.12 < share < 0.95:
+                        p.px(xy, noisy(p, mixc((64, 42, 52), (26, 20, 26), share), 2))   # the hollow within
+                    elif across > share - 0.14:
+                        p.px(xy, mixc(p.img.getpixel(xy)[:3], SHEEN, 0.4))                 # its rim catching the light
+            for s in ('right', 'left', 'top', 'bottom'):         # the edges: only a sliver at the root
+                fx, fy, fw, fh = f[s]
+                for i, j, xy in each(f[s]):
+                    if s in ('top', 'bottom') or j < fh - 2:
+                        p.clear(xy)
             return
         if style == 'paw':
             fur(p, f, light=0.8, sheen=0.5)
