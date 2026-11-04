@@ -266,9 +266,21 @@ public final class LevelManager {
     @SubscribeEvent
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
-        if (event.isEndConquered()) return; // End portal respawn — not a death
-        reapplyStats(sp);
+        // out of the End by its exit portal: not a death, but the client's player is made anew all the same
+        if (!event.isEndConquered()) reapplyStats(sp);
         syncToClient(sp);
+    }
+
+    /**
+     * A change of realm (a portal, the Dragon's Dimension Travel, a realm leap, Hell's doors) makes the
+     * client's player anew, with none of what was mirrored on it: its level and class, and the mark that
+     * it has reincarnated, without which the JTTW health bar and ability bar are not drawn and vanilla's
+     * hearts come back (a wall of them at a high level's health, which brought a client down to 1 frame a
+     * second). Sent again here, after the client has its new player.
+     */
+    @SubscribeEvent
+    public static void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+        if (event.getEntity() instanceof ServerPlayer sp) syncToClient(sp);
     }
 
     @SubscribeEvent
