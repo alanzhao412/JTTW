@@ -27,6 +27,11 @@ final class HeavenHostScenes {
     static List<AbilityScenes.Scene> all() {
         List<AbilityScenes.Scene> all = new java.util.ArrayList<>();
         all.addAll(views("soldier", 2.0, (p, yaw) -> one(p, ModEntities.HEAVENLY_SOLDIER.get(), 0.5, 9.5, yaw, false, 0)));
+        all.addAll(faces("soldier_close", 1.72, p -> one(p, ModEntities.HEAVENLY_SOLDIER.get(), 0.5, 9.5, 180f, false, 0)));
+        all.addAll(faces("archer_close", 1.72, p -> one(p, HeavenRegistry.HEAVENLY_ARCHER.get(), 0.5, 9.5, 180f, false, 0)));
+        all.addAll(faces("drummer_close", 1.62, p -> one(p, HeavenRegistry.THUNDER_DRUMMER.get(), 0.5, 9.5, 180f, false, 0)));
+        all.addAll(faces("mansion_close", 1.72, p -> one(p, HeavenRegistry.LUNAR_MANSION.get(), 0.5, 9.5, 180f, true, 5)));
+        all.addAll(faces("cavalry_close", 2.57, p -> one(p, HeavenRegistry.CLOUD_CAVALRY.get(), 0.5, 9.5, 180f, false, 0)));
         all.addAll(views("soldier_captain", 2.0, (p, yaw) -> one(p, ModEntities.HEAVENLY_SOLDIER.get(), 0.5, 9.5, yaw, true, 0)));
         all.addAll(views("archer", 2.0, (p, yaw) -> one(p, HeavenRegistry.HEAVENLY_ARCHER.get(), 0.5, 9.5, yaw, false, 0)));
         all.addAll(views("archer_captain", 2.0, (p, yaw) -> one(p, HeavenRegistry.HEAVENLY_ARCHER.get(), 0.5, 9.5, yaw, true, 0)));

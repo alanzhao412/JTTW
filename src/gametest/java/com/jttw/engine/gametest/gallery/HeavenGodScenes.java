@@ -57,6 +57,7 @@ final class HeavenGodScenes {
             String n = StarLordEntity.LUMINARIES[i];
             all.add(front("star_lord_" + n + "_front", 2.3, p -> god(p, lord, 0.5, 9.5, 180f, v)));
             all.add(quarter("star_lord_" + n + "_quarter", 2.3, p -> god(p, lord, 0.5, 9.5, 180f, v)));
+            all.addAll(faces("star_lord_" + n, 2.3, p -> god(p, lord, 0.5, 9.5, 180f, v)));
         }
         // Ketu's comet from the side, its tail streaming back over his shoulder
         all.add(front("star_lord_ketu_side", 2.3, p -> god(p, lord, 0.5, 9.5, 90f, StarLordEntity.KETU)));
