@@ -561,7 +561,13 @@ public class WukongGameTests {
         for (Checkpoint cp : Checkpoint.values()) if (cp != Checkpoint.HUMAN_GINSENG_FRUIT) WukongCheckpoints.complete(p, cp);
         PlayerLevel.setLevel(p, 90);
         check(h, WukongCheckpoints.isBlocked(p), "held at 90 before the fruit");
-        com.jttw.engine.world.wuzhuang.Wuzhuang.eat(p);
+        for (var other : new net.minecraft.world.item.Item[] { net.minecraft.world.item.Items.APPLE, net.minecraft.world.item.Items.GOLDEN_APPLE,
+                net.minecraft.world.item.Items.SWEET_BERRIES, com.jttw.engine.registry.ModItems.IMMORTAL_PEACH.get() }) {
+            var fruit = new net.minecraft.world.item.ItemStack(other);
+            fruit.finishUsingItem(h.getLevel(), p);
+        }
+        check(h, WukongCheckpoints.isBlocked(p), "no other fruit opens it, not even an immortal peach");
+        com.jttw.engine.registry.ModItems.GINSENG_FRUIT.get().getDefaultInstance().finishUsingItem(h.getLevel(), p);
         check(h, !WukongCheckpoints.isBlocked(p), "the fruit opens the way past 90");
         ServerPlayer early = wukong(h);
         PlayerLevel.setLevel(early, 80);
