@@ -395,6 +395,11 @@ public class ByakkoGameTests {
         other.addEffect(new MobEffectInstance(MobEffects.HUNGER, 600));
         ByakkoAbilityHandler.onItemUseFinish(new LivingEntityUseItemEvent.Finish(other, flesh, 0, flesh));
         check(h, other.hasEffect(MobEffects.HUNGER), "only Byakko");
+
+        p.addEffect(new MobEffectInstance(MobEffects.POISON, 600));
+        ItemStack bread = new ItemStack(Items.BREAD);
+        ByakkoAbilityHandler.onItemUseFinish(new LivingEntityUseItemEvent.Finish(p, bread, 0, bread));
+        check(h, p.hasEffect(MobEffects.POISON), "only raw food cleanses: bread leaves the poison");
         h.succeed();
     }
 

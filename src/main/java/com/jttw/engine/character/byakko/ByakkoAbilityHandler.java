@@ -508,7 +508,7 @@ public final class ByakkoAbilityHandler {
         if (!isByakko(sp)) return;
 
         ItemStack stack = event.getItem();
-        if (stack.getFoodProperties(sp) == null) return;
+        if (!isRawFood(stack)) return;
 
         // Remove negative effects that come from eating raw/rotten foods
         // Schedule removal 1 tick later would be ideal, but removing immediately
