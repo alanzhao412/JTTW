@@ -87,6 +87,7 @@ public final class WukongCheckpoints {
     }
 
     public static boolean isComplete(Player player, Checkpoint cp) {
+        if (cp == Checkpoint.HUMAN_GINSENG_FRUIT && com.jttw.engine.world.wuzhuang.Wuzhuang.ateFruit(player)) return true;
         return player.getPersistentData().getBoolean(KEY_PREFIX + cp.name());
     }
 

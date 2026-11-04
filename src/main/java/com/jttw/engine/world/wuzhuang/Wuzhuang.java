@@ -161,6 +161,8 @@ public final class Wuzhuang {
      */
     public static boolean eat(ServerPlayer p) {
         boolean first = !p.getPersistentData().getBoolean(KEY_EATEN);
+        if (first && com.jttw.engine.character.wukong.WukongCharacter.is(p))   // his ninetieth level's checkpoint, any fruit he has eaten
+            com.jttw.engine.character.wukong.WukongCheckpoints.complete(p, com.jttw.engine.character.wukong.WukongCheckpoints.Checkpoint.HUMAN_GINSENG_FRUIT);
         if (first) {
             p.getPersistentData().putBoolean(KEY_EATEN, true);
             applyLongevity(p);

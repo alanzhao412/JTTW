@@ -555,6 +555,22 @@ public class WukongGameTests {
         h.succeed();
     }
 
+    @GameTest(template = PLATFORM, batch = "aGinsengFruitOpensHisNinetiethLevel")
+    public static void aGinsengFruitOpensHisNinetiethLevel(GameTestHelper h) {
+        ServerPlayer p = wukong(h);
+        for (Checkpoint cp : Checkpoint.values()) if (cp != Checkpoint.HUMAN_GINSENG_FRUIT) WukongCheckpoints.complete(p, cp);
+        PlayerLevel.setLevel(p, 90);
+        check(h, WukongCheckpoints.isBlocked(p), "held at 90 before the fruit");
+        com.jttw.engine.world.wuzhuang.Wuzhuang.eat(p);
+        check(h, !WukongCheckpoints.isBlocked(p), "the fruit opens the way past 90");
+        ServerPlayer early = wukong(h);
+        PlayerLevel.setLevel(early, 80);
+        com.jttw.engine.world.wuzhuang.Wuzhuang.eat(early);
+        PlayerLevel.setLevel(early, 90);
+        check(h, WukongCheckpoints.isComplete(early, Checkpoint.HUMAN_GINSENG_FRUIT), "a fruit eaten before 90 counts too");
+        h.succeed();
+    }
+
     @GameTest(template = PLATFORM, batch = "checkpointsNeverBlockNonPrimordialClasses")
     public static void checkpointsNeverBlockNonPrimordialClasses(GameTestHelper h) {
         ServerPlayer p = as(h, ReincarnationOutcome.EYE_OF_HEAVEN);
