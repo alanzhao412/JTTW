@@ -51,7 +51,11 @@ final class HeavenGreatScenes {
             EntityType<? extends Mob> type = kings.get(k);
             all.addAll(views("king_" + names[k], 3.0, (p, yaw) -> great(p, type, 0.5, 9.5, yaw)));
             all.add(windUp("king_" + names[k], 3.0, type));
+            all.add(HeavenGodScenes.quarter("king_" + names[k] + "_quarter", 3.0, p -> great(p, type, 0.5, 9.5, 180f)));
         }
+        // the West's serpent-dragon close, from his left side before him
+        all.add(scene("heaven_king_guangmu_serpent", p -> great(p, HeavenRegistry.KING_GUANGMU.get(), 0.5, 9.5, 180f),
+                new double[]{-1.6, 3.3, 7.0, -0.4, 2.7, 9.5}));
         // the four in a line, East, South, West, North; and the four winding up
         all.add(scene("heaven_king_lineup", p -> {
             for (int k = 0; k < 4; k++) great(p, kings.get(k), -4.0 + 3.0 * k, 10.5, 180f);
