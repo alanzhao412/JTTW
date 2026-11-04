@@ -436,11 +436,30 @@ def hair_box(p, f, tone, lean=0):
         strands(p, r, tone, lean, LIGHTS.get(s, 1.0))
 
 
+def block_eye(p, fx, fy, x0, ey, side, wide, iris, pupil=(14, 8, 8), glow=0.0, rows=2):
+    """An eye as the game draws its own: a flat block of iris `wide` across and `rows` high from (x0, ey),
+    a thin pupil one texel wide in its middle (iris either side of it); side 0 is the face's right (on the
+    left of the texture). Shining at `glow` if any; the pupil never shines."""
+    mid = wide // 2
+    for n in range(wide):
+        for j in range(rows):
+            xy = (fx + x0 + n, fy + ey + j)
+            if n == mid:
+                p.px(xy, pupil)
+                if glow:
+                    p.glow.putpixel((int(xy[0]), int(xy[1])), (0, 0, 0, 0))
+            elif glow:
+                p.lit(xy, iris, glow=glow)
+            else:
+                p.px(xy, iris if j else k(iris, 0.86))   # the upper lid's shadow on its top row
+
+
 def face_front(p, rect, o):
     """A face, painted on the front of the head's box (rect, some 18x15): o['kind'] one of 'man', 'lady',
-    'elder', 'fierce' (bulging glowing eyes, scowling), 'demon' (fierce, fanged); o['skin'] its colour,
-    o['hair'] the hair tone (its hairline along the top, `hairline` rows of it), o['eye'] the iris (a
-    fierce one's glows), o['third'] a third eye on the brow."""
+    'elder', 'fierce' (angled glowing eyes under a black lid, scowling), 'demon' (fierce, fanged); o['skin']
+    its colour, o['hair'] the hair tone (its hairline along the top, `hairline` rows of it), o['eye'] the
+    iris (a fierce one's glows), o['paint'] a fierce one's war paint about the eyes, o['third'] a third
+    eye on the brow. Every eye is the game's own kind: a flat block of iris with a thin pupil, no whites."""
     fx, fy, fw, fh = rect
     skin = o['skin']
     shade = k(skin, 0.72)
@@ -476,13 +495,14 @@ def face_front(p, rect, o):
                 if i == inner:
                     continue
                 p.px((fx + ex + i, fy + ey - 3 + (1 if i == outer else 0)), shade_of(hair, 0.9))
-            for i in range(5):                                     # the eye: a dark lash line, the white, the iris; the lid's crease above
+            for i in range(5):                                     # the eye: a dark lash line over a block of iris, a thin pupil
                 p.px((fx + ex + i, fy + ey - 1), (34, 22, 28) if i != inner else k(skin, 0.8))
-                p.px((fx + ex + i, fy + ey), (246, 242, 238))
-            ix = ex + (1 if side == 0 else 2)
-            p.px((fx + ix, fy + ey), o.get('eye', (40, 30, 34)))
-            p.px((fx + ix + 1, fy + ey), k(o.get('eye', (40, 30, 34)), 0.5))
+                p.px((fx + ex + i, fy + ey + 2), k(skin, 0.9))     # the lower lid, soft
+            p.px((fx + ex + outer, fy + ey), (34, 22, 28))         # the liner drawn along the outer corner
+            p.px((fx + ex + inner, fy + ey), k(skin, 0.86))
+            block_eye(p, fx, fy, ex + 1, ey, side, 3, o.get('eye', (120, 90, 60)))
             p.px((fx + ex + outer + (-1 if side == 0 else 1), fy + ey - 1), (20, 12, 16))   # liner flicked out at the corner
+            p.px((fx + ex + outer + (-1 if side == 0 else 1), fy + ey - 2), (20, 12, 16))
         for i in range(int(cx) - 2, int(cx) + 2):                  # small red lips
             p.px((fx + i, fy + fh - 1), RED_LIPS if abs(i + 0.5 - cx) < 1.6 else k(RED_LIPS, 0.75))
         p.px((fx + int(cx) - 1, fy + fh - 2), k(skin, 0.82))
@@ -515,13 +535,15 @@ def face_front(p, rect, o):
     if kind == 'man':
         for j in range(2, 5):                                      # a furrow between the brows
             p.px((fx + int(cx) - 1, fy + j), shade)
-        for side in (0, 1):                                        # eyes: calm, narrowed, dark
+        for side in (0, 1):                                        # eyes: calm, level, under a heavy lid
             ex = 3 if side == 0 else fw - 3 - 5
+            outer = 0 if side == 0 else 4
             for i in range(5):
-                p.px((fx + ex + i, fy + ey - 1), k(shade, 0.7))
-                p.px((fx + ex + i, fy + ey), (238, 232, 218) if i not in (2, 3) else o.get('eye', (34, 22, 20)))
-                p.px((fx + ex + i, fy + ey + 1), k(skin, 0.86))
-            p.px((fx + ex + (2 if side == 0 else 3), fy + ey), (10, 6, 6))
+                p.px((fx + ex + i, fy + ey - 1), k(shade, 0.62))
+                p.px((fx + ex + i, fy + ey + 2), k(skin, 0.86))
+            p.px((fx + ex + outer, fy + ey), k(shade, 0.8))
+            p.px((fx + ex + 4 - outer, fy + ey), k(shade, 0.9))
+            block_eye(p, fx, fy, ex + 1, ey, side, 3, o.get('eye', (120, 80, 40)))
         for j in range(9, 12):                                     # lines from the nose
             p.px((fx + 5 - (j - 9) // 2, fy + j), shade)
             p.px((fx + fw - 6 + (j - 9) // 2, fy + j), shade)
@@ -534,24 +556,32 @@ def face_front(p, rect, o):
     for j in range(1 + hairline, ey - 2):                          # the scowl's furrows
         p.px((fx + int(cx) - 1, fy + j), shade)
         p.px((fx + int(cx), fy + j), k(skin, 0.86))
+    kohl = (18, 8, 10)
+    war = o.get('paint')                                           # a demon's war paint about the eyes
     for side in (0, 1):
-        ex = 2 if side == 0 else fw - 2 - 6
-        for i in range(6):
-            for jj in range(-1, 3):
-                edge = (i in (0, 5) and jj in (-1, 2))
-                if edge:
-                    continue
-                c = (250, 244, 230) if jj in (-1, 2) or i in (0, 5) else iris
-                if jj == -1:
-                    c = (24, 12, 12)
-                p.lit((fx + ex + i, fy + ey + jj), c, glow=0.0 if jj == -1 else 0.9)
-        px_ = ex + (3 if side == 0 else 2)
-        p.px((fx + px_, fy + ey + 1), (10, 4, 4))
-        p.px((fx + px_, fy + ey), (10, 4, 4))
-        p.glow.putpixel((fx + px_, fy + ey + 1), (0, 0, 0, 0))
-        p.glow.putpixel((fx + px_, fy + ey), (0, 0, 0, 0))
-        for i in range(6):                                         # the lower lid's shadow
-            p.px((fx + ex + i, fy + ey + 3), shade)
+        # a glaring eye, angled: a flat block of glowing iris five across and two high, a thin black pupil
+        # in it; a heavy black lid over it that drops over the inner corner (down toward the nose: a
+        # scowl) and sweeps up and out past the outer corner toward the temple; a dark socket beneath
+        ex = 2 if side == 0 else fw - 2 - 5
+        out_n, in_n = (0, 4) if side == 0 else (4, 0)
+        step = -1 if side == 0 else 1                              # outward, across the texture
+        if war:                                                    # the paint: a crescent of it under the socket,
+            for n in range(5):
+                p.px((fx + ex + n, fy + ey + 3), war)
+            for n in range(1, 4):
+                p.px((fx + ex + n + (1 if side == 0 else -1), fy + ey + 4), k(war, 0.8))
+            for (a, b) in ((1, 0), (1, 1), (2, 1), (1, 2), (2, 2), (2, 3), (1, 3)):   # swept out to the temple
+                p.px((fx + ex + out_n + step * a, fy + ey + b), war if b < 3 else k(war, 0.8))
+        block_eye(p, fx, fy, ex, ey, side, 5, iris, pupil=(10, 4, 4), glow=o.get('eye_glow', 0.45))
+        for n in range(5):
+            p.px((fx + ex + n, fy + ey - 1), kohl)                 # the lid
+            p.px((fx + ex + n, fy + ey + 2), mixc(kohl, skin, 0.35))   # the socket's shadow below
+        p.px((fx + ex + in_n, fy + ey), kohl)                      # dropped over the inner corner
+        p.glow.putpixel((fx + ex + in_n, fy + ey), (0, 0, 0, 0))
+        p.px((fx + ex + in_n - step, fy + ey), kohl)               # and on toward the nose
+        p.px((fx + ex + out_n + step, fy + ey - 1), kohl)          # swept up past the outer corner
+        p.px((fx + ex + out_n + step, fy + ey - 2), kohl)
+        p.px((fx + ex + out_n, fy + ey - 2), kohl)
     if o.get('third'):                                             # a third eye, upright, on the brow
         tx = int(cx) - 1
         for jj in range(4):

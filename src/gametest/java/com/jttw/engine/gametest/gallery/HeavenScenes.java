@@ -82,6 +82,16 @@ final class HeavenScenes {
                         0.5, face - 0.02, 9.5 - 0.1 * tall}));
     }
 
+    /** Close at the face of one standing at (0.5, 9.5) facing the camera's line, its face {@code face} high: from
+     *  the front, three-quarters and the side; named heaven_{name}_face, _face_quarter, _face_side. */
+    static List<AbilityScenes.Scene> faces(String name, double face, Consumer<ServerPlayer> put) {
+        double r = 1.0, tz = 9.3;
+        return List.of(
+                scene("heaven_" + name + "_face", put, new double[]{0.5, face + 0.05, tz - r, 0.5, face, tz}),
+                scene("heaven_" + name + "_face_quarter", put, new double[]{0.5 + r * 0.7, face + 0.05, tz - r * 0.7, 0.5, face, tz}),
+                scene("heaven_" + name + "_face_side", put, new double[]{0.5 + r, face + 0.05, tz, 0.5, face, tz}));
+    }
+
     static List<AbilityScenes.Scene> all() {
         List<AbilityScenes.Scene> all = new java.util.ArrayList<>();
         all.addAll(HeavenHostScenes.all());
