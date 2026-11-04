@@ -297,21 +297,18 @@ def painter(berserk):
             # from the front an iris block at the skull's edge with the pupil inside it, like the wolf's; the iris
             # wraps round the corner onto the side face (flush either side of the front in the UV), so from the side
             # and three-quarters it is the same eye
-            # the pupil set in the iris near the corner on each face, a rim of iris on the corner itself, so it shows
-            # against the black fur head-on and side-on, and the two halves sit close as one eye at three-quarters
-            h, pw = 3, 2
+            # a thin pupil in each eye, seen from the front only; from the side just the iris
+            h = 3
             fx, fy, fw, fh = f['front']
             y = fy + 2
             flat_eye(p, (fx, y, 5, h), iris, eye_glow)
-            flat_eye(p, (fx + 1, y, pw, h), None, 0)
+            flat_eye(p, (fx + 2, y, 1, h), None, 0)
             flat_eye(p, (fx + fw - 5, y, 5, h), iris, eye_glow)
-            flat_eye(p, (fx + fw - 1 - pw, y, pw, h), None, 0)
+            flat_eye(p, (fx + fw - 3, y, 1, h), None, 0)
             fx, fy, fw, fh = f['right']
             flat_eye(p, (fx + fw - 6, y, 6, h), iris, eye_glow)
-            flat_eye(p, (fx + fw - 1 - pw, y, pw, h), None, 0)
             fx, fy, fw, fh = f['left']
             flat_eye(p, (fx, y, 6, h), iris, eye_glow)
-            flat_eye(p, (fx + 1, y, pw, h), None, 0)
             fx, fy, fw, fh = f['top']                    # a flame on the brow
             flame(p, (fx + fw // 2 - 3, fy + fh - 9, 6, 8), mark, mark_glow)
             return
