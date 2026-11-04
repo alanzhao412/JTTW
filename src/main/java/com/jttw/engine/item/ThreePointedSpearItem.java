@@ -227,7 +227,7 @@ public class ThreePointedSpearItem extends Item implements Charged {
 
             if (eyeActive) {
                 target.invulnerableTime = 0;
-                target.hurt(sp.damageSources().magic(), thrustDamage * 0.3f);
+                com.jttw.engine.progression.stats.AbilityDamage.hurtBy(sp, target, sp.damageSources().magic(), thrustDamage * 0.3f);
                 target.invulnerableTime = oldInvuln;
             }
 
@@ -245,7 +245,7 @@ public class ThreePointedSpearItem extends Item implements Charged {
             for (LivingEntity target : shockTargets) {
                 net.minecraft.world.phys.Vec3 pullDir = shockPos.subtract(target.position()).normalize();
                 target.setDeltaMovement(target.getDeltaMovement().add(pullDir.scale(0.8)));
-                target.hurt(sp.damageSources().magic(), atk * 0.5f);
+                com.jttw.engine.progression.stats.AbilityDamage.hurtBy(sp, target, sp.damageSources().magic(), atk * 0.5f);
             }
             serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.EXPLOSION,
                     shockPos.x, shockPos.y + 1, shockPos.z, 15, 2.0, 1.0, 2.0, 0.1);

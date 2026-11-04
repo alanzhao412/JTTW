@@ -516,7 +516,7 @@ public final class YuanDiAbilityHandler {
             double perpDist = toTarget.subtract(projected).length();
 
             if (perpDist <= halfWidth + 0.5) {
-                target.hurt(player.damageSources().magic(), damage);
+                com.jttw.engine.progression.stats.AbilityDamage.hurtBy(player, target, player.damageSources().magic(), damage);
                 if (target instanceof LivingEntity le) {
                     le.addEffect(new MobEffectInstance(MobEffects.WITHER, 60, witherLevel, false, true));
                 }
@@ -992,7 +992,7 @@ public final class YuanDiAbilityHandler {
                         if (target.position().distanceTo(well.center) > radius) continue;
 
                         float burstDamage = target.getMaxHealth() * 0.30f;
-                        target.hurt(player.damageSources().magic(), burstDamage);
+                        com.jttw.engine.progression.stats.AbilityDamage.hurtBy(player, target, player.damageSources().magic(), burstDamage);
                     }
 
                     // Collapse visual
@@ -1023,7 +1023,7 @@ public final class YuanDiAbilityHandler {
 
                 // T2+: 2 magic damage per second at level 1 (every 20 ticks), scaled by his power
                 if (well.tier >= 2 && well.ticksRemaining % 20 == 0) {
-                    target.hurt(player.damageSources().magic(), LevelPower.scaled(player, 2.0));
+                    com.jttw.engine.progression.stats.AbilityDamage.hurtBy(player, target, player.damageSources().magic(), LevelPower.scaled(player, 2.0));
                 }
             }
 

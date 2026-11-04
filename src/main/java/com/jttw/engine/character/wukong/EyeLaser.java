@@ -265,7 +265,7 @@ public final class EyeLaser {
             Vec3 nearest = closestOnSegment(eye, end, bb.getCenter());
             double d = Math.sqrt(distanceSq(nearest, bb));
             if (d > hitRadius) continue;
-            e.hurt(level.damageSources().magic(), damage);
+            com.jttw.engine.progression.stats.AbilityDamage.hurtBy(player, e, level.damageSources().magic(), damage);
             e.setRemainingFireTicks(Math.max(e.getRemainingFireTicks(), o.burnTicks()));
             FieryGaze.ignite(e, player, o.level()); // and it burns on, until it dies
             struck.add(e);

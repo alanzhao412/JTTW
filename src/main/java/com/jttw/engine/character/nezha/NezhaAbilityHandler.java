@@ -226,7 +226,7 @@ public final class NezhaAbilityHandler {
                 player.getBoundingBox().inflate(radius),
                 e -> e != player && e.isAlive());
         for (LivingEntity target : targets) {
-            target.hurt(level.damageSources().magic(), damage);
+            com.jttw.engine.progression.stats.AbilityDamage.hurtBy(player, target, level.damageSources().magic(), damage);
             target.setRemainingFireTicks(200);
         }
 

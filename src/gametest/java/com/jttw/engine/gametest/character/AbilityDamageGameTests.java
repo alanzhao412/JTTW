@@ -35,6 +35,56 @@ public class AbilityDamageGameTests {
         return e[0].getAmount();
     }
 
+    /** Whether a blow of 10 from this source to {@code victim} is let through by the PvP guard. */
+    private static boolean lands(net.minecraft.world.entity.LivingEntity victim, net.minecraft.world.damagesource.DamageSource source) {
+        LivingIncomingDamageEvent e = incoming(victim, source, 10f);
+        AbilityDamage.guardPlayers(e);
+        return !e.isCanceled();
+    }
+
+    /** With PvP off, no ability of one player hurts another, whatever its blow names: the friendly fire a dedicated server showed. */
+    @GameTest(template = PLATFORM)
+    public static void withPvpOffAbilitiesSpareOtherPlayers(GameTestHelper h) {
+        var server = h.getLevel().getServer();
+        boolean was = server.isPvpAllowed();
+        onEnd(h, () -> server.setPvpAllowed(was));
+        // the caster a plain player, whose canHarmPlayer is the game's own (the test players' never harm)
+        ServerPlayer caster = new ServerPlayer(server, h.getLevel(), new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(), "jttw_pvp_caster"),
+                net.minecraft.server.level.ClientInformation.createDefault());
+        ServerPlayer friend = CharTest.as(h, ReincarnationOutcome.THIRD_LOTUS_PRINCE);
+        Pig pig = CharTest.mob(h, EntityType.PIG, 0, 0);
+        var ds = h.getLevel().damageSources();
+        boolean[] got = new boolean[4];
+
+        server.setPvpAllowed(false);
+        AbilityDamage.as(caster, () -> got[0] = lands(friend, ds.magic()));
+        AbilityDamage.onBehalfOf(caster, () -> got[1] = lands(friend, ds.explosion(null, null)));
+        check(h, !got[0], "an ability's magic, crediting no one, spares him");
+        check(h, !got[1], "an explosion credited to no one, on the caster's behalf, spares him");
+        check(h, !lands(friend, ds.indirectMagic(caster, caster)), "a blow naming the caster spares him");
+        check(h, !AbilityDamage.mayHarm(caster, friend), "the rule: PvP off");
+        check(h, AbilityDamage.mayHarm(caster, caster), "the caster himself is his own affair");
+        AbilityDamage.as(caster, () -> got[2] = lands(pig, ds.magic()));
+        check(h, got[2], "a beast is struck as ever");
+        float before = friend.getHealth();
+        check(h, !AbilityDamage.hurtBy(caster, friend, ds.magic(), 5f), "hurtBy spares him");
+        eq(h, before, friend.getHealth(), "his health untouched");
+        var bolt = EntityType.LIGHTNING_BOLT.create(h.getLevel());
+        bolt.setCause(caster);
+        var struck = new net.neoforged.neoforge.event.entity.EntityStruckByLightningEvent(friend, bolt);
+        AbilityDamage.guardPlayersFromLightning(struck);
+        check(h, struck.isCanceled(), "his lightning spares him");
+        var wild = new net.neoforged.neoforge.event.entity.EntityStruckByLightningEvent(friend, EntityType.LIGHTNING_BOLT.create(h.getLevel()));
+        AbilityDamage.guardPlayersFromLightning(wild);
+        check(h, !wild.isCanceled(), "a storm's lightning is no one's: it strikes as ever");
+
+        server.setPvpAllowed(true);
+        AbilityDamage.as(caster, () -> got[3] = lands(friend, ds.magic()));
+        check(h, got[3], "with PvP on, his abilities hurt other players again");
+        pig.discard();
+        h.succeed();
+    }
+
     @GameTest(template = PLATFORM)
     public static void yaoguaiAbilitiesHitHardAndTheirWeaponsModestly(GameTestHelper h) {
         Pig pig = CharTest.mob(h, EntityType.PIG, 0, 0);

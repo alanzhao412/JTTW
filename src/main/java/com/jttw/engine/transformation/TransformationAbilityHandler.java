@@ -607,7 +607,7 @@ public final class TransformationAbilityHandler {
         if (owed <= 0) return;
         state.pulses()[0] += owed;
         if (target.invulnerableTime <= GUARDIAN_LASER_DAMAGE_INTERVAL + 1) target.invulnerableTime = 0;
-        target.hurt(sp.serverLevel().damageSources().magic(), owed * LevelPower.scaled(sp, GUARDIAN_LASER_TICK_DAMAGE));
+        com.jttw.engine.progression.stats.AbilityDamage.hurtBy(sp, target, sp.serverLevel().damageSources().magic(), owed * LevelPower.scaled(sp, GUARDIAN_LASER_TICK_DAMAGE));
     }
 
     private static void endGuardianLaser(ServerPlayer sp) {

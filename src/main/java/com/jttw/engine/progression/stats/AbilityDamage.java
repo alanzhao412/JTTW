@@ -50,7 +50,7 @@ public final class AbilityDamage {
         Player was = CASTER.get();
         CASTER.set(caster);
         try {
-            return target.hurt(source, amount);
+            return mayHarm(caster, target) && target.hurt(source, amount);
         } finally {
             if (was == null) CASTER.remove();
             else CASTER.set(was);
@@ -67,6 +67,58 @@ public final class AbilityDamage {
             if (was == null) CASTER.remove();
             else CASTER.set(was);
         }
+    }
+
+    private static final ThreadLocal<Player> BEHALF = new ThreadLocal<>();
+
+    /**
+     * Whether {@code by}'s ability may hurt {@code target}: always, unless the target is another player
+     * whom {@code by} may not harm (the server's PvP off, or a team without friendly fire), as an
+     * ordinary blow is barred. An ability's blow that names no attacker would slip past that rule.
+     */
+    public static boolean mayHarm(@Nullable Player by, Entity target) {
+        return by == null || !(target instanceof Player victim) || victim == by || by.canHarmPlayer(victim);
+    }
+
+    /** {@code target.hurt(source, amount)} for {@code caster}'s ability, kept off a player they may not harm; its damage as it is. */
+    public static boolean hurtBy(@Nullable Player caster, Entity target, DamageSource source, float amount) {
+        return mayHarm(caster, target) && target.hurt(source, amount);
+    }
+
+    /** Runs {@code r} with every blow in it kept off a player {@code by} may not harm (an explosion credited to no one, say). */
+    public static void onBehalfOf(@Nullable Player by, Runnable r) {
+        Player was = BEHALF.get();
+        BEHALF.set(by);
+        try {
+            r.run();
+        } finally {
+            if (was == null) BEHALF.remove();
+            else BEHALF.set(was);
+        }
+    }
+
+    /** The player answerable for this blow: the ability's caster, whoever it names, or whoever called its lightning down. */
+    @Nullable
+    static Player answerable(DamageSource source) {
+        if (CASTER.get() != null) return CASTER.get();
+        if (BEHALF.get() != null) return BEHALF.get();
+        if (source.getEntity() instanceof Player p) return p;
+        if (source.getDirectEntity() instanceof net.minecraft.world.entity.LightningBolt bolt && bolt.getCause() != null) return bolt.getCause();
+        return null;
+    }
+
+    /** A player's abilities never hurt a player they may not harm, whatever the blow names. */
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void guardPlayers(LivingIncomingDamageEvent event) {
+        if (event.getEntity().level().isClientSide || !(event.getEntity() instanceof Player)) return;
+        if (!mayHarm(answerable(event.getSource()), event.getEntity())) event.setCanceled(true);
+    }
+
+    /** Nor does lightning a player called down (the Dragon's) strike a player they may not harm. */
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void guardPlayersFromLightning(net.neoforged.neoforge.event.entity.EntityStruckByLightningEvent event) {
+        if (event.getEntity().level().isClientSide || !(event.getEntity() instanceof Player)) return;
+        if (event.getLightning().getCause() != null && !mayHarm(event.getLightning().getCause(), event.getEntity())) event.setCanceled(true);
     }
 
     /** The caster whose ability is landing now, or null. */

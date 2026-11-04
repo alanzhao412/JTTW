@@ -170,7 +170,7 @@ public final class WukongAbilityHandler {
             entity.setDeltaMovement(pushed);
 
             entity.setRemainingFireTicks(fireTicks);
-            entity.hurt(fireSrc, ringDamage);
+            com.jttw.engine.progression.stats.AbilityDamage.hurtBy(player, entity, fireSrc, ringDamage);
 
             if (tier >= 3) {
                 double dist = entity.distanceTo(centre);

@@ -541,12 +541,13 @@ public final class PhoenixAbilityHandler {
 
         // The burst breaks no block, and spares the Phoenix: it is the explosion's source, which an
         // explosion never harms. Its damage is credited to no one, so a kill by it sets off no other.
-        victim.level().explode(
+        // Kept off any player the Phoenix may not harm (PvP off), as its credit names no one.
+        com.jttw.engine.progression.stats.AbilityDamage.onBehalfOf(attacker, () -> victim.level().explode(
                 attacker, victim.level().damageSources().explosion(null, null), null,
                 victim.getX(), victim.getY(), victim.getZ(),
                 2.0f, false,
                 Level.ExplosionInteraction.NONE
-        );
+        ));
 
         // Spread fire to nearby mobs within 4 blocks
         double spreadRadius = 4.0;

@@ -244,7 +244,7 @@ public class QiWaveEntity extends Entity {
                 Long last = struckAt.get(target.getId());
                 if (last != null && now - last < 10) continue;
                 struckAt.put(target.getId(), now);
-                target.hurt(dmgSource, attackDamage);
+                com.jttw.engine.progression.stats.AbilityDamage.hurtBy(owner, target, dmgSource, attackDamage);
                 target.igniteForSeconds(5);
 
                 // Massive explosion on impact
