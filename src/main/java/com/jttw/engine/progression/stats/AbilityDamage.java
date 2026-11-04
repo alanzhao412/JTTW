@@ -121,6 +121,29 @@ public final class AbilityDamage {
         if (event.getLightning().getCause() != null && !mayHarm(event.getLightning().getCause(), event.getEntity())) event.setCanceled(true);
     }
 
+    /**
+     * Nor does a harmful effect a player's ability lays (a pin, a stun, a slowing) take hold of a player
+     * they may not harm: the effect's source is the player, or what they own (a clone, a thrown thing).
+     */
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void guardPlayersFromEffects(net.neoforged.neoforge.event.entity.living.MobEffectEvent.Applicable event) {
+        if (event.getEntity().level().isClientSide || !(event.getEntity() instanceof Player)) return;
+        if (event.getEffectInstance().getEffect().value().getCategory() != net.minecraft.world.effect.MobEffectCategory.HARMFUL) return;
+        Player by = playerBehind(event.getEffectSource());
+        if (by == null) by = CASTER.get() != null ? CASTER.get() : BEHALF.get();
+        if (!mayHarm(by, event.getEntity())) event.setResult(net.neoforged.neoforge.event.entity.living.MobEffectEvent.Applicable.Result.DO_NOT_APPLY);
+    }
+
+    /** The player who answers for {@code e}: itself, its owner (a pet, a clone), or whoever loosed it. */
+    @Nullable
+    public static Player playerBehind(@Nullable Entity e) {
+        if (e instanceof Player p) return p;
+        if (e instanceof net.minecraft.world.entity.OwnableEntity o && o.getOwner() instanceof Player p) return p;
+        if (e instanceof net.minecraft.world.entity.TraceableEntity t && t.getOwner() instanceof Player p) return p;
+        if (e instanceof Projectile pr && pr.getOwner() instanceof Player p) return p;
+        return null;
+    }
+
     /** The caster whose ability is landing now, or null. */
     @Nullable
     public static Player caster() {

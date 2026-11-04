@@ -291,7 +291,7 @@ public class DragonGameTests {
         DragonAbilityHandler.castTidalWave(p);
         eq(h, 0, amp(golem, ModEffects.PINNED), "pinned: held in place");
         eq(h, 60, duration(golem, ModEffects.PINNED), "for 3 s");
-        tick(p, DragonAbilityHandler::onPlayerTick, 80);
+        for (int s = 0; s < 4; s++) DragonAbilityHandler.tickBubbleDrowning(h.getLevel().getServer());   // 4 seconds
         List<Hit> drown = of(hits, DamageTypes.DROWN);
         check(h, !drown.isEmpty(), "bubble drowns its prisoner");
         near(h, LevelPower.of(com.jttw.engine.progression.stats.ProgressionClass.DIVINE_BEAST, 20), drown.get(0).amount(), "1 x power drowning damage per second");
@@ -307,7 +307,9 @@ public class DragonGameTests {
         IronGolem golem = mob(h, EntityType.IRON_GOLEM, 2, 4);
         List<Hit> hits = watch(golem);
         DragonAbilityHandler.castTidalWave(p);
+        // the whole server's once-a-second tick, however many Dragons are about (each Dragon's own tick no longer counts)
         tick(p, DragonAbilityHandler::onPlayerTick, 100);
+        for (int s = 0; s < 5; s++) DragonAbilityHandler.tickBubbleDrowning(h.getLevel().getServer());
         eq(h, 3, of(hits, DamageTypes.DROWN).size(), "drowning hits");
         h.succeed();
     }

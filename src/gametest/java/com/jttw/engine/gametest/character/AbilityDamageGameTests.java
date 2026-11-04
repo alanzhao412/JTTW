@@ -85,6 +85,42 @@ public class AbilityDamageGameTests {
         h.succeed();
     }
 
+    /** Nor do his pins, stuns and slowings take hold of another player while PvP is off; a web's (no one's) still does. */
+    @GameTest(template = PLATFORM)
+    public static void withPvpOffHisPinsAndSlowingsSpareOtherPlayers(GameTestHelper h) {
+        var server = h.getLevel().getServer();
+        boolean was = server.isPvpAllowed();
+        onEnd(h, () -> server.setPvpAllowed(was));
+        ServerPlayer caster = new ServerPlayer(server, h.getLevel(), new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(), "jttw_pin_caster"),
+                net.minecraft.server.level.ClientInformation.createDefault());
+        ServerPlayer friend = CharTest.as(h, ReincarnationOutcome.THIRD_LOTUS_PRINCE);
+        Pig pig = CharTest.mob(h, EntityType.PIG, 0, 0);
+        var pinned = com.jttw.engine.registry.ModEffects.PINNED;
+        var slow = net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN;
+
+        server.setPvpAllowed(false);
+        com.jttw.engine.world.Stun.pin(friend, 60, caster);
+        com.jttw.engine.world.Stun.stun(friend, 60, caster);
+        friend.addEffect(new net.minecraft.world.effect.MobEffectInstance(slow, 60, 1), caster);
+        check(h, !friend.hasEffect(pinned), "his pin does not hold a friend");
+        check(h, !friend.hasEffect(com.jttw.engine.registry.ModEffects.STUNNED), "nor his stun");
+        check(h, !friend.hasEffect(slow), "nor his slowing");
+        friend.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.REGENERATION, 60, 0), caster);
+        check(h, friend.hasEffect(net.minecraft.world.effect.MobEffects.REGENERATION), "a kindness still lands");
+        com.jttw.engine.world.Stun.pin(pig, 60, caster);
+        check(h, pig.hasEffect(pinned), "a beast is pinned as ever");
+        com.jttw.engine.world.Stun.pin(friend, 60, null);
+        check(h, friend.hasEffect(pinned), "a pin no player answers for (a web) holds him");
+        friend.removeAllEffects();
+
+        server.setPvpAllowed(true);
+        com.jttw.engine.world.Stun.pin(friend, 60, caster);
+        check(h, friend.hasEffect(pinned), "with PvP on, his pin holds another player again");
+        friend.removeAllEffects();
+        pig.discard();
+        h.succeed();
+    }
+
     @GameTest(template = PLATFORM)
     public static void yaoguaiAbilitiesHitHardAndTheirWeaponsModestly(GameTestHelper h) {
         Pig pig = CharTest.mob(h, EntityType.PIG, 0, 0);

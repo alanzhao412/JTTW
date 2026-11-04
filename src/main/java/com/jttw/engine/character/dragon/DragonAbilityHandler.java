@@ -337,6 +337,8 @@ public final class DragonAbilityHandler {
 
         List<Entity> targets = player.level().getEntities(player, searchBox, e -> {
             if (!e.isAlive() || e == player) return false;
+            // a player he may not harm (PvP off) is neither washed off, slowed, nor drowned
+            if (!com.jttw.engine.progression.stats.AbilityDamage.mayHarm(player, e)) return false;
             Vec3 toEntity = e.position().add(0, e.getBbHeight() * 0.5, 0).subtract(eyePos);
             double dist = toEntity.length();
             if (dist > WAVE_RANGE || dist < 0.1) return false;
@@ -365,7 +367,7 @@ public final class DragonAbilityHandler {
                 com.jttw.engine.world.Stun.pin(living, 60, player);
                 // Track for drowning damage (1 damage/sec for 3 seconds)
                 BUBBLE_TARGETS.put(target.getId(), new BubbleEntry(
-                        target.getId(), player.getUUID(), 60 // 3 seconds = 60 ticks
+                        target.getId(), target.level().dimension(), player.getUUID(), 60 // 3 seconds = 60 ticks
                 ));
             }
         }
@@ -419,7 +421,7 @@ public final class DragonAbilityHandler {
     /** Drowning damage per second inside the bubble at level 1; it grows with the caster's level power. */
     private static final float BUBBLE_DROWN_DAMAGE = 1.0f;
 
-    private record BubbleEntry(int entityId, UUID sourcePlayerId, int remainingTicks) {}
+    private record BubbleEntry(int entityId, ResourceKey<Level> level, UUID sourcePlayerId, int remainingTicks) {}
 
     // -----------------------------------------------------------------------
     // Dragon Scales (PASSIVE defense — LivingIncomingDamageEvent)
@@ -631,11 +633,6 @@ public final class DragonAbilityHandler {
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
         if (!isDragon(sp)) return;
 
-        // Tick global bubble drowning (every 20 ticks)
-        if (sp.tickCount % 20 == 0 && !BUBBLE_TARGETS.isEmpty()) {
-            tickBubbleDrowning(sp.serverLevel());
-        }
-
         if (!KNOCKBACK_TARGETS.isEmpty()) {
             tickWallImpact(sp.serverLevel());
         }
@@ -649,17 +646,27 @@ public final class DragonAbilityHandler {
     }
 
     /**
-     * Tick bubble drowning: deal {@link #BUBBLE_DROWN_DAMAGE} (at the caster's power) per second
-     * to trapped entities.
+     * Bubble drowning, once a second for the whole server (not on each Dragon's tick: two Dragons
+     * would drown twice as fast, and one in another realm would look for the bubbles in his own).
      */
-    private static void tickBubbleDrowning(ServerLevel level) {
+    @SubscribeEvent
+    public static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (event.getServer().getTickCount() % 20 == 0 && !BUBBLE_TARGETS.isEmpty()) tickBubbleDrowning(event.getServer());
+    }
+
+    /**
+     * Tick bubble drowning: deal {@link #BUBBLE_DROWN_DAMAGE} (at the caster's power) per second
+     * to trapped entities, each looked for in its own realm, the blow the caster's.
+     */
+    public static void tickBubbleDrowning(MinecraftServer server) {
         Iterator<Map.Entry<Integer, BubbleEntry>> it = BUBBLE_TARGETS.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<Integer, BubbleEntry> entry = it.next();
             BubbleEntry bubble = entry.getValue();
 
             int remaining = bubble.remainingTicks() - 20;
-            Entity entity = level.getEntity(bubble.entityId());
+            ServerLevel level = server.getLevel(bubble.level());
+            Entity entity = level == null ? null : level.getEntity(bubble.entityId());
             if (entity == null || !entity.isAlive()) {
                 it.remove();
                 continue;
@@ -667,9 +674,10 @@ public final class DragonAbilityHandler {
 
             // Deal the drowning damage for this second, at the caster's level power
             if (entity instanceof LivingEntity living) {
-                ServerPlayer source = level.getServer().getPlayerList().getPlayer(bubble.sourcePlayerId());
+                ServerPlayer source = server.getPlayerList().getPlayer(bubble.sourcePlayerId());
                 if (source != null) {
-                    living.hurt(source.damageSources().drown(), LevelPower.scaled(source, BUBBLE_DROWN_DAMAGE));
+                    com.jttw.engine.progression.stats.AbilityDamage.hurtBy(source, living,
+                            source.damageSources().drown(), LevelPower.scaled(source, BUBBLE_DROWN_DAMAGE));
                 } else {
                     living.hurt(level.damageSources().drown(), BUBBLE_DROWN_DAMAGE);
                 }
@@ -680,7 +688,7 @@ public final class DragonAbilityHandler {
                 it.remove();
                 continue;
             }
-            entry.setValue(new BubbleEntry(bubble.entityId(), bubble.sourcePlayerId(), remaining));
+            entry.setValue(new BubbleEntry(bubble.entityId(), bubble.level(), bubble.sourcePlayerId(), remaining));
         }
     }
 
