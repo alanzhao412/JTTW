@@ -94,6 +94,25 @@ public class CloneAiGameTests {
         });
     }
 
+    /** His staff's ×2 (×3 empowered) is in his attack once; the clone holds a staff of its own, so it must not take it twice. */
+    @GameTest(template = PLATFORM, timeoutTicks = 100)
+    public static void aClonesBlowCountsHisStaffOnce(GameTestHelper h) {
+        ServerPlayer p = wukong(h);
+        com.jttw.engine.progression.level.PlayerLevel.setLevel(p, 50);
+        p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(com.jttw.engine.registry.ModItems.RUYI_JINGU_BANG.get()));
+        // what his tick does in play, a test player not ticking: his hand's modifiers on him
+        p.getMainHandItem().forEachModifier(net.minecraft.world.entity.EquipmentSlot.MAINHAND,
+                (attr, mod) -> p.getAttribute(attr).addOrUpdateTransientModifier(mod));
+        WuCloneEntity c = clone(h, p);
+        h.runAfterDelay(30, () -> {
+            var atk = net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE;
+            double his = p.getAttributeValue(atk), its = c.getAttributeValue(atk);
+            check(h, c.getMainHandItem().is(com.jttw.engine.registry.ModItems.RUYI_JINGU_BANG.get()), "the clone holds a staff too");
+            check(h, Math.abs(his - its) < 0.01 * his, "the clone hits as he does: his " + his + ", its " + its);
+            h.succeed();
+        });
+    }
+
     @GameTest(template = PLATFORM)
     public static void aCloneHasItsOwnersHealth(GameTestHelper h) {
         ServerPlayer p = wukong(h);

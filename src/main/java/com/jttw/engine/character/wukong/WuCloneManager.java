@@ -481,10 +481,8 @@ public final class WuCloneManager {
         if (maxHp != null) maxHp.setBaseValue(cloneHp);
         clone.setHealth(cloneHp);
 
-        double playerAtk = player.getAttributeValue(Attributes.ATTACK_DAMAGE);
-
         var atk = clone.getAttribute(Attributes.ATTACK_DAMAGE);
-        if (atk != null) atk.setBaseValue(Math.max(1.0, playerAtk));
+        if (atk != null) atk.setBaseValue(Math.max(1.0, attackBarehanded(player)));
 
         // Same resistances as the player (uncapped, like theirs)
         var pres = clone.getAttribute(ModAttributes.PHYSICAL_RESISTANCE);
@@ -504,15 +502,29 @@ public final class WuCloneManager {
         }
     }
 
+    /**
+     * His attack without what is in his hand: a clone holds a copy of that itself, whose modifiers
+     * (the staff's ×2, ×3 empowered) its own attack takes, so taking his whole attack counted them twice.
+     */
+    static double attackBarehanded(ServerPlayer player) {
+        var his = player.getAttribute(Attributes.ATTACK_DAMAGE);
+        if (his == null) return 1.0;
+        var bare = new net.minecraft.world.entity.ai.attributes.AttributeInstance(Attributes.ATTACK_DAMAGE, i -> {});
+        bare.replaceFrom(his);
+        player.getMainHandItem().forEachModifier(EquipmentSlot.MAINHAND, (attr, mod) -> {
+            if (attr.is(Attributes.ATTACK_DAMAGE)) bare.removeModifier(mod.id());
+        });
+        return bare.getValue();
+    }
+
     private static void syncHeldItem(WuCloneEntity clone, ServerPlayer player) {
         ItemStack held = player.getMainHandItem().copy();
         clone.setItemSlot(EquipmentSlot.MAINHAND, held);
     }
 
     private static void syncAttack(WuCloneEntity clone, ServerPlayer player) {
-        double playerAtk = player.getAttributeValue(Attributes.ATTACK_DAMAGE);
         var atk = clone.getAttribute(Attributes.ATTACK_DAMAGE);
-        if (atk != null) atk.setBaseValue(Math.max(1.0, playerAtk));
+        if (atk != null) atk.setBaseValue(Math.max(1.0, attackBarehanded(player)));
         // and its health with his, at the share it has left
         var maxHp = clone.getAttribute(Attributes.MAX_HEALTH);
         if (maxHp != null && maxHp.getBaseValue() != player.getMaxHealth()) {
