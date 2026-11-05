@@ -446,13 +446,14 @@ public final class StressPass {
                     + (knows ? ", client knows him (level 100, reincarnated)" : ", CLIENT HAS LOST HIS LEVEL OR REINCARNATION"));
         }
         PlayableCharacter dragon = Characters.all().stream().filter(c -> c.outcomeId().equals("dragon")).findFirst().orElseThrow();
+        if (tick % 10 == 0 && tick >= 60 && tick <= 600) log("  at " + mc.level.dimension().location() + " " + String.format("%.1f %.1f %.1f", mc.player.getX(), mc.player.getY(), mc.player.getZ())
+                + ", motion y " + String.format("%.2f", mc.player.getDeltaMovement().y) + (mc.screen == null ? "" : ", screen " + mc.screen.getClass().getSimpleName()));
         switch (tick) {
-            case 1 -> { phase("probe-overworld"); cmd("execute in minecraft:overworld run tp @s 0 120 0"); cmd("gamemode survival"); hardy();
-                cmd("jttw setclass any dragon"); cmd("jttw_setlevel 100"); cmd("jttw_addsp 1000"); cmd("jttw_addsp 1000"); }
-            case 40, 50, 60, 70 -> { for (SkillNode n : dragon.skillTree().allOrdered()) NetworkHandler.sendToServer(new SpendSkillPointPacket(n.id())); }
-            case 200 -> { phase("probe-next-realm-by-dimension-travel"); travel(1); }
-            case 400 -> { phase("probe-another-realm-by-dimension-travel"); travel(2); }
-            case 600 -> { log("== probe done =="); finish(mc); }
+            case 1 -> { phase("probe-heaven-fall"); closeScreens = false; cmd("execute in minecraft:overworld run tp @s 0 120 0"); cmd("gamemode survival");
+                cmd("effect clear @s"); cmd("effect give @s minecraft:resistance infinite 4 true"); }
+            case 60 -> { cmd("execute in jttw_engine:heaven run tp @s 0 120 0"); }
+            case 340 -> { phase("probe-long-overworld-fall"); cmd("execute in minecraft:overworld run tp @s 0 600 0"); }
+            case 620 -> { log("== probe done (not kicked) =="); finish(mc); }
             default -> {}
         }
     }

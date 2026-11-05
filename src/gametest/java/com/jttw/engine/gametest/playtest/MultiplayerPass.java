@@ -41,7 +41,7 @@ public final class MultiplayerPass {
 
     private MultiplayerPass() {}
 
-    private static final boolean ENABLED = Boolean.getBoolean("jttw.mpPass") && !StressPass.active();   // the stress roles are StressPass's
+    private static final boolean ENABLED = Boolean.getBoolean("jttw.mpPass") && !StressPass.active() && !GeneralStress.active();   // the stress roles are StressPass's
     /** {@code observer}: a second player who only watches the first, logging what the server shows it of him. */
     private static final boolean OBSERVER = "observer".equals(System.getProperty("jttw.mpPass.role"));
     private static final String RUN = "mp-pass-" + new java.text.SimpleDateFormat("yyyyMMdd-HHmmss").format(new java.util.Date());
