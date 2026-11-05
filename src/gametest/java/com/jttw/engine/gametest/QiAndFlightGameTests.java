@@ -181,4 +181,21 @@ public class QiAndFlightGameTests {
         leaveWorld(p);
         h.succeed();
     }
+
+    /** Over Overworld ground not yet made, they come down on ground (RealmArrival makes it first), not at the world's floor. */
+    @GameTest(template = PLATFORM)
+    public static void fallingOutOfHeavenOverUnmadeGroundLandsOnIt(GameTestHelper h) {
+        ServerPlayer p = player(h);
+        ServerLevel heaven = h.getLevel().getServer().getLevel(JTTWDimensions.HEAVEN);
+        ServerLevel overworld = h.getLevel().getServer().overworld();
+        int far = 24_000 + h.getLevel().random.nextInt(4000);
+        check(h, !overworld.hasChunk(far >> 4, far >> 4), "the ground under the fall not yet made");
+        p.teleportTo(heaven, far + 0.5, -200, far + 0.5, 0, 0);
+        HeavenVoidHandler.onPlayerTick(new PlayerTickEvent.Post(p));
+        eq(h, Level.OVERWORLD, p.level().dimension(), "dimension");
+        check(h, p.getY() > overworld.getMinBuildHeight() + 2, "set down on ground, not at the world's floor (y "
+                + overworld.getMinBuildHeight() + "): at y " + p.getY());
+        leaveWorld(p);
+        h.succeed();
+    }
 }

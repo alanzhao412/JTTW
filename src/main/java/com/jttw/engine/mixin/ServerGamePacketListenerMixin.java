@@ -68,8 +68,19 @@ public class ServerGamePacketListenerMixin {
         return com.jttw.engine.flight.JTTWFlight.moveCheckLimit(player, vanilla);
     }
 
+    @Shadow private int aboveGroundTickCount;
+
+    /** The player's fall distance at their last move. */
+    private float jttw_lastFallDistance;
+
     @Inject(method = "handleMovePlayer", at = @At("TAIL"))
     private void jttw_postMovePlayer(ServerboundMovePlayerPacket packet, CallbackInfo ci) {
         jttw_phasingMoveActive = false;
+        // A fall is not flight. Vanilla takes every move through open air for floating (its drop is
+        // zeroed before the test), so four seconds of falling kicked a player off a server without
+        // allow-flight: off Heaven's islands, down Kunlun or Mount Wuzhuang. While their fall grows
+        // they are falling, and the count starts again; one hanging still in the air grows none.
+        if (!player.onGround() && player.fallDistance > jttw_lastFallDistance) aboveGroundTickCount = 0;
+        jttw_lastFallDistance = player.fallDistance;
     }
 }
