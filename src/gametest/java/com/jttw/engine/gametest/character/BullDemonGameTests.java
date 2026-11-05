@@ -241,6 +241,17 @@ public class BullDemonGameTests {
         check(h, far.hasEffect(MobEffects.SLOW_FALLING), "drifting down");
         far.discard();
 
+        // a thousand blocks off, over ground not yet loaded: down onto it, not at the world's floor
+        Zombie farthest = mob(h, EntityType.ZOMBIE, 2, 3);
+        int lx = farthest.getBlockX(), lz = farthest.getBlockZ() + 1000;
+        check(h, !h.getLevel().hasChunk(lx >> 4, lz >> 4), "its landing not yet loaded");
+        BullDemonAbilityHandler.blowAway(p, farthest, new Vec3(0, 0, 1), 1000);
+        BullDemonAbilityHandler.landBlown(farthest);
+        int ground = h.getLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, lx, lz);
+        check(h, ground > h.getLevel().getMinBuildHeight(), "there is ground there, at y " + ground);
+        near(h, ground + 12.0, farthest.getY(), "set down 12 over that ground, not over the world's floor");
+        farthest.discard();
+
         near(h, 37.0, BullDemonAbilityHandler.fanReach(1f), "weak: 37 blocks");
         near(h, 1000.0, BullDemonAbilityHandler.fanReach(27.03f), "strong: 1000");
         near(h, 1000.0, BullDemonAbilityHandler.fanReach(200f), "never more than 1000");

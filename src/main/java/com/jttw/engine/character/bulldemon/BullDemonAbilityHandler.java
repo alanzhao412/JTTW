@@ -17,6 +17,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -324,6 +325,9 @@ public final class BullDemonAbilityHandler {
         t.remove(KEY_BLOWN_X);
         t.remove(KEY_BLOWN_Z);
         ServerLevel level = (ServerLevel) e.level();
+        // made first: up to a thousand blocks off, its ground is often not loaded, and the height of a
+        // chunk not loaded reads as the world's floor (the blown came down under the world)
+        level.getChunk(Mth.floor(x) >> 4, Mth.floor(z) >> 4);
         int surface = level.getHeight(Heightmap.Types.MOTION_BLOCKING, (int) Math.floor(x), (int) Math.floor(z));
         double y = surface + 12;
         e.setDeltaMovement(Vec3.ZERO);
