@@ -54,8 +54,8 @@ public final class StressPass {
     private StressPass() {}
 
     static final String ROLE = Boolean.getBoolean("jttw.mpPass") ? System.getProperty("jttw.mpPass.role", "") : "";
-    private static final boolean STRESS = ROLE.equals("stress"), ROAMER = ROLE.equals("roamer"), PROBE = ROLE.equals("probe");
-    static boolean active() { return STRESS || ROAMER || PROBE; }
+    private static final boolean STRESS = ROLE.equals("stress"), ROAMER = ROLE.equals("roamer"), PROBE = ROLE.equals("probe"), KUNLUN = ROLE.equals("kunlun"), LAIRS = ROLE.equals("lairs");
+    static boolean active() { return STRESS || ROAMER || PROBE || KUNLUN || LAIRS; }
 
     private static final String RUN = "stress-" + ROLE + "-" + new java.text.SimpleDateFormat("yyyyMMdd-HHmmss").format(new java.util.Date());
     private record Action(int at, String name, Runnable run) {}
@@ -87,6 +87,11 @@ public final class StressPass {
         String m = e.getMessage().getString().replace('\n', ' ');
         if (m.contains("ROAM_NOW")) startRoaming = true;
         if (m.contains("STRESS_END")) stressEnded = true;
+        var any = java.util.regex.Pattern.compile("nearest jttw_engine:([a-z_]+) is at \\[(-?\\d+), ~, (-?\\d+)\\]").matcher(m);
+        if (any.find()) located.put(any.group(1), new int[]{Integer.parseInt(any.group(2)), Integer.parseInt(any.group(3))});
+        if (m.startsWith("Test passed")) lairFound = true;
+        var kl = java.util.regex.Pattern.compile("kunlun is at \\[(-?\\d+), ~, (-?\\d+)\\]").matcher(m);
+        if (kl.find()) kunlunAt = new int[]{Integer.parseInt(kl.group(1)), Integer.parseInt(kl.group(2))};
         if (m.contains("ROAMER_DONE")) roamerDone = true;
         // the ability chatter ("[Nezha] ...") is many lines a second: keep the wave's, the travels', and all else
         if (m.startsWith("[") && !m.contains("Tidal Wave") && !m.contains("arrive") && !m.contains("Dimension") && !m.contains("_NOW")
@@ -119,7 +124,7 @@ public final class StressPass {
         if (settle < 100) { settle++; return; }
         tick++;
         sample(mc);
-        if (PROBE) probe(mc); else if (STRESS) driver(mc); else roamer(mc);
+        if (LAIRS) lairs(mc); else if (KUNLUN) kunlun(mc); else if (PROBE) probe(mc); else if (STRESS) driver(mc); else roamer(mc);
     }
 
     /** Every 5 s, this client's frames and memory; every 10 s (the driver), the server's tick times. */
@@ -456,6 +461,89 @@ public final class StressPass {
             case 620 -> { log("== probe done (not kicked) =="); finish(mc); }
             default -> {}
         }
+    }
+
+    private static volatile int[] kunlunAt;
+    private static final java.util.Map<String, int[]> located = new java.util.concurrent.ConcurrentHashMap<>();
+    private static volatile boolean lairFound;
+
+    /** A zone's lair: where its boss is set down, from the zone's centre (see each lair feature), and who. */
+    private record Lair(String zone, int dx, int dz, String... bosses) {}
+
+    private static final Lair[] LAIRS_ALL = {
+            new Lair("white_bone_ridge", 0, -6, "lady_white_bone"),
+            new Lair("bottomless_cave", 0, 0, "lady_earth_flow"),
+            new Lair("mystical_waters", 0, 0, "ao_guang", "ao_qin", "ao_run", "ao_shun"),
+            new Lair("fire_mountain", 0, 0, "red_boy"),
+            new Lair("mount_wuzhuang", 0, -18, "clear_wind", "bright_moon"),
+            new Lair("silk_web_ridge", -96, 86, "hundred_eyed_demon"),
+            new Lair("black_wind_mountain", 0, -82, "black_bear_demon"),
+            new Lair("flower_fruit_mountain", 0, -74, "six_eared_macaque"),
+            new Lair("lion_camel_ridge", 0, -164, "azure_lion", "white_elephant"),   // the fortress is 110 behind the city (LionFortress.FZ), its throne 54 into it
+    };
+    private static int lair = -1, lairAt, lairBoss;
+
+    /**
+     * {@code -Pmp.role=lairs}, alone, a fresh world: to each zone's lair (its centre by
+     * {@code /locate biome}, and the lair's offset from it), a spectator over it while its ground is
+     * made; then the server asked for each of its bosses in the column about it, 64 blocks across.
+     */
+    private static void lairs(Minecraft mc) {
+        if (tick == 1) {
+            phase("lairs");
+            cmd("gamemode spectator");
+            for (Lair l : LAIRS_ALL) cmd("locate biome jttw_engine:" + l.zone());
+            lair = 0; lairAt = 60;
+            return;
+        }
+        if (lair < 0 || tick < lairAt) return;
+        if (lair >= LAIRS_ALL.length) { log("== lairs done =="); lair = -1; finish(mc); return; }
+        Lair l = LAIRS_ALL[lair];
+        int[] c = located.get(l.zone());
+        int since = tick - lairAt;
+        if (since == 0) {
+            if (c == null) { log("LAIR " + l.zone() + ": zone not located"); lair++; return; }
+            phase("lair " + l.zone() + " at " + (c[0] + l.dx()) + " " + (c[1] + l.dz()));
+            cmd("execute in minecraft:overworld run tp @s " + (c[0] + l.dx()) + " 300 " + (c[1] + l.dz()));
+            lairBoss = 0;
+            lairFound = false;
+        }
+        // each boss asked for in turn, 40 ticks apart, its answer read before the next is asked
+        if (since >= 300 && since % 40 == 0) {
+            if (lairBoss > 0) log("LAIR " + l.zone() + ": " + l.bosses()[lairBoss - 1] + (lairFound ? " FOUND" : " not there"));
+            lairFound = false;
+            if (lairBoss < l.bosses().length) {
+                int x = c[0] + l.dx() - 32, z = c[1] + l.dz() - 32;
+                cmd("execute if entity @e[type=jttw_engine:" + l.bosses()[lairBoss] + ",x=" + x + ",y=-64,z=" + z + ",dx=64,dy=704,dz=64]");
+                lairBoss++;
+            } else {
+                shot("lair-" + l.zone());
+                lair++;
+                lairAt = tick + 20;
+            }
+        }
+    }
+
+    /**
+     * {@code -Pmp.role=kunlun}, alone, a fresh world: a jump into new vanilla ground 5000 blocks out
+     * (the measure), then one into Kunlun, each logged to the second, for a sampler of the server's
+     * thread to be laid against.
+     */
+    private static void kunlun(Minecraft mc) {
+        switch (tick) {
+            case 1 -> { phase("kunlun-setup"); cmd("gamemode creative"); cmd("locate biome jttw_engine:kunlun"); }
+            case 100 -> { phase("control-jump " + java.time.LocalTime.now()); cmd("execute in minecraft:overworld run tp @s 5000 200 5000"); }
+            case 500 -> {
+                int[] k = kunlunAt;
+                if (k == null) { log("FAILED: no Kunlun found"); finish(mc); return; }
+                phase("kunlun-jump " + java.time.LocalTime.now() + " to " + k[0] + " " + k[1]);
+                cmd("execute in minecraft:overworld run tp @s " + k[0] + " 400 " + k[1]);
+            }
+            case 900 -> { shot("kunlun"); }
+            case 920 -> { log("== kunlun probe done " + java.time.LocalTime.now() + " =="); finish(mc); }
+            default -> {}
+        }
+        if (tick % 20 == 0) cmd("tick query");
     }
 
     /** The Dragon's Dimension Travel, {@code steps} on round the wheel from where it points. */
