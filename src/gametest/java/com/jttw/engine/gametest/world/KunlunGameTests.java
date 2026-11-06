@@ -380,4 +380,21 @@ public class KunlunGameTests {
         eq(h, new BlockPos(k[0], 64, k[1]), luopan.get(DataComponents.LODESTONE_TRACKER).target().get().pos(), "held sneaking: to Kunlun");
         h.succeed();
     }
+
+    /** The stair is laid out as the server starts, off its thread: the first of Kunlun's chunks finds it made. */
+    @GameTest(template = PLATFORM, timeoutTicks = 200_000)   // the test server runs its ticks as fast as it can: seconds are what is waited
+    public static void kunlunsStairIsLaidOutBeforeAnyoneComes(GameTestHelper h) {
+        ServerLevel level = h.getLevel();
+        int[][] cs = Zones.KUNLUN.centres(level.getSeed());
+        check(h, cs.length > 0, "a Kunlun in the world");
+        var warm = com.jttw.engine.world.kunlun.KunlunWarmup.warm(level);
+        h.succeedWhen(() -> {
+            h.assertTrue(warm.isDone(), "still laying it out");   // asked again each tick till done
+            h.assertTrue(!warm.isCompletedExceptionally(), "laid out without a fault");
+            long t0 = System.nanoTime();
+            KunlunFeature.path(level, cs[0][0], cs[0][1]);
+            long ms = (System.nanoTime() - t0) / 1_000_000;
+            h.assertTrue(ms < 50, "the first chunk's ask is answered at once, in " + ms + " ms");
+        });
+    }
 }
