@@ -141,6 +141,7 @@ public class ZoneFrameworkGameTests {
         };
         m.moveTo(h.absoluteVec(Vec3.atBottomCenterOf(at)));
         m.become(20, false);
+        m.setPersistenceRequired();   // a real player far off in another test would despawn it
         h.getLevel().addFreshEntity(m);
         onEnd(h, m::discard);
         return m;
@@ -182,11 +183,18 @@ public class ZoneFrameworkGameTests {
         // not at their first tick: a hurt then looks to HurtByTargetGoal like none at all
         boolean[] hurt = new boolean[2];
         h.runAfterDelay(5, () -> {
+            // a stray blow from what other tests left about (their golems, their fire) leaves its own
+            // hurt-time, under which a blow no harder than it is turned aside: wiped, these are the only blows
+            spared.invulnerableTime = 0;
+            angered.invulnerableTime = 0;
+            spared.setTarget(null);
+            angered.setTarget(null);
             hurt[0] = spared.hurt(h.getLevel().damageSources().playerAttack(peng), 1);
             hurt[1] = angered.hurt(h.getLevel().damageSources().playerAttack(other), 1);
         });
         h.runAfterDelay(25, () -> {
-            check(h, hurt[0], "the Peng's blow lands");
+            check(h, hurt[0], "the Peng's blow lands (removed " + spared.isRemoved() + ", alive " + spared.isAlive()
+                    + ", last struck by " + spared.getLastHurtByMob() + ")");
             check(h, spared.getTarget() == null, "struck by the Peng, it lets it be: " + spared.getTarget());
             check(h, angered.getTarget() == other, "struck by another, it turns on them: " + angered.getTarget()
                     + " (hurt: " + hurt[1] + ")");
